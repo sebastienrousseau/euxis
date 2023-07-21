@@ -1,0 +1,4 @@
+[submodule "tests/Euxis-test-cassettes"]
+path = tests/Euxis-test-cassettes
+url = https://github.com/sebastienrousseau/euxis-test-cassettes
+branch = master
