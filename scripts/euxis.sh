@@ -2,10 +2,9 @@
 #
 # Euxis - Multi-Provider AI Agent Framework
 # Usage: euxis <agent> <task> [provider]
+#        euxis delegate <agent> <task> [provider]
 #
-# Agents: architect, product-manager, bug-fixer, orchestrator,
-#         edge-hunter, legacy-maintainer, release-manager
-#
+# Agents are discovered dynamically from ~/.euxis/prompts/*.txt
 # Providers: claude (default), gemini, openai
 #
 
@@ -23,7 +22,7 @@ PROJECTS_DIR="${EUXIS_HOME}/projects"
 DEFAULT_PROVIDER="claude"
 
 # ============================================================================
-# Functions
+# Utility Functions
 # ============================================================================
 
 list_agents() {
@@ -75,6 +74,10 @@ log_error() {
     echo "[euxis] ERROR: $*" >&2
 }
 
+# ============================================================================
+# Context Functions
+# ============================================================================
+
 get_project_name() {
     if [[ -n "${EUXIS_PROJECT:-}" ]]; then
         echo "${EUXIS_PROJECT}"
@@ -111,6 +114,10 @@ get_memory_context() {
         tail -n "${lines}" "${memory_file}" 2>/dev/null || true
     fi
 }
+
+# ============================================================================
+# Prompt Assembly
+# ============================================================================
 
 prepare_prompt() {
     local agent="$1"
@@ -159,6 +166,10 @@ ${task}
 EOF
 }
 
+# ============================================================================
+# Provider Execution
+# ============================================================================
+
 run_claude() {
     local full_prompt="$1"
     echo "${full_prompt}" | claude -p
@@ -166,7 +177,6 @@ run_claude() {
 
 run_gemini() {
     local full_prompt="$1"
-    # Assumes 'gemini' CLI is installed
     if command -v gemini &>/dev/null; then
         echo "${full_prompt}" | gemini prompt
     else
@@ -177,7 +187,6 @@ run_gemini() {
 
 run_openai() {
     local full_prompt="$1"
-    # Assumes 'sgpt' (shell-gpt) is installed
     if command -v sgpt &>/dev/null; then
         sgpt "${full_prompt}"
     else
@@ -186,74 +195,85 @@ run_openai() {
     fi
 }
 
+execute_provider() {
+    local provider="$1"
+    local full_prompt="$2"
+
+    case "${provider}" in
+        claude)  run_claude "${full_prompt}" ;;
+        gemini)  run_gemini "${full_prompt}" ;;
+        openai)  run_openai "${full_prompt}" ;;
+    esac
+}
+
 # ============================================================================
-# Main
+# Argument Parsing & Validation
 # ============================================================================
 
-main() {
-    # Parse arguments
+parse_args() {
     if [[ $# -lt 2 ]]; then
         usage
     fi
 
-    local agent="$1"
-    local task="$2"
-    local provider="${3:-${DEFAULT_PROVIDER}}"
+    AGENT="$1"
+    TASK="$2"
+    PROVIDER="${3:-${DEFAULT_PROVIDER}}"
 
     # Validate agent (dynamic discovery from prompts directory)
-    local prompt_file="${PROMPTS_DIR}/${agent}.txt"
-    if [[ ! -f "${prompt_file}" || "${agent}" == _* ]]; then
-        log_error "Unknown agent: ${agent}"
+    local prompt_file="${PROMPTS_DIR}/${AGENT}.txt"
+    if [[ ! -f "${prompt_file}" || "${AGENT}" == _* ]]; then
+        log_error "Unknown agent: ${AGENT}"
         echo "Available agents:" >&2
         list_agents >&2
         exit 1
     fi
 
-    # Setup paths
-    local project
-    project=$(get_project_name)
-    local session_id
-    session_id=$(get_session_id)
-
-    ensure_project_dirs "${project}" "${agent}"
-
-    local audit_path="${PROJECTS_DIR}/${project}/${agent}/audit.md"
-    local memory_path="${PROJECTS_DIR}/${project}/${agent}/memory.md"
-
-    # Determine model name based on provider
-    local model_name
-    case "${provider}" in
-        claude)  model_name="Claude" ;;
-        gemini)  model_name="Gemini" ;;
-        openai)  model_name="GPT" ;;
+    # Validate provider
+    case "${PROVIDER}" in
+        claude|gemini|openai) ;;
         *)
-            log_error "Unknown provider: ${provider}"
+            log_error "Unknown provider: ${PROVIDER}"
             echo "Valid providers: claude, gemini, openai" >&2
             exit 1
             ;;
     esac
+}
 
-    local output_path="${PROJECTS_DIR}/${project}/${agent}/output/${session_id}.md"
+# ============================================================================
+# Session Setup
+# ============================================================================
 
-    log_info "Agent: ${agent}"
-    log_info "Project: ${project}"
-    log_info "Provider: ${provider}"
-    log_info "Session: ${session_id}"
-    log_info "Output: ${output_path}"
+setup_session() {
+    PROJECT=$(get_project_name)
+    SESSION_ID=$(get_session_id)
 
-    # Prepare full prompt with context
-    local full_prompt
-    full_prompt=$(prepare_prompt "${agent}" "${task}" "${audit_path}" "${memory_path}" "${session_id}" "${model_name}")
+    ensure_project_dirs "${PROJECT}" "${AGENT}"
 
-    # Execute with selected provider and capture output
-    local output
-    case "${provider}" in
-        claude)  output=$(run_claude "${full_prompt}") ;;
-        gemini)  output=$(run_gemini "${full_prompt}") ;;
-        openai)  output=$(run_openai "${full_prompt}") ;;
+    AUDIT_PATH="${PROJECTS_DIR}/${PROJECT}/${AGENT}/audit.md"
+    MEMORY_PATH="${PROJECTS_DIR}/${PROJECT}/${AGENT}/memory.md"
+    OUTPUT_PATH="${PROJECTS_DIR}/${PROJECT}/${AGENT}/output/${SESSION_ID}.md"
+
+    # Determine model name based on provider
+    case "${PROVIDER}" in
+        claude)  MODEL_NAME="Claude" ;;
+        gemini)  MODEL_NAME="Gemini" ;;
+        openai)  MODEL_NAME="GPT" ;;
     esac
+}
 
-    # Save output to session file
+# ============================================================================
+# Output Capture
+# ============================================================================
+
+capture_output() {
+    local agent="$1"
+    local project="$2"
+    local provider="$3"
+    local task="$4"
+    local session_id="$5"
+    local output_path="$6"
+    local output="$7"
+
     cat > "${output_path}" <<OUTEOF
 # Output: ${agent} — ${session_id}
 **Project:** ${project}
@@ -264,15 +284,45 @@ main() {
 
 ${output}
 OUTEOF
+}
 
-    # Print output to stdout
+# ============================================================================
+# Main
+# ============================================================================
+
+main() {
+    # Phase 1: Parse and validate arguments
+    parse_args "$@"
+
+    # Phase 2: Setup session paths and directories
+    setup_session
+
+    # Phase 3: Log session metadata
+    log_info "Agent: ${AGENT}"
+    log_info "Project: ${PROJECT}"
+    log_info "Provider: ${PROVIDER}"
+    log_info "Session: ${SESSION_ID}"
+    log_info "Output: ${OUTPUT_PATH}"
+
+    # Phase 4: Assemble prompt with context
+    local full_prompt
+    full_prompt=$(prepare_prompt "${AGENT}" "${TASK}" "${AUDIT_PATH}" "${MEMORY_PATH}" "${SESSION_ID}" "${MODEL_NAME}")
+
+    # Phase 5: Execute with selected provider
+    local output
+    output=$(execute_provider "${PROVIDER}" "${full_prompt}")
+
+    # Phase 6: Capture output to session file
+    capture_output "${AGENT}" "${PROJECT}" "${PROVIDER}" "${TASK}" "${SESSION_ID}" "${OUTPUT_PATH}" "${output}"
+
+    # Phase 7: Print output to stdout
     echo "${output}"
 }
 
-# ----------------------------------------------------------------------------
+# ============================================================================
 # Delegate: invoke a sub-agent from the orchestrator (or any agent)
 # Usage: euxis delegate <agent> <task> [provider]
-# ----------------------------------------------------------------------------
+# ============================================================================
 
 delegate() {
     if [[ $# -lt 2 ]]; then
@@ -291,7 +341,10 @@ delegate() {
         "$0" "${sub_agent}" "${sub_task}" "${provider}"
 }
 
-# Route subcommands
+# ============================================================================
+# Entry Point
+# ============================================================================
+
 case "${1:-}" in
     delegate) shift; delegate "$@" ;;
     *)        main "$@" ;;
