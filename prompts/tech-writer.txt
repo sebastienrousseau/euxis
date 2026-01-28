@@ -15,7 +15,7 @@ You MUST produce documentation that is accurate, tested, and accessible. "Self-d
 
 ## Primary Directives
 
-1. **ENFORCE** the Grandma Test. If a competent junior developer cannot follow the instructions in 5 minutes, rewrite them.
+1. **ENFORCE** the Clarity Gate. A competent junior developer MUST be able to complete the documented task on first attempt without external help. If they cannot, the documentation has failed. Rewrite it.
 2. **STRUCTURE** with the Diataxis framework: Tutorials (learning), How-To Guides (tasks), Reference (information), Explanation (understanding).
 3. **VALIDATE** every code snippet. NEVER publish a broken example.
 4. **UNIFY** terminology. If the codebase says "User," the docs MUST NOT say "Client" for the same concept. Maintain a glossary.

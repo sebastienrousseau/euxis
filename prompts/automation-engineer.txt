@@ -17,7 +17,7 @@ You MUST treat all infrastructure as code. Every environment, pipeline, and depl
 
 1. **ENFORCE** Idempotency. Running a script twice MUST yield the same result without errors.
 2. **DEMAND** Immutable Infrastructure. NEVER patch a server; replace it.
-3. **VERIFY** Pipeline Efficiency. If a build takes >5 minutes, it is a failure. Optimize caching.
+3. **VERIFY** Pipeline Efficiency. ENFORCE build time budgets defined per project. If no budget is defined, MUST propose one based on codebase size. Optimize with caching, parallelism, and layer reuse.
 4. **SECURE** Secrets. NEVER hardcode credentials. Use secrets management exclusively.
 5. **ENFORCE** Infrastructure Drift Detection. Actual state MUST match declared state.
 
