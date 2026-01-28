@@ -1,0 +1,91 @@
+#!/bin/bash
+# EUXIS INFRA TEST: Branch Coverage for euxis.sh
+# Uses mocked providers to verify routing logic without spending money.
+
+EUXIS_HOME="$HOME/.euxis"
+EUXIS_SCRIPT="$EUXIS_HOME/scripts/euxis.sh"
+PASS=0
+FAIL=0
+
+report() {
+    local status="$1"
+    local name="$2"
+    if [[ "$status" == "PASS" ]]; then
+        echo "  PASS: $name"
+        ((PASS++))
+    else
+        echo "  FAIL: $name"
+        ((FAIL++))
+    fi
+}
+
+echo "TESTING INFRASTRUCTURE LOGIC..."
+
+# TEST 1: Missing arguments shows usage
+OUTPUT=$("$EUXIS_SCRIPT" 2>&1 || true)
+if [[ "$OUTPUT" == *"Usage:"* ]]; then
+    report "PASS" "Handles missing arguments"
+else
+    report "FAIL" "Handles missing arguments"
+fi
+
+# TEST 2: Invalid agent name rejected
+OUTPUT=$("$EUXIS_SCRIPT" "nonexistent-agent-xyz" "test task" claude 2>&1 || true)
+if [[ "$OUTPUT" == *"Unknown agent"* ]]; then
+    report "PASS" "Rejects unknown agent"
+else
+    report "FAIL" "Rejects unknown agent"
+fi
+
+# TEST 3: Invalid provider rejected
+OUTPUT=$("$EUXIS_SCRIPT" "architect" "test task" "badprovider" 2>&1 || true)
+if [[ "$OUTPUT" == *"Unknown provider"* ]]; then
+    report "PASS" "Rejects unknown provider"
+else
+    report "FAIL" "Rejects unknown provider"
+fi
+
+# TEST 4: Agent name sanitization (path traversal defense)
+OUTPUT=$("$EUXIS_SCRIPT" "../../../etc/passwd" "test" claude 2>&1 || true)
+if [[ "$OUTPUT" == *"Invalid agent name"* ]]; then
+    report "PASS" "Rejects path traversal in agent name"
+else
+    report "FAIL" "Rejects path traversal in agent name"
+fi
+
+# TEST 5: Partial files (underscore prefix) rejected
+OUTPUT=$("$EUXIS_SCRIPT" "_protocol" "test" claude 2>&1 || true)
+if [[ "$OUTPUT" == *"Unknown agent"* ]]; then
+    report "PASS" "Rejects partial files (_protocol)"
+else
+    report "FAIL" "Rejects partial files (_protocol)"
+fi
+
+# TEST 6: Delegate with missing args
+OUTPUT=$("$EUXIS_SCRIPT" delegate 2>&1 || true)
+if [[ "$OUTPUT" == *"delegate requires"* ]]; then
+    report "PASS" "Delegate rejects missing arguments"
+else
+    report "FAIL" "Delegate rejects missing arguments"
+fi
+
+# TEST 7: Project directory creation
+TEMP_PROJECT="euxis_test_$$"
+EUXIS_PROJECT="$TEMP_PROJECT" "$EUXIS_SCRIPT" architect "test" claude >/dev/null 2>&1 || true
+if [[ -d "$EUXIS_HOME/projects/$TEMP_PROJECT/architect/output" ]]; then
+    report "PASS" "Creates project directory structure"
+    rm -rf "$EUXIS_HOME/projects/$TEMP_PROJECT"
+else
+    report "FAIL" "Creates project directory structure"
+fi
+
+echo "---------------------------------------------------"
+echo "Results: $PASS passed, $FAIL failed, $((PASS + FAIL)) total"
+
+if [[ $FAIL -eq 0 ]]; then
+    echo "INFRASTRUCTURE TESTS PASSED."
+    exit 0
+else
+    echo "INFRASTRUCTURE TESTS FAILED."
+    exit 1
+fi

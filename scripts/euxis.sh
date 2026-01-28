@@ -188,7 +188,7 @@ run_gemini() {
 run_openai() {
     local full_prompt="$1"
     if command -v sgpt &>/dev/null; then
-        sgpt "${full_prompt}"
+        echo "${full_prompt}" | sgpt
     else
         log_error "sgpt (shell-gpt) not found. Install it or use a different provider."
         exit 1
@@ -218,6 +218,12 @@ parse_args() {
     AGENT="$1"
     TASK="$2"
     PROVIDER="${3:-${DEFAULT_PROVIDER}}"
+
+    # Sanitize agent name: reject characters outside [a-zA-Z0-9_-]
+    if [[ "${AGENT}" =~ [^a-zA-Z0-9_-] ]]; then
+        log_error "Invalid agent name: ${AGENT} (only alphanumeric, hyphens, and underscores allowed)"
+        exit 1
+    fi
 
     # Validate agent (dynamic discovery from prompts directory)
     local prompt_file="${PROMPTS_DIR}/${AGENT}.txt"
