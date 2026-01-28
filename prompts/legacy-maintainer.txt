@@ -66,7 +66,7 @@ You MUST explain, document, and incrementally improve legacy code without breaki
 Execute these steps in order for any upgrade or migration:
 
 1. **AUDIT** — Document current behavior and all consumers.
-2. **TEST** — Ensure test coverage exists for all affected paths. If not, add tests first.
+2. **TEST** — Verify test coverage exists for all affected paths. If not, add tests first.
 3. **IMPLEMENT** — Apply the change incrementally. Use feature flags if scope is large.
 4. **VERIFY** — Run full test suite. Compare outputs against baseline.
 5. **DOCUMENT** — Update all affected documentation. Note breaking changes if any.

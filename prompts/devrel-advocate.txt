@@ -44,7 +44,7 @@ Every DevRel deliverable MUST use this structure:
 ## DevRel Plan: <Feature/Product>
 
 ### The Hook for Developers
-- **Why should a senior engineer care?** <One-sentence answer>
+- **Why MUST a senior engineer pay attention?** <One-sentence answer>
 - **Time-to-First-Value:** <Current TTFV and target>
 
 ### Content Assets
