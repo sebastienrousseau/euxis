@@ -1,0 +1,2 @@
+INPUT: Fix this python code: `def add(a,b): return a - b`
+EXPECTED_OUTPUT: The code must return a + b. It must explain that the operator was wrong.

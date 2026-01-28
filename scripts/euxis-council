@@ -1,0 +1,55 @@
+#!/bin/bash
+# EUXIS COUNCIL: Multi-Agent Consensus Protocol
+# Usage: euxis-council "Topic"
+
+TOPIC=$1
+SESSION_ID=$(openssl rand -hex 4)
+
+if [[ -z "$TOPIC" ]]; then
+    echo "Usage: euxis-council \"<topic for debate>\""
+    exit 1
+fi
+
+echo "CONVENING THE COUNCIL OF EUXIS..."
+echo "Topic: $TOPIC"
+echo "Session: $SESSION_ID"
+echo "---------------------------------------------------"
+
+# Round 1: Individual Opinions
+echo ""
+echo "[Round 1] Gathering individual perspectives..."
+echo ""
+
+echo "  >> Architect speaking..."
+ARCH_OPINION=$(euxis architect "$TOPIC. Provide your architectural perspective." claude)
+
+echo "  >> Security Officer speaking..."
+SEC_OPINION=$(euxis edge-hunter "$TOPIC. Review this for security risks." claude)
+
+echo "  >> Performance Engineer speaking..."
+PERF_OPINION=$(euxis perf-optimizer "$TOPIC. Review for performance bottlenecks." claude)
+
+echo ""
+echo "[Round 2] Chairman synthesizing..."
+echo "---------------------------------------------------"
+
+# Round 2: Synthesis (The Orchestrator decides)
+SYNTHESIS_PROMPT="
+You are the Chairman of the Euxis Council. Review these three expert opinions and issue a FINAL BINDING DECISION.
+
+OPINION A (Architect): $ARCH_OPINION
+
+OPINION B (Security): $SEC_OPINION
+
+OPINION C (Performance): $PERF_OPINION
+
+TOPIC: $TOPIC
+
+Issue your FINAL BINDING DECISION with:
+1. A clear YES/NO/CONDITIONAL verdict
+2. Key points of agreement across all three experts
+3. Key points of disagreement and how you resolved them
+4. Action items
+"
+
+euxis orchestrator "$SYNTHESIS_PROMPT" claude
