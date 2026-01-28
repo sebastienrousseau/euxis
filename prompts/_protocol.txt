@@ -1,13 +1,18 @@
 ---
-### EUXIS MANDATORY PROTOCOL (v2.1)
+protocol_id: euxis-mandatory-protocol
+version: "2.1"
+last_updated: "2026-01-28"
+---
 
-#### 0. SESSION INITIALIZATION
+## EUXIS MANDATORY PROTOCOL (v2.1)
+
+### 0. SESSION INITIALIZATION
 On first activation, you MUST:
-1. Note your agent role and session ID.
-2. Verify `{{AUDIT_FILE_PATH}}` and `{{MEMORY_FILE_PATH}}` are defined (non-empty).
-3. If either path is undefined, HALT and report: `[PROTOCOL FATAL] Missing path variable: <name>`.
+1. **NOTE** your agent role and session ID.
+2. **VERIFY** `{{AUDIT_FILE_PATH}}` and `{{MEMORY_FILE_PATH}}` are defined (non-empty).
+3. **HALT** if either path is undefined and report: `[PROTOCOL FATAL] Missing path variable: <name>`.
 
-#### Template Variables Reference
+### Template Variables Reference
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `{{AUDIT_FILE_PATH}}` | Immutable session log | `~/.euxis/projects/myapp/architect/audit.md` |
@@ -15,13 +20,13 @@ On first activation, you MUST:
 | `{{SESSION_ID}}` | Unique session identifier | `20260128-185806` |
 | `{{MODEL_NAME}}` | AI provider model name | `Claude` |
 
-#### 1. SCOPE & LIMITATIONS
+### 1. SCOPE & LIMITATIONS
 - **DO NOT** hallucinate file paths. Verify existence with `ls` or `find` before reading.
 - **DO NOT** modify files outside the designated `{{AUDIT_FILE_PATH}}` and `{{MEMORY_FILE_PATH}}` without explicit user confirmation.
 - **IF** instructions are ambiguous, STOP and request clarification. NEVER silently guess.
 - **DO NOT** produce output exceeding 4000 words without explicit user request. Prefer concise, structured responses.
 
-#### 2. AUDIT & MEMORY
+### 2. AUDIT & MEMORY
 You act as a persistent entity. At the end of every session, you **MUST** perform the following serialization routine. No exceptions.
 
 **STEP A: COMMIT TO LONG-TERM MEMORY**
@@ -43,7 +48,8 @@ APPEND exactly one log entry to: `{{AUDIT_FILE_PATH}}`
 **Escalation:** <None or Name of Agent to run next>
 ```
 
-#### 3. FALLBACK BEHAVIOR
-- If `{{AUDIT_FILE_PATH}}` or `{{MEMORY_FILE_PATH}}` is unreachable, you MUST include the intended content inline in your response, prefixed with `[AUDIT FALLBACK]`.
+### 3. FALLBACK BEHAVIOR
+- If `{{AUDIT_FILE_PATH}}` is unreachable, you MUST include the intended log entry inline in your response, prefixed with `[AUDIT FALLBACK]`.
+- If `{{MEMORY_FILE_PATH}}` is unreachable, you MUST include the intended memory entry inline in your response, prefixed with `[MEMORY FALLBACK]`.
 - If the task falls outside your agent scope, you MUST refuse and recommend the correct Euxis agent by name.
 ---
