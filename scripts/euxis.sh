@@ -26,25 +26,33 @@ DEFAULT_PROVIDER="claude"
 # Functions
 # ============================================================================
 
+list_agents() {
+    local name
+    for f in "${PROMPTS_DIR}"/*.txt; do
+        name=$(basename "${f}" .txt)
+        # Skip partials (files starting with _)
+        [[ "${name}" == _* ]] && continue
+        echo "    ${name}"
+    done
+}
+
 usage() {
     cat <<EOF
 Euxis - Multi-Provider AI Agent Framework
 
 Usage: euxis <agent> <task> [provider]
+       euxis delegate <agent> <task> [provider]
 
 Arguments:
     agent       Agent to invoke (see list below)
     task        Task description or file path
     provider    AI provider: claude (default), gemini, openai
 
+Subcommands:
+    delegate    Invoke a sub-agent (used by orchestrator for chaining)
+
 Available Agents:
-    architect           Senior Architect - structure, patterns, refactoring
-    product-manager     Technical PM - user stories, acceptance criteria
-    bug-fixer           Debugging Specialist - root cause analysis
-    orchestrator        Chief Planner - task breakdown, delegation
-    edge-hunter         Red Team - security analysis, boundary testing
-    legacy-maintainer   Legacy Specialist - documentation, upgrades
-    release-manager     Release Lead - changelogs, versioning
+$(list_agents)
 
 Examples:
     euxis architect "Review the authentication module"
@@ -88,7 +96,7 @@ ensure_project_dirs() {
     local agent="$2"
     local agent_dir="${PROJECTS_DIR}/${project}/${agent}"
 
-    mkdir -p "${agent_dir}"
+    mkdir -p "${agent_dir}/output"
 
     # Initialize files if they don't exist
     [[ -f "${agent_dir}/audit.md" ]] || echo "# Audit Log: ${agent}" > "${agent_dir}/audit.md"
@@ -113,15 +121,19 @@ prepare_prompt() {
     local model_name="$6"
 
     local prompt_file="${PROMPTS_DIR}/${agent}.txt"
+    local protocol_file="${PROMPTS_DIR}/_protocol.txt"
 
     if [[ ! -f "${prompt_file}" ]]; then
         log_error "Agent prompt not found: ${prompt_file}"
         exit 1
     fi
 
-    # Load base prompt
+    # Load base prompt and append protocol partial
     local prompt
     prompt=$(cat "${prompt_file}")
+    if [[ -f "${protocol_file}" ]]; then
+        prompt="${prompt}"$'\n\n'"$(cat "${protocol_file}")"
+    fi
 
     # Replace variables
     prompt="${prompt//\{\{AUDIT_FILE_PATH\}\}/${audit_path}}"
@@ -188,28 +200,12 @@ main() {
     local task="$2"
     local provider="${3:-${DEFAULT_PROVIDER}}"
 
-    # Validate agent
-    local valid_agents=(
-        "architect"
-        "product-manager"
-        "bug-fixer"
-        "orchestrator"
-        "edge-hunter"
-        "legacy-maintainer"
-        "release-manager"
-    )
-
-    local agent_valid=false
-    for valid in "${valid_agents[@]}"; do
-        if [[ "${agent}" == "${valid}" ]]; then
-            agent_valid=true
-            break
-        fi
-    done
-
-    if [[ "${agent_valid}" != "true" ]]; then
+    # Validate agent (dynamic discovery from prompts directory)
+    local prompt_file="${PROMPTS_DIR}/${agent}.txt"
+    if [[ ! -f "${prompt_file}" || "${agent}" == _* ]]; then
         log_error "Unknown agent: ${agent}"
-        echo "Valid agents: ${valid_agents[*]}" >&2
+        echo "Available agents:" >&2
+        list_agents >&2
         exit 1
     fi
 
@@ -237,21 +233,66 @@ main() {
             ;;
     esac
 
+    local output_path="${PROJECTS_DIR}/${project}/${agent}/output/${session_id}.md"
+
     log_info "Agent: ${agent}"
     log_info "Project: ${project}"
     log_info "Provider: ${provider}"
     log_info "Session: ${session_id}"
+    log_info "Output: ${output_path}"
 
     # Prepare full prompt with context
     local full_prompt
     full_prompt=$(prepare_prompt "${agent}" "${task}" "${audit_path}" "${memory_path}" "${session_id}" "${model_name}")
 
-    # Execute with selected provider
+    # Execute with selected provider and capture output
+    local output
     case "${provider}" in
-        claude)  run_claude "${full_prompt}" ;;
-        gemini)  run_gemini "${full_prompt}" ;;
-        openai)  run_openai "${full_prompt}" ;;
+        claude)  output=$(run_claude "${full_prompt}") ;;
+        gemini)  output=$(run_gemini "${full_prompt}") ;;
+        openai)  output=$(run_openai "${full_prompt}") ;;
     esac
+
+    # Save output to session file
+    cat > "${output_path}" <<OUTEOF
+# Output: ${agent} — ${session_id}
+**Project:** ${project}
+**Provider:** ${provider}
+**Task:** ${task}
+
+---
+
+${output}
+OUTEOF
+
+    # Print output to stdout
+    echo "${output}"
 }
 
-main "$@"
+# ----------------------------------------------------------------------------
+# Delegate: invoke a sub-agent from the orchestrator (or any agent)
+# Usage: euxis delegate <agent> <task> [provider]
+# ----------------------------------------------------------------------------
+
+delegate() {
+    if [[ $# -lt 2 ]]; then
+        log_error "delegate requires: <agent> <task> [provider]"
+        exit 1
+    fi
+
+    local sub_agent="$1"
+    local sub_task="$2"
+    local provider="${3:-${DEFAULT_PROVIDER}}"
+
+    log_info "Delegating to ${sub_agent}..."
+
+    # Re-invoke euxis for the sub-agent (inherits EUXIS_PROJECT)
+    EUXIS_PROJECT="${EUXIS_PROJECT:-$(get_project_name)}" \
+        "$0" "${sub_agent}" "${sub_task}" "${provider}"
+}
+
+# Route subcommands
+case "${1:-}" in
+    delegate) shift; delegate "$@" ;;
+    *)        main "$@" ;;
+esac
