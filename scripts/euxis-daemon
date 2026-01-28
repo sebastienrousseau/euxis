@@ -8,17 +8,38 @@ INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first a
 LOG_DIR="$EUXIS_HOME/projects/euxis-internal/daemon-logs"
 mkdir -p "$LOG_DIR"
 
+LAST_HASH=""
+
 echo "EUXIS DAEMON STARTED."
 echo "  Interval: Every $((INTERVAL / 60)) minutes"
 echo "  Log Dir:  $LOG_DIR"
+echo "  Mode:     Smart (skips unchanged files)"
 echo "  Press [Ctrl+C] to stop safely."
 echo "---------------------------------------------------"
+
+compute_hash() {
+    find "$EUXIS_HOME/prompts" "$EUXIS_HOME/scripts" -type f -exec md5 -q {} + 2>/dev/null | sort | md5 -q 2>/dev/null \
+        || find "$EUXIS_HOME/prompts" "$EUXIS_HOME/scripts" -type f -exec md5sum {} + 2>/dev/null | sort | md5sum 2>/dev/null
+}
 
 while true; do
     TIMESTAMP=$(date +%Y%m%d-%H%M%S)
     LOG_FILE="$LOG_DIR/run-$TIMESTAMP.log"
 
-    echo -n "[$TIMESTAMP] Starting Kaizen Cycle... "
+    # File hash check: skip expensive AI audit if nothing changed
+    CURRENT_HASH=$(compute_hash)
+
+    if [[ -n "$LAST_HASH" && "$CURRENT_HASH" == "$LAST_HASH" ]]; then
+        echo "[$TIMESTAMP] No changes detected. Skipping AI audit."
+        echo "Sleeping for $((INTERVAL / 60)) minutes..."
+        echo "---------------------------------------------------"
+        sleep $INTERVAL
+        continue
+    fi
+
+    LAST_HASH="$CURRENT_HASH"
+
+    echo -n "[$TIMESTAMP] Changes detected. Starting Kaizen Cycle... "
 
     # 1. Run the Kaizen Loop (Capture output to file)
     "$SCRIPTS_DIR/euxis-kaizen" > "$LOG_FILE" 2>&1
