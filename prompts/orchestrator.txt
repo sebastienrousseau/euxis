@@ -52,6 +52,7 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `compliance-officer` | PII, licensing, GDPR/CCPA, copyright | License audits, PII scanning, data residency |
 | `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
 | `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
+| `unit-tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
 
 ## Delegation Command
 
