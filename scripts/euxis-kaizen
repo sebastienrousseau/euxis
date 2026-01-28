@@ -1,0 +1,68 @@
+#!/bin/bash
+# EUXIS KAIZEN: Continuous Self-Improvement Loop
+# "Better every day."
+
+EUXIS_HOME="$HOME/.euxis"
+SCRIPTS_DIR="$EUXIS_HOME/scripts"
+DATE=$(date +%Y-%m-%d)
+
+echo "STARTING KAIZEN SESSION: $DATE"
+echo "=================================================="
+
+# STEP 1: THE TOLL GATES (Sanity Check)
+echo ""
+echo "[GATE 1] Running Certification Suite..."
+echo "--------------------------------------------------"
+"$SCRIPTS_DIR/euxis-certify"
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "CRITICAL: Euxis failed certification. Fix the base system before optimizing."
+    exit 1
+fi
+echo ""
+echo "System is stable. Proceeding to optimization."
+
+# STEP 2: THE SELF-REFLECTION (Architect Scan)
+echo ""
+echo "[GATE 2] Architectural Self-Reflection..."
+echo "--------------------------------------------------"
+"$SCRIPTS_DIR/euxis.sh" architect "META-AUDIT: Read the files in ~/.euxis/prompts/.
+CRITERIA:
+1. Are there inconsistencies between agent definitions?
+2. Do any agents use weak language (e.g., 'Please', 'Try to', 'ensure', 'should') instead of 'MUST'?
+3. Is the 'Agent Registry' in orchestrator.txt out of sync with the actual files?
+4. Are all Output Format templates structurally complete?
+
+OUTPUT:
+- A list of 3 specific improvements to make the fleet sharper.
+- Rate overall fleet consistency 0-100." claude
+
+# STEP 3: THE DOCUMENTATION SYNC (Tech Writer)
+echo ""
+echo "[GATE 3] Documentation Sync..."
+echo "--------------------------------------------------"
+"$SCRIPTS_DIR/euxis.sh" tech-writer "Read ~/.euxis/prompts/ and verify the ROOT README.md in ~/.euxis/.
+VERIFY:
+1. Every agent is listed in the README.
+2. The version number in the README matches the Protocol (v2.1).
+3. The 'Installation' instructions are accurate.
+4. All CLI tools are documented.
+
+OUTPUT:
+- List any gaps found.
+- If no gaps, confirm README is in sync." claude
+
+# STEP 4: THE STRATEGIC UPGRADE (Orchestrator)
+echo ""
+echo "[GATE 4] The Upgrade Plan..."
+echo "--------------------------------------------------"
+"$SCRIPTS_DIR/euxis.sh" orchestrator "Based on the current state of ~/.euxis/prompts/, propose a 'Next Version Patch'.
+TASK:
+1. Identify the top 3 marginal improvements across the fleet.
+2. If no critical fixes are needed, propose a new capability (e.g., a new agent, script, or protocol enhancement).
+3. Format as an Orchestration Plan with phases, agents, and success criteria." claude
+
+echo ""
+echo "=================================================="
+echo "KAIZEN COMPLETE. Review the suggestions above."
+echo "=================================================="

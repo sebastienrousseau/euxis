@@ -1,0 +1,43 @@
+#!/bin/bash
+# EUXIS DAEMON: Safe, Periodic Self-Improvement
+# Runs 'euxis-kaizen' every X minutes with safety stops.
+
+EUXIS_HOME="$HOME/.euxis"
+SCRIPTS_DIR="$EUXIS_HOME/scripts"
+INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first arg.
+LOG_DIR="$EUXIS_HOME/projects/euxis-internal/daemon-logs"
+mkdir -p "$LOG_DIR"
+
+echo "EUXIS DAEMON STARTED."
+echo "  Interval: Every $((INTERVAL / 60)) minutes"
+echo "  Log Dir:  $LOG_DIR"
+echo "  Press [Ctrl+C] to stop safely."
+echo "---------------------------------------------------"
+
+while true; do
+    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    LOG_FILE="$LOG_DIR/run-$TIMESTAMP.log"
+
+    echo -n "[$TIMESTAMP] Starting Kaizen Cycle... "
+
+    # 1. Run the Kaizen Loop (Capture output to file)
+    "$SCRIPTS_DIR/euxis-kaizen" > "$LOG_FILE" 2>&1
+    EXIT_CODE=$?
+
+    # 2. Safety Check
+    if [ $EXIT_CODE -eq 0 ]; then
+        echo "COMPLETE."
+        echo "  View Report: tail -n 10 $LOG_FILE"
+    else
+        echo "FAILED."
+        echo "  CRITICAL ERROR DETECTED. Daemon is pausing for safety."
+        echo "  Check Log: $LOG_FILE"
+        echo "  System Halted."
+        exit 1
+    fi
+
+    # 3. The Wait (Safety Buffer)
+    echo "Sleeping for $((INTERVAL / 60)) minutes..."
+    echo "---------------------------------------------------"
+    sleep $INTERVAL
+done

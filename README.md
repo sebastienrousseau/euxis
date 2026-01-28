@@ -202,6 +202,34 @@ Runs all toll gates (lint, infra tests, semantic verification) in sequence. Gree
 euxis-certify
 ```
 
+### `euxis-kaizen` — Continuous Self-Improvement
+
+Runs a 4-gate Kaizen cycle: certification, architectural self-reflection, documentation sync, and strategic upgrade proposal.
+
+```bash
+euxis-kaizen
+```
+
+Gate sequence:
+1. Certification suite (all toll gates)
+2. Architect meta-audit (weak language, inconsistencies, registry sync)
+3. Tech-writer documentation verification
+4. Orchestrator upgrade plan proposal
+
+### `euxis-daemon` — Safe Periodic Kaizen Loop
+
+Runs `euxis-kaizen` on a configurable interval with fail-safe halting. If any cycle fails certification, the daemon stops immediately.
+
+```bash
+euxis-daemon           # Default: every 30 minutes
+euxis-daemon 3600      # Custom: every 60 minutes (seconds)
+```
+
+Run in a dedicated terminal tab or tmux session. Review logs at:
+```bash
+cat $(ls -t ~/.euxis/projects/euxis-internal/daemon-logs/*.log | head -n 1)
+```
+
 ## License
 
 Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
