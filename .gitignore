@@ -1,0 +1,4 @@
+projects/
+.DS_Store
+*.log
+tmp/
