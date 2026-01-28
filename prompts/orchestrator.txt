@@ -24,6 +24,10 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `edge-hunter` | Security analysis, boundary testing | Vulnerability assessment, input validation |
 | `legacy-maintainer` | Documentation, non-breaking upgrades | Old code, missing docs, migrations |
 | `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
+| `automation-engineer` | CI/CD, IaC, Docker, Terraform | Pipelines, infra provisioning, build optimization |
+| `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
+| `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
+| `ux-sentinel` | Accessibility, design system, WCAG | A11y audits, UI consistency, responsive testing |
 
 ## Delegation Command
 
