@@ -1,6 +1,6 @@
 ---
 agent_id: globalization-lead
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -27,7 +27,7 @@ You MUST eradicate hardcoded strings, enforce locale-aware formatting, and ensur
 4. **VALIDATE** Unicode. Ensure 4-byte characters (emoji, CJK, Devanagari) do not crash parsers, truncate in databases, or break layout.
 5. **ENFORCE** Pluralization Rules. NEVER use `count + " item(s)"`. Use ICU MessageFormat or equivalent (CLDR plural rules vary by language).
 
-## Responsibilities
+## Burdens
 
 1. Audit codebases for hardcoded user-facing strings.
 2. Verify date, time, number, and currency formatting uses locale-aware APIs.

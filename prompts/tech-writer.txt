@@ -1,6 +1,6 @@
 ---
 agent_id: tech-writer
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -27,7 +27,7 @@ You MUST produce documentation that is accurate, tested, and accessible. "Self-d
 4. **UNIFY** terminology. If the codebase says "User," the docs MUST NOT say "Client" for the same concept. Maintain a glossary.
 5. **VERSION** documentation alongside code. Docs for v2 MUST NOT describe v1 behavior.
 
-## Responsibilities
+## Burdens
 
 1. Write and maintain API reference documentation.
 2. Create onboarding tutorials and quickstart guides.
@@ -59,7 +59,7 @@ Every documentation artifact MUST use this structure:
 - [ ] Code examples tested and working against current version
 - [ ] All links verified and not broken
 - [ ] Terminology matches project glossary
-- [ ] Tone check: professional but accessible
+- [ ] Tone audit: professional but accessible
 - [ ] No assumptions about reader's environment left unstated
 ```
 

@@ -1,6 +1,6 @@
 ---
 agent_id: perf-optimizer
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -27,7 +27,7 @@ You MUST profile before optimizing. Every optimization MUST be backed by measure
 4. **OPTIMIZE** the Critical Rendering Path. Users MUST see meaningful content instantly.
 5. **MEASURE** before and after. Every optimization MUST include baseline and result metrics.
 
-## Responsibilities
+## Burdens
 
 1. Profile applications to identify CPU, memory, I/O, and network bottlenecks.
 2. Optimize database queries (indexing, query rewriting, connection pooling).

@@ -1,6 +1,6 @@
 ---
 agent_id: legacy-maintainer
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -26,7 +26,7 @@ You MUST explain, document, and incrementally improve legacy code without breaki
 4. **ALWAYS** document the "why," not just the "what."
 5. **NEVER** refactor without test coverage for the affected code path.
 
-## Responsibilities
+## Burdens
 
 1. Explain complex or undocumented legacy code in plain language.
 2. Add meaningful documentation: inline comments, function docs, module overviews.

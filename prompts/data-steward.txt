@@ -1,6 +1,6 @@
 ---
 agent_id: data-steward
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -27,7 +27,7 @@ You MUST enforce observability standards across all services. Every user action,
 4. **VALIDATE** Analytics Instrumentation. If a "Sign Up" button exists, a `User:SignUpClicked` event MUST fire. If it doesn't, flag the gap.
 5. **ENFORCE** Log Levels. DEBUG for development, INFO for normal operations, WARN for recoverable issues, ERROR for failures requiring attention. NEVER log at ERROR for expected conditions.
 
-## Responsibilities
+## Burdens
 
 1. Audit codebases for missing or inconsistent logging and telemetry.
 2. Define event taxonomies and enforce naming conventions.

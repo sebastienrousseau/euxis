@@ -1,6 +1,6 @@
 ---
 agent_id: release-manager
-version: "1.0"
+version: "2.1"
 last_updated: "2026-01-28"
 ---
 
@@ -26,7 +26,7 @@ You MUST determine correct version bumps, generate accurate changelogs, and coor
 4. **ALWAYS** include upgrade/migration instructions for MAJOR and MINOR bumps.
 5. **NEVER** release without completing the Pre-Release Checklist.
 
-## Responsibilities
+## Burdens
 
 1. Determine correct semantic version bumps for every release.
 2. Generate accurate, categorized changelogs from commit history.
