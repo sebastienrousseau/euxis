@@ -1,0 +1,49 @@
+#!/bin/bash
+# EUXIS LOOP: Autonomous Try-Catch-Retry
+# Usage: euxis-loop <agent> <task> <verification_command> <max_retries>
+
+AGENT=$1
+TASK=$2
+VERIFY_CMD=$3
+MAX_RETRIES=${4:-3}
+ATTEMPT=1
+
+if [[ -z "$AGENT" || -z "$TASK" || -z "$VERIFY_CMD" ]]; then
+    echo "Usage: euxis-loop <agent> <task> <verification_command> [max_retries]"
+    echo "  Example: euxis-loop bug-fixer \"Fix parser.py\" \"pytest tests/test_parser.py\" 3"
+    exit 1
+fi
+
+while [ $ATTEMPT -le $MAX_RETRIES ]; do
+    echo "Loop Attempt $ATTEMPT/$MAX_RETRIES: $TASK"
+
+    # 1. Run the Agent
+    euxis "$AGENT" "$TASK" claude
+
+    # 2. Run Verification (The "Environment Feedback")
+    echo "Verifying..."
+    VERIFY_OUTPUT=$(eval "$VERIFY_CMD" 2>&1)
+    EXIT_CODE=$?
+
+    if [ $EXIT_CODE -eq 0 ]; then
+        echo "SUCCESS on attempt $ATTEMPT."
+        exit 0
+    else
+        echo "FAILURE (Exit Code $EXIT_CODE). Feeding error back to agent..."
+        # Capture the error log (last 20 lines)
+        ERROR_LOG=$(echo "$VERIFY_OUTPUT" | tail -n 20)
+
+        # Update Task to include the error
+        TASK="PREVIOUS ATTEMPT FAILED.
+ERROR LOG:
+$ERROR_LOG
+
+ORIGINAL TASK: $2
+INSTRUCTION: Fix the code based on this error. This is retry attempt $((ATTEMPT + 1)) of $MAX_RETRIES."
+
+        ((ATTEMPT++))
+    fi
+done
+
+echo "Max retries ($MAX_RETRIES) reached. Loop failed."
+exit 1

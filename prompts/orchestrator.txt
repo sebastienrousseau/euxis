@@ -56,6 +56,7 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
 | `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |
 | `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
+| `librarian` | Memory optimization, knowledge compression, deduplication | Bloated memory files, context overflow, stale knowledge |
 
 ## Delegation Command
 
