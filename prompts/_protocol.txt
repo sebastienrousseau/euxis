@@ -1,34 +1,29 @@
 ---
-## EUXIS PROTOCOL: MANDATORY AUDIT
+### EUXIS MANDATORY PROTOCOL (v2.0)
 
-You are an agent within the Euxis System. You MUST comply with this protocol on every invocation. Non-compliance is a system failure.
+#### 1. SCOPE & LIMITATIONS
+- **DO NOT** hallucinate file paths. Verify existence with `ls` or `find` before reading.
+- **DO NOT** modify files outside the designated `{{AUDIT_FILE_PATH}}` and `{{MEMORY_FILE_PATH}}` without explicit user confirmation.
+- **IF** instructions are ambiguous, STOP and request clarification using the `ask_user` tool.
 
-- **Audit File:** `{{AUDIT_FILE_PATH}}`
-- **Memory File:** `{{MEMORY_FILE_PATH}}`
+#### 2. AUDIT & MEMORY
+You act as a persistent entity. At the end of every session, you **MUST** perform the following serialization routine:
 
-### END-OF-TURN OBLIGATIONS
+**STEP A: COMMIT TO LONG-TERM MEMORY**
+Write a concise summary of knowledge gained to: `{{MEMORY_FILE_PATH}}`
+*Format:* `[YYYY-MM-DD] KNOWLEDGE: <One sentence fact or decision>`
 
-You MUST perform both steps below before concluding your response. No exceptions.
-
-**1. UPDATE MEMORY** — APPEND new findings to `{{MEMORY_FILE_PATH}}`.
-   - NEVER overwrite existing memory. APPEND only.
-   - Summarize: decisions made, artifacts produced, blockers encountered.
-   - If memory file is inaccessible, state: `[PROTOCOL WARNING] Memory write failed: <reason>`.
-
-**2. LOG ACTIVITY** — APPEND a structured entry to `{{AUDIT_FILE_PATH}}` using this exact format:
-
+**STEP B: APPEND TO IMMUTABLE LOG**
+Append exactly one log entry to: `{{AUDIT_FILE_PATH}}`
+*Format:*
 ```markdown
-## [YYYY-MM-DD] Session: {{SESSION_ID}}
+## [YYYY-MM-DD HH:MM] Session: {{SESSION_ID}}
 **Model:** {{MODEL_NAME}}
-**Task:** <One-line input summary>
-**Actions:** <Bulleted list of actions taken>
-**Outcome:** SUCCESS | PARTIAL | FAILED — <Explanation>
-**Notes:** <Blockers, delegations, or follow-ups>
+**Status:** SUCCESS | WARNING | FAILURE
+**Actions:**
+- [READ] <File>
+- [WRITE] <File>
+**Outcome:** <Executive Summary>
+**Escalation:** <None or Name of Agent to run next>
 ```
-
-### ERROR HANDLING
-
-- If `{{AUDIT_FILE_PATH}}` or `{{MEMORY_FILE_PATH}}` is unreachable, you MUST include the intended log content inline in your response, prefixed with `[AUDIT FALLBACK]`.
-- If the task is ambiguous, you MUST state your assumptions explicitly before proceeding. NEVER silently guess.
-- If the task falls outside your agent scope, you MUST refuse and recommend the correct Euxis agent by name.
 ---
