@@ -116,6 +116,109 @@ get_memory_context() {
 }
 
 # ============================================================================
+# Tiered Memory Retrieval (MemGPT-inspired)
+# ============================================================================
+
+# Tier 1: Hot memory — most recent entries (always included)
+get_hot_memory() {
+    local memory_file="$1"
+    if [[ -f "${memory_file}" ]]; then
+        tail -n 20 "${memory_file}" 2>/dev/null || true
+    fi
+}
+
+# Tier 2: Relevant memory — keyword search against full memory
+get_relevant_memory() {
+    local memory_file="$1"
+    local task="$2"
+
+    if [[ ! -f "${memory_file}" ]]; then
+        return
+    fi
+
+    # Extract keywords from task (words > 4 chars, deduplicated, max 10)
+    local keywords
+    keywords=$(echo "${task}" | tr '[:upper:]' '[:lower:]' | \
+        grep -oE '[a-z]{5,}' | sort -u | head -n 10)
+
+    if [[ -z "${keywords}" ]]; then
+        return
+    fi
+
+    # Build grep alternation pattern from keywords
+    local pattern
+    pattern=$(echo "${keywords}" | paste -sd'|')
+
+    # Search full memory, deduplicate, take top 10 matches
+    grep -iE "${pattern}" "${memory_file}" 2>/dev/null | \
+        sort -u | head -n 10 || true
+}
+
+# Tier 3: Cross-agent memory — search sibling agents for relevant context
+get_cross_agent_memory() {
+    local project_dir="$1"
+    local current_agent="$2"
+    local task="$3"
+
+    if [[ ! -d "${project_dir}" ]]; then
+        return
+    fi
+
+    # Extract keywords (same logic as Tier 2)
+    local keywords
+    keywords=$(echo "${task}" | tr '[:upper:]' '[:lower:]' | \
+        grep -oE '[a-z]{5,}' | sort -u | head -n 10)
+
+    if [[ -z "${keywords}" ]]; then
+        return
+    fi
+
+    local pattern
+    pattern=$(echo "${keywords}" | paste -sd'|')
+
+    # Search all sibling agent memory files (not our own)
+    local sibling_mem
+    for sibling_mem in "${project_dir}"/*/memory.md; do
+        [[ -f "${sibling_mem}" ]] || continue
+        # Skip our own memory
+        local sibling_agent
+        sibling_agent=$(basename "$(dirname "${sibling_mem}")")
+        [[ "${sibling_agent}" == "${current_agent}" ]] && continue
+
+        local matches
+        matches=$(grep -iE "${pattern}" "${sibling_mem}" 2>/dev/null | head -n 3 || true)
+        if [[ -n "${matches}" ]]; then
+            echo "  [${sibling_agent}]:"
+            echo "${matches}" | sed 's/^/    /'
+        fi
+    done
+}
+
+build_tiered_memory() {
+    local memory_file="$1"
+    local task="$2"
+    local project_dir="$3"
+    local agent="$4"
+
+    local hot relevant cross
+
+    hot=$(get_hot_memory "${memory_file}")
+    relevant=$(get_relevant_memory "${memory_file}" "${task}")
+    cross=$(get_cross_agent_memory "${project_dir}" "${agent}" "${task}")
+
+    cat <<MEMEOF
+### Tier 1: Hot Memory (Recent)
+${hot:-<empty>}
+
+### Tier 2: Relevant Memory (Keyword Match)
+${relevant:-<no matches>}
+
+### Tier 3: Cross-Agent Context (Read-Only)
+${cross:-<no sibling matches>}
+MEMEOF
+}
+
+# ============================================================================
 # Prompt Assembly
 # ============================================================================
 
@@ -148,16 +251,23 @@ prepare_prompt() {
     prompt="${prompt//\{\{SESSION_ID\}\}/${session_id}}"
     prompt="${prompt//\{\{MODEL_NAME\}\}/${model_name}}"
 
-    # Get memory context
+    # Build tiered memory context
+    local project_dir
+    project_dir=$(dirname "$(dirname "${memory_path}")")  # up from agent/ to project/
+    # If project_dir resolution fails, fall back to flat memory
+    if [[ ! -d "${project_dir}" ]]; then
+        project_dir=""
+    fi
+
     local memory_context
-    memory_context=$(get_memory_context "${memory_path}" 50)
+    memory_context=$(build_tiered_memory "${memory_path}" "${task}" "${project_dir}" "${agent}")
 
     # Build final prompt
     cat <<EOF
 ${prompt}
 
 ---
-## MEMORY CONTEXT (Last 50 lines)
+## MEMORY CONTEXT (Tiered Retrieval)
 ${memory_context}
 
 ---

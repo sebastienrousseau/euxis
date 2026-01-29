@@ -1,6 +1,6 @@
 # Euxis
 
-Enterprise multi-provider AI agent framework. 19 specialized agents with persistent audit logs, structured memory, and automated evaluation.
+Enterprise multi-provider AI agent framework. 20 specialized agents with persistent audit logs, tiered memory retrieval, ReAct reasoning loops, and automated evaluation.
 
 ## Directory Structure
 
@@ -46,6 +46,7 @@ Enterprise multi-provider AI agent framework. 19 specialized agents with persist
 | `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
 | `perf-optimizer` | Latency, throughput, memory profiling, performance budgets |
 | `unit-tester` | Test coverage, test reliability, regression prevention |
+| `reviewer` | Quality gate, output validation, completeness checking |
 | `librarian` | Memory optimization, knowledge compression, deduplication |
 
 ### Security & Compliance
@@ -64,6 +65,12 @@ Enterprise multi-provider AI agent framework. 19 specialized agents with persist
 | `data-steward` | Observability, telemetry, structured logging |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), design system, responsive testing |
 | `product-manager` | Requirements, user stories, MoSCoW prioritization |
+
+### Research
+
+| Agent | Role |
+|-------|------|
+| `deep-researcher` | Iterative multi-pass research with cross-validation and citation |
 
 ### Growth & Community
 
@@ -136,16 +143,21 @@ Interactive terminal interface for deploying agents, switching providers, and br
 euxis-ui
 ```
 
-### `euxis-gym` — Agent Evaluation
+### `euxis-gym` — Agent Evaluation & A/B Testing
 
-Runs an agent against a golden test case and scores the output 0-100 using a judge model.
+Runs an agent against a golden test case and scores the output 0-100 using a judge model. Supports A/B testing across providers.
 
 ```bash
-euxis-gym <agent> <test_case_path>
+euxis-gym <agent> <test_case_path> [provider]
+euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>
 ```
 
 ```bash
+# Single evaluation
 euxis-gym bug-fixer ~/.euxis/tests/bug-fixer-01.txt
+
+# A/B test: compare Claude vs Gemini on the same task
+euxis-gym --ab architect ~/.euxis/tests/architect-01.txt claude gemini
 ```
 
 Test case format:
@@ -154,9 +166,9 @@ INPUT: <task for the agent>
 EXPECTED_OUTPUT: <criteria the output must satisfy>
 ```
 
-### `euxis-council` — Multi-Agent Consensus
+### `euxis-council` — Multi-Agent Debate & Consensus
 
-Convenes architect, edge-hunter, and perf-optimizer to debate a topic. The orchestrator synthesizes a final binding decision.
+Convenes architect, edge-hunter, and perf-optimizer for a 3-round adversarial debate. Round 1 gathers independent opinions, Round 2 has each expert rebut the others, and Round 3 has the orchestrator synthesize a final binding decision.
 
 ```bash
 euxis-council "<topic>"
@@ -166,16 +178,28 @@ euxis-council "<topic>"
 euxis-council "Should we migrate from Postgres to MongoDB for logging?"
 ```
 
-### `euxis-loop` — Autonomous Self-Correction
+### `euxis-loop` — Autonomous Self-Correction with Reflexion
 
-Runs an agent, executes a verification command, and retries on failure — feeding errors back as context.
+Runs an agent, executes verification checkpoints, and retries on failure — injecting both error logs and the agent's own REFLECTION entries from memory into the retry prompt.
 
 ```bash
+# Single verification command
 euxis-loop <agent> <task> <verification_command> [max_retries]
+
+# Multi-checkpoint mode (catches errors at intermediate steps)
+euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ...
+
+# Human-in-the-loop (pauses for confirmation before each retry)
+euxis-loop --confirm <agent> <task> <verify_cmd> [max_retries]
 ```
 
 ```bash
 euxis-loop bug-fixer "Fix parser.py" "pytest tests/test_parser.py" 3
+
+euxis-loop --checkpoints bug-fixer "Fix parser.py" 3 \
+  "python -c 'import parser'" \
+  "pytest tests/test_parser.py" \
+  "mypy parser.py"
 ```
 
 ### `euxis-lint` — Fleet Static Analysis

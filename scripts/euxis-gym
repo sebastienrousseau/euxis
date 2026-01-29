@@ -1,14 +1,38 @@
 #!/bin/bash
-# EUXIS GYM: Automated Evaluation Framework
-# Usage: euxis-gym [agent] [test_file]
+# EUXIS GYM: Automated Evaluation Framework with A/B Testing
+# Usage: euxis-gym <agent> <test_case_path>
+#        euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>
+#
+# Modes:
+#   Single eval: Run one agent against a test case and score 0-100
+#   A/B testing:  Run the same agent with two providers, compare scores
 
-AGENT=$1
-TEST_CASE=$2
+set -uo pipefail
+
+MODE="single"
 LOG_FILE="/tmp/euxis_gym_result.md"
 
-if [[ -z "$AGENT" || -z "$TEST_CASE" ]]; then
-    echo "Usage: euxis-gym <agent> <test_case_path>"
-    exit 1
+if [[ "${1:-}" == "--ab" ]]; then
+    MODE="ab"
+    shift
+    AGENT="${1:-}"
+    TEST_CASE="${2:-}"
+    PROVIDER_A="${3:-claude}"
+    PROVIDER_B="${4:-gemini}"
+    if [[ -z "$AGENT" || -z "$TEST_CASE" ]]; then
+        echo "Usage: euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>"
+        echo "  Example: euxis-gym --ab architect tests/architect-01.txt claude gemini"
+        exit 1
+    fi
+else
+    AGENT="${1:-}"
+    TEST_CASE="${2:-}"
+    PROVIDER="${3:-claude}"
+    if [[ -z "$AGENT" || -z "$TEST_CASE" ]]; then
+        echo "Usage: euxis-gym <agent> <test_case_path> [provider]"
+        echo "       euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>"
+        exit 1
+    fi
 fi
 
 if [[ ! -f "$TEST_CASE" ]]; then
@@ -16,48 +40,114 @@ if [[ ! -f "$TEST_CASE" ]]; then
     exit 1
 fi
 
-echo "EUXIS GYM: Evaluating $AGENT..."
-
 # 1. READ THE TEST
-# A test file contains an 'INPUT:' and an 'EXPECTED_OUTPUT:' section
 INPUT=$(sed -n '/INPUT:/,/EXPECTED_OUTPUT:/p' "$TEST_CASE" | sed 's/INPUT://' | sed 's/EXPECTED_OUTPUT://')
 EXPECTED=$(sed -n '/EXPECTED_OUTPUT:/,$p' "$TEST_CASE" | sed 's/EXPECTED_OUTPUT://')
 
-# 2. RUN THE AGENT (Sandboxed)
-# We capture the output silently
-OUTPUT=$(euxis "$AGENT" "$INPUT" claude)
+# Judge function: scores an output 0-100
+judge_output() {
+    local input="$1"
+    local output="$2"
+    local expected="$3"
+    local label="$4"
 
-# 3. EVALUATE (Using a Judge Model)
-# We ask a "Judge" (Claude) to grade the performance 0-100
-JUDGE_PROMPT="
+    local judge_prompt="
 You are the Gym Referee. Compare the Actual Output against the Expected Criteria.
 ---
-TASK: $INPUT
+TASK: $input
 ---
 ACTUAL OUTPUT:
-$OUTPUT
+$output
 ---
 EXPECTED CRITERIA:
-$EXPECTED
+$expected
 ---
 VERDICT:
 Rate the Actual Output from 0-100.
 Provide a 1-sentence explanation.
 Format: SCORE: <num> | REASON: <text>
 "
+    local result
+    result=$(claude -p "$judge_prompt")
+    echo "  [$label] $result"
+    echo "$result"
+}
 
-RESULT=$(claude -p "$JUDGE_PROMPT")
-
-echo "---------------------------------------------------"
-echo "test: $TEST_CASE"
-echo "agent: $AGENT"
-echo "$RESULT"
-echo "---------------------------------------------------"
-
-# 4. LOG RESULT
-{
-    echo "## Eval: $AGENT — $(date '+%Y-%m-%d %H:%M')"
-    echo "- **Test:** $TEST_CASE"
-    echo "- **Result:** $RESULT"
+if [[ "$MODE" == "ab" ]]; then
     echo ""
-} >> "$LOG_FILE"
+    echo "╔═══════════════════════════════════════════════════╗"
+    echo "║         EUXIS GYM — A/B TEST                     ║"
+    echo "╠═══════════════════════════════════════════════════╣"
+    echo "║  Agent:      $AGENT"
+    echo "║  Test:       $TEST_CASE"
+    echo "║  Provider A: $PROVIDER_A"
+    echo "║  Provider B: $PROVIDER_B"
+    echo "╚═══════════════════════════════════════════════════╝"
+    echo ""
+
+    # Run variant A
+    echo "  Running variant A ($PROVIDER_A)..."
+    OUTPUT_A=$(euxis "$AGENT" "$INPUT" "$PROVIDER_A")
+
+    # Run variant B
+    echo "  Running variant B ($PROVIDER_B)..."
+    OUTPUT_B=$(euxis "$AGENT" "$INPUT" "$PROVIDER_B")
+
+    # Judge both
+    echo ""
+    echo "━━━ Scoring ━━━"
+    RESULT_A=$(judge_output "$INPUT" "$OUTPUT_A" "$EXPECTED" "$PROVIDER_A")
+    RESULT_B=$(judge_output "$INPUT" "$OUTPUT_B" "$EXPECTED" "$PROVIDER_B")
+
+    # Extract numeric scores
+    SCORE_A=$(echo "$RESULT_A" | grep -oP 'SCORE:\s*\K[0-9]+' | tail -1 || echo "?")
+    SCORE_B=$(echo "$RESULT_B" | grep -oP 'SCORE:\s*\K[0-9]+' | tail -1 || echo "?")
+
+    echo ""
+    echo "━━━ A/B Result ━━━"
+    echo "  $PROVIDER_A: $SCORE_A/100"
+    echo "  $PROVIDER_B: $SCORE_B/100"
+
+    if [[ "$SCORE_A" =~ ^[0-9]+$ && "$SCORE_B" =~ ^[0-9]+$ ]]; then
+        if [[ "$SCORE_A" -gt "$SCORE_B" ]]; then
+            echo "  WINNER: $PROVIDER_A (+$((SCORE_A - SCORE_B)))"
+        elif [[ "$SCORE_B" -gt "$SCORE_A" ]]; then
+            echo "  WINNER: $PROVIDER_B (+$((SCORE_B - SCORE_A)))"
+        else
+            echo "  TIE"
+        fi
+    fi
+
+    # Log
+    {
+        echo "## A/B Test: $AGENT — $(date '+%Y-%m-%d %H:%M')"
+        echo "- **Test:** $TEST_CASE"
+        echo "- **$PROVIDER_A:** $SCORE_A/100"
+        echo "- **$PROVIDER_B:** $SCORE_B/100"
+        echo ""
+    } >> "$LOG_FILE"
+
+else
+    echo "EUXIS GYM: Evaluating $AGENT ($PROVIDER)..."
+
+    # 2. RUN THE AGENT
+    OUTPUT=$(euxis "$AGENT" "$INPUT" "$PROVIDER")
+
+    # 3. EVALUATE
+    RESULT=$(judge_output "$INPUT" "$OUTPUT" "$EXPECTED" "$PROVIDER")
+
+    echo "---------------------------------------------------"
+    echo "test: $TEST_CASE"
+    echo "agent: $AGENT"
+    echo "provider: $PROVIDER"
+    echo "$RESULT"
+    echo "---------------------------------------------------"
+
+    # 4. LOG RESULT
+    {
+        echo "## Eval: $AGENT ($PROVIDER) — $(date '+%Y-%m-%d %H:%M')"
+        echo "- **Test:** $TEST_CASE"
+        echo "- **Result:** $RESULT"
+        echo ""
+    } >> "$LOG_FILE"
+fi
