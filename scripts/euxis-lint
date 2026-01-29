@@ -1,6 +1,6 @@
 #!/bin/bash
 # EUXIS LINT: Static Analysis for Agent Fleet
-# Enforces Protocol v3.0 Compliance
+# Enforces Protocol v4.0 Compliance
 
 EUXIS_HOME="$HOME/.euxis"
 FAILURES=0
@@ -31,7 +31,7 @@ if [[ ! -f "$PROTOCOL_FILE" ]]; then
     ((FAILURES++))
 else
     # Verify protocol contains key sections
-    for section in "EUXIS MANDATORY PROTOCOL" "AUDIT_FILE_PATH" "MEMORY_FILE_PATH" "SESSION_ID" "MODEL_NAME" "AUTHORIZED TOOL BELT" "FALLBACK BEHAVIOR"; do
+    for section in "EUXIS MANDATORY PROTOCOL" "AUDIT_FILE_PATH" "MEMORY_FILE_PATH" "SESSION_ID" "MODEL_NAME" "AUTHORIZED TOOL BELT" "FALLBACK BEHAVIOR" "CORTEX" "ReAct REASONING LOOP" "INTER-AGENT MESSAGE SCHEMA"; do
         if ! grep -q "$section" "$PROTOCOL_FILE"; then
             echo "  PROTOCOL GAP: Missing section — $section"
             ((FAILURES++))

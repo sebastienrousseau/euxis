@@ -1,6 +1,6 @@
 # Euxis
 
-Enterprise multi-provider AI agent framework. 20 specialized agents with persistent audit logs, tiered memory retrieval, ReAct reasoning loops, and automated evaluation.
+Enterprise multi-provider AI agent framework. 21 specialized agents with persistent audit logs, Cortex vector memory, ReAct reasoning loops, and automated evaluation.
 
 ## Directory Structure
 
@@ -18,7 +18,9 @@ Enterprise multi-provider AI agent framework. 20 specialized agents with persist
     euxis-lint          Static analysis for agent fleet
     euxis-test-infra    Infrastructure unit tests
     euxis-certify       Full certification pipeline
+    euxis-cortex        Cross-platform semantic memory (vector store)
   tests/                Golden datasets for agent evaluation
+  cortex_db/            ChromaDB vector database (auto-created, git-ignored)
   projects/             Per-project audit logs and memory (git-ignored, local only)
     <project>/
       <agent>/
@@ -85,10 +87,14 @@ Enterprise multi-provider AI agent framework. 20 specialized agents with persist
 ### Prerequisites
 
 - Bash 4.0+
+- Python 3.8+
 - One or more AI providers installed:
   - [Claude CLI](https://docs.anthropic.com/en/docs/claude-cli) (`claude`)
   - [Gemini CLI](https://github.com/google-gemini/gemini-cli) (`gemini`)
   - [shell-gpt](https://github.com/TheR1D/shell_gpt) (`sgpt`)
+- Cortex dependencies (optional, for semantic memory):
+  - macOS: `pip install chromadb sentence-transformers`
+  - Linux/WSL: `sudo apt-get install -y build-essential python3-dev && pip install chromadb sentence-transformers`
 
 ### Setup
 
@@ -108,6 +114,7 @@ ln -sf ~/.euxis/scripts/euxis-loop   ~/bin/euxis-loop
 ln -sf ~/.euxis/scripts/euxis-lint   ~/bin/euxis-lint
 ln -sf ~/.euxis/scripts/euxis-test-infra ~/bin/euxis-test-infra
 ln -sf ~/.euxis/scripts/euxis-certify ~/bin/euxis-certify
+ln -sf ~/.euxis/scripts/euxis-cortex ~/bin/euxis-cortex
 
 # Add ~/bin to PATH (if not already present)
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
@@ -133,6 +140,28 @@ euxis delegate <agent> <task> [provider]
 euxis architect "Review the authentication module"
 euxis bug-fixer "Fix the null pointer in user.py" gemini
 euxis delegate perf-optimizer "Profile the API layer"
+```
+
+### `euxis-cortex` — Cross-Platform Semantic Memory
+
+Vector-based memory store using ChromaDB and sentence-transformers. Works on macOS, Linux, and WSL.
+
+```bash
+euxis-cortex remember "fact to store" [source_agent]
+euxis-cortex recall   "query keywords" [n_results]
+euxis-cortex stats
+euxis-cortex forget   "exact document text"
+```
+
+```bash
+# Store a fact from the architect agent
+euxis-cortex remember "Project uses hexagonal architecture with ports/adapters" "architect"
+
+# Semantic recall before starting a task
+euxis-cortex recall "authentication module architecture"
+
+# Check database stats
+euxis-cortex stats
 ```
 
 ### `euxis-ui` — Mission Control TUI
