@@ -1,6 +1,6 @@
 #!/bin/bash
 # EUXIS LINT: Static Analysis for Agent Fleet
-# Enforces Protocol v2.1 Compliance
+# Enforces Protocol v3.0 Compliance
 
 EUXIS_HOME="$HOME/.euxis"
 FAILURES=0
@@ -9,7 +9,7 @@ echo "STARTING STATIC ANALYSIS..."
 
 # CHECK 1: Agent Registry Integrity
 echo "[1/4] Checking Registry..."
-AGENTS=("architect" "automation-engineer" "bug-fixer" "compliance-officer" "data-steward" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "legacy-maintainer" "librarian" "orchestrator" "perf-optimizer" "product-manager" "release-manager" "social-manager" "tech-writer" "unit-tester" "ux-sentinel")
+AGENTS=("architect" "automation-engineer" "bug-fixer" "compliance-officer" "data-steward" "deep-researcher" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "legacy-maintainer" "librarian" "orchestrator" "perf-optimizer" "product-manager" "release-manager" "reviewer" "social-manager" "tech-writer" "unit-tester" "ux-sentinel")
 
 for agent in "${AGENTS[@]}"; do
     FILE="$EUXIS_HOME/prompts/${agent}.txt"
@@ -58,8 +58,8 @@ fi
 echo "[4/4] Checking Script Permissions..."
 for script in "$EUXIS_HOME/scripts/"*; do
     PERMS=$(stat -c "%a" "$script" 2>/dev/null || stat -f "%Lp" "$script" 2>/dev/null)
-    if [[ "$PERMS" != "755" && "$PERMS" != "700" ]]; then
-        echo "  BAD PERMS: $(basename "$script") is $PERMS (expected 755 or 700)"
+    if [[ "$PERMS" != "755" && "$PERMS" != "700" && "$PERMS" != "775" ]]; then
+        echo "  BAD PERMS: $(basename "$script") is $PERMS (expected 755, 775, or 700)"
         ((FAILURES++))
     fi
 done

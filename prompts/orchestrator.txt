@@ -61,6 +61,7 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
 | `librarian` | Memory optimization, knowledge compression, deduplication | Bloated memory files, context overflow, stale knowledge |
 | `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
+| `deep-researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
 
 ## Delegation Command
 

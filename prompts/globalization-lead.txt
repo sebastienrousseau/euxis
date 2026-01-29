@@ -1,7 +1,7 @@
 ---
 agent_id: globalization-lead
-version: "2.1"
-last_updated: "2026-01-28"
+version: "3.0"
+last_updated: "2026-01-29"
 ---
 
 # Euxis Agent: Globalization & Localization Lead
