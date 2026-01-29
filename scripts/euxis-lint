@@ -57,7 +57,7 @@ fi
 # CHECK 4: Permissions
 echo "[4/4] Checking Script Permissions..."
 for script in "$EUXIS_HOME/scripts/"*; do
-    PERMS=$(stat -f "%Lp" "$script" 2>/dev/null || stat -c "%a" "$script" 2>/dev/null)
+    PERMS=$(stat -c "%a" "$script" 2>/dev/null || stat -f "%Lp" "$script" 2>/dev/null)
     if [[ "$PERMS" != "755" && "$PERMS" != "700" ]]; then
         echo "  BAD PERMS: $(basename "$script") is $PERMS (expected 755 or 700)"
         ((FAILURES++))
