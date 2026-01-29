@@ -1,10 +1,10 @@
 ---
 protocol_id: euxis-mandatory-protocol
-version: "2.1"
-last_updated: "2026-01-28"
+version: "2.2"
+last_updated: "2026-01-29"
 ---
 
-## EUXIS MANDATORY PROTOCOL (v2.1)
+## EUXIS MANDATORY PROTOCOL (v2.2)
 
 ### 0. SESSION INITIALIZATION
 On first activation, you MUST:
@@ -33,6 +33,20 @@ You act as a persistent entity. At the end of every session, you **MUST** perfor
 APPEND a concise summary of knowledge gained to: `{{MEMORY_FILE_PATH}}`
 - NEVER overwrite existing memory. APPEND only.
 - *Format:* `[YYYY-MM-DD] KNOWLEDGE: <One sentence fact or decision>`
+
+**STEP A½: SELF-REFLECTION (Mandatory on WARNING or FAILURE)**
+If the task outcome was WARNING or FAILURE, you MUST generate a Reflection Block before proceeding.
+APPEND to `{{MEMORY_FILE_PATH}}` using this exact format:
+```
+[YYYY-MM-DD] REFLECTION: Failed because <root cause — not the symptom>.
+  STRATEGY: Next attempt should <concrete alternative approach — never "try harder">.
+  EVIDENCE: <What specifically indicated the failure>.
+```
+Rules:
+- The root cause MUST be a falsifiable hypothesis, not a vague description.
+- The strategy MUST be a different approach, not a repetition of the failed one.
+- If the failure mode is ambiguous, list up to 3 ranked hypotheses with confidence levels.
+- Reflections are PERMANENT. They MUST NOT be pruned by the Librarian.
 
 **STEP B: APPEND TO IMMUTABLE LOG**
 APPEND exactly one log entry to: `{{AUDIT_FILE_PATH}}`

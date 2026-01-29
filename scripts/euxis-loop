@@ -1,12 +1,25 @@
 #!/bin/bash
-# EUXIS LOOP: Autonomous Try-Catch-Retry
+# EUXIS LOOP: Autonomous Try-Catch-Retry with Reflexion
 # Usage: euxis-loop <agent> <task> <verification_command> <max_retries>
+#
+# Implements the Reflexion pattern (Shinn et al., NeurIPS 2023):
+#   1. Execute the agent
+#   2. Verify with environment feedback
+#   3. On failure, extract the agent's REFLECTION entries from memory
+#   4. Inject both the error log AND prior reflections into the retry prompt
+#   5. The agent learns from structured self-critique, not just raw errors
+
+set -uo pipefail
+
+EUXIS_HOME="${HOME}/.euxis"
+PROJECTS_DIR="${EUXIS_HOME}/projects"
 
 AGENT=$1
 TASK=$2
 VERIFY_CMD=$3
 MAX_RETRIES=${4:-3}
 ATTEMPT=1
+ORIGINAL_TASK="$TASK"
 
 if [[ -z "$AGENT" || -z "$TASK" || -z "$VERIFY_CMD" ]]; then
     echo "Usage: euxis-loop <agent> <task> <verification_command> [max_retries]"
@@ -14,36 +27,73 @@ if [[ -z "$AGENT" || -z "$TASK" || -z "$VERIFY_CMD" ]]; then
     exit 1
 fi
 
+# Resolve the project name (same logic as euxis.sh)
+PROJECT="${EUXIS_PROJECT:-$(basename "$(pwd)")}"
+
+# Locate the agent's memory file for reflection extraction
+MEMORY_FILE="${PROJECTS_DIR}/${PROJECT}/${AGENT}/memory.md"
+
+# Extract REFLECTION entries from the agent's memory
+get_reflections() {
+    if [[ -f "$MEMORY_FILE" ]]; then
+        grep -E '^\[.*\] REFLECTION:' "$MEMORY_FILE" 2>/dev/null | tail -n 5 || true
+    fi
+}
+
 while [ $ATTEMPT -le $MAX_RETRIES ]; do
-    echo "Loop Attempt $ATTEMPT/$MAX_RETRIES: $TASK"
+    echo ""
+    echo "═══════════════════════════════════════════════════"
+    echo "  Loop Attempt $ATTEMPT/$MAX_RETRIES"
+    echo "═══════════════════════════════════════════════════"
 
     # 1. Run the Agent
     euxis "$AGENT" "$TASK" claude
 
-    # 2. Run Verification (The "Environment Feedback")
-    echo "Verifying..."
+    # 2. Run Verification (Environment Feedback)
+    echo ""
+    echo "  Verifying: $VERIFY_CMD"
     VERIFY_OUTPUT=$(eval "$VERIFY_CMD" 2>&1)
     EXIT_CODE=$?
 
     if [ $EXIT_CODE -eq 0 ]; then
-        echo "SUCCESS on attempt $ATTEMPT."
+        echo ""
+        echo "  ✔ SUCCESS on attempt $ATTEMPT."
         exit 0
     else
-        echo "FAILURE (Exit Code $EXIT_CODE). Feeding error back to agent..."
+        echo ""
+        echo "  ✘ FAILURE (Exit Code $EXIT_CODE)"
+
         # Capture the error log (last 20 lines)
         ERROR_LOG=$(echo "$VERIFY_OUTPUT" | tail -n 20)
 
-        # Update Task to include the error
-        TASK="PREVIOUS ATTEMPT FAILED.
-ERROR LOG:
+        # 3. Extract prior reflections from memory (the Reflexion step)
+        PRIOR_REFLECTIONS=$(get_reflections)
+
+        # 4. Build the enriched retry prompt
+        TASK="PREVIOUS ATTEMPT FAILED (attempt $ATTEMPT of $MAX_RETRIES).
+
+## Error Log
 $ERROR_LOG
 
-ORIGINAL TASK: $2
-INSTRUCTION: Fix the code based on this error. This is retry attempt $((ATTEMPT + 1)) of $MAX_RETRIES."
+## Prior Reflections from Memory
+${PRIOR_REFLECTIONS:-No prior reflections found. You MUST generate a REFLECTION entry in memory before retrying.}
+
+## Original Task
+$ORIGINAL_TASK
+
+## Instructions for This Retry
+1. Read your REFLECTION entries above. Do NOT repeat the same strategy that failed.
+2. If no reflection exists yet, STOP and write one to memory first.
+3. Apply a DIFFERENT approach based on your reflection's STRATEGY field.
+4. This is retry attempt $((ATTEMPT + 1)) of $MAX_RETRIES."
 
         ((ATTEMPT++))
     fi
 done
 
+echo ""
 echo "Max retries ($MAX_RETRIES) reached. Loop failed."
+echo ""
+echo "Final reflections from memory:"
+get_reflections
 exit 1

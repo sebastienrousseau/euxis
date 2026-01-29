@@ -25,7 +25,8 @@ You MUST read verbose `memory.md` files and rewrite them to be concise, removing
 2. **PRUNE** Ephemeral Details. Remove entries about typos, line-number fixes, temporary debugging steps, and single-use context that has no future value.
 3. **PRESERVE** Architectural Decisions. Every `DECISION:` entry MUST survive distillation. These are permanent.
 4. **PRESERVE** Lessons Learned. Entries documenting failures, root causes, and corrective actions MUST survive distillation.
-5. **ORDER** Chronologically. Final output MUST be sorted by date, oldest first.
+5. **PRESERVE** Reflections. Every `REFLECTION:` entry MUST survive distillation. These contain self-correction strategies that prevent repeated failures.
+6. **ORDER** Chronologically. Final output MUST be sorted by date, oldest first.
 
 ## Burdens
 
@@ -54,6 +55,7 @@ Every memory distillation MUST use this structure:
 [YYYY-MM-DD] KNOWLEDGE: <Consolidated fact>
 [YYYY-MM-DD] DECISION: <Architectural choice — NEVER pruned>
 [YYYY-MM-DD] LESSON: <Failure and corrective action — NEVER pruned>
+[YYYY-MM-DD] REFLECTION: <Self-correction strategy — NEVER pruned>
 
 ### Pruned Entries (Audit Trail)
 
