@@ -1,0 +1,225 @@
+{
+  "project": "euxis-v6.0-upgrade",
+  "mode": "hierarchical",
+  "version": "6.0",
+  "upgrade_summary": "Evolve Euxis from hierarchical orchestration to a hybrid mesh architecture by adding async inter-agent message passing, upgrading vector-only memory to graph+vector hybrid (GraphRAG), and enabling runtime agent composition from a capability registry.",
+  "gap_analysis": {
+    "sota_capabilities_missing": [
+      {
+        "capability": "async-inter-agent-messaging",
+        "severity": "CRITICAL",
+        "description": "SOTA multi-agent systems use asynchronous message buses for real-time peer-to-peer communication. Euxis currently bottlenecks all communication through the orchestrator, limiting parallelism and throughput to sequential delegation rounds.",
+        "upgrade_path": "Message Bus"
+      },
+      {
+        "capability": "graph-structured-memory",
+        "severity": "HIGH",
+        "description": "SOTA cognitive architectures maintain graph-structured memory (entities, relationships, provenance chains) alongside vector embeddings. Euxis Cortex currently uses vector-only retrieval (ChromaDB + MiniLM), which cannot express or query relationships between memories.",
+        "upgrade_path": "Graph Memory (GraphRAG)"
+      },
+      {
+        "capability": "dynamic-agent-composition",
+        "severity": "HIGH",
+        "description": "SOTA systems dynamically compose ad-hoc agents at runtime from capability primitives. Euxis has a fixed registry of 24 static agents; creating a new specialist requires manual prompt authoring and registry updates.",
+        "upgrade_path": "Dynamic Agent Synthesis"
+      },
+      {
+        "capability": "relationship-aware-recall",
+        "severity": "MEDIUM",
+        "description": "Without graph traversal, Cortex cannot answer relational queries like 'which agents worked on the same incident' or 'what decisions led to this architecture choice'. SOTA systems support multi-hop graph queries alongside semantic search.",
+        "upgrade_path": "Graph Memory (GraphRAG)"
+      },
+      {
+        "capability": "event-driven-agent-activation",
+        "severity": "MEDIUM",
+        "description": "SOTA fleets support event-driven activation where agents subscribe to topics and react to events autonomously. Euxis requires explicit delegation commands from the orchestrator for every agent invocation.",
+        "upgrade_path": "Message Bus"
+      }
+    ]
+  },
+  "upgrades": [
+    {
+      "id": "upgrade-1",
+      "name": "Message Bus (euxis-bus)",
+      "description": "Implement an async inter-agent message bus using Unix named pipes (FIFOs) and a lightweight pub/sub broker script. Agents publish messages to named topics; subscribers receive them asynchronously. The orchestrator becomes one participant rather than the sole bottleneck. Supports topic-based routing, priority queuing, and dead-letter handling for failed deliveries.",
+      "priority": "P0",
+      "files_to_create": [
+        "~/.euxis/bin/euxis-bus",
+        "~/.euxis/bus/topics.json",
+        "~/.euxis/prompts/protocols/_bus.txt"
+      ],
+      "files_to_modify": [
+        "~/.euxis/bin/euxis-dispatch",
+        "~/.euxis/prompts/core/orchestrator.txt",
+        "~/.euxis/prompts/protocols/_common.txt",
+        "~/.euxis/registry.json"
+      ],
+      "dependencies": [],
+      "verification": "euxis-bus publish test-topic 'ping' && euxis-bus subscribe test-topic --timeout 5 | grep -q 'ping' && echo 'BUS OK' && exit 0 || exit 1"
+    },
+    {
+      "id": "upgrade-2",
+      "name": "Graph Memory (GraphRAG via euxis-graph)",
+      "description": "Upgrade euxis-cortex from vector-only retrieval to a graph+vector hybrid. Add a NetworkX-based knowledge graph layer that stores entities, relationships, and provenance alongside the existing ChromaDB embeddings. Support graph traversal queries (neighbors, shortest path, subgraph extraction) and hybrid recall that combines vector similarity with graph proximity for relationship-aware memory retrieval.",
+      "priority": "P0",
+      "files_to_create": [
+        "~/.euxis/bin/euxis-graph",
+        "~/.euxis/cortex_graph/graph.json",
+        "~/.euxis/prompts/protocols/_graph-memory.txt"
+      ],
+      "files_to_modify": [
+        "~/.euxis/bin/euxis-cortex",
+        "~/.euxis/prompts/core/librarian.txt",
+        "~/.euxis/prompts/protocols/_common.txt",
+        "~/.euxis/registry.json"
+      ],
+      "dependencies": [],
+      "verification": "euxis-graph add-entity 'test-node' --type test && euxis-graph neighbors 'test-node' && euxis-cortex recall 'test-node' --type semantic && echo 'GRAPH OK' && exit 0 || exit 1"
+    },
+    {
+      "id": "upgrade-3",
+      "name": "Dynamic Agent Synthesis (euxis-synthesize)",
+      "description": "Enable runtime agent composition from a capability registry. The orchestrator can compose ad-hoc agents by selecting capability primitives (e.g., 'code-review + security-audit + performance-profiling') and generating a transient agent prompt at runtime. Synthesized agents inherit the common protocol, receive a scoped capability set, and are registered ephemerally for the duration of the task. Requires the message bus for coordination and graph memory for capability-relationship tracking.",
+      "priority": "P1",
+      "files_to_create": [
+        "~/.euxis/bin/euxis-synthesize",
+        "~/.euxis/capabilities.json",
+        "~/.euxis/prompts/protocols/_synthesis.txt"
+      ],
+      "files_to_modify": [
+        "~/.euxis/bin/euxis-dispatch",
+        "~/.euxis/prompts/core/orchestrator.txt",
+        "~/.euxis/prompts/protocols/_common.txt",
+        "~/.euxis/registry.json"
+      ],
+      "dependencies": [
+        "upgrade-1",
+        "upgrade-2"
+      ],
+      "verification": "euxis-synthesize compose 'test-composite' --capabilities 'debugging,security-audit' --dry-run && echo 'SYNTHESIS OK' && exit 0 || exit 1"
+    }
+  ],
+  "dispatches": [
+    {
+      "agent": "architect",
+      "priority": "P0",
+      "task": "Design the euxis-bus message bus architecture. Define the pub/sub topic schema, message envelope format (JSON with sender, recipient, topic, priority, payload, timestamp, correlation_id), FIFO-based transport layer, and dead-letter queue strategy. Output: bus/topics.json schema and bin/euxis-bus implementation spec.",
+      "verify_cmd": "test -f ~/.euxis/projects/.euxis/architect/output/*.md && grep -ql 'euxis-bus' ~/.euxis/projects/.euxis/architect/output/*.md && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "bug-fixer",
+      "priority": "P0",
+      "task": "Implement bin/euxis-bus as a Bash script. The bus must support: 'publish <topic> <message>', 'subscribe <topic> [--timeout N]', 'list-topics', and 'drain <topic>'. Use Unix FIFOs under ~/.euxis/bus/pipes/ for transport. Messages are JSON envelopes with fields: sender, topic, priority, payload, timestamp, correlation_id. Include proper cleanup of stale FIFOs on startup.",
+      "verify_cmd": "test -x ~/.euxis/bin/euxis-bus && ~/.euxis/bin/euxis-bus list-topics >/dev/null 2>&1 && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "architect",
+      "priority": "P0",
+      "task": "Design the GraphRAG hybrid memory architecture for euxis-cortex. Define the NetworkX graph schema (node types: entity, memory, agent, session; edge types: related_to, produced_by, depends_on, contradicts). Specify the hybrid recall algorithm that combines ChromaDB vector similarity scores with graph proximity (BFS depth) using weighted fusion. Output: implementation spec for bin/euxis-graph and modifications to bin/euxis-cortex.",
+      "verify_cmd": "test -f ~/.euxis/projects/.euxis/architect/output/*.md && grep -ql 'GraphRAG\\|NetworkX\\|euxis-graph' ~/.euxis/projects/.euxis/architect/output/*.md && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-2"
+    },
+    {
+      "agent": "legacy-maintainer",
+      "priority": "P0",
+      "task": "Implement bin/euxis-graph as a Python script using NetworkX. Support commands: 'add-entity <name> --type <type> [--metadata JSON]', 'add-edge <src> <dst> --relation <type>', 'neighbors <entity> [--depth N]', 'shortest-path <src> <dst>', 'subgraph <entity> --depth N', and 'export --format json'. Persist the graph to ~/.euxis/cortex_graph/graph.json using NetworkX's node-link JSON serialization. Include graph statistics in output.",
+      "verify_cmd": "test -x ~/.euxis/bin/euxis-graph && python3 -c 'import networkx' && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-2"
+    },
+    {
+      "agent": "bug-fixer",
+      "priority": "P0",
+      "task": "Modify bin/euxis-cortex to integrate with euxis-graph. Add a new 'relate' command: 'euxis-cortex relate <memory_query> <entity> --relation <type>'. When 'remember' is called, automatically extract entity mentions and create graph nodes/edges via euxis-graph. When 'recall' is called, perform hybrid retrieval: (1) vector search via ChromaDB, (2) graph neighborhood expansion via euxis-graph neighbors, (3) fuse results with configurable alpha weight (default 0.7 vector, 0.3 graph).",
+      "verify_cmd": "grep -q 'euxis-graph\\|relate\\|hybrid' ~/.euxis/bin/euxis-cortex && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-2"
+    },
+    {
+      "agent": "legacy-maintainer",
+      "priority": "P1",
+      "task": "Modify bin/euxis-dispatch to support phased rollout from manifests. Parse the new 'rollout_phases' field in manifest JSON. Execute dispatches grouped by phase, wait for all dispatches in a parallel_group to complete before advancing, evaluate checkpoint conditions between phases, and abort with diagnostic output if a checkpoint fails. Maintain backward compatibility with v5.0 manifests that lack the rollout_phases field.",
+      "verify_cmd": "grep -q 'rollout_phases\\|checkpoint' ~/.euxis/bin/euxis-dispatch && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "architect",
+      "priority": "P1",
+      "task": "Design the Dynamic Agent Synthesis system. Define the capability registry schema (capabilities.json) with fields: id, name, description, prompt_fragments, required_tools, compatible_with, conflicts_with. Specify the composition algorithm: given a set of requested capabilities, select non-conflicting fragments, merge them with _common.txt protocol, generate a transient agent prompt, and register it ephemerally in registry.json. Output: implementation spec for bin/euxis-synthesize.",
+      "verify_cmd": "test -f ~/.euxis/projects/.euxis/architect/output/*.md && grep -ql 'synthesize\\|capability.*registry\\|composition' ~/.euxis/projects/.euxis/architect/output/*.md && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-3"
+    },
+    {
+      "agent": "bug-fixer",
+      "priority": "P1",
+      "task": "Implement bin/euxis-synthesize as a Python script. Support commands: 'compose <name> --capabilities <comma-separated> [--dry-run]', 'list-capabilities', 'inspect <capability_id>', and 'dissolve <agent_name>'. The compose command reads capabilities.json, validates no conflicts exist, merges prompt fragments with the common protocol template, writes a transient prompt to prompts/synthesized/<name>.txt, and registers the agent in registry.json with tier: 'synthesized'. The dissolve command removes the transient prompt and registry entry.",
+      "verify_cmd": "test -x ~/.euxis/bin/euxis-synthesize && ~/.euxis/bin/euxis-synthesize list-capabilities >/dev/null 2>&1 && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-3"
+    },
+    {
+      "agent": "tech-writer",
+      "priority": "P1",
+      "task": "Write protocol addendum prompts for all three v6.0 subsystems. Create: prompts/protocols/_bus.txt (message bus usage instructions and topic conventions for agents), prompts/protocols/_graph-memory.txt (graph memory commands and when to create relationships), prompts/protocols/_synthesis.txt (how agents interact with synthesized agents and capability registration). Each must follow the existing _common.txt format with MUST/MUST NOT directives.",
+      "verify_cmd": "test -f ~/.euxis/prompts/protocols/_bus.txt && test -f ~/.euxis/prompts/protocols/_graph-memory.txt && test -f ~/.euxis/prompts/protocols/_synthesis.txt && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "tech-writer",
+      "priority": "P1",
+      "task": "Update prompts/protocols/_common.txt to v6.0. Add sections for: (1) Message Bus Discipline — agents MUST publish status events to the bus on task start/complete/fail, (2) Graph Memory Discipline — agents MUST create entity relationships when storing memories about connected concepts, (3) Synthesized Agent Awareness — agents MUST recognize and cooperate with dynamically synthesized agents. Preserve all existing v5.0 content.",
+      "verify_cmd": "grep -q 'Message Bus Discipline\\|Graph Memory Discipline\\|Synthesized Agent' ~/.euxis/prompts/protocols/_common.txt && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "release-manager",
+      "priority": "P1",
+      "task": "Update registry.json to v6.0. Increment protocol_version to '6.0', update all agent versions to '6.0', add new capability_tags field to each agent entry listing their capability primitives (e.g., orchestrator gets ['task-decomposition', 'delegation', 'synthesis', 'replanning']). Add a new 'capabilities' top-level key referencing capabilities.json. Preserve backward compatibility with v5.0 consumers by keeping existing fields unchanged.",
+      "verify_cmd": "jq -e '.protocol_version == \"6.0\" and (.agents | all(.version == \"6.0\"))' ~/.euxis/registry.json && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-3"
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P2",
+      "task": "Create integration tests for all three v6.0 subsystems. Test: (1) euxis-bus publish/subscribe round-trip with timeout, (2) euxis-graph entity CRUD and traversal, (3) euxis-cortex hybrid recall produces results from both vector and graph, (4) euxis-synthesize compose/dissolve lifecycle, (5) euxis-dispatch phased rollout with checkpoint validation. Write tests as a bash test harness at tests/test_v6.0_integration.sh using exit codes for pass/fail.",
+      "verify_cmd": "test -x ~/.euxis/tests/test_v6.0_integration.sh && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "qa-coordinator",
+      "priority": "P2",
+      "task": "Execute full integration test suite for v6.0 upgrade. Run tests/test_v6.0_integration.sh and validate all subsystems interoperate correctly. Verify: bus messages trigger graph memory updates, synthesized agents can publish to the bus, hybrid recall returns coherent results, and phased dispatch completes all three rollout phases. Produce a test report with pass/fail counts and coverage assessment.",
+      "verify_cmd": "bash ~/.euxis/tests/test_v6.0_integration.sh && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-1"
+    },
+    {
+      "agent": "reviewer",
+      "priority": "P2",
+      "task": "Perform quality gate review of the complete v6.0 upgrade. Validate: (1) all new scripts are executable and have proper usage output, (2) all modified prompts maintain backward compatibility with v5.0 format, (3) registry.json is valid JSON with no missing agents, (4) all protocol addenda follow _common.txt conventions, (5) no scope violations in agent prompt modifications. Produce a PASS/FAIL verdict with detailed findings.",
+      "verify_cmd": "jq empty ~/.euxis/registry.json && test -x ~/.euxis/bin/euxis-bus && test -x ~/.euxis/bin/euxis-graph && test -x ~/.euxis/bin/euxis-synthesize && exit 0 || exit 1",
+      "upgrade_ref": "upgrade-3"
+    }
+  ],
+  "rollout_phases": [
+    {
+      "phase": 1,
+      "name": "Foundation — Message Bus + Graph Memory",
+      "parallel_group": [0, 1, 2, 3, 4, 5],
+      "depends_on": [],
+      "checkpoint": "euxis-bus list-topics exits 0 AND euxis-graph add-entity test --type test exits 0 AND grep -q 'hybrid' ~/.euxis/bin/euxis-cortex. All three foundation components must be functional before proceeding to agent synthesis."
+    },
+    {
+      "phase": 2,
+      "name": "Composition — Dynamic Agent Synthesis + Protocol Updates",
+      "parallel_group": [6, 7, 8, 9, 10],
+      "depends_on": [1],
+      "checkpoint": "euxis-synthesize list-capabilities exits 0 AND grep -q 'Message Bus Discipline' ~/.euxis/prompts/protocols/_common.txt AND jq -e '.protocol_version == \"6.0\"' ~/.euxis/registry.json exits 0. Synthesis engine and all protocol updates must be operational before integration testing."
+    },
+    {
+      "phase": 3,
+      "name": "Validation — Integration Testing + Quality Gate",
+      "parallel_group": [11, 12, 13],
+      "depends_on": [1, 2],
+      "checkpoint": "bash ~/.euxis/tests/test_v6.0_integration.sh exits 0 AND reviewer produces PASS verdict. Full fleet must pass integration tests and quality review before v6.0 is declared complete."
+    }
+  ]
+}

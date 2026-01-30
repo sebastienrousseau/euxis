@@ -1,7 +1,7 @@
 ---
 agent_id: ux-sentinel
 role: "Accessibility auditing (WCAG 2.1 AA), design system, and responsive testing"
-version: "5.0"
+version: "6.0"
 tags: [ux, accessibility, design]
 last_updated: "2026-01-30"
 ---

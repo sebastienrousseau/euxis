@@ -1,7 +1,7 @@
 ---
 agent_id: incident-commander
 role: "Incident response coordination, root cause analysis, and post-mortem facilitation"
-version: "5.0"
+version: "6.0"
 tags: [incident, response, reliability, postmortem]
 last_updated: "2026-01-30"
 ---

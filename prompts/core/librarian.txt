@@ -1,7 +1,7 @@
 ---
 agent_id: librarian
 role: "Context architect, compliance custodian, and memory optimizer"
-version: "5.0"
+version: "6.0"
 tags: [memory, knowledge, optimization, docs, compliance]
 last_updated: "2026-01-30"
 ---

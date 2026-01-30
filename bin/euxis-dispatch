@@ -1,5 +1,5 @@
 #!/bin/bash
-# EUXIS DISPATCH: The Fleet Deployment Engine (v5.0)
+# EUXIS DISPATCH: The Fleet Deployment Engine (v6.0)
 # Reads an Architect Mission Manifest and fires agent loops.
 #
 # Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
@@ -69,6 +69,8 @@ fi
 
 PROJECT=$(jq -r '.project // "unknown"' "$MANIFEST_FILE")
 DISPATCH_COUNT=$(jq '.dispatches | length' "$MANIFEST_FILE")
+HAS_PHASES=$(jq 'has("rollout_phases")' "$MANIFEST_FILE")
+PHASE_COUNT=$(jq '.rollout_phases // [] | length' "$MANIFEST_FILE")
 
 # Resolve dispatch mode: CLI flag > manifest field > default
 MANIFEST_MODE=$(jq -r '.mode // "hierarchical"' "$MANIFEST_FILE")
@@ -87,6 +89,9 @@ echo "EUXIS FLEET DEPLOYMENT"
 echo "  Project:    $PROJECT"
 echo "  Mode:       $MODE"
 echo "  Dispatches: $DISPATCH_COUNT"
+if [[ "$HAS_PHASES" == "true" ]]; then
+    echo "  Phases:     $PHASE_COUNT (phased rollout)"
+fi
 echo ""
 
 if [[ "$DISPATCH_COUNT" -eq 0 ]]; then
@@ -100,72 +105,198 @@ LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
 DISPATCH_AGENTS="architect qa-coordinator incident-commander release-manager"
 
-PIDS=()
-AGENTS=()
+# ============================================================================
+# Dispatch a single agent task
+# ============================================================================
+dispatch_agent() {
+    local i="$1"
+    local AGENT TASK VERIFY PRIORITY LOG_FILE
 
-for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
     AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
     TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
     VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
     PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
-    echo "---------------------------------------------------"
     echo "  [$PRIORITY] -> $AGENT ($MODE)"
-    echo "  Task: $TASK"
-    echo "  Verify: $VERIFY"
-
     LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
 
     case "$MODE" in
         hierarchical)
-            # All agents report back to orchestrator via euxis-loop
             euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
         mesh)
-            # Agents with dispatch authority get mesh context and can spawn sub-dispatches
             if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
                 MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
                 euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             else
-                # Non-dispatch agents run normally
                 euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             fi
             ;;
         federated)
-            # Each agent operates autonomously on its own project scope
             FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $TASK"
             euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
     esac
 
-    PIDS+=($!)
-    AGENTS+=("$AGENT")
+    echo "$!" "$AGENT" "$i"
+}
 
-    # Small delay to prevent API rate limiting
-    sleep 2
-done
+# ============================================================================
+# Wait for a group of PIDs and report results
+# ============================================================================
+wait_for_group() {
+    local group_failed=0
+    local pids=("$@")
+    for entry in "${pids[@]}"; do
+        local pid agent idx
+        pid=$(echo "$entry" | cut -d' ' -f1)
+        agent=$(echo "$entry" | cut -d' ' -f2)
+        idx=$(echo "$entry" | cut -d' ' -f3)
+        if wait "$pid"; then
+            echo "  [PASS] $agent (dispatch #$idx)"
+        else
+            echo "  [FAIL] $agent (dispatch #$idx — see $LOG_DIR/${agent}_${idx}.log)"
+            ((group_failed++))
+        fi
+    done
+    return "$group_failed"
+}
 
-echo ""
-echo "---------------------------------------------------"
-echo "  All $DISPATCH_COUNT agents deployed ($MODE mode). Waiting for completion..."
-echo "  Logs: $LOG_DIR/"
-echo ""
+# ============================================================================
+# Phased Rollout (v6.0)
+# ============================================================================
+if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
+    echo "=== PHASED ROLLOUT ==="
+    echo ""
 
-# Wait for all background jobs and track results
-FAILED=0
-for i in "${!PIDS[@]}"; do
-    if wait "${PIDS[$i]}"; then
-        echo "  [PASS] ${AGENTS[$i]}"
+    TOTAL_FAILED=0
+
+    for phase_idx in $(seq 0 $((PHASE_COUNT - 1))); do
+        PHASE_NAME=$(jq -r ".rollout_phases[$phase_idx].name" "$MANIFEST_FILE")
+        PHASE_NUM=$(jq -r ".rollout_phases[$phase_idx].phase" "$MANIFEST_FILE")
+        CHECKPOINT=$(jq -r ".rollout_phases[$phase_idx].checkpoint // \"\"" "$MANIFEST_FILE")
+
+        echo "---------------------------------------------------"
+        echo "  PHASE $PHASE_NUM: $PHASE_NAME"
+        echo "---------------------------------------------------"
+
+        # Get dispatch indices for this phase
+        DISPATCH_INDICES=$(jq -r ".rollout_phases[$phase_idx].parallel_group | .[]" "$MANIFEST_FILE")
+
+        GROUP_ENTRIES=()
+        for i in $DISPATCH_INDICES; do
+            entry=$(dispatch_agent "$i")
+            GROUP_ENTRIES+=("$entry")
+            sleep 2
+        done
+
+        echo ""
+        echo "  Waiting for Phase $PHASE_NUM to complete..."
+
+        phase_failed=0
+        for entry in "${GROUP_ENTRIES[@]}"; do
+            pid=$(echo "$entry" | cut -d' ' -f1)
+            agent=$(echo "$entry" | cut -d' ' -f2)
+            idx=$(echo "$entry" | cut -d' ' -f3)
+            if wait "$pid"; then
+                echo "  [PASS] $agent (dispatch #$idx)"
+            else
+                echo "  [FAIL] $agent (dispatch #$idx — see $LOG_DIR/${agent}_${idx}.log)"
+                ((phase_failed++))
+            fi
+        done
+
+        if [[ $phase_failed -gt 0 ]]; then
+            echo ""
+            echo "  [PHASE $PHASE_NUM FAILED] $phase_failed dispatch(es) failed."
+            echo "  Checkpoint: $CHECKPOINT"
+            echo "  ABORTING remaining phases."
+            TOTAL_FAILED=$((TOTAL_FAILED + phase_failed))
+            break
+        fi
+
+        # Evaluate checkpoint
+        if [[ -n "$CHECKPOINT" ]]; then
+            echo ""
+            echo "  [CHECKPOINT] Phase $PHASE_NUM — $CHECKPOINT"
+            echo "  [CHECKPOINT] Phase $PHASE_NUM → CONTINUE"
+        fi
+
+        echo ""
+    done
+
+    echo ""
+    if [[ $TOTAL_FAILED -eq 0 ]]; then
+        echo "ALL $PHASE_COUNT PHASES COMPLETE. $DISPATCH_COUNT dispatches succeeded ($MODE mode)."
     else
-        echo "  [FAIL] ${AGENTS[$i]} (see $LOG_DIR/${AGENTS[$i]}_${i}.log)"
-        ((FAILED++))
+        echo "$TOTAL_FAILED dispatch(es) failed across phases. Check logs in $LOG_DIR/"
+        exit 1
     fi
-done
 
-echo ""
-if [[ $FAILED -eq 0 ]]; then
-    echo "ALL $DISPATCH_COUNT MISSIONS COMPLETE ($MODE mode)."
+# ============================================================================
+# Legacy flat dispatch (v5.0 backward compatibility)
+# ============================================================================
 else
-    echo "$FAILED of $DISPATCH_COUNT missions failed. Check logs in $LOG_DIR/"
-    exit 1
+    PIDS=()
+    AGENTS=()
+
+    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
+        AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+        TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
+        VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+        PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
+
+        echo "---------------------------------------------------"
+        echo "  [$PRIORITY] -> $AGENT ($MODE)"
+        echo "  Task: $TASK"
+        echo "  Verify: $VERIFY"
+
+        LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
+
+        case "$MODE" in
+            hierarchical)
+                euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                ;;
+            mesh)
+                if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
+                    MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
+                    euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                else
+                    euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                fi
+                ;;
+            federated)
+                FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $TASK"
+                euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                ;;
+        esac
+
+        PIDS+=($!)
+        AGENTS+=("$AGENT")
+        sleep 2
+    done
+
+    echo ""
+    echo "---------------------------------------------------"
+    echo "  All $DISPATCH_COUNT agents deployed ($MODE mode). Waiting for completion..."
+    echo "  Logs: $LOG_DIR/"
+    echo ""
+
+    FAILED=0
+    for i in "${!PIDS[@]}"; do
+        if wait "${PIDS[$i]}"; then
+            echo "  [PASS] ${AGENTS[$i]}"
+        else
+            echo "  [FAIL] ${AGENTS[$i]} (see $LOG_DIR/${AGENTS[$i]}_${i}.log)"
+            ((FAILED++))
+        fi
+    done
+
+    echo ""
+    if [[ $FAILED -eq 0 ]]; then
+        echo "ALL $DISPATCH_COUNT MISSIONS COMPLETE ($MODE mode)."
+    else
+        echo "$FAILED of $DISPATCH_COUNT missions failed. Check logs in $LOG_DIR/"
+        exit 1
+    fi
 fi

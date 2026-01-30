@@ -1,7 +1,7 @@
 ---
 agent_id: bug-fixer
 role: "Debugging, root cause analysis, and surgical code fixes"
-version: "5.0"
+version: "6.0"
 tags: [debugging, fixes, engineering]
 last_updated: "2026-01-30"
 ---

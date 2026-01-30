@@ -1,7 +1,7 @@
 ---
 agent_id: legacy-maintainer
 role: "Legacy code documentation, non-breaking upgrades, and migrations"
-version: "5.0"
+version: "6.0"
 tags: [legacy, maintenance, migrations]
 last_updated: "2026-01-30"
 ---

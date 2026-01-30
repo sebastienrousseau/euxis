@@ -1,7 +1,7 @@
 ---
 agent_id: devrel-advocate
 role: "Developer relations, tutorials, demos, and conference evangelism"
-version: "5.0"
+version: "6.0"
 tags: [devrel, community, content]
 last_updated: "2026-01-30"
 ---

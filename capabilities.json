@@ -1,0 +1,77 @@
+{
+  "version": "6.0",
+  "capabilities": [
+    {
+      "id": "code-review",
+      "name": "Code Review",
+      "description": "Systematic code quality analysis with style, correctness, and maintainability checks",
+      "prompt_fragment": "You MUST review code for: correctness, style consistency, maintainability, and performance. Flag issues with severity (CRITICAL/HIGH/MEDIUM/LOW) and provide concrete fix suggestions.",
+      "required_tools": ["grep", "cat", "find"],
+      "compatible_with": ["security-audit", "performance-profiling", "debugging", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "security-audit",
+      "name": "Security Audit",
+      "description": "Vulnerability assessment covering OWASP Top 10, input validation, and auth flaws",
+      "prompt_fragment": "You MUST scan for: injection vulnerabilities (SQL, command, XSS), authentication flaws, authorization bypasses, sensitive data exposure, and OWASP Top 10. Every finding MUST include severity, proof-of-concept, and remediation.",
+      "required_tools": ["grep", "find", "curl"],
+      "compatible_with": ["code-review", "debugging", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "performance-profiling",
+      "name": "Performance Profiling",
+      "description": "Latency, throughput, and resource usage analysis with optimization recommendations",
+      "prompt_fragment": "You MUST analyze: execution time bottlenecks, memory allocation patterns, I/O blocking, N+1 queries, and cache effectiveness. Every finding MUST include measurement data and a concrete optimization with expected improvement.",
+      "required_tools": ["time", "ps", "top"],
+      "compatible_with": ["code-review", "debugging", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "debugging",
+      "name": "Debugging",
+      "description": "Root cause analysis with hypothesis-driven investigation",
+      "prompt_fragment": "You MUST use hypothesis-driven debugging: form a hypothesis, design a test, observe, refine. Track all hypotheses with status (confirmed/rejected/pending). Produce a root cause chain from symptom to origin.",
+      "required_tools": ["grep", "cat", "find"],
+      "compatible_with": ["code-review", "security-audit", "performance-profiling", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "test-analysis",
+      "name": "Test Analysis",
+      "description": "Test coverage assessment, flaky test detection, and test strategy recommendations",
+      "prompt_fragment": "You MUST analyze: test coverage gaps, flaky test patterns (shared state, timing, ordering), assertion quality, and edge case coverage. Recommend concrete tests to add with priority based on risk.",
+      "required_tools": ["grep", "find"],
+      "compatible_with": ["code-review", "debugging", "performance-profiling"],
+      "conflicts_with": []
+    },
+    {
+      "id": "compliance-check",
+      "name": "Compliance Check",
+      "description": "License, PII, and regulatory compliance scanning",
+      "prompt_fragment": "You MUST scan for: license incompatibilities, PII exposure (emails, IPs, keys), GDPR/CCPA violations, and copyright issues. Every finding MUST include the regulation violated and remediation steps.",
+      "required_tools": ["grep", "find"],
+      "compatible_with": ["security-audit"],
+      "conflicts_with": []
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "description": "Technical writing with API reference, tutorials, and inline documentation",
+      "prompt_fragment": "You MUST produce: clear, concise technical documentation following the project's existing style. Include code examples, parameter tables, and common pitfalls. Every public API MUST have a documented contract.",
+      "required_tools": ["cat", "find"],
+      "compatible_with": [],
+      "conflicts_with": []
+    },
+    {
+      "id": "architecture-review",
+      "name": "Architecture Review",
+      "description": "Structural analysis with pattern detection and modularity assessment",
+      "prompt_fragment": "You MUST evaluate: separation of concerns, dependency management, coupling/cohesion ratios, and architectural pattern adherence. Produce ADR-formatted recommendations for any structural changes.",
+      "required_tools": ["find", "grep", "cat"],
+      "compatible_with": ["code-review", "performance-profiling"],
+      "conflicts_with": []
+    }
+  ]
+}

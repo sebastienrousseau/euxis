@@ -1,7 +1,7 @@
 ---
 agent_id: compliance-officer
 role: "PII scanning, license auditing, GDPR/CCPA compliance enforcement"
-version: "5.0"
+version: "6.0"
 tags: [compliance, security, legal]
 last_updated: "2026-01-30"
 ---

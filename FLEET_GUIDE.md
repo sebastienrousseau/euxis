@@ -1,6 +1,6 @@
 # Euxis Fleet Guide
 
-Version: 5.0 | Last updated: 2026-01-30
+Version: 6.0 | Last updated: 2026-01-30
 
 Central registry of all 24 agents with delegation patterns, provider tiering, dispatch modes, and workflow examples.
 

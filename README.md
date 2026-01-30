@@ -1,6 +1,6 @@
 # Euxis Fleet: The Autonomous Agent OS
 
-![Version](https://img.shields.io/badge/version-v5.0--STABLE-blue.svg) ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen) ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey)
+![Version](https://img.shields.io/badge/version-v6.0--STABLE-blue.svg) ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen) ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey)
 
 > **"Not just a tool, but a workforce."**
 

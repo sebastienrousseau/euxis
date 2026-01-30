@@ -1,6 +1,6 @@
 # Euxis User Guide
 
-Version: 5.0 | Last updated: 2026-01-30
+Version: 6.0 | Last updated: 2026-01-30
 
 ## CLI Tools
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Euxis Cortex — Cross-Platform Semantic Memory (Vector Store)
+Euxis Cortex — Cross-Platform Semantic Memory (Vector + Graph Hybrid)
 
 Usage:
     euxis-cortex remember "fact to store" [source] [--type episodic|semantic|procedural]
-    euxis-cortex recall   "query keywords" [n_results] [--type episodic|semantic|procedural]
+    euxis-cortex recall   "query keywords" [n_results] [--type episodic|semantic|procedural] [--hybrid]
+    euxis-cortex relate   "memory query" <entity> --relation <type>
     euxis-cortex stats
     euxis-cortex forget   "exact document text"
 
@@ -13,7 +14,12 @@ Memory Types:
     semantic    — General facts, rules, relationships
     procedural  — Reusable workflows, patterns, contraindications
 
+Graph Integration (v6.0):
+    --hybrid    — Combine vector similarity with graph proximity for recall
+    relate      — Link a memory to a graph entity via euxis-graph
+
 Requires: pip install chromadb sentence-transformers
+Optional: pip install networkx (for graph hybrid recall)
 
 Works on: macOS, Linux, WSL (Ubuntu/Debian)
 - macOS:       pip install chromadb sentence-transformers
@@ -24,6 +30,8 @@ Works on: macOS, Linux, WSL (Ubuntu/Debian)
 import sys
 import os
 import platform
+import subprocess
+import json
 
 # ============================================================================
 # Cross-Platform Configuration
@@ -165,6 +173,127 @@ def cmd_stats():
     print(f"  Platform:  {PLATFORM_LABEL} ({platform.platform()})")
 
 
+def cmd_relate(memory_query, entity, relation):
+    """Link a memory to a graph entity via euxis-graph."""
+    VALID_RELATIONS = {"related_to", "produced_by", "depends_on", "contradicts", "references", "part_of"}
+    if relation not in VALID_RELATIONS:
+        print(f"Error: Invalid relation '{relation}'. Must be one of: {', '.join(sorted(VALID_RELATIONS))}")
+        sys.exit(1)
+
+    # Find the memory via vector search
+    collection = get_collection()
+    results = collection.query(query_texts=[memory_query], n_results=1)
+    if not results["documents"][0]:
+        print(f"  No memory found matching: {memory_query}")
+        return
+
+    memory_text = results["documents"][0][0]
+    memory_id = results["ids"][0][0]
+    memory_node = f"memory-{memory_id[:8]}"
+
+    # Create memory node in graph
+    euxis_graph = os.path.expanduser("~/.euxis/bin/euxis-graph")
+    if not os.path.isfile(euxis_graph):
+        print("Error: euxis-graph not found. Graph integration requires bin/euxis-graph.")
+        sys.exit(1)
+
+    # Add memory as graph node
+    meta = json.dumps({"text": memory_text[:100], "full_id": memory_id})
+    subprocess.run(
+        [euxis_graph, "add-entity", memory_node, "--type", "memory", "--metadata", meta],
+        capture_output=True, text=True
+    )
+
+    # Add edge from memory to entity
+    result = subprocess.run(
+        [euxis_graph, "add-edge", memory_node, entity, "--relation", relation],
+        capture_output=True, text=True
+    )
+
+    if result.returncode == 0:
+        print(f"  Linked memory '{memory_query[:40]}...' -> '{entity}' ({relation})")
+    else:
+        print(f"  Error creating edge: {result.stderr.strip()}")
+
+
+def cmd_hybrid_recall(query, n_results=3, memory_type=None):
+    """Hybrid recall combining vector similarity with graph proximity."""
+    # Step 1: Vector search
+    collection = get_collection()
+    query_kwargs = {"query_texts": [query], "n_results": n_results}
+    if memory_type:
+        if memory_type not in VALID_MEMORY_TYPES:
+            print(f"Error: Invalid memory type '{memory_type}'.")
+            sys.exit(1)
+        query_kwargs["where"] = {"type": memory_type}
+
+    results = collection.query(**query_kwargs)
+    vector_results = []
+    if results["documents"][0]:
+        for i, doc in enumerate(results["documents"][0]):
+            meta = results["metadatas"][0][i]
+            dist = results["distances"][0][i] if "distances" in results else 1.0
+            vector_results.append({
+                "doc": doc,
+                "meta": meta,
+                "vector_score": max(0, 1 - dist),  # Convert distance to similarity
+                "source": "vector"
+            })
+
+    # Step 2: Graph neighborhood expansion
+    graph_results = []
+    euxis_graph = os.path.expanduser("~/.euxis/bin/euxis-graph")
+    if os.path.isfile(euxis_graph):
+        # Search graph for entities matching the query
+        result = subprocess.run(
+            [euxis_graph, "query", query],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            try:
+                matches = json.loads(result.stdout)
+                for match in matches.get("matches", []):
+                    entity_name = match.get("name", "")
+                    # Get neighbors of matched entities
+                    nb_result = subprocess.run(
+                        [euxis_graph, "neighbors", entity_name, "--depth", "2"],
+                        capture_output=True, text=True
+                    )
+                    if nb_result.returncode == 0:
+                        nb_data = json.loads(nb_result.stdout)
+                        for neighbor in nb_data.get("neighbors", []):
+                            if neighbor.get("type") == "memory":
+                                graph_results.append({
+                                    "entity": neighbor.get("name", ""),
+                                    "distance": neighbor.get("distance", 1),
+                                    "graph_score": 1.0 / (1 + neighbor.get("distance", 1)),
+                                    "source": "graph"
+                                })
+            except (json.JSONDecodeError, KeyError):
+                pass
+
+    # Step 3: Output results
+    alpha = 0.7  # vector weight
+    print(f"Cortex ({PLATFORM_LABEL}): Hybrid recall (alpha={alpha})...")
+
+    if not vector_results and not graph_results:
+        print("  No relevant memories found.")
+        return
+
+    # Print vector results
+    for r in vector_results:
+        score = r["vector_score"] * alpha
+        meta = r["meta"]
+        mem_type = meta.get("type", "unknown")
+        source = meta.get("source", "unknown")
+        print(f"  [VECTOR {score:.3f}] [{source}|{mem_type}] {r['doc']}")
+
+    # Print graph results
+    for r in graph_results:
+        score = r["graph_score"] * (1 - alpha)
+        print(f"  [GRAPH  {score:.3f}] {r['entity']} (depth={r['distance']})")
+
+
 def cmd_forget(text):
     """Remove a specific memory by exact document text."""
     collection = get_collection()
@@ -194,13 +323,36 @@ def parse_type_flag(args):
     return remaining, memory_type
 
 
+def parse_flag(args, flag_name):
+    """Extract a --flag value from argument list, return (remaining_args, value)."""
+    value = None
+    remaining = []
+    i = 0
+    while i < len(args):
+        if args[i] == flag_name and i + 1 < len(args):
+            value = args[i + 1]
+            i += 2
+        else:
+            remaining.append(args[i])
+            i += 1
+    return remaining, value
+
+
+def has_flag(args, flag_name):
+    """Check if a boolean flag is present, return (remaining_args, present)."""
+    present = flag_name in args
+    remaining = [a for a in args if a != flag_name]
+    return remaining, present
+
+
 def usage():
     """Print usage and exit."""
-    print("Euxis Cortex - Cross-Platform Semantic Memory")
+    print("Euxis Cortex - Cross-Platform Semantic Memory (Vector + Graph Hybrid)")
     print("")
     print("Usage:")
     print("  euxis-cortex remember 'fact to store' [source_agent] [--type episodic|semantic|procedural]")
-    print("  euxis-cortex recall   'query keywords' [n_results] [--type episodic|semantic|procedural]")
+    print("  euxis-cortex recall   'query keywords' [n_results] [--type TYPE] [--hybrid]")
+    print("  euxis-cortex relate   'memory query' <entity> --relation <type>")
     print("  euxis-cortex stats")
     print("  euxis-cortex forget   'exact document text'")
     print("")
@@ -208,6 +360,12 @@ def usage():
     print("  episodic    — Specific events, outcomes, timestamps (default)")
     print("  semantic    — General facts, rules, relationships")
     print("  procedural  — Reusable workflows, patterns, contraindications")
+    print("")
+    print("Graph Relations:")
+    print("  related_to, produced_by, depends_on, contradicts, references, part_of")
+    print("")
+    print("Flags:")
+    print("  --hybrid    Combine vector similarity with graph proximity for recall")
     print("")
     print(f"Platform: {PLATFORM_LABEL} | DB: {DB_PATH}")
     sys.exit(1)
@@ -223,6 +381,7 @@ if __name__ == "__main__":
 
     command = sys.argv[1]
     remaining_args, memory_type = parse_type_flag(sys.argv[2:])
+    remaining_args, hybrid = has_flag(remaining_args, "--hybrid")
 
     if command == "remember":
         if len(remaining_args) < 1:
@@ -238,7 +397,24 @@ if __name__ == "__main__":
             usage()
         query = remaining_args[0]
         n = int(remaining_args[1]) if len(remaining_args) > 1 else 3
-        cmd_recall(query, n, memory_type)
+        if hybrid:
+            cmd_hybrid_recall(query, n, memory_type)
+        else:
+            cmd_recall(query, n, memory_type)
+
+    elif command == "relate":
+        if len(remaining_args) < 2:
+            print("Error: 'relate' requires memory query and entity arguments.")
+            print("Usage: euxis-cortex relate 'memory query' <entity> --relation <type>")
+            usage()
+        mem_query = remaining_args[0]
+        entity = remaining_args[1]
+        # Parse --relation flag from remaining args
+        relation_args, relation = parse_flag(remaining_args[2:], "--relation")
+        if not relation:
+            print("Error: 'relate' requires --relation flag.")
+            usage()
+        cmd_relate(mem_query, entity, relation)
 
     elif command == "stats":
         cmd_stats()

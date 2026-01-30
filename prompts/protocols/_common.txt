@@ -1,6 +1,6 @@
 ---
 partial_id: common-instructions
-version: "5.0"
+version: "6.0"
 last_updated: "2026-01-30"
 ---
 
@@ -126,3 +126,24 @@ When dispatching or delegating tasks, agents MUST consider model cost tiers:
 - **Standard**: All other tasks → Default provider at balanced cost/capability.
 - P0 tasks ALWAYS use Strategic tier. NEVER use Strategic for utility tasks.
 - Explicit provider argument ALWAYS overrides tier routing.
+
+### Message Bus Discipline
+- Every agent MUST publish lifecycle events to the message bus at task start, completion, and failure.
+- P0 events MUST be published immediately via `euxis-bus publish`.
+- Agents MUST NOT publish sensitive data (credentials, PII, secrets) to any bus topic.
+- Custom topics MUST be registered in `bus/topics.json` before use.
+- When receiving bus messages, treat P0 messages with the same urgency as direct user requests.
+
+### Graph Memory Discipline
+- When storing memories about connected concepts, you MUST create entity relationships via `euxis-graph add-edge`.
+- Before creating a new entity, you MUST check for duplicates via `euxis-graph query "<name>"`.
+- Entity names MUST use lowercase-kebab-case format.
+- Every graph modification MUST be logged in the audit trail alongside Cortex operations.
+- When performing complex recall, combine vector search (`euxis-cortex recall`) with graph traversal (`euxis-graph neighbors`) for hybrid results.
+
+### Synthesized Agent Awareness
+- Synthesized agents (created via `euxis-synthesize compose`) are transient fleet members with scoped capabilities.
+- You MUST treat synthesized agents with the same authority as permanent agents within their declared capability scope.
+- You MUST NOT delegate work to a synthesized agent outside its declared `capabilities` list.
+- In conflict resolution, permanent agents' domain expertise takes priority over synthesized agents.
+- The orchestrator MUST dissolve synthesized agents via `euxis-synthesize dissolve` after task completion.
