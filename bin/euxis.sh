@@ -460,10 +460,10 @@ run_gemini() {
 
 run_openai() {
     local full_prompt="$1"
-    if command -v sgpt &>/dev/null; then
-        echo "${full_prompt}" | sgpt --model "${PROVIDER_MODEL}"
+    if command -v codex &>/dev/null; then
+        echo "${full_prompt}" | codex --model "${PROVIDER_MODEL}"
     else
-        log_error "sgpt (shell-gpt) not found. Install it or use a different provider."
+        log_error "codex (OpenAI Codex CLI) not found. Install via: npm i -g @openai/codex"
         exit 1
     fi
 }

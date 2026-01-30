@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "id": "zero-to-one",
+  "name": "Zero to One",
+  "description": "Full product launch. Vision to market.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Vision",
+      "squad": "vision",
+      "mode": "hierarchical",
+      "task_template": "Phase 1 — Vision: Analyze, architect, and research. Goal: ${goal}",
+      "checkpoint": "Architecture and requirements approved",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Build",
+      "squad": "build",
+      "mode": "hierarchical",
+      "task_template": "Phase 2 — Build: Implement, fix, and test. Goal: ${goal}",
+      "checkpoint": "All tests passing and code reviewed",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Quality",
+      "squad": "quality",
+      "mode": "hierarchical",
+      "task_template": "Phase 3 — Quality: Review, audit, and certify. Goal: ${goal}",
+      "checkpoint": "Quality gates passed and compliance verified",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 4,
+      "name": "Growth",
+      "squad": "growth",
+      "mode": "hierarchical",
+      "task_template": "Phase 4 — Growth: Document, market, and launch. Goal: ${goal}",
+      "checkpoint": "Documentation complete and launch materials ready",
+      "abort_on_failure": false
+    }
+  ]
+}

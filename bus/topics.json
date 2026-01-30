@@ -5,6 +5,9 @@
     {"name": "memory-updates", "description": "Cortex memory changes (remember, forget, relate)", "subscribers": ["librarian", "orchestrator"]},
     {"name": "conflict-alerts", "description": "Inter-agent conflict detection", "subscribers": ["orchestrator", "reviewer"]},
     {"name": "health-checks", "description": "Periodic health status from agents", "subscribers": ["data-steward"]},
-    {"name": "escalations", "description": "Priority escalation requests", "subscribers": ["orchestrator"]}
+    {"name": "escalations", "description": "Priority escalation requests", "subscribers": ["orchestrator"]},
+    {"name": "squad-events", "description": "Squad deployment and completion events", "subscribers": ["orchestrator", "data-steward"]},
+    {"name": "playbook-events", "description": "Playbook phase transitions and completions", "subscribers": ["orchestrator", "data-steward"]},
+    {"name": "combo-events", "description": "Combo chain execution events", "subscribers": ["orchestrator"]}
   ]
 }

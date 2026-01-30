@@ -27,6 +27,9 @@ Build faster. Ship with confidence.
 - [Self-Correction](#self-correction)
 - [Intelligence Tiering](#intelligence-tiering)
 - [Security](#security)
+- [Squads](#squads)
+- [Playbooks](#playbooks)
+- [Combos](#combos)
 - [CLI Reference](#cli-reference)
 - [Directory Structure](#directory-structure)
 - [Advanced](#advanced)
@@ -46,7 +49,7 @@ Build faster. Ship with confidence.
 | [Claude][claude-url] | `claude` | Reasoning, architecture, strategy |
 | [Gemini][gemini-url] | `gemini` | Research with large context |
 | [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
-| [shell-gpt][sgpt-url] | `sgpt` | OpenAI models |
+| [Codex CLI][codex-url] | `codex` | OpenAI models |
 | [OpenCode][opencode-url] | `opencode` | Local code generation |
 
 ### Install
@@ -269,6 +272,64 @@ Euxis is built for zero-trust environments.
 
 ---
 
+## Squads
+
+Four cross-functional teams. Each with a lead and a clear purpose.
+
+| Squad | Purpose | Lead | Members |
+|:------|:--------|:-----|:--------|
+| Vision | Strategy | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
+| Build | Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
+| Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
+| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, ux-sentinel, globalization-lead |
+
+```bash
+euxis-squad list                            # All squads
+euxis-squad info vision                     # Details
+euxis-squad deploy build "Fix auth module"  # Deploy
+euxis-squad validate                        # Cross-check against registry
+```
+
+---
+
+## Playbooks
+
+Phased squad activations for repeatable workflows. Each phase generates a dispatch manifest with checkpoints.
+
+| Playbook | Sequence | Use Case |
+|:---------|:---------|:---------|
+| Zero to One | Vision → Build → Quality → Growth | Full product launch |
+| Legacy Overhaul | Build → Quality → Vision | Modernize legacy systems |
+| Red Alert | Quality → Build → Vision | Emergency incident response |
+
+```bash
+euxis-playbook list                                             # Available playbooks
+euxis-playbook info zero-to-one                                 # Phase breakdown
+euxis-playbook run zero-to-one "Launch auth service" --dry-run  # Preview manifests
+euxis-playbook run zero-to-one "Launch auth service"            # Execute all phases
+euxis-playbook status                                           # Session history
+```
+
+---
+
+## Combos
+
+Sequential agent chains. Each agent receives the previous agent's output as context. Fast, focused, no manifest overhead.
+
+| Combo | Chain | Use Case |
+|:------|:------|:---------|
+| Steve Jobs | product-manager → architect → brand-evangelist → reviewer | Vision to polished review |
+| Fort Knox | edge-hunter → compliance-officer → qa-coordinator → reviewer | Maximum security assurance |
+| Content Factory | tech-writer → brand-evangelist → social-manager → reviewer | End-to-end content production |
+
+```bash
+euxis-combo list                                      # Available combos
+euxis-combo info steve-jobs                           # Chain detail
+euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
+```
+
+---
+
 ## CLI Reference
 
 ### Core
@@ -298,6 +359,9 @@ Euxis is built for zero-trust environments.
 | `euxis-council "<topic>"` | Multi-agent adversarial debate |
 | `euxis-bus <cmd> [args]` | Async pub/sub message bus |
 | `euxis-graph <cmd> [args]` | GraphRAG knowledge graph |
+| `euxis-squad <cmd> [args]` | Squad management and deployment |
+| `euxis-playbook <cmd> [args]` | Phased squad execution via playbooks |
+| `euxis-combo <cmd> [args]` | Sequential agent chain execution |
 | `euxis-synthesize <cmd> [args]` | Dynamic agent composition |
 
 ### Memory
@@ -339,7 +403,15 @@ Euxis is built for zero-trust environments.
 │   ├── euxis-bus           Async message bus
 │   ├── euxis-graph         GraphRAG knowledge graph
 │   ├── euxis-synthesize    Dynamic agent composition
-│   └── ...                 20 tools total
+│   ├── euxis-squad         Squad management and deployment
+│   ├── euxis-playbook      Phased squad execution
+│   ├── euxis-combo         Sequential agent chains
+│   └── ...                 23 tools total
+├── squads.json             Squad and combo registry
+├── playbooks/              Phased squad activation definitions
+│   ├── zero-to-one.json    Vision → Build → Quality → Growth
+│   ├── legacy-overhaul.json Build → Quality → Vision
+│   └── red-alert.json      Quality → Build → Vision
 ├── prompts/
 │   ├── core/               Orchestrator, Architect, Librarian
 │   ├── fleet/              21 specialist agents
@@ -408,5 +480,5 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli
 [gemini-url]: https://github.com/google-gemini/gemini-cli
 [ollama-url]: https://ollama.com/
-[sgpt-url]: https://github.com/TheR1D/shell_gpt
+[codex-url]: https://github.com/openai/codex
 [opencode-url]: https://github.com/opencode-ai/opencode

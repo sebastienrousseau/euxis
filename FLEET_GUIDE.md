@@ -256,6 +256,72 @@ deep-researcher → architect → product-manager → bug-fixer → reviewer
 
 ---
 
+## Squads
+
+Cross-functional teams. Clear ownership.
+
+| Squad | Purpose | Lead | Members |
+|-------|---------|------|---------|
+| Vision | Strategy | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
+| Build | Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
+| Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
+| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, ux-sentinel, globalization-lead |
+
+Deploy an entire squad with one command. Leads get P0 priority. Members get P1.
+
+```bash
+euxis-squad list                                # All squads
+euxis-squad info build                          # Details
+euxis-squad deploy quality "Audit auth module"  # Deploy squad
+euxis-squad members vision                      # Members with roles
+euxis-squad validate                            # Cross-check against registry
+```
+
+---
+
+## Playbooks
+
+Repeatable multi-phase workflows. Squad-level automation.
+
+| Playbook | Sequence | Use Case |
+|----------|----------|----------|
+| Zero to One | Vision → Build → Quality → Growth | Full product launch |
+| Legacy Overhaul | Build → Quality → Vision | Modernize legacy systems |
+| Red Alert | Quality → Build → Vision | Emergency incident response |
+
+Each phase generates a dispatch manifest. Phases execute sequentially. Checkpoints gate progression. Abort-on-failure stops the pipeline when a critical phase fails.
+
+```bash
+euxis-playbook list                                             # Available playbooks
+euxis-playbook info zero-to-one                                 # Phase breakdown
+euxis-playbook run zero-to-one "Launch auth service" --dry-run  # Preview manifests
+euxis-playbook run red-alert "Production DB outage"             # Execute emergency playbook
+euxis-playbook status                                           # Session history
+```
+
+---
+
+## Combos
+
+Sequential agent chains. No manifest. No phases. Just fast, focused pipelines.
+
+Each agent receives the original task plus the previous agent's output (capped at 4000 chars).
+
+| Combo | Chain | Use Case |
+|-------|-------|----------|
+| Steve Jobs | product-manager → architect → brand-evangelist → reviewer | Vision to polished review |
+| Fort Knox | edge-hunter → compliance-officer → qa-coordinator → reviewer | Maximum security assurance |
+| Content Factory | tech-writer → brand-evangelist → social-manager → reviewer | End-to-end content production |
+
+```bash
+euxis-combo list                                                # Available combos
+euxis-combo info fort-knox                                      # Chain detail
+euxis-combo run steve-jobs "Design onboarding flow"             # Execute chain
+euxis-combo run fort-knox "Audit payment module" --provider claude  # Override provider
+```
+
+---
+
 ## Usage
 
 ### Single Agent

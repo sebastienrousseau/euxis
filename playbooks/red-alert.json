@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "id": "red-alert",
+  "name": "Red Alert",
+  "description": "Emergency response. Quality first, fix fast, then reassess.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Quality",
+      "squad": "quality",
+      "mode": "hierarchical",
+      "task_template": "Phase 1 — Quality: Triage and assess the incident. Goal: ${goal}",
+      "checkpoint": "Root cause identified and severity assessed",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Build",
+      "squad": "build",
+      "mode": "hierarchical",
+      "task_template": "Phase 2 — Build: Apply emergency fixes and verify. Goal: ${goal}",
+      "checkpoint": "Fix deployed and verified",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Vision",
+      "squad": "vision",
+      "mode": "hierarchical",
+      "task_template": "Phase 3 — Vision: Post-mortem and prevention strategy. Goal: ${goal}",
+      "checkpoint": "Post-mortem documented and prevention plan approved",
+      "abort_on_failure": false
+    }
+  ]
+}

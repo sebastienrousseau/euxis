@@ -32,6 +32,23 @@ Version 6.0
 | `euxis-kaizen` | 4-gate self-improvement cycle |
 | `euxis-daemon [interval]` | Periodic kaizen with fail-safe halting (default: 30 min) |
 
+### Squads, Playbooks & Combos
+
+| Command | Description |
+|---------|-------------|
+| `euxis-squad list` | All squads with member counts |
+| `euxis-squad info <id>` | Squad details: lead, members, purpose |
+| `euxis-squad deploy <id> "<task>"` | Deploy a full squad via dispatch manifest |
+| `euxis-squad members <id>` | Member list with registry info |
+| `euxis-squad validate` | Cross-check all squad members against registry |
+| `euxis-playbook list` | Available playbooks |
+| `euxis-playbook info <id>` | Phase breakdown with squads and checkpoints |
+| `euxis-playbook run <id> "<goal>" [--dry-run]` | Execute phases sequentially (or preview with `--dry-run`) |
+| `euxis-playbook status [session-id]` | Session log |
+| `euxis-combo list` | Available combos with chains |
+| `euxis-combo info <id>` | Chain detail |
+| `euxis-combo run <id> "<task>" [--provider P]` | Execute sequential agent chain |
+
 ### Performance & Audit
 
 | Command | Description |
@@ -108,6 +125,9 @@ Version 6.0
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
 | **Fleet** | 24 specialized agent personas |
+| **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth) |
+| **Playbook** | Phased sequence of squad activations for repeatable workflows |
+| **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
 
 ## Intelligence Tiering
 
@@ -223,4 +243,13 @@ euxis-audit-run
 
 # Sync documentation (with approval)
 euxis-sync-docs
+
+# Deploy a squad
+euxis-squad deploy build "Fix auth module"
+
+# Run a playbook (dry run first)
+euxis-playbook run zero-to-one "Launch auth service" --dry-run
+
+# Execute a combo chain
+euxis-combo run steve-jobs "Design new onboarding flow"
 ```

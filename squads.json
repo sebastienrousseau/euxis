@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "6.0",
+  "last_updated": "2026-01-30",
+  "squads": [
+    {
+      "id": "vision",
+      "name": "Vision Squad",
+      "purpose": "Strategy",
+      "lead": "orchestrator",
+      "members": ["orchestrator", "architect", "product-manager", "deep-researcher"]
+    },
+    {
+      "id": "build",
+      "name": "Build Squad",
+      "purpose": "Execution",
+      "lead": "bug-fixer",
+      "members": ["bug-fixer", "legacy-maintainer", "automation-engineer", "unit-tester"]
+    },
+    {
+      "id": "quality",
+      "name": "Quality Squad",
+      "purpose": "Assurance",
+      "lead": "reviewer",
+      "members": ["reviewer", "qa-coordinator", "edge-hunter", "compliance-officer", "perf-optimizer"]
+    },
+    {
+      "id": "growth",
+      "name": "Growth Squad",
+      "purpose": "Amplification",
+      "lead": "tech-writer",
+      "members": ["tech-writer", "brand-evangelist", "social-manager", "devrel-advocate", "growth-marketer", "ux-sentinel", "globalization-lead"]
+    }
+  ],
+  "combos": [
+    {
+      "id": "steve-jobs",
+      "name": "Steve Jobs",
+      "description": "Product vision to polished review",
+      "chain": ["product-manager", "architect", "brand-evangelist", "reviewer"]
+    },
+    {
+      "id": "fort-knox",
+      "name": "Fort Knox",
+      "description": "Maximum security assurance",
+      "chain": ["edge-hunter", "compliance-officer", "qa-coordinator", "reviewer"]
+    },
+    {
+      "id": "content-factory",
+      "name": "Content Factory",
+      "description": "End-to-end content production",
+      "chain": ["tech-writer", "brand-evangelist", "social-manager", "reviewer"]
+    }
+  ]
+}

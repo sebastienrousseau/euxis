@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "id": "legacy-overhaul",
+  "name": "Legacy Overhaul",
+  "description": "Modernize legacy systems safely. Build first, verify, then redesign.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Build",
+      "squad": "build",
+      "mode": "hierarchical",
+      "task_template": "Phase 1 — Build: Stabilize and modernize legacy code. Goal: ${goal}",
+      "checkpoint": "Legacy code documented and tests added",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Quality",
+      "squad": "quality",
+      "mode": "hierarchical",
+      "task_template": "Phase 2 — Quality: Verify modernization and audit compliance. Goal: ${goal}",
+      "checkpoint": "All quality gates passed",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Vision",
+      "squad": "vision",
+      "mode": "hierarchical",
+      "task_template": "Phase 3 — Vision: Redesign architecture for the modernized system. Goal: ${goal}",
+      "checkpoint": "New architecture approved",
+      "abort_on_failure": false
+    }
+  ]
+}
