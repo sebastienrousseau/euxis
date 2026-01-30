@@ -1,0 +1,66 @@
+#!/bin/bash
+# (c) 2026 Euxis Fleet. Performance Benchmarking.
+
+set -uo pipefail
+
+EUXIS_HOME="$HOME/.euxis"
+BIN_DIR="$EUXIS_HOME/bin"
+
+echo "=================================================="
+echo "  EUXIS PERFORMANCE BENCHMARK"
+echo "  Platform: $(uname -s) ($(uname -m))"
+echo "=================================================="
+
+# 1. Health Check (fast boot)
+echo ""
+echo "[1/4] Health Check (silent)..."
+TIME_START=$(date +%s%N)
+"$BIN_DIR/euxis-health" --silent
+TIME_END=$(date +%s%N)
+echo "  Latency: $(( (TIME_END - TIME_START) / 1000000 ))ms"
+
+# 2. Lint
+echo ""
+echo "[2/4] Lint..."
+TIME_START=$(date +%s%N)
+"$BIN_DIR/euxis-lint" > /dev/null 2>&1
+TIME_END=$(date +%s%N)
+echo "  Latency: $(( (TIME_END - TIME_START) / 1000000 ))ms"
+
+# 3. Cortex Recall (if available)
+echo ""
+echo "[3/4] Cortex Recall..."
+if command -v euxis-cortex &>/dev/null; then
+    TIME_START=$(date +%s%N)
+    euxis-cortex recall "health check" > /dev/null 2>&1
+    TIME_END=$(date +%s%N)
+    echo "  Latency: $(( (TIME_END - TIME_START) / 1000000 ))ms"
+else
+    echo "  SKIP: euxis-cortex not available."
+fi
+
+# 4. Provider Round-Trip (small task)
+echo ""
+echo "[4/4] Provider Latency..."
+
+for provider in claude ollama; do
+    if command -v euxis &>/dev/null; then
+        echo -n "  $provider: "
+        TIME_START=$(date +%s%N)
+        timeout 30 euxis butler "Respond with exactly: OK" "$provider" > /dev/null 2>&1
+        RC=$?
+        TIME_END=$(date +%s%N)
+        if [[ $RC -eq 0 ]]; then
+            echo "$(( (TIME_END - TIME_START) / 1000000 ))ms"
+        elif [[ $RC -eq 124 ]]; then
+            echo "TIMEOUT (>30s)"
+        else
+            echo "UNAVAILABLE (exit $RC)"
+        fi
+    fi
+done
+
+echo ""
+echo "=================================================="
+echo "  BENCHMARK COMPLETE"
+echo "=================================================="

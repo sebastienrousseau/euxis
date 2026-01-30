@@ -29,7 +29,7 @@ log "=================================================="
 # CHECK 1: Naming Consistency (filename vs agent_id)
 # ────────────────────────────────────────────────────────
 log ""
-log "[1/6] Naming Consistency..."
+log "[1/7] Naming Consistency..."
 
 for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
@@ -51,7 +51,7 @@ fi
 # CHECK 2: Script Hardening (set -uo pipefail)
 # ────────────────────────────────────────────────────────
 log ""
-log "[2/6] Script Hardening..."
+log "[2/7] Script Hardening..."
 
 HARDENING_FAILURES=0
 for script in "${BIN_DIR}"/*; do
@@ -73,7 +73,7 @@ fi
 # CHECK 3: Orphan Detection (agents not in registry)
 # ────────────────────────────────────────────────────────
 log ""
-log "[3/6] Orphan Detection..."
+log "[3/7] Orphan Detection..."
 
 if [[ ! -f "$REGISTRY" ]]; then
     log "  MISSING: registry.json not found at $REGISTRY"
@@ -125,7 +125,7 @@ fi
 # CHECK 4: Header Schema Validation
 # ────────────────────────────────────────────────────────
 log ""
-log "[4/6] Header Schema Validation..."
+log "[4/7] Header Schema Validation..."
 
 REQUIRED_FIELDS=("agent_id" "role" "version" "tags" "last_updated")
 HEADER_FAILURES=0
@@ -154,7 +154,25 @@ fi
 # CHECK 5: Certification Readiness
 # ────────────────────────────────────────────────────────
 log ""
-log "[5/6] Certification Readiness..."
+log "[5/7] Documentation Drift..."
+
+USER_GUIDE="${EUXIS_HOME}/USER_GUIDE.md"
+if [[ -f "$USER_GUIDE" ]]; then
+    LAST_DOC_SYNC=$(stat -c %Y "$USER_GUIDE" 2>/dev/null || stat -f %m "$USER_GUIDE" 2>/dev/null || echo 0)
+    NOW=$(date +%s)
+    if (( NOW - LAST_DOC_SYNC > 86400 )); then
+        log "  STALE: USER_GUIDE.md hasn't been updated in 24+ hours. Run 'euxis-sync-docs'."
+        ((WARNINGS++))
+    else
+        log "  USER_GUIDE.md is current (updated within 24h)."
+    fi
+else
+    log "  MISSING: USER_GUIDE.md not found. Run 'euxis-sync-docs' to generate."
+    ((WARNINGS++))
+fi
+
+log ""
+log "[6/7] Certification Readiness..."
 
 CERTIFY_SCRIPT="${BIN_DIR}/euxis-certify"
 if [[ -x "$CERTIFY_SCRIPT" ]]; then
@@ -184,7 +202,7 @@ fi
 # CHECK 6: Provider Connectivity (CLI tools)
 # ────────────────────────────────────────────────────────
 log ""
-log "[6/6] Provider Connectivity..."
+log "[7/7] Provider Connectivity..."
 
 PROVIDER_WARNINGS=0
 for cli in claude gemini sgpt ollama opencode; do

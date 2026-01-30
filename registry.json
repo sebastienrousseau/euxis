@@ -5,7 +5,7 @@
   "agents": [
     { "id": "orchestrator", "path": "prompts/core/orchestrator.txt", "tier": "core", "version": "4.2", "tags": ["orchestration", "delegation", "planning"] },
     { "id": "architect", "path": "prompts/core/architect.txt", "tier": "core", "version": "4.2", "tags": ["architecture", "design", "engineering"] },
-    { "id": "librarian", "path": "prompts/core/librarian.txt", "tier": "core", "version": "4.2", "tags": ["memory", "knowledge", "optimization"] },
+    { "id": "librarian", "path": "prompts/core/librarian.txt", "tier": "core", "version": "4.5", "tags": ["memory", "knowledge", "optimization", "docs", "compliance"] },
     { "id": "automation-engineer", "path": "prompts/fleet/automation-engineer.txt", "tier": "fleet", "version": "4.2", "tags": ["automation", "cicd", "infrastructure"] },
     { "id": "bug-fixer", "path": "prompts/fleet/bug-fixer.txt", "tier": "fleet", "version": "4.2", "tags": ["debugging", "fixes", "engineering"] },
     { "id": "butler", "path": "prompts/fleet/butler.txt", "tier": "fleet", "version": "4.2", "tags": ["voice", "tts", "summarization"] },
