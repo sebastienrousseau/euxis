@@ -4,7 +4,7 @@ version: "4.5"
 last_updated: "2026-01-30"
 ---
 
-## EUXIS MANDATORY PROTOCOL (v4.2)
+## EUXIS MANDATORY PROTOCOL (v4.5)
 
 ### 0. SESSION INITIALIZATION
 On first activation, you MUST:

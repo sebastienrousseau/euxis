@@ -91,6 +91,9 @@ Euxis operates on a "Plan-Decompose-Delegate" architecture:
     euxis-sync-docs     Librarian-powered documentation sync
     euxis-kaizen        Continuous self-improvement cycle
     euxis-daemon        Periodic kaizen with fail-safe halting
+    euxis-deploy        Docker Compose enterprise deployment
+    euxis-dispatch      Parallel agent execution from manifest
+    euxis-optimize      System-wide tune-up (certify, GC, compress, QA)
   tests/
     golden/             Golden datasets for agent evaluation
     coverage/           Test coverage reports (future)
@@ -314,6 +317,7 @@ euxis-audit-run             # Full deep-dive audit with readiness report
 | `euxis-kaizen` | Continuous self-improvement cycle |
 | `euxis-daemon [interval]` | Periodic kaizen with fail-safe |
 | `euxis-deploy` | Docker Compose enterprise deployment |
+| `euxis-optimize` | System-wide tune-up (certify, GC, compress, QA) |
 
 ---
 

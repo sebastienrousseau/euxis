@@ -42,29 +42,37 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 
 ## Agent Registry
 
+### Core Infrastructure (3)
+
 | Agent | Scope | Delegate When |
 |-------|-------|---------------|
+| `orchestrator` | Task decomposition, delegation, synthesis | Complex multi-phase goals requiring coordination |
 | `architect` | Structure, patterns, refactoring | Design decisions, code organization, ADRs |
-| `product-manager` | Requirements, user stories, prioritization | Unclear requirements, feature scoping |
-| `bug-fixer` | Debugging, root cause analysis, surgical fixes | Defects, errors, unexpected behavior |
-| `edge-hunter` | Security analysis, boundary testing | Vulnerability assessment, input validation |
-| `legacy-maintainer` | Documentation, non-breaking upgrades | Old code, missing docs, migrations |
-| `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
+| `librarian` | Memory optimization, docs governance, compliance | Bloated memory files, context overflow, doc sync |
+
+### Fleet Specialists (19)
+
+| Agent | Scope | Delegate When |
+|-------|-------|---------------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform | Pipelines, infra provisioning, build optimization |
-| `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
-| `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
-| `ux-sentinel` | Accessibility, design system, WCAG | A11y audits, UI consistency, responsive testing |
-| `compliance-officer` | PII, licensing, GDPR/CCPA, copyright | License audits, PII scanning, data residency |
-| `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
-| `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
-| `unit-tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
-| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
-| `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |
-| `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
-| `librarian` | Memory optimization, knowledge compression, deduplication | Bloated memory files, context overflow, stale knowledge |
-| `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
-| `deep-researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
+| `bug-fixer` | Debugging, root cause analysis, surgical fixes | Defects, errors, unexpected behavior |
 | `butler` | TTS-optimized summarization, voice interface | Verbalizing complex output for spoken delivery |
+| `compliance-officer` | PII, licensing, GDPR/CCPA, copyright | License audits, PII scanning, data residency |
+| `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
+| `deep-researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
+| `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
+| `edge-hunter` | Security analysis, boundary testing | Vulnerability assessment, input validation |
+| `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
+| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
+| `legacy-maintainer` | Documentation, non-breaking upgrades | Old code, missing docs, migrations |
+| `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
+| `product-manager` | Requirements, user stories, prioritization | Unclear requirements, feature scoping |
+| `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
+| `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
+| `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |
+| `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
+| `unit-tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
+| `ux-sentinel` | Accessibility, design system, WCAG | A11y audits, UI consistency, responsive testing |
 
 ## Delegation Command
 
