@@ -6,6 +6,27 @@ set -uo pipefail
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
+SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-60}"
+
+run_with_timeout() {
+    local timeout="$1"
+    shift
+    "$@" &
+    local pid=$!
+    local elapsed=0
+
+    while kill -0 "$pid" 2>/dev/null; do
+        if (( elapsed >= timeout )); then
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            return 124
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+
+    wait "$pid"
+}
 
 echo "=================================================="
 echo "  EUXIS CERTIFICATION PIPELINE"
@@ -42,7 +63,14 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
     echo "  Golden dataset found. Running sample eval..."
 
     # Test Architect output format
-    RESP=$("$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude 2>/dev/null)
+    resp_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_semantic_resp.$$")
+    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude > "${resp_file}" 2>/dev/null; then
+        RESP=$(cat "${resp_file}")
+    else
+        RESP=""
+        echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
+    fi
+    rm -f "${resp_file}"
     if [[ -n "$RESP" ]]; then
         echo "  PASS: Architect produced output."
     else

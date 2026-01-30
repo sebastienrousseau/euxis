@@ -9,6 +9,9 @@ echo "Linking tools to ~/bin..."
 for script in "${HOME}/.euxis/bin/"*; do
     if [[ -x "${script}" ]]; then
         name="$(basename "${script}" .sh)"
+        if [[ "${script}" == *.sh && -x "${HOME}/.euxis/bin/${name}" ]]; then
+            continue
+        fi
         ln -sf "${script}" "${HOME}/bin/${name}"
         echo "  - ${name}"
     fi
