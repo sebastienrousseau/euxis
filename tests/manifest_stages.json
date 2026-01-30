@@ -1,0 +1,32 @@
+{
+  "project": "test-stage-ordering",
+  "mode": "hierarchical",
+  "dispatches": [
+    {
+      "agent": "unit-tester",
+      "priority": "P2",
+      "task": "echo 'Stage 2 task' > /tmp/euxis_test_stage2.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_stage2.txt",
+      "stage": 2,
+      "depends_on": ["stage1_task"],
+      "locks": ["/tmp/euxis_test_shared.lock"]
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "echo 'Stage 1 task' > /tmp/euxis_test_stage1.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_stage1.txt",
+      "stage": 1,
+      "task_id": "stage1_task",
+      "locks": ["/tmp/euxis_test_shared.lock"]
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P3",
+      "task": "echo 'Stage 3 task' > /tmp/euxis_test_stage3.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_stage3.txt",
+      "stage": 3,
+      "depends_on": ["stage1_task"]
+    }
+  ]
+}

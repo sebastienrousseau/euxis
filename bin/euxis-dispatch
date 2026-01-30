@@ -144,6 +144,110 @@ if [[ ${#MISSING_CMDS[@]} -gt 0 ]]; then
 fi
 
 # ============================================================================
+# File Locking Infrastructure
+# ============================================================================
+LOCK_DIR="$HOME/.euxis/locks"
+LOCK_TIMEOUT=10  # seconds
+
+# Sanitize file paths for use as lock file names (prevent shell injection)
+sanitize_lock_path() {
+    printf '%s' "$1" | tr -cs 'a-zA-Z0-9._-' '_'
+}
+
+ensure_lock_dir() {
+    mkdir -p "$LOCK_DIR"
+}
+
+# Cleanup all locks on unexpected exit
+cleanup_all_locks() {
+    echo "  [CLEANUP] Releasing all locks due to process termination..."
+    if [[ -d "$LOCK_DIR" ]]; then
+        find "$LOCK_DIR" -name '*.lock' -newer /tmp/.euxis_dispatch_start_$$ -delete 2>/dev/null
+    fi
+    rm -f /tmp/.euxis_dispatch_start_$$ 2>/dev/null
+}
+
+trap cleanup_all_locks EXIT INT TERM HUP
+
+acquire_file_lock() {
+    local file_path="$1"
+    local agent_name="$2"
+    local lock_file="$LOCK_DIR/$(sanitize_lock_path "$file_path").lock"
+
+    # Create lock file with agent metadata
+    (
+        if flock -w "$LOCK_TIMEOUT" 200; then
+            echo "agent=$agent_name" >&200
+            echo "pid=$$" >&200
+            echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >&200
+            echo "file_path=$file_path" >&200
+            return 0
+        else
+            echo "ERROR: Failed to acquire lock for $file_path within ${LOCK_TIMEOUT}s" >&2
+            return 1
+        fi
+    ) 200>"$lock_file"
+}
+
+acquire_agent_locks() {
+    local agent_name="$1"
+    local dispatch_index="$2"
+
+    # Get lock paths for this agent from manifest
+    local lock_paths
+    lock_paths=$(jq -r ".dispatches[$dispatch_index].locks[]? // empty" "$MANIFEST_FILE")
+
+    if [[ -z "$lock_paths" ]]; then
+        return 0  # No locks required
+    fi
+
+    echo "  [LOCK] $agent_name acquiring locks..."
+    while IFS= read -r lock_path; do
+        if [[ -n "$lock_path" ]]; then
+            if ! acquire_file_lock "$lock_path" "$agent_name"; then
+                echo "  [LOCK] $agent_name failed to acquire lock: $lock_path"
+                release_agent_locks "$agent_name" "$dispatch_index"
+                return 1
+            fi
+            echo "  [LOCK] $agent_name acquired: $lock_path"
+        fi
+    done <<< "$lock_paths"
+
+    return 0
+}
+
+release_agent_locks() {
+    local agent_name="$1"
+    local dispatch_index="$2"
+
+    local lock_paths
+    lock_paths=$(jq -r ".dispatches[$dispatch_index].locks[]? // empty" "$MANIFEST_FILE")
+
+    while IFS= read -r lock_path; do
+        if [[ -n "$lock_path" ]]; then
+            local lock_file="$LOCK_DIR/$(sanitize_lock_path "$lock_path").lock"
+            if [[ -f "$lock_file" ]]; then
+                rm -f "$lock_file"
+                echo "  [UNLOCK] $agent_name released: $lock_path"
+            fi
+        fi
+    done <<< "$lock_paths"
+}
+
+# Dependency tracking
+COMPLETED_AGENTS_FILE=""
+
+mark_agent_completed() {
+    local agent="$1"
+    echo "$agent" >> "$COMPLETED_AGENTS_FILE"
+}
+
+check_agent_completed() {
+    local agent="$1"
+    [[ -f "$COMPLETED_AGENTS_FILE" ]] && grep -q "^$agent$" "$COMPLETED_AGENTS_FILE"
+}
+
+# ============================================================================
 # Pre-dispatch: ensure project environment is ready
 # ============================================================================
 ensure_project_env() {
@@ -262,7 +366,50 @@ dispatch_agent() {
             ;;
     esac
 
-    echo "$!" "$AGENT" "$i"
+    __dispatch_pid="$!"
+}
+
+# ============================================================================
+# Dispatch a single agent task with atomic file operations
+# ============================================================================
+dispatch_agent_with_cleanup() {
+    local i="$1"
+    local AGENT TASK VERIFY PRIORITY LOG_FILE
+
+    AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+    TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
+    VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+    PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
+
+    LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
+
+    # Wrap task with atomic file operation instructions
+    local ATOMIC_TASK="$TASK
+
+ATOMIC FILE OPERATIONS REQUIRED:
+- Use temp files for all write operations: write to 'file.tmp' then rename to 'file'
+- This prevents corruption if your process is interrupted
+- Pattern: write_content > temp_file && mv temp_file final_file"
+
+    case "$MODE" in
+        hierarchical)
+            euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            ;;
+        mesh)
+            if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
+                MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $ATOMIC_TASK"
+                euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            else
+                euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            fi
+            ;;
+        federated)
+            FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $ATOMIC_TASK"
+            euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            ;;
+    esac
+
+    __dispatch_pid="$!"
 }
 
 # ============================================================================
@@ -284,6 +431,125 @@ wait_for_group() {
         fi
     done
     return "$group_failed"
+}
+
+# ============================================================================
+# Stage-Based Sequential Execution
+# ============================================================================
+execute_by_stages() {
+    ensure_lock_dir
+    touch /tmp/.euxis_dispatch_start_$$
+    COMPLETED_AGENTS_FILE="$LOG_DIR/.completed_agents"
+    : > "$COMPLETED_AGENTS_FILE"  # Initialize empty file
+
+    # Build stage groups from manifest
+    local max_stage=1
+    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
+        local stage
+        stage=$(jq -r ".dispatches[$i].stage // 1" "$MANIFEST_FILE")
+        if [[ $stage -gt $max_stage ]]; then
+            max_stage=$stage
+        fi
+    done
+
+    echo "=== STAGE-BASED EXECUTION ==="
+    echo "  Stages: 1-$max_stage"
+    echo ""
+
+    local total_failed=0
+
+    for current_stage in $(seq 1 "$max_stage"); do
+        echo "---------------------------------------------------"
+        echo "  STAGE $current_stage"
+        echo "---------------------------------------------------"
+
+        # Get agents for this stage
+        local stage_agents=()
+        local stage_indices=()
+
+        for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
+            local agent_stage
+            agent_stage=$(jq -r ".dispatches[$i].stage // 1" "$MANIFEST_FILE")
+            if [[ $agent_stage -eq $current_stage ]]; then
+                # Verify dependencies are met
+                local depends_on
+                depends_on=$(jq -r ".dispatches[$i].depends_on[]? // empty" "$MANIFEST_FILE")
+                local deps_met=true
+
+                while IFS= read -r dep_agent; do
+                    if [[ -n "$dep_agent" ]] && ! check_agent_completed "$dep_agent"; then
+                        echo "  [SKIP] Agent $(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE") waiting for dependency: $dep_agent"
+                        deps_met=false
+                        break
+                    fi
+                done <<< "$depends_on"
+
+                if [[ "$deps_met" == "true" ]]; then
+                    stage_agents+=($(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE"))
+                    stage_indices+=("$i")
+                fi
+            fi
+        done
+
+        if [[ ${#stage_agents[@]} -eq 0 ]]; then
+            echo "  No agents ready for Stage $current_stage"
+            continue
+        fi
+
+        # Execute stage agents in parallel (within stage)
+        local stage_pids=()
+        for i in "${!stage_indices[@]}"; do
+            local idx="${stage_indices[$i]}"
+            local agent="${stage_agents[$i]}"
+
+            if acquire_agent_locks "$agent" "$idx"; then
+                dispatch_agent_with_cleanup "$idx"
+                stage_pids+=("$__dispatch_pid $agent $idx")
+                sleep 1  # Stagger startup
+            else
+                echo "  [FAIL] $agent - could not acquire required locks"
+                ((total_failed++))
+            fi
+        done
+
+        # Wait for stage completion
+        local stage_failed=0
+        for entry in "${stage_pids[@]}"; do
+            local pid agent idx
+            pid=$(echo "$entry" | cut -d' ' -f1)
+            agent=$(echo "$entry" | cut -d' ' -f2)
+            idx=$(echo "$entry" | cut -d' ' -f3)
+
+            if wait "$pid"; then
+                echo "  [PASS] $agent"
+                mark_agent_completed "$agent"
+            else
+                echo "  [FAIL] $agent (see $LOG_DIR/${agent}_${idx}.log)"
+                ((stage_failed++))
+            fi
+
+            # Always release locks after completion/failure
+            release_agent_locks "$agent" "$idx"
+        done
+
+        total_failed=$((total_failed + stage_failed))
+
+        if [[ $stage_failed -gt 0 ]]; then
+            echo "  [STAGE $current_stage FAILED] $stage_failed agent(s) failed"
+            echo "  ABORTING remaining stages due to failures"
+            break
+        fi
+
+        echo "  [STAGE $current_stage COMPLETE] ${#stage_agents[@]} agent(s) succeeded"
+        echo ""
+    done
+
+    if [[ $total_failed -eq 0 ]]; then
+        echo "ALL STAGES COMPLETE. $DISPATCH_COUNT dispatches succeeded."
+    else
+        echo "$total_failed dispatch(es) failed. Check logs in $LOG_DIR/"
+        exit 1
+    fi
 }
 
 # ============================================================================
@@ -309,8 +575,8 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
 
         GROUP_ENTRIES=()
         for i in $DISPATCH_INDICES; do
-            entry=$(dispatch_agent "$i")
-            GROUP_ENTRIES+=("$entry")
+            dispatch_agent "$i"
+            GROUP_ENTRIES+=("$__dispatch_pid $(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE") $i")
             sleep 2
         done
 
@@ -403,6 +669,15 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
         echo "$TOTAL_FAILED dispatch(es) failed across phases. Check logs in $LOG_DIR/"
         exit 1
     fi
+
+# ============================================================================
+# Stage-based execution engine (v6.1)
+# ============================================================================
+elif jq -e '.dispatches[] | select(has("stage") or has("depends_on") or has("locks"))' "$MANIFEST_FILE" &>/dev/null; then
+    echo "=== STAGE-BASED EXECUTION MODE DETECTED ==="
+    echo "  Found stage, depends_on, or locks fields in manifest"
+    echo ""
+    execute_by_stages
 
 # ============================================================================
 # Legacy flat dispatch (v5.0 backward compatibility)

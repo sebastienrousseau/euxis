@@ -1,0 +1,18 @@
+{
+  "project": "test-legacy-compatibility",
+  "mode": "hierarchical",
+  "dispatches": [
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "echo 'Legacy task 1' > /tmp/euxis_test_legacy1.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_legacy1.txt"
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P2",
+      "task": "echo 'Legacy task 2' > /tmp/euxis_test_legacy2.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_legacy2.txt"
+    }
+  ]
+}

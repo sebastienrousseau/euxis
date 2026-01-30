@@ -9,7 +9,7 @@
       "name": "Vision",
       "squad": "vision",
       "mode": "hierarchical",
-      "task_template": "Phase 1 — Vision: Analyze, architect, and research. Goal: ${goal}",
+      "task_template": "Research and architect the initial blueprint for: ${goal}",
       "checkpoint": "Architecture and requirements approved",
       "abort_on_failure": true
     },
@@ -18,7 +18,7 @@
       "name": "Build",
       "squad": "build",
       "mode": "hierarchical",
-      "task_template": "Phase 2 — Build: Implement, fix, and test. Goal: ${goal}",
+      "task_template": "Build the MVP based on the vision blueprint for: ${goal}",
       "checkpoint": "All tests passing and code reviewed",
       "abort_on_failure": true
     },

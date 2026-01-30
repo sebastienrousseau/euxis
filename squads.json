@@ -6,28 +6,28 @@
     {
       "id": "vision",
       "name": "Vision Squad",
-      "purpose": "Strategy",
+      "purpose": "Strategy & Discovery",
       "lead": "orchestrator",
       "members": ["orchestrator", "architect", "product-manager", "deep-researcher"]
     },
     {
       "id": "build",
       "name": "Build Squad",
-      "purpose": "Execution",
+      "purpose": "Engineering & Execution",
       "lead": "bug-fixer",
       "members": ["bug-fixer", "legacy-maintainer", "automation-engineer", "unit-tester"]
     },
     {
       "id": "quality",
       "name": "Quality Squad",
-      "purpose": "Assurance",
+      "purpose": "Assurance & Security",
       "lead": "reviewer",
       "members": ["reviewer", "qa-coordinator", "edge-hunter", "compliance-officer", "perf-optimizer"]
     },
     {
       "id": "growth",
       "name": "Growth Squad",
-      "purpose": "Amplification",
+      "purpose": "Branding & Documentation",
       "lead": "tech-writer",
       "members": ["tech-writer", "brand-evangelist", "social-manager", "devrel-advocate", "growth-marketer", "ux-sentinel", "globalization-lead"]
     }
@@ -36,7 +36,7 @@
     {
       "id": "steve-jobs",
       "name": "Steve Jobs",
-      "description": "Product vision to polished review",
+      "description": "Minimalist design to polished review",
       "chain": ["product-manager", "architect", "brand-evangelist", "reviewer"]
     },
     {

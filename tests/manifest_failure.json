@@ -1,0 +1,30 @@
+{
+  "project": "test-failure-abort",
+  "mode": "hierarchical",
+  "dispatches": [
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "echo 'Success task' > /tmp/euxis_test_success.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_success.txt",
+      "stage": 1,
+      "task_id": "success_task"
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "exit 1",
+      "verify_cmd": "false",
+      "stage": 1,
+      "task_id": "failure_task"
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P2",
+      "task": "echo 'Should not run' > /tmp/euxis_test_should_not_run.txt",
+      "verify_cmd": "test -f /tmp/euxis_test_should_not_run.txt",
+      "stage": 2,
+      "depends_on": ["failure_task"]
+    }
+  ]
+}
