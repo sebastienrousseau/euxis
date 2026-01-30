@@ -50,7 +50,7 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `architect` | Structure, patterns, refactoring | Design decisions, code organization, ADRs |
 | `librarian` | Memory optimization, docs governance, compliance | Bloated memory files, context overflow, doc sync |
 
-### Fleet Specialists (19)
+### Fleet Specialists (21)
 
 | Agent | Scope | Delegate When |
 |-------|-------|---------------|
@@ -64,9 +64,11 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `edge-hunter` | Security analysis, boundary testing | Vulnerability assessment, input validation |
 | `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
 | `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
+| `incident-commander` | Incident response, root cause analysis, post-mortems | System failures, SEV-1/2 events, outage coordination |
 | `legacy-maintainer` | Documentation, non-breaking upgrades | Old code, missing docs, migrations |
 | `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
 | `product-manager` | Requirements, user stories, prioritization | Unclear requirements, feature scoping |
+| `qa-coordinator` | E2E testing coordination, quality gate enforcement | Test strategy, release readiness, coverage tracking |
 | `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
 | `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
 | `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |

@@ -11,7 +11,7 @@ echo "STARTING STATIC ANALYSIS..."
 
 # CHECK 1: Agent Registry Integrity
 echo "[1/4] Checking Registry..."
-AGENTS=("architect" "automation-engineer" "bug-fixer" "butler" "compliance-officer" "data-steward" "deep-researcher" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "legacy-maintainer" "librarian" "orchestrator" "perf-optimizer" "product-manager" "release-manager" "reviewer" "social-manager" "tech-writer" "unit-tester" "ux-sentinel")
+AGENTS=("architect" "automation-engineer" "bug-fixer" "butler" "compliance-officer" "data-steward" "deep-researcher" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "incident-commander" "legacy-maintainer" "librarian" "orchestrator" "perf-optimizer" "product-manager" "qa-coordinator" "release-manager" "reviewer" "social-manager" "tech-writer" "unit-tester" "ux-sentinel")
 
 for agent in "${AGENTS[@]}"; do
     FOUND=false

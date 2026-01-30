@@ -4,7 +4,7 @@
 
 > **"Not just a tool, but a workforce."**
 
-Euxis is a local-first, privacy-centric **Operating System for AI Agents**. It orchestrates a fleet of 22 specialized personas (Architect, Researcher, Engineer) to plan, execute, and verify complex engineering tasks autonomously.
+Euxis is a local-first, privacy-centric **Operating System for AI Agents**. It orchestrates a fleet of 24 specialized personas (Architect, Researcher, Engineer) to plan, execute, and verify complex engineering tasks autonomously.
 
 Unlike standard "Chat with PDF" tools, Euxis features **Infinite Context (Vector Memory)**, **Parallel Dispatch**, and **Self-Healing Infrastructure**.
 
@@ -49,7 +49,7 @@ flowchart LR
 | `architect` | Software architecture, patterns, ADRs, refactoring |
 | `librarian` | Context architect, compliance custodian, memory optimizer |
 
-#### Fleet (19)
+#### Fleet (21)
 
 | Agent | Role |
 |-------|------|
@@ -63,9 +63,11 @@ flowchart LR
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
 | `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
 | `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `incident-commander` | Incident response, root cause analysis, post-mortems |
 | `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
 | `perf-optimizer` | Latency, throughput, memory profiling |
 | `product-manager` | Requirements, user stories, MoSCoW prioritization |
+| `qa-coordinator` | E2E testing coordination, quality gate enforcement |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
 | `reviewer` | Quality gate, output validation, completeness checking |
 | `social-manager` | Platform-native content, calendars, community engagement |
@@ -81,7 +83,7 @@ flowchart LR
 ~/.euxis/
   prompts/
     core/               Core agents (orchestrator, architect, librarian)
-    fleet/              All 19 specialist agents
+    fleet/              All 21 specialist agents
     protocols/          Shared protocol and common instructions
       _protocol.txt     Mandatory protocol (appended at runtime to all agents)
       _common.txt       Shared agent instructions (deduplication snippet)
