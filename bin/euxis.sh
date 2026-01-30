@@ -440,7 +440,16 @@ resolve_provider_config() {
 
 run_claude() {
     local full_prompt="$1"
-    echo "${full_prompt}" | claude -p --model "${PROVIDER_MODEL}"
+    # Use agentic mode with file tools so agents can make actual code changes.
+    # --dangerously-skip-permissions avoids interactive prompts in background loops.
+    # --max-turns caps agent reasoning to prevent runaway execution.
+    echo "${full_prompt}" | claude \
+        --print \
+        --model "${PROVIDER_MODEL}" \
+        --tools "Read,Edit,Write,Bash" \
+        --allowedTools "Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*)" \
+        --dangerously-skip-permissions \
+        --max-turns 25
 }
 
 run_gemini() {
