@@ -134,7 +134,7 @@ for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "$f" ]] || continue
         # Extract frontmatter (between first --- and second ---)
-        header=$(sed -n '1,/^---$/p' "$f" | tail -n +2 | head -n -1)
+        header=$(sed -n '1,/^---$/p' "$f" | tail -n +2 | sed '$d')
         for field in "${REQUIRED_FIELDS[@]}"; do
             if ! echo "$header" | grep -q "^${field}:"; then
                 log "  MISSING FIELD: $(basename "$f") — '${field}'"

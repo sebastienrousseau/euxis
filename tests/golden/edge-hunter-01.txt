@@ -1,0 +1,2 @@
+INPUT: Review a file upload endpoint that saves user filenames directly to disk.
+EXPECTED_OUTPUT: Must flag path traversal risk and recommend sanitizing filenames and restricting to a safe directory.

@@ -100,8 +100,10 @@ if [[ "$MODE" == "ab" ]]; then
     RESULT_B=$(judge_output "$INPUT" "$OUTPUT_B" "$EXPECTED" "$PROVIDER_B")
 
     # Extract numeric scores
-    SCORE_A=$(echo "$RESULT_A" | grep -oP 'SCORE:\s*\K[0-9]+' | tail -1 || echo "?")
-    SCORE_B=$(echo "$RESULT_B" | grep -oP 'SCORE:\s*\K[0-9]+' | tail -1 || echo "?")
+    SCORE_A=$(echo "$RESULT_A" | grep -oE 'SCORE:[[:space:]]*[0-9]+' | tail -1 | sed 's/[^0-9]*//g')
+    SCORE_B=$(echo "$RESULT_B" | grep -oE 'SCORE:[[:space:]]*[0-9]+' | tail -1 | sed 's/[^0-9]*//g')
+    [[ -n "$SCORE_A" ]] || SCORE_A="?"
+    [[ -n "$SCORE_B" ]] || SCORE_B="?"
 
     echo ""
     echo "━━━ A/B Result ━━━"

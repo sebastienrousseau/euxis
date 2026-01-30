@@ -1,0 +1,2 @@
+INPUT: Legacy monolith: propose an incremental split into services with minimal risk.
+EXPECTED_OUTPUT: Must mention an incremental/strangler approach, boundary definition, and migration steps.

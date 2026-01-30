@@ -249,7 +249,7 @@ get_relevant_memory() {
 
     # Build grep alternation pattern from keywords
     local pattern
-    pattern=$(echo "${keywords}" | paste -sd'|')
+    pattern=$(printf '%s\n' "${keywords}" | tr '\n' '|' | sed 's/|$//')
 
     # Search full memory, deduplicate, take top 10 matches
     grep -iE "${pattern}" "${memory_file}" 2>/dev/null | \
@@ -276,7 +276,7 @@ get_cross_agent_memory() {
     fi
 
     local pattern
-    pattern=$(echo "${keywords}" | paste -sd'|')
+    pattern=$(printf '%s\n' "${keywords}" | tr '\n' '|' | sed 's/|$//')
 
     # Search all sibling agent memory files (not our own)
     local sibling_mem
@@ -428,7 +428,23 @@ run_claude() {
 run_gemini() {
     local full_prompt="$1"
     if command -v gemini &>/dev/null; then
-        echo "${full_prompt}" | gemini prompt
+        # Gemini CLI may attempt tool calls; explicitly disable via prompt guard.
+        local guard
+        guard="IMPORTANT: This is plain-text mode. Do not call tools or output ACTION/OBSERVATION steps. Respond only with the final answer in the required Output Format."
+        local err_file
+        err_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_gemini_err.$$") 
+        local out
+        out=$(printf '%s\n\n%s' "${guard}" "${full_prompt}" | NODE_OPTIONS="--no-deprecation" \
+            gemini --output-format text -p "" 2> "${err_file}")
+        local rc=$?
+        # Filter known noisy Gemini CLI stderr lines while preserving real errors.
+        if [[ -s "${err_file}" ]]; then
+            grep -vE '^(Error executing tool|Tool execution denied by policy|Tool ".*" not found in registry|Loaded cached credentials|Hook registry initialized|\\(node:.*\\) \\[DEP0040\\])' "${err_file}" >&2 || true
+        fi
+        rm -f "${err_file}"
+        # Filter known noisy lines that sometimes appear on stdout.
+        printf '%s' "${out}" | grep -vE '^(Error executing tool|Tool execution denied by policy|Tool ".*" not found in registry|Loaded cached credentials|Hook registry initialized)$' || true
+        return "${rc}"
     else
         log_error "Gemini CLI not found. Install it or use a different provider."
         exit 1
