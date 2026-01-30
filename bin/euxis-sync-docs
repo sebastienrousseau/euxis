@@ -4,6 +4,8 @@
 
 set -uo pipefail
 
+export PATH="$HOME/bin:$PATH"
+
 PATCH_FILE=$(mktemp /tmp/euxis_doc_patch.XXXXXX)
 FORBIDDEN_PATTERNS='rm -rf /|mkfs|dd if=|> /dev/|chmod 777|curl.*\|.*bash|wget.*\|.*sh'
 
