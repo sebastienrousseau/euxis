@@ -181,25 +181,28 @@ else
 fi
 
 # ────────────────────────────────────────────────────────
-# CHECK 6: API Key Connectivity
+# CHECK 6: Provider Connectivity (CLI tools)
 # ────────────────────────────────────────────────────────
 log ""
-log "[6/6] API Connectivity..."
+log "[6/6] Provider Connectivity..."
 
-KEY_WARNINGS=0
-for varname in ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY; do
-    if [[ -z "${!varname:-}" ]]; then
-        log "  MISSING: $varname not set"
-        ((KEY_WARNINGS++))
-        ((WARNINGS++))
+PROVIDER_WARNINGS=0
+for cli in claude gemini sgpt ollama opencode; do
+    if command -v "$cli" &>/dev/null; then
+        log "  FOUND: $cli"
+    else
+        log "  NOT FOUND: $cli (optional — install to enable this provider)"
+        ((PROVIDER_WARNINGS++))
     fi
 done
 
-if [[ $KEY_WARNINGS -eq 0 ]]; then
-    log "  All provider API keys present."
+if [[ $PROVIDER_WARNINGS -eq 0 ]]; then
+    log "  All provider CLIs available."
+elif [[ $PROVIDER_WARNINGS -le 3 ]]; then
+    log "  $PROVIDER_WARNINGS provider CLI(s) not installed. At least one provider is required."
 else
-    log "  $KEY_WARNINGS API key(s) missing. Cloud providers using those keys will fail."
-    log "  (Local providers ollama/opencode do not require API keys.)"
+    log "  WARNING: Only $((5 - PROVIDER_WARNINGS)) of 5 providers available."
+    ((WARNINGS++))
 fi
 
 # ────────────────────────────────────────────────────────

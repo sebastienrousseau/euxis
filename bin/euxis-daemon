@@ -2,6 +2,8 @@
 # EUXIS DAEMON: Safe, Periodic Self-Improvement
 # Runs 'euxis-kaizen' every X minutes with safety stops.
 
+set -uo pipefail
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first arg.

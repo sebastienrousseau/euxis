@@ -2,6 +2,8 @@
 # EUXIS LINT: Static Analysis for Agent Fleet
 # Enforces Protocol v4.0 Compliance
 
+set -uo pipefail
+
 EUXIS_HOME="$HOME/.euxis"
 FAILURES=0
 

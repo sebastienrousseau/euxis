@@ -1,8 +1,9 @@
 #!/bin/bash
-
 # EUXIS CONSOLE: Mission Control TUI
 # Version: 2.1
 # Author: Euxis System
+
+set -uo pipefail
 
 # --- CONFIGURATION & COLORS ---
 EUXIS_HOME="$HOME/.euxis"

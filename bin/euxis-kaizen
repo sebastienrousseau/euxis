@@ -2,6 +2,8 @@
 # EUXIS KAIZEN: Continuous Self-Improvement Loop
 # "Better every day."
 
+set -uo pipefail
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 DATE=$(date +%Y-%m-%d)

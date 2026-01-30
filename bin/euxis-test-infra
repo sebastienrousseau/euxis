@@ -2,6 +2,8 @@
 # EUXIS INFRA TEST: Branch Coverage for euxis.sh
 # Uses mocked providers to verify routing logic without spending money.
 
+set -uo pipefail
+
 EUXIS_HOME="$HOME/.euxis"
 EUXIS_SCRIPT="$EUXIS_HOME/bin/euxis.sh"
 PASS=0

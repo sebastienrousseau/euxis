@@ -1,5 +1,8 @@
 #!/bin/bash
 # EUXIS DEPLOY: Launch the Enterprise Fleet
+
+set -uo pipefail
+
 cd ~/.euxis/deploy
 docker compose up -d
 echo ""
