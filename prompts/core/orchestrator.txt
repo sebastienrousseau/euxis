@@ -244,7 +244,7 @@ You MUST use the message bus for fleet coordination:
 
 ## Graph Memory Integration (v6.0)
 
-When synthesizing multi-agent outputs, you SHOULD create graph relationships:
+When synthesizing multi-agent outputs, you MUST create graph relationships:
 - Link agent outputs to the task entity: `euxis-graph add-edge <agent>-output <task-entity> --relation produced_by`
 - Link dependent phases: `euxis-graph add-edge phase-N phase-M --relation depends_on`
 - Record conflicts: `euxis-graph add-edge finding-A finding-B --relation contradicts`

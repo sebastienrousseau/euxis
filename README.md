@@ -107,6 +107,9 @@ flowchart LR
     euxis-deploy        Docker Compose enterprise deployment
     euxis-dispatch      Parallel agent execution from manifest
     euxis-optimize      System-wide tune-up (certify, GC, compress, QA)
+    euxis-bus           Async pub/sub message bus for inter-agent communication
+    euxis-graph         GraphRAG knowledge graph (entity/edge CRUD, traversal)
+    euxis-synthesize    Dynamic agent composition from capability primitives
   tests/
     golden/             Golden datasets for agent evaluation
     coverage/           Test coverage reports (future)
@@ -406,6 +409,9 @@ euxis-audit-run             # Full deep-dive audit with readiness report
 | `euxis-daemon [interval]` | Periodic kaizen with fail-safe |
 | `euxis-deploy` | Docker Compose enterprise deployment |
 | `euxis-optimize` | System-wide tune-up (certify, GC, compress, QA) |
+| `euxis-bus <cmd> [args]` | Async pub/sub message bus (publish, subscribe, drain) |
+| `euxis-graph <cmd> [args]` | GraphRAG knowledge graph (entities, edges, traversal) |
+| `euxis-synthesize <cmd> [args]` | Dynamic agent composition from capability primitives |
 
 ---
 
