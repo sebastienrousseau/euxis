@@ -626,7 +626,13 @@ main() {
     capture_output "${AGENT}" "${PROJECT}" "${PROVIDER}" "${TASK}" "${SESSION_ID}" "${OUTPUT_PATH}" "${output}"
 
     # Phase 7: Print output to stdout
-    echo "${output}"
+    # When stdout is piped or redirected, extract the first JSON block (if any)
+    # so that `euxis architect "..." > plan.json` produces valid JSON.
+    if [[ ! -t 1 ]] && echo "${output}" | grep -q '```json'; then
+        echo "${output}" | sed -n '/^```json$/,/^```$/p' | sed '1d;$d'
+    else
+        echo "${output}"
+    fi
 }
 
 # ============================================================================
