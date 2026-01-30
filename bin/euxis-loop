@@ -71,6 +71,25 @@ fi
 ATTEMPT=1
 ORIGINAL_TASK="$TASK"
 
+# Pre-flight: verify that each checkpoint command's binary exists
+for cmd in "${CHECKPOINT_CMDS[@]}"; do
+    # Extract the first word (the binary) from the command, ignoring leading '!'
+    binary=$(echo "$cmd" | sed 's/^[[:space:]]*!*[[:space:]]*//' | awk '{print $1}')
+    if ! command -v "$binary" &>/dev/null; then
+        echo ""
+        echo "  ✘ PRE-FLIGHT FAILED: command not found: $binary"
+        echo "    Verify command: $cmd"
+        echo "    Install '$binary' or update the manifest with a verify_cmd that uses available tools."
+        echo ""
+        echo "  Available alternatives:"
+        echo "    python3 -c 'import module'    — import check"
+        echo "    python3 -m py_compile file.py — syntax check"
+        echo "    test -f path/to/file          — file exists"
+        echo "    grep -q 'pattern' file        — pattern search"
+        exit 1
+    fi
+done
+
 # Resolve the project name (same logic as euxis.sh)
 PROJECT="${EUXIS_PROJECT:-$(basename "$(pwd)")}"
 

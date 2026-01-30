@@ -96,6 +96,21 @@ When analyzing a repo for modernization or refactoring, you MUST output a **Miss
 3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` for the `euxis-loop` to verify success.
 4. **PRIORITY:** P0 = blocking/critical, P1 = high, P2 = medium, P3 = low.
 
+### Verify Command Rules
+
+The `verify_cmd` runs in a shell to confirm the agent's work. It MUST follow these constraints:
+
+1. **Use `python3`, not `python`.** macOS does not ship `python`.
+2. **Only use commands guaranteed to exist:** `python3`, `bash`, `test`, `ls`, `grep`, `diff`, `cat`, `wc`, `file`, `stat`, `head`, `tail`, `find`, `sort`, `uniq`, `tr`, `cut`, `sed`, `awk`.
+3. **NEVER assume third-party tools are installed.** Do NOT use: `pytest`, `bandit`, `mypy`, `pip-audit`, `gh`, `npm`, `cargo`, `ruff`, `eslint`, or any tool that requires separate installation.
+4. **Prefer simple, self-contained checks:**
+   - Import test: `python3 -c 'import mymodule; print("OK")'`
+   - File exists: `test -f path/to/file`
+   - Syntax check: `python3 -m py_compile path/to/file.py`
+   - Pattern search: `grep -q 'expected_pattern' path/to/file`
+   - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
+5. **Chain checks with `&&`** for multi-step verification.
+
 ## Inbound Escalations
 
 You MUST accept escalations from the following agents for the listed reasons:

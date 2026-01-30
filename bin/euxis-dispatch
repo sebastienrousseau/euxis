@@ -119,6 +119,30 @@ if [[ -f "$REGISTRY_FILE" ]]; then
         exit 1
     fi
 fi
+
+# Pre-flight: verify that each dispatch's verify_cmd binary exists
+MISSING_CMDS=()
+for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
+    VERIFY_CMD=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+    AGENT_NAME=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+    # Extract the first binary from the command (skip leading ! and whitespace)
+    BINARY=$(echo "$VERIFY_CMD" | sed 's/^[[:space:]]*!*[[:space:]]*//' | awk '{print $1}')
+    if [[ -n "$BINARY" ]] && ! command -v "$BINARY" &>/dev/null; then
+        MISSING_CMDS+=("  [$AGENT_NAME] $BINARY (from: $VERIFY_CMD)")
+    fi
+done
+if [[ ${#MISSING_CMDS[@]} -gt 0 ]]; then
+    echo "" >&2
+    echo "Error: Manifest verify commands reference missing tools:" >&2
+    for line in "${MISSING_CMDS[@]}"; do
+        echo "$line" >&2
+    done
+    echo "" >&2
+    echo "  Install the missing tools, or re-run the architect to generate" >&2
+    echo "  verify commands using only standard tools (python3, grep, test, etc.)." >&2
+    exit 1
+fi
+
 LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
