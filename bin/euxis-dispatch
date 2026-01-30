@@ -143,6 +143,87 @@ if [[ ${#MISSING_CMDS[@]} -gt 0 ]]; then
     exit 1
 fi
 
+# ============================================================================
+# Pre-dispatch: ensure project environment is ready
+# ============================================================================
+ensure_project_env() {
+    # Only act for Python projects
+    if [[ ! -f "pyproject.toml" && ! -f "setup.py" && ! -f "requirements.txt" ]]; then
+        return 0
+    fi
+
+    # Already activated or present
+    if [[ -f ".venv/bin/activate" ]]; then
+        echo "  [env] Activating existing .venv"
+        # shellcheck disable=SC1091
+        source .venv/bin/activate
+        return 0
+    fi
+
+    echo "  [env] Python project detected — setting up .venv..."
+
+    if ! command -v uv &>/dev/null; then
+        echo "  [env] WARNING: uv not found. Install via: brew install uv" >&2
+        echo "  [env] Skipping automatic environment setup." >&2
+        return 0
+    fi
+
+    # Determine Python version constraint from pyproject.toml
+    local py_version=""
+    if [[ -f "pyproject.toml" ]] && command -v python3 &>/dev/null; then
+        # Extract upper bound (e.g. <3.13 → 3.12)
+        local upper_bound
+        upper_bound=$(python3 -c "
+import re, sys
+try:
+    text = open('pyproject.toml').read()
+    m = re.search(r'python\s*=\s*\"[^\"]*<\s*(\d+\.\d+)', text)
+    if m:
+        parts = m.group(1).split('.')
+        major, minor = int(parts[0]), int(parts[1])
+        print(f'{major}.{minor - 1}')
+except Exception:
+    pass
+" 2>/dev/null)
+        if [[ -n "$upper_bound" ]]; then
+            py_version="$upper_bound"
+        fi
+    fi
+
+    # Create venv
+    if [[ -n "$py_version" ]]; then
+        echo "  [env] Creating .venv with Python $py_version (from pyproject.toml constraint)"
+        if ! uv venv --python "$py_version" .venv 2>&1 | sed 's/^/  [env] /'; then
+            echo "  [env] WARNING: Failed to create venv with Python $py_version. Trying default..." >&2
+            uv venv .venv 2>&1 | sed 's/^/  [env] /'
+        fi
+    else
+        echo "  [env] Creating .venv"
+        uv venv .venv 2>&1 | sed 's/^/  [env] /'
+    fi
+
+    # shellcheck disable=SC1091
+    source .venv/bin/activate
+
+    # Install project dependencies
+    if [[ -f "pyproject.toml" ]]; then
+        echo "  [env] Installing project (editable) + dependencies..."
+        uv pip install -e . 2>&1 | tail -3 | sed 's/^/  [env] /'
+    elif [[ -f "requirements.txt" ]]; then
+        echo "  [env] Installing from requirements.txt..."
+        uv pip install -r requirements.txt 2>&1 | tail -3 | sed 's/^/  [env] /'
+    fi
+
+    # Install common dev tools into the venv
+    echo "  [env] Installing dev tools (pytest, pytest-cov)..."
+    uv pip install pytest pytest-cov 2>&1 | tail -1 | sed 's/^/  [env] /'
+
+    echo "  [env] Environment ready: $(python --version)"
+    echo ""
+}
+
+ensure_project_env
+
 LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
