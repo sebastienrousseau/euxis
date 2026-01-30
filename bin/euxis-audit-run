@@ -67,9 +67,12 @@ echo "--------------------------------------------------"
 
     # Probe 1: Shell injection via agent name
     echo "## Probe 1: Shell injection in agent argument"
-    RESULT=$(euxis '; echo INJECTED' "test" claude 2>&1 || true)
-    if echo "$RESULT" | grep -q "INJECTED"; then
-        echo "  FAIL: Shell injection succeeded."
+    # Injection blocked = error message containing the input (reflected, not executed).
+    # Injection succeeded = canary appears as standalone output on its own line.
+    CANARY="EUXIS_PROBE_$(date +%s)"
+    RESULT=$(euxis "; echo $CANARY" "test" claude 2>&1 || true)
+    if echo "$RESULT" | grep -qx "$CANARY"; then
+        echo "  FAIL: Shell injection succeeded (canary found as command output)."
         ((PROBE_FAIL++))
     else
         echo "  PASS: Agent argument is not injectable."
