@@ -71,6 +71,15 @@ fi
 ATTEMPT=1
 ORIGINAL_TASK="$TASK"
 
+# Auto-activate project virtualenv if present
+for venv_dir in .venv venv env; do
+    if [[ -f "$venv_dir/bin/activate" ]]; then
+        # shellcheck disable=SC1091
+        source "$venv_dir/bin/activate"
+        break
+    fi
+done
+
 # Pre-flight: verify that each checkpoint command's binary exists
 for cmd in "${CHECKPOINT_CMDS[@]}"; do
     # Extract the first word (the binary) from the command, ignoring leading '!'

@@ -102,18 +102,18 @@ The `verify_cmd` runs in a shell to confirm the agent's work. It MUST follow the
 
 1. **Use `python3`, not `python`.** macOS does not ship `python`.
 2. **Available tools:** `python3`, `pytest`, `mypy`, `bandit`, `pip-audit`, `ruff`, `gh`, plus standard Unix tools (`bash`, `test`, `grep`, `find`, `diff`, `sed`, `awk`).
-3. **NEVER assume project-specific tools are installed.** Do NOT use: `npm`, `cargo`, `eslint`, `tox`, `nox`, or tools that require per-project setup unless the task explicitly installs them.
-4. **Preferred verification patterns:**
-   - Import test: `python3 -c 'import mymodule; print("OK")'`
-   - Unit tests: `pytest path/to/tests/ -x -q`
+3. **NEVER assume project-specific dependencies are importable.** Third-party libraries (lxml, pandas, requests, etc.) may not be installed system-wide. Use `grep` patterns to verify code changes instead of `python3 -c 'import third_party_lib'`.
+4. **NEVER assume project-specific tools are installed.** Do NOT use: `npm`, `cargo`, `eslint`, `tox`, `nox`, or tools that require per-project setup unless the task explicitly installs them.
+5. **Preferred verification patterns:**
+   - Code change check: `grep -q 'expected_pattern' path/to/file`
+   - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
+   - File exists: `test -f path/to/file`
+   - Syntax check: `python3 -m py_compile path/to/file.py`
+   - Stdlib import: `python3 -c 'import mymodule; print("OK")'` (only for stdlib or the project's own modules)
+   - Unit tests: `pytest path/to/tests/ -x -q` (if project has a virtualenv with deps)
    - Type check: `mypy path/to/module/ --ignore-missing-imports`
    - Security scan: `bandit -r path/to/module/ -q`
-   - Dependency audit: `pip-audit --format=json`
-   - Syntax check: `python3 -m py_compile path/to/file.py`
-   - File exists: `test -f path/to/file`
-   - Pattern search: `grep -q 'expected_pattern' path/to/file`
-   - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
-5. **Chain checks with `&&`** for multi-step verification.
+6. **Chain checks with `&&`** for multi-step verification.
 
 ## Inbound Escalations
 
