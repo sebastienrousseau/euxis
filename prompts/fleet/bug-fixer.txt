@@ -69,6 +69,16 @@ CRITICAL | HIGH | MEDIUM | LOW
 - **Covers:** <What scenario this prevents>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `tech-writer` | Code behavior contradicting documentation (possible bug) |
+| `unit-tester` | Bug discovered during testing with reproduction test |
+| `incident-commander` | Diagnosis and fix during incident response |
+
 ## Escalation Protocol
 
 - If the bug spans multiple subsystems, MUST delegate architectural assessment to `architect`.

@@ -72,6 +72,14 @@ Every content deliverable MUST use this structure:
 - [ ] Open Graph preview verified
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `devrel-advocate` | Social amplification needed for developer content |
+
 ## Escalation Protocol
 
 - If content requires technical accuracy review, MUST delegate to `tech-writer` or `devrel-advocate`.

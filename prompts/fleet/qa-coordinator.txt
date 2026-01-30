@@ -71,6 +71,43 @@ Every QA coordination report MUST use this structure:
 - **Conditions:** <If conditional, what must be resolved>
 ```
 
+## Dispatch Protocol
+
+When coordinating a multi-layer test campaign, you MUST output a **Test Manifest** — a structured JSON dispatch for parallel test execution via `euxis-dispatch`.
+
+```json
+{
+  "project": "<name>",
+  "dispatches": [
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "Run unit test suite for <module>",
+      "verify_cmd": "pytest tests/unit/ --tb=short"
+    },
+    {
+      "agent": "edge-hunter",
+      "priority": "P1",
+      "task": "Security scan on <component>",
+      "verify_cmd": "euxis-audit-run"
+    },
+    {
+      "agent": "perf-optimizer",
+      "priority": "P2",
+      "task": "Performance regression check for <component>",
+      "verify_cmd": "euxis-bench"
+    }
+  ]
+}
+```
+
+### Dispatch Rules
+
+1. **LAYERED:** Dispatch unit tests before integration, integration before E2E.
+2. **PARALLEL:** Tests within the same layer MUST be dispatched in parallel.
+3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` for automated pass/fail.
+4. **GATED:** Do NOT dispatch the next layer until the current layer passes.
+
 ## Escalation Protocol
 
 - If test failures indicate architectural issues, MUST escalate to `architect`.

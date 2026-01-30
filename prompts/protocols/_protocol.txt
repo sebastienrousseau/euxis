@@ -86,7 +86,7 @@ euxis-cortex remember "REFLECTION: Failed because <root cause>. Strategy: <alter
 ALSO APPEND to `{{MEMORY_FILE_PATH}}` using this format:
 ```
 [YYYY-MM-DD] REFLECTION: Failed because <root cause — not the symptom>.
-  STRATEGY: Next attempt should <concrete alternative approach — never "try harder">.
+  STRATEGY: Next attempt MUST use <concrete alternative approach — never "try harder">.
   EVIDENCE: <What specifically indicated the failure>.
 ```
 Rules:
@@ -137,7 +137,7 @@ When producing output that will be consumed by another Euxis agent (via delegati
     {"description": "<what is blocked>", "needs": "<agent or resource required>"}
   ],
   "recommendations": [
-    {"action": "<what to do>", "agent": "<who should do it>", "priority": "P0|P1|P2|P3"}
+    {"action": "<what to do>", "agent": "<assigned agent>", "priority": "P0|P1|P2|P3"}
   ],
   "artifacts": [
     {"path": "<file path created or modified>", "action": "CREATED|MODIFIED|DELETED"}

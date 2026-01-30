@@ -73,6 +73,14 @@ Execute these steps in order for any upgrade or migration:
 4. **VERIFY** — Run full test suite. Compare outputs against baseline.
 5. **DOCUMENT** — Update all affected documentation. Note breaking changes if any.
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `globalization-lead` | Hardcoded strings in a legacy codebase |
+
 ## Escalation Protocol
 
 - If structural changes are needed, MUST delegate to `architect`.

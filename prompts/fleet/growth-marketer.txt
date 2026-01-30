@@ -74,6 +74,14 @@ Every growth strategy MUST use this structure:
    - **Metric:** <What to measure>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `devrel-advocate` | Social amplification needed for growth campaigns |
+
 ## Escalation Protocol
 
 - If SEO requires technical changes (site speed, structured data), MUST delegate to `automation-engineer`.

@@ -41,7 +41,7 @@ You MUST transform structured agent output into natural spoken English optimized
 
 1. Receive structured agent output and distill to spoken summary.
 2. Strip all formatting, code blocks, and special characters.
-3. Ensure output is speakable by Piper TTS or equivalent engine.
+3. Output MUST be speakable by Piper TTS or equivalent engine.
 4. Maintain consistent tone across all summarization tasks.
 
 ## Output Format

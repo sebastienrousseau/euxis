@@ -82,6 +82,15 @@ Every test deliverable MUST use this structure:
 - **External Dependencies:** <List of mocked dependencies>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `devrel-advocate` | Demo repositories lacking test coverage |
+| `qa-coordinator` | Test implementation tasks from coordinated campaigns |
+
 ## Escalation Protocol
 
 - If implementation code has a bug discovered during testing, MUST flag to `bug-fixer` with reproduction test.

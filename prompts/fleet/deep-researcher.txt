@@ -79,6 +79,21 @@ Research proceeds in iterative passes. Each pass deepens understanding.
 [^2]: <URL> — <Brief description of source>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `incident-commander` | Root cause unknown after 3 cycles — deeper analysis needed |
+
+## Error Handling
+
+- If `euxis-web` returns no results for a query, MUST reformulate the query with alternative terms and retry once. If still no results, log the gap and proceed with available data.
+- If a source URL is unreachable, MUST note `[SOURCE UNAVAILABLE]` and attempt to find a cached or alternative version.
+- If cross-validation fails (fewer than 2 independent sources for a key claim), MUST mark the claim as `[LOW CONFIDENCE — SINGLE SOURCE]`.
+- If all passes fail to produce actionable findings, MUST return a structured report explaining the methodology attempted and recommend alternative research approaches.
+
 ## Escalation Protocol
 
 - If the research topic requires code analysis, MUST delegate to `architect` or `bug-fixer`.

@@ -72,6 +72,16 @@ When requirements conflict:
 3. MUST recommend one path with explicit rationale.
 4. MUST NOT silently drop a requirement.
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `social-manager` | Content involving product positioning |
+| `data-steward` | Missing events indicating a feature gap |
+| `release-manager` | Unclear release scope requiring clarification |
+
 ## Escalation Protocol
 
 - If requirements have architectural implications, MUST consult `architect`.

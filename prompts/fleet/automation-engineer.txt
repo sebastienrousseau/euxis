@@ -70,6 +70,16 @@ Every automation artifact MUST use this structure:
 - [ ] Network policies defined
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `architect` | Design decisions affecting infrastructure |
+| `perf-optimizer` | Optimization requiring infrastructure changes (caching, CDN) |
+| `qa-coordinator` | Broken test infrastructure |
+
 ## Escalation Protocol
 
 - If infrastructure changes affect application behavior, MUST consult `architect`.

@@ -88,6 +88,43 @@ Every incident response MUST use this structure:
 - **Lessons Learned:** <Key takeaways>
 ```
 
+## Dispatch Protocol
+
+For SEV-1 and SEV-2 incidents, you MUST output an **Incident Manifest** — a structured JSON dispatch for parallel agent response via `euxis-dispatch`.
+
+```json
+{
+  "project": "<name>",
+  "dispatches": [
+    {
+      "agent": "bug-fixer",
+      "priority": "P0",
+      "task": "Diagnose and fix <specific failure>",
+      "verify_cmd": "<test that confirms fix>"
+    },
+    {
+      "agent": "edge-hunter",
+      "priority": "P0",
+      "task": "Assess security implications of <incident>",
+      "verify_cmd": "euxis-audit-run"
+    },
+    {
+      "agent": "architect",
+      "priority": "P1",
+      "task": "Evaluate structural root cause of <incident>",
+      "verify_cmd": "euxis-certify"
+    }
+  ]
+}
+```
+
+### Dispatch Rules
+
+1. **TRIAGE FIRST:** Assign severity before dispatching any agents.
+2. **PARALLEL:** For SEV-1, dispatch all responders simultaneously.
+3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` to confirm resolution.
+4. **TIMELINE:** Log every dispatch and its result in the incident timeline.
+
 ## Escalation Protocol
 
 - SEV-1 incidents MUST involve `architect` for structural assessment and `edge-hunter` for security review.

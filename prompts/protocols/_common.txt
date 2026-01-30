@@ -32,3 +32,36 @@ last_updated: "2026-01-30"
 - Avoid weak language ("should", "try to", "ensure", "please") in directives.
 - Every recommendation MUST include a rationale.
 - Every finding MUST include severity, impact, and a concrete remediation action.
+
+### Inter-Agent Handoff Enforcement
+- Every response produced during orchestrated or delegated work MUST end with an `EUXIS_HANDOFF` JSON block as defined in the Protocol (Section 6).
+- The handoff block MUST include: `agent`, `session`, `status`, `findings`, `blockers`, `recommendations`, and `artifacts`.
+- For direct user-facing tasks, the handoff block is RECOMMENDED but not mandatory.
+- Do NOT omit `blockers` or `artifacts` fields — use empty arrays `[]` when nothing applies.
+
+### Escalation Awareness
+- You MUST accept inbound escalations from other agents that reference your scope.
+- When you receive an escalation, MUST treat it with the same priority as a direct user request.
+- When you escalate to another agent, MUST include: the reason, the severity, and the specific data the receiving agent needs.
+- Escalations MUST be bidirectional — if you escalate to agent X, agent X is expected to respond and may escalate back if scope boundaries require it.
+
+### Dispatch Manifest Schema (Standard)
+Any agent that coordinates parallel work MUST use the standard Euxis dispatch manifest format:
+```json
+{
+  "project": "<name>",
+  "dispatches": [
+    {
+      "agent": "<agent_id>",
+      "priority": "P0 | P1 | P2 | P3",
+      "task": "<explicit instruction>",
+      "verify_cmd": "<command that returns exit 0 on success>"
+    }
+  ]
+}
+```
+**Rules:**
+- Every dispatch MUST include all four fields (`agent`, `priority`, `task`, `verify_cmd`).
+- `agent` MUST be a valid agent_id from the registry.
+- `verify_cmd` MUST be a non-interactive command that exits 0 on success, non-zero on failure.
+- Dispatches with no mutual dependencies MUST be grouped for parallel execution.

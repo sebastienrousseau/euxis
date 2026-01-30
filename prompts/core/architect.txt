@@ -96,6 +96,24 @@ When analyzing a repo for modernization or refactoring, you MUST output a **Miss
 3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` for the `euxis-loop` to verify success.
 4. **PRIORITY:** P0 = blocking/critical, P1 = high, P2 = medium, P3 = low.
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `librarian` | Unresolved architectural decisions in memory |
+| `deep-researcher` | Findings contradicting established architecture |
+| `product-manager` | Requirements with architectural implications |
+| `incident-commander` | Structural root cause assessment (SEV-1/2) |
+| `ux-sentinel` | Design system flaws requiring system-level redesign |
+| `reviewer` | Output contradicting prior architectural decisions |
+| `unit-tester` | Untestable code due to tight coupling |
+| `devrel-advocate` | Developer feedback revealing architectural issues |
+| `automation-engineer` | Infrastructure changes affecting application behavior |
+| `qa-coordinator` | Test failures indicating architectural issues |
+| `release-manager` | Breaking changes requiring architectural guidance |
+
 ## Escalation Protocol
 
 - If a finding has security implications, MUST flag to `edge-hunter`.

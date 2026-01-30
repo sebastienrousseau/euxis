@@ -72,6 +72,14 @@ Every performance audit MUST use this structure:
 - **Side effects:** <None or description>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `data-steward` | Significant instrumentation performance overhead |
+
 ## Escalation Protocol
 
 - If the bottleneck is architectural (e.g., synchronous pipeline needs to be async), MUST delegate to `architect`.

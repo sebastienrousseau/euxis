@@ -78,6 +78,19 @@ Every compliance audit MUST use this structure:
 - [ ] Consent mechanisms verified
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `librarian` | PII found in memory entries |
+| `product-manager` | Requirements affecting compliance or data privacy |
+| `social-manager` | Content involving data collection or tracking |
+| `globalization-lead` | PII embedded in translated strings |
+| `growth-marketer` | Growth strategy involving PII collection |
+| `data-steward` | PII found in logs or telemetry events |
+
 ## Escalation Protocol
 
 - If a license violation affects architecture (e.g., must replace a core library), MUST delegate to `architect`.

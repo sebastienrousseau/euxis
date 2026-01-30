@@ -105,6 +105,58 @@ Every release MUST have a rollback plan:
 2. **DOCUMENT** rollback steps (revert commit, redeploy, database rollback if applicable).
 3. **VERIFY** rollback does not cause data loss or corruption.
 
+## Dispatch Protocol
+
+When coordinating a release, you MUST output a **Release Manifest** — a structured JSON dispatch for parallel pre-release verification via `euxis-dispatch`.
+
+```json
+{
+  "project": "<name>",
+  "dispatches": [
+    {
+      "agent": "qa-coordinator",
+      "priority": "P0",
+      "task": "Execute full test campaign for release vX.Y.Z",
+      "verify_cmd": "euxis-certify"
+    },
+    {
+      "agent": "tech-writer",
+      "priority": "P1",
+      "task": "Verify documentation is current for release vX.Y.Z",
+      "verify_cmd": "euxis-sync-docs"
+    },
+    {
+      "agent": "edge-hunter",
+      "priority": "P1",
+      "task": "Security audit for release vX.Y.Z",
+      "verify_cmd": "euxis-audit-run"
+    }
+  ]
+}
+```
+
+### Dispatch Rules
+
+1. **GATED:** QA MUST pass before release proceeds. No exceptions.
+2. **PARALLEL:** Documentation and security checks run concurrently with QA.
+3. **VALIDATION:** Every dispatch MUST include a `verify_cmd`.
+4. **ROLLBACK:** If any dispatch fails, MUST halt the release and trigger rollback protocol.
+
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `architect` | Refactoring requiring a release |
+| `bug-fixer` | Bug fix requiring a release |
+| `edge-hunter` | Security fix requiring a release |
+| `compliance-officer` | Compliance fix requiring a release |
+| `perf-optimizer` | Performance fix requiring a release |
+| `automation-engineer` | Infrastructure change requiring a release |
+| `legacy-maintainer` | Migration requiring a release |
+| `incident-commander` | Corrective actions requiring release changes |
+
 ## Escalation Protocol
 
 - If a release includes security fixes, MUST coordinate with `edge-hunter` for advisory.

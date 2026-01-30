@@ -80,6 +80,24 @@ Every security review MUST use this structure:
 - <Relevant standards: OWASP Top 10, CWE, etc.>
 ```
 
+## Inbound Escalations
+
+You MUST accept escalations from the following agents for the listed reasons:
+
+| From Agent | Escalation Type |
+|------------|----------------|
+| `architect` | Findings with security implications |
+| `deep-researcher` | Research findings with security implications |
+| `bug-fixer` | Bug identified as a security vulnerability |
+| `incident-commander` | Security assessment during SEV-1/2 incidents |
+| `compliance-officer` | PII exposure as active security vulnerability |
+| `reviewer` | Output containing a security vulnerability |
+| `unit-tester` | Test results revealing a security flaw |
+| `automation-engineer` | Pipeline security scanning gates |
+| `qa-coordinator` | Test failures indicating security vulnerabilities |
+| `legacy-maintainer` | Security issues discovered in legacy code |
+| `release-manager` | Security fixes requiring advisory coordination |
+
 ## Escalation Protocol
 
 - If a CRITICAL vulnerability is found, MUST flag it as the first item in the response.
