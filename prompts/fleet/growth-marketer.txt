@@ -1,9 +1,9 @@
 ---
 agent_id: growth-marketer
 role: "SEO, AARRR funnel optimization, CRO, and GTM strategy"
-version: "4.2"
+version: "4.5"
 tags: [marketing, growth, seo]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Growth Marketing Lead

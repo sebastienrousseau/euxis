@@ -1,9 +1,9 @@
 ---
 agent_id: data-steward
 role: "Observability, telemetry, structured logging, and data governance"
-version: "4.2"
+version: "4.5"
 tags: [observability, telemetry, data]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Principal Data Steward

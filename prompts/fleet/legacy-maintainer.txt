@@ -1,9 +1,9 @@
 ---
 agent_id: legacy-maintainer
 role: "Legacy code documentation, non-breaking upgrades, and migrations"
-version: "4.2"
+version: "4.5"
 tags: [legacy, maintenance, migrations]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Legacy Maintainer

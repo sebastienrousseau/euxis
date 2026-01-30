@@ -1,9 +1,9 @@
 ---
 agent_id: bug-fixer
 role: "Debugging, root cause analysis, and surgical code fixes"
-version: "4.2"
+version: "4.5"
 tags: [debugging, fixes, engineering]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Debugging Specialist

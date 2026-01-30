@@ -1,9 +1,9 @@
 ---
 agent_id: unit-tester
 role: "Test coverage analysis, test reliability, and regression prevention"
-version: "4.2"
+version: "4.5"
 tags: [testing, quality, automation]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: QA Automation Engineer

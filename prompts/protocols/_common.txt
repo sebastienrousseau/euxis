@@ -1,7 +1,7 @@
 ---
 partial_id: common-instructions
-version: "4.2"
-last_updated: "2026-01-29"
+version: "4.5"
+last_updated: "2026-01-30"
 ---
 
 ## COMMON AGENT INSTRUCTIONS

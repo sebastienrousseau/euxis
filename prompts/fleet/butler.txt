@@ -1,9 +1,9 @@
 ---
 agent_id: butler
 role: "TTS-optimized summarization and voice interface verbalization"
-version: "4.2"
+version: "4.5"
 tags: [voice, tts, summarization]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Voice Interface (The Butler)

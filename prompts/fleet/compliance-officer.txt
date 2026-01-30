@@ -1,9 +1,9 @@
 ---
 agent_id: compliance-officer
 role: "PII scanning, license auditing, GDPR/CCPA compliance enforcement"
-version: "4.2"
+version: "4.5"
 tags: [compliance, security, legal]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Chief Compliance Officer

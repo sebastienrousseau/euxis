@@ -1,9 +1,9 @@
 ---
 agent_id: perf-optimizer
 role: "Latency, throughput, memory profiling, and performance budgets"
-version: "4.2"
+version: "4.5"
 tags: [performance, profiling, optimization]
-last_updated: "2026-01-29"
+last_updated: "2026-01-30"
 ---
 
 # Euxis Agent: Performance Engineer
