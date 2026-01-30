@@ -212,28 +212,44 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
         echo ""
         echo "  Waiting for Phase $PHASE_NUM to complete..."
 
-        # Phase progress monitor
+        # Phase progress monitor: single-line spinner
         _phase_monitor_pid=""
         if [[ -t 1 ]]; then
             PHASE_PID_FILE="$LOG_DIR/.phase_pids"
             : > "$PHASE_PID_FILE"
+            phase_total=0
             for entry in "${GROUP_ENTRIES[@]}"; do
                 echo "$entry" >> "$PHASE_PID_FILE"
+                phase_total=$((phase_total + 1))
             done
             (
+                chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+                tick=0
                 while true; do
-                    sleep 5
-                    all_done=true
+                    sleep 1
+                    done_count=0
+                    running_names=""
                     while IFS=' ' read -r pid agent idx; do
-                        kill -0 "$pid" 2>/dev/null || continue
-                        all_done=false
-                        log_file="$LOG_DIR/${agent}_${idx}.log"
-                        if [[ -f "$log_file" ]]; then
-                            size=$(du -h "$log_file" 2>/dev/null | cut -f1 | tr -d ' ')
-                            echo "  ... $agent running (log ${size:-0})"
+                        if ! kill -0 "$pid" 2>/dev/null; then
+                            done_count=$((done_count + 1))
+                        else
+                            if [[ -z "$running_names" ]]; then
+                                running_names="$agent"
+                            else
+                                running_names="$running_names, $agent"
+                            fi
                         fi
                     done < "$PHASE_PID_FILE"
-                    [[ "$all_done" == true ]] && break
+                    if [[ $done_count -ge $phase_total ]]; then
+                        printf '\r%80s\r' ""
+                        break
+                    fi
+                    if [[ ${#running_names} -gt 50 ]]; then
+                        running_names="${running_names:0:47}..."
+                    fi
+                    spin="${chars:tick%10:1}"
+                    tick=$((tick + 1))
+                    printf '\r  %s %d/%d complete | %s ' "$spin" "$done_count" "$phase_total" "$running_names"
                 done
             ) &
             _phase_monitor_pid=$!
@@ -252,10 +268,11 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
             fi
         done
 
-        # Stop phase monitor
+        # Stop phase monitor and clear its line
         if [[ -n "${_phase_monitor_pid:-}" ]]; then
             kill "$_phase_monitor_pid" 2>/dev/null
             wait "$_phase_monitor_pid" 2>/dev/null
+            printf '\r%80s\r' "" 2>/dev/null
         fi
 
         if [[ $phase_failed -gt 0 ]]; then
@@ -340,38 +357,46 @@ else
         echo "${PIDS[$i]} ${AGENTS[$i]} ${i}" >> "$PID_MANIFEST"
     done
 
-    # Background progress monitor: poll log files every 5s and report status
-    # Uses file markers instead of associative arrays for bash 3.2 compatibility
+    # Background progress monitor: single-line spinner with agent count
+    # Overwrites in place to avoid terminal pollution
     _monitor_pid=""
     DONE_DIR="$LOG_DIR/.done"
     mkdir -p "$DONE_DIR"
     if [[ -t 1 ]]; then
         (
+            chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+            tick=0
+            total=$DISPATCH_COUNT
             while true; do
-                sleep 5
-                all_done=true
+                sleep 1
+                done_count=0
+                running_names=""
                 while IFS=' ' read -r pid agent idx; do
-                    # Skip already reported
-                    [[ -f "$DONE_DIR/${agent}_${idx}" ]] && continue
-
-                    # Check if process finished
-                    if ! kill -0 "$pid" 2>/dev/null; then
-                        touch "$DONE_DIR/${agent}_${idx}"
-                        continue
-                    fi
-
-                    all_done=false
-
-                    # Show activity from log
-                    log_file="$LOG_DIR/${agent}_${idx}.log"
-                    if [[ -f "$log_file" ]]; then
-                        attempt=$(grep -c "Loop Attempt" "$log_file" 2>/dev/null || true)
-                        size=$(du -h "$log_file" 2>/dev/null | cut -f1 | tr -d ' ')
-                        echo "  ... $agent running (attempt ${attempt:-0}, log ${size:-0})"
+                    if [[ -f "$DONE_DIR/${agent}_${idx}" ]] || ! kill -0 "$pid" 2>/dev/null; then
+                        [[ ! -f "$DONE_DIR/${agent}_${idx}" ]] && touch "$DONE_DIR/${agent}_${idx}"
+                        done_count=$((done_count + 1))
+                    else
+                        if [[ -z "$running_names" ]]; then
+                            running_names="$agent"
+                        else
+                            running_names="$running_names, $agent"
+                        fi
                     fi
                 done < "$PID_MANIFEST"
 
-                if [[ "$all_done" == true ]]; then break; fi
+                if [[ $done_count -ge $total ]]; then
+                    printf '\r%80s\r' ""
+                    break
+                fi
+
+                # Truncate running names if too long
+                if [[ ${#running_names} -gt 50 ]]; then
+                    running_names="${running_names:0:47}..."
+                fi
+
+                spin="${chars:tick%10:1}"
+                tick=$((tick + 1))
+                printf '\r  %s %d/%d complete | %s ' "$spin" "$done_count" "$total" "$running_names"
             done
         ) &
         _monitor_pid=$!
@@ -387,10 +412,11 @@ else
         fi
     done
 
-    # Stop monitor
+    # Stop monitor and clear its line
     if [[ -n "${_monitor_pid:-}" ]]; then
         kill "$_monitor_pid" 2>/dev/null
         wait "$_monitor_pid" 2>/dev/null
+        printf '\r%80s\r' "" 2>/dev/null
     fi
 
     echo ""
