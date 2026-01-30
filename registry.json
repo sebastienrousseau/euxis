@@ -27,6 +27,7 @@
     { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "6.0", "tags": ["social", "content", "community"], "capability_tags": ["documentation"] },
     { "id": "tech-writer", "path": "prompts/fleet/tech-writer.txt", "tier": "fleet", "version": "6.0", "tags": ["documentation", "writing", "content"], "capability_tags": ["documentation"] },
     { "id": "unit-tester", "path": "prompts/fleet/unit-tester.txt", "tier": "fleet", "version": "6.0", "tags": ["testing", "quality", "automation"], "capability_tags": ["test-analysis", "debugging"] },
-    { "id": "ux-sentinel", "path": "prompts/fleet/ux-sentinel.txt", "tier": "fleet", "version": "6.0", "tags": ["ux", "accessibility", "design"], "capability_tags": ["compliance-check", "code-review"] }
+    { "id": "ux-sentinel", "path": "prompts/fleet/ux-sentinel.txt", "tier": "fleet", "version": "6.0", "tags": ["ux", "accessibility", "design"], "capability_tags": ["compliance-check", "code-review"] },
+    { "id": "brand-evangelist", "path": "prompts/fleet/brand-evangelist.txt", "tier": "fleet", "version": "6.0", "tags": ["brand", "voice", "content", "design"], "capability_tags": ["documentation", "compliance-check"] }
   ]
 }

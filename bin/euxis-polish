@@ -1,0 +1,57 @@
+#!/bin/bash
+# EUXIS POLISH: Apply the Euxis Standard to any content.
+# Usage: euxis-polish [file_or_directory]
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")" && pwd)"
+export PATH="$PATH:$HOME/bin"
+
+TARGET="${1:-$HOME/.euxis/README.md}"
+
+if [[ ! -f "$TARGET" ]]; then
+    echo "Error: File not found — $TARGET"
+    exit 1
+fi
+
+echo "POLISHING: Applying the Euxis Standard to $TARGET..."
+
+POLISHED_FILE="${TARGET}.polished"
+
+"$SCRIPT_DIR/euxis.sh" brand-evangelist "
+Here is the content of '$TARGET':
+
+$(cat "$TARGET")
+
+TASK:
+Rewrite this entire content to align with the Euxis Standard.
+- Principle 5: Cut the filler. Eliminate the unnecessary.
+- Principle 4: Focus on the user's ambition, not just the specs.
+- Tone: Apple Developer Documentation — clear, essential, professional.
+
+OUTPUT:
+Only the rewritten markdown. No conversational filler.
+" claude > "$POLISHED_FILE" 2>/dev/null
+
+if [[ ! -s "$POLISHED_FILE" ]]; then
+    echo "No output from brand-evangelist. Nothing to apply."
+    rm -f "$POLISHED_FILE"
+    exit 0
+fi
+
+echo "---------------------------------------------------"
+echo "REVIEW CHANGES:"
+echo "---------------------------------------------------"
+diff "$TARGET" "$POLISHED_FILE" | head -n 40
+echo "..."
+echo "---------------------------------------------------"
+
+read -rp "Apply these changes? (y/N): " -n 1
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    mv "$POLISHED_FILE" "$TARGET"
+    echo "Content polished."
+else
+    rm -f "$POLISHED_FILE"
+    echo "Reverted."
+fi

@@ -1,6 +1,8 @@
 # Euxis Fleet Guide
 
-Version: 6.0 | Last updated: 2026-01-30
+Enterprise Unified eXecution Intelligence System
+
+Version 6.0
 
 Central registry of all 24 agents with delegation patterns, provider tiering, dispatch modes, and workflow examples.
 

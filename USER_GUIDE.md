@@ -1,6 +1,8 @@
 # Euxis User Guide
 
-Version: 6.0 | Last updated: 2026-01-30
+Enterprise Unified eXecution Intelligence System
+
+Version 6.0
 
 ## CLI Tools
 
@@ -96,6 +98,16 @@ Version: 6.0 | Last updated: 2026-01-30
 | `tech-writer` | Documentation, tutorials, API reference, glossary |
 | `unit-tester` | Test coverage, reliability, regression prevention |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), design system, responsive testing |
+
+## Glossary
+
+| Term | Definition |
+|------|-----------|
+| **Euxis** | **E**nterprise **U**nified e**X**ecution **I**ntelligence **S**ystem — A local-first, privacy-centric operating system for AI agents that orchestrates specialized personas for autonomous engineering tasks. |
+| **Cortex** | The tri-typed semantic memory layer (episodic, semantic, procedural) backed by ChromaDB. |
+| **Dispatch** | The parallel agent deployment engine that executes mission manifests. |
+| **Kaizen** | The continuous self-improvement loop that audits, documents, and upgrades the fleet. |
+| **Fleet** | The full collection of 24 specialized agent personas. |
 
 ## Intelligence Tiering (5-Tier Cost-Optimized Routing)
 
