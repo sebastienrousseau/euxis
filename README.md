@@ -18,6 +18,17 @@ Euxis operates on a "Plan-Decompose-Delegate" architecture:
 2. **The Dispatcher (Control):** The Architect breaks tasks into a JSON Manifest; the Dispatcher executes them in parallel background loops.
 3. **The Link (Interface):** Connects to your terminal (CLI), your voice (Local Whisper/Piper), and your IDE (MCP).
 
+```mermaid
+flowchart LR
+  U[User Goal] --> O[Orchestrator]
+  O --> A[Architect]
+  A --> M[Manifest.json]
+  M --> D[Dispatcher]
+  D --> F[Fleet Agents]
+  F --> C[Cortex Memory]
+  C --> O
+```
+
 ### The Fleet (Key Agents)
 
 | Agent | Role | Capability |
@@ -123,14 +134,8 @@ Euxis operates on a "Plan-Decompose-Delegate" architecture:
 # Clone the core
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 
-# Create ~/bin if it does not exist
-mkdir -p ~/bin
-
-# Symlink all tools
-for script in ~/.euxis/bin/*; do
-    name=$(basename "$script" .sh)
-    ln -sf "$script" ~/bin/"$name"
-done
+# One-line install
+~/.euxis/setup.sh
 
 # Add ~/bin to PATH (if not already present)
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile
