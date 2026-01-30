@@ -382,7 +382,7 @@ prepare_prompt() {
 
     # Build fleet roster for manifest-producing agents
     local fleet_roster=""
-    local registry_file="${EUXIS_DIR}/registry.json"
+    local registry_file="${EUXIS_HOME}/registry.json"
     if [[ -f "${registry_file}" ]] && command -v jq &>/dev/null; then
         fleet_roster=$(jq -r '.agents[].id' "${registry_file}" | tr '\n' ', ' | sed 's/,$//')
     fi
