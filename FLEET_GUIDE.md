@@ -25,6 +25,7 @@ Ship code. Solve problems. Own your domain.
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
 | `automation-engineer` | Zero-touch deployments | Standard |
+| `brand-evangelist` | Brand voice and storytelling | Standard |
 | `bug-fixer` | Get to root cause fast | Coding |
 | `butler` | Perfect voice summaries | Utility |
 | `compliance-officer` | Ship with confidence | Standard |

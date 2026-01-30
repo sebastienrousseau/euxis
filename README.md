@@ -11,7 +11,7 @@
 
 ## Overview
 
-Deploy 24 specialist AI agents to plan, execute, and verify engineering tasks autonomously. From architecture to security to release management — every decision tracked, every outcome verified.
+Deploy 25 specialist AI agents to plan, execute, and verify engineering tasks autonomously. From architecture to security to release management — every decision tracked, every outcome verified.
 
 Build faster. Ship with confidence.
 
@@ -99,7 +99,7 @@ flowchart LR
 
 ## The Fleet
 
-Three core agents govern. Twenty-one specialists execute.
+Three core agents govern. Twenty-two specialists execute.
 
 ### Core
 
@@ -114,6 +114,7 @@ Three core agents govern. Twenty-one specialists execute.
 | Agent | Domain |
 |:------|:-------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform |
+| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
 | `butler` | TTS-optimized summarization for spoken output |
 | `compliance-officer` | PII scanning, license auditing, GDPR/CCPA |
@@ -160,7 +161,7 @@ euxis deep-researcher "Compare the top 3 Python PDF parsing libraries. Include b
 Generate a plan, then execute agents in parallel.
 
 ```bash
-euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." > plan.json
+euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." >| plan.json
 euxis-dispatch plan.json
 ```
 
@@ -202,7 +203,7 @@ euxis-cortex stats
 
 ## Dispatch
 
-The fleet supports three coordination modes.
+The fleet supports three coordination modes. Dispatches show a live status table with per-agent progress.
 
 | Mode | Behavior |
 |:-----|:----------|
@@ -474,7 +475,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-24-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-25-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/FLEET_GUIDE.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

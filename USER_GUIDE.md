@@ -95,6 +95,7 @@ Version 6.0
 | Agent | Role |
 |-------|------|
 | `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
+| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
 | `butler` | TTS-optimized summarization, spoken English output |
 | `compliance-officer` | PII scanning, license auditing, GDPR/CCPA compliance |
@@ -124,7 +125,7 @@ Version 6.0
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 24 specialized agent personas |
+| **Fleet** | 25 specialized agent personas |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
