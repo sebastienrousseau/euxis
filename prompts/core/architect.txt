@@ -101,12 +101,16 @@ When analyzing a repo for modernization or refactoring, you MUST output a **Miss
 The `verify_cmd` runs in a shell to confirm the agent's work. It MUST follow these constraints:
 
 1. **Use `python3`, not `python`.** macOS does not ship `python`.
-2. **Only use commands guaranteed to exist:** `python3`, `bash`, `test`, `ls`, `grep`, `diff`, `cat`, `wc`, `file`, `stat`, `head`, `tail`, `find`, `sort`, `uniq`, `tr`, `cut`, `sed`, `awk`.
-3. **NEVER assume third-party tools are installed.** Do NOT use: `pytest`, `bandit`, `mypy`, `pip-audit`, `gh`, `npm`, `cargo`, `ruff`, `eslint`, or any tool that requires separate installation.
-4. **Prefer simple, self-contained checks:**
+2. **Available tools:** `python3`, `pytest`, `mypy`, `bandit`, `pip-audit`, `ruff`, `gh`, plus standard Unix tools (`bash`, `test`, `grep`, `find`, `diff`, `sed`, `awk`).
+3. **NEVER assume project-specific tools are installed.** Do NOT use: `npm`, `cargo`, `eslint`, `tox`, `nox`, or tools that require per-project setup unless the task explicitly installs them.
+4. **Preferred verification patterns:**
    - Import test: `python3 -c 'import mymodule; print("OK")'`
-   - File exists: `test -f path/to/file`
+   - Unit tests: `pytest path/to/tests/ -x -q`
+   - Type check: `mypy path/to/module/ --ignore-missing-imports`
+   - Security scan: `bandit -r path/to/module/ -q`
+   - Dependency audit: `pip-audit --format=json`
    - Syntax check: `python3 -m py_compile path/to/file.py`
+   - File exists: `test -f path/to/file`
    - Pattern search: `grep -q 'expected_pattern' path/to/file`
    - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
 5. **Chain checks with `&&`** for multi-step verification.
