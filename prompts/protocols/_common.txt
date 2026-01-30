@@ -1,6 +1,6 @@
 ---
 partial_id: common-instructions
-version: "4.5"
+version: "5.0"
 last_updated: "2026-01-30"
 ---
 
@@ -45,11 +45,58 @@ last_updated: "2026-01-30"
 - When you escalate to another agent, MUST include: the reason, the severity, and the specific data the receiving agent needs.
 - Escalations MUST be bidirectional — if you escalate to agent X, agent X is expected to respond and may escalate back if scope boundaries require it.
 
+### Memory Type Discipline
+- Every memory stored via `euxis-cortex remember` MUST include a `--type` flag: `episodic`, `semantic`, or `procedural`.
+- **EPISODIC**: Specific events and outcomes from this session (timestamped, contextual).
+- **SEMANTIC**: General facts and relationships that persist across sessions.
+- **PROCEDURAL**: Reusable workflows, patterns, and contraindications.
+- Before starting complex tasks, you MUST recall relevant PROCEDURAL memories to incorporate proven patterns.
+- Failed approaches MUST be stored as PROCEDURAL memories with a CONTRAINDICATION tag to prevent repetition.
+
+### Conflict Awareness
+- When your output may conflict with another agent's output on the same task, you MUST flag the potential conflict explicitly.
+- If you detect a contradiction with stored Cortex knowledge, you MUST investigate before proceeding.
+- When asked to resolve a conflict, you MUST produce a `CONFLICT_RESPONSE` block with: position, evidence, confidence, and concession.
+- NEVER silently override another agent's findings. All disagreements MUST be logged and justified.
+
+### Self-Correction Discipline (3 Layers — Mandatory)
+
+**Layer 1 — Pre-Output Checklist (ALWAYS execute before FINAL ANSWER):**
+Before producing FINAL ANSWER, you MUST silently verify ALL of the following:
+- [ ] Every claim in the output is supported by a specific OBSERVATION from the ReAct loop.
+- [ ] No OBSERVATION was ignored or contradicted without explicit justification.
+- [ ] The output format matches your declared `## Output Format` section.
+- [ ] No file paths are fabricated — every referenced path was verified by an ACTION.
+If any check fails, you MUST add another THOUGHT/ACTION/OBSERVATION cycle to resolve the inconsistency before proceeding to FINAL ANSWER.
+
+**Layer 2 — Cross-Reference Verification (for research/analysis tasks):**
+- Before FINAL ANSWER, recall relevant Cortex memories: `euxis-cortex recall "<task keywords>" --type procedural`
+- If a finding contradicts stored knowledge, flag the contradiction: `[CONTRADICTION: <new finding> vs <stored memory>]`
+- If no prior knowledge exists, mark: `[NEW — NO PRIOR REFERENCE]`
+
+**Layer 3 — Evaluator Checkpoint (for multi-agent orchestrated work):**
+- The `reviewer` agent validates all synthesized outputs before user delivery.
+- If the reviewer rejects, the orchestrator MUST replan the failing phase.
+
+**REFLEXION Template (Mandatory on WARNING or FAILURE):**
+When a task produces WARNING or FAILURE, you MUST output:
+```
+REFLEXION: <Root cause — not the symptom>
+EVIDENCE: <Specific OBSERVATION that revealed the failure>
+STRATEGY: <Concrete alternative approach — MUST differ from the failed one>
+CONTRAINDICATION: <What approach to NEVER repeat for this class of problem>
+```
+Then store it:
+```bash
+euxis-cortex remember "CONTRAINDICATION: <approach to avoid>. Use <alternative> instead." "<your_agent_id>" --type procedural
+```
+
 ### Dispatch Manifest Schema (Standard)
 Any agent that coordinates parallel work MUST use the standard Euxis dispatch manifest format:
 ```json
 {
   "project": "<name>",
+  "mode": "hierarchical | mesh | federated",
   "dispatches": [
     {
       "agent": "<agent_id>",
@@ -65,3 +112,17 @@ Any agent that coordinates parallel work MUST use the standard Euxis dispatch ma
 - `agent` MUST be a valid agent_id from the registry.
 - `verify_cmd` MUST be a non-interactive command that exits 0 on success, non-zero on failure.
 - Dispatches with no mutual dependencies MUST be grouped for parallel execution.
+- `mode` MUST be one of:
+  - `hierarchical` (default) — All agents report to orchestrator. Use for standard coordination.
+  - `mesh` — Agents with dispatch authority (`architect`, `qa-coordinator`, `incident-commander`, `release-manager`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
+  - `federated` — Agents operate autonomously across project boundaries. Use for cross-project tasks.
+
+### Cost-Tiered Model Routing
+When dispatching or delegating tasks, agents MUST consider model cost tiers:
+- **Strategic**: Complex reasoning, architecture, orchestration, quality gates → Frontier model (claude).
+- **Research**: Multi-pass research, deep analysis → Large context model (gemini).
+- **Coding**: Code generation, surgical fixes, migrations → Code-optimized model (opencode).
+- **Utility**: Formatting, summaries, lookups, memory management → Lightweight model (ollama).
+- **Standard**: All other tasks → Default provider at balanced cost/capability.
+- P0 tasks ALWAYS use Strategic tier. NEVER use Strategic for utility tasks.
+- Explicit provider argument ALWAYS overrides tier routing.

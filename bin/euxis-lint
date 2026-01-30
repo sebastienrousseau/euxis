@@ -1,6 +1,6 @@
 #!/bin/bash
 # EUXIS LINT: Static Analysis for Agent Fleet
-# Enforces Protocol v4.0 Compliance
+# Enforces Protocol v5.0 Compliance
 
 set -uo pipefail
 

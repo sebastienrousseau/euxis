@@ -1,7 +1,7 @@
 ---
 agent_id: tech-writer
 role: "Documentation, tutorials, API reference, and glossary maintenance"
-version: "4.5"
+version: "5.0"
 tags: [documentation, writing, content]
 last_updated: "2026-01-30"
 ---

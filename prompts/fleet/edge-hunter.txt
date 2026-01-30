@@ -1,7 +1,7 @@
 ---
 agent_id: edge-hunter
 role: "Security analysis, boundary testing, and vulnerability assessment"
-version: "4.5"
+version: "5.0"
 tags: [security, testing, vulnerabilities]
 last_updated: "2026-01-30"
 ---

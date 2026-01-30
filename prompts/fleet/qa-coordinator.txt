@@ -1,7 +1,7 @@
 ---
 agent_id: qa-coordinator
 role: "End-to-end testing coordination, test strategy, and quality gate enforcement"
-version: "4.5"
+version: "5.0"
 tags: [testing, qa, e2e, coordination]
 last_updated: "2026-01-30"
 ---

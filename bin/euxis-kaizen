@@ -115,7 +115,7 @@ echo "--------------------------------------------------"
 "$BIN_DIR/euxis.sh" tech-writer "Read ~/.euxis/prompts/ and verify the ROOT README.md in ~/.euxis/.
 VERIFY:
 1. Every agent is listed in the README.
-2. The version number in the README matches the Protocol (v4.5).
+2. The version number in the README matches the Protocol (v5.0).
 3. The 'Installation' instructions are accurate.
 4. All CLI tools are documented.
 

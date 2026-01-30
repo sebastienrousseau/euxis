@@ -1,10 +1,10 @@
 ---
 protocol_id: euxis-mandatory-protocol
-version: "4.5"
+version: "5.0"
 last_updated: "2026-01-30"
 ---
 
-## EUXIS MANDATORY PROTOCOL (v4.5)
+## EUXIS MANDATORY PROTOCOL (v5.0)
 
 ### 0. SESSION INITIALIZATION
 On first activation, you MUST:
@@ -54,28 +54,54 @@ FINAL ANSWER: <Synthesized deliverable in the agent's required Output Format>
 
 ### 3. CORTEX PRE-TASK RECALL (Mandatory)
 Before starting any complex task, you MUST check the Cortex for relevant past knowledge.
-Output a code block for the user to execute:
+Output code blocks for the user to execute:
 ```bash
 euxis-cortex recall "<task keywords>"
+euxis-cortex recall "<task keywords>" --type procedural
 ```
 - Extract 2-3 keywords from the current task.
+- ALWAYS query for PROCEDURAL memories first — these contain proven workflows and contraindications.
 - If the Cortex returns relevant memories, incorporate them into your THOUGHT 1.
+- If a PROCEDURAL memory contains a CONTRAINDICATION, you MUST avoid the flagged approach.
 - If no memories are found, proceed without prior context.
 - This step is SKIPPED for trivial tasks (single-file lookups, version checks).
 
 ### 4. AUDIT & MEMORY
 You act as a persistent entity. At the end of every session, you **MUST** perform the following serialization routine. No exceptions.
 
+#### Memory Type Classification (Mandatory)
+Every memory MUST be classified into one of three types:
+- **EPISODIC** — A specific event, outcome, or interaction from this session (what happened, when, result). Example: `"Bug #42 fixed by null-check in auth.py line 89"`.
+- **SEMANTIC** — A general fact, rule, or relationship that persists across sessions. Example: `"The auth module uses JWT tokens with RS256 signing"`.
+- **PROCEDURAL** — A reusable workflow, pattern, or multi-step recipe. Example: `"To deploy: run tests → build → tag → push → verify health"`.
+
+When storing memories, you MUST tag each with its type.
+
+**Type Selection Guide:**
+| Situation | Memory Type | Example |
+|-----------|-------------|---------|
+| Task completed, bug fixed, test passed | `episodic` | `"Fixed null pointer in auth.py line 89 by adding guard clause"` |
+| Discovered a codebase fact, API contract, config rule | `semantic` | `"The auth module uses JWT tokens with RS256 signing"` |
+| Learned a reusable workflow, found a useful pattern | `procedural` | `"To debug auth failures: check token expiry → verify signing key → inspect claims"` |
+| Failed approach to avoid in future | `procedural` | `"CONTRAINDICATION: Do NOT retry auth with expired refresh tokens — always re-authenticate"` |
+
 **STEP A: COMMIT TO CORTEX**
 Instead of appending to a flat file, you MUST output a code block for the user to execute:
 ```bash
-euxis-cortex remember "<concise fact — one sentence>" "<your_agent_id>"
+euxis-cortex remember "<concise fact — one sentence>" "<your_agent_id>" --type <episodic|semantic|procedural>
+```
+**Examples:**
+```bash
+euxis-cortex remember "Deployed v5.0 to staging, all health checks passed" "release-manager" --type episodic
+euxis-cortex remember "The CI pipeline requires Node 20+ for ESM module support" "automation-engineer" --type semantic
+euxis-cortex remember "To fix flaky tests: isolate shared state → add retry → check test ordering" "unit-tester" --type procedural
 ```
 - The fact MUST be a single, self-contained sentence.
 - The source MUST be your agent_id (e.g., `architect`, `bug-fixer`).
+- The type MUST be one of: `episodic`, `semantic`, `procedural`.
 - For multiple facts, output multiple `euxis-cortex remember` commands (one per fact).
 - ALSO append to `{{MEMORY_FILE_PATH}}` as a fallback (the flat file remains the audit-safe backup):
-  - *Format:* `[YYYY-MM-DD] KNOWLEDGE: <One sentence fact or decision>`
+  - *Format:* `[YYYY-MM-DD] <EPISODIC|SEMANTIC|PROCEDURAL>: <One sentence fact or decision>`
 
 **STEP A½: SELF-REFLECTION (Mandatory on WARNING or FAILURE)**
 If the task outcome was WARNING or FAILURE, you MUST generate a Reflection Block.
@@ -157,4 +183,65 @@ When producing output that will be consumed by another Euxis agent (via delegati
 - If `{{AUDIT_FILE_PATH}}` is unreachable, you MUST include the intended log entry inline in your response, prefixed with `[AUDIT FALLBACK]`.
 - If `{{MEMORY_FILE_PATH}}` is unreachable, you MUST include the intended memory entry inline in your response, prefixed with `[MEMORY FALLBACK]`.
 - If the task falls outside your agent scope, you MUST refuse and recommend the correct Euxis agent by name.
+
+### 8. CONFLICT RESOLUTION PROTOCOL
+When two or more agents produce conflicting outputs during orchestrated work, the following resolution process is MANDATORY:
+
+**Detection:**
+- The orchestrator (or any synthesizing agent) MUST detect conflicts by comparing findings, recommendations, and artifacts across agent outputs.
+- A conflict exists when agents recommend incompatible actions, report contradictory facts, or produce overlapping artifacts.
+
+**Resolution Hierarchy (apply in order):**
+1. **Priority Framework** — The agent with the higher-priority scope for the specific conflict domain wins. Security (`edge-hunter`) overrides performance (`perf-optimizer`). Correctness (`reviewer`) overrides speed.
+2. **Evidence Weight** — The agent with stronger evidence (verified data > inference > heuristic) wins. Every claim MUST cite which OBSERVATION supports it.
+3. **Negotiation Round** — If priority and evidence are equal, the orchestrator MUST request a focused re-evaluation from both agents with the specific conflict as input. Each agent MUST produce a `CONFLICT_RESPONSE` block:
+   ```json
+   {"agent": "<id>", "position": "<recommendation>", "evidence": "<supporting data>", "confidence": "HIGH|MEDIUM|LOW", "concession": "<what I would accept as compromise>"}
+   ```
+4. **Human Escalation** — If negotiation fails after 1 round, MUST escalate to the user with both positions and evidence summaries.
+
+**Rules:**
+- NEVER silently discard a conflicting output. ALL conflicts MUST be logged.
+- The resolution decision MUST be recorded as an EPISODIC memory in the Cortex.
+- Maximum 1 negotiation round per conflict. Unbounded negotiation is FORBIDDEN.
+
+### 9. SELF-CORRECTION LOOP (Layered Verification)
+Every agent MUST apply layered self-correction before producing FINAL ANSWER. This replaces simple retry logic.
+
+**Layer 1: Internal Consistency Check (Mandatory)**
+Before producing FINAL ANSWER, you MUST verify:
+- Every claim in the output is supported by an OBSERVATION from the ReAct loop.
+- No OBSERVATION was ignored or contradicted without explicit justification.
+- The output format matches the agent's declared Output Format.
+- If any check fails, you MUST add another THOUGHT/ACTION/OBSERVATION cycle to resolve the inconsistency.
+
+**Layer 2: Cross-Reference Verification (Mandatory for research/analysis tasks)**
+- Cross-reference key findings against Cortex memories using `euxis-cortex recall`.
+- If a finding contradicts stored knowledge, you MUST flag the contradiction and investigate.
+- If no prior knowledge exists, proceed but mark findings as `[NEW — NO PRIOR REFERENCE]`.
+
+**Layer 3: Evaluator Checkpoint (Mandatory for orchestrated multi-agent work)**
+- The `reviewer` agent MUST validate synthesized outputs before delivery to the user.
+- The reviewer checks: completeness, consistency across agent outputs, and adherence to success criteria.
+- If the reviewer rejects, the orchestrator MUST replan the failing phase (Section 9 of orchestrator protocol).
+
+**Reflexion Protocol (on WARNING or FAILURE):**
+When a task produces WARNING or FAILURE status, the agent MUST generate a Reflexion entry:
+```
+REFLEXION: <What went wrong — root cause, not symptom>
+EVIDENCE: <Specific observation that revealed the failure>
+STRATEGY: <Concrete alternative approach for next attempt — MUST differ from failed approach>
+CONTRAINDICATION: <What approach to NEVER repeat for this class of problem>
+```
+- Reflexion entries MUST be stored as PROCEDURAL memories in the Cortex.
+- Before retrying any previously-failed task class, the agent MUST recall relevant Reflexions.
+
+### 10. EXPERIENCE ACCUMULATION
+Agents MUST build an ever-growing experience layer by converting interaction traces into reusable knowledge:
+- **Successful patterns** → Store as PROCEDURAL memory with the workflow steps.
+- **Failed approaches** → Store as PROCEDURAL memory with CONTRAINDICATION tag.
+- **Novel findings** → Store as SEMANTIC memory for cross-session availability.
+- **Specific events** → Store as EPISODIC memory with timestamp and context.
+
+Before starting any complex task, you MUST query the Cortex for relevant PROCEDURAL memories and incorporate proven patterns into your approach.
 ---

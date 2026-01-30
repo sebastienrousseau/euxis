@@ -22,18 +22,25 @@ PROJECTS_DIR="${EUXIS_HOME}/projects"
 DEFAULT_PROVIDER="claude"
 
 # ============================================================================
-# Intelligence Tiering (v4.5)
+# Intelligence Tiering (v5.0)
 # Maps agent → optimal provider based on task complexity profile.
 # Explicit provider argument always overrides tiering.
+# P0 tasks always use Strategic tier (claude) regardless of agent.
 # ============================================================================
-#   Tier 1: Strategic   — orchestrator, architect        → claude  (best reasoning)
-#   Tier 2: Research    — deep-researcher                → gemini  (2M context window)
-#   Tier 3: Utility     — butler, librarian              → ollama  (zero latency, no cost)
-#   Tier 4: Coding      — bug-fixer, legacy-maintainer   → opencode (fast local code models)
-#   Default: all others                                   → claude
+#   Tier 1: Strategic   — orchestrator, architect, product-manager, reviewer → claude
+#   Tier 2: Research    — deep-researcher                                    → gemini
+#   Tier 3: Coding      — bug-fixer, legacy-maintainer                      → opencode
+#   Tier 4: Utility     — butler, librarian                                 → ollama
+#   Default: Standard   — all others                                         → claude
 
 resolve_tiered_provider() {
     local agent="$1"
+    local priority="${2:-}"
+    # P0 tasks ALWAYS use Strategic tier (claude) regardless of agent
+    if [[ "$priority" == "P0" ]]; then
+        echo "claude"
+        return
+    fi
     case "${agent}" in
         # Tier 1: Strategic — best-in-class reasoning and tool use
         orchestrator|architect|product-manager|reviewer)
@@ -41,13 +48,13 @@ resolve_tiered_provider() {
         # Tier 2: Research — massive context window for deep analysis
         deep-researcher)
             echo "gemini" ;;
-        # Tier 3: Utility — zero latency, no cost for simple summaries
-        butler|librarian)
-            echo "ollama" ;;
-        # Tier 4: Coding — local code models are fast for diffs and fixes
+        # Tier 3: Coding — local code models are fast for diffs and fixes
         bug-fixer|legacy-maintainer)
             echo "opencode" ;;
-        # Default: fall back to primary provider
+        # Tier 4: Utility — zero latency, no cost for simple summaries
+        butler|librarian)
+            echo "ollama" ;;
+        # Default (Standard): fall back to primary provider
         *)
             echo "${DEFAULT_PROVIDER}" ;;
     esac
@@ -388,7 +395,7 @@ EOF
 }
 
 # ============================================================================
-# Provider Routing (v4.5 — specialized model + flags per provider)
+# Provider Routing (v5.0 — specialized model + flags per provider)
 # ============================================================================
 
 # Resolve provider-specific model name and CLI flags.

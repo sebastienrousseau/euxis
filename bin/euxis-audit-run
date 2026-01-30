@@ -111,7 +111,7 @@ if command -v euxis &>/dev/null; then
     SECURITY=$(cat "$REPORT_DIR/security_probe.txt" 2>/dev/null || echo "N/A")
 
     euxis tech-writer \
-        "Consolidate the following audit results into a structured 'v4.5 Readiness Report' in Markdown. Include a verdict: PASS if no failures, CONDITIONAL if warnings only, FAIL if critical issues. Sections: Performance, Logic, Security, Verdict.
+        "Consolidate the following audit results into a structured 'v5.0 Readiness Report' in Markdown. Include a verdict: PASS if no failures, CONDITIONAL if warnings only, FAIL if critical issues. Sections: Performance, Logic, Security, Verdict.
 
 --- PERFORMANCE ---
 $BENCH
@@ -121,17 +121,17 @@ $LOGIC
 
 --- SECURITY ---
 $SECURITY
-" claude > "$EUXIS_HOME/v4.5_FINAL_AUDIT.md" 2>/dev/null
+" claude > "$EUXIS_HOME/v5.0_FINAL_AUDIT.md" 2>/dev/null
     gate_result "Report consolidation" $?
 else
     {
-        echo "# v4.5 Readiness Report"
+        echo "# v5.0 Readiness Report"
         echo ""
         echo "Generated: $(date)"
         echo "Gates passed: $GATE_PASS / $((GATE_PASS + GATE_FAIL))"
         echo ""
         echo "See individual reports in: $REPORT_DIR/"
-    } > "$EUXIS_HOME/v4.5_FINAL_AUDIT.md"
+    } > "$EUXIS_HOME/v5.0_FINAL_AUDIT.md"
     gate_result "Report consolidation (offline)" 0
 fi
 
@@ -143,7 +143,7 @@ if [[ $GATE_FAIL -eq 0 ]]; then
 else
     echo "  AUDIT INCOMPLETE: $GATE_PASS passed, $GATE_FAIL failed/skipped."
 fi
-echo "  Report: ~/.euxis/v4.5_FINAL_AUDIT.md"
+echo "  Report: ~/.euxis/v5.0_FINAL_AUDIT.md"
 echo "  Details: $REPORT_DIR/"
 echo "=================================================="
 

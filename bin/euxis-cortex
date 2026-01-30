@@ -3,10 +3,15 @@
 Euxis Cortex — Cross-Platform Semantic Memory (Vector Store)
 
 Usage:
-    euxis-cortex remember "fact to store" [source]
-    euxis-cortex recall   "query keywords" [n_results]
+    euxis-cortex remember "fact to store" [source] [--type episodic|semantic|procedural]
+    euxis-cortex recall   "query keywords" [n_results] [--type episodic|semantic|procedural]
     euxis-cortex stats
     euxis-cortex forget   "exact document text"
+
+Memory Types:
+    episodic    — Specific events, outcomes, timestamps (default)
+    semantic    — General facts, rules, relationships
+    procedural  — Reusable workflows, patterns, contraindications
 
 Requires: pip install chromadb sentence-transformers
 
@@ -91,28 +96,44 @@ def get_collection():
 # Commands
 # ============================================================================
 
-def cmd_remember(text, source="system"):
-    """Store a fact in the Cortex with metadata."""
+VALID_MEMORY_TYPES = {"episodic", "semantic", "procedural"}
+
+
+def cmd_remember(text, source="system", memory_type="episodic"):
+    """Store a fact in the Cortex with metadata and memory type."""
+    if memory_type not in VALID_MEMORY_TYPES:
+        print(f"Error: Invalid memory type '{memory_type}'. Must be one of: {', '.join(sorted(VALID_MEMORY_TYPES))}")
+        sys.exit(1)
+
     collection = get_collection()
 
     # Deterministic ID from content + source (prevents exact duplicates)
     doc_id = str(abs(hash(text + source)))
 
-    print(f"Cortex ({PLATFORM_LABEL}): Storing fact...")
+    print(f"Cortex ({PLATFORM_LABEL}): Storing {memory_type} memory...")
     collection.add(
         documents=[text],
-        metadatas=[{"source": source, "os": PLATFORM_LABEL}],
+        metadatas=[{"source": source, "os": PLATFORM_LABEL, "type": memory_type}],
         ids=[doc_id]
     )
-    print(f"  Saved. (source={source}, id={doc_id[:8]}...)")
+    print(f"  Saved. (source={source}, type={memory_type}, id={doc_id[:8]}...)")
 
 
-def cmd_recall(query, n_results=3):
-    """Semantic search against stored memories."""
+def cmd_recall(query, n_results=3, memory_type=None):
+    """Semantic search against stored memories, optionally filtered by type."""
     collection = get_collection()
 
-    print(f"Cortex ({PLATFORM_LABEL}): Recalling...")
-    results = collection.query(query_texts=[query], n_results=n_results)
+    type_label = f" ({memory_type})" if memory_type else ""
+    print(f"Cortex ({PLATFORM_LABEL}): Recalling{type_label}...")
+
+    query_kwargs = {"query_texts": [query], "n_results": n_results}
+    if memory_type:
+        if memory_type not in VALID_MEMORY_TYPES:
+            print(f"Error: Invalid memory type '{memory_type}'. Must be one of: {', '.join(sorted(VALID_MEMORY_TYPES))}")
+            sys.exit(1)
+        query_kwargs["where"] = {"type": memory_type}
+
+    results = collection.query(**query_kwargs)
 
     if not results["documents"][0]:
         print("  No relevant memories found.")
@@ -123,8 +144,9 @@ def cmd_recall(query, n_results=3):
         dist = results["distances"][0][i] if "distances" in results else None
         source = meta.get("source", "unknown")
         origin_os = meta.get("os", "?")
+        mem_type = meta.get("type", "unknown")
         dist_str = f" (dist={dist:.3f})" if dist is not None else ""
-        print(f"  [{source}@{origin_os}]{dist_str} {doc}")
+        print(f"  [{source}@{origin_os}|{mem_type}]{dist_str} {doc}")
 
 
 def cmd_stats():
@@ -157,15 +179,35 @@ def cmd_forget(text):
     print(f"  Removed {len(results['ids'])} memory/memories.")
 
 
+def parse_type_flag(args):
+    """Extract --type flag from argument list, return (remaining_args, memory_type)."""
+    memory_type = None
+    remaining = []
+    i = 0
+    while i < len(args):
+        if args[i] == "--type" and i + 1 < len(args):
+            memory_type = args[i + 1]
+            i += 2
+        else:
+            remaining.append(args[i])
+            i += 1
+    return remaining, memory_type
+
+
 def usage():
     """Print usage and exit."""
     print("Euxis Cortex - Cross-Platform Semantic Memory")
     print("")
     print("Usage:")
-    print("  euxis-cortex remember 'fact to store' [source_agent]")
-    print("  euxis-cortex recall   'query keywords' [n_results]")
+    print("  euxis-cortex remember 'fact to store' [source_agent] [--type episodic|semantic|procedural]")
+    print("  euxis-cortex recall   'query keywords' [n_results] [--type episodic|semantic|procedural]")
     print("  euxis-cortex stats")
     print("  euxis-cortex forget   'exact document text'")
+    print("")
+    print("Memory Types:")
+    print("  episodic    — Specific events, outcomes, timestamps (default)")
+    print("  semantic    — General facts, rules, relationships")
+    print("  procedural  — Reusable workflows, patterns, contraindications")
     print("")
     print(f"Platform: {PLATFORM_LABEL} | DB: {DB_PATH}")
     sys.exit(1)
@@ -180,31 +222,32 @@ if __name__ == "__main__":
         usage()
 
     command = sys.argv[1]
+    remaining_args, memory_type = parse_type_flag(sys.argv[2:])
 
     if command == "remember":
-        if len(sys.argv) < 3:
+        if len(remaining_args) < 1:
             print("Error: 'remember' requires text argument.")
             usage()
-        text = sys.argv[2]
-        source = sys.argv[3] if len(sys.argv) > 3 else "system"
-        cmd_remember(text, source)
+        text = remaining_args[0]
+        source = remaining_args[1] if len(remaining_args) > 1 else "system"
+        cmd_remember(text, source, memory_type or "episodic")
 
     elif command == "recall":
-        if len(sys.argv) < 3:
+        if len(remaining_args) < 1:
             print("Error: 'recall' requires a query argument.")
             usage()
-        query = sys.argv[2]
-        n = int(sys.argv[3]) if len(sys.argv) > 3 else 3
-        cmd_recall(query, n)
+        query = remaining_args[0]
+        n = int(remaining_args[1]) if len(remaining_args) > 1 else 3
+        cmd_recall(query, n, memory_type)
 
     elif command == "stats":
         cmd_stats()
 
     elif command == "forget":
-        if len(sys.argv) < 3:
+        if len(remaining_args) < 1:
             print("Error: 'forget' requires text argument.")
             usage()
-        cmd_forget(sys.argv[2])
+        cmd_forget(remaining_args[0])
 
     else:
         print(f"Unknown command: {command}")

@@ -1,6 +1,6 @@
 # Euxis Fleet: The Autonomous Agent OS
 
-![Version](https://img.shields.io/badge/version-v4.5--STABLE-blue.svg) ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen) ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey)
+![Version](https://img.shields.io/badge/version-v5.0--STABLE-blue.svg) ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen) ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey)
 
 > **"Not just a tool, but a workforce."**
 
@@ -194,14 +194,16 @@ euxis deep-researcher "Analyze the top 3 Python PDF parsing libraries in 2026. C
 
 ### Level 3: Enterprise Dispatch (The "Manager" Mode)
 
-For massive refactors, generate a plan and fire agents in parallel.
+For massive refactors, generate a plan and fire agents in parallel. Supports three dispatch modes.
 
 ```bash
 # 1. Plan
 euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." > plan.json
 
-# 2. Execute
-euxis-dispatch plan.json
+# 2. Execute (3 modes available)
+euxis-dispatch plan.json                          # hierarchical (default)
+euxis-dispatch --mode mesh plan.json              # peer-to-peer sub-workflows
+euxis-dispatch --mode federated plan.json         # cross-project autonomous
 ```
 
 ### Level 4: Multi-Agent Debate
@@ -227,7 +229,76 @@ euxis-loop --checkpoints bug-fixer "Fix parser.py" 3 \
 
 ---
 
-## Intelligence Tiering
+## v5.0 Architecture Features
+
+### Hybrid Dispatch Architecture
+
+The fleet supports three dispatch modes via `euxis-dispatch --mode <mode>`:
+
+| Mode | Description | Use When |
+|------|-------------|----------|
+| `hierarchical` (default) | All agents report to orchestrator | Standard coordination |
+| `mesh` | Dispatch-authority agents coordinate sub-workflows directly | Specialists can manage focused sub-workflows |
+| `federated` | Agents operate autonomously across project boundaries | Cross-project tasks |
+
+**Dispatch-authority agents (mesh mode):** `architect`, `qa-coordinator`, `incident-commander`, `release-manager`
+
+```bash
+euxis-dispatch manifest.json                      # hierarchical (default)
+euxis-dispatch --mode mesh manifest.json           # peer-to-peer
+euxis-dispatch --mode federated manifest.json      # cross-project
+```
+
+### Tri-Typed Memory System
+
+The Cortex classifies all memories into three types:
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `episodic` | Specific events and outcomes from a session | `"Bug #42 fixed by null-check in auth.py line 89"` |
+| `semantic` | General facts that persist across sessions | `"The auth module uses JWT tokens with RS256 signing"` |
+| `procedural` | Reusable workflows and contraindications | `"CONTRAINDICATION: Never retry with expired tokens"` |
+
+```bash
+euxis-cortex remember "Fixed null pointer in auth.py" "bug-fixer" --type episodic
+euxis-cortex recall "authentication" --type procedural
+```
+
+### 3-Layer Self-Correction
+
+Every agent applies layered verification before producing output:
+
+1. **Layer 1 — Internal Consistency:** Every claim supported by a ReAct OBSERVATION. No fabricated paths.
+2. **Layer 2 — Cross-Reference:** Key findings cross-referenced against Cortex memories. Contradictions flagged.
+3. **Layer 3 — Evaluator Checkpoint:** The `reviewer` validates synthesized outputs before user delivery.
+
+### Reflexion Protocol
+
+On WARNING or FAILURE, agents generate structured analysis stored as PROCEDURAL memory:
+
+```
+REFLEXION: <Root cause — not the symptom>
+EVIDENCE: <Specific OBSERVATION that revealed the failure>
+STRATEGY: <Concrete alternative approach>
+CONTRAINDICATION: <What approach to NEVER repeat>
+```
+
+### Conflict Resolution
+
+When multiple agents produce conflicting outputs, resolution follows:
+
+1. **Domain Priority** — Primary scope agent wins (security → `edge-hunter`, architecture → `architect`)
+2. **Evidence Weight** — Verified data > inference > heuristic
+3. **Negotiation Round** — Agents produce `CONFLICT_RESPONSE` blocks (max 1 round)
+4. **Human Escalation** — Both positions presented to user if unresolved
+
+### ReAct Reasoning Loop
+
+All agents use the ReAct (Reasoning + Acting) loop for non-trivial tasks, iterating through THOUGHT → ACTION → OBSERVATION cycles (minimum 2) before producing a FINAL ANSWER that cites supporting observations.
+
+---
+
+## Intelligence Tiering (5-Tier Cost-Optimized)
 
 When no provider is specified, agents are auto-routed to the optimal provider:
 
@@ -235,9 +306,11 @@ When no provider is specified, agents are auto-routed to the optimal provider:
 |------|--------|----------|--------|
 | Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Best reasoning and tool use |
 | Research | deep-researcher | `gemini` | 2M context window for massive analysis |
-| Utility | butler, librarian | `ollama` | Zero latency, no cost for summaries |
 | Coding | bug-fixer, legacy-maintainer | `opencode` | Fast local code models for diffs |
-| Default | all others | `claude` | General-purpose fallback |
+| Utility | butler, librarian | `ollama` | Zero latency, no cost for summaries |
+| Standard | all others | `claude` | General-purpose fallback |
+
+**P0 Override:** Tasks marked P0 (CRITICAL) always route to the Strategic tier regardless of agent.
 
 An explicit provider argument always overrides tiering.
 
@@ -262,13 +335,21 @@ Euxis is designed for Zero-Trust environments:
 
 ## Advanced Configuration
 
-### The Cortex (Memory)
+### The Cortex (Tri-Typed Memory)
 
-Manage the vector database manually if needed:
+Manage the vector database with typed memories:
 
 ```bash
-euxis-cortex remember "Project uses hexagonal architecture" "architect"
+# Store with type classification
+euxis-cortex remember "Project uses hexagonal architecture" "architect" --type semantic
+euxis-cortex remember "Deployed v5.0, all checks passed" "release-manager" --type episodic
+euxis-cortex remember "To fix flaky tests: isolate state → add retry → check ordering" "unit-tester" --type procedural
+
+# Recall with optional type filter
 euxis-cortex recall "authentication module architecture"
+euxis-cortex recall "deployment workflow" --type procedural
+
+# Database management
 euxis-cortex stats
 euxis-cortex forget "obsolete fact"
 ```
@@ -315,8 +396,8 @@ euxis-audit-run             # Full deep-dive audit with readiness report
 | `euxis-audit-run` | Deep-dive audit with security probes |
 | `euxis-council "<topic>"` | Multi-agent adversarial debate |
 | `euxis-loop <agent> <task> <verify> [retries]` | Autonomous retry loop |
-| `euxis-dispatch` | Parallel agent execution |
-| `euxis-cortex <cmd> [args]` | Vector memory operations |
+| `euxis-dispatch [--mode MODE] <manifest>` | Parallel agent execution (hierarchical/mesh/federated) |
+| `euxis-cortex <cmd> [args] [--type TYPE]` | Tri-typed vector memory operations |
 | `euxis-sync-docs` | Librarian-powered doc sync (HITL) |
 | `euxis-voice` | Voice interface (Whisper + Piper) |
 | `euxis-ui` | Mission Control TUI |
