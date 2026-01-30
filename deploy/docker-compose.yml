@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # The Agent Workforce
+  euxis-agents:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: euxis-fleet
+    volumes:
+      - ..:/root/.euxis  # Maps local prompts/logs for persistence
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CHROMA_HOST=cortex-db
+    depends_on:
+      - cortex-db
+    restart: unless-stopped
+
+  # The Infinite Memory (Cortex)
+  cortex-db:
+    image: chromadb/chroma:latest
+    container_name: cortex-db
+    volumes:
+      - ./cortex-data:/chroma/chroma
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

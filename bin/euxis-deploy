@@ -1,0 +1,11 @@
+#!/bin/bash
+# EUXIS DEPLOY: Launch the Enterprise Fleet
+cd ~/.euxis/deploy
+docker compose up -d
+echo ""
+echo "Euxis Enterprise is now running."
+echo "   Agents: euxis-fleet"
+echo "   Memory: cortex-db (port 8000)"
+echo ""
+echo "   Logs:   docker compose -f ~/.euxis/deploy/docker-compose.yml logs -f"
+echo "   Stop:   docker compose -f ~/.euxis/deploy/docker-compose.yml down"

@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""
+Euxis Cortex — Cross-Platform Semantic Memory (Vector Store)
+
+Usage:
+    euxis-cortex remember "fact to store" [source]
+    euxis-cortex recall   "query keywords" [n_results]
+    euxis-cortex stats
+    euxis-cortex forget   "exact document text"
+
+Requires: pip install chromadb sentence-transformers
+
+Works on: macOS, Linux, WSL (Ubuntu/Debian)
+- macOS:       pip install chromadb sentence-transformers
+- Linux/WSL:   sudo apt-get install -y build-essential python3-dev && \
+               pip install chromadb sentence-transformers
+"""
+
+import sys
+import os
+import platform
+
+# ============================================================================
+# Cross-Platform Configuration
+# ============================================================================
+
+# Store in standard user location valid on Mac/Linux/WSL
+DB_PATH = os.path.expanduser("~/.euxis/cortex_db")
+OS_INFO = platform.system()  # Darwin, Linux, or Windows (WSL reports Linux)
+
+# Detect WSL specifically
+IS_WSL = False
+if OS_INFO == "Linux":
+    try:
+        with open("/proc/version", "r") as f:
+            if "microsoft" in f.read().lower():
+                IS_WSL = True
+    except (FileNotFoundError, PermissionError):
+        pass
+
+PLATFORM_LABEL = "WSL" if IS_WSL else OS_INFO
+
+
+# ============================================================================
+# Lazy Imports (avoid startup lag for --help / no-args)
+# ============================================================================
+
+def load_chromadb():
+    """Import heavy libraries only when needed."""
+    try:
+        import chromadb
+        from chromadb.utils import embedding_functions
+        return chromadb, embedding_functions
+    except ImportError:
+        print("Critical: chromadb not installed.")
+        print("")
+        if OS_INFO == "Darwin":
+            print("  Install (macOS):")
+            print("    pip install chromadb sentence-transformers")
+        else:
+            print("  Install (Linux/WSL):")
+            print("    sudo apt-get install -y build-essential python3-dev")
+            print("    pip install chromadb sentence-transformers")
+        sys.exit(1)
+
+
+def get_collection():
+    """Initialize vector store with sentence-transformer embeddings."""
+    chromadb, embedding_functions = load_chromadb()
+
+    # Use HTTP client when running inside Docker (CHROMA_HOST set),
+    # otherwise use local persistent storage
+    chroma_host = os.getenv("CHROMA_HOST")
+    if chroma_host and chroma_host != "localhost":
+        client = chromadb.HttpClient(host=chroma_host, port=8000)
+    else:
+        os.makedirs(DB_PATH, exist_ok=True)
+        client = chromadb.PersistentClient(path=DB_PATH)
+
+    # all-MiniLM-L6-v2: small, fast, CPU-friendly (22M params, ~80MB)
+    ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name="all-MiniLM-L6-v2"
+    )
+    return client.get_or_create_collection(
+        name="euxis_memory",
+        embedding_function=ef
+    )
+
+
+# ============================================================================
+# Commands
+# ============================================================================
+
+def cmd_remember(text, source="system"):
+    """Store a fact in the Cortex with metadata."""
+    collection = get_collection()
+
+    # Deterministic ID from content + source (prevents exact duplicates)
+    doc_id = str(abs(hash(text + source)))
+
+    print(f"Cortex ({PLATFORM_LABEL}): Storing fact...")
+    collection.add(
+        documents=[text],
+        metadatas=[{"source": source, "os": PLATFORM_LABEL}],
+        ids=[doc_id]
+    )
+    print(f"  Saved. (source={source}, id={doc_id[:8]}...)")
+
+
+def cmd_recall(query, n_results=3):
+    """Semantic search against stored memories."""
+    collection = get_collection()
+
+    print(f"Cortex ({PLATFORM_LABEL}): Recalling...")
+    results = collection.query(query_texts=[query], n_results=n_results)
+
+    if not results["documents"][0]:
+        print("  No relevant memories found.")
+        return
+
+    for i, doc in enumerate(results["documents"][0]):
+        meta = results["metadatas"][0][i]
+        dist = results["distances"][0][i] if "distances" in results else None
+        source = meta.get("source", "unknown")
+        origin_os = meta.get("os", "?")
+        dist_str = f" (dist={dist:.3f})" if dist is not None else ""
+        print(f"  [{source}@{origin_os}]{dist_str} {doc}")
+
+
+def cmd_stats():
+    """Show Cortex database statistics."""
+    collection = get_collection()
+    count = collection.count()
+    db_size = sum(
+        os.path.getsize(os.path.join(dp, f))
+        for dp, _, filenames in os.walk(DB_PATH)
+        for f in filenames
+    )
+    print(f"Cortex Stats ({PLATFORM_LABEL}):")
+    print(f"  Memories:  {count}")
+    print(f"  DB size:   {db_size / 1024:.1f} KB")
+    print(f"  DB path:   {DB_PATH}")
+    print(f"  Platform:  {PLATFORM_LABEL} ({platform.platform()})")
+
+
+def cmd_forget(text):
+    """Remove a specific memory by exact document text."""
+    collection = get_collection()
+    # Find the document ID by searching for exact match
+    results = collection.get(where_document={"$contains": text})
+    if not results["ids"]:
+        print(f"  No memory found containing: {text[:60]}...")
+        return
+
+    for doc_id in results["ids"]:
+        collection.delete(ids=[doc_id])
+    print(f"  Removed {len(results['ids'])} memory/memories.")
+
+
+def usage():
+    """Print usage and exit."""
+    print("Euxis Cortex - Cross-Platform Semantic Memory")
+    print("")
+    print("Usage:")
+    print("  euxis-cortex remember 'fact to store' [source_agent]")
+    print("  euxis-cortex recall   'query keywords' [n_results]")
+    print("  euxis-cortex stats")
+    print("  euxis-cortex forget   'exact document text'")
+    print("")
+    print(f"Platform: {PLATFORM_LABEL} | DB: {DB_PATH}")
+    sys.exit(1)
+
+
+# ============================================================================
+# Entry Point
+# ============================================================================
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        usage()
+
+    command = sys.argv[1]
+
+    if command == "remember":
+        if len(sys.argv) < 3:
+            print("Error: 'remember' requires text argument.")
+            usage()
+        text = sys.argv[2]
+        source = sys.argv[3] if len(sys.argv) > 3 else "system"
+        cmd_remember(text, source)
+
+    elif command == "recall":
+        if len(sys.argv) < 3:
+            print("Error: 'recall' requires a query argument.")
+            usage()
+        query = sys.argv[2]
+        n = int(sys.argv[3]) if len(sys.argv) > 3 else 3
+        cmd_recall(query, n)
+
+    elif command == "stats":
+        cmd_stats()
+
+    elif command == "forget":
+        if len(sys.argv) < 3:
+            print("Error: 'forget' requires text argument.")
+            usage()
+        cmd_forget(sys.argv[2])
+
+    else:
+        print(f"Unknown command: {command}")
+        usage()

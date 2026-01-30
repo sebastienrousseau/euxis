@@ -1,5 +1,6 @@
 projects/
 cortex_db/
+.venv-voice/
 .DS_Store
 *.log
 tmp/

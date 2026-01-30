@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "4.2",
+  "last_updated": "2026-01-29",
+  "agents": [
+    { "id": "orchestrator", "path": "prompts/core/orchestrator.txt", "tier": "core", "version": "4.2", "tags": ["orchestration", "delegation", "planning"] },
+    { "id": "architect", "path": "prompts/core/architect.txt", "tier": "core", "version": "4.2", "tags": ["architecture", "design", "engineering"] },
+    { "id": "librarian", "path": "prompts/core/librarian.txt", "tier": "core", "version": "4.2", "tags": ["memory", "knowledge", "optimization"] },
+    { "id": "automation-engineer", "path": "prompts/fleet/automation-engineer.txt", "tier": "fleet", "version": "4.2", "tags": ["automation", "cicd", "infrastructure"] },
+    { "id": "bug-fixer", "path": "prompts/fleet/bug-fixer.txt", "tier": "fleet", "version": "4.2", "tags": ["debugging", "fixes", "engineering"] },
+    { "id": "butler", "path": "prompts/fleet/butler.txt", "tier": "fleet", "version": "4.2", "tags": ["voice", "tts", "summarization"] },
+    { "id": "compliance-officer", "path": "prompts/fleet/compliance-officer.txt", "tier": "fleet", "version": "4.2", "tags": ["compliance", "security", "legal"] },
+    { "id": "data-steward", "path": "prompts/fleet/data-steward.txt", "tier": "fleet", "version": "4.2", "tags": ["observability", "telemetry", "data"] },
+    { "id": "deep-researcher", "path": "prompts/fleet/deep-researcher.txt", "tier": "fleet", "version": "4.2", "tags": ["research", "analysis", "knowledge"] },
+    { "id": "devrel-advocate", "path": "prompts/fleet/devrel-advocate.txt", "tier": "fleet", "version": "4.2", "tags": ["devrel", "community", "content"] },
+    { "id": "edge-hunter", "path": "prompts/fleet/edge-hunter.txt", "tier": "fleet", "version": "4.2", "tags": ["security", "testing", "vulnerabilities"] },
+    { "id": "globalization-lead", "path": "prompts/fleet/globalization-lead.txt", "tier": "fleet", "version": "4.2", "tags": ["i18n", "l10n", "globalization"] },
+    { "id": "growth-marketer", "path": "prompts/fleet/growth-marketer.txt", "tier": "fleet", "version": "4.2", "tags": ["marketing", "growth", "seo"] },
+    { "id": "legacy-maintainer", "path": "prompts/fleet/legacy-maintainer.txt", "tier": "fleet", "version": "4.2", "tags": ["legacy", "maintenance", "migrations"] },
+    { "id": "perf-optimizer", "path": "prompts/fleet/perf-optimizer.txt", "tier": "fleet", "version": "4.2", "tags": ["performance", "profiling", "optimization"] },
+    { "id": "product-manager", "path": "prompts/fleet/product-manager.txt", "tier": "fleet", "version": "4.2", "tags": ["product", "requirements", "planning"] },
+    { "id": "release-manager", "path": "prompts/fleet/release-manager.txt", "tier": "fleet", "version": "4.2", "tags": ["releases", "versioning", "coordination"] },
+    { "id": "reviewer", "path": "prompts/fleet/reviewer.txt", "tier": "fleet", "version": "4.2", "tags": ["quality", "review", "validation"] },
+    { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "4.2", "tags": ["social", "content", "community"] },
+    { "id": "tech-writer", "path": "prompts/fleet/tech-writer.txt", "tier": "fleet", "version": "4.2", "tags": ["documentation", "writing", "content"] },
+    { "id": "unit-tester", "path": "prompts/fleet/unit-tester.txt", "tier": "fleet", "version": "4.2", "tags": ["testing", "quality", "automation"] },
+    { "id": "ux-sentinel", "path": "prompts/fleet/ux-sentinel.txt", "tier": "fleet", "version": "4.2", "tags": ["ux", "accessibility", "design"] }
+  ]
+}

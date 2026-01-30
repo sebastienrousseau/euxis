@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""Euxis Voice Interface: Record -> Local STT -> Orchestrator -> Butler -> Local TTS"""
+
+import os
+import sys
+import subprocess
+import platform
+import threading
+import itertools
+import time
+
+VENV_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".venv-voice")
+VENV_PYTHON = os.path.join(VENV_DIR, "bin", "python3")
+DEPS = ["faster-whisper", "piper-tts", "sounddevice", "numpy", "scipy"]
+
+
+def _ensure_venv():
+    """Bootstrap venv and re-exec if not already running inside it."""
+    if sys.prefix != os.path.normpath(VENV_DIR):
+        if not os.path.isfile(VENV_PYTHON):
+            print("First run: creating voice venv...")
+            subprocess.run([sys.executable, "-m", "venv", VENV_DIR], check=True)
+            pip = os.path.join(VENV_DIR, "bin", "pip")
+            subprocess.run([pip, "install", "--quiet"] + DEPS, check=True)
+            print("Dependencies installed.")
+        os.execv(VENV_PYTHON, [VENV_PYTHON] + sys.argv)
+
+
+_ensure_venv()
+
+import sounddevice as sd
+import numpy as np
+import scipy.io.wavfile as wav
+from faster_whisper import WhisperModel
+
+# CONFIGURATION
+SAMPLE_RATE = 16000  # 16kHz is optimal for Whisper
+TMP_INPUT = "/tmp/euxis_input.wav"
+TMP_OUTPUT = "/tmp/euxis_output.wav"
+
+# Silence detection settings
+CHUNK_DURATION = 0.3       # seconds per chunk
+SILENCE_THRESHOLD = 0.005  # RMS below this = silence
+SILENCE_CHUNKS = 7         # consecutive silent chunks (~2.1s) to stop
+MAX_RECORD_SECONDS = 30    # hard cap
+MIN_RECORD_SECONDS = 3     # minimum seconds before silence detection kicks in
+
+PIPER_VOICE = "en_US-lessac-medium"
+PIPER_VOICES_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".piper-voices")
+
+# Lazy-loaded globals
+_whisper_model = None
+_piper_model_path = None
+_audio_player = None
+_piper_bin = None
+
+
+def _get_whisper_model():
+    """Load faster-whisper model once, reuse across calls."""
+    global _whisper_model
+    if _whisper_model is None:
+        print("Loading Whisper model (first run downloads ~150MB)...")
+        _whisper_model = WhisperModel("small.en", device="cpu", compute_type="int8")
+    return _whisper_model
+
+
+def _ensure_piper_voice():
+    """Download piper voice model if not already present."""
+    global _piper_model_path
+    if _piper_model_path is not None:
+        return _piper_model_path
+
+    model_file = os.path.join(PIPER_VOICES_DIR, f"{PIPER_VOICE}.onnx")
+    config_file = os.path.join(PIPER_VOICES_DIR, f"{PIPER_VOICE}.onnx.json")
+
+    if not os.path.isfile(model_file) or not os.path.isfile(config_file):
+        print(f"Downloading piper voice model '{PIPER_VOICE}'...")
+        os.makedirs(PIPER_VOICES_DIR, exist_ok=True)
+        from piper.download_voices import download_voice
+        from pathlib import Path
+        download_voice(PIPER_VOICE, Path(PIPER_VOICES_DIR))
+        print("Voice model downloaded.")
+
+    _piper_model_path = model_file
+    return _piper_model_path
+
+
+def _get_audio_player():
+    """Cache and return the audio player command."""
+    global _audio_player
+    if _audio_player is not None:
+        return _audio_player
+    if platform.system() == "Darwin":
+        _audio_player = "afplay"
+    elif subprocess.run(["which", "aplay"], capture_output=True).returncode == 0:
+        _audio_player = "aplay"
+    return _audio_player
+
+
+def _get_piper_bin():
+    """Cache the piper binary path."""
+    global _piper_bin
+    if _piper_bin is None:
+        _piper_bin = os.path.join(VENV_DIR, "bin", "piper")
+    return _piper_bin
+
+
+def _synthesize_wav(text):
+    """Generate WAV file from text using piper. Returns True on success."""
+    model_path = _ensure_piper_voice()
+    proc = subprocess.run(
+        [_get_piper_bin(), "--model", model_path, "--output_file", TMP_OUTPUT],
+        input=text, text=True, capture_output=True,
+    )
+    if proc.returncode != 0:
+        print(f"TTS Error: {proc.stderr}")
+        return False
+    return True
+
+
+def _play_wav():
+    """Play the TMP_OUTPUT wav file."""
+    player = _get_audio_player()
+    if player is None:
+        print("Warning: No WAV player found. Install alsa-utils: sudo apt install alsa-utils")
+        return
+    if player == "aplay":
+        subprocess.run([player, "-q", TMP_OUTPUT], check=False)
+    else:
+        subprocess.run([player, TMP_OUTPUT], check=False)
+
+
+def play_sound(text):
+    """Generates audio from text via piper TTS and plays it."""
+    print(f"    Euxis: {text}")
+    try:
+        if _synthesize_wav(text):
+            _play_wav()
+    except Exception as e:
+        print(f"Audio Error: {e}")
+
+
+def record_audio():
+    """Records audio with silence-based stop detection."""
+    print("Listening... (speak, then pause to finish)")
+    try:
+        chunk_samples = int(CHUNK_DURATION * SAMPLE_RATE)
+        max_chunks = int(MAX_RECORD_SECONDS / CHUNK_DURATION)
+        min_chunks = int(MIN_RECORD_SECONDS / CHUNK_DURATION)
+
+        chunks = []
+        silent_count = 0
+
+        with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32") as stream:
+            for i in range(max_chunks):
+                data, _ = stream.read(chunk_samples)
+                chunks.append(data.copy())
+
+                rms = np.sqrt(np.mean(data ** 2))
+                if i >= min_chunks and rms < SILENCE_THRESHOLD:
+                    silent_count += 1
+                    if silent_count >= SILENCE_CHUNKS:
+                        break
+                else:
+                    silent_count = 0
+
+        recording = np.concatenate(chunks)
+        duration = len(recording) / SAMPLE_RATE
+        # Convert float32 [-1,1] to int16 for WAV
+        audio_int16 = np.clip(recording * 32767, -32768, 32767).astype(np.int16)
+        wav.write(TMP_INPUT, SAMPLE_RATE, audio_int16)
+        print(f"Recorded {duration:.1f}s. Processing...")
+    except Exception as e:
+        print(f"Mic Error: {e}")
+        return False
+    return True
+
+
+def transcribe():
+    """Converts audio to text using faster-whisper locally."""
+    try:
+        model = _get_whisper_model()
+        segments, _ = model.transcribe(TMP_INPUT, beam_size=5)
+        text = " ".join(segment.text for segment in segments).strip()
+        return text
+    except Exception as e:
+        print(f"Transcription Error: {e}")
+        return ""
+
+
+def _spinner(message, stop_event):
+    """Show a spinning indicator so the user knows work is happening."""
+    chars = itertools.cycle(["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"])
+    while not stop_event.is_set():
+        sys.stdout.write(f"\r{next(chars)} {message}")
+        sys.stdout.flush()
+        time.sleep(0.1)
+    sys.stdout.write(f"\r✓ {message}\n")
+    sys.stdout.flush()
+
+
+def run_euxis_fleet(user_command):
+    """Passes the voice command to the Euxis Orchestrator."""
+    stop = threading.Event()
+    t = threading.Thread(target=_spinner, args=("Working on it...", stop), daemon=True)
+    t.start()
+    cmd = ["euxis", "orchestrator", user_command, "claude"]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    stop.set()
+    t.join()
+    return result.stdout
+
+
+def synthesize_briefing(raw_output):
+    """Uses the Butler Agent via local ollama for zero-latency spoken summary."""
+    prompt = (
+        "Summarize this execution log into 1-2 short sentences suitable for speaking aloud. "
+        "Be concise and conversational:\n" + raw_output
+    )
+    # Use ollama (local) for near-instant butler responses — no network round-trip.
+    # Falls back to intelligence tiering if ollama is not available.
+    cmd = ["euxis", "butler", prompt, "ollama"]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result.stdout
+
+
+def _warmup():
+    """Pre-load models and cache lookups before user interaction."""
+    _get_whisper_model()
+    _ensure_piper_voice()
+    _get_audio_player()
+    _get_piper_bin()
+    print("Ready.\n")
+
+
+def main():
+    _warmup()
+    conversation_history = []
+
+    try:
+        while True:
+            # 1. Record
+            if not record_audio():
+                continue
+
+            # 2. Transcribe
+            user_text = transcribe()
+            if not user_text:
+                print("No speech detected. Try again.\n")
+                continue
+
+            print(f"You said: '{user_text}'")
+
+            if user_text.lower().strip() in ("exit", "stop", "quit"):
+                play_sound("Goodbye.")
+                break
+
+            # 3. Print ack immediately (no TTS delay), start TTS for "On it" in background
+            print("    Euxis: On it.")
+            conversation_history.append(f"User: {user_text}")
+
+            # Pre-synthesize "on it" audio while building command
+            tts_thread = threading.Thread(target=_synthesize_wav, args=("On it.",), daemon=True)
+            tts_thread.start()
+
+            # 4. Build context-aware command
+            if len(conversation_history) > 1:
+                context = "\n".join(conversation_history)
+                full_command = (
+                    f"Conversation so far:\n{context}\n\n"
+                    f"Respond to the latest message. Use the conversation history for context."
+                )
+            else:
+                full_command = user_text
+
+            # Play "on it" once synthesis is done (should be ready by now)
+            tts_thread.join()
+            _play_wav()
+
+            # 5. Execute orchestrator
+            raw_output = run_euxis_fleet(full_command)
+
+            # 6. Summarize and speak in parallel: start TTS as soon as butler is done
+            briefing = synthesize_briefing(raw_output).strip()
+            conversation_history.append(f"Euxis: {briefing}")
+            play_sound(briefing)
+            print()  # blank line before next round
+
+    except KeyboardInterrupt:
+        print("\nGoodbye.")
+
+
+if __name__ == "__main__":
+    main()

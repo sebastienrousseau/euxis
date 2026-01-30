@@ -1,0 +1,26 @@
+{
+  "architect": {
+    "task": "Review this python code: def main(): print('hi')",
+    "must_contain": ["Architectural Review", "Assessment", "Risk Level"]
+  },
+  "bug-fixer": {
+    "task": "Fix this: x = null",
+    "must_contain": ["Bug Report", "Root Cause", "```diff"]
+  },
+  "release-manager": {
+    "task": "Prepare release v1.0.1",
+    "must_contain": ["Release Manifest", "Changelog", "Rollback Plan"]
+  },
+  "edge-hunter": {
+    "task": "Audit this login: if password == stored_password: grant_access()",
+    "must_contain": ["Security Assessment", "Vulnerability", "CVSS"]
+  },
+  "unit-tester": {
+    "task": "Write tests for: def divide(a, b): return a / b",
+    "must_contain": ["Test Strategy", "Coverage", "Edge Cases"]
+  },
+  "architect-hardmode": {
+    "task": "Design a system that handles 1M requests/sec but has $0 budget for cloud load balancers. Explain the trade-offs.",
+    "must_contain": ["DNS Round Robin", "P2P", "Client-side"]
+  }
+}
