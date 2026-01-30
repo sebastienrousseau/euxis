@@ -1,6 +1,9 @@
 projects/
 cortex_db/
+audits/
+v4.5_FINAL_AUDIT.md
 .venv-voice/
+.piper-voices/
 .DS_Store
 *.log
 tmp/
