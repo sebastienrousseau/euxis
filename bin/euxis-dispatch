@@ -212,6 +212,33 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
         echo ""
         echo "  Waiting for Phase $PHASE_NUM to complete..."
 
+        # Phase progress monitor
+        _phase_monitor_pid=""
+        if [[ -t 1 ]]; then
+            PHASE_PID_FILE="$LOG_DIR/.phase_pids"
+            : > "$PHASE_PID_FILE"
+            for entry in "${GROUP_ENTRIES[@]}"; do
+                echo "$entry" >> "$PHASE_PID_FILE"
+            done
+            (
+                while true; do
+                    sleep 5
+                    all_done=true
+                    while IFS=' ' read -r pid agent idx; do
+                        kill -0 "$pid" 2>/dev/null || continue
+                        all_done=false
+                        log_file="$LOG_DIR/${agent}_${idx}.log"
+                        if [[ -f "$log_file" ]]; then
+                            size=$(du -h "$log_file" 2>/dev/null | cut -f1 | tr -d ' ')
+                            echo "  ... $agent running (log ${size:-0})"
+                        fi
+                    done < "$PHASE_PID_FILE"
+                    [[ "$all_done" == true ]] && break
+                done
+            ) &
+            _phase_monitor_pid=$!
+        fi
+
         phase_failed=0
         for entry in "${GROUP_ENTRIES[@]}"; do
             pid=$(echo "$entry" | cut -d' ' -f1)
@@ -224,6 +251,12 @@ if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
                 ((phase_failed++))
             fi
         done
+
+        # Stop phase monitor
+        if [[ -n "${_phase_monitor_pid:-}" ]]; then
+            kill "$_phase_monitor_pid" 2>/dev/null
+            wait "$_phase_monitor_pid" 2>/dev/null
+        fi
 
         if [[ $phase_failed -gt 0 ]]; then
             echo ""
@@ -301,6 +334,49 @@ else
     echo "  Logs: $LOG_DIR/"
     echo ""
 
+    # Write PID manifest for progress monitor
+    PID_MANIFEST="$LOG_DIR/.pids"
+    for i in "${!PIDS[@]}"; do
+        echo "${PIDS[$i]} ${AGENTS[$i]} ${i}" >> "$PID_MANIFEST"
+    done
+
+    # Background progress monitor: poll log files every 5s and report status
+    _monitor_pid=""
+    if [[ -t 1 ]]; then
+        (
+            declare -A reported
+            while true; do
+                sleep 5
+                all_done=true
+                while IFS=' ' read -r pid agent idx; do
+                    key="${agent}_${idx}"
+                    log_file="$LOG_DIR/${agent}_${idx}.log"
+
+                    # Skip already reported
+                    [[ "${reported[$key]:-}" == "1" ]] && continue
+
+                    # Check if process finished
+                    if ! kill -0 "$pid" 2>/dev/null; then
+                        reported[$key]=1
+                        continue
+                    fi
+
+                    all_done=false
+
+                    # Show activity from log
+                    if [[ -f "$log_file" ]]; then
+                        attempt=$(grep -c "Loop Attempt" "$log_file" 2>/dev/null || true)
+                        size=$(du -h "$log_file" 2>/dev/null | cut -f1 | tr -d ' ')
+                        echo "  ... $agent running (attempt ${attempt:-0}, log ${size:-0})"
+                    fi
+                done < "$PID_MANIFEST"
+
+                [[ "$all_done" == true ]] && break
+            done
+        ) &
+        _monitor_pid=$!
+    fi
+
     FAILED=0
     for i in "${!PIDS[@]}"; do
         if wait "${PIDS[$i]}"; then
@@ -310,6 +386,12 @@ else
             ((FAILED++))
         fi
     done
+
+    # Stop monitor
+    if [[ -n "${_monitor_pid:-}" ]]; then
+        kill "$_monitor_pid" 2>/dev/null
+        wait "$_monitor_pid" 2>/dev/null
+    fi
 
     echo ""
     if [[ $FAILED -eq 0 ]]; then
