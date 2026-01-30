@@ -30,6 +30,7 @@ Works on: macOS, Linux, WSL (Ubuntu/Debian)
 import sys
 import os
 import platform
+import hashlib
 import subprocess
 import json
 
@@ -116,7 +117,7 @@ def cmd_remember(text, source="system", memory_type="episodic"):
     collection = get_collection()
 
     # Deterministic ID from content + source (prevents exact duplicates)
-    doc_id = str(abs(hash(text + source)))
+    doc_id = hashlib.sha256((text + source).encode()).hexdigest()[:16]
 
     print(f"Cortex ({PLATFORM_LABEL}): Storing {memory_type} memory...")
     collection.add(

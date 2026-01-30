@@ -2,7 +2,7 @@
 # EUXIS CERTIFY: The Final Toll Gate
 # Runs all 4 gates in sequence. All must pass for certification.
 
-set -uo pipefail
+set -euo pipefail
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"

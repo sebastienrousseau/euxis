@@ -18,7 +18,7 @@
 # Human-in-the-loop (--confirm):
 #   Pauses for user confirmation before each retry attempt.
 
-set -uo pipefail
+set -euo pipefail
 
 EUXIS_HOME="${HOME}/.euxis"
 PROJECTS_DIR="${EUXIS_HOME}/projects"
@@ -92,7 +92,7 @@ run_checkpoints() {
     for cmd in "${CHECKPOINT_CMDS[@]}"; do
         echo "  [Checkpoint $i/$total] $cmd"
         local output
-        output=$(bash -c "$cmd" 2>&1)
+        output=$(eval "$cmd" 2>&1)
         local exit_code=$?
 
         if [[ $exit_code -ne 0 ]]; then

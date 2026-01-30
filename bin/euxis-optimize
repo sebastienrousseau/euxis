@@ -5,10 +5,10 @@
 # 3. Compresses Prompts (Librarian Audit)
 # 4. Quality Assurance (Architect Self-Reflection)
 
-set -uo pipefail
+set -euo pipefail
 
 # Ensure ~/bin is in PATH for euxis commands
-export PATH="$HOME/bin:$PATH"
+export PATH="$PATH:$HOME/bin"
 
 LOG_FILE="/tmp/euxis_optimize_$(date +%s).log"
 

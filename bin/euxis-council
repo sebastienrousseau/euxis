@@ -7,9 +7,9 @@
 #   Round 2: Rebuttals — each expert sees all Round 1 opinions and responds
 #   Round 3: Chairman synthesizes both rounds into a binding decision
 
-set -uo pipefail
+set -euo pipefail
 
-export PATH="$HOME/bin:$PATH"
+export PATH="$PATH:$HOME/bin"
 
 # Sanitize input: reject shell metacharacters to prevent injection
 sanitize_input() {

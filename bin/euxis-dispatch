@@ -20,9 +20,9 @@
 #   ]
 # }
 
-set -uo pipefail
+set -euo pipefail
 
-export PATH="$HOME/bin:$PATH"
+export PATH="$PATH:$HOME/bin"
 
 # Parse arguments
 MANIFEST_FILE=""

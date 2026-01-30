@@ -2,9 +2,9 @@
 # (c) 2026 Euxis Fleet. Secure Documentation Sync.
 # Dry-Run & Validation pattern: stage, verify, approve, execute.
 
-set -uo pipefail
+set -euo pipefail
 
-export PATH="$HOME/bin:$PATH"
+export PATH="$PATH:$HOME/bin"
 
 PATCH_FILE=$(mktemp /tmp/euxis_doc_patch.XXXXXX)
 FORBIDDEN_PATTERNS='rm -rf /|mkfs|dd if=|> /dev/|chmod 777|curl.*\|.*bash|wget.*\|.*sh'
