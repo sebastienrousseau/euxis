@@ -1,6 +1,6 @@
 # Euxis
 
-**Enterprise Unified eXecution Intelligence System**
+**Your Local-First AI Operating System**
 
 ![Banner][banner]
 
@@ -11,9 +11,9 @@
 
 ## Overview
 
-Euxis is a local-first operating system for AI agents. It orchestrates 24 specialised personas — from architecture to security to release management — to plan, execute, and verify engineering tasks autonomously.
+Deploy 24 specialist AI agents to plan, execute, and verify engineering tasks autonomously. From architecture to security to release management — every decision tracked, every outcome verified.
 
-Every action is traceable. Every decision persists in memory. Every output is verified before delivery.
+Build faster. Ship with confidence.
 
 ## Table of Contents
 
@@ -56,7 +56,7 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 ~/.euxis/setup.sh
 ```
 
-Add `~/bin` to your `PATH` if not already present:
+Add `~/bin` to your `PATH`:
 
 ```bash
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile && source ~/.profile
@@ -73,7 +73,7 @@ euxis-certify     # Full 4-gate certification pipeline
 
 ## Architecture
 
-Euxis follows a **Plan — Decompose — Delegate** model.
+Euxis follows **Plan — Decompose — Delegate**.
 
 | Layer | Component | Purpose |
 |:------|:----------|:--------|
@@ -104,7 +104,7 @@ Three core agents govern. Twenty-one specialists execute.
 |:------|:-------|
 | `orchestrator` | Task decomposition, delegation, and synthesis |
 | `architect` | Software architecture, patterns, and fleet dispatching |
-| `librarian` | Memory optimisation, documentation governance, compliance |
+| `librarian` | Memory optimization, documentation governance, compliance |
 
 ### Specialists
 
@@ -112,18 +112,18 @@ Three core agents govern. Twenty-one specialists execute.
 |:------|:-------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `butler` | TTS-optimised summarisation for spoken output |
+| `butler` | TTS-optimized summarization for spoken output |
 | `compliance-officer` | PII scanning, license auditing, GDPR/CCPA |
 | `data-steward` | Observability, telemetry, structured logging |
 | `deep-researcher` | Iterative multi-pass research with cross-validation |
 | `devrel-advocate` | Developer relations, tutorials, demos |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
 | `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, funnel optimisation, go-to-market strategy |
+| `growth-marketer` | SEO, funnel optimization, go-to-market strategy |
 | `incident-commander` | Incident response, root cause analysis, post-mortems |
 | `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
 | `perf-optimizer` | Latency, throughput, and memory profiling |
-| `product-manager` | Requirements, user stories, prioritisation |
+| `product-manager` | Requirements, user stories, prioritization |
 | `qa-coordinator` | End-to-end testing coordination, quality gates |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
 | `reviewer` | Quality gate validation and completeness checking |
@@ -181,7 +181,7 @@ euxis-loop bug-fixer "Fix parser.py" "pytest tests/test_parser.py" 3
 
 ## Memory
 
-The Cortex provides persistent semantic memory across sessions using three distinct types.
+The Cortex provides persistent semantic memory across sessions using three types.
 
 | Type | Purpose | Example |
 |:-----|:--------|:--------|
@@ -201,7 +201,7 @@ euxis-cortex stats
 
 The fleet supports three coordination modes.
 
-| Mode | Behaviour |
+| Mode | Behavior |
 |:-----|:----------|
 | `hierarchical` | All agents report to the orchestrator. Default. |
 | `mesh` | Agents with dispatch authority coordinate sub-workflows directly. |
@@ -223,7 +223,7 @@ Every agent applies three verification layers before delivering output.
 
 1. **Internal Consistency.** Every claim is supported by a ReAct observation. No fabricated paths.
 2. **Cross-Reference.** Key findings are checked against Cortex memories. Contradictions are flagged.
-3. **Evaluator Checkpoint.** The `reviewer` validates synthesised outputs before delivery.
+3. **Evaluator Checkpoint.** The `reviewer` validates synthesized outputs before delivery.
 
 On failure, agents generate structured reflections stored as procedural memory:
 
@@ -238,7 +238,7 @@ CONTRAINDICATION:   What to never repeat
 
 ## Intelligence Tiering
 
-When no provider is specified, agents route automatically to the optimal tier.
+Agents route automatically to the optimal tier.
 
 | Tier | Agents | Provider | Rationale |
 |:-----|:-------|:---------|:----------|
@@ -391,7 +391,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 
 <!-- Reference Links -->
 
-[banner]: https://raw.githubusercontent.com/sebastienrousseau/euxis/main/.github/assets/banner.svg "Euxis — Enterprise Unified eXecution Intelligence System"
+[banner]: https://raw.githubusercontent.com/sebastienrousseau/euxis/main/.github/assets/banner.svg "Euxis — Your Local-First AI Operating System"
 
 [version-badge]: https://img.shields.io/badge/version-6.0-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases

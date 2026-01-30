@@ -10,70 +10,70 @@ Version 6.0
 
 | Command | Description |
 |---------|-------------|
-| `euxis <agent> <task> [provider]` | Route a task to any agent. Provider auto-selected via intelligence tiering if omitted. |
-| `euxis-ui` | Interactive Mission Control TUI for deploying agents and browsing logs. |
+| `euxis <agent> <task> [provider]` | Deploy any agent with automatic intelligence routing |
+| `euxis-ui` | Mission Control TUI for agent deployment and log browsing |
 
 ### Quality & Certification
 
 | Command | Description |
 |---------|-------------|
-| `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync. |
-| `euxis-test-infra` | Infrastructure unit tests: argument validation, provider routing, space handling. |
-| `euxis-certify` | Full certification pipeline (lint + infra tests + semantic verification). |
-| `euxis-health` | Fleet health check: naming, hardening, orphans, headers, doc drift, providers. |
+| `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
+| `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
+| `euxis-certify` | Full certification: lint + tests + semantic verification |
+| `euxis-health` | Fleet health check: naming, hardening, orphans, headers, doc drift |
 
 ### Orchestration & Autonomy
 
 | Command | Description |
 |---------|-------------|
-| `euxis-council "<topic>"` | 3-round adversarial debate (architect, edge-hunter, perf-optimizer). |
-| `euxis-loop <agent> <task> <verify_cmd> [retries]` | Autonomous retry loop with reflexion and checkpoint support. |
-| `euxis-dispatch [--mode MODE] <manifest.json>` | Batch task dispatcher for parallel agent execution. Supports `hierarchical`, `mesh`, and `federated` modes. |
-| `euxis-kaizen` | 4-gate continuous self-improvement cycle. |
-| `euxis-daemon [interval]` | Periodic kaizen loop with fail-safe halting. Default: 30 min. |
+| `euxis-council "<topic>"` | 3-round adversarial debate between architect, edge-hunter, perf-optimizer |
+| `euxis-loop <agent> <task> <verify_cmd> [retries]` | Autonomous retry with reflexion and checkpoints |
+| `euxis-dispatch [--mode MODE] <manifest.json>` | Parallel agent execution across hierarchical, mesh, or federated modes |
+| `euxis-kaizen` | 4-gate self-improvement cycle |
+| `euxis-daemon [interval]` | Periodic kaizen with fail-safe halting (default: 30 min) |
 
 ### Performance & Audit
 
 | Command | Description |
 |---------|-------------|
-| `euxis-bench` | Performance benchmarking: health, lint, cortex recall, provider latency. |
-| `euxis-audit-run` | Deep-dive audit: benchmarks, logic integrity, security probes, readiness report. |
-| `euxis-gym <agent> <test_case> [provider]` | Agent evaluation and A/B testing against golden datasets. |
+| `euxis-bench` | Performance benchmarks: health, lint, cortex recall, provider latency |
+| `euxis-audit-run` | Deep audit: benchmarks, logic integrity, security probes, readiness |
+| `euxis-gym <agent> <test_case> [provider]` | Agent evaluation and A/B testing against golden datasets |
 
 ### Memory & Knowledge
 
 | Command | Description |
 |---------|-------------|
-| `euxis-cortex remember "<fact>" "<agent>" --type <episodic\|semantic\|procedural>` | Store a typed fact in the vector memory. |
-| `euxis-cortex recall "<query>" [n] [--type <type>]` | Semantic recall from the Cortex, optionally filtered by memory type. |
-| `euxis-cortex stats` | Show database statistics. |
-| `euxis-cortex forget "<text>"` | Remove a specific memory entry. |
+| `euxis-cortex remember "<fact>" "<agent>" --type <episodic\|semantic\|procedural>` | Store typed facts in vector memory |
+| `euxis-cortex recall "<query>" [n] [--type <type>]` | Semantic recall from Cortex with type filtering |
+| `euxis-cortex stats` | Database statistics |
+| `euxis-cortex forget "<text>"` | Remove memory entry |
 
 ### Documentation & Governance
 
 | Command | Description |
 |---------|-------------|
-| `euxis-sync-docs` | Librarian-powered doc sync with human-in-the-loop approval. |
-| `euxis-optimize` | Prompt optimization and compression. |
+| `euxis-sync-docs` | Doc sync with human approval |
+| `euxis-optimize` | Prompt optimization and compression |
 
 ### Infrastructure
 
 | Command | Description |
 |---------|-------------|
-| `euxis-deploy` | Launch the enterprise fleet via Docker Compose. |
-| `euxis-voice` | Voice interface: record, transcribe (Whisper), orchestrate, speak (Piper TTS). |
+| `euxis-deploy` | Launch enterprise fleet via Docker Compose |
+| `euxis-voice` | Voice interface: record, transcribe, orchestrate, speak |
 
 ## Agent Fleet
 
-### Core (3)
+### Core
 
 | Agent | Role |
 |-------|------|
-| `orchestrator` | Task decomposition, delegation, synthesis across the fleet |
+| `orchestrator` | Task decomposition, delegation, synthesis |
 | `architect` | Software architecture, patterns, ADRs, refactoring |
-| `librarian` | Context architect, compliance custodian, memory optimizer |
+| `librarian` | Context architecture, compliance, memory optimization |
 
-### Fleet (21)
+### Fleet
 
 | Agent | Role |
 |-------|------|
@@ -82,7 +82,7 @@ Version 6.0
 | `butler` | TTS-optimized summarization, spoken English output |
 | `compliance-officer` | PII scanning, license auditing, GDPR/CCPA compliance |
 | `data-steward` | Observability, telemetry, structured logging |
-| `deep-researcher` | Iterative multi-pass research with cross-validation |
+| `deep-researcher` | Iterative research with cross-validation |
 | `devrel-advocate` | Developer relations, tutorials, demos, conferences |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
 | `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
@@ -93,58 +93,58 @@ Version 6.0
 | `product-manager` | Requirements, user stories, MoSCoW prioritization |
 | `qa-coordinator` | E2E testing coordination, quality gate enforcement |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
-| `reviewer` | Quality gate, output validation, completeness checking |
+| `reviewer` | Quality gates, output validation, completeness checking |
 | `social-manager` | Platform-native content, calendars, community engagement |
 | `tech-writer` | Documentation, tutorials, API reference, glossary |
 | `unit-tester` | Test coverage, reliability, regression prevention |
-| `ux-sentinel` | Accessibility (WCAG 2.1 AA), design system, responsive testing |
+| `ux-sentinel` | Accessibility (WCAG 2.1 AA), design systems, responsive testing |
 
 ## Glossary
 
 | Term | Definition |
 |------|-----------|
-| **Euxis** | **E**nterprise **U**nified e**X**ecution **I**ntelligence **S**ystem — A local-first, privacy-centric operating system for AI agents that orchestrates specialized personas for autonomous engineering tasks. |
-| **Cortex** | The tri-typed semantic memory layer (episodic, semantic, procedural) backed by ChromaDB. |
-| **Dispatch** | The parallel agent deployment engine that executes mission manifests. |
-| **Kaizen** | The continuous self-improvement loop that audits, documents, and upgrades the fleet. |
-| **Fleet** | The full collection of 24 specialized agent personas. |
+| **Euxis** | **E**nterprise **U**nified e**X**ecution **I**ntelligence **S**ystem. Local-first AI agent orchestration for autonomous engineering. |
+| **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
+| **Dispatch** | Parallel agent deployment engine for mission manifests |
+| **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
+| **Fleet** | 24 specialized agent personas |
 
-## Intelligence Tiering (5-Tier Cost-Optimized Routing)
+## Intelligence Tiering
 
-When no provider is specified, agents are auto-routed based on task complexity:
+Routes agents by task complexity when no provider is specified:
 
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
 | Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Best reasoning and tool use |
 | Research | deep-researcher | `gemini` | 2M context window for massive analysis |
-| Coding | bug-fixer, legacy-maintainer | `opencode` | Fast local code models for diffs |
-| Utility | butler, librarian | `ollama` | Zero latency, no cost for summaries |
+| Coding | bug-fixer, legacy-maintainer | `opencode` | Fast local code models |
+| Utility | butler, librarian | `ollama` | Zero latency, no cost |
 | Standard | all others | `claude` | General-purpose fallback |
 
-**P0 Override:** Tasks marked P0 (CRITICAL) always route to the Strategic tier regardless of agent.
+**P0 Override:** Critical tasks always route to Strategic tier.
 
-An explicit provider argument always overrides tiering.
+Explicit provider argument overrides tiering.
 
-## Hybrid Dispatch Architecture (v5.0)
+## Hybrid Dispatch Architecture
 
-The fleet supports three dispatch modes via `euxis-dispatch --mode <mode>`:
+Three modes via `euxis-dispatch --mode <mode>`:
 
 | Mode | Description | Use When |
 |------|-------------|----------|
 | `hierarchical` (default) | All agents report to orchestrator. Centralized coordination. | Standard multi-agent tasks |
-| `mesh` | Agents with dispatch authority coordinate sub-workflows directly. | Specialists can manage focused sub-workflows (e.g., `qa-coordinator` dispatching `unit-tester`) |
-| `federated` | Agents operate autonomously across project boundaries. | Cross-project tasks |
+| `mesh` | Agents with dispatch authority coordinate sub-workflows directly | Specialists manage focused sub-workflows |
+| `federated` | Agents operate autonomously across project boundaries | Cross-project tasks |
 
 **Dispatch-authority agents (mesh mode):** `architect`, `qa-coordinator`, `incident-commander`, `release-manager`
 
-## Tri-Typed Memory System (v5.0)
+## Tri-Typed Memory System
 
-The Cortex classifies all memories into three types:
+Cortex classifies memories into three types:
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `episodic` | Specific events and outcomes from a session | `"Bug #42 fixed by null-check in auth.py line 89"` |
-| `semantic` | General facts and relationships that persist across sessions | `"The auth module uses JWT tokens with RS256 signing"` |
+| `episodic` | Specific events and outcomes from sessions | `"Bug #42 fixed by null-check in auth.py line 89"` |
+| `semantic` | General facts and relationships across sessions | `"The auth module uses JWT tokens with RS256 signing"` |
 | `procedural` | Reusable workflows, patterns, and contraindications | `"To deploy: run tests -> build -> tag -> push -> verify health"` |
 
 ```bash
@@ -157,28 +157,28 @@ euxis-cortex remember "CONTRAINDICATION: Never retry with expired tokens" "bug-f
 euxis-cortex recall "authentication" --type procedural
 ```
 
-## 3-Layer Self-Correction (v5.0)
+## 3-Layer Self-Correction
 
-Every agent applies layered verification before producing output:
+Agents apply layered verification before output:
 
-1. **Layer 1 — Internal Consistency:** Every claim is supported by a ReAct OBSERVATION. No fabricated paths. Output format matches the agent's declared format.
-2. **Layer 2 — Cross-Reference:** Key findings are cross-referenced against Cortex memories. Contradictions are flagged and investigated.
-3. **Layer 3 — Evaluator Checkpoint:** The `reviewer` agent validates synthesized outputs before user delivery. If rejected, the orchestrator replans the failing phase.
+1. **Internal Consistency** — Every claim supported by ReAct OBSERVATION. No fabricated paths. Output format matches agent specification.
+2. **Cross-Reference** — Key findings cross-referenced against Cortex memories. Contradictions flagged and investigated.
+3. **Evaluator Checkpoint** — Reviewer agent validates synthesized outputs before user delivery. Rejection triggers orchestrator replanning.
 
-**Reflexion Protocol:** On WARNING or FAILURE, agents generate a structured analysis (root cause, evidence, strategy, contraindication) and store it as a PROCEDURAL memory to prevent repeating failed approaches.
+**Reflexion Protocol:** On WARNING or FAILURE, agents generate structured analysis (root cause, evidence, strategy, contraindication) stored as PROCEDURAL memory to prevent repeating failed approaches.
 
-## Conflict Resolution Protocol (v5.0)
+## Conflict Resolution
 
 When multiple agents produce conflicting outputs, resolution follows this hierarchy:
 
-1. **Domain Priority** — The agent with primary scope wins (e.g., security conflicts → `edge-hunter`).
-2. **Evidence Weight** — Verified data > inference > heuristic.
-3. **Negotiation Round** — Each agent produces a `CONFLICT_RESPONSE` with position, evidence, confidence, and acceptable compromise. Maximum 1 round.
-4. **Human Escalation** — If negotiation fails, both positions are presented to the user.
+1. **Domain Priority** — Agent with primary scope wins (e.g., security conflicts → `edge-hunter`)
+2. **Evidence Weight** — Verified data > inference > heuristic
+3. **Negotiation Round** — Each agent produces `CONFLICT_RESPONSE` with position, evidence, confidence, and acceptable compromise. Maximum 1 round.
+4. **Human Escalation** — Failed negotiation presents both positions to user
 
-## ReAct Reasoning Loop (v5.0)
+## ReAct Reasoning Loop
 
-All agents use the ReAct (Reasoning + Acting) loop for non-trivial tasks:
+All agents use ReAct (Reasoning + Acting) for non-trivial tasks:
 
 ```
 THOUGHT 1: <What I know, what I need to find out>
@@ -192,7 +192,7 @@ OBSERVATION 2: <Result>
 FINAL ANSWER: <Synthesized deliverable citing supporting OBSERVATIONs>
 ```
 
-Minimum 2 cycles before FINAL ANSWER. Every claim must cite which OBSERVATION supports it.
+Minimum 2 cycles before FINAL ANSWER. Every claim must cite supporting OBSERVATION.
 
 ## Quick Start
 
