@@ -69,6 +69,8 @@ Every architectural review MUST use this structure:
 
 When analyzing a repo for modernization or refactoring, you MUST output a **Mission Manifest** — a structured JSON dispatch that the orchestrator uses to launch parallel agent missions via `euxis-dispatch`.
 
+**CRITICAL:** The Mission Manifest JSON MUST be wrapped in a ` ```json ` fenced code block. This is the ONLY format that the pipeline can extract. Do NOT put the manifest inside HTML comments, EUXIS_HANDOFF blocks, or any other wrapper. The ` ```json ` block MUST be the LAST code block in your output.
+
 ```json
 {
   "project": "<name>",

@@ -637,10 +637,46 @@ main() {
     capture_output "${AGENT}" "${PROJECT}" "${PROVIDER}" "${TASK}" "${SESSION_ID}" "${OUTPUT_PATH}" "${output}"
 
     # Phase 7: Print output to stdout
-    # When stdout is piped or redirected, extract the first JSON block (if any)
-    # so that `euxis architect "..." > plan.json` produces valid JSON.
-    if [[ ! -t 1 ]] && echo "${output}" | grep -q '```json'; then
-        echo "${output}" | sed -n '/^```json$/,/^```$/p' | sed '1d;$d'
+    # When stdout is piped or redirected, extract JSON for dispatch consumption.
+    # Tries multiple extraction strategies in order of reliability.
+    if [[ ! -t 1 ]]; then
+        local extracted=""
+
+        # Strategy 1: Last ```json fenced block (preferred, most reliable)
+        if echo "${output}" | grep -q '```json'; then
+            extracted=$(echo "${output}" | awk '/^```json$/{found=""; capture=1; next} /^```$/ && capture{capture=0} capture{found=found (found?"\n":"") $0} END{print found}')
+        fi
+
+        # Strategy 2: JSON inside <!-- EUXIS_HANDOFF ... --> with "dispatches" key
+        if [[ -z "$extracted" ]] && echo "${output}" | grep -q 'EUXIS_HANDOFF'; then
+            local handoff
+            handoff=$(echo "${output}" | sed -n '/<!-- EUXIS_HANDOFF/,/-->/p' | sed '1d;$d')
+            if echo "$handoff" | jq -e 'has("dispatches")' &>/dev/null; then
+                extracted="$handoff"
+            fi
+        fi
+
+        # Strategy 3: Any JSON object with "dispatches" array anywhere in output
+        if [[ -z "$extracted" ]] && command -v python3 &>/dev/null; then
+            extracted=$(python3 -c "
+import json, re, sys
+text = sys.stdin.read()
+for m in re.finditer(r'\{[^{}]*\"dispatches\"[^{}]*\[.*?\].*?\}', text, re.DOTALL):
+    try:
+        obj = json.loads(m.group())
+        if 'dispatches' in obj:
+            print(json.dumps(obj, indent=2))
+            sys.exit(0)
+    except json.JSONDecodeError:
+        pass
+" <<< "${output}" 2>/dev/null || true)
+        fi
+
+        if [[ -n "$extracted" ]] && echo "$extracted" | jq empty 2>/dev/null; then
+            echo "$extracted"
+        else
+            echo "${output}"
+        fi
     else
         echo "${output}"
     fi
