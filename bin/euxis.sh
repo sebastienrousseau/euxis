@@ -398,11 +398,11 @@ resolve_provider_config() {
 
     case "${provider}" in
         claude)   # The Strategist (Primary)
-            PROVIDER_MODEL="claude-3-7-sonnet-latest"
+            PROVIDER_MODEL="claude-sonnet-4-20250514"
             PROVIDER_FLAGS="--cache-prompt --stream"
             ;;
         gemini)   # The Researcher (Massive Context)
-            PROVIDER_MODEL="gemini-1.5-pro"
+            PROVIDER_MODEL="gemini-2.0-flash"
             PROVIDER_FLAGS="--search-web"
             ;;
         openai)   # The Generalist
