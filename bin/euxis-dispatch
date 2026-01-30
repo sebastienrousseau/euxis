@@ -100,6 +100,25 @@ if [[ "$DISPATCH_COUNT" -eq 0 ]]; then
 fi
 
 EUXIS_HOME="$HOME/.euxis"
+
+# Validate agent names against registry
+REGISTRY_FILE="$EUXIS_HOME/registry.json"
+if [[ -f "$REGISTRY_FILE" ]]; then
+    INVALID_AGENTS=()
+    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
+        AGENT_NAME=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+        if ! jq -e --arg id "$AGENT_NAME" '.agents[] | select(.id == $id)' "$REGISTRY_FILE" &>/dev/null; then
+            INVALID_AGENTS+=("$AGENT_NAME")
+        fi
+    done
+    if [[ ${#INVALID_AGENTS[@]} -gt 0 ]]; then
+        echo "Error: Manifest references unknown agents: ${INVALID_AGENTS[*]}" >&2
+        echo "  Valid agents: $(jq -r '.agents[].id' "$REGISTRY_FILE" | tr '\n' ', ' | sed 's/,$//')" >&2
+        echo "" >&2
+        echo "  Hint: Re-run the architect to regenerate the manifest with valid agent names." >&2
+        exit 1
+    fi
+fi
 LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)

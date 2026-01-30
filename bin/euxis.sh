@@ -380,6 +380,13 @@ prepare_prompt() {
     local memory_context
     memory_context=$(build_tiered_memory "${memory_path}" "${task}" "${project_dir}" "${agent}")
 
+    # Build fleet roster for manifest-producing agents
+    local fleet_roster=""
+    local registry_file="${EUXIS_DIR}/registry.json"
+    if [[ -f "${registry_file}" ]] && command -v jq &>/dev/null; then
+        fleet_roster=$(jq -r '.agents[].id' "${registry_file}" | tr '\n' ', ' | sed 's/,$//')
+    fi
+
     # Build final prompt
     cat <<EOF
 ${prompt}
@@ -387,6 +394,10 @@ ${prompt}
 ---
 ## MEMORY CONTEXT (Tiered Retrieval)
 ${memory_context}
+
+---
+## FLEET ROSTER (Valid Agent IDs)
+Use ONLY agents from this list in mission manifests: ${fleet_roster}
 
 ---
 ## CURRENT TASK
