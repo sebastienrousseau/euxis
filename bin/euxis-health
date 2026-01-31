@@ -205,7 +205,8 @@ log ""
 log "[7/7] Provider Connectivity..."
 
 PROVIDER_WARNINGS=0
-for cli in claude gemini codex ollama opencode; do
+PROVIDER_CLIS=(claude gemini codex ollama opencode qwen-code crush kilo q goose)
+for cli in "${PROVIDER_CLIS[@]}"; do
     if command -v "$cli" &>/dev/null; then
         log "  FOUND: $cli"
     else
@@ -214,12 +215,14 @@ for cli in claude gemini codex ollama opencode; do
     fi
 done
 
+TOTAL_PROVIDERS=${#PROVIDER_CLIS[@]}
+FOUND_PROVIDERS=$((TOTAL_PROVIDERS - PROVIDER_WARNINGS))
 if [[ $PROVIDER_WARNINGS -eq 0 ]]; then
     log "  All provider CLIs available."
-elif [[ $PROVIDER_WARNINGS -le 3 ]]; then
-    log "  $PROVIDER_WARNINGS provider CLI(s) not installed. At least one provider is required."
+elif [[ $FOUND_PROVIDERS -ge 1 ]]; then
+    log "  ${FOUND_PROVIDERS} of ${TOTAL_PROVIDERS} provider CLIs available."
 else
-    log "  WARNING: Only $((5 - PROVIDER_WARNINGS)) of 5 providers available."
+    log "  WARNING: No provider CLIs found. At least one is required."
     ((WARNINGS++))
 fi
 

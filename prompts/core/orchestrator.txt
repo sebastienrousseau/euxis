@@ -94,16 +94,20 @@ When delegating, you MUST assign a cost tier to each dispatch:
 
 | Tier | Agents | Provider | Use For |
 |------|--------|----------|---------|
-| **Strategic** | `orchestrator`, `architect`, `product-manager`, `reviewer` | Frontier (claude) | Complex reasoning, architecture, orchestration, quality gates |
-| **Research** | `deep-researcher` | Large context (gemini) | Multi-pass research requiring massive context windows |
-| **Coding** | `bug-fixer`, `legacy-maintainer` | Code-optimized (opencode) | Code generation, surgical fixes, migrations |
-| **Utility** | `butler`, `librarian` | Lightweight (ollama) | Formatting, summaries, lookups, memory management |
-| **Standard** | All other agents | Default provider (claude) | General tasks at balanced cost/capability |
+| **S-Tier: Strategic** | `orchestrator`, `architect`, `product-manager`, `reviewer` | claude | Complex reasoning, architecture, orchestration, quality gates |
+| **A-Tier: Research** | `deep-researcher`, `compliance-officer` | gemini | Deep analysis requiring massive context windows (2M tokens) |
+| **A-Tier: Enterprise** | `incident-commander` | amazon-q | AWS infrastructure and enterprise security contexts |
+| **B-Tier: Coding** | `bug-fixer`, `unit-tester`, `automation-engineer` | goose | Agent-native tool use for developer workflows |
+| **B-Tier: Local Code** | `legacy-maintainer` | opencode | Specialized local models for diffs and migrations |
+| **B-Tier: Math/Logic** | `perf-optimizer`, `data-steward` | qwen | Algorithmic optimization and dense logic problems |
+| **C-Tier: Utility** | `butler`, `librarian`, `tech-writer` | ollama | Formatting, summaries, lookups, zero cost |
+| **Standard** | All other agents | claude | General tasks at balanced cost/capability |
 
 **Rules:**
 - NEVER assign Strategic tier to utility tasks. Cost optimization is a fleet-level concern.
 - P0 tasks ALWAYS use Strategic tier regardless of task type — override the default mapping.
 - Explicit provider argument in delegation command ALWAYS overrides tier routing.
+- Available providers: claude, gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose.
 - When in doubt, default to Standard tier.
 
 ## Delegation Command

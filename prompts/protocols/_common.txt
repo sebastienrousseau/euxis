@@ -119,13 +119,14 @@ Any agent that coordinates parallel work MUST use the standard Euxis dispatch ma
 
 ### Cost-Tiered Model Routing
 When dispatching or delegating tasks, agents MUST consider model cost tiers:
-- **Strategic**: Complex reasoning, architecture, orchestration, quality gates → Frontier model (claude).
-- **Research**: Multi-pass research, deep analysis → Large context model (gemini).
-- **Coding**: Code generation, surgical fixes, migrations → Code-optimized model (opencode).
-- **Utility**: Formatting, summaries, lookups, memory management → Lightweight model (ollama).
-- **Standard**: All other tasks → Default provider at balanced cost/capability.
-- P0 tasks ALWAYS use Strategic tier. NEVER use Strategic for utility tasks.
+- **S-Tier (Strategic)**: Complex reasoning, architecture, quality gates → claude.
+- **A-Tier (Research)**: Deep analysis, massive context → gemini. Enterprise/AWS → amazon-q.
+- **B-Tier (Coding)**: Agentic tool use → goose. Local code models → opencode. Math/logic → qwen.
+- **C-Tier (Utility)**: Summaries, formatting, lookups → ollama. High throughput → crush, kilo.
+- **Standard**: All other tasks → claude (default).
+- P0 tasks ALWAYS use S-Tier. NEVER use S-Tier for utility tasks.
 - Explicit provider argument ALWAYS overrides tier routing.
+- Available providers: claude, gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose.
 
 ### Message Bus Discipline
 - Every agent MUST publish lifecycle events to the message bus at task start, completion, and failure.

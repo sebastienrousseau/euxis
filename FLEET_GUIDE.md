@@ -150,17 +150,22 @@ Right capability. Right cost.
 
 | Tier | When to Use | Provider | Agents |
 |------|-------------|----------|--------|
-| Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer |
-| Research | Deep analysis, large context | `gemini` | deep-researcher |
-| Coding | Code generation, surgical fixes | `opencode` | bug-fixer, legacy-maintainer |
-| Utility | Fast operations, zero cost | `ollama` | butler, librarian |
+| S-Tier: Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer |
+| A-Tier: Research | Deep analysis, large context | `gemini` | deep-researcher, compliance-officer |
+| A-Tier: Enterprise | AWS infrastructure, corporate security | `amazon-q` | incident-commander |
+| B-Tier: Coding | Agentic tool use, developer workflows | `goose` | bug-fixer, unit-tester, automation-engineer |
+| B-Tier: Local Code | Local models for diffs, migrations | `opencode` | legacy-maintainer |
+| B-Tier: Math/Logic | Algorithmic optimization, dense logic | `qwen` | perf-optimizer, data-steward |
+| C-Tier: Utility | Summaries, formatting, zero cost | `ollama` | butler, librarian, tech-writer |
 | Standard | General purpose | `claude` | all others |
 
-**P0 Override:** Critical work gets Strategic tier. Always.
+**P0 Override:** Critical work gets S-Tier. Always.
 
-**Explicit Override:** Specify any provider.
+**Explicit Override:** Specify any of the 10 providers.
 ```bash
 euxis bug-fixer "Fix auth.py" gemini
+euxis architect "Review this module" qwen
+euxis deep-researcher "Audit all dependencies" amazon-q
 ```
 
 ---

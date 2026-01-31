@@ -130,19 +130,64 @@ Version 6.0
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
 
+## AI Provider Matrix
+
+Euxis supports 10 providers, tiered by capability.
+
+### S-Tier: Strategic (High Reasoning)
+
+Use for complex planning, difficult refactors, and mission dispatching.
+
+| Provider | CLI | Best For |
+|----------|-----|---------|
+| `claude` (Anthropic) | `claude` | Default brain. Best multi-step reasoning and tool use |
+| `openai` (GPT-4o) | `codex` | Strong structured output (JSON), reliable fallback |
+
+### A-Tier: Research and Enterprise (High Context)
+
+Use for ingesting massive files or enterprise-specific queries.
+
+| Provider | CLI | Best For |
+|----------|-----|---------|
+| `gemini` (Google) | `gemini` | 2M+ token context. Use for deep-researcher or massive codebases |
+| `amazon-q` (AWS) | `q` | AWS infrastructure, enterprise security contexts |
+
+### B-Tier: Specialist (Coding and Logic)
+
+Use for specific engineering tasks.
+
+| Provider | CLI | Best For |
+|----------|-----|---------|
+| `goose` (Block) | `goose` | Agent-native tool use for developer workflows |
+| `opencode` | `opencode` | Specialized local coding models (DeepSeek, CodeLlama) |
+| `qwen` (Alibaba) | `qwen-code` | Mathematical logic and dense algorithmic problems |
+
+### C-Tier: Utility (Speed and Local)
+
+Use for summaries, linting, formatting to save costs and latency.
+
+| Provider | CLI | Best For |
+|----------|-----|---------|
+| `ollama` | `ollama` | Local standard. Runs Llama 3, Phi, etc. |
+| `crush` (Charm) | `crush` | High-performance multi-model TUI agent |
+| `kilo` (Kilo Code) | `kilo` | Ultra-fast multi-model agentic CLI |
+
 ## Intelligence Tiering
 
 Routes agents by task complexity when no provider is specified:
 
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
-| Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Best reasoning and tool use |
-| Research | deep-researcher | `gemini` | 2M context window for massive analysis |
-| Coding | bug-fixer, legacy-maintainer | `opencode` | Fast local code models |
-| Utility | butler, librarian | `ollama` | Zero latency, no cost |
+| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Best reasoning and tool use |
+| A-Tier: Research | deep-researcher, compliance-officer | `gemini` | 2M context window for massive analysis |
+| A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
+| B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
+| B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
+| B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
+| C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |
 | Standard | all others | `claude` | General-purpose fallback |
 
-**P0 Override:** Critical tasks always route to Strategic tier.
+**P0 Override:** Critical tasks always route to S-Tier (claude).
 
 Explicit provider argument overrides tiering.
 

@@ -49,6 +49,11 @@ Build faster. Ship with confidence.
 | [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
 | [Codex CLI][codex-url] | `codex` | OpenAI models |
 | [OpenCode][opencode-url] | `opencode` | Local code generation |
+| [Qwen Code][qwen-url] | `qwen-code` | Open-source agentic coding (256K context) |
+| [Crush][crush-url] | `crush` | Multi-model TUI agent |
+| [Kilo Code][kilo-url] | `kilo` | Multi-model agentic CLI |
+| [Amazon Q][amazon-q-url] | `q` | AWS-native developer agent |
+| [Goose][goose-url] | `goose` | Open-source MCP-native agent |
 
 ### Install
 
@@ -244,17 +249,21 @@ Agents route automatically to the optimal tier.
 
 | Tier | Agents | Provider | Rationale |
 |:-----|:-------|:---------|:----------|
-| Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Strongest reasoning |
-| Research | deep-researcher | `gemini` | 2M token context window |
-| Coding | bug-fixer, legacy-maintainer | `opencode` | Fast local code models |
-| Utility | butler, librarian | `ollama` | Zero latency, no cost |
+| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Strongest reasoning |
+| A-Tier: Research | deep-researcher, compliance-officer | `gemini` | 2M token context window |
+| A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
+| B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
+| B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
+| B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
+| C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |
 | Standard | All others | `claude` | General-purpose fallback |
 
-An explicit provider argument always overrides tiering. Tasks marked P0 always route to the Strategic tier.
+An explicit provider argument always overrides tiering. Tasks marked P0 always route to S-Tier.
 
 ```bash
 euxis architect "Review the auth module"          # auto → claude
 euxis bug-fixer "Fix user.py" gemini              # explicit override
+euxis perf-optimizer "Optimize queries" qwen      # explicit override
 ```
 
 ---
@@ -479,3 +488,8 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [ollama-url]: https://ollama.com/
 [codex-url]: https://github.com/openai/codex
 [opencode-url]: https://github.com/opencode-ai/opencode
+[qwen-url]: https://github.com/QwenLM/qwen-code
+[crush-url]: https://github.com/charmbracelet/crush
+[kilo-url]: https://github.com/Kilo-Org/kilocode
+[amazon-q-url]: https://github.com/aws/amazon-q-developer-cli
+[goose-url]: https://github.com/block/goose

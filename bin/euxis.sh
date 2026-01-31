@@ -5,7 +5,7 @@
 #        euxis delegate <agent> <task> [provider]
 #
 # Agents are discovered dynamically from ~/.euxis/prompts/{core,fleet}/*.txt
-# Providers: claude (default), gemini, openai, ollama, opencode
+# Providers: claude (default), gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose
 #
 
 set -euo pipefail
@@ -22,16 +22,19 @@ PROJECTS_DIR="${EUXIS_HOME}/projects"
 DEFAULT_PROVIDER="claude"
 
 # ============================================================================
-# Intelligence Tiering (v5.0)
+# Intelligence Tiering (v4.7)
 # Maps agent → optimal provider based on task complexity profile.
 # Explicit provider argument always overrides tiering.
 # P0 tasks always use Strategic tier (claude) regardless of agent.
 # ============================================================================
-#   Tier 1: Strategic   — orchestrator, architect, product-manager, reviewer → claude
-#   Tier 2: Research    — deep-researcher                                    → gemini
-#   Tier 3: Coding      — bug-fixer, legacy-maintainer                      → opencode
-#   Tier 4: Utility     — butler, librarian                                 → ollama
-#   Default: Standard   — all others                                         → claude
+#   S-Tier: Strategic    — orchestrator, architect, product-manager, reviewer   → claude
+#   A-Tier: Research     — deep-researcher, compliance-officer                  → gemini
+#   A-Tier: Enterprise   — incident-commander                                   → amazon-q
+#   B-Tier: Coding       — bug-fixer, unit-tester, automation-engineer          → goose
+#   B-Tier: Local Code   — legacy-maintainer                                    → opencode
+#   B-Tier: Math/Logic   — perf-optimizer, data-steward                         → qwen
+#   C-Tier: Utility      — butler, librarian, tech-writer                       → ollama
+#   Default: Standard    — all others                                            → claude
 
 resolve_tiered_provider() {
     local agent="$1"
@@ -42,17 +45,26 @@ resolve_tiered_provider() {
         return
     fi
     case "${agent}" in
-        # Tier 1: Strategic — best-in-class reasoning and tool use
+        # S-Tier: Strategic — best-in-class reasoning and tool use
         orchestrator|architect|product-manager|reviewer)
             echo "claude" ;;
-        # Tier 2: Research — massive context window for deep analysis
-        deep-researcher)
+        # A-Tier: Research — massive context window for deep analysis
+        deep-researcher|compliance-officer)
             echo "gemini" ;;
-        # Tier 3: Coding — local code models are fast for diffs and fixes
-        bug-fixer|legacy-maintainer)
+        # A-Tier: Enterprise — AWS-native, corporate security contexts
+        incident-commander)
+            echo "amazon-q" ;;
+        # B-Tier: Coding — agent-native tool use for developer workflows
+        bug-fixer|unit-tester|automation-engineer)
+            echo "goose" ;;
+        # B-Tier: Local Code — specialized local models for diffs and migrations
+        legacy-maintainer)
             echo "opencode" ;;
-        # Tier 4: Utility — zero latency, no cost for simple summaries
-        butler|librarian)
+        # B-Tier: Math/Logic — strong at algorithmic and optimization tasks
+        perf-optimizer|data-steward)
+            echo "qwen" ;;
+        # C-Tier: Utility — zero latency, no cost for summaries and formatting
+        butler|librarian|tech-writer)
             echo "ollama" ;;
         # Default (Standard): fall back to primary provider
         *)
@@ -220,7 +232,8 @@ Commands:
 Agent Mode:
     euxis <agent> <task> [provider]
 
-    provider    AI provider: claude, gemini, openai, ollama, opencode
+    provider    AI provider: claude, gemini, openai, ollama, opencode,
+                qwen, crush, kilo, amazon-q, goose
                 (auto-selected per agent via intelligence tiering if omitted)
 
 Available Agents:
@@ -528,6 +541,26 @@ resolve_provider_config() {
             PROVIDER_MODEL="${EUXIS_OPENCODE_MODEL:-codellama}"
             PROVIDER_FLAGS="--local"
             ;;
+        qwen)     # Alibaba Qwen3-Coder (Open Source, 256K context)
+            PROVIDER_MODEL="${EUXIS_QWEN_MODEL:-qwen3-coder}"
+            PROVIDER_FLAGS=""
+            ;;
+        crush)    # Charm Crush (Multi-model TUI agent)
+            PROVIDER_MODEL="${EUXIS_CRUSH_MODEL:-claude-sonnet-4}"
+            PROVIDER_FLAGS=""
+            ;;
+        kilo)     # Kilo Code (Multi-model agentic CLI)
+            PROVIDER_MODEL="${EUXIS_KILO_MODEL:-claude-sonnet-4}"
+            PROVIDER_FLAGS=""
+            ;;
+        amazon-q) # Amazon Q Developer (AWS-native agent)
+            PROVIDER_MODEL="amazon-q"
+            PROVIDER_FLAGS=""
+            ;;
+        goose)    # Block Goose (Open source, MCP-native agent)
+            PROVIDER_MODEL="${EUXIS_GOOSE_MODEL:-claude-sonnet-4}"
+            PROVIDER_FLAGS=""
+            ;;
     esac
 }
 
@@ -601,6 +634,56 @@ run_opencode() {
     fi
 }
 
+run_qwen() {
+    local full_prompt="$1"
+    if command -v qwen-code &>/dev/null; then
+        echo "${full_prompt}" | qwen-code --model "${PROVIDER_MODEL}" -p ""
+    else
+        log_error "qwen-code not found. Install via: npm i -g @qwen-code/qwen-code"
+        exit 1
+    fi
+}
+
+run_crush() {
+    local full_prompt="$1"
+    if command -v crush &>/dev/null; then
+        echo "${full_prompt}" | crush --model "${PROVIDER_MODEL}"
+    else
+        log_error "crush not found. Install via: brew install charmbracelet/tap/crush"
+        exit 1
+    fi
+}
+
+run_kilo() {
+    local full_prompt="$1"
+    if command -v kilo &>/dev/null; then
+        echo "${full_prompt}" | kilo --model "${PROVIDER_MODEL}"
+    else
+        log_error "kilo not found. Install via: npm i -g @kilocode/cli"
+        exit 1
+    fi
+}
+
+run_amazon_q() {
+    local full_prompt="$1"
+    if command -v q &>/dev/null; then
+        echo "${full_prompt}" | q chat
+    else
+        log_error "Amazon Q Developer CLI (q) not found. Install from: https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html"
+        exit 1
+    fi
+}
+
+run_goose() {
+    local full_prompt="$1"
+    if command -v goose &>/dev/null; then
+        echo "${full_prompt}" | goose run --model "${PROVIDER_MODEL}"
+    else
+        log_error "goose not found. Install from: https://github.com/block/goose"
+        exit 1
+    fi
+}
+
 execute_provider() {
     local provider="$1"
     local full_prompt="$2"
@@ -614,6 +697,11 @@ execute_provider() {
         openai)    run_openai "${full_prompt}" ;;
         ollama)    run_ollama "${full_prompt}" ;;
         opencode)  run_opencode "${full_prompt}" ;;
+        qwen)      run_qwen "${full_prompt}" ;;
+        crush)     run_crush "${full_prompt}" ;;
+        kilo)      run_kilo "${full_prompt}" ;;
+        amazon-q)  run_amazon_q "${full_prompt}" ;;
+        goose)     run_goose "${full_prompt}" ;;
     esac
 }
 
@@ -654,10 +742,10 @@ parse_args() {
 
     # Validate provider
     case "${PROVIDER}" in
-        claude|gemini|openai|ollama|opencode) ;;
+        claude|gemini|openai|ollama|opencode|qwen|crush|kilo|amazon-q|goose) ;;
         *)
             log_error "Unknown provider: ${PROVIDER}"
-            echo "Valid providers: claude, gemini, openai, ollama, opencode" >&2
+            echo "Valid providers: claude, gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose" >&2
             exit 1
             ;;
     esac
