@@ -4,19 +4,28 @@ set -uo pipefail
 EUXIS_DIR="$HOME/.euxis"
 HOOKS_DIR="$EUXIS_DIR/hooks"
 
+SIGNATURE_FOOTER='---
+
+> Designed by **Sebastien Rousseau**
+> Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System'
+
 usage() {
   cat <<'EOF'
-euxis-hooks — Install Euxis Git hooks into your repository
+euxis-hooks — Install Euxis Git hooks and enforce branding
 
 Usage:
   euxis-hooks install [--repo PATH]
   euxis-hooks uninstall [--repo PATH]
   euxis-hooks status [--repo PATH]
+  euxis-hooks pr "<title>" [--body "<text>"] [gh pr create flags...]
+  euxis-hooks check-pr [PR_NUMBER]
 
 Commands:
   install     Symlink Euxis hooks into .git/hooks/
   uninstall   Remove Euxis hook symlinks from .git/hooks/
   status      Show which Euxis hooks are installed
+  pr          Create a PR with branding signature auto-appended
+  check-pr    Verify open PR descriptions carry the branding signature
 
 Options:
   --repo PATH   Target repository (default: current directory)
@@ -169,11 +178,119 @@ cmd_status() {
   done
 }
 
+cmd_pr() {
+  if ! command -v gh &>/dev/null; then
+    echo "Error: gh (GitHub CLI) is required. Install via: brew install gh" >&2
+    exit 1
+  fi
+
+  local title=""
+  local body=""
+  local extra_args=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --body) body="$2"; shift 2 ;;
+      --title) title="$2"; shift 2 ;;
+      -*) extra_args+=("$1" "$2"); shift 2 ;;
+      *)
+        if [[ -z "$title" ]]; then
+          title="$1"; shift
+        else
+          extra_args+=("$1"); shift
+        fi
+        ;;
+    esac
+  done
+
+  if [[ -z "$title" ]]; then
+    echo "Error: PR title is required." >&2
+    echo "Usage: euxis-hooks pr \"<title>\" [--body \"<text>\"]" >&2
+    exit 1
+  fi
+
+  # Append signature if not already present
+  if ! echo "$body" | grep -qF "Engineered with"; then
+    if [[ -n "$body" ]]; then
+      body="$body
+
+$SIGNATURE_FOOTER"
+    else
+      # Use the PR template as the base body
+      local template="$EUXIS_DIR/.github/pull_request_template.md"
+      if [[ -f "$template" ]]; then
+        body=$(cat "$template")
+      else
+        body="$SIGNATURE_FOOTER"
+      fi
+    fi
+  fi
+
+  gh pr create --title "$title" --body "$body" "${extra_args[@]}"
+}
+
+cmd_check_pr() {
+  if ! command -v gh &>/dev/null; then
+    echo "Error: gh (GitHub CLI) is required." >&2
+    exit 1
+  fi
+
+  local pr_number="${1:-}"
+  local failures=0
+
+  if [[ -n "$pr_number" ]]; then
+    # Check a specific PR
+    local pr_body
+    pr_body=$(gh pr view "$pr_number" --json body -q '.body' 2>/dev/null)
+    if [[ -z "$pr_body" ]]; then
+      echo "Error: Could not fetch PR #$pr_number" >&2
+      exit 1
+    fi
+
+    echo "Checking PR #$pr_number..."
+    if echo "$pr_body" | grep -qF "Sebastien Rousseau" && echo "$pr_body" | grep -qF "euxis.co"; then
+      echo "  PASS: PR #$pr_number carries branding signature."
+    else
+      echo "  FAIL: PR #$pr_number missing branding signature."
+      ((failures++))
+    fi
+  else
+    # Check all open PRs
+    local pr_list
+    pr_list=$(gh pr list --json number,title --jq '.[] | "\(.number)\t\(.title)"' 2>/dev/null)
+    if [[ -z "$pr_list" ]]; then
+      echo "No open PRs found."
+      return 0
+    fi
+
+    echo "Checking open PRs for branding signature..."
+    echo ""
+    while IFS=$'\t' read -r num title; do
+      local pr_body
+      pr_body=$(gh pr view "$num" --json body -q '.body' 2>/dev/null)
+      if echo "$pr_body" | grep -qF "Sebastien Rousseau" && echo "$pr_body" | grep -qF "euxis.co"; then
+        echo "  PASS: #$num $title"
+      else
+        echo "  FAIL: #$num $title — missing branding signature"
+        ((failures++))
+      fi
+    done <<< "$pr_list"
+  fi
+
+  if [[ $failures -gt 0 ]]; then
+    echo ""
+    echo "$failures PR(s) missing branding signature."
+    exit 1
+  fi
+}
+
 # Main
 case "${1:-}" in
   install)    shift; cmd_install "$@" ;;
   uninstall)  shift; cmd_uninstall "$@" ;;
   status)     shift; cmd_status "$@" ;;
+  pr)         shift; cmd_pr "$@" ;;
+  check-pr)   shift; cmd_check_pr "$@" ;;
   -h|--help)  usage ;;
   *)          usage >&2; exit 1 ;;
 esac

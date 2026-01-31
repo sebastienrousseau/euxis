@@ -66,6 +66,8 @@ Activate teams, run phased workflows, or chain agents in sequence.
 | `euxis-hooks install [--repo PATH]` | Install Euxis Git hooks into a repository |
 | `euxis-hooks uninstall [--repo PATH]` | Remove Euxis hook symlinks |
 | `euxis-hooks status [--repo PATH]` | Show which Euxis hooks are installed |
+| `euxis-hooks pr "<title>" [--body "<text>"]` | Create a PR with branding signature auto-appended |
+| `euxis-hooks check-pr [PR_NUMBER]` | Verify open PR descriptions carry the branding signature |
 
 ### Performance & Audit
 

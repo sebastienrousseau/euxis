@@ -171,6 +171,37 @@ if [[ -f "$SIGNATURE_FILE" ]]; then
     fi
 fi
 
+# 5g. GitHub Actions branding workflow exists
+BRANDING_WORKFLOW="$EUXIS_HOME/.github/workflows/branding-check.yml"
+if [[ -f "$BRANDING_WORKFLOW" ]]; then
+    echo "  PASS: GitHub Actions branding-check workflow exists."
+else
+    echo "  FAIL: .github/workflows/branding-check.yml not found."
+    ((BRANDING_FAILURES++))
+fi
+
+# 5h. Open PRs carry branding signature (if gh CLI available)
+if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
+    PR_LIST=$(cd "$EUXIS_HOME" && gh pr list --json number,title,body --jq '.[] | "\(.number)\t\(.title)\t\(.body)"' 2>/dev/null || true)
+    if [[ -n "$PR_LIST" ]]; then
+        UNSIGNED_PRS=0
+        while IFS=$'\t' read -r pr_num pr_title pr_body; do
+            if ! echo "$pr_body" | grep -qF "Sebastien Rousseau" || ! echo "$pr_body" | grep -qF "euxis.co"; then
+                echo "  UNSIGNED PR: #$pr_num $pr_title"
+                ((UNSIGNED_PRS++))
+            fi
+        done <<< "$PR_LIST"
+        if [[ $UNSIGNED_PRS -eq 0 ]]; then
+            echo "  PASS: All open PRs carry branding signature."
+        else
+            echo "  FAIL: $UNSIGNED_PRS open PR(s) missing branding signature."
+            ((BRANDING_FAILURES++))
+        fi
+    else
+        echo "  PASS: No open PRs to check."
+    fi
+fi
+
 if [[ $BRANDING_FAILURES -gt 0 ]]; then
     echo ""
     echo "CERTIFICATION FAILED at Gate 5 (Branding): $BRANDING_FAILURES issue(s)."
