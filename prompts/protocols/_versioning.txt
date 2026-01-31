@@ -115,18 +115,24 @@ New permanent agents MUST NOT be added unless they introduce a **new axis of res
 
 **Transient agents** (created via `euxis-synthesize compose`) are exempt from this rule — they are temporary by design and dissolved after task completion.
 
-### 10. Agent Activation Modes
+### 10. Agent Classification & Activation Modes
 
-Agents are classified by activation mode in `registry.json`:
+Agents are classified into three tiers per the Fleet Constitution (`CONSTITUTION.md`):
 
-| Mode | Meaning | Behavior |
-|------|---------|----------|
-| `always` (default) | Available in every session | Orchestrator considers for all task decompositions |
-| `on-demand` | Available but not loaded by default | Orchestrator dispatches only when explicitly needed or when task tags match |
+| Class | Activation | Rule |
+|-------|-----------|------|
+| **Core** (7) | Always present, authority-bearing | Define direction and may block progress |
+| **Default** (13) | Auto-available, task-triggered | Execute and advise within scope; do not define direction |
+| **On-Demand** (7) | Explicit invocation only | Add leverage, not safety; never block, never override core authority |
+
+The `activation` field in `registry.json` records this:
+- Core agents have no `activation` field (always present by definition).
+- Default agents: `"activation": "default"`.
+- On-demand agents: `"activation": "on-demand"`.
 
 On-demand agents are fully capable — they are not degraded or disabled. The distinction reduces cognitive load during orchestration by narrowing the default candidate set.
 
-**Current on-demand agents:** `growth-marketer`, `social-manager`, `brand-evangelist`.
+**Current on-demand agents:** `brand-evangelist`, `butler`, `deep-researcher`, `devrel-advocate`, `globalization-lead`, `growth-marketer`, `social-manager`.
 
 ### 11. Enforcement
 
