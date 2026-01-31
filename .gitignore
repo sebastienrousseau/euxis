@@ -7,3 +7,6 @@ v4.5_FINAL_AUDIT.md
 .DS_Store
 *.log
 tmp/
+
+# Override global gitignore that excludes /bin/ (Rust/Go convention)
+!bin/
