@@ -37,7 +37,7 @@ Ship code. Solve problems. Own your domain.
 | `growth-marketer` | Scale your impact | Standard |
 | `incident-commander` | Handle any crisis | Standard |
 | `legacy-maintainer` | Modernize without breaking | Coding |
-| `perf-optimizer` | Make it fast | Standard |
+| `perf-optimizer` | Make it fast | Math/Logic |
 | `product-manager` | Ship what matters | Strategic |
 | `qa-coordinator` | Ship with certainty | Standard |
 | `release-manager` | Flawless releases | Standard |
