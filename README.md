@@ -76,7 +76,7 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile && source ~/.profile
 
 ```bash
 euxis-health      # 8-point fleet integrity check
-euxis-certify     # Full 4-gate certification pipeline
+euxis-certify     # Full 6-gate certification pipeline
 ```
 
 ---
@@ -383,7 +383,7 @@ euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Exec
 |:--------|:------------|
 | `euxis-health` | Fleet integrity check |
 | `euxis-lint` | Static analysis |
-| `euxis-certify` | Full certification pipeline |
+| `euxis-certify` | 6-gate certification pipeline |
 | `euxis-test-infra` | Infrastructure unit tests |
 | `euxis-bench` | Performance benchmarking |
 | `euxis-audit-run` | Security audit with probes |

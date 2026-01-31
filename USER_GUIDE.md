@@ -23,7 +23,7 @@ Run these tools to verify fleet integrity before and after changes.
 |---------|-------------|
 | `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
 | `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
-| `euxis-certify` | Full certification: lint + tests + semantic verification |
+| `euxis-certify` | 6-gate certification: lint, tests, semantic, branding, documentation governance |
 | `euxis-health` | 8-point fleet health check: naming, hardening, orphans, headers, doc drift, certification, providers, codex |
 | `euxis-git-guard` | Pre-commit safety checks |
 | `euxis-verify` | Output verification |

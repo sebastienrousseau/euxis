@@ -1,6 +1,6 @@
 #!/bin/bash
 # EUXIS CERTIFY: The Final Toll Gate
-# Runs all 4 gates in sequence. All must pass for certification.
+# Runs all 6 gates in sequence. All must pass for certification.
 
 set -euo pipefail
 
@@ -82,6 +82,193 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
 else
     echo "  Golden dataset not found at $GOLDEN_DATASET"
     echo "  Skipping semantic verification (Gate 4 is advisory)."
+fi
+
+# GATE 5: Branding Compliance (Signature Presence)
+echo ""
+echo "[GATE 5] Branding Compliance..."
+echo "--------------------------------------------------"
+
+BRANDING_FAILURES=0
+SIGNATURE_FILE="$EUXIS_HOME/branding/signature.txt"
+
+# 5a. Signature file exists
+if [[ -f "$SIGNATURE_FILE" ]]; then
+    echo "  PASS: branding/signature.txt exists."
+else
+    echo "  FAIL: branding/signature.txt not found."
+    ((BRANDING_FAILURES++))
+fi
+
+# 5b. PR template contains signature
+PR_TEMPLATE="$EUXIS_HOME/.github/pull_request_template.md"
+if [[ -f "$PR_TEMPLATE" ]]; then
+    if grep -qF "Engineered with" "$PR_TEMPLATE" && grep -qF "Sebastien Rousseau" "$PR_TEMPLATE"; then
+        echo "  PASS: PR template carries branding signature."
+    else
+        echo "  FAIL: PR template missing branding signature."
+        ((BRANDING_FAILURES++))
+    fi
+else
+    echo "  FAIL: .github/pull_request_template.md not found."
+    ((BRANDING_FAILURES++))
+fi
+
+# 5c. README contains signature/branding
+README_FILE="$EUXIS_HOME/README.md"
+if [[ -f "$README_FILE" ]]; then
+    if grep -qF "Sebastien Rousseau" "$README_FILE"; then
+        echo "  PASS: README.md carries author attribution."
+    else
+        echo "  FAIL: README.md missing author attribution."
+        ((BRANDING_FAILURES++))
+    fi
+else
+    echo "  FAIL: README.md not found."
+    ((BRANDING_FAILURES++))
+fi
+
+# 5d. Git hook installed and executable
+HOOK_FILE="$EUXIS_HOME/hooks/prepare-commit-msg"
+if [[ -x "$HOOK_FILE" ]]; then
+    echo "  PASS: prepare-commit-msg hook is present and executable."
+else
+    echo "  FAIL: prepare-commit-msg hook missing or not executable."
+    ((BRANDING_FAILURES++))
+fi
+
+# 5e. Recent commits carry signature (check last 5)
+if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
+    UNSIGNED_COMMITS=0
+    CHECKED=0
+    while IFS= read -r hash; do
+        CHECKED=$((CHECKED + 1))
+        MSG=$(git -C "$EUXIS_HOME" log -1 --format="%B" "$hash")
+        if ! echo "$MSG" | grep -qF "Engineered with Euxis"; then
+            UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
+            SHORT=$(git -C "$EUXIS_HOME" log -1 --format="%h %s" "$hash")
+            echo "  UNSIGNED: $SHORT"
+        fi
+    done < <(git -C "$EUXIS_HOME" log --format="%H" -5 2>/dev/null)
+
+    if [[ $UNSIGNED_COMMITS -eq 0 && $CHECKED -gt 0 ]]; then
+        echo "  PASS: Last $CHECKED commits carry branding signature."
+    elif [[ $CHECKED -eq 0 ]]; then
+        echo "  SKIP: No git history available."
+    else
+        echo "  FAIL: $UNSIGNED_COMMITS of $CHECKED recent commits missing signature."
+        ((BRANDING_FAILURES++))
+    fi
+fi
+
+# 5f. Signature URL points to euxis.co
+if [[ -f "$SIGNATURE_FILE" ]]; then
+    if grep -qF "euxis.co" "$SIGNATURE_FILE"; then
+        echo "  PASS: Signature URL points to euxis.co."
+    else
+        echo "  FAIL: Signature URL does not point to euxis.co."
+        ((BRANDING_FAILURES++))
+    fi
+fi
+
+if [[ $BRANDING_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 5 (Branding): $BRANDING_FAILURES issue(s)."
+    exit 1
+fi
+
+# GATE 6: Documentation Governance (sync-docs readiness, doc completeness)
+echo ""
+echo "[GATE 6] Documentation Governance..."
+echo "--------------------------------------------------"
+
+DOC_FAILURES=0
+
+# 6a. euxis-sync-docs exists and is executable
+SYNC_DOCS="$BIN_DIR/euxis-sync-docs"
+if [[ -x "$SYNC_DOCS" ]]; then
+    echo "  PASS: euxis-sync-docs is present and executable."
+else
+    echo "  FAIL: euxis-sync-docs missing or not executable."
+    ((DOC_FAILURES++))
+fi
+
+# 6b. Core documentation files exist
+REQUIRED_DOCS=("README.md" "USER_GUIDE.md" "FLEET_GUIDE.md")
+for doc in "${REQUIRED_DOCS[@]}"; do
+    if [[ -f "$EUXIS_HOME/$doc" ]]; then
+        echo "  PASS: $doc exists."
+    else
+        echo "  FAIL: $doc not found."
+        ((DOC_FAILURES++))
+    fi
+done
+
+# 6c. Documentation freshness (all core docs updated within 7 days)
+for doc in "${REQUIRED_DOCS[@]}"; do
+    DOC_PATH="$EUXIS_HOME/$doc"
+    if [[ -f "$DOC_PATH" ]]; then
+        LAST_MOD=$(stat -c %Y "$DOC_PATH" 2>/dev/null || stat -f %m "$DOC_PATH" 2>/dev/null || echo 0)
+        NOW=$(date +%s)
+        AGE_DAYS=$(( (NOW - LAST_MOD) / 86400 ))
+        if (( AGE_DAYS > 7 )); then
+            echo "  WARN: $doc is ${AGE_DAYS} days old. Run 'euxis-sync-docs' to refresh."
+            ((DOC_FAILURES++))
+        fi
+    fi
+done
+if [[ $DOC_FAILURES -eq 0 ]]; then
+    echo "  PASS: All documentation is current (updated within 7 days)."
+fi
+
+# 6d. README references correct version
+CURRENT_VERSION="0.0.6"
+if [[ -f "$EUXIS_HOME/README.md" ]]; then
+    if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
+        echo "  PASS: README.md references version $CURRENT_VERSION."
+    else
+        echo "  FAIL: README.md does not reference version $CURRENT_VERSION."
+        ((DOC_FAILURES++))
+    fi
+fi
+
+# 6e. USER_GUIDE and FLEET_GUIDE reference correct version
+for doc in USER_GUIDE.md FLEET_GUIDE.md; do
+    if [[ -f "$EUXIS_HOME/$doc" ]]; then
+        if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
+            echo "  PASS: $doc references version $CURRENT_VERSION."
+        else
+            echo "  FAIL: $doc does not reference version $CURRENT_VERSION."
+            ((DOC_FAILURES++))
+        fi
+    fi
+done
+
+# 6f. Registry, squads, and codex manifests are valid JSON
+MANIFESTS=("registry.json" "squads.json" "capabilities.json" "codex/codex.json")
+if command -v jq &>/dev/null; then
+    for manifest in "${MANIFESTS[@]}"; do
+        MANIFEST_PATH="$EUXIS_HOME/$manifest"
+        if [[ -f "$MANIFEST_PATH" ]]; then
+            if jq empty "$MANIFEST_PATH" 2>/dev/null; then
+                echo "  PASS: $manifest is valid JSON."
+            else
+                echo "  FAIL: $manifest is invalid JSON."
+                ((DOC_FAILURES++))
+            fi
+        else
+            echo "  FAIL: $manifest not found."
+            ((DOC_FAILURES++))
+        fi
+    done
+else
+    echo "  SKIP: jq not installed, cannot validate JSON manifests."
+fi
+
+if [[ $DOC_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 6 (Documentation): $DOC_FAILURES issue(s)."
+    exit 1
 fi
 
 echo ""
