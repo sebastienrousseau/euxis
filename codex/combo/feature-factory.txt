@@ -1,0 +1,77 @@
+# Codex Template: Feature Factory
+# Target Agents: deep-researcher, architect, bug-fixer, unit-tester, reviewer
+# Category: combo
+# Output: manifest
+
+You are running the **Feature Factory** — a 5-agent chain that takes a feature idea from research to review-ready implementation.
+
+## Inputs
+
+- **Feature Idea:** `{{CODEX_FEATURE_IDEA}}`
+- **Target Codebase:** {{CODEX_TARGET_CODEBASE}}
+
+## Mission
+
+Generate a dispatch manifest that chains 5 agents in sequence. Each agent builds on the previous agent's output. The final output is a JSON dispatch manifest ready for `euxis-dispatch`.
+
+## Agent Chain
+
+### Agent 1: deep-researcher
+**Task:** Research the feature idea. Identify prior art, relevant libraries, potential pitfalls, and recommended approach. Output a research brief (max 1000 words).
+
+### Agent 2: architect
+**Task:** Using the research brief, design the implementation. Produce: file list, module boundaries, data flow, and integration points. Output an architecture spec (max 1000 words).
+
+### Agent 3: bug-fixer
+**Task:** Using the architecture spec, implement the feature. Write the actual code changes as diffs. Follow existing codebase conventions. Output implementation diffs.
+
+### Agent 4: unit-tester
+**Task:** Using the implementation diffs, write comprehensive tests. Cover happy path, edge cases, and error conditions. Output test files.
+
+### Agent 5: reviewer
+**Task:** Review the entire chain output (research, architecture, implementation, tests). Produce a quality gate verdict: PASS, PASS_WITH_NOTES, or FAIL with specific issues.
+
+## Output Format
+
+Generate a dispatch manifest:
+
+```json
+{
+  "project": "feature-factory-{{CODEX_FEATURE_IDEA}}",
+  "mode": "hierarchical",
+  "dispatches": [
+    {
+      "agent": "deep-researcher",
+      "priority": "P1",
+      "task": "Research: {{CODEX_FEATURE_IDEA}}. Identify prior art, libraries, pitfalls, and recommended approach. Output a research brief."
+    },
+    {
+      "agent": "architect",
+      "priority": "P1",
+      "task": "Design implementation for: {{CODEX_FEATURE_IDEA}}. Produce file list, module boundaries, data flow, integration points."
+    },
+    {
+      "agent": "bug-fixer",
+      "priority": "P1",
+      "task": "Implement feature: {{CODEX_FEATURE_IDEA}}. Write code changes as diffs following existing codebase conventions."
+    },
+    {
+      "agent": "unit-tester",
+      "priority": "P1",
+      "task": "Write tests for: {{CODEX_FEATURE_IDEA}}. Cover happy path, edge cases, error conditions."
+    },
+    {
+      "agent": "reviewer",
+      "priority": "P0",
+      "task": "Review full feature delivery for: {{CODEX_FEATURE_IDEA}}. Verdict: PASS, PASS_WITH_NOTES, or FAIL."
+    }
+  ]
+}
+```
+
+## Constraints
+
+- Each agent's task must be self-contained (include enough context to execute independently).
+- If a target codebase is specified, all agents must scope their work to that codebase.
+- The reviewer gets P0 priority (quality gate).
+- Maximum output: 2000 words.

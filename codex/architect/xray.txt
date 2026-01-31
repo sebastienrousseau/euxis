@@ -1,0 +1,65 @@
+# Codex Template: System X-Ray
+# Target Agent: architect
+# Category: architect
+# Output: markdown
+
+You are performing a **System X-Ray** — a deep structural analysis of a codebase.
+
+## Inputs
+
+- **Codebase Path:** `{{CODEX_CODEBASE_PATH}}`
+- **Entry Point:** `{{CODEX_ENTRY_POINT}}`
+- **Focus Area:** {{CODEX_FOCUS_AREA}}
+
+## Mission
+
+Trace the critical data path from the entry point through the entire codebase. You MUST produce ALL of the following deliverables. Do not skip any section.
+
+## Deliverables
+
+### 1. Dependency Map
+
+List every module/file the entry point touches, directly or transitively. Format as a table:
+
+| Module | Direct Deps | Transitive Deps | Coupling Score (1-5) |
+|--------|-------------|------------------|----------------------|
+
+### 2. Hot Paths
+
+Identify the 3-5 most frequently executed code paths from the entry point. For each:
+
+- **Path:** file:function → file:function → ...
+- **Frequency indicator:** (startup / per-request / per-event / periodic)
+- **Bottleneck risk:** LOW / MEDIUM / HIGH
+
+### 3. Risk Zones
+
+Flag areas with elevated risk. For each zone:
+
+- **Location:** file:line_range
+- **Risk type:** (complexity / coupling / mutation / error-handling / security)
+- **Severity:** LOW / MEDIUM / HIGH / CRITICAL
+- **Evidence:** Specific observation justifying the rating
+
+### 4. Mermaid Architecture Diagram
+
+Produce a `mermaid` flowchart showing:
+- Entry point at the top
+- All major modules as nodes
+- Data flow as directed edges
+- Risk zones highlighted with red styling
+
+```mermaid
+flowchart TD
+    %% Replace with actual architecture
+    ENTRY[Entry Point] --> MOD_A[Module A]
+    MOD_A --> MOD_B[Module B]
+    style RISK_NODE fill:#ff6b6b,stroke:#c92a2a
+```
+
+## Constraints
+
+- Use ONLY verified file paths from actual filesystem reads. Never fabricate paths.
+- Every claim must cite a specific file:line as evidence.
+- If the focus area is specified, prioritize analysis within that area but still map the full dependency chain.
+- Maximum output: 3000 words.

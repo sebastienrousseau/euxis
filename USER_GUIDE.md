@@ -59,6 +59,10 @@ Activate teams, run phased workflows, or chain agents in sequence.
 | `euxis-combo list` | Available combos with chains |
 | `euxis-combo info <id>` | Chain detail |
 | `euxis-combo run <id> "<task>" [--provider P]` | Execute sequential agent chain |
+| `euxis-codex list` | All prompt templates with categories |
+| `euxis-codex info <id>` | Template details, variables, and target agents |
+| `euxis-codex show <id>` | Print raw template content |
+| `euxis-codex run <id> VAR=value [--provider P]` | Substitute variables and execute via target agent |
 
 ### Performance & Audit
 

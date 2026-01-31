@@ -29,7 +29,7 @@ log "=================================================="
 # CHECK 1: Naming Consistency (filename vs agent_id)
 # ────────────────────────────────────────────────────────
 log ""
-log "[1/7] Naming Consistency..."
+log "[1/8] Naming Consistency..."
 
 for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
@@ -51,7 +51,7 @@ fi
 # CHECK 2: Script Hardening (set -uo pipefail)
 # ────────────────────────────────────────────────────────
 log ""
-log "[2/7] Script Hardening..."
+log "[2/8] Script Hardening..."
 
 HARDENING_FAILURES=0
 for script in "${BIN_DIR}"/*; do
@@ -73,7 +73,7 @@ fi
 # CHECK 3: Orphan Detection (agents not in registry)
 # ────────────────────────────────────────────────────────
 log ""
-log "[3/7] Orphan Detection..."
+log "[3/8] Orphan Detection..."
 
 if [[ ! -f "$REGISTRY" ]]; then
     log "  MISSING: registry.json not found at $REGISTRY"
@@ -125,7 +125,7 @@ fi
 # CHECK 4: Header Schema Validation
 # ────────────────────────────────────────────────────────
 log ""
-log "[4/7] Header Schema Validation..."
+log "[4/8] Header Schema Validation..."
 
 REQUIRED_FIELDS=("agent_id" "role" "version" "tags" "last_updated")
 HEADER_FAILURES=0
@@ -154,7 +154,7 @@ fi
 # CHECK 5: Certification Readiness
 # ────────────────────────────────────────────────────────
 log ""
-log "[5/7] Documentation Drift..."
+log "[5/8] Documentation Drift..."
 
 USER_GUIDE="${EUXIS_HOME}/USER_GUIDE.md"
 if [[ -f "$USER_GUIDE" ]]; then
@@ -172,7 +172,7 @@ else
 fi
 
 log ""
-log "[6/7] Certification Readiness..."
+log "[6/8] Certification Readiness..."
 
 CERTIFY_SCRIPT="${BIN_DIR}/euxis-certify"
 if [[ -x "$CERTIFY_SCRIPT" ]]; then
@@ -202,7 +202,7 @@ fi
 # CHECK 6: Provider Connectivity (CLI tools)
 # ────────────────────────────────────────────────────────
 log ""
-log "[7/7] Provider Connectivity..."
+log "[7/8] Provider Connectivity..."
 
 PROVIDER_WARNINGS=0
 PROVIDER_CLIS=(claude gemini codex ollama opencode qwen crush kilo kiro-cli goose)
@@ -224,6 +224,43 @@ elif [[ $FOUND_PROVIDERS -ge 1 ]]; then
 else
     log "  WARNING: No provider CLIs found. At least one is required."
     ((WARNINGS++))
+fi
+
+# ────────────────────────────────────────────────────────
+# CHECK 8: Codex Integrity (manifest + template files)
+# ────────────────────────────────────────────────────────
+log ""
+log "[8/8] Codex Integrity..."
+
+CODEX_DIR="${EUXIS_HOME}/codex"
+CODEX_MANIFEST="${CODEX_DIR}/codex.json"
+
+if [[ ! -f "$CODEX_MANIFEST" ]]; then
+    log "  MISSING: codex.json not found at $CODEX_MANIFEST"
+    ((FAILURES++))
+else
+    if ! command -v jq &>/dev/null; then
+        log "  SKIP: jq not installed, cannot validate codex.json"
+        ((WARNINGS++))
+    elif ! jq empty "$CODEX_MANIFEST" 2>/dev/null; then
+        log "  INVALID JSON: codex.json is not valid JSON"
+        ((FAILURES++))
+    else
+        CODEX_FAILURES=0
+        while IFS=$'\t' read -r tid tfile; do
+            if [[ ! -f "${CODEX_DIR}/${tfile}" ]]; then
+                log "  MISSING TEMPLATE: '$tid' references '${tfile}' but file not found"
+                ((CODEX_FAILURES++))
+            fi
+        done < <(jq -r '.templates[] | [.id, .file] | @tsv' "$CODEX_MANIFEST")
+
+        if [[ $CODEX_FAILURES -eq 0 ]]; then
+            TEMPLATE_COUNT=$(jq '.templates | length' "$CODEX_MANIFEST")
+            log "  Codex manifest valid. $TEMPLATE_COUNT templates verified."
+        else
+            FAILURES=$((FAILURES + CODEX_FAILURES))
+        fi
+    fi
 fi
 
 # ────────────────────────────────────────────────────────

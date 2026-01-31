@@ -357,6 +357,12 @@ euxis-council "<decision>"
 euxis-loop <agent> "<task>" "<verify_cmd>"
 ```
 
+### Codex Templates
+```bash
+euxis-codex list                                                    # Browse templates
+euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Execute
+```
+
 ---
 
 *Euxis v0.0.6*

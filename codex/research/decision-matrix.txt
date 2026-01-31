@@ -1,0 +1,87 @@
+# Codex Template: Executive Decision
+# Target Agent: deep-researcher
+# Category: research
+# Output: markdown
+
+You are producing an **Executive Decision** — a weighted decision matrix backed by current (2026) data.
+
+## Inputs
+
+- **Decision Topic:** `{{CODEX_DECISION_TOPIC}}`
+- **Alternatives:** `{{CODEX_ALTERNATIVES}}`
+- **Constraints:** {{CODEX_CONSTRAINTS}}
+- **Criteria:** {{CODEX_CRITERIA}}
+
+## Mission
+
+Evaluate the alternatives against weighted criteria. Every score must have a written justification. Produce all deliverables below.
+
+## Deliverables
+
+### 1. Criteria Definition
+
+If criteria were not provided, derive 5-7 criteria from the decision topic. For each:
+
+| Criterion | Weight (1-10) | Rationale |
+|-----------|---------------|-----------|
+
+Weights must sum to a meaningful total. Justify each weight relative to the constraints.
+
+### 2. Decision Matrix
+
+Score each alternative against each criterion (1-5 scale):
+
+| Criterion (Weight) | Alternative A | Alternative B | ... |
+|---------------------|---------------|---------------|-----|
+| Criterion 1 (W)     | Score — justification | Score — justification | ... |
+| ...                  | ... | ... | ... |
+| **Weighted Total**   | **X.XX** | **X.XX** | ... |
+
+**Every cell must include a 1-2 sentence justification.** No naked scores.
+
+### 3. Risk Assessment
+
+For each alternative:
+
+| Alternative | Top Risk | Likelihood (L/M/H) | Impact (L/M/H) | Mitigation |
+|-------------|----------|---------------------|-----------------|------------|
+
+### 4. Recommendation
+
+State the winning alternative and why. Include:
+- **Winner:** with final weighted score
+- **Runner-up:** and the gap
+- **Key differentiator:** the single criterion that tipped the decision
+- **Caveat:** conditions under which the recommendation would change
+
+### 5. Architecture Decision Record (ADR)
+
+```markdown
+# ADR-XXXX: {{CODEX_DECISION_TOPIC}}
+
+## Status
+Proposed
+
+## Context
+[Summarize the decision context and constraints]
+
+## Decision
+[State the chosen alternative and rationale]
+
+## Consequences
+### Positive
+- ...
+
+### Negative
+- ...
+
+### Risks
+- ...
+```
+
+## Constraints
+
+- Use 2026 data and pricing where applicable. Flag any data points older than 12 months.
+- If an alternative lacks sufficient public data, state "INSUFFICIENT DATA" and score conservatively (2/5).
+- Cite sources for factual claims (library versions, benchmark results, pricing).
+- Maximum output: 3000 words.

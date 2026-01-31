@@ -30,6 +30,7 @@ Build faster. Ship with confidence.
 - [Squads](#squads)
 - [Playbooks](#playbooks)
 - [Combos](#combos)
+- [Codex](#codex)
 - [CLI Reference](#cli-reference)
 - [Directory Structure](#directory-structure)
 - [Advanced](#advanced)
@@ -74,7 +75,7 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile && source ~/.profile
 ### Verify
 
 ```bash
-euxis-health      # 7-point fleet integrity check
+euxis-health      # 8-point fleet integrity check
 euxis-certify     # Full 4-gate certification pipeline
 ```
 
@@ -347,6 +348,26 @@ euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
 
 ---
 
+## Codex
+
+The Codex is a prompt template library. Battle-tested templates that force agents into structured, high-quality output patterns.
+
+| Template | Agent | Use Case |
+|:---------|:------|:---------|
+| System X-Ray | `architect` | Trace critical data paths, dependency maps, risk zones |
+| Surgical Strike | `bug-fixer` | Zero-side-effect fix with blast radius verification |
+| Executive Decision | `deep-researcher` | Weighted decision matrix with 2026 data and ADR |
+| Feature Factory | 5-agent chain | End-to-end feature delivery from research to review |
+
+```bash
+euxis-codex list                                                    # All templates
+euxis-codex info xray                                               # Details and variables
+euxis-codex show surgical-fix                                       # Raw template
+euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Execute
+```
+
+---
+
 ## CLI Reference
 
 ### Core
@@ -382,6 +403,7 @@ euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
 | `euxis-squad <cmd> [args]` | Squad management and deployment |
 | `euxis-playbook <cmd> [args]` | Phased squad execution via playbooks |
 | `euxis-combo <cmd> [args]` | Sequential agent chain execution |
+| `euxis-codex <cmd> [args]` | Prompt template library |
 | `euxis-synthesize <cmd> [args]` | Dynamic agent composition |
 
 ### Memory
@@ -426,7 +448,14 @@ euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
 │   ├── euxis-squad         Squad management and deployment
 │   ├── euxis-playbook      Phased squad execution
 │   ├── euxis-combo         Sequential agent chains
-│   └── ...                 23 tools total
+│   ├── euxis-codex         Prompt template library
+│   └── ...                 24 tools total
+├── codex/                     Prompt template library
+│   ├── codex.json             Template manifest
+│   ├── architect/             Architecture templates
+│   ├── code/                  Code templates
+│   ├── research/              Research templates
+│   └── combo/                 Multi-agent chain templates
 ├── squads.json             Squad and combo registry
 ├── playbooks/              Phased squad activation definitions
 │   ├── zero-to-one.json    Vision → Build → Quality → Growth

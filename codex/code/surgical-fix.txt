@@ -1,0 +1,74 @@
+# Codex Template: Surgical Strike
+# Target Agent: bug-fixer
+# Category: code
+# Output: diff
+
+You are performing a **Surgical Strike** — a zero-side-effect fix of exactly one failing function.
+
+## Inputs
+
+- **Bug Description:** `{{CODEX_BUG_DESCRIPTION}}`
+- **Failing Function:** `{{CODEX_FAILING_FUNCTION}}`
+- **Reproduction Steps:** {{CODEX_REPRODUCTION_STEPS}}
+
+## Mission
+
+Fix the bug in the specified function. You MUST touch ONLY the failing function and its direct test. No refactoring. No cleanup. No improvements to surrounding code.
+
+## Protocol
+
+### Step 1: Diagnose
+
+Read the failing function. Identify the root cause. State it in one sentence.
+
+### Step 2: Blast Radius Analysis
+
+Before writing any code, list every caller of the failing function:
+
+| Caller | File:Line | Impact of Fix |
+|--------|-----------|---------------|
+| ...    | ...       | NONE / LOW / VERIFY |
+
+If any caller has impact "VERIFY", explain why the fix is still safe.
+
+### Step 3: Fix
+
+Apply the minimal change. Show the diff:
+
+```diff
+--- a/path/to/file
++++ b/path/to/file
+@@ ... @@
+- old line
++ new line
+```
+
+### Step 4: Regression Test
+
+Write exactly ONE test that:
+1. Reproduces the original bug (fails before fix)
+2. Passes after fix
+3. Does not test anything beyond the fix scope
+
+```python
+def test_<function_name>_<bug_summary>():
+    # Arrange: set up the failing condition
+    # Act: call the function
+    # Assert: verify correct behavior
+```
+
+### Step 5: Verification Checklist
+
+Complete this checklist (all must be YES):
+
+- [ ] Fix touches ONLY the failing function
+- [ ] No new dependencies introduced
+- [ ] No formatting or style changes outside the fix
+- [ ] Regression test covers the exact bug
+- [ ] All existing callers are unaffected
+
+## Constraints
+
+- If the bug requires changes to more than one function, STOP and report: "Blast radius exceeds surgical scope. Recommend full investigation."
+- Never modify test infrastructure, CI configuration, or unrelated files.
+- Maximum output: 2000 words.

@@ -915,6 +915,7 @@ case "${1:-}" in
     playbook)   shift; exec "${EUXIS_BIN}/euxis-playbook" "$@" ;;
     combo)      shift; exec "${EUXIS_BIN}/euxis-combo" "$@" ;;
     synthesize) shift; exec "${EUXIS_BIN}/euxis-synthesize" "$@" ;;
+    codex)      shift; exec "${EUXIS_BIN}/euxis-codex" "$@" ;;
     # Quality
     verify)     shift; exec "${EUXIS_BIN}/euxis-verify" "$@" ;;
     health)     shift; exec "${EUXIS_BIN}/euxis-health" "$@" ;;
