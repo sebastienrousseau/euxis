@@ -6,16 +6,29 @@
 
 <!-- How was this tested? -->
 
-- [ ] Unit tests pass
-- [ ] Integration tests pass
+- [ ] `euxis-health` — 8-point fleet integrity check passes
+- [ ] `euxis-lint` — Static analysis clean
+- [ ] `euxis-certify` — All 6 gates pass
 - [ ] Manual verification
 
-## Checklist
+## Quality Checklist
 
-- [ ] Code follows project conventions
-- [ ] Documentation updated (if applicable)
+- [ ] Code follows project conventions (`set -uo pipefail` in bash scripts)
+- [ ] Documentation updated (README.md, USER_GUIDE.md, FLEET_GUIDE.md)
 - [ ] No secrets or credentials committed
-- [ ] Changelog entry added (if user-facing)
+- [ ] Branding signature present in all commits
+- [ ] JSON manifests valid (registry.json, squads.json, codex.json)
+- [ ] Agent prompts include required header fields (agent_id, role, version, tags, last_updated)
+
+## Certification Gates
+
+| Gate | Check | Status |
+|:-----|:------|:-------|
+| 1+2 | Static Analysis (Lint) | |
+| 3 | Infrastructure Tests | |
+| 4 | Semantic Verification | |
+| 5 | Branding Compliance | |
+| 6 | Documentation Governance | |
 
 ---
 
