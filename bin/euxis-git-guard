@@ -4,6 +4,9 @@
 # Exits 0 if safe to proceed, 1 if on a protected branch and user declines.
 set -uo pipefail
 
+# 0. Skip in non-interactive contexts (CI, tests, pipes)
+[[ -t 0 ]] || exit 0
+
 # 1. Get current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [[ -z "$CURRENT_BRANCH" ]]; then

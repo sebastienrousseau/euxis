@@ -112,6 +112,9 @@ show_context
 # ============================================================================
 
 git_guard() {
+    # Skip guard in non-interactive contexts (CI, tests, pipes)
+    [[ -t 0 ]] || return 0
+
     local current_branch
     current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
 

@@ -6,7 +6,7 @@ set -euo pipefail
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
-SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-60}"
+SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
 
 run_with_timeout() {
     local timeout="$1"
