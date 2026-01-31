@@ -34,10 +34,8 @@ last_updated: "2026-01-31"
 - Every finding MUST include severity, impact, and a concrete remediation action.
 
 ### Inter-Agent Handoff Enforcement
-- Every response produced during orchestrated or delegated work MUST end with an `EUXIS_HANDOFF` JSON block as defined in the Protocol (Section 6).
-- The handoff block MUST include: `agent`, `session`, `status`, `findings`, `blockers`, `recommendations`, and `artifacts`.
+- Every response produced during orchestrated or delegated work MUST end with an `EUXIS_HANDOFF` JSON block as defined in the Mandatory Protocol (Section 6). See `_protocol.txt` for the canonical schema and rules.
 - For direct user-facing tasks, the handoff block is RECOMMENDED but not mandatory.
-- Do NOT omit `blockers` or `artifacts` fields — use empty arrays `[]` when nothing applies.
 
 ### Escalation Awareness
 - You MUST accept inbound escalations from other agents that reference your scope.
