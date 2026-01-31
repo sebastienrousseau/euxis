@@ -32,5 +32,5 @@
 
 ---
 
-> Designed by **Sebastien Rousseau**
-> Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+> 🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+> 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
