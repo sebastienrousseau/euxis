@@ -190,7 +190,7 @@ cmd_run() {
         --arg agent "$member" \
         --arg priority "$priority" \
         --arg task "$task" \
-        '. + [{"agent": $agent, "priority": $priority, "task": $task}]')
+        '. + [{"agent": $agent, "priority": $priority, "task": $task, "verify_cmd": "true"}]')
     done < <(echo "$squad" | jq -r '.members[]')
 
     local manifest_file

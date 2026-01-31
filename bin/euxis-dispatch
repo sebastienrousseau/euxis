@@ -565,6 +565,7 @@ execute_by_stages() {
 
     if [[ $total_failed -eq 0 ]]; then
         echo "ALL STAGES COMPLETE. $DISPATCH_COUNT dispatches succeeded."
+        exit 0
     else
         echo "$total_failed dispatch(es) failed. Check logs in $LOG_DIR/"
         exit 1
@@ -831,6 +832,7 @@ else
     echo ""
     if [[ $FAILED -eq 0 ]]; then
         echo "ALL $DISPATCH_COUNT MISSIONS COMPLETE ($MODE mode)."
+        exit 0
     else
         echo "$FAILED of $DISPATCH_COUNT missions failed. Check logs in $LOG_DIR/"
         exit 1
