@@ -219,7 +219,7 @@ When no provider is specified, Euxis routes agents by task complexity:
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
 | S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Best reasoning and tool use |
-| A-Tier: Research | deep-researcher, compliance-officer | `gemini` | 2M context window for massive analysis |
+| A-Tier: Research | deep-researcher | `gemini` | 2M context window for massive analysis |
 | A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
 | B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
 | B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |

@@ -8,44 +8,55 @@ Version 0.0.6
 
 ## Agent Registry
 
-### Command Layer
+See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
 
-Three core agents orchestrate complex work, design systems, and govern quality.
+### Core (7) — Authority-bearing, always present
 
-| Agent | What It Does |
-|-------|-------------|
-| `orchestrator` | Breaks down ambitious goals. Routes work to specialists. Delivers complete solutions. |
-| `architect` | Designs systems that scale. Creates patterns that last. |
-| `librarian` | Keeps knowledge sharp. Makes documentation beautiful. |
+Seven core agents define direction and may block progress. If one is missing, the system is incomplete.
 
-### Execution Layer
+| Agent | What It Does | Model Tier |
+|-------|-------------|------------|
+| `orchestrator` | Breaks down ambitious goals. Routes work to specialists. Delivers complete solutions. | Strategic |
+| `architect` | Designs systems that scale. Creates patterns that last. | Strategic |
+| `product-manager` | Defines intent, scope, and prioritization. Ships what matters. | Strategic |
+| `reviewer` | Truth & quality gate. Guarantees correctness and completeness. | Strategic |
+| `librarian` | Keeps knowledge sharp. Documentation governance. | Utility |
+| `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
+| `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
 
-Twenty-two specialists own their domain and ship verified results.
+### Default (13) — Auto-available, task-triggered
+
+Execute within scope when triggered. Advise but do not define direction.
 
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
-| `automation-engineer` | Zero-touch deployments | Standard |
-| `brand-evangelist` | Brand voice and storytelling | Standard |
+| `automation-engineer` | Zero-touch deployments | Coding |
 | `bug-fixer` | Get to root cause fast | Coding |
-| `butler` | Perfect voice summaries | Utility |
-| `compliance-officer` | Ship with confidence | Standard |
-| `data-steward` | Total system visibility | Standard |
-| `deep-researcher` | Find what others miss | Research |
-| `devrel-advocate` | Build community | Standard |
+| `data-steward` | Total system visibility | Math/Logic |
 | `edge-hunter` | Bulletproof security | Standard |
-| `globalization-lead` | Global reach | Standard |
-| `growth-marketer` | Scale your impact | Standard |
-| `incident-commander` | Handle any crisis | Standard |
-| `legacy-maintainer` | Modernize without breaking | Coding |
+| `incident-commander` | Handle any crisis | Enterprise |
+| `legacy-maintainer` | Modernize without breaking | Local Code |
 | `perf-optimizer` | Make it fast | Math/Logic |
-| `product-manager` | Ship what matters | Strategic |
 | `qa-coordinator` | Ship with certainty | Standard |
 | `release-manager` | Flawless releases | Standard |
-| `reviewer` | Guarantee quality | Strategic |
-| `social-manager` | Amplify your voice | Standard |
-| `tech-writer` | Documentation that delights | Standard |
-| `unit-tester` | Prevent regressions | Standard |
+| `security-lead` | Security policy, threat governance, edge-hunter dispatch | Standard |
+| `tech-writer` | Documentation that delights | Utility |
+| `unit-tester` | Prevent regressions | Coding |
 | `ux-sentinel` | Experiences users love | Standard |
+
+### On-Demand (7) — Explicit invocation only
+
+Add leverage, not safety. Never block, never override core authority.
+
+| Agent | Domain | Model Tier |
+|-------|--------|------------|
+| `brand-evangelist` | Brand voice and storytelling | Standard |
+| `butler` | Perfect voice summaries | Utility |
+| `deep-researcher` | Find what others miss | Research |
+| `devrel-advocate` | Build community | Standard |
+| `globalization-lead` | Global reach | Standard |
+| `growth-marketer` | Scale your impact | Standard |
+| `social-manager` | Amplify your voice | Standard |
 
 ---
 
@@ -152,8 +163,8 @@ Right capability. Right cost.
 
 | Tier | When to Use | Provider | Agents |
 |------|-------------|----------|--------|
-| S-Tier: Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer |
-| A-Tier: Research | Deep analysis, large context | `gemini` | deep-researcher, compliance-officer |
+| S-Tier: Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer |
+| A-Tier: Research | Deep analysis, large context | `gemini` | deep-researcher |
 | A-Tier: Enterprise | AWS infrastructure, corporate security | `amazon-q` | incident-commander |
 | B-Tier: Coding | Agentic tool use, developer workflows | `goose` | bug-fixer, unit-tester, automation-engineer |
 | B-Tier: Local Code | Local models for diffs, migrations | `opencode` | legacy-maintainer |
@@ -228,7 +239,7 @@ Route work to the right specialist every time.
 
 | Task | Lead | Support |
 |------|------|---------|
-| Security audit | `edge-hunter` | `compliance-officer` |
+| Security audit | `security-lead` | `edge-hunter`, `compliance-officer` |
 | Bug investigation | `bug-fixer` | `data-steward` |
 | Architecture design | `architect` | `product-manager` |
 | Release coordination | `release-manager` | `qa-coordinator`, `tech-writer` |
@@ -244,7 +255,7 @@ Route work to the right specialist every time.
 
 ### Security Pipeline
 ```
-edge-hunter -> bug-fixer -> unit-tester -> qa-coordinator -> reviewer
+security-lead -> edge-hunter -> bug-fixer -> unit-tester -> qa-coordinator -> reviewer
 ```
 
 ### Release Pipeline

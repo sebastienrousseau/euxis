@@ -11,7 +11,7 @@ Version 0.0.6
 
 ## Overview
 
-Euxis gives you 25 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
+Euxis gives you 27 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
 
 Build faster. Ship with confidence.
 
@@ -108,44 +108,49 @@ flowchart LR
 
 ## Your Specialist Team
 
-Three core agents govern the fleet. Twenty-two specialists execute domain work.
+27 agents across three tiers: 7 core agents govern the fleet, 13 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
 
-### Core
+### Core (7) — Authority-bearing, always present
 
 | Agent | Domain |
 |:------|:-------|
 | `orchestrator` | Task decomposition, delegation, and synthesis |
-| `architect` | Software architecture, patterns, and fleet dispatching |
-| `librarian` | Memory optimization, documentation governance, compliance |
+| `architect` | Software architecture, patterns, and design decisions |
+| `product-manager` | Intent, scope, and prioritization |
+| `reviewer` | Truth & quality gate |
+| `librarian` | Memory optimization, knowledge continuity, documentation governance |
+| `compliance-officer` | Legal, privacy, and regulatory authority |
+| `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Specialists
-
-Each specialist owns a domain and delivers verified results.
+### Default (13) — Auto-available, task-triggered
 
 | Agent | Domain |
 |:------|:-------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform |
-| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `butler` | TTS-optimized summarization for spoken output |
-| `compliance-officer` | PII scanning, license auditing, GDPR/CCPA |
 | `data-steward` | Observability, telemetry, structured logging |
-| `deep-researcher` | Iterative multi-pass research with cross-validation |
-| `devrel-advocate` | Developer relations, tutorials, demos |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
-| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, funnel optimization, go-to-market strategy |
 | `incident-commander` | Incident response, root cause analysis, post-mortems |
 | `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
 | `perf-optimizer` | Latency, throughput, and memory profiling |
-| `product-manager` | Requirements, user stories, prioritization |
 | `qa-coordinator` | End-to-end testing coordination, quality gates |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
-| `reviewer` | Quality gate validation and completeness checking |
-| `social-manager` | Platform-native content and community engagement |
+| `security-lead` | Security policy, threat governance, edge-hunter dispatch |
 | `tech-writer` | Documentation, tutorials, API reference |
 | `unit-tester` | Test coverage, reliability, regression prevention |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), responsive testing |
+
+### On-Demand (7) — Explicit invocation only
+
+| Agent | Domain |
+|:------|:-------|
+| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
+| `butler` | TTS-optimized summarization for spoken output |
+| `deep-researcher` | Iterative multi-pass research with cross-validation |
+| `devrel-advocate` | Developer relations, tutorials, demos |
+| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
+| `growth-marketer` | SEO, funnel optimization, go-to-market strategy |
+| `social-manager` | Platform-native content and community engagement |
 
 See the [Fleet Guide](FLEET_GUIDE.md) for delegation patterns, provider tiering, and workflow examples.
 
@@ -259,8 +264,8 @@ When you omit the provider argument, Euxis routes each agent to the optimal tier
 
 | Tier | Agents | Provider | Rationale |
 |:-----|:-------|:---------|:----------|
-| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Strongest reasoning |
-| A-Tier: Research | deep-researcher, compliance-officer | `gemini` | 2M token context window |
+| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Strongest reasoning |
+| A-Tier: Research | deep-researcher | `gemini` | 2M token context window |
 | A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
 | B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
 | B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
@@ -470,8 +475,8 @@ euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Exec
 │   ├── legacy-overhaul.json Build → Quality → Vision
 │   └── red-alert.json      Quality → Build → Vision
 ├── prompts/
-│   ├── core/               Orchestrator, Architect, Librarian
-│   ├── fleet/              22 specialist agents
+│   ├── core/               7 core agents (authority-bearing)
+│   ├── fleet/              20 agents (13 default + 7 on-demand)
 │   └── protocols/          Shared protocol and common instructions
 ├── tests/
 │   └── golden/             Golden datasets for evaluation
@@ -529,7 +534,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-25-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-27-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/FLEET_GUIDE.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli
