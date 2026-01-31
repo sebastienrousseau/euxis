@@ -137,7 +137,29 @@ else
     ((BRANDING_FAILURES++))
 fi
 
-# 5e. Recent commits carry signature (check last 5)
+# 5e. commit.gpgsign MUST be true globally
+if command -v git &>/dev/null; then
+    GPGSIGN=$(git config --global commit.gpgsign 2>/dev/null || echo "false")
+    if [[ "$GPGSIGN" == "true" ]]; then
+        echo "  PASS: commit.gpgsign is globally enabled."
+    else
+        echo "  FAIL: commit.gpgsign is not set to true globally."
+        echo "        Run: git config --global commit.gpgsign true"
+        ((BRANDING_FAILURES++))
+    fi
+
+    GPG_FORMAT=$(git config --global gpg.format 2>/dev/null || echo "")
+    SIGNING_KEY=$(git config --global user.signingkey 2>/dev/null || echo "")
+    if [[ -n "$SIGNING_KEY" ]]; then
+        echo "  PASS: Signing key is configured (format: ${GPG_FORMAT:-gpg})."
+    else
+        echo "  FAIL: No signing key configured."
+        echo "        Run: git config --global user.signingkey <your-key>"
+        ((BRANDING_FAILURES++))
+    fi
+fi
+
+# 5f. Recent commits carry branding signature (check last 5)
 if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
     UNSIGNED_COMMITS=0
     CHECKED=0
@@ -161,7 +183,31 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
     fi
 fi
 
-# 5f. Signature URL points to euxis.co
+# 5g. Recent commits are cryptographically signed (check last 5 in current repo)
+if command -v git &>/dev/null && git rev-parse --git-dir &>/dev/null 2>&1; then
+    UNSIGNED_CRYPTO=0
+    CRYPTO_CHECKED=0
+    while IFS= read -r hash; do
+        CRYPTO_CHECKED=$((CRYPTO_CHECKED + 1))
+        HAS_SIG=$(git cat-file -p "$hash" 2>/dev/null | grep -c "^gpgsig " || true)
+        if [[ "$HAS_SIG" -eq 0 ]]; then
+            UNSIGNED_CRYPTO=$((UNSIGNED_CRYPTO + 1))
+            SHORT=$(git log -1 --format="%h %s" "$hash")
+            echo "  NOT SIGNED: $SHORT"
+        fi
+    done < <(git log --format="%H" -5 2>/dev/null)
+
+    if [[ $UNSIGNED_CRYPTO -eq 0 && $CRYPTO_CHECKED -gt 0 ]]; then
+        echo "  PASS: Last $CRYPTO_CHECKED commits are cryptographically signed."
+    elif [[ $CRYPTO_CHECKED -eq 0 ]]; then
+        echo "  SKIP: No git history available."
+    else
+        echo "  WARN: $UNSIGNED_CRYPTO of $CRYPTO_CHECKED recent commits lack cryptographic signature."
+        ((BRANDING_FAILURES++))
+    fi
+fi
+
+# 5h. Signature URL points to euxis.co
 if [[ -f "$SIGNATURE_FILE" ]]; then
     if grep -qF "euxis.co" "$SIGNATURE_FILE"; then
         echo "  PASS: Signature URL points to euxis.co."
@@ -171,7 +217,7 @@ if [[ -f "$SIGNATURE_FILE" ]]; then
     fi
 fi
 
-# 5g. GitHub Actions branding workflow exists
+# 5i. GitHub Actions branding workflow exists
 BRANDING_WORKFLOW="$EUXIS_HOME/.github/workflows/branding-check.yml"
 if [[ -f "$BRANDING_WORKFLOW" ]]; then
     echo "  PASS: GitHub Actions branding-check workflow exists."
@@ -180,7 +226,7 @@ else
     ((BRANDING_FAILURES++))
 fi
 
-# 5h. Open PRs carry branding signature (if gh CLI available)
+# 5j. Open PRs carry branding signature (if gh CLI available)
 if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
     PR_LIST=$(cd "$EUXIS_HOME" && gh pr list --json number,title,body --jq '.[] | "\(.number)\t\(.title)\t\(.body)"' 2>/dev/null || true)
     if [[ -n "$PR_LIST" ]]; then
