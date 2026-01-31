@@ -8,6 +8,9 @@ import platform
 import threading
 import itertools
 import time
+import json
+import urllib.request
+import urllib.error
 
 VENV_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".venv-voice")
 VENV_PYTHON = os.path.join(VENV_DIR, "bin", "python3")
@@ -32,6 +35,8 @@ import sounddevice as sd
 import numpy as np
 import scipy.io.wavfile as wav
 from faster_whisper import WhisperModel
+from piper import PiperVoice
+import wave
 
 # CONFIGURATION
 SAMPLE_RATE = 16000  # 16kHz is optimal for Whisper
@@ -50,9 +55,8 @@ PIPER_VOICES_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".piper-voice
 
 # Lazy-loaded globals
 _whisper_model = None
-_piper_model_path = None
+_piper_voice = None
 _audio_player = None
-_piper_bin = None
 
 
 def _get_whisper_model():
@@ -60,15 +64,15 @@ def _get_whisper_model():
     global _whisper_model
     if _whisper_model is None:
         print("Loading Whisper model (first run downloads ~150MB)...")
-        _whisper_model = WhisperModel("small.en", device="cpu", compute_type="int8")
+        _whisper_model = WhisperModel("base.en", device="cpu", compute_type="int8", num_workers=4)
     return _whisper_model
 
 
-def _ensure_piper_voice():
-    """Download piper voice model if not already present."""
-    global _piper_model_path
-    if _piper_model_path is not None:
-        return _piper_model_path
+def _get_piper_voice():
+    """Load Piper voice model once via Python API, reuse across calls."""
+    global _piper_voice
+    if _piper_voice is not None:
+        return _piper_voice
 
     model_file = os.path.join(PIPER_VOICES_DIR, f"{PIPER_VOICE}.onnx")
     config_file = os.path.join(PIPER_VOICES_DIR, f"{PIPER_VOICE}.onnx.json")
@@ -81,8 +85,9 @@ def _ensure_piper_voice():
         download_voice(PIPER_VOICE, Path(PIPER_VOICES_DIR))
         print("Voice model downloaded.")
 
-    _piper_model_path = model_file
-    return _piper_model_path
+    print("Loading TTS model...")
+    _piper_voice = PiperVoice.load(model_file)
+    return _piper_voice
 
 
 def _get_audio_player():
@@ -97,25 +102,16 @@ def _get_audio_player():
     return _audio_player
 
 
-def _get_piper_bin():
-    """Cache the piper binary path."""
-    global _piper_bin
-    if _piper_bin is None:
-        _piper_bin = os.path.join(VENV_DIR, "bin", "piper")
-    return _piper_bin
-
-
 def _synthesize_wav(text):
-    """Generate WAV file from text using piper. Returns True on success."""
-    model_path = _ensure_piper_voice()
-    proc = subprocess.run(
-        [_get_piper_bin(), "--model", model_path, "--output_file", TMP_OUTPUT],
-        input=text, text=True, capture_output=True,
-    )
-    if proc.returncode != 0:
-        print(f"TTS Error: {proc.stderr}")
+    """Generate WAV file from text using Piper Python API (model kept in memory)."""
+    try:
+        voice = _get_piper_voice()
+        with wave.open(TMP_OUTPUT, "wb") as wf:
+            voice.synthesize_wav(text, wf)
+        return True
+    except Exception as e:
+        print(f"TTS Error: {e}")
         return False
-    return True
 
 
 def _play_wav():
@@ -180,7 +176,7 @@ def transcribe():
     """Converts audio to text using faster-whisper locally."""
     try:
         model = _get_whisper_model()
-        segments, _ = model.transcribe(TMP_INPUT, beam_size=5)
+        segments, _ = model.transcribe(TMP_INPUT, beam_size=1)
         text = " ".join(segment.text for segment in segments).strip()
         return text
     except Exception as e:
@@ -199,8 +195,72 @@ def _spinner(message, stop_event):
     sys.stdout.flush()
 
 
+VOICE_SYSTEM_PROMPT = (
+    "You are a voice assistant. Respond in 1-3 short spoken sentences. "
+    "No formatting, no markdown, no bullet points, no code blocks. "
+    "Plain text only, suitable for text-to-speech. Be concise and conversational."
+)
+
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+GROQ_MODEL = "llama-3.3-70b-versatile"
+
+# Keywords that indicate the user wants multi-agent orchestration, not a quick answer.
+_ORCHESTRATOR_KEYWORDS = {
+    "run", "deploy", "fix", "build", "test", "commit", "push", "refactor",
+    "create file", "edit file", "delete", "install", "update code", "debug",
+    "scan", "audit", "lint", "dispatch", "execute",
+}
+
+
+def _call_groq(user_message):
+    """Call Groq API directly via urllib. Returns response text (~0.3s)."""
+    payload = json.dumps({
+        "model": GROQ_MODEL,
+        "max_tokens": 150,
+        "messages": [
+            {"role": "system", "content": VOICE_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+    }).encode()
+    req = urllib.request.Request(
+        GROQ_API_URL,
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json",
+            "User-Agent": "euxis-voice/1.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+        return data["choices"][0]["message"]["content"].strip()
+    except (urllib.error.URLError, json.JSONDecodeError, KeyError, IndexError) as e:
+        print(f"Groq API Error: {e}")
+        return ""
+
+
+def _needs_orchestrator(text):
+    """Return True if the voice command requires full orchestrator dispatch."""
+    lower = text.lower()
+    return any(kw in lower for kw in _ORCHESTRATOR_KEYWORDS)
+
+
+def _query_direct(user_command):
+    """Fast path: call Groq for conversational answers (~0.3s)."""
+    stop = threading.Event()
+    t = threading.Thread(target=_spinner, args=("Thinking...", stop), daemon=True)
+    t.start()
+    result = _call_groq(user_command)
+    stop.set()
+    t.join()
+    return result
+
+
 def run_euxis_fleet(user_command):
-    """Passes the voice command to the Euxis Orchestrator."""
+    """Slow path: full Euxis Orchestrator for engineering tasks."""
     stop = threading.Event()
     t = threading.Thread(target=_spinner, args=("Working on it...", stop), daemon=True)
     t.start()
@@ -212,24 +272,19 @@ def run_euxis_fleet(user_command):
 
 
 def synthesize_briefing(raw_output):
-    """Uses the Butler Agent via local ollama for zero-latency spoken summary."""
+    """Summarize orchestrator output into spoken text via Groq."""
     prompt = (
         "Summarize this execution log into 1-2 short sentences suitable for speaking aloud. "
-        "Be concise and conversational:\n" + raw_output
+        "No formatting, no markdown. Plain text only:\n" + raw_output
     )
-    # Use ollama (local) for near-instant butler responses — no network round-trip.
-    # Falls back to intelligence tiering if ollama is not available.
-    cmd = ["euxis", "butler", prompt, "ollama"]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return result.stdout
+    return _call_groq(prompt)
 
 
 def _warmup():
     """Pre-load models and cache lookups before user interaction."""
     _get_whisper_model()
-    _ensure_piper_voice()
+    _get_piper_voice()
     _get_audio_player()
-    _get_piper_bin()
     print("Ready.\n")
 
 
@@ -255,15 +310,9 @@ def main():
                 play_sound("Goodbye.")
                 break
 
-            # 3. Print ack immediately (no TTS delay), start TTS for "On it" in background
-            print("    Euxis: On it.")
             conversation_history.append(f"User: {user_text}")
 
-            # Pre-synthesize "on it" audio while building command
-            tts_thread = threading.Thread(target=_synthesize_wav, args=("On it.",), daemon=True)
-            tts_thread.start()
-
-            # 4. Build context-aware command
+            # 3. Build context-aware command
             if len(conversation_history) > 1:
                 context = "\n".join(conversation_history)
                 full_command = (
@@ -273,17 +322,29 @@ def main():
             else:
                 full_command = user_text
 
-            # Play "on it" once synthesis is done (should be ready by now)
-            tts_thread.join()
-            _play_wav()
+            # 4. Route: fast direct answer vs full orchestrator
+            if _needs_orchestrator(user_text):
+                # Engineering task — full pipeline with "On it" acknowledgment
+                print("    Euxis: On it.")
+                tts_thread = threading.Thread(target=_synthesize_wav, args=("On it.",), daemon=True)
+                tts_thread.start()
+                tts_thread.join()
+                _play_wav()
 
-            # 5. Execute orchestrator
-            raw_output = run_euxis_fleet(full_command)
+                raw_output = run_euxis_fleet(full_command)
+                briefing = synthesize_briefing(raw_output).strip()
+            else:
+                # Conversational question — fast direct path
+                print("    Euxis: ...")
+                briefing = _query_direct(full_command)
 
-            # 6. Summarize and speak in parallel: start TTS as soon as butler is done
-            briefing = synthesize_briefing(raw_output).strip()
+            # 5. Speak the response
             conversation_history.append(f"Euxis: {briefing}")
-            play_sound(briefing)
+            tts_ready = threading.Thread(target=_synthesize_wav, args=(briefing,), daemon=True)
+            tts_ready.start()
+            print(f"    Euxis: {briefing}")
+            tts_ready.join()
+            _play_wav()
             print()  # blank line before next round
 
     except KeyboardInterrupt:
