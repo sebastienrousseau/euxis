@@ -21,15 +21,15 @@
     { "id": "edge-hunter", "path": "prompts/fleet/edge-hunter.txt", "tier": "fleet", "version": "0.0.6", "tags": ["security", "testing", "vulnerabilities"], "capability_tags": ["security-audit", "debugging"] },
     { "id": "globalization-lead", "path": "prompts/fleet/globalization-lead.txt", "tier": "fleet", "version": "0.0.6", "tags": ["i18n", "l10n", "globalization"], "capability_tags": ["compliance-check"] },
     { "id": "incident-commander", "path": "prompts/fleet/incident-commander.txt", "tier": "fleet", "version": "0.0.6", "tags": ["incident", "response", "reliability", "postmortem"], "capability_tags": ["debugging", "architecture-review"] },
-    { "id": "growth-marketer", "path": "prompts/fleet/growth-marketer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["marketing", "growth", "seo"], "capability_tags": ["documentation"] },
+    { "id": "growth-marketer", "path": "prompts/fleet/growth-marketer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["marketing", "growth", "seo"], "capability_tags": ["documentation"], "activation": "on-demand" },
     { "id": "legacy-maintainer", "path": "prompts/fleet/legacy-maintainer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["legacy", "maintenance", "migrations"], "capability_tags": ["code-review", "documentation", "debugging"] },
     { "id": "perf-optimizer", "path": "prompts/fleet/perf-optimizer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["performance", "profiling", "optimization"], "capability_tags": ["performance-profiling", "debugging"] },
     { "id": "qa-coordinator", "path": "prompts/fleet/qa-coordinator.txt", "tier": "fleet", "version": "0.0.6", "tags": ["testing", "qa", "e2e", "coordination"], "capability_tags": ["test-analysis", "code-review"] },
     { "id": "release-manager", "path": "prompts/fleet/release-manager.txt", "tier": "fleet", "version": "0.0.6", "tags": ["releases", "versioning", "coordination"], "capability_tags": ["documentation", "compliance-check"] },
-    { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "0.0.6", "tags": ["social", "content", "community"], "capability_tags": ["documentation"] },
+    { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "0.0.6", "tags": ["social", "content", "community"], "capability_tags": ["documentation"], "activation": "on-demand" },
     { "id": "tech-writer", "path": "prompts/fleet/tech-writer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["documentation", "writing", "content"], "capability_tags": ["documentation"] },
     { "id": "unit-tester", "path": "prompts/fleet/unit-tester.txt", "tier": "fleet", "version": "0.0.6", "tags": ["testing", "quality", "automation"], "capability_tags": ["test-analysis", "debugging"] },
     { "id": "ux-sentinel", "path": "prompts/fleet/ux-sentinel.txt", "tier": "fleet", "version": "0.0.6", "tags": ["ux", "accessibility", "design"], "capability_tags": ["compliance-check", "code-review"] },
-    { "id": "brand-evangelist", "path": "prompts/fleet/brand-evangelist.txt", "tier": "fleet", "version": "0.0.6", "tags": ["brand", "voice", "content", "design"], "capability_tags": ["documentation", "compliance-check"] }
+    { "id": "brand-evangelist", "path": "prompts/fleet/brand-evangelist.txt", "tier": "fleet", "version": "0.0.6", "tags": ["brand", "voice", "content", "design"], "capability_tags": ["documentation", "compliance-check"], "activation": "on-demand" }
   ]
 }

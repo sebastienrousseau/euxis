@@ -99,7 +99,36 @@ The following version references are **DEPRECATED** and MUST NOT be used:
 | Agent prompt v0.1.0 | Protocol v0.0.6 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
 | CLI tool v0.0.6 | Protocol v0.0.6 | MUST match |
 
-### 9. Enforcement
+### 9. Fleet Freeze Rule
+
+New permanent agents MUST NOT be added unless they introduce a **new axis of responsibility** — a domain that no existing agent covers. Refinements of an existing agent's scope MUST be implemented as capability extensions to that agent, not as new agents.
+
+**Admission criteria for a new permanent agent:**
+
+| Criterion | Required |
+|-----------|----------|
+| Introduces a responsibility axis not covered by any existing agent | YES |
+| Cannot be achieved by extending an existing agent's scope | YES |
+| Has at least 2 inbound escalation sources from existing agents | YES |
+| Justified in writing with rationale reviewed by `product-manager` | YES |
+| Approved by user | YES |
+
+**Transient agents** (created via `euxis-synthesize compose`) are exempt from this rule — they are temporary by design and dissolved after task completion.
+
+### 10. Agent Activation Modes
+
+Agents are classified by activation mode in `registry.json`:
+
+| Mode | Meaning | Behavior |
+|------|---------|----------|
+| `always` (default) | Available in every session | Orchestrator considers for all task decompositions |
+| `on-demand` | Available but not loaded by default | Orchestrator dispatches only when explicitly needed or when task tags match |
+
+On-demand agents are fully capable — they are not degraded or disabled. The distinction reduces cognitive load during orchestration by narrowing the default candidate set.
+
+**Current on-demand agents:** `growth-marketer`, `social-manager`, `brand-evangelist`.
+
+### 11. Enforcement
 
 - The `librarian` MUST flag version mismatches during documentation governance.
 - The `reviewer` MUST verify version consistency as part of quality gate checks.
