@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+EUXIS_DIR="$HOME/.euxis"
+HOOKS_DIR="$EUXIS_DIR/hooks"
+
+usage() {
+  cat <<'EOF'
+euxis-hooks — Install Euxis Git hooks into your repository
+
+Usage:
+  euxis-hooks install [--repo PATH]
+  euxis-hooks uninstall [--repo PATH]
+  euxis-hooks status [--repo PATH]
+
+Commands:
+  install     Symlink Euxis hooks into .git/hooks/
+  uninstall   Remove Euxis hook symlinks from .git/hooks/
+  status      Show which Euxis hooks are installed
+
+Options:
+  --repo PATH   Target repository (default: current directory)
+  -h, --help    Show this help text
+EOF
+}
+
+resolve_repo() {
+  local repo="${1:-.}"
+  local git_dir
+  git_dir=$(git -C "$repo" rev-parse --git-dir 2>/dev/null) || {
+    echo "Error: '$repo' is not a Git repository." >&2
+    exit 1
+  }
+  # Resolve to absolute path
+  if [[ "$git_dir" == /* ]]; then
+    echo "$git_dir"
+  else
+    echo "$(cd "$repo" && pwd)/$git_dir"
+  fi
+}
+
+cmd_install() {
+  local repo_path="."
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo) repo_path="$2"; shift 2 ;;
+      *) echo "Error: Unknown option '$1'" >&2; return 1 ;;
+    esac
+  done
+
+  local git_dir
+  git_dir=$(resolve_repo "$repo_path")
+  local target_dir="$git_dir/hooks"
+  mkdir -p "$target_dir"
+
+  local installed=0
+  for hook in "$HOOKS_DIR"/*; do
+    [[ -f "$hook" ]] || continue
+    local hook_name
+    hook_name=$(basename "$hook")
+    local target="$target_dir/$hook_name"
+
+    if [[ -L "$target" ]]; then
+      local existing
+      existing=$(readlink "$target")
+      if [[ "$existing" == "$hook" ]]; then
+        echo "  SKIP: $hook_name (already installed)"
+        continue
+      fi
+    fi
+
+    if [[ -f "$target" && ! -L "$target" ]]; then
+      # Back up existing non-Euxis hook
+      cp "$target" "$target.pre-euxis"
+      echo "  BACKUP: $hook_name → $hook_name.pre-euxis"
+    fi
+
+    ln -sf "$hook" "$target"
+    echo "  INSTALLED: $hook_name"
+    ((installed++))
+  done
+
+  if [[ $installed -eq 0 ]]; then
+    echo "All hooks already installed."
+  else
+    echo "Installed $installed hook(s) into $target_dir"
+  fi
+}
+
+cmd_uninstall() {
+  local repo_path="."
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo) repo_path="$2"; shift 2 ;;
+      *) echo "Error: Unknown option '$1'" >&2; return 1 ;;
+    esac
+  done
+
+  local git_dir
+  git_dir=$(resolve_repo "$repo_path")
+  local target_dir="$git_dir/hooks"
+
+  local removed=0
+  for hook in "$HOOKS_DIR"/*; do
+    [[ -f "$hook" ]] || continue
+    local hook_name
+    hook_name=$(basename "$hook")
+    local target="$target_dir/$hook_name"
+
+    if [[ -L "$target" ]]; then
+      local existing
+      existing=$(readlink "$target")
+      if [[ "$existing" == "$hook" ]]; then
+        rm "$target"
+        echo "  REMOVED: $hook_name"
+        ((removed++))
+
+        # Restore backup if it exists
+        if [[ -f "$target.pre-euxis" ]]; then
+          mv "$target.pre-euxis" "$target"
+          echo "  RESTORED: $hook_name.pre-euxis → $hook_name"
+        fi
+      fi
+    fi
+  done
+
+  if [[ $removed -eq 0 ]]; then
+    echo "No Euxis hooks found to remove."
+  else
+    echo "Removed $removed hook(s) from $target_dir"
+  fi
+}
+
+cmd_status() {
+  local repo_path="."
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo) repo_path="$2"; shift 2 ;;
+      *) echo "Error: Unknown option '$1'" >&2; return 1 ;;
+    esac
+  done
+
+  local git_dir
+  git_dir=$(resolve_repo "$repo_path")
+  local target_dir="$git_dir/hooks"
+
+  echo "Euxis hooks status for $target_dir:"
+  echo ""
+
+  for hook in "$HOOKS_DIR"/*; do
+    [[ -f "$hook" ]] || continue
+    local hook_name
+    hook_name=$(basename "$hook")
+    local target="$target_dir/$hook_name"
+
+    if [[ -L "$target" ]]; then
+      local existing
+      existing=$(readlink "$target")
+      if [[ "$existing" == "$hook" ]]; then
+        echo "  $hook_name: INSTALLED (euxis)"
+      else
+        echo "  $hook_name: CONFLICT (symlink points to $existing)"
+      fi
+    elif [[ -f "$target" ]]; then
+      echo "  $hook_name: CONFLICT (non-euxis hook exists)"
+    else
+      echo "  $hook_name: NOT INSTALLED"
+    fi
+  done
+}
+
+# Main
+case "${1:-}" in
+  install)    shift; cmd_install "$@" ;;
+  uninstall)  shift; cmd_uninstall "$@" ;;
+  status)     shift; cmd_status "$@" ;;
+  -h|--help)  usage ;;
+  *)          usage >&2; exit 1 ;;
+esac

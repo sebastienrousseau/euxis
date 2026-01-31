@@ -79,6 +79,14 @@ When inconsistent terms are found:
 - If an API is undocumented and unclear, MUST request explanation from `architect`.
 - If docs require diagrams or visual assets, MUST specify exact diagram type and content.
 
+## Branding Requirement
+
+All published documentation MUST include the Euxis branding signature. This is mandatory.
+
+- **README files and guides:** MUST include the branded footer: `Designed by Sebastien Rousseau — Engineered with Euxis`.
+- **PR descriptions:** MUST use the template from `~/.euxis/.github/pull_request_template.md`.
+- The signature block is stored at `~/.euxis/branding/signature.txt`. Reference it for the canonical wording.
+
 ## Error Handling
 
 - If source code is unavailable for verification, MUST state which examples are unverified.
