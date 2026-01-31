@@ -119,7 +119,7 @@ You MUST accept escalations from the following agents for the listed reasons:
 
 ## Escalation Protocol
 
-- If a challenge reveals a security vulnerability, MUST escalate to `edge-hunter`.
+- If a challenge reveals a security vulnerability, MUST escalate to `security-lead` (who dispatches `edge-hunter` for testing).
 - If a challenge invalidates architectural assumptions, MUST notify `architect`.
 - If the proposing agent disagrees with the challenge, MUST present both positions to the orchestrator with evidence.
 - If the decision is a ONE-WAY-DOOR with HIGH blast radius, MUST recommend user sign-off before proceeding.

@@ -6,7 +6,7 @@
   "agents": [
     { "id": "orchestrator", "path": "prompts/core/orchestrator.txt", "tier": "core", "version": "0.0.6", "tags": ["orchestration", "delegation", "planning"], "capability_tags": ["task-decomposition", "delegation", "synthesis", "replanning"] },
     { "id": "architect", "path": "prompts/core/architect.txt", "tier": "core", "version": "0.0.6", "tags": ["architecture", "design", "engineering"], "capability_tags": ["architecture-review", "code-review", "design-patterns"] },
-    { "id": "librarian", "path": "prompts/core/librarian.txt", "tier": "core", "version": "0.0.6", "tags": ["memory", "knowledge", "optimization", "docs", "compliance"], "capability_tags": ["documentation", "compliance-check", "memory-optimization"] },
+    { "id": "librarian", "path": "prompts/core/librarian.txt", "tier": "core", "version": "0.0.6", "tags": ["memory", "knowledge", "optimization", "docs"], "capability_tags": ["documentation", "memory-optimization"] },
     { "id": "automation-engineer", "path": "prompts/fleet/automation-engineer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["automation", "cicd", "infrastructure"], "capability_tags": ["cicd-pipeline", "infrastructure-provisioning", "build-optimization"] },
     { "id": "bug-fixer", "path": "prompts/fleet/bug-fixer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["debugging", "fixes", "engineering"], "capability_tags": ["debugging", "code-review", "test-analysis"] },
     { "id": "butler", "path": "prompts/fleet/butler.txt", "tier": "fleet", "version": "0.0.6", "tags": ["voice", "tts", "summarization"], "capability_tags": ["documentation", "summarization"] },
@@ -14,6 +14,7 @@
     { "id": "product-manager", "path": "prompts/core/product-manager.txt", "tier": "core", "version": "0.0.6", "tags": ["product", "requirements", "planning"], "capability_tags": ["documentation", "architecture-review"] },
     { "id": "compliance-officer", "path": "prompts/core/compliance-officer.txt", "tier": "core", "version": "0.0.6", "tags": ["compliance", "security", "legal"], "capability_tags": ["compliance-check", "security-audit"] },
     { "id": "system-critic", "path": "prompts/core/system-critic.txt", "tier": "core", "version": "0.0.6", "tags": ["critic", "risk", "challenge", "decision-quality"], "capability_tags": ["architecture-review", "security-audit", "compliance-check"] },
+    { "id": "security-lead", "path": "prompts/core/security-lead.txt", "tier": "core", "version": "0.0.6", "tags": ["security", "governance", "policy", "threat-modeling"], "capability_tags": ["security-audit", "compliance-check", "architecture-review"] },
     { "id": "data-steward", "path": "prompts/fleet/data-steward.txt", "tier": "fleet", "version": "0.0.6", "tags": ["observability", "telemetry", "data"], "capability_tags": ["performance-profiling", "debugging"] },
     { "id": "deep-researcher", "path": "prompts/fleet/deep-researcher.txt", "tier": "fleet", "version": "0.0.6", "tags": ["research", "analysis", "knowledge"], "capability_tags": ["documentation", "test-analysis"] },
     { "id": "devrel-advocate", "path": "prompts/fleet/devrel-advocate.txt", "tier": "fleet", "version": "0.0.6", "tags": ["devrel", "community", "content"], "capability_tags": ["documentation"] },

@@ -20,7 +20,7 @@ This protocol defines the security perimeter for all Euxis agents. Every agent M
 | Secrets MUST NEVER be published to the message bus | All agents |
 | Secrets MUST NEVER be committed to git | All agents, `euxis-hooks` pre-commit check |
 | Secrets MUST NEVER appear in PR descriptions or comments | All agents, `euxis-hooks pr` |
-| If a secret is accidentally exposed, MUST escalate as S0 (CRITICAL) immediately | All agents → `compliance-officer` |
+| If a secret is accidentally exposed, MUST escalate as S0 (CRITICAL) immediately | All agents → `security-lead` + `compliance-officer` |
 
 **Detection patterns:**
 ```
@@ -67,9 +67,9 @@ Agents are restricted to the authorized tool belt defined in the Mandatory Proto
 3. **No piped execution.** `curl ... | sh` and `wget ... | bash` patterns are FORBIDDEN. The `euxis-dispatch` security checkpoint blocks these patterns.
 4. **TLS required.** All network requests MUST use HTTPS. Plain HTTP is forbidden except for localhost.
 
-### 5. Mandatory Edge-Hunter Triggers
+### 5. Mandatory Security Review Triggers
 
-The `edge-hunter` agent MUST be invoked automatically when any of the following conditions are detected:
+The `security-lead` agent MUST be notified, and MUST dispatch `edge-hunter` for testing, when any of the following conditions are detected:
 
 | Trigger | Detection Point | Severity |
 |---------|----------------|----------|
@@ -95,7 +95,7 @@ The `edge-hunter` agent MUST be invoked automatically when any of the following 
 When a security incident is detected:
 
 1. **HALT** all non-essential work.
-2. **ESCALATE** as S0 to `incident-commander` and `edge-hunter`.
+2. **ESCALATE** as S0 to `security-lead`, `incident-commander`, and `edge-hunter`.
 3. **PRESERVE** evidence — do NOT modify, delete, or overwrite affected files.
 4. **LOG** the incident in the audit trail with full context.
 5. **NOTIFY** the user immediately via the orchestrator.
@@ -103,7 +103,7 @@ When a security incident is detected:
 ### 8. Compliance Integration
 
 - The `compliance-officer` agent MUST be consulted for any changes affecting PII handling, data residency, or regulatory requirements.
-- The `edge-hunter` agent MUST be consulted for any changes to authentication, authorization, or encryption.
+- The `security-lead` agent MUST be consulted for any changes to authentication, authorization, or encryption. The `security-lead` dispatches `edge-hunter` for hands-on testing.
 - Security findings MUST be stored as SEMANTIC memories in the Cortex for cross-session availability.
 
 ### 9. Enforcement

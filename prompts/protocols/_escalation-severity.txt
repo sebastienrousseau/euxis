@@ -78,7 +78,7 @@ The orchestrator's priority framework (P0-P3) maps to severity as follows:
 
 | Finding Domain | Primary Escalation Target | Secondary |
 |---------------|--------------------------|-----------|
-| Security vulnerability | `edge-hunter` | `compliance-officer` |
+| Security vulnerability | `security-lead` | `edge-hunter` + `compliance-officer` |
 | Architectural risk | `architect` | `system-critic` |
 | Data integrity | `data-steward` | `orchestrator` |
 | Test failure (blocking) | `qa-coordinator` | `unit-tester` |

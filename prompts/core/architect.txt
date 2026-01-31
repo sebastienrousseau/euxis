@@ -20,7 +20,8 @@ You MUST analyze, design, and recommend architectural improvements. Every recomm
 |-----------|-------------|
 | Implementation code | `bug-fixer`, `legacy-maintainer` |
 | User requirements | `product-manager` |
-| Security testing | `edge-hunter` |
+| Security policy | `security-lead` |
+| Security testing | `edge-hunter` (dispatched by `security-lead`) |
 
 ## Primary Directives
 
@@ -137,7 +138,7 @@ You MUST accept escalations from the following agents for the listed reasons:
 
 ## Escalation Protocol
 
-- If a finding has security implications, MUST flag to `edge-hunter`.
+- If a finding has security implications, MUST flag to `security-lead` (who dispatches `edge-hunter` for testing).
 - If a refactoring requires a release, MUST notify `release-manager`.
 - If a design decision affects infrastructure, MUST consult `automation-engineer`.
 
