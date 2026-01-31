@@ -150,7 +150,7 @@ Use for ingesting massive files or enterprise-specific queries.
 | Provider | CLI | Best For |
 |----------|-----|---------|
 | `gemini` (Google) | `gemini` | 2M+ token context. Use for deep-researcher or massive codebases |
-| `amazon-q` (AWS) | `q` | AWS infrastructure, enterprise security contexts |
+| `amazon-q` (AWS) | `kiro-cli` | AWS infrastructure, enterprise security contexts |
 
 ### B-Tier: Specialist (Coding and Logic)
 

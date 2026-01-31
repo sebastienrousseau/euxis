@@ -666,10 +666,10 @@ run_kilo() {
 
 run_amazon_q() {
     local full_prompt="$1"
-    if command -v q &>/dev/null; then
-        echo "${full_prompt}" | q chat
+    if command -v kiro-cli &>/dev/null; then
+        echo "${full_prompt}" | kiro-cli chat
     else
-        log_error "Amazon Q Developer CLI (q) not found. Install from: https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html"
+        log_error "kiro-cli (Amazon Q Developer CLI) not found. Install via: brew install --cask amazon-q"
         exit 1
     fi
 }

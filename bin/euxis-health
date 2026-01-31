@@ -205,7 +205,7 @@ log ""
 log "[7/7] Provider Connectivity..."
 
 PROVIDER_WARNINGS=0
-PROVIDER_CLIS=(claude gemini codex ollama opencode qwen-code crush kilo q goose)
+PROVIDER_CLIS=(claude gemini codex ollama opencode qwen-code crush kilo kiro-cli goose)
 for cli in "${PROVIDER_CLIS[@]}"; do
     if command -v "$cli" &>/dev/null; then
         log "  FOUND: $cli"

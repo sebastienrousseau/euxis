@@ -52,7 +52,7 @@ Build faster. Ship with confidence.
 | [Qwen Code][qwen-url] | `qwen-code` | Open-source agentic coding (256K context) |
 | [Crush][crush-url] | `crush` | Multi-model TUI agent |
 | [Kilo Code][kilo-url] | `kilo` | Multi-model agentic CLI |
-| [Amazon Q][amazon-q-url] | `q` | AWS-native developer agent |
+| [Amazon Q][amazon-q-url] | `kiro-cli` | AWS-native developer agent |
 | [Goose][goose-url] | `goose` | Open-source MCP-native agent |
 
 ### Install
