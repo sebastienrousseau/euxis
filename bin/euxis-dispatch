@@ -179,11 +179,13 @@ ensure_lock_dir() {
 
 # Cleanup all locks on unexpected exit
 cleanup_all_locks() {
+    local _exit_code=$?
     echo "  [CLEANUP] Releasing all locks due to process termination..."
     if [[ -d "$LOCK_DIR" ]]; then
-        find "$LOCK_DIR" -name '*.lock' -newer /tmp/.euxis_dispatch_start_$$ -delete 2>/dev/null
+        find "$LOCK_DIR" -name '*.lock' -newer "/tmp/.euxis_dispatch_start_$$" -delete 2>/dev/null || true
     fi
-    rm -f /tmp/.euxis_dispatch_start_$$ 2>/dev/null
+    rm -f "/tmp/.euxis_dispatch_start_$$" 2>/dev/null || true
+    exit "$_exit_code"
 }
 
 trap cleanup_all_locks EXIT INT TERM HUP
