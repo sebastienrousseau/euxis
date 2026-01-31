@@ -1,10 +1,12 @@
 # Euxis User Guide
 
-Enterprise Unified eXecution Intelligence System
+**Enterprise Unified eXecution Intelligence System**
 
-Version 6.0
+Version 0.0.6
 
 ## CLI Tools
+
+Euxis ships with a complete set of command-line tools. Each tool does one thing well.
 
 ### Core
 
@@ -15,14 +17,21 @@ Version 6.0
 
 ### Quality & Certification
 
+Run these tools to verify fleet integrity before and after changes.
+
 | Command | Description |
 |---------|-------------|
 | `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
 | `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
 | `euxis-certify` | Full certification: lint + tests + semantic verification |
 | `euxis-health` | Fleet health check: naming, hardening, orphans, headers, doc drift |
+| `euxis-git-guard` | Pre-commit safety checks |
+| `euxis-verify` | Output verification |
+| `euxis-polish` | Prompt polishing |
 
 ### Orchestration & Autonomy
+
+Coordinate multiple agents or run autonomous workflows.
 
 | Command | Description |
 |---------|-------------|
@@ -33,6 +42,8 @@ Version 6.0
 | `euxis-daemon [interval]` | Periodic kaizen with fail-safe halting (default: 30 min) |
 
 ### Squads, Playbooks & Combos
+
+Activate teams, run phased workflows, or chain agents in sequence.
 
 | Command | Description |
 |---------|-------------|
@@ -51,6 +62,8 @@ Version 6.0
 
 ### Performance & Audit
 
+Benchmark your fleet and run deep security audits.
+
 | Command | Description |
 |---------|-------------|
 | `euxis-bench` | Performance benchmarks: health, lint, cortex recall, provider latency |
@@ -58,6 +71,8 @@ Version 6.0
 | `euxis-gym <agent> <test_case> [provider]` | Agent evaluation and A/B testing against golden datasets |
 
 ### Memory & Knowledge
+
+Store and recall typed memories across sessions.
 
 | Command | Description |
 |---------|-------------|
@@ -84,6 +99,8 @@ Version 6.0
 
 ### Core
 
+Three agents govern the fleet.
+
 | Agent | Role |
 |-------|------|
 | `orchestrator` | Task decomposition, delegation, synthesis |
@@ -91,6 +108,8 @@ Version 6.0
 | `librarian` | Context architecture, compliance, memory optimization |
 
 ### Fleet
+
+Twenty-two specialists execute domain work.
 
 | Agent | Role |
 |-------|------|
@@ -132,7 +151,7 @@ Version 6.0
 
 ## AI Provider Matrix
 
-Euxis supports 10 providers, tiered by capability.
+Euxis supports 10 providers, tiered by capability. Choose the right provider for each task, or let automatic routing handle it.
 
 ### S-Tier: Strategic (High Reasoning)
 
@@ -164,7 +183,7 @@ Use for specific engineering tasks.
 
 ### C-Tier: Utility (Speed and Local)
 
-Use for summaries, linting, formatting to save costs and latency.
+Use for summaries, linting, and formatting to save costs and latency.
 
 | Provider | CLI | Best For |
 |----------|-----|---------|
@@ -174,7 +193,7 @@ Use for summaries, linting, formatting to save costs and latency.
 
 ## Intelligence Tiering
 
-Routes agents by task complexity when no provider is specified:
+When no provider is specified, Euxis routes agents by task complexity:
 
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
@@ -205,7 +224,7 @@ Three modes via `euxis-dispatch --mode <mode>`:
 
 ## Tri-Typed Memory System
 
-Cortex classifies memories into three types:
+The Cortex classifies memories into three types:
 
 | Type | Description | Example |
 |------|-------------|---------|
@@ -225,7 +244,7 @@ euxis-cortex recall "authentication" --type procedural
 
 ## 3-Layer Self-Correction
 
-Agents apply layered verification before output:
+Every agent applies layered verification before delivering output.
 
 1. **Internal Consistency** — Every claim supported by ReAct OBSERVATION. No fabricated paths. Output format matches agent specification.
 2. **Cross-Reference** — Key findings cross-referenced against Cortex memories. Contradictions flagged and investigated.
@@ -235,9 +254,9 @@ Agents apply layered verification before output:
 
 ## Conflict Resolution
 
-When multiple agents produce conflicting outputs, resolution follows this hierarchy:
+When multiple agents produce conflicting outputs, Euxis resolves them systematically:
 
-1. **Domain Priority** — Agent with primary scope wins (e.g., security conflicts → `edge-hunter`)
+1. **Domain Priority** — Agent with primary scope wins (e.g., security conflicts go to `edge-hunter`)
 2. **Evidence Weight** — Verified data > inference > heuristic
 3. **Negotiation Round** — Each agent produces `CONFLICT_RESPONSE` with position, evidence, confidence, and acceptable compromise. Maximum 1 round.
 4. **Human Escalation** — Failed negotiation presents both positions to user

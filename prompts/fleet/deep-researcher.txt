@@ -1,7 +1,7 @@
 ---
 agent_id: deep-researcher
 role: "Iterative multi-pass research with cross-validation and citation"
-version: "6.0"
+version: "0.0.6"
 tags: [research, analysis, knowledge]
 last_updated: "2026-01-30"
 ---

@@ -1,8 +1,8 @@
 # Euxis Fleet Guide
 
-Build software systems that work.
+**Enterprise Unified eXecution Intelligence System**
 
-Version 6.0
+Version 0.0.6
 
 ---
 
@@ -10,7 +10,7 @@ Version 6.0
 
 ### Command Layer
 
-Orchestrate complex work. Design systems. Govern quality.
+Three core agents orchestrate complex work, design systems, and govern quality.
 
 | Agent | What It Does |
 |-------|-------------|
@@ -20,7 +20,7 @@ Orchestrate complex work. Design systems. Govern quality.
 
 ### Execution Layer
 
-Ship code. Solve problems. Own your domain.
+Twenty-two specialists own their domain and ship verified results.
 
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
@@ -87,6 +87,8 @@ For cross-project work requiring independent operation.
 
 ### Dispatch Manifest
 
+Every dispatch starts with a manifest. Here is the format:
+
 ```json
 {
   "project": "auth-service",
@@ -106,7 +108,7 @@ For cross-project work requiring independent operation.
 
 ## Memory Architecture
 
-Remember everything. Learn from everything.
+Every agent has access to persistent memory. The Cortex stores three types of knowledge.
 
 ### Episodic
 Capture what happened.
@@ -123,7 +125,7 @@ euxis-cortex remember "API uses OAuth 2.0 with PKCE" "architect" --type semantic
 ### Procedural
 Build repeatable workflows.
 ```bash
-euxis-cortex remember "Deploy: test → build → tag → push → verify" "release-manager" --type procedural
+euxis-cortex remember "Deploy: test -> build -> tag -> push -> verify" "release-manager" --type procedural
 ```
 
 ### Memory Commands
@@ -137,7 +139,7 @@ euxis-cortex recall "<keywords>"
 euxis-cortex recall "<keywords>" --type procedural
 ```
 
-Always check for proven patterns:
+Always check for proven patterns before starting complex work:
 ```bash
 euxis-cortex recall "deployment workflow" --type procedural
 ```
@@ -172,7 +174,7 @@ euxis deep-researcher "Audit all dependencies" amazon-q
 
 ## Quality Gates
 
-Ship with confidence.
+Every agent applies three verification layers before delivering output.
 
 ### Layer 1: Internal Consistency
 Every claim backed by evidence. No contradictions.
@@ -186,7 +188,7 @@ The `reviewer` validates all multi-agent output.
 ### Learn from Failure
 ```
 REFLEXION: Root cause analysis
-EVIDENCE: Specific failure indicator  
+EVIDENCE: Specific failure indicator
 STRATEGY: Different approach for retry
 CONTRAINDICATION: Never repeat this mistake
 ```
@@ -197,7 +199,7 @@ Store as procedural memory. Get better every time.
 
 ## Conflict Resolution
 
-When specialists disagree. Resolve systematically.
+When specialists disagree, Euxis resolves it systematically.
 
 ### Resolution Order
 1. **Domain Priority** — Security beats performance. Correctness beats speed.
@@ -222,7 +224,7 @@ One round. No endless debate.
 
 ## Delegation Patterns
 
-Right specialist. Every time.
+Route work to the right specialist every time.
 
 | Task | Lead | Support |
 |------|------|---------|
@@ -242,29 +244,29 @@ Right specialist. Every time.
 
 ### Security Pipeline
 ```
-edge-hunter → bug-fixer → unit-tester → qa-coordinator → reviewer
+edge-hunter -> bug-fixer -> unit-tester -> qa-coordinator -> reviewer
 ```
 
 ### Release Pipeline
 ```
-qa-coordinator → release-manager → tech-writer → reviewer
+qa-coordinator -> release-manager -> tech-writer -> reviewer
 ```
 
 ### Incident Response
 ```
-incident-commander → bug-fixer + edge-hunter → architect → qa-coordinator
+incident-commander -> bug-fixer + edge-hunter -> architect -> qa-coordinator
 ```
 
 ### Research to Implementation
 ```
-deep-researcher → architect → product-manager → bug-fixer → reviewer
+deep-researcher -> architect -> product-manager -> bug-fixer -> reviewer
 ```
 
 ---
 
 ## Squads
 
-Cross-functional teams. Clear ownership.
+Four cross-functional teams with clear ownership.
 
 | Squad | Purpose | Lead | Members |
 |-------|---------|------|---------|
@@ -287,13 +289,13 @@ euxis-squad validate                            # Cross-check against registry
 
 ## Playbooks
 
-Repeatable multi-phase workflows. Squad-level automation.
+Repeatable multi-phase workflows with squad-level automation.
 
 | Playbook | Sequence | Use Case |
 |----------|----------|----------|
-| Zero to One | Vision → Build → Quality → Growth | Full product launch |
-| Legacy Overhaul | Build → Quality → Vision | Modernize legacy systems |
-| Red Alert | Quality → Build → Vision | Emergency incident response |
+| Zero to One | Vision -> Build -> Quality -> Growth | Full product launch |
+| Legacy Overhaul | Build -> Quality -> Vision | Modernize legacy systems |
+| Red Alert | Quality -> Build -> Vision | Emergency incident response |
 
 Each phase generates a dispatch manifest. Phases execute sequentially. Checkpoints gate progression. Abort-on-failure stops the pipeline when a critical phase fails.
 
@@ -315,9 +317,9 @@ Each agent receives the original task plus the previous agent's output (capped a
 
 | Combo | Chain | Use Case |
 |-------|-------|----------|
-| Steve Jobs | product-manager → architect → brand-evangelist → reviewer | Vision to polished review |
-| Fort Knox | edge-hunter → compliance-officer → qa-coordinator → reviewer | Maximum security assurance |
-| Content Factory | tech-writer → brand-evangelist → social-manager → reviewer | End-to-end content production |
+| Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
+| Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
+| Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
 
 ```bash
 euxis-combo list                                                # Available combos
@@ -357,6 +359,6 @@ euxis-loop <agent> "<task>" "<verify_cmd>"
 
 ---
 
-*Euxis v6.0*
+*Euxis v0.0.6*
 
 *Build something that matters.*

@@ -1,7 +1,7 @@
 ---
 agent_id: perf-optimizer
 role: "Latency, throughput, memory profiling, and performance budgets"
-version: "6.0"
+version: "0.0.6"
 tags: [performance, profiling, optimization]
 last_updated: "2026-01-30"
 ---

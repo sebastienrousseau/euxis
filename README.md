@@ -1,6 +1,8 @@
 # Euxis
 
-**Your Local-First AI Operating System**
+**Enterprise Unified eXecution Intelligence System**
+
+Version 0.0.6
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
@@ -9,7 +11,7 @@
 
 ## Overview
 
-Deploy 25 specialist AI agents to plan, execute, and verify engineering tasks autonomously. From architecture to security to release management — every decision tracked, every outcome verified.
+Euxis gives you 25 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
 
 Build faster. Ship with confidence.
 
@@ -17,14 +19,14 @@ Build faster. Ship with confidence.
 
 - [Overview](#overview)
 - [Get Started](#get-started)
-- [Architecture](#architecture)
-- [The Fleet](#the-fleet)
+- [How It Works](#how-it-works)
+- [Your Specialist Team](#your-specialist-team)
 - [Usage](#usage)
-- [Memory](#memory)
-- [Dispatch](#dispatch)
-- [Self-Correction](#self-correction)
-- [Intelligence Tiering](#intelligence-tiering)
-- [Security](#security)
+- [Persistent Memory](#persistent-memory)
+- [Parallel Execution](#parallel-execution)
+- [Built-In Quality Assurance](#built-in-quality-assurance)
+- [Automatic Task Routing](#automatic-task-routing)
+- [Security Model](#security-model)
 - [Squads](#squads)
 - [Playbooks](#playbooks)
 - [Combos](#combos)
@@ -39,8 +41,9 @@ Build faster. Ship with confidence.
 
 ### Prerequisites
 
-- Bash 4.0+ and Python 3.8+
-- One or more AI providers:
+You need Bash 4.0+ and Python 3.8+, plus at least one AI provider.
+
+Euxis works with 10 providers out of the box:
 
 | Provider | CLI | Best For |
 |:---------|:----|:---------|
@@ -77,9 +80,11 @@ euxis-certify     # Full 4-gate certification pipeline
 
 ---
 
-## Architecture
+## How It Works
 
-Euxis follows **Plan — Decompose — Delegate**.
+Euxis follows a three-step cycle: **Plan — Decompose — Delegate**.
+
+Your goal enters the orchestrator, gets broken into tasks, and flows through the fleet. The Cortex remembers everything across sessions.
 
 | Layer | Component | Purpose |
 |:------|:----------|:--------|
@@ -100,9 +105,9 @@ flowchart LR
 
 ---
 
-## The Fleet
+## Your Specialist Team
 
-Three core agents govern. Twenty-two specialists execute.
+Three core agents govern the fleet. Twenty-two specialists execute domain work.
 
 ### Core
 
@@ -113,6 +118,8 @@ Three core agents govern. Twenty-two specialists execute.
 | `librarian` | Memory optimization, documentation governance, compliance |
 
 ### Specialists
+
+Each specialist owns a domain and delivers verified results.
 
 | Agent | Domain |
 |:------|:-------|
@@ -147,6 +154,8 @@ See the [Fleet Guide](FLEET_GUIDE.md) for delegation patterns, provider tiering,
 
 ### Route a task
 
+Send work to any agent by name. Euxis assembles the prompt, routes to the right provider, and captures the output.
+
 ```bash
 euxis orchestrator "Refactor the login module to use JWT."
 euxis architect "Review the authentication module."
@@ -164,7 +173,7 @@ euxis deep-researcher "Compare the top 3 Python PDF parsing libraries. Include b
 Generate a plan, then execute agents in parallel.
 
 ```bash
-euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." >| plan.json
+euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." > plan.json
 euxis-dispatch plan.json
 ```
 
@@ -186,9 +195,9 @@ euxis-loop bug-fixer "Fix parser.py" "pytest tests/test_parser.py" 3
 
 ---
 
-## Memory
+## Persistent Memory
 
-The Cortex provides persistent semantic memory across sessions using three types.
+The Cortex gives every agent access to persistent semantic memory across sessions. Memories are classified into three types so agents recall the right knowledge at the right time.
 
 | Type | Purpose | Example |
 |:-----|:--------|:--------|
@@ -204,9 +213,9 @@ euxis-cortex stats
 
 ---
 
-## Dispatch
+## Parallel Execution
 
-The fleet supports three coordination modes. Dispatches show a live status table with per-agent progress.
+The fleet supports three coordination modes. Choose the one that fits your workflow. Dispatches display a live status table with per-agent progress.
 
 | Mode | Behavior |
 |:-----|:----------|
@@ -224,7 +233,7 @@ Dispatch-authority agents: `architect`, `qa-coordinator`, `incident-commander`, 
 
 ---
 
-## Self-Correction
+## Built-In Quality Assurance
 
 Every agent applies three verification layers before delivering output.
 
@@ -243,9 +252,9 @@ CONTRAINDICATION:   What to never repeat
 
 ---
 
-## Intelligence Tiering
+## Automatic Task Routing
 
-Agents route automatically to the optimal tier.
+When you omit the provider argument, Euxis routes each agent to the optimal tier automatically.
 
 | Tier | Agents | Provider | Rationale |
 |:-----|:-------|:---------|:----------|
@@ -261,16 +270,16 @@ Agents route automatically to the optimal tier.
 An explicit provider argument always overrides tiering. Tasks marked P0 always route to S-Tier.
 
 ```bash
-euxis architect "Review the auth module"          # auto → claude
+euxis architect "Review the auth module"          # auto routes to claude
 euxis bug-fixer "Fix user.py" gemini              # explicit override
 euxis perf-optimizer "Optimize queries" qwen      # explicit override
 ```
 
 ---
 
-## Security
+## Security Model
 
-Euxis is built for zero-trust environments.
+Euxis enforces a zero-trust security model at every layer.
 
 - **Input Validation.** Agent names validated against `[a-zA-Z0-9_-]`. Shell metacharacters rejected.
 - **Script Hardening.** Every bash script enforces `set -euo pipefail`.
@@ -282,7 +291,7 @@ Euxis is built for zero-trust environments.
 
 ## Squads
 
-Four cross-functional teams. Each with a lead and a clear purpose.
+Four cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
 
 | Squad | Purpose | Lead | Members |
 |:------|:--------|:-----|:--------|
@@ -302,13 +311,13 @@ euxis-squad validate                        # Cross-check against registry
 
 ## Playbooks
 
-Phased squad activations for repeatable workflows. Each phase generates a dispatch manifest with checkpoints.
+Playbooks activate squads in sequence for repeatable workflows. Each phase generates a dispatch manifest with checkpoints that gate progression.
 
 | Playbook | Sequence | Use Case |
 |:---------|:---------|:---------|
-| Zero to One | Vision → Build → Quality → Growth | Full product launch |
-| Legacy Overhaul | Build → Quality → Vision | Modernize legacy systems |
-| Red Alert | Quality → Build → Vision | Emergency incident response |
+| Zero to One | Vision -> Build -> Quality -> Growth | Full product launch |
+| Legacy Overhaul | Build -> Quality -> Vision | Modernize legacy systems |
+| Red Alert | Quality -> Build -> Vision | Emergency incident response |
 
 ```bash
 euxis-playbook list                                             # Available playbooks
@@ -322,13 +331,13 @@ euxis-playbook status                                           # Session histor
 
 ## Combos
 
-Sequential agent chains. Each agent receives the previous agent's output as context. Fast, focused, no manifest overhead.
+Combos are sequential agent chains. Each agent receives the previous agent's output as context. Fast, focused, no manifest overhead.
 
 | Combo | Chain | Use Case |
 |:------|:------|:---------|
-| Steve Jobs | product-manager → architect → brand-evangelist → reviewer | Vision to polished review |
-| Fort Knox | edge-hunter → compliance-officer → qa-coordinator → reviewer | Maximum security assurance |
-| Content Factory | tech-writer → brand-evangelist → social-manager → reviewer | End-to-end content production |
+| Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
+| Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
+| Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
 
 ```bash
 euxis-combo list                                      # Available combos
@@ -357,6 +366,9 @@ euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
 | `euxis-test-infra` | Infrastructure unit tests |
 | `euxis-bench` | Performance benchmarking |
 | `euxis-audit-run` | Security audit with probes |
+| `euxis-git-guard` | Pre-commit safety checks |
+| `euxis-verify` | Output verification |
+| `euxis-polish` | Prompt polishing |
 
 ### Orchestration
 
@@ -422,7 +434,7 @@ euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
 │   └── red-alert.json      Quality → Build → Vision
 ├── prompts/
 │   ├── core/               Orchestrator, Architect, Librarian
-│   ├── fleet/              21 specialist agents
+│   ├── fleet/              22 specialist agents
 │   └── protocols/          Shared protocol and common instructions
 ├── tests/
 │   └── golden/             Golden datasets for evaluation
@@ -454,7 +466,7 @@ euxis-daemon 3600         # Custom interval in seconds
 
 ### Conflict Resolution
 
-When agents produce conflicting outputs:
+When agents produce conflicting outputs, Euxis resolves them systematically:
 
 1. **Domain Priority.** Primary scope agent wins.
 2. **Evidence Weight.** Verified data over inference over heuristic.
@@ -471,7 +483,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 
 <!-- Reference Links -->
 
-[version-badge]: https://img.shields.io/badge/version-6.0-blue?style=for-the-badge
+[version-badge]: https://img.shields.io/badge/version-0.0.6-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
 
 [license-badge]: https://img.shields.io/badge/license-proprietary-green?style=for-the-badge

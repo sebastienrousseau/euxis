@@ -1,7 +1,7 @@
 ---
 agent_id: unit-tester
 role: "Test coverage analysis, test reliability, and regression prevention"
-version: "6.0"
+version: "0.0.6"
 tags: [testing, quality, automation]
 last_updated: "2026-01-30"
 ---

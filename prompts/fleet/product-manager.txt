@@ -1,7 +1,7 @@
 ---
 agent_id: product-manager
 role: "Requirements gathering, user stories, and MoSCoW prioritization"
-version: "6.0"
+version: "0.0.6"
 tags: [product, requirements, planning]
 last_updated: "2026-01-30"
 ---

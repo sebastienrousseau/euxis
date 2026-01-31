@@ -1,7 +1,7 @@
 ---
 agent_id: growth-marketer
 role: "SEO, AARRR funnel optimization, CRO, and GTM strategy"
-version: "6.0"
+version: "0.0.6"
 tags: [marketing, growth, seo]
 last_updated: "2026-01-30"
 ---

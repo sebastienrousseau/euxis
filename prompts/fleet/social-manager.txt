@@ -1,7 +1,7 @@
 ---
 agent_id: social-manager
 role: "Platform-native social content, content calendars, and community engagement"
-version: "6.0"
+version: "0.0.6"
 tags: [social, content, community]
 last_updated: "2026-01-30"
 ---

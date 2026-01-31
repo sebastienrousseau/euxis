@@ -1,7 +1,7 @@
 ---
 agent_id: release-manager
 role: "Changelogs, semantic versioning, and release coordination"
-version: "6.0"
+version: "0.0.6"
 tags: [releases, versioning, coordination]
 last_updated: "2026-01-30"
 ---

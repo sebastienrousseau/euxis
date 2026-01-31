@@ -1,6 +1,6 @@
 #!/bin/bash
 # EUXIS LINT: Static Analysis for Agent Fleet
-# Enforces Protocol v6.0 Compliance
+# Enforces Protocol v0.0.6 Compliance
 
 set -uo pipefail
 
@@ -52,8 +52,8 @@ fi
 
 # CHECK 3: Version Synchronization
 echo "[3/4] Checking Versions..."
-VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+"' | sort -u | wc -l | tr -d ' ')
-VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+"' | sort -u | tr -d '"')
+VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
+VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
 
 if [[ "$VERSION_COUNT" -ne 1 ]]; then
     echo "  VERSION MISMATCH: Found multiple versions: $VERSIONS"
