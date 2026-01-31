@@ -72,6 +72,96 @@
       "required_tools": ["find", "grep", "cat"],
       "compatible_with": ["code-review", "performance-profiling"],
       "conflicts_with": []
+    },
+    {
+      "id": "task-decomposition",
+      "name": "Task Decomposition",
+      "description": "Break complex goals into discrete, assignable subtasks with dependency DAGs",
+      "prompt_fragment": "You MUST decompose complex tasks into phases with clear success criteria, dependencies, and priority. Output a DAG-based plan with parallel groups identified.",
+      "required_tools": [],
+      "compatible_with": ["delegation", "synthesis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "delegation",
+      "name": "Delegation",
+      "description": "Route subtasks to the most qualified agent with appropriate cost tier",
+      "prompt_fragment": "You MUST match each subtask to the most qualified agent, assign cost tier routing, and define success criteria before delegating.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "synthesis", "replanning"],
+      "conflicts_with": []
+    },
+    {
+      "id": "synthesis",
+      "name": "Synthesis",
+      "description": "Aggregate and reconcile multi-agent outputs into cohesive deliverables",
+      "prompt_fragment": "You MUST synthesize outputs from multiple agents, detect conflicts, and produce a unified deliverable that preserves all relevant findings.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "delegation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "replanning",
+      "name": "Replanning",
+      "description": "Dynamic plan revision when phase results invalidate downstream assumptions",
+      "prompt_fragment": "You MUST evaluate each phase result against downstream assumptions. If invalidated, revise affected phases while preserving completed work. Log checkpoint decisions.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "delegation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "design-patterns",
+      "name": "Design Patterns",
+      "description": "Pattern selection, evaluation, and application for software architecture",
+      "prompt_fragment": "You MUST identify applicable design patterns, evaluate trade-offs (complexity vs flexibility), and recommend the simplest pattern that meets requirements. Reference GoF, SOLID, or domain-specific patterns.",
+      "required_tools": ["find", "grep", "cat"],
+      "compatible_with": ["architecture-review", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "cicd-pipeline",
+      "name": "CI/CD Pipeline",
+      "description": "Continuous integration and deployment pipeline design, implementation, and optimization",
+      "prompt_fragment": "You MUST design pipelines with: build, test, lint, security scan, and deploy stages. Enforce fail-fast on critical gates. Minimize build times through caching and parallelization.",
+      "required_tools": ["grep", "find", "cat"],
+      "compatible_with": ["build-optimization", "infrastructure-provisioning", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "infrastructure-provisioning",
+      "name": "Infrastructure Provisioning",
+      "description": "Infrastructure as Code design and implementation using Docker, Terraform, and cloud services",
+      "prompt_fragment": "You MUST produce idempotent, version-controlled infrastructure definitions. Include health checks, rollback procedures, and resource limits.",
+      "required_tools": ["find", "cat"],
+      "compatible_with": ["cicd-pipeline", "build-optimization"],
+      "conflicts_with": []
+    },
+    {
+      "id": "build-optimization",
+      "name": "Build Optimization",
+      "description": "Build system performance tuning, caching strategies, and dependency management",
+      "prompt_fragment": "You MUST analyze build bottlenecks, implement caching layers, parallelize independent steps, and minimize artifact size. Measure before/after build times.",
+      "required_tools": ["time", "find"],
+      "compatible_with": ["cicd-pipeline", "performance-profiling"],
+      "conflicts_with": []
+    },
+    {
+      "id": "memory-optimization",
+      "name": "Memory Optimization",
+      "description": "Context window management, knowledge compression, and memory lifecycle governance",
+      "prompt_fragment": "You MUST manage context efficiently: compress verbose content, archive stale knowledge, and maintain retrieval accuracy. Track memory usage and prune when approaching limits.",
+      "required_tools": [],
+      "compatible_with": ["documentation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "summarization",
+      "name": "Summarization",
+      "description": "Concise synthesis of complex information optimized for target audience and delivery format",
+      "prompt_fragment": "You MUST produce summaries that preserve key facts, decisions, and action items. Adapt format to delivery channel (text, voice, report). Never introduce information not in the source.",
+      "required_tools": [],
+      "compatible_with": ["documentation", "memory-optimization"],
+      "conflicts_with": []
     }
   ]
 }
