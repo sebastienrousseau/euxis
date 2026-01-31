@@ -106,44 +106,55 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-### Core
+See `CONSTITUTION.md` for the authoritative fleet governance document.
 
-Three agents govern the fleet.
+### Core (7) — Authority-bearing, always present
 
-| Agent | Role |
+Only core agents can block progress. If one is missing, the system is incomplete.
+
+| Agent | Owns |
 |-------|------|
-| `orchestrator` | Task decomposition, delegation, synthesis |
-| `architect` | Software architecture, patterns, ADRs, refactoring |
-| `librarian` | Context architecture, compliance, memory optimization |
+| `orchestrator` | Coordination, synthesis, final assembly |
+| `architect` | Structure, patterns, design decisions |
+| `product-manager` | Intent, scope, prioritization |
+| `reviewer` | Truth & quality gate |
+| `librarian` | Memory, knowledge continuity, documentation governance |
+| `compliance-officer` | Legal, privacy, regulatory authority |
+| `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Fleet
+### Default (13) — Auto-available, task-triggered
 
-Twenty-two specialists execute domain work.
+Execute and advise within scope. Do not define direction.
 
 | Agent | Role |
 |-------|------|
 | `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
-| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `butler` | TTS-optimized summarization, spoken English output |
-| `compliance-officer` | PII scanning, license auditing, GDPR/CCPA compliance |
 | `data-steward` | Observability, telemetry, structured logging |
-| `deep-researcher` | Iterative research with cross-validation |
-| `devrel-advocate` | Developer relations, tutorials, demos, conferences |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
-| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
 | `incident-commander` | Incident response, root cause analysis, post-mortems |
-| `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
+| `legacy-maintainer` | Non-breaking upgrades, migrations |
 | `perf-optimizer` | Latency, throughput, memory profiling |
-| `product-manager` | Requirements, user stories, MoSCoW prioritization |
 | `qa-coordinator` | E2E testing coordination, quality gate enforcement |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
-| `reviewer` | Quality gates, output validation, completeness checking |
-| `social-manager` | Platform-native content, calendars, community engagement |
+| `security-lead` | Security policy, threat governance, edge-hunter dispatch |
 | `tech-writer` | Documentation, tutorials, API reference, glossary |
 | `unit-tester` | Test coverage, reliability, regression prevention |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), design systems, responsive testing |
+
+### On-Demand (7) — Explicit invocation only
+
+Add leverage, not safety. Never block, never override core authority.
+
+| Agent | Role |
+|-------|------|
+| `brand-evangelist` | Brand voice, visual identity, content design |
+| `butler` | TTS-optimized summarization, spoken English output |
+| `deep-researcher` | Iterative research with cross-validation |
+| `devrel-advocate` | Developer relations, tutorials, demos, conferences |
+| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
+| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `social-manager` | Platform-native content, calendars, community engagement |
 
 ## Glossary
 
@@ -153,7 +164,7 @@ Twenty-two specialists execute domain work.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 25 specialized agent personas |
+| **Fleet** | 27 agents: 7 core + 13 default + 7 on-demand |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
@@ -207,7 +218,7 @@ When no provider is specified, Euxis routes agents by task complexity:
 
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
-| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer | `claude` | Best reasoning and tool use |
+| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Best reasoning and tool use |
 | A-Tier: Research | deep-researcher, compliance-officer | `gemini` | 2M context window for massive analysis |
 | A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
 | B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
