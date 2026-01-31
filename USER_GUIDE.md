@@ -160,7 +160,7 @@ Use for specific engineering tasks.
 |----------|-----|---------|
 | `goose` (Block) | `goose` | Agent-native tool use for developer workflows |
 | `opencode` | `opencode` | Specialized local coding models (DeepSeek, CodeLlama) |
-| `qwen` (Alibaba) | `qwen-code` | Mathematical logic and dense algorithmic problems |
+| `qwen` (Alibaba) | `qwen` | Mathematical logic and dense algorithmic problems |
 
 ### C-Tier: Utility (Speed and Local)
 

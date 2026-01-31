@@ -49,7 +49,7 @@ Build faster. Ship with confidence.
 | [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
 | [Codex CLI][codex-url] | `codex` | OpenAI models |
 | [OpenCode][opencode-url] | `opencode` | Local code generation |
-| [Qwen Code][qwen-url] | `qwen-code` | Open-source agentic coding (256K context) |
+| [Qwen Code][qwen-url] | `qwen` | Open-source agentic coding (256K context) |
 | [Crush][crush-url] | `crush` | Multi-model TUI agent |
 | [Kilo Code][kilo-url] | `kilo` | Multi-model agentic CLI |
 | [Amazon Q][amazon-q-url] | `kiro-cli` | AWS-native developer agent |

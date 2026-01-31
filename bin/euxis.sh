@@ -636,10 +636,10 @@ run_opencode() {
 
 run_qwen() {
     local full_prompt="$1"
-    if command -v qwen-code &>/dev/null; then
-        echo "${full_prompt}" | qwen-code --model "${PROVIDER_MODEL}" -p ""
+    if command -v qwen &>/dev/null; then
+        echo "${full_prompt}" | qwen --model "${PROVIDER_MODEL}" -p ""
     else
-        log_error "qwen-code not found. Install via: npm i -g @qwen-code/qwen-code"
+        log_error "qwen not found. Install via: brew install qwen-code"
         exit 1
     fi
 }
