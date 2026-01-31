@@ -88,6 +88,72 @@ check_health_fast() {
 check_health_fast
 
 # ============================================================================
+# Context Display (PWD Beacon)
+# ============================================================================
+
+show_context() {
+    local repo_root branch relative_path
+    repo_root=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-git")
+    relative_path=".${PWD#"$repo_root"}"
+
+    local CYAN='\033[0;36m'
+    local YELLOW='\033[1;33m'
+    local NC='\033[0m'
+
+    echo -e "Scope: ${CYAN}${repo_root##*/}${NC}/${relative_path}  Branch: ${YELLOW}${branch}${NC}"
+    echo "---------------------------------------------------"
+}
+
+show_context
+
+# ============================================================================
+# Git Branch Guard (Feature Branch Enforcer)
+# ============================================================================
+
+git_guard() {
+    local current_branch
+    current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || return 0
+
+    # Short circuit: already on a compliant branch
+    case "${current_branch}" in
+        feat/*|fix/*|refactor/*|chore/*) return 0 ;;
+    esac
+
+    local protected="main master develop production staging"
+    if [[ " ${protected} " == *" ${current_branch} "* ]]; then
+        echo "[euxis] SAFETY STOP: You are on a protected branch ('${current_branch}')."
+
+        local latest_tag base_ver major minor patch next_patch next_ver new_branch
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        base_ver="${latest_tag#v}"
+        IFS='.' read -r major minor patch <<< "${base_ver}"
+        major="${major:-0}"; minor="${minor:-0}"; patch="${patch:-0}"
+        next_patch=$((patch + 1))
+        next_ver="v${major}.${minor}.${next_patch}"
+        new_branch="feat/${next_ver}"
+
+        echo "   Euxis must work in a feature branch."
+        echo "   Proposed Branch: ${new_branch} (derived from ${latest_tag})"
+
+        read -p "   Create and switch to '${new_branch}'? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            git checkout -b "${new_branch}"
+            echo "[euxis] Switched to ${new_branch}. Proceeding..."
+        else
+            echo "[euxis] Aborted. Please switch branches manually before running Euxis."
+            exit 1
+        fi
+    else
+        # Gray zone: non-standard branch name, warn but allow
+        echo "[euxis] Warning: Non-standard branch name '${current_branch}'. Proceeding..."
+    fi
+}
+
+git_guard
+
+# ============================================================================
 # Utility Functions
 # ============================================================================
 

@@ -85,10 +85,29 @@ case "$MODE" in
         ;;
 esac
 
+# Branch guard: refuse to run on protected branches
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+if [[ -n "$CURRENT_BRANCH" ]]; then
+    case "$CURRENT_BRANCH" in
+        feat/*|fix/*|refactor/*|chore/*) ;;  # compliant — pass
+        main|master|develop|production|staging)
+            echo "ERROR: Dispatch cannot run on protected branch '${CURRENT_BRANCH}'."
+            echo "  Switch to a feature branch first: git checkout -b feat/<version>"
+            exit 1
+            ;;
+        *)
+            echo "Warning: Non-standard branch name '${CURRENT_BRANCH}'. Proceeding..."
+            ;;
+    esac
+fi
+
 echo "EUXIS FLEET DEPLOYMENT"
 echo "  Project:    $PROJECT"
 echo "  Mode:       $MODE"
 echo "  Dispatches: $DISPATCH_COUNT"
+if [[ -n "$CURRENT_BRANCH" ]]; then
+    echo "  Branch:     $CURRENT_BRANCH"
+fi
 if [[ "$HAS_PHASES" == "true" ]]; then
     echo "  Phases:     $PHASE_COUNT (phased rollout)"
 fi
