@@ -20,4 +20,4 @@
 ---
 
 > Designed by **Sebastien Rousseau**
-> Engineered with **[Euxis](https://github.com/sebastienrousseau/euxis)** — Enterprise Unified eXecution Intelligence System
+> Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System

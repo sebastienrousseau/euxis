@@ -404,6 +404,7 @@ euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Exec
 | `euxis-playbook <cmd> [args]` | Phased squad execution via playbooks |
 | `euxis-combo <cmd> [args]` | Sequential agent chain execution |
 | `euxis-codex <cmd> [args]` | Prompt template library |
+| `euxis-hooks <cmd> [--repo PATH]` | Git hook management |
 | `euxis-synthesize <cmd> [args]` | Dynamic agent composition |
 
 ### Memory
@@ -449,13 +450,20 @@ euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Exec
 │   ├── euxis-playbook      Phased squad execution
 │   ├── euxis-combo         Sequential agent chains
 │   ├── euxis-codex         Prompt template library
-│   └── ...                 24 tools total
+│   ├── euxis-hooks         Git hook management
+│   └── ...                 30 tools total
 ├── codex/                     Prompt template library
 │   ├── codex.json             Template manifest
 │   ├── architect/             Architecture templates
 │   ├── code/                  Code templates
 │   ├── research/              Research templates
 │   └── combo/                 Multi-agent chain templates
+├── branding/
+│   └── signature.txt          Canonical branding signature
+├── hooks/
+│   └── prepare-commit-msg     Auto-appends signature to commits
+├── .github/
+│   └── pull_request_template.md  Branded PR template
 ├── squads.json             Squad and combo registry
 ├── playbooks/              Phased squad activation definitions
 │   ├── zero-to-one.json    Vision → Build → Quality → Growth

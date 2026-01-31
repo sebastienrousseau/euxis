@@ -363,6 +363,12 @@ euxis-codex list                                                    # Browse tem
 euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Execute
 ```
 
+### Git Hooks
+```bash
+euxis-hooks install                     # Brand every commit automatically
+euxis-hooks status                      # Check installation
+```
+
 ---
 
 *Euxis v0.0.6*

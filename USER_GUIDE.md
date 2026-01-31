@@ -24,7 +24,7 @@ Run these tools to verify fleet integrity before and after changes.
 | `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
 | `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
 | `euxis-certify` | Full certification: lint + tests + semantic verification |
-| `euxis-health` | Fleet health check: naming, hardening, orphans, headers, doc drift |
+| `euxis-health` | 8-point fleet health check: naming, hardening, orphans, headers, doc drift, certification, providers, codex |
 | `euxis-git-guard` | Pre-commit safety checks |
 | `euxis-verify` | Output verification |
 | `euxis-polish` | Prompt polishing |
@@ -63,6 +63,9 @@ Activate teams, run phased workflows, or chain agents in sequence.
 | `euxis-codex info <id>` | Template details, variables, and target agents |
 | `euxis-codex show <id>` | Print raw template content |
 | `euxis-codex run <id> VAR=value [--provider P]` | Substitute variables and execute via target agent |
+| `euxis-hooks install [--repo PATH]` | Install Euxis Git hooks into a repository |
+| `euxis-hooks uninstall [--repo PATH]` | Remove Euxis hook symlinks |
+| `euxis-hooks status [--repo PATH]` | Show which Euxis hooks are installed |
 
 ### Performance & Audit
 
@@ -152,6 +155,7 @@ Twenty-two specialists execute domain work.
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
+| **Codex** | Prompt template library with battle-tested templates for structured agent output |
 
 ## AI Provider Matrix
 

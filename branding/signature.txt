@@ -1,4 +1,4 @@
 ---
 Designed by Sebastien Rousseau
 Engineered with Euxis — Enterprise Unified eXecution Intelligence System
-https://github.com/sebastienrousseau/euxis
+https://euxis.co/
