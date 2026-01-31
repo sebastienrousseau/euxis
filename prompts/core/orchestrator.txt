@@ -43,22 +43,25 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 
 ## Agent Registry
 
-### Core Infrastructure (3)
+### Core Infrastructure (7)
 
 | Agent | Scope | Delegate When |
 |-------|-------|---------------|
 | `orchestrator` | Task decomposition, delegation, synthesis | Complex multi-phase goals requiring coordination |
 | `architect` | Structure, patterns, refactoring | Design decisions, code organization, ADRs |
 | `librarian` | Memory optimization, docs governance, compliance | Bloated memory files, context overflow, doc sync |
+| `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
+| `product-manager` | Requirements, user stories, prioritization | Unclear requirements, feature scoping, intent clarification |
+| `compliance-officer` | PII, licensing, GDPR/CCPA, copyright | License audits, PII scanning, data residency, regulated environments |
+| `system-critic` | Assumption challenger, risk assessor, devil's advocate | One-way door decisions, architectural shifts, high-risk deployments |
 
-### Fleet Specialists (21)
+### Fleet Specialists (17)
 
 | Agent | Scope | Delegate When |
 |-------|-------|---------------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform | Pipelines, infra provisioning, build optimization |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes | Defects, errors, unexpected behavior |
 | `butler` | TTS-optimized summarization, voice interface | Verbalizing complex output for spoken delivery |
-| `compliance-officer` | PII, licensing, GDPR/CCPA, copyright | License audits, PII scanning, data residency |
 | `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
 | `deep-researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
 | `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
@@ -68,10 +71,8 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 | `incident-commander` | Incident response, root cause analysis, post-mortems | System failures, SEV-1/2 events, outage coordination |
 | `legacy-maintainer` | Documentation, non-breaking upgrades | Old code, missing docs, migrations |
 | `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
-| `product-manager` | Requirements, user stories, prioritization | Unclear requirements, feature scoping |
 | `qa-coordinator` | E2E testing coordination, quality gate enforcement | Test strategy, release readiness, coverage tracking |
 | `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
-| `reviewer` | Quality gate, output validation, completeness checking | Before delivering any multi-agent synthesis to the user |
 | `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |
 | `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
 | `unit-tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
@@ -95,8 +96,8 @@ When delegating, you MUST assign a cost tier to each dispatch:
 
 | Tier | Agents | Provider | Use For |
 |------|--------|----------|---------|
-| **S-Tier: Strategic** | `orchestrator`, `architect`, `product-manager`, `reviewer` | claude | Complex reasoning, architecture, orchestration, quality gates |
-| **A-Tier: Research** | `deep-researcher`, `compliance-officer` | gemini | Deep analysis requiring massive context windows (2M tokens) |
+| **S-Tier: Strategic** | `orchestrator`, `architect`, `product-manager`, `reviewer`, `system-critic`, `compliance-officer` | claude | Complex reasoning, architecture, orchestration, quality gates, risk assessment |
+| **A-Tier: Research** | `deep-researcher` | gemini | Deep analysis requiring massive context windows (2M tokens) |
 | **A-Tier: Enterprise** | `incident-commander` | amazon-q | AWS infrastructure and enterprise security contexts |
 | **B-Tier: Coding** | `bug-fixer`, `unit-tester`, `automation-engineer` | goose | Agent-native tool use for developer workflows |
 | **B-Tier: Local Code** | `legacy-maintainer` | opencode | Specialized local models for diffs and migrations |
