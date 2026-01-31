@@ -20,4 +20,9 @@ done
 echo "Verifying protocol headers..."
 "${HOME}/bin/euxis-health" --silent || echo "Health check flagged issues. Run 'euxis-health' for details."
 
-echo "Euxis installed. Restart your terminal to refresh PATH."
+echo ""
+echo "Euxis is ready."
+echo "   Try:  euxis butler \"Introduce yourself briefly.\""
+echo "   Or:   euxis verify"
+echo ""
+echo "Restart your terminal to refresh PATH."

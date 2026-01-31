@@ -188,25 +188,49 @@ usage() {
     cat <<EOF
 Euxis - Multi-Provider AI Agent Framework
 
-Usage: euxis <agent> <task> [provider]
-       euxis delegate <agent> <task> [provider]
+Usage: euxis <command> [args...]
+       euxis <agent> <task> [provider]
 
-Arguments:
-    agent       Agent to invoke (see list below)
-    task        Task description or file path
+Commands:
+    dispatch <manifest>      Deploy fleet from architect manifest
+    verify                   Run pre-commit quality gate (5 checks)
+    health [--silent]        System health check
+    lint                     Static analysis (registry, headers, versions)
+    certify                  Full certification pipeline
+    test                     Infrastructure unit tests
+    squad <cmd> [args]       Squad management and deployment
+    playbook <cmd> [args]    Phased squad execution via playbooks
+    combo <cmd> [args]       Sequential agent chain execution
+    council "<topic>"        Multi-agent adversarial debate
+    loop <agent> ...         Autonomous retry loop
+    bus <cmd> [args]         Async pub/sub message bus
+    graph <cmd> [args]       GraphRAG knowledge graph
+    cortex <cmd> [args]      Tri-typed vector memory
+    voice                    Offline voice interface
+    gym <agent> <test>       Agent evaluation and A/B testing
+    audit                    Security audit with probes
+    bench                    Performance benchmarking
+    kaizen                   Continuous self-improvement cycle
+    daemon [interval]        Periodic kaizen with fail-safe
+    optimize                 System-wide tune-up
+    sync-docs                Documentation sync with approval gate
+    deploy                   Docker Compose enterprise deployment
+    delegate <agent> ...     Invoke a sub-agent (used for chaining)
+
+Agent Mode:
+    euxis <agent> <task> [provider]
+
     provider    AI provider: claude, gemini, openai, ollama, opencode
                 (auto-selected per agent via intelligence tiering if omitted)
-
-Subcommands:
-    delegate    Invoke a sub-agent (used by orchestrator for chaining)
 
 Available Agents:
 $(list_agents)
 
 Examples:
     euxis architect "Review the authentication module"
-    euxis bug-fixer "Fix the null pointer exception in user.py" gemini
-    euxis orchestrator "Plan the migration to microservices"
+    euxis dispatch plan.json
+    euxis verify
+    euxis squad list
 
 Environment:
     EUXIS_PROJECT        Project name (default: derived from current directory)
@@ -786,7 +810,43 @@ delegate() {
 # Entry Point
 # ============================================================================
 
+# Subcommand routing: euxis <command> → euxis-<command>
+# Falls through to agent mode if no subcommand matches.
+EUXIS_BIN="${EUXIS_HOME}/bin"
+
 case "${1:-}" in
-    delegate) shift; delegate "$@" ;;
-    *)        main "$@" ;;
+    # Built-in
+    delegate)   shift; delegate "$@" ;;
+    # Orchestration
+    dispatch)   shift; exec "${EUXIS_BIN}/euxis-dispatch" "$@" ;;
+    loop)       shift; exec "${EUXIS_BIN}/euxis-loop" "$@" ;;
+    council)    shift; exec "${EUXIS_BIN}/euxis-council" "$@" ;;
+    bus)        shift; exec "${EUXIS_BIN}/euxis-bus" "$@" ;;
+    graph)      shift; exec "${EUXIS_BIN}/euxis-graph" "$@" ;;
+    squad)      shift; exec "${EUXIS_BIN}/euxis-squad" "$@" ;;
+    playbook)   shift; exec "${EUXIS_BIN}/euxis-playbook" "$@" ;;
+    combo)      shift; exec "${EUXIS_BIN}/euxis-combo" "$@" ;;
+    synthesize) shift; exec "${EUXIS_BIN}/euxis-synthesize" "$@" ;;
+    # Quality
+    verify)     shift; exec "${EUXIS_BIN}/euxis-verify" "$@" ;;
+    health)     shift; exec "${EUXIS_BIN}/euxis-health" "$@" ;;
+    lint)       shift; exec "${EUXIS_BIN}/euxis-lint" "$@" ;;
+    certify)    shift; exec "${EUXIS_BIN}/euxis-certify" "$@" ;;
+    test)       shift; exec "${EUXIS_BIN}/euxis-test-infra" "$@" ;;
+    audit)      shift; exec "${EUXIS_BIN}/euxis-audit-run" "$@" ;;
+    bench)      shift; exec "${EUXIS_BIN}/euxis-bench" "$@" ;;
+    # Memory
+    cortex)     shift; exec "${EUXIS_BIN}/euxis-cortex" "$@" ;;
+    # Maintenance
+    kaizen)     shift; exec "${EUXIS_BIN}/euxis-kaizen" "$@" ;;
+    daemon)     shift; exec "${EUXIS_BIN}/euxis-daemon" "$@" ;;
+    optimize)   shift; exec "${EUXIS_BIN}/euxis-optimize" "$@" ;;
+    sync-docs)  shift; exec "${EUXIS_BIN}/euxis-sync-docs" "$@" ;;
+    deploy)     shift; exec "${EUXIS_BIN}/euxis-deploy" "$@" ;;
+    # Interface
+    voice)      shift; exec "${EUXIS_BIN}/euxis-voice" "$@" ;;
+    gym)        shift; exec "${EUXIS_BIN}/euxis-gym" "$@" ;;
+    ui)         shift; exec "${EUXIS_BIN}/euxis-ui" "$@" ;;
+    # Default: agent mode
+    *)          main "$@" ;;
 esac
