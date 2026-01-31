@@ -8,5 +8,9 @@ v4.5_FINAL_AUDIT.md
 *.log
 tmp/
 
+# Security-sensitive manifests (never commit)
+internal_manifest.json
+edge-hunter-fixes.json
+
 # Override global gitignore that excludes /bin/ (Rust/Go convention)
 !bin/

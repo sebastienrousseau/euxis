@@ -80,8 +80,49 @@ for venv_dir in .venv venv env; do
     fi
 done
 
+# Validate checkpoint commands: reject known-dangerous patterns (defense-in-depth)
+validate_checkpoint_cmd() {
+    local cmd="$1"
+    local dangerous_patterns=(
+        # Reverse shells
+        '/dev/tcp/'
+        '/dev/udp/'
+        'bash -i'
+        'nc -e'
+        'ncat -e'
+        'mkfifo'
+        # Destructive commands
+        'rm -rf /'
+        'mkfs\.'
+        'dd if='
+        ':(){:|:&};:'
+        '> /dev/sd'
+        # Data exfiltration
+        'curl.*|.*sh'
+        'wget.*|.*sh'
+        'curl.*POST.*@'
+        # Code injection / obfuscation
+        'base64.*decode.*|.*sh'
+        'base64.*-d.*|.*sh'
+        'python.*-c.*exec'
+        'perl.*-e.*system'
+        'ruby.*-e.*exec'
+    )
+
+    for pattern in "${dangerous_patterns[@]}"; do
+        if [[ "$cmd" =~ $pattern ]]; then
+            echo ""
+            echo "  ✘ SECURITY: checkpoint command rejected — matches dangerous pattern: $pattern"
+            echo "    Command: $cmd"
+            echo ""
+            exit 1
+        fi
+    done
+}
+
 # Pre-flight: verify that each checkpoint command's binary exists
 for cmd in "${CHECKPOINT_CMDS[@]}"; do
+    validate_checkpoint_cmd "$cmd"
     # Extract the first word (the binary) from the command, ignoring leading '!'
     binary=$(echo "$cmd" | sed 's/^[[:space:]]*!*[[:space:]]*//' | awk '{print $1}')
     if ! command -v "$binary" &>/dev/null; then
@@ -118,6 +159,7 @@ run_checkpoints() {
     local total=${#CHECKPOINT_CMDS[@]}
 
     for cmd in "${CHECKPOINT_CMDS[@]}"; do
+        validate_checkpoint_cmd "$cmd"
         echo "  [Checkpoint $i/$total] $cmd"
         local output
         output=$(eval "$cmd" 2>&1)
