@@ -2,8 +2,6 @@
 
 **Your Local-First AI Operating System**
 
-![Banner][banner]
-
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
 [![Platform][platform-badge]][platform-url]
@@ -463,8 +461,6 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-docs`.
 
 <!-- Reference Links -->
-
-[banner]: https://raw.githubusercontent.com/sebastienrousseau/euxis/main/.github/assets/banner.svg "Euxis — Your Local-First AI Operating System"
 
 [version-badge]: https://img.shields.io/badge/version-6.0-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
