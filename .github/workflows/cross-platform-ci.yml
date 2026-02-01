@@ -89,37 +89,27 @@ jobs:
       - name: Run platform-specific verification tests
         run: |
           export EUXIS_HOME="$PWD"
-          python3 -c "
-import sys, platform, os
-print(f'Python: {sys.version}')
-print(f'Platform: {platform.system()} {platform.release()}')
-print(f'Architecture: {platform.machine()}')
-print(f'PATH includes euxis bin: {any(\"bin\" in p for p in os.environ.get(\"PATH\", \"\").split(os.pathsep))}')
-
-# Test basic file operations
-test_file = 'platform_test.tmp'
-with open(test_file, 'w') as f:
-    f.write('cross-platform test')
-
-with open(test_file, 'r') as f:
-    content = f.read()
-    assert content == 'cross-platform test', f'File I/O test failed: {content}'
-
-os.remove(test_file)
-print('✓ File I/O: PASSED')
-
-# Test shell integration
-import subprocess
-try:
-    result = subprocess.run(['echo', 'shell_test'], capture_output=True, text=True, timeout=10)
-    assert result.returncode == 0, f'Shell test failed: {result.stderr}'
-    assert 'shell_test' in result.stdout, f'Shell output unexpected: {result.stdout}'
-    print('✓ Shell integration: PASSED')
-except Exception as e:
-    print(f'⚠ Shell integration: FAILED - {e}')
-
-print('=== Platform Verification Complete ===')
-          "
+          python3 << 'PYEOF'
+          import sys, platform, os, subprocess
+          print(f'Python: {sys.version}')
+          print(f'Platform: {platform.system()} {platform.release()}')
+          print(f'Architecture: {platform.machine()}')
+          # Test basic file operations
+          test_file = 'platform_test.tmp'
+          with open(test_file, 'w') as f:
+              f.write('cross-platform test')
+          with open(test_file, 'r') as f:
+              content = f.read()
+              assert content == 'cross-platform test', f'File I/O failed: {content}'
+          os.remove(test_file)
+          print('File I/O: PASSED')
+          # Test shell integration
+          result = subprocess.run(['echo', 'shell_test'], capture_output=True, text=True, timeout=10)
+          assert result.returncode == 0
+          assert 'shell_test' in result.stdout
+          print('Shell integration: PASSED')
+          print('=== Platform Verification Complete ===')
+          PYEOF
 
       - name: Generate platform report
         run: |
