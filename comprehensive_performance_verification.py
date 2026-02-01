@@ -5,6 +5,7 @@ Combines existing performance benchmarks with voice/audio performance verificati
 """
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -36,7 +37,7 @@ class ComprehensivePerformanceVerification:
             # Extract results from the JSON output file
             # The script saves to /tmp/euxis_performance_results_{timestamp}.json
             import glob
-            latest_file = max(glob.glob("/tmp/euxis_performance_results_*.json"), key=Path.getmtime)
+            latest_file = max(glob.glob("/tmp/euxis_performance_results_*.json"), key=os.path.getmtime)
 
             with open(latest_file, 'r') as f:
                 self.results['general_performance'] = json.load(f)
@@ -59,7 +60,7 @@ class ComprehensivePerformanceVerification:
 
             # Extract results from the JSON output file
             import glob
-            latest_file = max(glob.glob("/tmp/euxis_voice_performance_*.json"), key=Path.getmtime)
+            latest_file = max(glob.glob("/tmp/euxis_voice_performance_*.json"), key=os.path.getmtime)
 
             with open(latest_file, 'r') as f:
                 voice_data = json.load(f)

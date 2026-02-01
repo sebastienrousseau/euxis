@@ -9,8 +9,10 @@ import threading
 import itertools
 import time
 import json
+import hashlib
 import urllib.request
 import urllib.error
+
 
 VENV_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".venv-voice")
 VENV_PYTHON = os.path.join(VENV_DIR, "bin", "python3")
@@ -31,11 +33,6 @@ def _ensure_venv():
 
 _ensure_venv()
 
-import sounddevice as sd
-import numpy as np
-import scipy.io.wavfile as wav
-from faster_whisper import WhisperModel
-from piper import PiperVoice
 import wave
 
 # CONFIGURATION
@@ -50,8 +47,13 @@ SILENCE_CHUNKS = 7         # consecutive silent chunks (~2.1s) to stop
 MAX_RECORD_SECONDS = 30    # hard cap
 MIN_RECORD_SECONDS = 3     # minimum seconds before silence detection kicks in
 
-PIPER_VOICE = "en_US-lessac-medium"
+PIPER_VOICE = "en_US-lessac-low"
 PIPER_VOICES_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".piper-voices")
+
+# TTS cache
+TTS_CACHE_DIR = os.path.join(os.path.expanduser("~"), ".euxis", ".tts-cache")
+TTS_CACHE_MAX = 100
+COMMON_PHRASES = ["On it.", "Goodbye.", "No speech detected. Try again.", "Working on it."]
 
 # Lazy-loaded globals
 _whisper_model = None
@@ -63,8 +65,9 @@ def _get_whisper_model():
     """Load faster-whisper model once, reuse across calls."""
     global _whisper_model
     if _whisper_model is None:
-        print("Loading Whisper model (first run downloads ~150MB)...")
-        _whisper_model = WhisperModel("base.en", device="cpu", compute_type="int8", num_workers=4)
+        from faster_whisper import WhisperModel
+        print("Loading Whisper model (first run downloads ~39MB)...")
+        _whisper_model = WhisperModel("tiny.en", device="cpu", compute_type="int8", num_workers=2)
     return _whisper_model
 
 
@@ -85,8 +88,25 @@ def _get_piper_voice():
         download_voice(PIPER_VOICE, Path(PIPER_VOICES_DIR))
         print("Voice model downloaded.")
 
+    import json as _json
+    from pathlib import Path as _Path
+    import onnxruntime
+    from piper import PiperVoice
+    from piper.voice import PiperConfig
+
     print("Loading TTS model...")
-    _piper_voice = PiperVoice.load(model_file)
+    opts = onnxruntime.SessionOptions()
+    opts.inter_op_num_threads = 2
+    opts.intra_op_num_threads = 0
+    opts.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+    with open(config_file, "r", encoding="utf-8") as f:
+        config = PiperConfig.from_dict(_json.load(f))
+    session = onnxruntime.InferenceSession(
+        model_file, sess_options=opts, providers=["CPUExecutionProvider"]
+    )
+    espeak_dir = _Path(onnxruntime.__file__).parent.parent / "piper" / "espeak-ng-data"
+    _piper_voice = PiperVoice(config=config, session=session, espeak_data_dir=espeak_dir)
     return _piper_voice
 
 
@@ -102,12 +122,41 @@ def _get_audio_player():
     return _audio_player
 
 
-def _synthesize_wav(text):
-    """Generate WAV file from text using Piper Python API (model kept in memory)."""
+def _cache_key(text):
+    """Return a hash-based filename for TTS cache."""
+    return hashlib.sha256(text.encode()).hexdigest()[:16] + ".wav"
+
+
+def _evict_cache():
+    """Remove oldest files if cache exceeds TTS_CACHE_MAX."""
     try:
+        files = [os.path.join(TTS_CACHE_DIR, f) for f in os.listdir(TTS_CACHE_DIR) if f.endswith(".wav")]
+        if len(files) <= TTS_CACHE_MAX:
+            return
+        files.sort(key=os.path.getmtime)
+        for f in files[: len(files) - TTS_CACHE_MAX]:
+            os.remove(f)
+    except OSError:
+        pass
+
+
+def _synthesize_wav(text, output_path=None):
+    """Generate WAV file from text, using cache when available."""
+    if output_path is None:
+        output_path = TMP_OUTPUT
+    try:
+        os.makedirs(TTS_CACHE_DIR, exist_ok=True)
+        cached = os.path.join(TTS_CACHE_DIR, _cache_key(text))
+        if os.path.isfile(cached):
+            import shutil
+            shutil.copy2(cached, output_path)
+            return True
         voice = _get_piper_voice()
-        with wave.open(TMP_OUTPUT, "wb") as wf:
+        with wave.open(output_path, "wb") as wf:
             voice.synthesize_wav(text, wf)
+        import shutil
+        shutil.copy2(output_path, cached)
+        _evict_cache()
         return True
     except Exception as e:
         print(f"TTS Error: {e}")
@@ -138,6 +187,9 @@ def play_sound(text):
 
 def record_audio():
     """Records audio with silence-based stop detection."""
+    import sounddevice as sd
+    import numpy as np
+    import scipy.io.wavfile as wavfile
     print("Listening... (speak, then pause to finish)")
     try:
         chunk_samples = int(CHUNK_DURATION * SAMPLE_RATE)
@@ -164,7 +216,7 @@ def record_audio():
         duration = len(recording) / SAMPLE_RATE
         # Convert float32 [-1,1] to int16 for WAV
         audio_int16 = np.clip(recording * 32767, -32768, 32767).astype(np.int16)
-        wav.write(TMP_INPUT, SAMPLE_RATE, audio_int16)
+        wavfile.write(TMP_INPUT, SAMPLE_RATE, audio_int16)
         print(f"Recorded {duration:.1f}s. Processing...")
     except Exception as e:
         print(f"Mic Error: {e}")
@@ -280,11 +332,61 @@ def synthesize_briefing(raw_output):
     return _call_groq(prompt)
 
 
+def _prewarm_phrases():
+    """Pre-synthesize common phrases into TTS cache."""
+    os.makedirs(TTS_CACHE_DIR, exist_ok=True)
+    for phrase in COMMON_PHRASES:
+        cached = os.path.join(TTS_CACHE_DIR, _cache_key(phrase))
+        if not os.path.isfile(cached):
+            try:
+                voice = _get_piper_voice()
+                with wave.open(cached, "wb") as wf:
+                    voice.synthesize_wav(phrase, wf)
+            except Exception:
+                pass
+
+
+def _prime_disk_cache():
+    """Read model files into OS page cache so model loading hits RAM not disk."""
+    paths = [os.path.join(PIPER_VOICES_DIR, f"{PIPER_VOICE}.onnx")]
+    # Find Whisper model.bin in HuggingFace cache
+    hf_snap = os.path.join(os.path.expanduser("~"), ".cache", "huggingface",
+                           "hub", "models--Systran--faster-whisper-tiny.en", "snapshots")
+    if os.path.isdir(hf_snap):
+        for snap in os.listdir(hf_snap):
+            mb = os.path.join(hf_snap, snap, "model.bin")
+            if os.path.isfile(mb):
+                paths.append(mb)
+                break
+    for path in paths:
+        try:
+            with open(path, "rb") as f:
+                while f.read(1048576):
+                    pass
+        except OSError:
+            pass
+
+
 def _warmup():
-    """Pre-load models and cache lookups before user interaction."""
-    _get_whisper_model()
-    _get_piper_voice()
+    """Pre-load models concurrently and pre-warm TTS cache."""
     _get_audio_player()
+    # Prime OS disk cache in background while we import libraries
+    tc = threading.Thread(target=_prime_disk_cache, daemon=True)
+    tc.start()
+    # Import heavy libraries sequentially (import lock prevents true thread parallelism)
+    import faster_whisper  # noqa: F401
+    import piper  # noqa: F401
+    tc.join()  # Ensure files are in page cache before model loading
+    # Model loading truly parallelizes (C extensions release the GIL)
+    tw = threading.Thread(target=_get_whisper_model)
+    tp = threading.Thread(target=_get_piper_voice)
+    tw.start()
+    tp.start()
+    tw.join()
+    tp.join()
+    # Pre-warm cache and audio deps in background (not on critical path)
+    threading.Thread(target=_prewarm_phrases, daemon=True).start()
+    threading.Thread(target=lambda: __import__('sounddevice') or __import__('numpy'), daemon=True).start()
     print("Ready.\n")
 
 
@@ -326,9 +428,7 @@ def main():
             if _needs_orchestrator(user_text):
                 # Engineering task — full pipeline with "On it" acknowledgment
                 print("    Euxis: On it.")
-                tts_thread = threading.Thread(target=_synthesize_wav, args=("On it.",), daemon=True)
-                tts_thread.start()
-                tts_thread.join()
+                _synthesize_wav("On it.")
                 _play_wav()
 
                 raw_output = run_euxis_fleet(full_command)
