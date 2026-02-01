@@ -162,6 +162,42 @@
       "required_tools": [],
       "compatible_with": ["documentation", "memory-optimization"],
       "conflicts_with": []
+    },
+    {
+      "id": "tui-design",
+      "name": "TUI Design",
+      "description": "Terminal UI layout, rendering, and interaction design for keyboard-first CLI experiences",
+      "prompt_fragment": "You MUST design TUI layouts with clear spatial hierarchy, low-latency rendering, and graceful degradation. Every view MUST support keyboard-only operation with predictable focus management.",
+      "required_tools": [],
+      "compatible_with": ["keyboard-navigation", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "design-system",
+      "name": "Design System",
+      "description": "Token-based design system architecture with component contracts, responsive layouts, and multi-input modality",
+      "prompt_fragment": "You MUST define tokens (spacing, typography, elevation, radii), component contracts (props, states, ARIA, keyboard), and responsive behavior. Every component MUST work across keyboard, mouse, and touch.",
+      "required_tools": [],
+      "compatible_with": ["theming", "keyboard-navigation", "architecture-review", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "theming",
+      "name": "Theming",
+      "description": "Adaptive Light/Dark appearance systems, semantic color tokens, motion rules, and contrast compliance",
+      "prompt_fragment": "You MUST produce co-equal Light and Dark token sets, enforce WCAG AA contrast minimums, define motion duration/easing scales with reduced-motion fallbacks, and respect all user appearance preferences.",
+      "required_tools": [],
+      "compatible_with": ["design-system", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "keyboard-navigation",
+      "name": "Keyboard Navigation",
+      "description": "Full keyboard navigation model, focus management, shortcut registry, and command palette design",
+      "prompt_fragment": "You MUST map complete focus orders, implement roving tabindex for composite widgets, maintain a conflict-free shortcut registry, and ensure focus traps restore correctly. No mouse required MUST be genuinely true.",
+      "required_tools": [],
+      "compatible_with": ["tui-design", "design-system", "compliance-check"],
+      "conflicts_with": []
     }
   ]
 }
