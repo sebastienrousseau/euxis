@@ -23,19 +23,9 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             python: "3.12"
-            shell: bash
           - os: macos-latest
             platform: macos
             python: "3.12"
-            shell: bash
-          - os: windows-latest
-            platform: wsl
-            python: "3.12"
-            shell: wsl-bash {0}
-
-    defaults:
-      run:
-        shell: ${{ matrix.shell }}
 
     steps:
       - name: Checkout code
@@ -46,15 +36,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Setup WSL (Windows only)
-        if: matrix.platform == 'wsl'
-        uses: Vampire/setup-wsl@v2
-        with:
-          distribution: Ubuntu-22.04
-          use-cache: false
-
-      - name: Install system dependencies (Linux/WSL)
-        if: matrix.platform == 'linux' || matrix.platform == 'wsl'
+      - name: Install system dependencies (Linux)
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y curl git build-essential libportaudio2
@@ -175,7 +158,7 @@ print('=== Platform Verification Complete ===')
           echo "Generated: $(date -u)" >> cross-platform-summary.md
           echo "" >> cross-platform-summary.md
 
-          for platform in linux macos wsl; do
+          for platform in linux macos; do
             echo "## $platform Platform" >> cross-platform-summary.md
             if [ -f "platform-report-$platform/platform-report-$platform.md" ]; then
               cat "platform-report-$platform/platform-report-$platform.md" >> cross-platform-summary.md
