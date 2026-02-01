@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'verify-everything' gate 0 (Documentation Truth) completed","timestamp":"2026-02-01T21:06:01Z","correlation_id":"1769979961-348551-30566"}

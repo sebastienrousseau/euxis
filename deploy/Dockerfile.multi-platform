@@ -1,0 +1,70 @@
+# Euxis Multi-Platform Container Images
+# Builds Euxis for AMD64 and ARM64 architectures
+
+# Stage 1: Base Python environment
+FROM python:3.11-slim as base
+
+# Install common system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    libportaudio2 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create euxis user for security
+RUN groupadd -r euxis && useradd --no-log-init -r -g euxis euxis
+
+# Set up environment
+ENV EUXIS_HOME=/app/.euxis
+ENV PATH="/app/.euxis/bin:$PATH"
+WORKDIR /app
+
+# Copy requirements first for layer caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Application layer
+FROM base as application
+
+# Copy source code
+COPY . /app/.euxis/
+
+# Set proper ownership and permissions
+RUN chown -R euxis:euxis /app \
+    && chmod -R 755 /app/.euxis/bin/ \
+    && find /app/.euxis/bin -name "euxis*" -exec chmod +x {} \;
+
+# Switch to non-root user
+USER euxis
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD timeout 5 bash -c '/app/.euxis/bin/euxis --help >/dev/null 2>&1 || exit 1'
+
+# Default command
+CMD ["/app/.euxis/bin/euxis-daemon"]
+
+# Stage 3: Multi-platform variants
+
+# AMD64 variant
+FROM application as amd64
+LABEL architecture="amd64"
+LABEL platform="linux/amd64"
+
+# ARM64 variant
+FROM application as arm64
+LABEL architecture="arm64"
+LABEL platform="linux/arm64"
+
+# Final stage - select based on build args
+ARG TARGETARCH
+FROM ${TARGETARCH} as final
+LABEL org.opencontainers.image.title="Euxis Agent Framework"
+LABEL org.opencontainers.image.description="Enterprise Unified eXecution Intelligence System"
+LABEL org.opencontainers.image.vendor="Euxis"
+LABEL org.opencontainers.image.version="v0.0.6"
+LABEL org.opencontainers.image.source="https://github.com/euxis/euxis"
