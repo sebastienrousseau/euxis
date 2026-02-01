@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PATH=\"$HOME/bin:$PATH\")",
+      "Bash(euxis-health)",
+      "Bash(euxis-audit-run)",
+      "Bash(euxis-kaizen)",
+      "Bash(euxis-certify:*)",
+      "Bash(git stash:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git -C /home/seb/.euxis add:*)",
+      "Bash(git -C /home/seb/.euxis commit -m \"$\\(cat <<''EOF''\nHarden bin/euxis wrapper with set -uo pipefail\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /home/seb/.euxis push origin main)",
+      "Bash(euxis-lint:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-kaizen:*)",
+      "Bash(/home/seb/.euxis/bin/euxis.sh deep-researcher:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-bus list-topics:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-synthesize list-capabilities:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-bus publish:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-synthesize inspect:*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-bus drain:*)",
+      "Bash(/home/seb/.euxis/bin/euxis-graph stats:*)",
+      "Bash(bin/euxis-health)",
+      "Bash(bin/euxis-lint:*)",
+      "Bash(~/.euxis/bin/euxis-bus status:*)",
+      "Bash(~/.euxis/bin/euxis-graph stats:*)",
+      "Bash(~/.euxis/bin/euxis-synthesize list-capabilities:*)",
+      "Bash(~/.euxis/bin/euxis-kaizen:*)"
+    ]
+  }
+}
