@@ -24,7 +24,7 @@ Seven core agents define direction and may block progress. If one is missing, th
 | `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
 | `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
 
-### Default (13) — Auto-available, task-triggered
+### Default (17) — Auto-available, task-triggered
 
 Execute within scope when triggered. Advise but do not define direction.
 
@@ -43,6 +43,10 @@ Execute within scope when triggered. Advise but do not define direction.
 | `tech-writer` | Documentation that delights | Utility |
 | `unit-tester` | Prevent regressions | Coding |
 | `ux-sentinel` | Experiences users love | Standard |
+| `cli-ui-artisan` | Terminal UI design and keyboard navigation | Standard |
+| `web-ui-architect` | Web UI components and design systems | Standard |
+| `theming-and-motion-engineer` | Theming, color systems, and animation | Standard |
+| `interaction-and-input-specialist` | Keyboard navigation and input handling | Standard |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -277,14 +281,15 @@ deep-researcher -> architect -> product-manager -> bug-fixer -> reviewer
 
 ## Squads
 
-Four cross-functional teams with clear ownership.
+Five cross-functional teams with clear ownership.
 
 | Squad | Purpose | Lead | Members |
 |-------|---------|------|---------|
 | Vision | Strategy | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
 | Build | Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
 | Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
-| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, ux-sentinel, globalization-lead |
+| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
+| Experience | UI Excellence | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
 
 Deploy an entire squad with one command. Leads get P0 priority. Members get P1.
 
@@ -331,12 +336,14 @@ Each agent receives the original task plus the previous agent's output (capped a
 | Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
 | Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
 | Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
+| Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI design and interaction |
 
 ```bash
 euxis-combo list                                                # Available combos
 euxis-combo info fort-knox                                      # Chain detail
 euxis-combo run steve-jobs "Design onboarding flow"             # Execute chain
 euxis-combo run fort-knox "Audit payment module" --provider claude  # Override provider
+euxis-combo run jony-ive "Create a stunning dashboard UI"       # Apple-level design execution
 ```
 
 ---

@@ -11,7 +11,7 @@ Version 0.0.6
 
 ## Overview
 
-Euxis gives you 27 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
+Euxis gives you 31 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
 
 Build faster. Ship with confidence.
 
@@ -108,7 +108,7 @@ flowchart LR
 
 ## Your Specialist Team
 
-27 agents across three tiers: 7 core agents govern the fleet, 13 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
+31 agents across three tiers: 7 core agents govern the fleet, 17 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
 
 ### Core (7) — Authority-bearing, always present
 
@@ -122,7 +122,7 @@ flowchart LR
 | `compliance-officer` | Legal, privacy, and regulatory authority |
 | `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Default (13) — Auto-available, task-triggered
+### Default (17) — Auto-available, task-triggered
 
 | Agent | Domain |
 |:------|:-------|
@@ -139,6 +139,10 @@ flowchart LR
 | `tech-writer` | Documentation, tutorials, API reference |
 | `unit-tester` | Test coverage, reliability, regression prevention |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), responsive testing |
+| `cli-ui-artisan` | Terminal UI design and keyboard navigation |
+| `web-ui-architect` | Web UI components and design systems |
+| `theming-and-motion-engineer` | Theming, color systems, and animation |
+| `interaction-and-input-specialist` | Keyboard navigation and input handling |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -297,14 +301,15 @@ Euxis enforces a zero-trust security model at every layer.
 
 ## Squads
 
-Four cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
+Five cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
 
 | Squad | Purpose | Lead | Members |
 |:------|:--------|:-----|:--------|
-| Vision | Strategy | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
-| Build | Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
-| Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
-| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, ux-sentinel, globalization-lead |
+| Vision | Strategy & Discovery | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
+| Build | Engineering & Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
+| Quality | Assurance & Security | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
+| Growth | Branding & Documentation | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
+| Experience | UI Excellence & Interaction Design | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
 
 ```bash
 euxis-squad list                            # All squads
@@ -344,6 +349,7 @@ Combos are sequential agent chains. Each agent receives the previous agent's out
 | Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
 | Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
 | Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
+| Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI from design system to polished interaction |
 
 ```bash
 euxis-combo list                                      # Available combos
@@ -534,7 +540,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-27-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-31-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/FLEET_GUIDE.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

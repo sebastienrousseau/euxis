@@ -23,7 +23,7 @@ The Euxis Fleet exists to transform intent into reliable, ethical, high-quality 
 | Class | Count | Rule |
 |-------|-------|------|
 | **Core** | 7 | Define direction and may block progress |
-| **Default** | 13 | Execute within scope when triggered; advise but do not define direction |
+| **Default** | 17 | Execute within scope when triggered; advise but do not define direction |
 | **On-Demand** | 7 | Provide leverage when explicitly invoked; never block, never override core authority |
 
 ### Core Agents (always present, authority-bearing)
@@ -55,6 +55,10 @@ The operating engine. They activate automatically when their domain appears.
 - `tech-writer` — docs, tutorials, API reference
 - `unit-tester` — test coverage, reliability, regression prevention
 - `ux-sentinel` — accessibility, design system, WCAG
+- `cli-ui-artisan` — terminal UI design, keyboard navigation, TUI interaction
+- `web-ui-architect` — web UI components, design systems, responsive layouts
+- `theming-and-motion-engineer` — theming, color systems, dark mode, animation
+- `interaction-and-input-specialist` — keyboard navigation, input handling, accessibility
 
 ### On-Demand Agents (explicit invocation only)
 
