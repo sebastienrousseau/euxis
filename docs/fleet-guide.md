@@ -8,7 +8,73 @@ Version 0.0.7
 
 ## Fleet Overview
 
-35 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
+38 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
+
+### Core (7) — Authority-bearing, always present
+
+Seven core agents define direction and may block progress. If one is missing, the system is incomplete.
+
+| Agent | What It Does | Model Tier |
+|-------|-------------|------------|
+| `orchestrator` | Breaks down ambitious goals. Routes work to specialists. Delivers complete solutions. | Strategic |
+| `architect` | Designs systems that scale. Creates patterns that last. | Strategic |
+| `product-manager` | Defines intent, scope, and prioritization. Ships what matters. | Strategic |
+| `reviewer` | Truth & quality gate. Guarantees correctness and completeness. | Strategic |
+| `librarian` | Keeps knowledge sharp. Documentation governance. | Utility |
+| `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
+| `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
+
+### Default (20) — Auto-available, task-triggered
+
+Execute within scope when triggered. Advise but do not define direction.
+
+| Agent | Domain | Model Tier |
+|-------|--------|------------|
+| `automation-engineer` | Zero-touch deployments | Coding |
+| `bug-fixer` | Get to root cause fast | Coding |
+| `crash-investigator` | Post-incident crash forensics and evidence gathering | Standard |
+| `data-steward` | Total system visibility | Math/Logic |
+| `edge-hunter` | Bulletproof security | Standard |
+| `incident-commander` | Handle any crisis | Enterprise |
+| `language-specialist` | Language-specific pattern detection and idiom enforcement | Standard |
+| `legacy-maintainer` | Modernize without breaking | Local Code |
+| `perf-optimizer` | Make it fast | Math/Logic |
+| `qa-coordinator` | Ship with certainty | Standard |
+| `regression-analyst` | Exhaustive pre-merge regression analysis | Standard |
+| `release-manager` | Flawless releases | Standard |
+| `security-lead` | Security policy, threat governance, edge-hunter dispatch | Standard |
+| `tech-writer` | Documentation that delights | Utility |
+| `unit-tester` | Prevent regressions | Coding |
+| `ux-sentinel` | Experiences users love | Standard |
+| `cli-ui-artisan` | Terminal UI design and keyboard navigation | Standard |
+| `web-ui-architect` | Web UI components and design systems | Standard |
+| `theming-and-motion-engineer` | Theming, color systems, and animation | Standard |
+| `interaction-and-input-specialist` | Keyboard navigation and input handling | Standard |
+
+### On-Demand (7) — Explicit invocation only
+
+Add leverage, not safety. Never block, never override core authority.
+
+| Agent | Domain | Model Tier |
+|-------|--------|------------|
+| `brand-evangelist` | Brand voice and storytelling | Standard |
+| `butler` | Perfect voice summaries | Utility |
+| `deep-researcher` | Find what others miss | Research |
+| `devrel-advocate` | Build community | Standard |
+| `globalization-lead` | Global reach | Standard |
+| `growth-marketer` | Scale your impact | Standard |
+| `social-manager` | Amplify your voice | Standard |
+
+### Specialist (4) — Domain-specific expertise
+
+Activated for domain-scoped tasks only. Deep expertise in vertical domains.
+
+| Agent | Domain | Model Tier |
+|-------|--------|------------|
+| `crypto-cryptography-auditor` | Cryptographic correctness, PQC, hashing | Standard |
+| `payments-domain-steward` | ISO 20022, payments compliance, financial schemas | Standard |
+| `realtime-audio-engineer` | Real-time audio, latency, DSP, voice pipelines | Standard |
+| `rust-crate-steward` | Rust crate publishing, MSRV, docs | Standard |
 
 **For the authoritative agent registry, governance rules, and authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 

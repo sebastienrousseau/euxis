@@ -11,7 +11,7 @@ echo "STARTING STATIC ANALYSIS..."
 
 # CHECK 1: Agent Registry Integrity
 echo "[1/8] Checking Registry..."
-AGENTS=("architect" "automation-engineer" "brand-evangelist" "bug-fixer" "butler" "cli-ui-artisan" "compliance-officer" "crypto-cryptography-auditor" "data-steward" "deep-researcher" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "incident-commander" "interaction-and-input-specialist" "legacy-maintainer" "librarian" "orchestrator" "payments-domain-steward" "perf-optimizer" "product-manager" "qa-coordinator" "realtime-audio-engineer" "release-manager" "reviewer" "rust-crate-steward" "security-lead" "social-manager" "system-critic" "tech-writer" "theming-and-motion-engineer" "unit-tester" "ux-sentinel" "web-ui-architect")
+AGENTS=("architect" "automation-engineer" "brand-evangelist" "bug-fixer" "butler" "cli-ui-artisan" "compliance-officer" "crash-investigator" "crypto-cryptography-auditor" "data-steward" "deep-researcher" "devrel-advocate" "edge-hunter" "globalization-lead" "growth-marketer" "incident-commander" "interaction-and-input-specialist" "language-specialist" "legacy-maintainer" "librarian" "orchestrator" "payments-domain-steward" "perf-optimizer" "product-manager" "qa-coordinator" "realtime-audio-engineer" "regression-analyst" "release-manager" "reviewer" "rust-crate-steward" "security-lead" "social-manager" "system-critic" "tech-writer" "theming-and-motion-engineer" "unit-tester" "ux-sentinel" "web-ui-architect")
 
 for agent in "${AGENTS[@]}"; do
     FOUND=false

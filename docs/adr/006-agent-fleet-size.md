@@ -4,10 +4,10 @@
 Accepted
 
 ## Context
-Euxis operates a fleet of 35 specialized agents across two tiers (7 core, 28 fleet). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
+Euxis operates a fleet of 38 specialized agents across four tiers (7 core, 20 default, 7 on-demand, 4 specialist). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
 
 ## Decision
-Maintain the 35-agent architecture with the following constraints:
+Maintain the 38-agent architecture with the following constraints:
 
 1. **Core agents (7) are fixed.** Orchestrator, architect, reviewer, system-critic, compliance-officer, librarian, and product-manager form the governance layer. These are required for multi-agent coordination and quality gates.
 

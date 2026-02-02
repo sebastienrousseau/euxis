@@ -17,8 +17,8 @@ assert_contains "check 4 permissions" "[4/6]" "${lint_output}"
 assert_contains "check 5 headers" "[5/6]" "${lint_output}"
 assert_contains "check 6 patterns" "[6/6]" "${lint_output}"
 
-# Reports 35 agents
-assert_contains "35 agents" "35 agents" "${lint_output}"
+# Reports 38 agents
+assert_contains "38 agents" "38 agents" "${lint_output}"
 
 # Reports 11 patterns
 assert_contains "11 patterns" "11 patterns" "${lint_output}"

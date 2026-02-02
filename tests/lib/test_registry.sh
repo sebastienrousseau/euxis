@@ -11,9 +11,9 @@ else
     assert_eq "registry is valid JSON" "valid" "invalid"
 fi
 
-# Has 35 agents
+# Has 38 agents
 agent_count=$(jq '.agents | length' "${registry}" 2>/dev/null)
-assert_eq "35 agents in registry" "35" "${agent_count}"
+assert_eq "38 agents in registry" "38" "${agent_count}"
 
 # Every agent has required fields
 all_have_id=$(jq '[.agents[] | select(.id == null or .id == "")] | length' "${registry}" 2>/dev/null)

@@ -11,7 +11,7 @@ Version 0.0.7
 
 ## Overview
 
-Euxis gives you 35 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
+Euxis gives you 38 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
 
 Build faster. Ship with confidence.
 
@@ -104,7 +104,7 @@ flowchart LR
 
 ## Your Specialist Team
 
-35 agents across three tiers: 7 core agents govern the fleet, 17 default agents execute domain work, 7 on-demand agents provide leverage when invoked, and 4 specialist agents deliver domain-specific expertise.
+38 agents across four tiers: 7 core agents govern the fleet, 20 default agents execute domain work, 7 on-demand agents provide leverage when invoked, and 4 specialist agents deliver domain-specific expertise.
 
 **Authority Model:** Each agent class has distinct operational rules and scope boundaries. Core agents define direction and may block progress, while default agents execute within their domain when triggered. On-demand agents provide specialized leverage only when explicitly invoked.
 
@@ -304,7 +304,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-35-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-38-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

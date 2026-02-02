@@ -98,6 +98,11 @@ When analyzing a repo for modernization or refactoring, you MUST output a **Miss
 2. **SECURITY:** Always dispatch `edge-hunter` if new network/auth code is added.
 3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` for the `euxis-loop` to verify success.
 4. **PRIORITY:** P0 = blocking/critical, P1 = high, P2 = medium, P3 = low.
+5. **DEEP REVIEW (MANDATORY):** When the manifest touches concurrency, cryptography, parsing, audio, networking, serialization, or memory management, you MUST include the `deep-review` chain in the dispatch. Add these dispatches BEFORE the final `reviewer` gate:
+   - `language-specialist` — subsystem-aware pattern detection for changed files.
+   - `regression-analyst` — exhaustive regression analysis using language context.
+   - `edge-hunter` — security review with subsystem-specific threat modeling.
+6. **CRASH FORENSICS:** When dispatching in response to a crash or production failure, ALWAYS dispatch `crash-investigator` before `bug-fixer`. The investigator provides the evidence; the fixer applies the remedy.
 
 ### Verify Command Rules
 
