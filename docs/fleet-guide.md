@@ -6,72 +6,11 @@ Version 0.0.7
 
 ---
 
-## Agent Registry
+## Fleet Overview
 
-See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
+35 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
 
-### Core (7) — Authority-bearing, always present
-
-Seven core agents define direction and may block progress. If one is missing, the system is incomplete.
-
-| Agent | What It Does | Model Tier |
-|-------|-------------|------------|
-| `orchestrator` | Breaks down ambitious goals. Routes work to specialists. Delivers complete solutions. | Strategic |
-| `architect` | Designs systems that scale. Creates patterns that last. | Strategic |
-| `product-manager` | Defines intent, scope, and prioritization. Ships what matters. | Strategic |
-| `reviewer` | Truth & quality gate. Guarantees correctness and completeness. | Strategic |
-| `librarian` | Keeps knowledge sharp. Documentation governance. | Utility |
-| `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
-| `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
-
-### Default (17) — Auto-available, task-triggered
-
-Execute within scope when triggered. Advise but do not define direction.
-
-| Agent | Domain | Model Tier |
-|-------|--------|------------|
-| `automation-engineer` | Zero-touch deployments | Coding |
-| `bug-fixer` | Get to root cause fast | Coding |
-| `data-steward` | Total system visibility | Math/Logic |
-| `edge-hunter` | Bulletproof security | Standard |
-| `incident-commander` | Handle any crisis | Enterprise |
-| `legacy-maintainer` | Modernize without breaking | Local Code |
-| `perf-optimizer` | Make it fast | Math/Logic |
-| `qa-coordinator` | Ship with certainty | Standard |
-| `release-manager` | Flawless releases | Standard |
-| `security-lead` | Security policy, threat governance, edge-hunter dispatch | Standard |
-| `tech-writer` | Documentation that delights | Utility |
-| `unit-tester` | Prevent regressions | Coding |
-| `ux-sentinel` | Experiences users love | Standard |
-| `cli-ui-artisan` | Terminal UI design and keyboard navigation | Standard |
-| `web-ui-architect` | Web UI components and design systems | Standard |
-| `theming-and-motion-engineer` | Theming, color systems, and animation | Standard |
-| `interaction-and-input-specialist` | Keyboard navigation and input handling | Standard |
-
-### On-Demand (7) — Explicit invocation only
-
-Add leverage, not safety. Never block, never override core authority.
-
-| Agent | Domain | Model Tier |
-|-------|--------|------------|
-| `brand-evangelist` | Brand voice and storytelling | Standard |
-| `butler` | Perfect voice summaries | Utility |
-| `deep-researcher` | Find what others miss | Research |
-| `devrel-advocate` | Build community | Standard |
-| `globalization-lead` | Global reach | Standard |
-| `growth-marketer` | Scale your impact | Standard |
-| `social-manager` | Amplify your voice | Standard |
-
-### Specialist (4) — Domain-specific expertise
-
-Deep domain knowledge for specialized auditing and compliance.
-
-| Agent | Domain | Model Tier |
-|-------|--------|------------|
-| `crypto-cryptography-auditor` | Constant-time, key management, PQC readiness | Domain (claude) |
-| `payments-domain-steward` | ISO 20022, schema validation, regulatory | Domain (claude) |
-| `realtime-audio-engineer` | Latency budgets, buffer management, platform audio | Systems (goose) |
-| `rust-crate-steward` | MSRV, feature flags, semver, docs.rs | Systems (goose) |
+**For the authoritative agent registry, governance rules, and authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
 ---
 
@@ -132,71 +71,19 @@ Every dispatch starts with a manifest. Here is the format:
 
 ---
 
-## Memory Architecture
+## Memory-Driven Operation
 
-Every agent has access to persistent memory. The Cortex stores three types of knowledge.
+Agents leverage the Cortex for persistent, tri-typed memory across sessions. Before starting complex tasks, agents recall proven patterns and contraindications to avoid repeating failed approaches.
 
-### Episodic
-Capture what happened.
-```bash
-euxis-cortex remember "Fixed auth bug in login.py line 89" "bug-fixer" --type episodic
-```
-
-### Semantic
-Store lasting knowledge.
-```bash
-euxis-cortex remember "API uses OAuth 2.0 with PKCE" "architect" --type semantic
-```
-
-### Procedural
-Build repeatable workflows.
-```bash
-euxis-cortex remember "Deploy: test -> build -> tag -> push -> verify" "release-manager" --type procedural
-```
-
-### Memory Commands
-
-```bash
-# Store knowledge
-euxis-cortex remember "<fact>" "<agent>" --type <episodic|semantic|procedural>
-
-# Recall knowledge
-euxis-cortex recall "<keywords>"
-euxis-cortex recall "<keywords>" --type procedural
-```
-
-Always check for proven patterns before starting complex work:
-```bash
-euxis-cortex recall "deployment workflow" --type procedural
-```
+**For complete memory system documentation, commands, and type classification, see [User Guide](user-guide.md#tri-typed-memory-system).**
 
 ---
 
-## Model Tiers
+## Intelligence Routing
 
-Right capability. Right cost.
+Euxis automatically routes agents to optimal AI providers based on task complexity and domain requirements. Critical (P0) tasks always use strategic-tier providers for maximum reliability.
 
-| Tier | When to Use | Provider | Agents |
-|------|-------------|----------|--------|
-| S-Tier: Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer |
-| A-Tier: Research | Deep analysis, large context | `gemini` | deep-researcher |
-| A-Tier: Enterprise | AWS infrastructure, corporate security | `amazon-q` | incident-commander |
-| A-Tier: Domain | Domain-specific deep reasoning | `claude` | crypto-cryptography-auditor, payments-domain-steward |
-| B-Tier: Coding | Agentic tool use, developer workflows | `goose` | bug-fixer, unit-tester, automation-engineer |
-| B-Tier: Systems | Systems-level tool use | `goose` | realtime-audio-engineer, rust-crate-steward |
-| B-Tier: Local Code | Local models for diffs, migrations | `opencode` | legacy-maintainer |
-| B-Tier: Math/Logic | Algorithmic optimization, dense logic | `qwen` | perf-optimizer, data-steward |
-| C-Tier: Utility | Summaries, formatting, zero cost | `ollama` | butler, librarian, tech-writer |
-| Standard | General purpose | `claude` | all others |
-
-**P0 Override:** Critical work gets S-Tier. Always.
-
-**Explicit Override:** Specify any of the 10 providers.
-```bash
-euxis bug-fixer "Fix auth.py" gemini
-euxis architect "Review this module" qwen
-euxis deep-researcher "Audit all dependencies" amazon-q
-```
+**For the complete provider matrix, intelligence tiering, and explicit override syntax, see [User Guide](user-guide.md#ai-provider-matrix).**
 
 ---
 

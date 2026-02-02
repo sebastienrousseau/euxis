@@ -15,7 +15,7 @@ Euxis ships with a complete set of command-line tools. Each tool does one thing 
 | `euxis <agent> <task> [provider]` | Deploy any agent with automatic intelligence routing |
 | `euxis-ui` | Mission Control TUI for agent deployment and log browsing |
 
-**See also**: [UI & Interaction Guide](UI_INTERACTION_GUIDE.md) • [Keyboard Shortcuts](KEYBOARD_SHORTCUTS.md)
+**See also**: [UI Guide](ui-guide.md)
 
 ### Quality & Certification
 
@@ -99,7 +99,7 @@ Store and recall typed memories across sessions.
 | `euxis-sync-docs` | Doc sync with human approval |
 | `euxis-optimize` | Prompt optimization and compression |
 
-**UI Documentation**: [Interaction Guide](UI_INTERACTION_GUIDE.md) | [Keyboard Shortcuts](KEYBOARD_SHORTCUTS.md) | [Fleet Constitution](CONSTITUTION.md)
+**UI Documentation**: [UI Guide](ui-guide.md) | [Fleet Constitution](../CONSTITUTION.md)
 
 ### Infrastructure
 
@@ -110,70 +110,9 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-See `CONSTITUTION.md` for the authoritative fleet governance document.
+Euxis provides 35 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
-### Core (7) — Authority-bearing, always present
-
-Only core agents can block progress. If one is missing, the system is incomplete.
-
-| Agent | Owns |
-|-------|------|
-| `orchestrator` | Coordination, synthesis, final assembly |
-| `architect` | Structure, patterns, design decisions |
-| `product-manager` | Intent, scope, prioritization |
-| `reviewer` | Truth & quality gate |
-| `librarian` | Memory, knowledge continuity, documentation governance |
-| `compliance-officer` | Legal, privacy, regulatory authority |
-| `system-critic` | Risk, pre-mortems, counter-bias |
-
-### Default (17) — Auto-available, task-triggered
-
-Execute and advise within scope. Do not define direction.
-
-| Agent | Role |
-|-------|------|
-| `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
-| `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `data-steward` | Observability, telemetry, structured logging |
-| `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
-| `incident-commander` | Incident response, root cause analysis, post-mortems |
-| `legacy-maintainer` | Non-breaking upgrades, migrations |
-| `perf-optimizer` | Latency, throughput, memory profiling |
-| `qa-coordinator` | E2E testing coordination, quality gate enforcement |
-| `release-manager` | Changelogs, semantic versioning, release coordination |
-| `security-lead` | Security policy, threat governance, edge-hunter dispatch |
-| `tech-writer` | Documentation, tutorials, API reference, glossary |
-| `unit-tester` | Test coverage, reliability, regression prevention |
-| `ux-sentinel` | Accessibility (WCAG 2.1 AA), design systems, responsive testing |
-| `cli-ui-artisan` | Terminal UI design, keyboard navigation, TUI interaction |
-| `web-ui-architect` | Web UI components, design systems, responsive layouts |
-| `theming-and-motion-engineer` | Theming, color systems, dark mode, animation |
-| `interaction-and-input-specialist` | Keyboard navigation, input handling, accessibility |
-
-### On-Demand (7) — Explicit invocation only
-
-Add leverage, not safety. Never block, never override core authority.
-
-| Agent | Role |
-|-------|------|
-| `brand-evangelist` | Brand voice, visual identity, content design |
-| `butler` | TTS-optimized summarization, spoken English output |
-| `deep-researcher` | Iterative research with cross-validation |
-| `devrel-advocate` | Developer relations, tutorials, demos, conferences |
-| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
-| `social-manager` | Platform-native content, calendars, community engagement |
-
-### Specialist (4) — Domain-specific expertise
-
-Deep domain knowledge for specialized auditing and compliance.
-
-| Agent | Role |
-|-------|------|
-| `crypto-cryptography-auditor` | Constant-time discipline, key management, nonce handling, PQC readiness |
-| `payments-domain-steward` | ISO 20022 compliance, schema validation, canonicalization, regulatory |
-| `realtime-audio-engineer` | Buffer management, latency budgeting, platform audio abstraction |
-| `rust-crate-steward` | MSRV policy, feature flags, semver compliance, docs.rs quality |
+**For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
 ## Glossary
 

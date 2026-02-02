@@ -87,10 +87,10 @@ echo "  count_active_agents (${COUNT} active): $(( (TIME_END - TIME_START) / 100
 
 # Cleanup
 for i in $(seq 1 100); do
-    rm -f "$EUXIS_HOME/lifecycle/bench-agent-${i}.state"
+    rm -f "$EUXIS_HOME/data/lifecycle/bench-agent-${i}.state"
 done
 for i in $(seq 1 50); do
-    rm -f "$EUXIS_HOME/lifecycle/bench-concurrent-${i}.state"
+    rm -f "$EUXIS_HOME/data/lifecycle/bench-concurrent-${i}.state"
 done
 
 # 6. Prompt Assembly Performance

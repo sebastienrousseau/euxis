@@ -5,12 +5,12 @@ EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # ===== PLAYBOOK EXISTENCE =====
 for pb in zero-to-one legacy-overhaul red-alert verify-everything crypto-audit payments-integration rust-release audio-pipeline; do
-    assert_file_exists "playbook ${pb}" "${EUXIS_HOME}/playbooks/${pb}.json"
+    assert_file_exists "playbook ${pb}" "${EUXIS_HOME}/config/playbooks/${pb}.json"
 done
 
 # ===== PLAYBOOK STRUCTURE =====
 for pb in crypto-audit payments-integration rust-release audio-pipeline; do
-    pb_file="${EUXIS_HOME}/playbooks/${pb}.json"
+    pb_file="${EUXIS_HOME}/config/playbooks/${pb}.json"
 
     # Valid JSON
     if jq empty "${pb_file}" 2>/dev/null; then
@@ -44,7 +44,7 @@ done
 
 # ===== TEMPLATE EXISTENCE =====
 for tpl in dispatch-manifest.json agent-prompt.txt pattern.md adr.md playbook.json; do
-    assert_file_exists "template ${tpl}" "${EUXIS_HOME}/templates/${tpl}"
+    assert_file_exists "template ${tpl}" "${EUXIS_HOME}/config/templates/${tpl}"
 done
 
 # ===== SQUADS.JSON =====

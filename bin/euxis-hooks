@@ -2,7 +2,7 @@
 set -uo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
-HOOKS_DIR="$EUXIS_DIR/hooks"
+HOOKS_DIR="$EUXIS_DIR/bin/hooks"
 
 SIGNATURE_FOOTER='---
 

@@ -183,7 +183,7 @@ PATTERN_FAILURES=0
 PATTERN_COUNT=0
 TOTAL_RULES=0
 
-PATTERNS_DIR="$EUXIS_HOME/patterns"
+PATTERNS_DIR="$EUXIS_HOME/config/patterns"
 if [[ -d "$PATTERNS_DIR" ]]; then
     for pattern_file in "$PATTERNS_DIR"/*.md; do
         [[ -f "$pattern_file" ]] || continue
@@ -236,7 +236,7 @@ fi
 echo "[7/8] Checking Pattern Compliance..."
 COMPLIANCE_FAILURES=0
 
-PATTERNS_DIR="$EUXIS_HOME/patterns"
+PATTERNS_DIR="$EUXIS_HOME/config/patterns"
 if [[ -d "$PATTERNS_DIR" ]]; then
     # Verify every pattern has automated detection rules (not just descriptions)
     for pattern_file in "$PATTERNS_DIR"/*.md; do

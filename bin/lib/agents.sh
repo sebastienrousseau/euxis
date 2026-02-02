@@ -35,7 +35,7 @@ list_agents() {
 # Enables coordination overhead measurement and dynamic health monitoring
 # ============================================================================
 
-EUXIS_LIFECYCLE_DIR="${EUXIS_HOME}/lifecycle"
+EUXIS_LIFECYCLE_DIR="${EUXIS_HOME}/data/lifecycle"
 
 # Initialize lifecycle tracking directory
 _lifecycle_init() {
@@ -132,7 +132,7 @@ cleanup_stale_agents() {
 # Third-party agents can register via a simple manifest file
 # ============================================================================
 
-EUXIS_PLUGINS_DIR="${EUXIS_HOME}/plugins"
+EUXIS_PLUGINS_DIR="${EUXIS_HOME}/config/plugins"
 
 # Register a third-party agent from a plugin manifest
 # Manifest format: JSON with {agent_id, role, prompt_file, tier, tags}

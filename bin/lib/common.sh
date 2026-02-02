@@ -70,7 +70,7 @@ _perf_check_budget() {
 # ============================================================================
 
 # Global coordination metrics file (per-session)
-EUXIS_PERF_LOG="${EUXIS_HOME}/perf/metrics.jsonl"
+EUXIS_PERF_LOG="${EUXIS_HOME}/data/perf/metrics.jsonl"
 
 # Record a performance metric as JSONL
 _perf_record() {
@@ -79,7 +79,7 @@ _perf_record() {
     local agent="${3:-system}"
     local status="${4:-ok}"
 
-    local perf_dir="${EUXIS_HOME}/perf"
+    local perf_dir="${EUXIS_HOME}/data/perf"
     [[ -d "${perf_dir}" ]] || mkdir -p "${perf_dir}"
 
     printf '{"ts":"%s","op":"%s","agent":"%s","ms":%s,"status":"%s"}\n' \

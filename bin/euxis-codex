@@ -2,7 +2,7 @@
 set -uo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
-CODEX_DIR="$EUXIS_DIR/codex"
+CODEX_DIR="$EUXIS_DIR/config/codex"
 CODEX_MANIFEST="$CODEX_DIR/codex.json"
 
 usage() {

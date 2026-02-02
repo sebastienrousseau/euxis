@@ -112,7 +112,7 @@ view_audit_logs() {
     echo -e "  ${BOLD}SELECT AGENT LOGS TO VIEW:${RESET}\n"
 
     # List projects that have logs
-    project_logs="$EUXIS_HOME/projects/$(basename "$PROJECT_ROOT")"
+    project_logs="$EUXIS_HOME/data/projects/$(basename "$PROJECT_ROOT")"
     if [[ ! -d "$project_logs" ]]; then
         echo -e "  ${RED}No logs found for this project yet.${RESET}"
         pause

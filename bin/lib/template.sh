@@ -21,7 +21,7 @@ template_substitute() {
     text="${text//\{\{MODEL_NAME\}\}/${model_name}}"
     text="${text//\{\{EUXIS_HOME\}\}/${EUXIS_HOME}}"
     text="${text//\{\{PROMPTS_DIR\}\}/${EUXIS_HOME}/prompts}"
-    text="${text//\{\{PROJECTS_DIR\}\}/${EUXIS_HOME}/projects}"
+    text="${text//\{\{PROJECTS_DIR\}\}/${EUXIS_HOME}/data/projects}"
 
     printf '%s' "${text}"
 }

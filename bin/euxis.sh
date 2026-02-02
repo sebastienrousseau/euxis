@@ -16,7 +16,7 @@ set -euo pipefail
 
 EUXIS_HOME="${HOME}/.euxis"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
-PROJECTS_DIR="${EUXIS_HOME}/projects"
+PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 source "${EUXIS_HOME}/bin/lib/common.sh"
 source "${EUXIS_HOME}/bin/lib/providers.sh"
 source "${EUXIS_HOME}/bin/lib/agents.sh"

@@ -281,7 +281,7 @@ rm -f "${TEMP_MANIFEST}"
 # T6.4: Stale agent cleanup
 agent_lifecycle_transition "stale-test" "active" "old-session"
 # Manually backdate the state file
-touch -d "2 hours ago" "${EUXIS_HOME}/lifecycle/stale-test.state" 2>/dev/null || true
+touch -d "2 hours ago" "${EUXIS_HOME}/data/lifecycle/stale-test.state" 2>/dev/null || true
 cleanup_stale_agents 60
 state=$(agent_get_state "stale-test")
 [[ "${state}" == "timeout" ]] && pass "Stale agent cleaned up" || skip "Stale agent cleanup (touch -d may not be supported)"
@@ -492,6 +492,6 @@ echo "  RESULTS: ${TESTS_PASSED} passed, ${TESTS_FAILED} failed"
 echo "=================================================="
 
 # Cleanup test lifecycle files
-rm -f "${EUXIS_HOME}/lifecycle/test-agent.state" "${EUXIS_HOME}/lifecycle/stale-test.state" 2>/dev/null
+rm -f "${EUXIS_HOME}/data/lifecycle/test-agent.state" "${EUXIS_HOME}/data/lifecycle/stale-test.state" 2>/dev/null
 
 exit "${TESTS_FAILED}"

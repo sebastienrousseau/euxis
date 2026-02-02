@@ -175,7 +175,7 @@ Every release artifact MUST carry the Euxis branding signature. This is mandator
   > 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
   ```
 - **Pull request descriptions:** MUST include the branded footer from `~/.euxis/.github/pull_request_template.md`.
-- **Release notes:** MUST end with the signature block from `~/.euxis/branding/signature.txt`.
+- **Release notes:** MUST end with the signature block from `~/.euxis/config/branding/signature.txt`.
 - **Changelogs:** MUST include `Engineered with Euxis` in the footer of every release entry.
 
 If the branding signature is missing from any artifact, MUST flag it as a blocking issue before release.

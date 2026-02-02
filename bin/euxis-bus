@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-BUS_DIR="$HOME/.euxis/bus/pipes"
+BUS_DIR="$HOME/.euxis/data/bus/pipes"
 
 usage() {
   cat <<'EOF'

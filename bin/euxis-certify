@@ -90,13 +90,13 @@ echo "[GATE 5] Branding Compliance..."
 echo "--------------------------------------------------"
 
 BRANDING_FAILURES=0
-SIGNATURE_FILE="$EUXIS_HOME/branding/signature.txt"
+SIGNATURE_FILE="$EUXIS_HOME/config/branding/signature.txt"
 
 # 5a. Signature file exists
 if [[ -f "$SIGNATURE_FILE" ]]; then
-    echo "  PASS: branding/signature.txt exists."
+    echo "  PASS: config/branding/signature.txt exists."
 else
-    echo "  FAIL: branding/signature.txt not found."
+    echo "  FAIL: config/branding/signature.txt not found."
     ((BRANDING_FAILURES++))
 fi
 
@@ -129,7 +129,7 @@ else
 fi
 
 # 5d. Git hook installed and executable
-HOOK_FILE="$EUXIS_HOME/hooks/prepare-commit-msg"
+HOOK_FILE="$EUXIS_HOME/bin/hooks/prepare-commit-msg"
 if [[ -x "$HOOK_FILE" ]]; then
     echo "  PASS: prepare-commit-msg hook is present and executable."
 else
@@ -275,7 +275,7 @@ else
 fi
 
 # 6b. Core documentation files exist
-REQUIRED_DOCS=("README.md" "USER_GUIDE.md" "FLEET_GUIDE.md")
+REQUIRED_DOCS=("README.md" "docs/user-guide.md" "docs/fleet-guide.md")
 for doc in "${REQUIRED_DOCS[@]}"; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         echo "  PASS: $doc exists."
@@ -314,7 +314,7 @@ if [[ -f "$EUXIS_HOME/README.md" ]]; then
 fi
 
 # 6e. USER_GUIDE and FLEET_GUIDE reference correct version
-for doc in USER_GUIDE.md FLEET_GUIDE.md; do
+for doc in docs/user-guide.md docs/fleet-guide.md; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
             echo "  PASS: $doc references version $CURRENT_VERSION."
@@ -326,7 +326,7 @@ for doc in USER_GUIDE.md FLEET_GUIDE.md; do
 done
 
 # 6f. Registry, squads, and codex manifests are valid JSON
-MANIFESTS=("registry.json" "squads.json" "capabilities.json" "codex/codex.json")
+MANIFESTS=("registry.json" "squads.json" "capabilities.json" "config/codex/codex.json")
 if command -v jq &>/dev/null; then
     for manifest in "${MANIFESTS[@]}"; do
         MANIFEST_PATH="$EUXIS_HOME/$manifest"

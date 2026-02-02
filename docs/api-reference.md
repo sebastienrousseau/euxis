@@ -16,13 +16,13 @@ Complete function reference for all 8 library modules in `bin/lib/`.
 | `_perf_start` | `local t; t=$(_perf_start)` | Start a latency timer |
 | `_perf_elapsed_ms` | `_perf_elapsed_ms "$t"` | Returns elapsed milliseconds since timer start |
 | `_perf_check_budget` | `_perf_check_budget "$ms" "$budget" "op"` | Returns 0 if within budget, 1 if exceeded; logs warning on exceed |
-| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/perf/metrics.jsonl` |
+| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/data/perf/metrics.jsonl` |
 | `start_spinner` | `start_spinner "Thinking..."` | Start background spinner for LLM wait |
 | `stop_spinner` | `stop_spinner` | Stop and clear spinner |
 
 **Environment Variables:**
 - `EUXIS_DEBUG` — Set to `1` to enable debug logging
-- `EUXIS_PERF_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/perf/metrics.jsonl`)
+- `EUXIS_PERF_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/data/perf/metrics.jsonl`)
 
 ---
 
@@ -49,8 +49,8 @@ Depends on: `common.sh`
 **Intelligence Tiers:**
 | Tier | Provider | Agents |
 |------|----------|--------|
-| S-Tier (Strategic) | `claude` | orchestrator, architect, product-manager, reviewer |
-| A-Tier (Research) | `gemini` | deep-researcher, compliance-officer |
+| S-Tier (Strategic) | `claude` | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer |
+| A-Tier (Research) | `gemini` | deep-researcher |
 | A-Tier (Enterprise) | `amazon-q` | incident-commander |
 | A-Tier (Domain) | `claude` | crypto-cryptography-auditor, payments-domain-steward |
 | B-Tier (Coding) | `goose` | bug-fixer, unit-tester, automation-engineer |
@@ -72,7 +72,7 @@ Depends on: `common.sh`
 | `list_active_agents` | `list_active_agents` | Lists agent IDs currently in `active` state |
 | `count_active_agents` | `count_active_agents` | Returns count of active agents (for coordination overhead measurement) |
 | `cleanup_stale_agents` | `cleanup_stale_agents [timeout_seconds]` | Transitions agents stuck in `active` beyond timeout (default: 1800s) to `timeout` state |
-| `register_agent_plugin` | `register_agent_plugin "manifest.json"` | Registers third-party agent from JSON manifest. Symlinks prompt into fleet/, stores manifest in plugins/. Requires `jq`. |
+| `register_agent_plugin` | `register_agent_plugin "manifest.json"` | Registers third-party agent from JSON manifest. Symlinks prompt into fleet/, stores manifest in config/plugins/. Requires `jq`. |
 | `unregister_agent_plugin` | `unregister_agent_plugin "agent_id"` | Removes plugin agent prompt and manifest |
 | `list_plugins` | `list_plugins` | Lists registered plugin agent IDs |
 | `agent_probe_liveness` | `agent_probe_liveness "agent"` | Returns `live` if prompt exists and is readable, `dead` otherwise |

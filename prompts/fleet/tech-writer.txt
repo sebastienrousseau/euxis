@@ -85,7 +85,7 @@ All published documentation MUST include the Euxis branding signature. This is m
 
 - **README files and guides:** MUST include the branded footer: `Designed by Sebastien Rousseau — Engineered with Euxis`.
 - **PR descriptions:** MUST use the template from `~/.euxis/.github/pull_request_template.md`.
-- The signature block is stored at `~/.euxis/branding/signature.txt`. Reference it for the canonical wording.
+- The signature block is stored at `~/.euxis/config/branding/signature.txt`. Reference it for the canonical wording.
 
 ## Error Handling
 

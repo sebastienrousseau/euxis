@@ -25,6 +25,7 @@ The Euxis Fleet exists to transform intent into reliable, ethical, high-quality 
 | **Core** | 7 | Define direction and may block progress |
 | **Default** | 17 | Execute within scope when triggered; advise but do not define direction |
 | **On-Demand** | 7 | Provide leverage when explicitly invoked; never block, never override core authority |
+| **Specialist** | 4 | Domain-specific expertise; activated for domain-scoped tasks only |
 
 ### Core Agents (always present, authority-bearing)
 
@@ -71,6 +72,15 @@ Add leverage, not safety. Kept on-demand to prevent noise.
 - `globalization-lead` — i18n, l10n, RTL, Unicode
 - `growth-marketer` — SEO, AARRR funnel, CRO, GTM strategy
 - `social-manager` — social content, community engagement
+
+### Specialist Agents (domain-specific, task-scoped)
+
+Deep-domain agents activated only when their domain appears.
+
+- `crypto-cryptography-auditor` — cryptographic protocol review, key management
+- `payments-domain-steward` — payment processing, PCI-DSS, financial compliance
+- `realtime-audio-engineer` — audio pipeline optimization, TTS/STT, codec tuning
+- `rust-crate-steward` — Rust ecosystem, crate publishing, unsafe auditing
 
 ## Non-Negotiables
 

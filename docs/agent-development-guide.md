@@ -220,13 +220,13 @@ euxis reviewer "Final review of rate limiter implementation"
 EUXIS_DEBUG=1 euxis my-agent "test task"
 
 # Check lifecycle state
-cat ~/.euxis/lifecycle/my-agent.state
+cat ~/.euxis/data/lifecycle/my-agent.state
 
 # View performance metrics
-tail -5 ~/.euxis/perf/metrics.jsonl | jq .
+tail -5 ~/.euxis/data/perf/metrics.jsonl | jq .
 
 # View recent memory
-tail -20 ~/.euxis/projects/*/my-agent/memory.md
+tail -20 ~/.euxis/data/projects/*/my-agent/memory.md
 
 # Run lint for specific issues
 euxis lint 2>&1 | grep my-agent

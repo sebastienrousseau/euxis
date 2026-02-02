@@ -14,7 +14,7 @@
       "delegates": [
         {
           "agent": "librarian",
-          "task_template": "Sync agent registry, verify versions, reconcile documentation truth, and update USER_GUIDE.md registry sections if needed for: ${goal}",
+          "task_template": "Sync agent registry, verify versions, reconcile documentation truth, and update docs/user-guide.md registry sections if needed for: ${goal}",
           "verifies": [
             "registry matches actual agents",
             "version numbers are current",

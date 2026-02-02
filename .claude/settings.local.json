@@ -37,10 +37,10 @@
       "Bash(bin/euxis lint:*)",
       "Bash(bin/euxis-health:*)",
       "Bash(find:*)",
-      "Bash(for f in registry.json squads.json capabilities.json codex/codex.json)",
+      "Bash(for f in registry.json squads.json capabilities.json config/codex/codex.json)",
       "Bash(do sed -i 's/0\\\\.0\\\\.6/0.0.7/g' \"$f\")",
       "Bash(done)",
-      "Bash(for f in README.md USER_GUIDE.md FLEET_GUIDE.md KEYBOARD_SHORTCUTS.md UI_INTERACTION_GUIDE.md CONSTITUTION.md CROSS_PLATFORM_VERIFICATION.md)",
+      "Bash(for f in README.md CONSTITUTION.md docs/user-guide.md docs/fleet-guide.md docs/ui-guide.md docs/cross-platform.md)",
       "Bash(grep:*)"
     ]
   }

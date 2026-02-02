@@ -225,7 +225,7 @@ class LatencyBenchmark:
         if not cortex_cmd.exists():
             return {'error': 'euxis-cortex not found'}
 
-        db_path = str(self.euxis_dir / "cortex_db")
+        db_path = str(self.euxis_dir / "data" / "cortex" / "db")
         test_script = f"""
 import time, os, sys
 try:

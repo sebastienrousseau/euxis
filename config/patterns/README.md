@@ -72,7 +72,7 @@ Each pattern maps to automated checks:
 
 ## Adding a New Pattern
 
-1. Create `patterns/<CATEGORY>-<NNN>.md`
+1. Create `config/patterns/<CATEGORY>-<NNN>.md`
 2. Include all required sections: Pattern, Severity, Detection Rules, Validation, Remediation
 3. Run `euxis lint` to validate format
 4. Add to the catalog table above

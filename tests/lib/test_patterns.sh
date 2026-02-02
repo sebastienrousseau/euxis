@@ -4,15 +4,15 @@
 # Test: all pattern files exist
 EXPECTED_PATTERNS="SECURITY-001.md PERF-001.md QUALITY-001.md MEMORY-001.md CONCURRENCY-001.md ERROR-001.md API-001.md TEST-001.md LOG-001.md DEPENDENCY-001.md SCHEMA-001.md"
 for p in $EXPECTED_PATTERNS; do
-    assert_file_exists "pattern ${p} exists" "${EUXIS_HOME}/patterns/${p}"
+    assert_file_exists "pattern ${p} exists" "${EUXIS_HOME}/config/patterns/${p}"
 done
 
 # Test: README exists
-assert_file_exists "patterns README exists" "${EUXIS_HOME}/patterns/README.md"
+assert_file_exists "patterns README exists" "${EUXIS_HOME}/config/patterns/README.md"
 
 # Test: each pattern has required sections
 for p in $EXPECTED_PATTERNS; do
-    pf="${EUXIS_HOME}/patterns/${p}"
+    pf="${EUXIS_HOME}/config/patterns/${p}"
     [[ -f "${pf}" ]] || continue
     name="${p%.md}"
 
@@ -34,7 +34,7 @@ done
 
 # Test: severity values are valid
 for p in $EXPECTED_PATTERNS; do
-    pf="${EUXIS_HOME}/patterns/${p}"
+    pf="${EUXIS_HOME}/config/patterns/${p}"
     [[ -f "${pf}" ]] || continue
     severity=$(sed -n '/^## Severity$/,/^$/p' "${pf}" | grep -v "^## " | tr -d ' ' | head -1)
     case "${severity}" in
@@ -46,7 +46,7 @@ for p in $EXPECTED_PATTERNS; do
 done
 
 # Test: naming convention
-for f in "${EUXIS_HOME}/patterns/"*.md; do
+for f in "${EUXIS_HOME}/config/patterns/"*.md; do
     [[ -f "$f" ]] || continue
     name=$(basename "$f")
     [[ "$name" == "README.md" ]] && continue
@@ -58,5 +58,5 @@ for f in "${EUXIS_HOME}/patterns/"*.md; do
 done
 
 # Test: total pattern count
-count=$(ls -1 "${EUXIS_HOME}/patterns/"*.md 2>/dev/null | grep -v README | wc -l | tr -d ' ')
+count=$(ls -1 "${EUXIS_HOME}/config/patterns/"*.md 2>/dev/null | grep -v README | wc -l | tr -d ' ')
 assert_eq "total pattern count" "11" "${count}"

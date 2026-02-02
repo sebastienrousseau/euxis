@@ -21,7 +21,7 @@
 set -euo pipefail
 
 EUXIS_HOME="${HOME}/.euxis"
-PROJECTS_DIR="${EUXIS_HOME}/projects"
+PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 
 MODE="single"
 CONFIRM_MODE=false

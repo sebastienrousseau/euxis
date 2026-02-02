@@ -31,7 +31,7 @@ class ComprehensivePerformanceVerification:
 
         try:
             result = subprocess.run([
-                sys.executable, "performance_verification.py"
+                sys.executable, "performance-verification.py"
             ], capture_output=True, text=True, cwd=Path.cwd())
 
             # Extract results from the JSON output file
@@ -55,7 +55,7 @@ class ComprehensivePerformanceVerification:
 
         try:
             result = subprocess.run([
-                sys.executable, "voice_performance_benchmark.py"
+                sys.executable, "voice-perf-benchmark.py"
             ], capture_output=True, text=True, cwd=Path.cwd())
 
             # Extract results from the JSON output file

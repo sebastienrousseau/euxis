@@ -1,21 +1,28 @@
-projects/
-cortex_db/
-audits/
-v4.5_FINAL_AUDIT.md
+# Runtime state (data/ is mostly gitignored)
+data/projects/
+data/cortex/db/
+data/lifecycle/
+data/perf/
+
+# Audit artifacts (session-specific, not committed)
+docs/audits/
+docs/audits/v4.5-readiness-report.md
+
+# Voice/TTS
 .venv-voice/
 .piper-voices/
+.tts-cache/
+
+# OS/Editor/Build
 .DS_Store
 *.log
 tmp/
-.tts-cache/
+.pytest_cache/
+**/.pytest_cache/
 
 # Security-sensitive manifests (never commit)
 internal_manifest.json
 edge-hunter-fixes.json
-
-# Runtime artifacts
-lifecycle/
-perf/
 
 # Override global gitignore that excludes /bin/ (Rust/Go convention)
 !bin/

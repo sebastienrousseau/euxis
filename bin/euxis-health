@@ -160,18 +160,18 @@ fi
 log ""
 log "[5/10] Documentation Drift..."
 
-USER_GUIDE="${EUXIS_HOME}/USER_GUIDE.md"
+USER_GUIDE="${EUXIS_HOME}/docs/user-guide.md"
 if [[ -f "$USER_GUIDE" ]]; then
     LAST_DOC_SYNC=$(stat -c %Y "$USER_GUIDE" 2>/dev/null || stat -f %m "$USER_GUIDE" 2>/dev/null || echo 0)
     NOW=$(date +%s)
     if (( NOW - LAST_DOC_SYNC > 86400 )); then
-        log "  STALE: USER_GUIDE.md hasn't been updated in 24+ hours. Run 'euxis-sync-docs'."
+        log "  STALE: docs/user-guide.md hasn't been updated in 24+ hours. Run 'euxis-sync-docs'."
         ((WARNINGS++))
     else
-        log "  USER_GUIDE.md is current (updated within 24h)."
+        log "  docs/user-guide.md is current (updated within 24h)."
     fi
 else
-    log "  MISSING: USER_GUIDE.md not found. Run 'euxis-sync-docs' to generate."
+    log "  MISSING: docs/user-guide.md not found. Run 'euxis-sync-docs' to generate."
     ((WARNINGS++))
 fi
 
@@ -236,7 +236,7 @@ fi
 log ""
 log "[8/10] Codex Integrity..."
 
-CODEX_DIR="${EUXIS_HOME}/codex"
+CODEX_DIR="${EUXIS_HOME}/config/codex"
 CODEX_MANIFEST="${CODEX_DIR}/codex.json"
 
 if [[ ! -f "$CODEX_MANIFEST" ]]; then
@@ -273,7 +273,7 @@ fi
 log ""
 log "[9/10] Bus Pipe Activity..."
 
-BUS_DIR="${EUXIS_HOME}/bus/pipes"
+BUS_DIR="${EUXIS_HOME}/data/bus/pipes"
 if [[ -d "$BUS_DIR" ]]; then
     PIPE_COUNT=0
     MSG_COUNT=0

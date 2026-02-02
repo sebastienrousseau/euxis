@@ -51,7 +51,7 @@ Agents are restricted to the authorized tool belt defined in the Mandatory Proto
 | `~/.euxis/` | Read/Write | All agents (within their project scope) |
 | Project working directory | Read/Write | Delegated agents working on that project |
 | `~/.euxis/bin/` | Execute only | All agents |
-| `~/.euxis/branding/` | Read only | All agents |
+| `~/.euxis/config/branding/` | Read only | All agents |
 | System directories (`/etc`, `/usr`, `/var`) | Read only | `automation-engineer`, `incident-commander` (with justification) |
 | Other users' home directories | FORBIDDEN | — |
 | Temporary directories (`/tmp`) | Read/Write | All agents (clean up after use) |

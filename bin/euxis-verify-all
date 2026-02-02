@@ -34,7 +34,7 @@ echo ""
 
 # Gate 0 — Documentation truth (ALWAYS FIRST)
 echo "── Gate 0: Documentation Truth ──"
-euxis delegate librarian "Sync agent registry, verify versions, reconcile documentation truth, and update USER_GUIDE.md registry sections if needed for: $GOAL"
+euxis delegate librarian "Sync agent registry, verify versions, reconcile documentation truth, and update docs/user-guide.md registry sections if needed for: $GOAL"
 euxis delegate tech-writer "Sync all documentation to current fleet, protocols, and registry; validate snippets; update glossary/terms for: $GOAL"
 
 # Gate 1 — Intent verification

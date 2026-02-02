@@ -3,7 +3,7 @@ set -uo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/squads.json"
-PLAYBOOKS_DIR="$EUXIS_DIR/playbooks"
+PLAYBOOKS_DIR="$EUXIS_DIR/config/playbooks"
 SESSION_DIR="/tmp/euxis_playbook_sessions"
 
 usage() {

@@ -53,8 +53,8 @@ MAJOR.MINOR.PATCH
    - Every file in `prompts/fleet/*.txt` → YAML `version:`
    - Every file in `prompts/protocols/*.txt` → YAML `version:`
    - `README.md` version reference
-   - `USER_GUIDE.md` version reference
-   - `FLEET_GUIDE.md` version reference
+   - `docs/user-guide.md` version reference
+   - `docs/fleet-guide.md` version reference
 
 2. **Between releases**, working copies MAY have mixed versions during development. The `librarian` agent MUST flag mismatches.
 

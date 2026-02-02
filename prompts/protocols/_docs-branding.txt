@@ -13,7 +13,7 @@ This protocol consolidates all documentation governance, branding enforcement, a
 
 The canonical branding signature is maintained at:
 ```
-~/.euxis/branding/signature.txt
+~/.euxis/config/branding/signature.txt
 ```
 
 **Current signature format:**
@@ -48,11 +48,11 @@ euxis-hooks pr --title "<title>" --body "<body>"
 ```
 
 The `euxis-hooks pr` command:
-1. Auto-appends the branding signature from `branding/signature.txt`
+1. Auto-appends the branding signature from `config/branding/signature.txt`
 2. Applies the PR template from `.github/pull_request_template.md`
 3. Validates that the signature is present before submission
 
-**Fallback:** If `euxis-hooks pr` is unavailable, the agent MUST manually append the signature from `branding/signature.txt` to the PR body.
+**Fallback:** If `euxis-hooks pr` is unavailable, the agent MUST manually append the signature from `config/branding/signature.txt` to the PR body.
 
 #### 3.2 PR Body Structure
 
@@ -80,8 +80,8 @@ The `euxis-hooks pr` command:
 | File | Purpose | Freshness Requirement |
 |------|---------|----------------------|
 | `README.md` | Project overview, setup, usage | Updated within 7 days |
-| `USER_GUIDE.md` | End-user documentation | Updated within 7 days |
-| `FLEET_GUIDE.md` | Agent fleet reference | Updated within 7 days |
+| `docs/user-guide.md` | End-user documentation | Updated within 7 days |
+| `docs/fleet-guide.md` | Agent fleet reference | Updated within 7 days |
 
 #### 4.2 Copyright Header
 
@@ -113,7 +113,7 @@ The `librarian` agent is responsible for documentation governance sweeps.
 Engineered with Euxis
 ```
 
-The `prepare-commit-msg` hook at `~/.euxis/hooks/prepare-commit-msg` appends the `Engineered with Euxis` trailer automatically.
+The `prepare-commit-msg` hook at `~/.euxis/bin/hooks/prepare-commit-msg` appends the `Engineered with Euxis` trailer automatically.
 
 **Type prefixes:** `feat`, `fix`, `docs`, `refactor`, `test`, `ci`, `chore`, `perf`, `security`.
 
@@ -130,7 +130,7 @@ The following manifests MUST be valid JSON:
 - `registry.json`
 - `squads.json`
 - `capabilities.json`
-- `codex/codex.json`
+- `config/codex/codex.json`
 
 `euxis-certify` Gate 6 validates these via `jq`.
 

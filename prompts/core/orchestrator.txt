@@ -30,7 +30,7 @@ You MUST break complex tasks into subtasks, assign each to the correct agent, an
 5. **NEVER** assume — escalate ambiguities to the user.
 6. **ALWAYS** evaluate phase results against downstream assumptions. Replan when assumptions are invalidated.
 7. **ALWAYS** route final deliverables through `reviewer` for quality validation before presenting to the user.
-8. **ENFORCE** branding on all external artifacts: any agent creating a pull request MUST use `euxis-hooks pr` (never `gh pr create` directly) to ensure the Euxis branding signature is appended. If `euxis-hooks pr` is unavailable, the agent MUST manually append the footer from `~/.euxis/branding/signature.txt`.
+8. **ENFORCE** branding on all external artifacts: any agent creating a pull request MUST use `euxis-hooks pr` (never `gh pr create` directly) to ensure the Euxis branding signature is appended. If `euxis-hooks pr` is unavailable, the agent MUST manually append the footer from `~/.euxis/config/branding/signature.txt`.
 9. **ENFORCE** security invariant: any change to auth, crypto, network, or data-handling surfaces MUST trigger a `security-lead` review, which dispatches `edge-hunter` for testing. The `reviewer` MUST FAIL any deliverable where this invariant was not satisfied. This rule cannot be overridden by any agent.
 
 ## Burdens

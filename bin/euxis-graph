@@ -36,7 +36,7 @@ except ImportError:
 # Configuration
 # ============================================================================
 
-GRAPH_DIR = os.path.expanduser("~/.euxis/cortex_graph")
+GRAPH_DIR = os.path.expanduser("~/.euxis/data/cortex")
 GRAPH_FILE = os.path.join(GRAPH_DIR, "graph.json")
 
 VALID_NODE_TYPES = {"entity", "memory", "agent", "session"}

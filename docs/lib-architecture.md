@@ -24,10 +24,10 @@ The framework core consists of:
 - **1 main entry point** `bin/euxis.sh` (~400 LOC)
 - **20+ CLI tools** in `bin/` (dispatch, loop, council, bench, lint, etc.)
 - **6 test files** in `tests/` (E2E, concurrency, integration)
-- **11 validation patterns** in `patterns/`
+- **11 validation patterns** in `config/patterns/`
 - **35 agent prompts** in `prompts/core/` and `prompts/fleet/`
 - **11 protocol files** in `prompts/protocols/`
-- **6 templates** in `templates/`
+- **6 templates** in `config/templates/`
 - **6 ADRs** in `docs/adr/`
 
 Note: `.venv-voice/` contains a Python virtualenv for the voice interface feature. These ~17K files are third-party dependencies, not framework code. They are excluded via `.euxisignore` and should not be counted in framework metrics.

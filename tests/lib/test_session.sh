@@ -39,4 +39,4 @@ assert_file_exists "ensure_project_dirs creates audit.md" "${TEST_TMPDIR}/testpr
 assert_file_exists "ensure_project_dirs creates memory.md" "${TEST_TMPDIR}/testproj/testagent/memory.md"
 rm -rf "${TEST_TMPDIR}"
 # Restore PROJECTS_DIR
-PROJECTS_DIR="${EUXIS_HOME}/projects"
+PROJECTS_DIR="${EUXIS_HOME}/data/projects"

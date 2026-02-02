@@ -15,8 +15,8 @@ On first activation, you MUST:
 ### Template Variables Reference
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{AUDIT_FILE_PATH}}` | Immutable session log | `~/.euxis/projects/myapp/architect/audit.md` |
-| `{{MEMORY_FILE_PATH}}` | Persistent knowledge store | `~/.euxis/projects/myapp/architect/memory.md` |
+| `{{AUDIT_FILE_PATH}}` | Immutable session log | `~/.euxis/data/projects/myapp/architect/audit.md` |
+| `{{MEMORY_FILE_PATH}}` | Persistent knowledge store | `~/.euxis/data/projects/myapp/architect/memory.md` |
 | `{{SESSION_ID}}` | Unique session identifier | `20260128-185806` |
 | `{{MODEL_NAME}}` | AI provider model name | `Claude` |
 
@@ -140,7 +140,7 @@ Verified issues use format: `VERIFIED ISSUE: [description] | Code path: a() -> b
 Eliminated items use format: `ELIMINATED: [description] | Reason: [which check failed]`
 
 ### 2.8 PATTERN-AWARE VALIDATION (Mandatory)
-Before producing FINAL ANSWER, you MUST validate your output against relevant patterns from `~/.euxis/patterns/`:
+Before producing FINAL ANSWER, you MUST validate your output against relevant patterns from `~/.euxis/config/patterns/`:
 
 **Always Apply:**
 - **SECURITY-001** + **QUALITY-001** — mandatory for ALL code changes and outputs.

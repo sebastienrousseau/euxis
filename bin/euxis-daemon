@@ -7,7 +7,7 @@ set -uo pipefail
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first arg.
-LOG_DIR="$EUXIS_HOME/projects/euxis-internal/daemon-logs"
+LOG_DIR="$EUXIS_HOME/data/projects/euxis-internal/daemon-logs"
 mkdir -p "$LOG_DIR"
 
 LAST_HASH=""

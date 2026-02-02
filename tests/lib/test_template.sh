@@ -26,7 +26,7 @@ assert_contains "template replaces PROMPTS_DIR" "${EUXIS_HOME}/prompts" "${resul
 
 # Test template_substitute: PROJECTS_DIR
 result=$(template_substitute "Projects: {{PROJECTS_DIR}}" "" "" "" "")
-assert_contains "template replaces PROJECTS_DIR" "${EUXIS_HOME}/projects" "${result}"
+assert_contains "template replaces PROJECTS_DIR" "${EUXIS_HOME}/data/projects" "${result}"
 
 # Test template_substitute: no variables (passthrough)
 result=$(template_substitute "no variables here" "" "" "" "")

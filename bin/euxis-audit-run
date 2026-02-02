@@ -6,7 +6,7 @@ set -uo pipefail
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
-REPORT_DIR="$EUXIS_HOME/audits/$(date +%Y%m%d_%H%M)"
+REPORT_DIR="$EUXIS_HOME/docs/audits/$(date +%Y%m%d_%H%M)"
 mkdir -p "$REPORT_DIR"
 
 GATE_PASS=0
@@ -121,7 +121,7 @@ $LOGIC
 
 --- SECURITY ---
 $SECURITY
-" claude > "$EUXIS_HOME/v6.0_FINAL_AUDIT.md" 2>/dev/null
+" claude > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md" 2>/dev/null
     gate_result "Report consolidation" $?
 else
     {
@@ -131,7 +131,7 @@ else
         echo "Gates passed: $GATE_PASS / $((GATE_PASS + GATE_FAIL))"
         echo ""
         echo "See individual reports in: $REPORT_DIR/"
-    } > "$EUXIS_HOME/v6.0_FINAL_AUDIT.md"
+    } > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md"
     gate_result "Report consolidation (offline)" 0
 fi
 
@@ -143,7 +143,7 @@ if [[ $GATE_FAIL -eq 0 ]]; then
 else
     echo "  AUDIT INCOMPLETE: $GATE_PASS passed, $GATE_FAIL failed/skipped."
 fi
-echo "  Report: ~/.euxis/v6.0_FINAL_AUDIT.md"
+echo "  Report: ~/.euxis/docs/audits/v6.0-readiness-report.md"
 echo "  Details: $REPORT_DIR/"
 echo "=================================================="
 

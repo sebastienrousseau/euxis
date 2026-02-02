@@ -3,7 +3,7 @@
 [[ -n "${_EUXIS_LIB_SESSION:-}" ]] && return; _EUXIS_LIB_SESSION=1
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-PROJECTS_DIR="${EUXIS_HOME}/projects"
+PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 
 get_project_name() {
     if [[ -n "${EUXIS_PROJECT:-}" ]]; then

@@ -53,13 +53,13 @@ fi
 # 5. Documentation Drift
 echo -n "   [5/5] Checking Documentation...   "
 NEWEST_PROMPT=$(find "${EUXIS_HOME}/prompts" -name "*.txt" -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n 1)
-DOC_FILE="${EUXIS_HOME}/USER_GUIDE.md"
+DOC_FILE="${EUXIS_HOME}/docs/user-guide.md"
 
 if [[ ! -f "$DOC_FILE" ]]; then
-    echo "MISSING (USER_GUIDE.md not found)"
+    echo "MISSING (docs/user-guide.md not found)"
 elif [[ -n "$NEWEST_PROMPT" ]] && [[ "$NEWEST_PROMPT" -nt "$DOC_FILE" ]]; then
     echo "DRIFT DETECTED (warning)"
-    echo "   Prompts are newer than USER_GUIDE.md."
+    echo "   Prompts are newer than docs/user-guide.md."
 else
     echo "PASS"
 fi
