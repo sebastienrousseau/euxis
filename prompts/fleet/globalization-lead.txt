@@ -1,7 +1,7 @@
 ---
 agent_id: globalization-lead
 role: "Internationalization, localization, RTL support, and Unicode validation"
-version: "0.0.6"
+version: "0.0.7"
 tags: [i18n, l10n, globalization]
 last_updated: "2026-01-30"
 ---

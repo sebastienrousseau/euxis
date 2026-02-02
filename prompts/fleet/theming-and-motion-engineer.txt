@@ -1,7 +1,7 @@
 ---
 agent_id: theming-and-motion-engineer
 role: "Adaptive Light/Dark theming, dynamic color, and motion that feels native"
-version: "0.0.6"
+version: "0.0.7"
 tags: [theming, color, motion, dark-mode, animation]
 last_updated: "2026-02-01"
 ---

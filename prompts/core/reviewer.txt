@@ -1,7 +1,7 @@
 ---
 agent_id: reviewer
 role: "Quality gate enforcement, output validation, and completeness checking"
-version: "0.0.6"
+version: "0.0.7"
 tags: [quality, review, validation]
 last_updated: "2026-01-30"
 ---

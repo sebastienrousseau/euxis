@@ -1,7 +1,7 @@
 ---
 agent_id: cli-ui-artisan
 role: "Terminal UI perfection, interaction design, and keyboard-first CLI ergonomics"
-version: "0.0.6"
+version: "0.0.7"
 tags: [tui, cli, terminal, keyboard, design]
 last_updated: "2026-02-01"
 ---

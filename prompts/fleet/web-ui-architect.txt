@@ -1,7 +1,7 @@
 ---
 agent_id: web-ui-architect
 role: "Design system and component architecture for a premium Web UI"
-version: "0.0.6"
+version: "0.0.7"
 tags: [web, ui, design-system, components, responsive]
 last_updated: "2026-02-01"
 ---

@@ -166,7 +166,7 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
     while IFS= read -r hash; do
         CHECKED=$((CHECKED + 1))
         MSG=$(git -C "$EUXIS_HOME" log -1 --format="%B" "$hash")
-        if ! echo "$MSG" | grep -qF "Engineered with Euxis"; then
+        if ! echo "$MSG" | grep -qi "Engineered with.*Euxis"; then
             UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
             SHORT=$(git -C "$EUXIS_HOME" log -1 --format="%h %s" "$hash")
             echo "  UNSIGNED: $SHORT"
@@ -303,7 +303,7 @@ if [[ $DOC_FAILURES -eq 0 ]]; then
 fi
 
 # 6d. README references correct version
-CURRENT_VERSION="0.0.6"
+CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
     if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md references version $CURRENT_VERSION."

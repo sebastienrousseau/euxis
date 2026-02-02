@@ -1,7 +1,7 @@
 ---
 agent_id: security-lead
 role: "Security policy authority, threat governance, and security dispatch coordination"
-version: "0.0.6"
+version: "0.0.7"
 tags: [security, governance, policy, threat-modeling]
 last_updated: "2026-01-31"
 ---

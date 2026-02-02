@@ -1,7 +1,7 @@
 ---
 agent_id: interaction-and-input-specialist
 role: "Keyboard mastery, focus management, command palette, and shortcut registry"
-version: "0.0.6"
+version: "0.0.7"
 tags: [keyboard, focus, input, shortcuts, navigation]
 last_updated: "2026-02-01"
 ---

@@ -1,6 +1,6 @@
 ---
 partial_id: graph-memory-protocol
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-30"
 ---
 

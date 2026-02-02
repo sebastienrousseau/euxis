@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.0.6
+Version 0.0.7
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
@@ -531,7 +531,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 
 <!-- Reference Links -->
 
-[version-badge]: https://img.shields.io/badge/version-0.0.6-blue?style=for-the-badge
+[version-badge]: https://img.shields.io/badge/version-0.0.7-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
 
 [license-badge]: https://img.shields.io/badge/license-proprietary-green?style=for-the-badge

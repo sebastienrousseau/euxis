@@ -1,11 +1,11 @@
 ---
 protocol_id: versioning-compatibility
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 priority: "ORANGE"
 ---
 
-## VERSIONING & COMPATIBILITY PROTOCOL (v0.0.6)
+## VERSIONING & COMPATIBILITY PROTOCOL (v0.0.7)
 
 This protocol establishes a single source of truth for version governance across the Euxis fleet. All version references MUST conform to this protocol.
 
@@ -17,7 +17,7 @@ The **single source of truth** for the current Euxis system version is:
 ~/.euxis/registry.json → "protocol_version" field
 ```
 
-**Current system version: 0.0.6**
+**Current system version: 0.0.7**
 
 No other file, prompt, or agent may independently declare a system version. All version references MUST derive from `registry.json`.
 
@@ -80,7 +80,7 @@ The following version references are **DEPRECATED** and MUST NOT be used:
 
 | Deprecated Reference | Correct Reference | Found In |
 |---------------------|-------------------|----------|
-| `v5.0` | `0.0.6` | `librarian.txt` line 27 (fixed) |
+| `v5.0` | `0.0.7` | `librarian.txt` line 27 (fixed) |
 | Internal build numbers | semver only | — |
 | Date-based versions | semver only | — |
 
@@ -94,10 +94,10 @@ The following version references are **DEPRECATED** and MUST NOT be used:
 
 | Component A | Component B | Compatibility Rule |
 |-------------|-------------|-------------------|
-| Agent prompt v0.0.6 | Protocol v0.0.6 | MUST match — same MAJOR.MINOR required |
-| Agent prompt v0.0.5 | Protocol v0.0.6 | COMPATIBLE — PATCH mismatch tolerated |
-| Agent prompt v0.1.0 | Protocol v0.0.6 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
-| CLI tool v0.0.6 | Protocol v0.0.6 | MUST match |
+| Agent prompt v0.0.7 | Protocol v0.0.7 | MUST match — same MAJOR.MINOR required |
+| Agent prompt v0.0.5 | Protocol v0.0.7 | COMPATIBLE — PATCH mismatch tolerated |
+| Agent prompt v0.1.0 | Protocol v0.0.7 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
+| CLI tool v0.0.7 | Protocol v0.0.7 | MUST match |
 
 ### 9. Fleet Freeze Rule
 

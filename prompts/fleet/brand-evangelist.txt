@@ -1,7 +1,7 @@
 ---
 agent_id: brand-evangelist
 role: "Guardian of the Euxis philosophy, voice, and visual identity"
-version: "0.0.6"
+version: "0.0.7"
 tags: [brand, voice, content, design]
 last_updated: "2026-01-30"
 ---

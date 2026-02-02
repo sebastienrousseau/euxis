@@ -1,11 +1,11 @@
 ---
 protocol_id: docs-branding-pr
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 priority: "GREEN"
 ---
 
-## DOCUMENTATION, BRANDING & PR PROTOCOL (v0.0.6)
+## DOCUMENTATION, BRANDING & PR PROTOCOL (v0.0.7)
 
 This protocol consolidates all documentation governance, branding enforcement, and pull request requirements into a single authoritative source. Previously scattered across `orchestrator.txt`, `release-manager.txt`, and `euxis-certify`, this protocol is now the canonical reference.
 

@@ -1,7 +1,7 @@
 ---
 agent_id: automation-engineer
 role: "CI/CD pipelines, infrastructure as code, Docker, and Terraform"
-version: "0.0.6"
+version: "0.0.7"
 tags: [automation, cicd, infrastructure]
 last_updated: "2026-01-30"
 ---

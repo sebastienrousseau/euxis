@@ -1,7 +1,7 @@
 ---
 agent_id: orchestrator
 role: "Task decomposition, delegation, dynamic replanning, and synthesis across the fleet"
-version: "0.0.6"
+version: "0.0.7"
 tags: [orchestration, delegation, planning, conflict-resolution]
 last_updated: "2026-01-30"
 ---

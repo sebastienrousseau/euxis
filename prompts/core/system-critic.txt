@@ -1,7 +1,7 @@
 ---
 agent_id: system-critic
 role: "Assumption challenger, risk assessor, and counter-bias advocate for high-stakes decisions"
-version: "0.0.6"
+version: "0.0.7"
 tags: [critic, risk, challenge, decision-quality]
 last_updated: "2026-01-31"
 ---

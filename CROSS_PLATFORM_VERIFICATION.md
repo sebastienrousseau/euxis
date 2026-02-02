@@ -2,7 +2,7 @@
 
 ## Overview
 
-Comprehensive automation system ensuring Euxis v0.0.6 build/package/runtime parity across macOS, Linux, and WSL platforms.
+Comprehensive automation system ensuring Euxis v0.0.7 build/package/runtime parity across macOS, Linux, and WSL platforms.
 
 ## Verification Architecture
 
@@ -66,16 +66,16 @@ Comprehensive automation system ensuring Euxis v0.0.6 build/package/runtime pari
 ### Full Cross-Platform CI
 ```bash
 # Trigger GitHub Actions workflow (requires gh CLI)
-./bin/euxis-cross-platform-verify --version v0.0.6
+./bin/euxis-cross-platform-verify --version v0.0.7
 
 # Manual GitHub workflow trigger
-gh workflow run cross-platform-ci.yml --field version=v0.0.6
+gh workflow run cross-platform-ci.yml --field version=v0.0.7
 ```
 
 ### Multi-Platform Container Build
 ```bash
 # Build for AMD64 and ARM64
-./deploy/build-multi-platform.sh --version v0.0.6
+./deploy/build-multi-platform.sh --version v0.0.7
 
 # Build and push to registry
 ./deploy/build-multi-platform.sh --push --registry ghcr.io/euxis
@@ -173,7 +173,7 @@ docker buildx create --name multi-platform --use
 
 | Euxis Version | Python | Platforms | Docker |
 |---------------|--------|-----------|--------|
-| v0.0.6        | 3.11+  | macOS, Linux, WSL | 20.10+ |
+| v0.0.7        | 3.11+  | macOS, Linux, WSL | 20.10+ |
 | v0.0.7+       | 3.11+  | macOS, Linux, WSL, ARM64 | 20.10+ |
 
 ## Future Enhancements
@@ -186,7 +186,7 @@ docker buildx create --name multi-platform --use
 
 ---
 
-**Verification Status for v0.0.6:** ✅ IMPLEMENTED
+**Verification Status for v0.0.7:** ✅ IMPLEMENTED
 **Last Updated:** 2026-02-01
 **Next Review:** Release candidate testing
 
