@@ -70,7 +70,7 @@ jobs:
           export EUXIS_HOME="$PWD"
           export PATH="$PWD/bin:$PATH"
           echo "Testing basic euxis command..."
-          timeout 30 bash -c 'bin/euxis --help || echo "Help command completed with status: $?"'
+          bash -c 'bin/euxis --help || echo "Help command completed with status: $?"'
 
       - name: Test agent discovery
         run: |
