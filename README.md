@@ -243,8 +243,7 @@ Euxis provides a complete command-line interface with 30+ tools for agent manage
 │   └── *.md                   Guides (user, fleet, UI, cross-platform, API, lib-arch)
 ├── prompts/                   Agent intelligence
 │   ├── core/                  7 core agents (authority-bearing)
-│   ├── fleet/                 24 agents (17 default + 7 on-demand)
-│   ├── synthesized/           4 specialist agents (domain-specific)
+│   ├── fleet/                 31 agents (20 default + 7 on-demand + 4 specialist)
 │   └── protocols/             Shared protocol and common instructions
 ├── tests/                     Quality assurance
 │   ├── lib/                   16 test suites (363 assertions)
