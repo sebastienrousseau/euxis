@@ -126,7 +126,7 @@ Only core agents can block progress. If one is missing, the system is incomplete
 | `compliance-officer` | Legal, privacy, regulatory authority |
 | `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Default (17) — Auto-available, task-triggered
+### Default (20) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
@@ -134,12 +134,15 @@ Execute and advise within scope. Do not define direction.
 |-------|------|
 | `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
+| `crash-investigator` | Post-incident crash forensics, stack trace analysis, root cause evidence gathering |
 | `data-steward` | Observability, telemetry, structured logging |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
 | `incident-commander` | Incident response, root cause analysis, post-mortems |
+| `language-specialist` | Language-specific pattern detection, idiom enforcement, subsystem-aware analysis |
 | `legacy-maintainer` | Non-breaking upgrades, migrations |
 | `perf-optimizer` | Latency, throughput, memory profiling |
 | `qa-coordinator` | E2E testing coordination, quality gate enforcement |
+| `regression-analyst` | Pre-merge exhaustive regression analysis of commits and pull requests |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
 | `security-lead` | Security policy, threat governance, edge-hunter dispatch |
 | `tech-writer` | Documentation, tutorials, API reference, glossary |
@@ -172,7 +175,7 @@ Add leverage, not safety. Never block, never override core authority.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 31 agents: 7 core + 17 default + 7 on-demand |
+| **Fleet** | 34 agents: 7 core + 20 default + 7 on-demand |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |

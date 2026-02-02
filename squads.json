@@ -15,14 +15,14 @@
       "name": "Build Squad",
       "purpose": "Engineering & Execution",
       "lead": "bug-fixer",
-      "members": ["bug-fixer", "legacy-maintainer", "automation-engineer", "unit-tester"]
+      "members": ["bug-fixer", "legacy-maintainer", "automation-engineer", "unit-tester", "crash-investigator"]
     },
     {
       "id": "quality",
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "qa-coordinator", "edge-hunter", "compliance-officer", "perf-optimizer"]
+      "members": ["reviewer", "qa-coordinator", "edge-hunter", "compliance-officer", "perf-optimizer", "regression-analyst", "language-specialist"]
     },
     {
       "id": "growth",
@@ -63,6 +63,12 @@
       "name": "Jony Ive",
       "description": "Apple-level UI from design system to polished interaction",
       "chain": ["web-ui-architect", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel", "reviewer"]
+    },
+    {
+      "id": "deep-review",
+      "name": "Deep Review",
+      "description": "Exhaustive pre-merge regression and language analysis",
+      "chain": ["language-specialist", "regression-analyst", "edge-hunter", "reviewer"]
     }
   ]
 }

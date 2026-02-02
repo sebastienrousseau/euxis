@@ -60,7 +60,7 @@ Only core agents can block progress.
 | `compliance-officer` | Legal, privacy, regulatory authority | License audits, PII scanning, data residency, regulated environments |
 | `system-critic` | Risk, pre-mortems, counter-bias | One-way door decisions, architectural shifts, high-risk deployments |
 
-### Default (13) — Auto-available, task-triggered
+### Default (16) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
@@ -68,12 +68,15 @@ Execute and advise within scope. Do not define direction.
 |-------|-------|---------------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform | Pipelines, infra provisioning, build optimization |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes | Defects, errors, unexpected behavior |
+| `crash-investigator` | Post-incident crash forensics, stack trace analysis | Crash artifacts, panics, stack traces, error logs |
 | `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
 | `edge-hunter` | Hands-on security testing, boundary analysis | Vulnerability assessment, input validation, penetration testing |
 | `incident-commander` | Incident response, root cause analysis, post-mortems | System failures, SEV-1/2 events, outage coordination |
+| `language-specialist` | Language-specific pattern detection, idiom enforcement | Polyglot analysis, anti-pattern detection, subsystem-aware review |
 | `legacy-maintainer` | Non-breaking upgrades, migrations | Old code, missing docs, migrations |
 | `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
 | `qa-coordinator` | E2E testing coordination, quality gate enforcement | Test strategy, release readiness, coverage tracking |
+| `regression-analyst` | Pre-merge exhaustive regression analysis | Non-trivial PRs, changes to critical subsystems |
 | `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
 | `security-lead` | Security policy, threat governance, edge-hunter dispatch | Auth/crypto/network changes, security clearance for releases |
 | `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
@@ -93,6 +96,54 @@ Add leverage, not safety. Never block, never override core authority.
 | `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
 | `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
 | `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |
+
+## Mandatory Deep Review Policy
+
+When a change touches ANY of the following subsystems, you MUST dispatch the `deep-review` chain BEFORE the final `reviewer` gate. This rule cannot be overridden by any agent.
+
+### Trigger Subsystems
+
+| Subsystem | Detection signals |
+|-----------|-------------------|
+| **Concurrency** | Threads, locks, mutexes, atomics, async/await, goroutines, actors, channels, dispatch queues |
+| **Cryptography** | Encryption, hashing, signing, key management, TLS, certificates, HMAC |
+| **Parsing** | Deserialization, format conversion, codec, protocol decoding, regex on untrusted input |
+| **Audio** | Audio pipelines, sample rates, buffers, codecs, real-time processing |
+| **Networking** | Sockets, HTTP, gRPC, WebSocket, DNS, connection pooling, timeout handling |
+| **Serialization** | JSON/Protobuf/MessagePack encoding/decoding, schema evolution, wire format changes |
+| **Memory management** | Manual allocation, unsafe blocks, FFI boundaries, buffer management, pool exhaustion |
+
+### Dispatch Sequence
+
+When triggered, execute this chain in order:
+
+1. `language-specialist` — Load subsystem-aware context for changed files and detect language-specific anti-patterns.
+2. `regression-analyst` — Perform exhaustive pre-merge regression analysis using the language context.
+3. `edge-hunter` — Security review of changes with subsystem-specific threat modeling.
+4. `reviewer` — Final quality gate with evidence from all prior phases.
+
+### Delegation Commands
+
+```
+euxis delegate language-specialist "Load subsystem-aware context for changed files"
+euxis delegate regression-analyst "Perform exhaustive pre-merge regression analysis"
+euxis delegate edge-hunter "Security review of changes"
+euxis delegate reviewer "Final review gate for merge"
+```
+
+### Post-Crash Dispatch
+
+When a crash, panic, or production error is reported, dispatch `crash-investigator` BEFORE `bug-fixer`:
+
+```
+euxis delegate crash-investigator "Perform crash forensics with evidence and suspect commit identification"
+```
+
+Then route findings to:
+- `bug-fixer` — for the fix
+- `architect` — if systemic cause identified
+- `edge-hunter` — if security implications found
+- `librarian` — to store lessons as PROCEDURAL memory
 
 ## Hybrid Dispatch Architecture
 

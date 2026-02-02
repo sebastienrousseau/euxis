@@ -108,7 +108,7 @@ flowchart LR
 
 ## Your Specialist Team
 
-31 agents across three tiers: 7 core agents govern the fleet, 17 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
+34 agents across three tiers: 7 core agents govern the fleet, 20 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
 
 ### Core (7) — Authority-bearing, always present
 
@@ -122,18 +122,21 @@ flowchart LR
 | `compliance-officer` | Legal, privacy, and regulatory authority |
 | `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Default (17) — Auto-available, task-triggered
+### Default (20) — Auto-available, task-triggered
 
 | Agent | Domain |
 |:------|:-------|
 | `automation-engineer` | CI/CD, IaC, Docker, Terraform |
 | `bug-fixer` | Debugging, root cause analysis, surgical fixes |
+| `crash-investigator` | Post-incident crash forensics, stack trace analysis, root cause evidence gathering |
 | `data-steward` | Observability, telemetry, structured logging |
 | `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
 | `incident-commander` | Incident response, root cause analysis, post-mortems |
+| `language-specialist` | Language-specific pattern detection, idiom enforcement, subsystem-aware analysis |
 | `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
 | `perf-optimizer` | Latency, throughput, and memory profiling |
 | `qa-coordinator` | End-to-end testing coordination, quality gates |
+| `regression-analyst` | Pre-merge exhaustive regression analysis of commits and pull requests |
 | `release-manager` | Changelogs, semantic versioning, release coordination |
 | `security-lead` | Security policy, threat governance, edge-hunter dispatch |
 | `tech-writer` | Documentation, tutorials, API reference |

@@ -166,7 +166,7 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
     while IFS= read -r hash; do
         CHECKED=$((CHECKED + 1))
         MSG=$(git -C "$EUXIS_HOME" log -1 --format="%B" "$hash")
-        if ! echo "$MSG" | grep -qF "Engineered with Euxis"; then
+        if ! echo "$MSG" | grep -q "Engineered with.*Euxis"; then
             UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
             SHORT=$(git -C "$EUXIS_HOME" log -1 --format="%h %s" "$hash")
             echo "  UNSIGNED: $SHORT"

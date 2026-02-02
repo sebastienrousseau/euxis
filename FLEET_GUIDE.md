@@ -24,7 +24,7 @@ Seven core agents define direction and may block progress. If one is missing, th
 | `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
 | `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
 
-### Default (17) — Auto-available, task-triggered
+### Default (20) — Auto-available, task-triggered
 
 Execute within scope when triggered. Advise but do not define direction.
 
@@ -32,12 +32,15 @@ Execute within scope when triggered. Advise but do not define direction.
 |-------|--------|------------|
 | `automation-engineer` | Zero-touch deployments | Coding |
 | `bug-fixer` | Get to root cause fast | Coding |
+| `crash-investigator` | Post-incident crash forensics and evidence gathering | Standard |
 | `data-steward` | Total system visibility | Math/Logic |
 | `edge-hunter` | Bulletproof security | Standard |
 | `incident-commander` | Handle any crisis | Enterprise |
+| `language-specialist` | Language-specific pattern detection and idiom enforcement | Standard |
 | `legacy-maintainer` | Modernize without breaking | Local Code |
 | `perf-optimizer` | Make it fast | Math/Logic |
 | `qa-coordinator` | Ship with certainty | Standard |
+| `regression-analyst` | Exhaustive pre-merge regression analysis | Standard |
 | `release-manager` | Flawless releases | Standard |
 | `security-lead` | Security policy, threat governance, edge-hunter dispatch | Standard |
 | `tech-writer` | Documentation that delights | Utility |

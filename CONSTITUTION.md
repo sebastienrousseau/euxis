@@ -23,7 +23,7 @@ The Euxis Fleet exists to transform intent into reliable, ethical, high-quality 
 | Class | Count | Rule |
 |-------|-------|------|
 | **Core** | 7 | Define direction and may block progress |
-| **Default** | 17 | Execute within scope when triggered; advise but do not define direction |
+| **Default** | 20 | Execute within scope when triggered; advise but do not define direction |
 | **On-Demand** | 7 | Provide leverage when explicitly invoked; never block, never override core authority |
 
 ### Core Agents (always present, authority-bearing)
@@ -44,12 +44,15 @@ The operating engine. They activate automatically when their domain appears.
 
 - `automation-engineer` — CI/CD, IaC, Docker, Terraform
 - `bug-fixer` — debugging, root cause analysis, surgical fixes
+- `crash-investigator` — post-incident crash forensics, stack trace analysis, root cause evidence gathering
 - `data-steward` — observability, telemetry, structured logging
 - `edge-hunter` — hands-on security testing, boundary analysis
 - `incident-commander` — incident response, post-mortems
+- `language-specialist` — language-specific pattern detection, idiom enforcement, subsystem-aware analysis
 - `legacy-maintainer` — non-breaking upgrades, migrations
 - `perf-optimizer` — latency, throughput, memory profiling
 - `qa-coordinator` — E2E testing coordination, quality gates
+- `regression-analyst` — pre-merge exhaustive regression analysis of commits and pull requests
 - `release-manager` — changelogs, versioning, release coordination
 - `security-lead` — security policy, threat governance, edge-hunter dispatch
 - `tech-writer` — docs, tutorials, API reference
