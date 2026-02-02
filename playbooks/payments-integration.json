@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "payments-integration",
+  "name": "Payments Integration Pipeline",
+  "description": "ISO 20022 compliance verification, schema validation, and payments domain correctness.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Schema Validation",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "payments-domain-steward",
+          "task_template": "Validate ISO 20022 schema compliance, canonicalization rules, and backward compatibility for: ${goal}"
+        }
+      ],
+      "checkpoint": "All message schemas validated against ISO 20022 XSD",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Integration Testing",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "unit-tester",
+          "task_template": "Write and run integration tests for payments message flows: ${goal}"
+        },
+        {
+          "agent": "edge-hunter",
+          "task_template": "Test for injection vulnerabilities in payment message parsing: ${goal}"
+        },
+        {
+          "agent": "compliance-officer",
+          "task_template": "Verify regulatory compliance (PCI-DSS, PSD2) for payments integration: ${goal}"
+        }
+      ],
+      "checkpoint": "Integration tests passing and compliance verified",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Release Clearance",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "qa-coordinator",
+          "task_template": "Final quality gate for payments release: ${goal}"
+        }
+      ],
+      "checkpoint": "Payments integration cleared for release",
+      "abort_on_failure": true
+    }
+  ]
+}

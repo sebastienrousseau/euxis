@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+#
+# Euxis Slash Commands — Lightweight fast-path agent invocations
+# Bypasses full agent bootstrap for common workflows.
+#
+# Usage: euxis slash <command> [args...]
+#        euxis /review "task"
+#        euxis /debug "task"
+#
+
+set -euo pipefail
+
+EUXIS_HOME="${HOME}/.euxis"
+
+source "${EUXIS_HOME}/bin/lib/common.sh"
+source "${EUXIS_HOME}/bin/lib/providers.sh"
+source "${EUXIS_HOME}/bin/lib/agents.sh"
+source "${EUXIS_HOME}/bin/lib/template.sh"
+source "${EUXIS_HOME}/bin/lib/skill-detector.sh"
+
+# ============================================================================
+# Slash Command Registry
+# Maps /command -> agent + minimal prompt override
+# ============================================================================
+
+declare -A SLASH_AGENTS=(
+    [review]="reviewer"
+    [debug]="bug-fixer"
+    [verify]="qa-coordinator"
+    [secure]="security-lead"
+    [perf]="perf-optimizer"
+    [arch]="architect"
+    [test]="unit-tester"
+    [docs]="tech-writer"
+    [fix]="bug-fixer"
+    [optimize]="perf-optimizer"
+    [lint]="reviewer"
+)
+
+declare -A SLASH_PREFIXES=(
+    [review]="Review the following code or task with focus on correctness, edge cases, and best practices:"
+    [debug]="Debug and identify the root cause of the following issue:"
+    [verify]="Verify the following meets quality standards and requirements:"
+    [secure]="Perform a security review of the following:"
+    [perf]="Analyze performance characteristics and optimize:"
+    [arch]="Analyze the architecture and design of:"
+    [test]="Generate comprehensive tests for:"
+    [docs]="Write clear documentation for:"
+    [fix]="Fix the following bug or issue:"
+    [optimize]="Optimize for speed, memory, and efficiency:"
+    [lint]="Check code quality, style, and potential issues in:"
+)
+
+usage() {
+    echo "Euxis Slash Commands — Fast-path agent invocations"
+    echo ""
+    echo "Usage: euxis /<command> \"<task>\""
+    echo ""
+    echo "Commands:"
+    for cmd in $(echo "${!SLASH_AGENTS[@]}" | tr ' ' '\n' | sort); do
+        printf "    /%-12s → %s\n" "${cmd}" "${SLASH_AGENTS[$cmd]}"
+    done
+    echo ""
+    echo "Options:"
+    echo "    --detect     Auto-suggest commands based on project type"
+    echo ""
+    exit 1
+}
+
+# ============================================================================
+# Auto-detect suggestion
+# ============================================================================
+
+if [[ "${1:-}" == "--detect" ]]; then
+    project_type=$(detect_project_type)
+    suggested=$(detect_project_domain)
+    echo "Project type: ${project_type}"
+    echo "Suggested agents: ${suggested}"
+    exit 0
+fi
+
+# ============================================================================
+# Main dispatch
+# ============================================================================
+
+COMMAND="${1:-}"
+COMMAND="${COMMAND#/}"  # Strip leading /
+
+if [[ -z "${COMMAND}" ]] || [[ -z "${SLASH_AGENTS[$COMMAND]+x}" ]]; then
+    usage
+fi
+
+TASK="${2:-}"
+if [[ -z "${TASK}" ]]; then
+    log_error "Usage: euxis /${COMMAND} \"<task>\""
+    exit 1
+fi
+
+AGENT="${SLASH_AGENTS[$COMMAND]}"
+PREFIX="${SLASH_PREFIXES[$COMMAND]}"
+PROVIDER=$(resolve_tiered_provider "${AGENT}")
+
+# Build minimal prompt (skip full protocol loading for speed)
+PROTOCOL_FILE="${EUXIS_HOME}/prompts/protocols/_protocol.txt"
+AGENT_FILE=$(resolve_agent_path "${AGENT}")
+
+if [[ ! -f "${AGENT_FILE}" ]]; then
+    log_error "Agent not found: ${AGENT}"
+    exit 1
+fi
+
+PROMPT=""
+if [[ -f "${PROTOCOL_FILE}" ]]; then
+    PROMPT=$(< "${PROTOCOL_FILE}")$'\n\n'
+fi
+PROMPT="${PROMPT}$(< "${AGENT_FILE}")"$'\n\n'
+PROMPT="${PROMPT}---"$'\n'
+PROMPT="${PROMPT}## CURRENT TASK"$'\n'
+PROMPT="${PROMPT}${PREFIX}"$'\n\n'
+PROMPT="${PROMPT}${TASK}"
+
+log_info "/${COMMAND} → ${AGENT} (${PROVIDER})"
+
+start_spinner "${AGENT} (${PROVIDER})..."
+OUTPUT=$(execute_provider "${PROVIDER}" "${PROMPT}")
+stop_spinner
+
+echo "${OUTPUT}"

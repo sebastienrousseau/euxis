@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "crypto-audit",
+  "name": "Cryptographic Security Audit",
+  "description": "Full cryptographic correctness audit: constant-time discipline, key management, PQC readiness.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Threat Model",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "security-lead",
+          "task_template": "Define the cryptographic threat model and mandatory security requirements for: ${goal}"
+        }
+      ],
+      "checkpoint": "Threat model documented with crypto-specific requirements",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Crypto Audit",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "crypto-cryptography-auditor",
+          "task_template": "Perform a full cryptographic correctness audit covering constant-time discipline, key management, nonce handling, and PQC readiness for: ${goal}"
+        },
+        {
+          "agent": "edge-hunter",
+          "task_template": "Test for timing side-channels, padding oracle, and key extraction vulnerabilities in: ${goal}"
+        }
+      ],
+      "checkpoint": "All cryptographic findings classified and remediation planned",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Verification",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Verify all crypto audit findings have been addressed and no regressions introduced for: ${goal}"
+        }
+      ],
+      "checkpoint": "Crypto audit signed off by reviewer",
+      "abort_on_failure": true
+    }
+  ]
+}

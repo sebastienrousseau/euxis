@@ -62,6 +62,17 @@ Add leverage, not safety. Never block, never override core authority.
 | `growth-marketer` | Scale your impact | Standard |
 | `social-manager` | Amplify your voice | Standard |
 
+### Specialist (4) — Domain-specific expertise
+
+Deep domain knowledge for specialized auditing and compliance.
+
+| Agent | Domain | Model Tier |
+|-------|--------|------------|
+| `crypto-cryptography-auditor` | Constant-time, key management, PQC readiness | Domain (claude) |
+| `payments-domain-steward` | ISO 20022, schema validation, regulatory | Domain (claude) |
+| `realtime-audio-engineer` | Latency budgets, buffer management, platform audio | Systems (goose) |
+| `rust-crate-steward` | MSRV, feature flags, semver, docs.rs | Systems (goose) |
+
 ---
 
 ## Dispatch Modes
@@ -170,7 +181,9 @@ Right capability. Right cost.
 | S-Tier: Strategic | Complex reasoning, architecture | `claude` | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer |
 | A-Tier: Research | Deep analysis, large context | `gemini` | deep-researcher |
 | A-Tier: Enterprise | AWS infrastructure, corporate security | `amazon-q` | incident-commander |
+| A-Tier: Domain | Domain-specific deep reasoning | `claude` | crypto-cryptography-auditor, payments-domain-steward |
 | B-Tier: Coding | Agentic tool use, developer workflows | `goose` | bug-fixer, unit-tester, automation-engineer |
+| B-Tier: Systems | Systems-level tool use | `goose` | realtime-audio-engineer, rust-crate-steward |
 | B-Tier: Local Code | Local models for diffs, migrations | `opencode` | legacy-maintainer |
 | B-Tier: Math/Logic | Algorithmic optimization, dense logic | `qwen` | perf-optimizer, data-steward |
 | C-Tier: Utility | Summaries, formatting, zero cost | `ollama` | butler, librarian, tech-writer |
@@ -252,6 +265,10 @@ Route work to the right specialist every time.
 | Research | `deep-researcher` | `architect` |
 | Incident response | `incident-commander` | `bug-fixer`, `edge-hunter` |
 | Test strategy | `qa-coordinator` | `unit-tester`, `edge-hunter` |
+| Cryptographic audit | `crypto-cryptography-auditor` | `edge-hunter`, `reviewer` |
+| Payments integration | `payments-domain-steward` | `compliance-officer`, `unit-tester` |
+| Audio pipeline | `realtime-audio-engineer` | `perf-optimizer`, `automation-engineer` |
+| Rust crate release | `rust-crate-steward` | `unit-tester`, `edge-hunter` |
 
 ---
 
@@ -281,7 +298,7 @@ deep-researcher -> architect -> product-manager -> bug-fixer -> reviewer
 
 ## Squads
 
-Five cross-functional teams with clear ownership.
+Six cross-functional teams with clear ownership.
 
 | Squad | Purpose | Lead | Members |
 |-------|---------|------|---------|
@@ -290,6 +307,7 @@ Five cross-functional teams with clear ownership.
 | Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
 | Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
 | Experience | UI Excellence | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
+| Specialist | Domain Expertise | `crypto-cryptography-auditor` | crypto-cryptography-auditor, payments-domain-steward, realtime-audio-engineer, rust-crate-steward |
 
 Deploy an entire squad with one command. Leads get P0 priority. Members get P1.
 
@@ -312,6 +330,11 @@ Repeatable multi-phase workflows with squad-level automation.
 | Zero to One | Vision -> Build -> Quality -> Growth | Full product launch |
 | Legacy Overhaul | Build -> Quality -> Vision | Modernize legacy systems |
 | Red Alert | Quality -> Build -> Vision | Emergency incident response |
+| Verify Everything | 6-gate sequential pipeline | Comprehensive verification |
+| Crypto Audit | Threat Model -> Crypto Audit -> Verification | Cryptographic security audit |
+| Payments Integration | Schema Validation -> Integration Testing -> Release | ISO 20022 payments validation |
+| Rust Release | Pre-Release Audit -> Quality & Security -> Release | Crate publishing pipeline |
+| Audio Pipeline | Pipeline Audit -> Optimization -> Verification | Realtime audio optimization |
 
 Each phase generates a dispatch manifest. Phases execute sequentially. Checkpoints gate progression. Abort-on-failure stops the pipeline when a critical phase fails.
 
@@ -337,6 +360,8 @@ Each agent receives the original task plus the previous agent's output (capped a
 | Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
 | Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
 | Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI design and interaction |
+| Crypto Fortress | security-lead -> crypto-cryptography-auditor -> edge-hunter -> reviewer | Deep cryptographic audit with security review |
+| SWIFT Payment | payments-domain-steward -> compliance-officer -> unit-tester -> reviewer | End-to-end payments integration validation |
 
 ```bash
 euxis-combo list                                                # Available combos

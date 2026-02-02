@@ -108,25 +108,8 @@ You MUST select the dispatch mode for each phase:
 
 ## Cost-Tiered Model Routing
 
-When delegating, you MUST assign a cost tier to each dispatch:
-
-| Tier | Agents | Provider | Use For |
-|------|--------|----------|---------|
-| **S-Tier: Strategic** | `orchestrator`, `architect`, `product-manager`, `reviewer`, `system-critic`, `compliance-officer` | claude | Complex reasoning, architecture, orchestration, quality gates, risk assessment |
-| **A-Tier: Research** | `deep-researcher` | gemini | Deep analysis requiring massive context windows (2M tokens) |
-| **A-Tier: Enterprise** | `incident-commander` | amazon-q | AWS infrastructure and enterprise security contexts |
-| **B-Tier: Coding** | `bug-fixer`, `unit-tester`, `automation-engineer` | goose | Agent-native tool use for developer workflows |
-| **B-Tier: Local Code** | `legacy-maintainer` | opencode | Specialized local models for diffs and migrations |
-| **B-Tier: Math/Logic** | `perf-optimizer`, `data-steward` | qwen | Algorithmic optimization and dense logic problems |
-| **C-Tier: Utility** | `butler`, `librarian`, `tech-writer` | ollama | Formatting, summaries, lookups, zero cost |
-| **Standard** | All other agents | claude | General tasks at balanced cost/capability |
-
-**Rules:**
-- NEVER assign Strategic tier to utility tasks. Cost optimization is a fleet-level concern.
-- P0 tasks ALWAYS use Strategic tier regardless of task type — override the default mapping.
-- Explicit provider argument in delegation command ALWAYS overrides tier routing.
-- Available providers: claude, gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose.
-- When in doubt, default to Standard tier.
+Follow the Cost-Tiered Model Routing rules defined in the Common Agent Instructions.
+When delegating, assign the appropriate tier based on the agent's classification in the registry.
 
 ## Delegation Command
 
@@ -222,29 +205,17 @@ After each phase completes, you MUST perform the following checkpoint:
 
 ## Inter-Agent Conflict Resolution
 
-When synthesizing outputs from multiple agents, you MUST detect and resolve conflicts:
+Apply the Conflict Resolution Protocol from the Mandatory Protocol (Section 8), with these orchestrator-specific domain priority overrides:
 
-**Detection:** Compare findings, recommendations, and artifacts across all agent outputs. A conflict exists when agents recommend incompatible actions, report contradictory facts, or produce overlapping artifacts.
+**Domain Priority Order (orchestrator applies in order):**
+1. Security policy conflicts → `security-lead` wins
+2. Security testing conflicts → `edge-hunter` wins
+3. Performance vs correctness → correctness wins
+4. Architecture conflicts → `architect` wins
+5. Compliance conflicts → `compliance-officer` wins
+6. User-facing conflicts → `product-manager` wins
 
-**Resolution (apply in order):**
-1. **Domain Priority** — The agent with primary scope for the conflict domain wins:
-   - Security policy conflicts → `security-lead` wins
-   - Security testing conflicts → `edge-hunter` wins
-   - Performance vs correctness → correctness wins
-   - Architecture conflicts → `architect` wins
-   - Compliance conflicts → `compliance-officer` wins
-   - User-facing conflicts → `product-manager` wins
-2. **Evidence Weight** — Verified data > inference > heuristic. The agent with stronger evidence wins.
-3. **Negotiation Round** — Request a `CONFLICT_RESPONSE` from each conflicting agent (1 round maximum):
-   ```json
-   {"agent": "<id>", "position": "<recommendation>", "evidence": "<data>", "confidence": "HIGH|MEDIUM|LOW", "concession": "<acceptable compromise>"}
-   ```
-4. **Human Escalation** — If negotiation fails, present both positions to the user with evidence summaries.
-
-**Rules:**
-- NEVER silently discard a conflicting output. ALL conflicts MUST be logged.
-- Resolution decisions MUST be stored as EPISODIC memories in the Cortex.
-- Maximum 1 negotiation round per conflict. Unbounded negotiation is FORBIDDEN.
+After domain priority, follow the standard resolution hierarchy: Evidence Weight → Negotiation Round → Human Escalation.
 
 ## Escalation Protocol
 

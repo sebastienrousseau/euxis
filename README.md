@@ -11,7 +11,7 @@ Version 0.0.7
 
 ## Overview
 
-Euxis gives you 31 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
+Euxis gives you 35 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
 
 Build faster. Ship with confidence.
 
@@ -108,7 +108,7 @@ flowchart LR
 
 ## Your Specialist Team
 
-31 agents across three tiers: 7 core agents govern the fleet, 17 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
+35 agents across three tiers: 7 core agents govern the fleet, 17 default agents execute domain work, 7 on-demand agents provide leverage when invoked, and 4 specialist agents deliver domain-specific expertise. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
 
 ### Core (7) — Authority-bearing, always present
 
@@ -155,6 +155,15 @@ flowchart LR
 | `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
 | `growth-marketer` | SEO, funnel optimization, go-to-market strategy |
 | `social-manager` | Platform-native content and community engagement |
+
+### Specialist (4) — Domain-specific expertise
+
+| Agent | Domain |
+|:------|:-------|
+| `crypto-cryptography-auditor` | Constant-time discipline, key management, nonce handling, PQC readiness |
+| `payments-domain-steward` | ISO 20022 compliance, schema validation, canonicalization |
+| `realtime-audio-engineer` | Buffer management, latency budgeting, platform audio abstraction |
+| `rust-crate-steward` | MSRV policy, feature flags, semver compliance, docs.rs quality |
 
 See the [Fleet Guide](FLEET_GUIDE.md) for delegation patterns, provider tiering, and workflow examples.
 
@@ -271,7 +280,9 @@ When you omit the provider argument, Euxis routes each agent to the optimal tier
 | S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Strongest reasoning |
 | A-Tier: Research | deep-researcher | `gemini` | 2M token context window |
 | A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
+| A-Tier: Domain | crypto-cryptography-auditor, payments-domain-steward | `claude` | Deep domain reasoning |
 | B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
+| B-Tier: Systems | realtime-audio-engineer, rust-crate-steward | `goose` | Systems-level tool use |
 | B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
 | B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
 | C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |
@@ -301,7 +312,7 @@ Euxis enforces a zero-trust security model at every layer.
 
 ## Squads
 
-Five cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
+Six cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
 
 | Squad | Purpose | Lead | Members |
 |:------|:--------|:-----|:--------|
@@ -310,6 +321,7 @@ Five cross-functional teams, each with a lead and a clear purpose. Deploy an ent
 | Quality | Assurance & Security | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
 | Growth | Branding & Documentation | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
 | Experience | UI Excellence & Interaction Design | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
+| Specialist | Domain-Specific Expertise | `crypto-cryptography-auditor` | crypto-cryptography-auditor, payments-domain-steward, realtime-audio-engineer, rust-crate-steward |
 
 ```bash
 euxis-squad list                            # All squads
@@ -329,6 +341,11 @@ Playbooks activate squads in sequence for repeatable workflows. Each phase gener
 | Zero to One | Vision -> Build -> Quality -> Growth | Full product launch |
 | Legacy Overhaul | Build -> Quality -> Vision | Modernize legacy systems |
 | Red Alert | Quality -> Build -> Vision | Emergency incident response |
+| Verify Everything | 6-gate pipeline | Comprehensive verification |
+| Crypto Audit | Threat Model -> Audit -> Verification | Cryptographic security audit |
+| Payments Integration | Schema -> Testing -> Clearance | ISO 20022 payments validation |
+| Rust Release | Audit -> Quality -> Release | Crate publishing pipeline |
+| Audio Pipeline | Audit -> Optimization -> Verification | Realtime audio optimization |
 
 ```bash
 euxis-playbook list                                             # Available playbooks
@@ -350,6 +367,8 @@ Combos are sequential agent chains. Each agent receives the previous agent's out
 | Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
 | Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
 | Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI from design system to polished interaction |
+| Crypto Fortress | security-lead -> crypto-cryptography-auditor -> edge-hunter -> reviewer | Deep cryptographic audit with security review |
+| SWIFT Payment | payments-domain-steward -> compliance-officer -> unit-tester -> reviewer | End-to-end payments integration validation |
 
 ```bash
 euxis-combo list                                      # Available combos
@@ -475,16 +494,32 @@ euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Exec
 │   └── prepare-commit-msg     Auto-appends signature to commits
 ├── .github/
 │   └── pull_request_template.md  Branded PR template
-├── squads.json             Squad and combo registry
+├── squads.json             Squad and combo registry (6 squads, 6 combos)
 ├── playbooks/              Phased squad activation definitions
 │   ├── zero-to-one.json    Vision → Build → Quality → Growth
 │   ├── legacy-overhaul.json Build → Quality → Vision
-│   └── red-alert.json      Quality → Build → Vision
+│   ├── red-alert.json      Quality → Build → Vision
+│   ├── verify-everything.json 6-gate verification pipeline
+│   ├── crypto-audit.json   Threat Model → Crypto Audit → Verification
+│   ├── payments-integration.json Schema → Integration → Clearance
+│   ├── rust-release.json   Pre-Release → Quality → Release
+│   └── audio-pipeline.json Pipeline Audit → Optimization → Verification
+├── templates/              Reusable templates
+│   ├── agent-prompt.txt    Agent prompt template
+│   ├── dispatch-manifest.json Dispatch manifest template
+│   ├── pattern.md          Validation pattern template
+│   ├── playbook.json       Playbook phase template
+│   └── adr.md              Architecture decision record template
+├── patterns/               11 validation patterns (54 detection rules)
+│   ├── SECURITY-001.md     through SCHEMA-001.md
+│   └── README.md           Severity calibration and pattern guide
 ├── prompts/
 │   ├── core/               7 core agents (authority-bearing)
-│   ├── fleet/              20 agents (13 default + 7 on-demand)
+│   ├── fleet/              24 agents (17 default + 7 on-demand)
+│   ├── synthesized/        4 specialist agents (domain-specific)
 │   └── protocols/          Shared protocol and common instructions
 ├── tests/
+│   ├── lib/                16 test suites (363 assertions)
 │   └── golden/             Golden datasets for evaluation
 ├── registry.json           Master agent registry
 ├── USER_GUIDE.md           Complete CLI and agent reference
@@ -540,7 +575,7 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-31-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-35-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/FLEET_GUIDE.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

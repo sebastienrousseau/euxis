@@ -89,6 +89,22 @@ Then store it:
 euxis-cortex remember "CONTRAINDICATION: <approach to avoid>. Use <alternative> instead." "<your_agent_id>" --type procedural
 ```
 
+### Verify Command Rules (Shared)
+The `verify_cmd` in dispatch manifests runs in a shell to confirm agent work. It MUST follow these constraints:
+
+1. **Use `python3`, not `python`.** macOS does not ship `python`.
+2. **Available tools:** `python3`, `pytest`, `mypy`, `bandit`, `pip-audit`, `ruff`, `gh`, plus standard Unix tools (`bash`, `test`, `grep`, `find`, `diff`, `sed`, `awk`).
+3. **NEVER assume project-specific dependencies are importable.** Use `grep` patterns to verify code changes instead of importing third-party libraries.
+4. **NEVER assume project-specific tools are installed.** Do NOT use `npm`, `cargo`, `eslint`, `tox`, `nox`, or tools requiring per-project setup.
+5. **Preferred verification patterns:**
+   - Code change: `grep -q 'expected_pattern' path/to/file`
+   - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
+   - File exists: `test -f path/to/file`
+   - Syntax check: `python3 -m py_compile path/to/file.py`
+   - Unit tests: `pytest path/to/tests/ -x -q`
+   - Security scan: `bandit -r path/to/module/ -q`
+6. **Chain checks with `&&`** for multi-step verification.
+
 ### Dispatch Manifest Schema (Standard)
 Any agent that coordinates parallel work MUST use the standard Euxis dispatch manifest format:
 ```json

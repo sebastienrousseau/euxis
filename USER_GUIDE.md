@@ -164,6 +164,17 @@ Add leverage, not safety. Never block, never override core authority.
 | `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
 | `social-manager` | Platform-native content, calendars, community engagement |
 
+### Specialist (4) — Domain-specific expertise
+
+Deep domain knowledge for specialized auditing and compliance.
+
+| Agent | Role |
+|-------|------|
+| `crypto-cryptography-auditor` | Constant-time discipline, key management, nonce handling, PQC readiness |
+| `payments-domain-steward` | ISO 20022 compliance, schema validation, canonicalization, regulatory |
+| `realtime-audio-engineer` | Buffer management, latency budgeting, platform audio abstraction |
+| `rust-crate-steward` | MSRV policy, feature flags, semver compliance, docs.rs quality |
+
 ## Glossary
 
 | Term | Definition |
@@ -172,8 +183,8 @@ Add leverage, not safety. Never block, never override core authority.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 31 agents: 7 core + 17 default + 7 on-demand |
-| **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience) |
+| **Fleet** | 35 agents: 7 core + 17 default + 7 on-demand + 4 specialist |
+| **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
 | **Codex** | Prompt template library with battle-tested templates for structured agent output |
@@ -229,7 +240,9 @@ When no provider is specified, Euxis routes agents by task complexity:
 | S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Best reasoning and tool use |
 | A-Tier: Research | deep-researcher | `gemini` | 2M context window for massive analysis |
 | A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
+| A-Tier: Domain | crypto-cryptography-auditor, payments-domain-steward | `claude` | Deep domain reasoning |
 | B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
+| B-Tier: Systems | realtime-audio-engineer, rust-crate-steward | `goose` | Systems-level tool use |
 | B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
 | B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
 | C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |

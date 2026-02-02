@@ -1,0 +1,10 @@
+# Third-party dependencies (not framework code)
+.venv-voice/
+
+# Runtime artifacts
+lifecycle/
+perf/
+plugins/
+
+# Project data (user-specific)
+projects/

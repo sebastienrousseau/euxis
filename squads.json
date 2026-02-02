@@ -38,6 +38,13 @@
       "lead": "web-ui-architect",
       "members": ["web-ui-architect", "cli-ui-artisan", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel"]
     }
+    ,{
+      "id": "specialist",
+      "name": "Specialist Squad",
+      "purpose": "Domain-Specific Expertise (Crypto, Payments, Audio, Rust)",
+      "lead": "crypto-cryptography-auditor",
+      "members": ["crypto-cryptography-auditor", "payments-domain-steward", "realtime-audio-engineer", "rust-crate-steward"]
+    }
   ],
   "combos": [
     {
@@ -63,6 +70,18 @@
       "name": "Jony Ive",
       "description": "Apple-level UI from design system to polished interaction",
       "chain": ["web-ui-architect", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel", "reviewer"]
+    },
+    {
+      "id": "crypto-fortress",
+      "name": "Crypto Fortress",
+      "description": "Deep cryptographic audit with security policy review",
+      "chain": ["security-lead", "crypto-cryptography-auditor", "edge-hunter", "reviewer"]
+    },
+    {
+      "id": "swift-payment",
+      "name": "SWIFT Payment",
+      "description": "End-to-end payments integration validation",
+      "chain": ["payments-domain-steward", "compliance-officer", "unit-tester", "reviewer"]
     }
   ]
 }
