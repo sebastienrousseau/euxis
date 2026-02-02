@@ -15,6 +15,8 @@ Euxis ships with a complete set of command-line tools. Each tool does one thing 
 | `euxis <agent> <task> [provider]` | Deploy any agent with automatic intelligence routing |
 | `euxis-ui` | Mission Control TUI for agent deployment and log browsing |
 
+**See also**: [UI & Interaction Guide](UI_INTERACTION_GUIDE.md) • [Keyboard Shortcuts](KEYBOARD_SHORTCUTS.md)
+
 ### Quality & Certification
 
 Run these tools to verify fleet integrity before and after changes.
@@ -97,6 +99,8 @@ Store and recall typed memories across sessions.
 | `euxis-sync-docs` | Doc sync with human approval |
 | `euxis-optimize` | Prompt optimization and compression |
 
+**UI Documentation**: [Interaction Guide](UI_INTERACTION_GUIDE.md) | [Keyboard Shortcuts](KEYBOARD_SHORTCUTS.md) | [Fleet Constitution](CONSTITUTION.md)
+
 ### Infrastructure
 
 | Command | Description |
@@ -122,7 +126,7 @@ Only core agents can block progress. If one is missing, the system is incomplete
 | `compliance-officer` | Legal, privacy, regulatory authority |
 | `system-critic` | Risk, pre-mortems, counter-bias |
 
-### Default (13) — Auto-available, task-triggered
+### Default (17) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
@@ -141,6 +145,10 @@ Execute and advise within scope. Do not define direction.
 | `tech-writer` | Documentation, tutorials, API reference, glossary |
 | `unit-tester` | Test coverage, reliability, regression prevention |
 | `ux-sentinel` | Accessibility (WCAG 2.1 AA), design systems, responsive testing |
+| `cli-ui-artisan` | Terminal UI design, keyboard navigation, TUI interaction |
+| `web-ui-architect` | Web UI components, design systems, responsive layouts |
+| `theming-and-motion-engineer` | Theming, color systems, dark mode, animation |
+| `interaction-and-input-specialist` | Keyboard navigation, input handling, accessibility |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -164,8 +172,8 @@ Add leverage, not safety. Never block, never override core authority.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 27 agents: 7 core + 13 default + 7 on-demand |
-| **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth) |
+| **Fleet** | 31 agents: 7 core + 17 default + 7 on-demand |
+| **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
 | **Codex** | Prompt template library with battle-tested templates for structured agent output |

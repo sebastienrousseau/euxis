@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# EUXIS VERIFY-ALL: The canonical verification pipeline.
+# Runs every gate sequentially. Docs first, reviewer last. Fails fast.
+#
+# Usage: euxis-verify-all "<goal>"
+#        euxis-verify-all "<goal>" --dry-run
+#        euxis-verify-all "<goal>" --from-gate N
+#
+# This is a convenience wrapper around:
+#   euxis-playbook run verify-everything "<goal>"
+#
+# For the simple sequential form (no playbook engine), see below.
+
+set -euo pipefail
+
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: euxis-verify-all \"<goal>\" [--dry-run] [--from-gate N]" >&2
+  exit 1
+fi
+
+GOAL="$1"; shift
+
+# If euxis-playbook is available, use the full playbook engine
+if command -v euxis-playbook &>/dev/null; then
+  exec euxis-playbook run verify-everything "$GOAL" "$@"
+fi
+
+# Fallback: direct sequential delegation (no playbook engine needed)
+echo "═══════════════════════════════════════════════════════"
+echo "  euxis-verify-all (direct mode)"
+echo "  Goal: $GOAL"
+echo "═══════════════════════════════════════════════════════"
+echo ""
+
+# Gate 0 — Documentation truth (ALWAYS FIRST)
+echo "── Gate 0: Documentation Truth ──"
+euxis delegate librarian "Sync agent registry, verify versions, reconcile documentation truth, and update USER_GUIDE.md registry sections if needed for: $GOAL"
+euxis delegate tech-writer "Sync all documentation to current fleet, protocols, and registry; validate snippets; update glossary/terms for: $GOAL"
+
+# Gate 1 — Intent verification
+echo "── Gate 1: Intent Verification ──"
+euxis delegate product-manager "Verify requirements and acceptance criteria match current product behavior; flag scope creep for: $GOAL"
+
+# Gate 2 — Structural verification
+echo "── Gate 2: Structural Verification ──"
+euxis delegate architect "Verify architectural integrity, modularity, provider abstraction boundaries, concurrency model, and cross-platform assumptions for: $GOAL"
+
+# Gate 3 — Execution verification
+echo "── Gate 3: Execution Verification ──"
+euxis delegate perf-optimizer "Verify performance budgets with benchmarks; validate voice/audio hot path and threading overhead for: $GOAL"
+euxis delegate data-steward "Verify telemetry coverage for latency, jitter, underruns, queue depth, thread saturation, regressions for: $GOAL"
+euxis delegate automation-engineer "Verify cross-platform build/package/runtime parity for macOS, Linux, and WSL for: $GOAL"
+euxis delegate edge-hunter "Verify security boundaries, secrets handling, provider isolation, dependency risk for: $GOAL"
+euxis delegate ux-sentinel "Verify UI usability and a11y: keyboard-only, mouse, touch, auto light/dark, focus, contrast for: $GOAL"
+
+# Gate 4 — Release quality gates
+echo "── Gate 4: Release Quality Gates ──"
+euxis delegate qa-coordinator "Run full test strategy (unit/integration/e2e/smoke) and issue PASS/FAIL verdict for: $GOAL"
+
+# Gate 5 — Final truth gate (blocks everything)
+echo "── Gate 5: Final Truth Gate ──"
+euxis delegate reviewer "Final verification across docs, intent, architecture, performance, security, UX, and test evidence for: $GOAL"
+
+echo ""
+echo "═══════════════════════════════════════════════════════"
+echo "  All gates passed."
+echo "═══════════════════════════════════════════════════════"

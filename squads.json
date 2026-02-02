@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "protocol_version": "0.0.6",
-  "last_updated": "2026-01-31",
+  "last_updated": "2026-02-01",
   "squads": [
     {
       "id": "vision",
@@ -29,7 +29,14 @@
       "name": "Growth Squad",
       "purpose": "Branding & Documentation",
       "lead": "tech-writer",
-      "members": ["tech-writer", "brand-evangelist", "social-manager", "devrel-advocate", "growth-marketer", "ux-sentinel", "globalization-lead"]
+      "members": ["tech-writer", "brand-evangelist", "social-manager", "devrel-advocate", "growth-marketer", "globalization-lead"]
+    },
+    {
+      "id": "experience",
+      "name": "Experience Squad",
+      "purpose": "UI Excellence & Interaction Design",
+      "lead": "web-ui-architect",
+      "members": ["web-ui-architect", "cli-ui-artisan", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel"]
     }
   ],
   "combos": [
@@ -50,6 +57,12 @@
       "name": "Content Factory",
       "description": "End-to-end content production",
       "chain": ["tech-writer", "brand-evangelist", "social-manager", "reviewer"]
+    },
+    {
+      "id": "jony-ive",
+      "name": "Jony Ive",
+      "description": "Apple-level UI from design system to polished interaction",
+      "chain": ["web-ui-architect", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel", "reviewer"]
     }
   ]
 }

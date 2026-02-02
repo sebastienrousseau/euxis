@@ -8,24 +8,27 @@ SESSION_DIR="/tmp/euxis_playbook_sessions"
 
 usage() {
   cat <<'EOF'
-euxis-playbook — Phased squad deployment via playbooks
+euxis-playbook — Phased squad and delegate deployment via playbooks
 
 Usage:
   euxis-playbook list
   euxis-playbook info <playbook-id>
-  euxis-playbook run <playbook-id> "<goal>" [--project NAME] [--dry-run]
+  euxis-playbook run <playbook-id> "<goal>" [--project NAME] [--dry-run] [--from-gate N]
+  euxis-playbook run-subgate <playbook-id> <subgate-id> "<goal>" [--dry-run]
   euxis-playbook status [session-id]
 
 Commands:
-  list      Available playbooks from playbooks/*.json
-  info      Phase breakdown with squads and checkpoints
-  run       Execute phases sequentially via squad dispatch
-  status    Show session log
+  list         Available playbooks from playbooks/*.json
+  info         Phase breakdown with squads/delegates and checkpoints
+  run          Execute phases sequentially via squad dispatch or delegate loops
+  run-subgate  Execute an optional sub-gate by id
+  status       Show session log
 
 Options:
-  --project   Project name for dispatch manifests (default: playbook-<id>)
-  --dry-run   Print dispatch manifests without executing
-  -h, --help  Show this help text
+  --project     Project name for dispatch manifests (default: playbook-<id>)
+  --dry-run     Print dispatch manifests without executing
+  --from-gate N Resume from gate/phase N (skip earlier phases)
+  -h, --help    Show this help text
 EOF
 }
 
@@ -52,6 +55,173 @@ find_playbook() {
   fi
   echo "$file"
 }
+
+# --- Delegate helper functions ---
+
+build_delegate_manifest() {
+  local project="$1"
+  local mode="$2"
+  local goal="$3"
+  local phase_json="$4"
+
+  local dispatches="[]"
+  local delegate_count
+  delegate_count=$(echo "$phase_json" | jq '.delegates | length')
+
+  local i=0
+  while [[ $i -lt $delegate_count ]]; do
+    local agent task_template task
+    agent=$(echo "$phase_json" | jq -r ".delegates[$i].agent")
+    task_template=$(echo "$phase_json" | jq -r ".delegates[$i].task_template")
+    task="${task_template//\$\{goal\}/$goal}"
+
+    local priority="P1"
+    if [[ $i -eq 0 ]]; then
+      priority="P0"
+    fi
+
+    dispatches=$(echo "$dispatches" | jq \
+      --arg agent "$agent" \
+      --arg priority "$priority" \
+      --arg task "$task" \
+      '. + [{"agent": $agent, "priority": $priority, "task": $task, "verify_cmd": "true"}]')
+    ((i++))
+  done
+
+  local manifest_file
+  manifest_file=$(mktemp /tmp/euxis_playbook_manifest_XXXXXX)
+
+  jq -n \
+    --arg project "$project" \
+    --arg mode "$mode" \
+    --argjson dispatches "$dispatches" \
+    '{"project": $project, "mode": $mode, "dispatches": $dispatches}' > "$manifest_file"
+
+  echo "$manifest_file"
+}
+
+run_delegates_sequential() {
+  local goal="$1"
+  local phase_json="$2"
+  local dry_run="$3"
+
+  local delegate_count
+  delegate_count=$(echo "$phase_json" | jq '.delegates | length')
+
+  local i=0
+  while [[ $i -lt $delegate_count ]]; do
+    local agent task_template task
+    agent=$(echo "$phase_json" | jq -r ".delegates[$i].agent")
+    task_template=$(echo "$phase_json" | jq -r ".delegates[$i].task_template")
+    task="${task_template//\$\{goal\}/$goal}"
+
+    if [[ "$dry_run" == true ]]; then
+      echo "    [DRY RUN] euxis-loop $agent \"$task\" \"true\" 3"
+    else
+      if command -v euxis-loop &>/dev/null; then
+        euxis-loop "$agent" "$task" "true" 3 || return $?
+      else
+        echo "Error: euxis-loop not found." >&2
+        return 1
+      fi
+    fi
+    ((i++))
+  done
+  return 0
+}
+
+run_delegate_phase() {
+  local id="$1"
+  local phase_json="$2"
+  local goal="$3"
+  local project="$4"
+  local dry_run="$5"
+  # log_session is inherited from the caller's scope
+
+  local phase_num phase_name mode checkpoint abort_on_failure failure_message gate principle
+  phase_num=$(echo "$phase_json" | jq -r '.phase')
+  phase_name=$(echo "$phase_json" | jq -r '.name')
+  mode=$(echo "$phase_json" | jq -r '.mode')
+  checkpoint=$(echo "$phase_json" | jq -r '.checkpoint')
+  abort_on_failure=$(echo "$phase_json" | jq -r '.abort_on_failure')
+  failure_message=$(echo "$phase_json" | jq -r '.failure_message // empty')
+  gate=$(echo "$phase_json" | jq -r '.gate // empty')
+  principle=$(echo "$phase_json" | jq -r '.principle // empty')
+
+  echo "──────────────────────────────────────────────────────"
+  echo "  Gate $phase_num: $phase_name"
+  [[ -n "$principle" ]] && echo "  Principle: $principle"
+  [[ -n "$gate" ]] && echo "  Gate ID: $gate"
+  echo "  Mode: $mode"
+  echo "  Checkpoint: $checkpoint"
+  echo "──────────────────────────────────────────────────────"
+
+  log_session "GATE $phase_num ($phase_name) gate=$gate mode=$mode"
+
+  local exit_code=0
+
+  if [[ "$mode" == "parallel" ]]; then
+    # euxis-dispatch uses "hierarchical" for parallel agent execution
+    local dispatch_mode="hierarchical"
+    local manifest_file
+    manifest_file=$(build_delegate_manifest "$project" "$dispatch_mode" "$goal" "$phase_json")
+
+    if [[ "$dry_run" == true ]]; then
+      echo ""
+      echo "  [DRY RUN] Dispatch manifest:"
+      jq '.' "$manifest_file"
+      echo ""
+      log_session "DRY_RUN gate=$phase_num manifest=$manifest_file"
+    else
+      echo ""
+      if command -v euxis-dispatch &>/dev/null; then
+        euxis-dispatch "$manifest_file" --mode "$dispatch_mode" || exit_code=$?
+      else
+        echo "Error: euxis-dispatch not found." >&2
+        log_session "ERROR euxis-dispatch not found"
+        exit 1
+      fi
+    fi
+  else
+    # hierarchical: run delegates sequentially via euxis-loop
+    echo ""
+    run_delegates_sequential "$goal" "$phase_json" "$dry_run" || exit_code=$?
+  fi
+
+  if [[ "$dry_run" == true ]]; then
+    return 0
+  fi
+
+  if [[ $exit_code -ne 0 ]]; then
+    log_session "FAILED gate=$phase_num exit_code=$exit_code"
+    echo "  Gate $phase_num FAILED (exit code: $exit_code)"
+
+    if [[ -n "$failure_message" ]]; then
+      echo "  $failure_message"
+    fi
+
+    if [[ "$abort_on_failure" == "true" ]]; then
+      echo "  Aborting playbook (abort_on_failure=true)"
+      log_session "ABORT playbook aborted at gate $phase_num"
+
+      if command -v euxis-bus &>/dev/null; then
+        euxis-bus publish playbook-events "Playbook '$id' aborted at gate $phase_num ($phase_name)" --sender "euxis-playbook" --priority P0
+      fi
+      exit 1
+    else
+      echo "  Continuing despite failure (abort_on_failure=false)"
+    fi
+  else
+    log_session "COMPLETED gate=$phase_num"
+    echo "  Gate $phase_num completed."
+  fi
+
+  if command -v euxis-bus &>/dev/null; then
+    euxis-bus publish playbook-events "Playbook '$id' gate $phase_num ($phase_name) completed" --sender "euxis-playbook" --priority P2
+  fi
+}
+
+# --- Commands ---
 
 cmd_list() {
   require_jq
@@ -88,9 +258,71 @@ cmd_info() {
   echo "ID:          $(echo "$playbook" | jq -r '.id')"
   echo "Description: $(echo "$playbook" | jq -r '.description')"
   echo ""
-  echo "Phases:"
 
-  echo "$playbook" | jq -r '.phases[] | "  Phase \(.phase): \(.name)\n    Squad: \(.squad)\n    Mode: \(.mode)\n    Checkpoint: \(.checkpoint)\n    Abort on failure: \(.abort_on_failure)\n"'
+  local phase_count
+  phase_count=$(echo "$playbook" | jq '.phases | length')
+
+  local phase_idx=0
+  while [[ $phase_idx -lt $phase_count ]]; do
+    local phase
+    phase=$(echo "$playbook" | jq ".phases[$phase_idx]")
+    local has_delegates
+    has_delegates=$(echo "$phase" | jq 'has("delegates")')
+
+    if [[ "$has_delegates" == "true" ]]; then
+      local phase_num phase_name gate principle mode checkpoint abort_on_failure failure_message
+      phase_num=$(echo "$phase" | jq -r '.phase')
+      phase_name=$(echo "$phase" | jq -r '.name')
+      gate=$(echo "$phase" | jq -r '.gate // empty')
+      principle=$(echo "$phase" | jq -r '.principle // empty')
+      mode=$(echo "$phase" | jq -r '.mode')
+      checkpoint=$(echo "$phase" | jq -r '.checkpoint')
+      abort_on_failure=$(echo "$phase" | jq -r '.abort_on_failure')
+      failure_message=$(echo "$phase" | jq -r '.failure_message // empty')
+
+      echo "  Gate $phase_num: $phase_name"
+      [[ -n "$principle" ]] && echo "    Principle: $principle"
+      [[ -n "$gate" ]] && echo "    Gate ID: $gate"
+      echo "    Mode: $mode"
+
+      local delegate_count
+      delegate_count=$(echo "$phase" | jq '.delegates | length')
+      local d=0
+      while [[ $d -lt $delegate_count ]]; do
+        local agent invariant_count
+        agent=$(echo "$phase" | jq -r ".delegates[$d].agent")
+        invariant_count=$(echo "$phase" | jq ".delegates[$d].verifies // [] | length")
+        echo "    Delegate: $agent ($invariant_count invariants)"
+        ((d++))
+      done
+
+      echo "    Checkpoint: $checkpoint"
+      echo "    Abort on failure: $abort_on_failure"
+      [[ -n "$failure_message" ]] && echo "    Failure: $failure_message"
+      echo ""
+    else
+      echo "$phase" | jq -r '"  Phase \(.phase): \(.name)\n    Squad: \(.squad)\n    Mode: \(.mode)\n    Checkpoint: \(.checkpoint)\n    Abort on failure: \(.abort_on_failure)\n"'
+    fi
+
+    ((phase_idx++))
+  done
+
+  # Optional sub-gates
+  local subgate_count
+  subgate_count=$(echo "$playbook" | jq '.optional_sub_gates // [] | length')
+  if [[ $subgate_count -gt 0 ]]; then
+    echo "Optional Sub-Gates:"
+    local s=0
+    while [[ $s -lt $subgate_count ]]; do
+      local sg_id sg_trigger sg_delegates
+      sg_id=$(echo "$playbook" | jq -r ".optional_sub_gates[$s].id")
+      sg_trigger=$(echo "$playbook" | jq -r ".optional_sub_gates[$s].trigger")
+      sg_delegates=$(echo "$playbook" | jq -r ".optional_sub_gates[$s].delegates | length")
+      echo "  $sg_id (trigger: $sg_trigger, delegates: $sg_delegates)"
+      ((s++))
+    done
+    echo ""
+  fi
 }
 
 cmd_run() {
@@ -98,17 +330,18 @@ cmd_run() {
   local goal="$1"; shift
   local project="playbook-${id}"
   local dry_run=false
+  local from_gate=0
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --project) project="$2"; shift 2 ;;
       --dry-run) dry_run=true; shift ;;
+      --from-gate) from_gate="$2"; shift 2 ;;
       *) echo "Error: Unknown option '$1'" >&2; return 1 ;;
     esac
   done
 
   require_jq
-  require_squads_file
 
   local file
   file=$(find_playbook "$id")
@@ -137,114 +370,138 @@ cmd_run() {
   if [[ "$dry_run" == true ]]; then
     echo "  Mode: DRY RUN"
   fi
+  if [[ "$from_gate" -gt 0 ]]; then
+    echo "  Resuming from gate: $from_gate"
+  fi
   echo "═══════════════════════════════════════════════════════"
   echo ""
 
-  log_session "START playbook=$id goal=\"$goal\" project=$project dry_run=$dry_run"
+  log_session "START playbook=$id goal=\"$goal\" project=$project dry_run=$dry_run from_gate=$from_gate"
 
   local phase_idx=0
   while [[ $phase_idx -lt $phase_count ]]; do
     local phase
     phase=$(echo "$playbook" | jq ".phases[$phase_idx]")
-    local phase_num phase_name squad_id mode task_template checkpoint abort_on_failure
+    local phase_num
     phase_num=$(echo "$phase" | jq -r '.phase')
-    phase_name=$(echo "$phase" | jq -r '.name')
-    squad_id=$(echo "$phase" | jq -r '.squad')
-    mode=$(echo "$phase" | jq -r '.mode')
-    task_template=$(echo "$phase" | jq -r '.task_template')
-    checkpoint=$(echo "$phase" | jq -r '.checkpoint')
-    abort_on_failure=$(echo "$phase" | jq -r '.abort_on_failure')
 
-    # Substitute ${goal} in task_template
-    local task="${task_template//\$\{goal\}/$goal}"
-
-    echo "──────────────────────────────────────────────────────"
-    echo "  Phase $phase_num: $phase_name (squad: $squad_id)"
-    echo "  Task: $task"
-    echo "  Checkpoint: $checkpoint"
-    echo "──────────────────────────────────────────────────────"
-
-    log_session "PHASE $phase_num ($phase_name) squad=$squad_id mode=$mode"
-
-    # Resolve squad members
-    local squad
-    squad=$(jq --arg id "$squad_id" '.squads[] | select(.id == $id)' "$SQUADS_FILE")
-
-    if [[ -z "$squad" ]]; then
-      echo "Error: Squad '$squad_id' not found in squads.json" >&2
-      log_session "ERROR squad '$squad_id' not found"
-      exit 1
+    # Skip phases before --from-gate
+    if [[ "$from_gate" -gt 0 && "$phase_num" -lt "$from_gate" ]]; then
+      echo "  Skipping phase $phase_num (resuming from gate $from_gate)"
+      echo ""
+      ((phase_idx++))
+      continue
     fi
 
-    local lead
-    lead=$(echo "$squad" | jq -r '.lead')
+    local has_delegates
+    has_delegates=$(echo "$phase" | jq 'has("delegates")')
 
-    # Build dispatch manifest
-    local dispatches="[]"
-    while IFS= read -r member; do
-      local priority="P1"
-      if [[ "$member" == "$lead" ]]; then
-        priority="P0"
-      fi
-      dispatches=$(echo "$dispatches" | jq \
-        --arg agent "$member" \
-        --arg priority "$priority" \
-        --arg task "$task" \
-        '. + [{"agent": $agent, "priority": $priority, "task": $task, "verify_cmd": "true"}]')
-    done < <(echo "$squad" | jq -r '.members[]')
-
-    local manifest_file
-    manifest_file=$(mktemp /tmp/euxis_playbook_manifest_XXXXXX)
-
-    jq -n \
-      --arg project "$project" \
-      --arg mode "$mode" \
-      --argjson dispatches "$dispatches" \
-      '{"project": $project, "mode": $mode, "dispatches": $dispatches}' > "$manifest_file"
-
-    if [[ "$dry_run" == true ]]; then
-      echo ""
-      echo "  [DRY RUN] Dispatch manifest:"
-      jq '.' "$manifest_file"
-      echo ""
-      log_session "DRY_RUN manifest=$manifest_file"
+    if [[ "$has_delegates" == "true" ]]; then
+      # --- Delegate-based phase ---
+      run_delegate_phase "$id" "$phase" "$goal" "$project" "$dry_run"
     else
-      echo ""
+      # --- Squad-based phase (existing logic) ---
+      require_squads_file
 
-      # Invoke dispatch
-      local exit_code=0
-      if command -v euxis-dispatch &>/dev/null; then
-        euxis-dispatch "$manifest_file" --mode "$mode" || exit_code=$?
-      else
-        echo "Error: euxis-dispatch not found." >&2
-        log_session "ERROR euxis-dispatch not found"
+      local phase_name squad_id mode task_template checkpoint abort_on_failure
+      phase_name=$(echo "$phase" | jq -r '.name')
+      squad_id=$(echo "$phase" | jq -r '.squad')
+      mode=$(echo "$phase" | jq -r '.mode')
+      task_template=$(echo "$phase" | jq -r '.task_template')
+      checkpoint=$(echo "$phase" | jq -r '.checkpoint')
+      abort_on_failure=$(echo "$phase" | jq -r '.abort_on_failure')
+
+      # Substitute ${goal} in task_template
+      local task="${task_template//\$\{goal\}/$goal}"
+
+      echo "──────────────────────────────────────────────────────"
+      echo "  Phase $phase_num: $phase_name (squad: $squad_id)"
+      echo "  Task: $task"
+      echo "  Checkpoint: $checkpoint"
+      echo "──────────────────────────────────────────────────────"
+
+      log_session "PHASE $phase_num ($phase_name) squad=$squad_id mode=$mode"
+
+      # Resolve squad members
+      local squad
+      squad=$(jq --arg id "$squad_id" '.squads[] | select(.id == $id)' "$SQUADS_FILE")
+
+      if [[ -z "$squad" ]]; then
+        echo "Error: Squad '$squad_id' not found in squads.json" >&2
+        log_session "ERROR squad '$squad_id' not found"
         exit 1
       fi
 
-      if [[ $exit_code -ne 0 ]]; then
-        log_session "FAILED phase=$phase_num exit_code=$exit_code"
-        echo "  Phase $phase_num FAILED (exit code: $exit_code)"
+      local lead
+      lead=$(echo "$squad" | jq -r '.lead')
 
-        if [[ "$abort_on_failure" == "true" ]]; then
-          echo "  Aborting playbook (abort_on_failure=true)"
-          log_session "ABORT playbook aborted at phase $phase_num"
-
-          # Publish failure event
-          if command -v euxis-bus &>/dev/null; then
-            euxis-bus publish playbook-events "Playbook '$id' aborted at phase $phase_num ($phase_name)" --sender "euxis-playbook" --priority P0
-          fi
-          exit 1
-        else
-          echo "  Continuing despite failure (abort_on_failure=false)"
+      # Build dispatch manifest
+      local dispatches="[]"
+      while IFS= read -r member; do
+        local priority="P1"
+        if [[ "$member" == "$lead" ]]; then
+          priority="P0"
         fi
-      else
-        log_session "COMPLETED phase=$phase_num"
-        echo "  Phase $phase_num completed."
-      fi
+        dispatches=$(echo "$dispatches" | jq \
+          --arg agent "$member" \
+          --arg priority "$priority" \
+          --arg task "$task" \
+          '. + [{"agent": $agent, "priority": $priority, "task": $task, "verify_cmd": "true"}]')
+      done < <(echo "$squad" | jq -r '.members[]')
 
-      # Publish phase event
-      if command -v euxis-bus &>/dev/null; then
-        euxis-bus publish playbook-events "Playbook '$id' phase $phase_num ($phase_name) completed" --sender "euxis-playbook" --priority P2
+      local manifest_file
+      manifest_file=$(mktemp /tmp/euxis_playbook_manifest_XXXXXX)
+
+      jq -n \
+        --arg project "$project" \
+        --arg mode "$mode" \
+        --argjson dispatches "$dispatches" \
+        '{"project": $project, "mode": $mode, "dispatches": $dispatches}' > "$manifest_file"
+
+      if [[ "$dry_run" == true ]]; then
+        echo ""
+        echo "  [DRY RUN] Dispatch manifest:"
+        jq '.' "$manifest_file"
+        echo ""
+        log_session "DRY_RUN manifest=$manifest_file"
+      else
+        echo ""
+
+        # Invoke dispatch
+        local exit_code=0
+        if command -v euxis-dispatch &>/dev/null; then
+          euxis-dispatch "$manifest_file" --mode "$mode" || exit_code=$?
+        else
+          echo "Error: euxis-dispatch not found." >&2
+          log_session "ERROR euxis-dispatch not found"
+          exit 1
+        fi
+
+        if [[ $exit_code -ne 0 ]]; then
+          log_session "FAILED phase=$phase_num exit_code=$exit_code"
+          echo "  Phase $phase_num FAILED (exit code: $exit_code)"
+
+          if [[ "$abort_on_failure" == "true" ]]; then
+            echo "  Aborting playbook (abort_on_failure=true)"
+            log_session "ABORT playbook aborted at phase $phase_num"
+
+            # Publish failure event
+            if command -v euxis-bus &>/dev/null; then
+              euxis-bus publish playbook-events "Playbook '$id' aborted at phase $phase_num ($phase_name)" --sender "euxis-playbook" --priority P0
+            fi
+            exit 1
+          else
+            echo "  Continuing despite failure (abort_on_failure=false)"
+          fi
+        else
+          log_session "COMPLETED phase=$phase_num"
+          echo "  Phase $phase_num completed."
+        fi
+
+        # Publish phase event
+        if command -v euxis-bus &>/dev/null; then
+          euxis-bus publish playbook-events "Playbook '$id' phase $phase_num ($phase_name) completed" --sender "euxis-playbook" --priority P2
+        fi
       fi
     fi
 
@@ -262,6 +519,71 @@ cmd_run() {
   # Publish completion event
   if [[ "$dry_run" != true ]] && command -v euxis-bus &>/dev/null; then
     euxis-bus publish playbook-events "Playbook '$id' completed for: $goal" --sender "euxis-playbook" --priority P1
+  fi
+}
+
+cmd_run_subgate() {
+  local id="$1"
+  local subgate_id="$2"
+  local goal="$3"
+  shift 3
+  local dry_run=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run) dry_run=true; shift ;;
+      *) echo "Error: Unknown option '$1'" >&2; return 1 ;;
+    esac
+  done
+
+  require_jq
+
+  local file
+  file=$(find_playbook "$id")
+
+  local subgate
+  subgate=$(jq --arg sg "$subgate_id" '.optional_sub_gates[] | select(.id == $sg)' "$file")
+
+  if [[ -z "$subgate" ]]; then
+    echo "Error: Sub-gate '$subgate_id' not found in playbook '$id'" >&2
+    exit 1
+  fi
+
+  local trigger
+  trigger=$(echo "$subgate" | jq -r '.trigger')
+
+  echo "═══════════════════════════════════════════════════════"
+  echo "  Sub-Gate: $subgate_id"
+  echo "  Trigger: $trigger"
+  echo "  Goal: $goal"
+  if [[ "$dry_run" == true ]]; then
+    echo "  Mode: DRY RUN"
+  fi
+  echo "═══════════════════════════════════════════════════════"
+  echo ""
+
+  # Build a phase-like object for run_delegates_sequential
+  local phase_json
+  phase_json=$(echo "$subgate" | jq '{delegates: .delegates}')
+
+  local exit_code=0
+  run_delegates_sequential "$goal" "$phase_json" "$dry_run" || exit_code=$?
+
+  if [[ "$dry_run" != true ]]; then
+    if [[ $exit_code -ne 0 ]]; then
+      echo ""
+      echo "  Sub-gate '$subgate_id' FAILED (exit code: $exit_code)"
+      if command -v euxis-bus &>/dev/null; then
+        euxis-bus publish playbook-events "Sub-gate '$subgate_id' failed for playbook '$id'" --sender "euxis-playbook" --priority P0
+      fi
+      exit 1
+    else
+      echo ""
+      echo "  Sub-gate '$subgate_id' completed."
+      if command -v euxis-bus &>/dev/null; then
+        euxis-bus publish playbook-events "Sub-gate '$subgate_id' completed for playbook '$id'" --sender "euxis-playbook" --priority P2
+      fi
+    fi
   fi
 }
 
@@ -308,6 +630,11 @@ case "${1:-}" in
   run)
     if [[ -z "${2:-}" || -z "${3:-}" ]]; then echo "Error: run requires <playbook-id> and <goal>" >&2; usage >&2; exit 1; fi
     cmd_run "$2" "$3" "${@:4}" ;;
+  run-subgate)
+    if [[ -z "${2:-}" || -z "${3:-}" || -z "${4:-}" ]]; then
+      echo "Error: run-subgate requires <playbook-id> <subgate-id> <goal>" >&2; usage >&2; exit 1
+    fi
+    cmd_run_subgate "$2" "$3" "$4" "${@:5}" ;;
   status)     cmd_status "${2:-}" ;;
   -h|--help)  usage ;;
   *)          usage >&2; exit 1 ;;

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "protocol_version": "0.0.6",
-  "last_updated": "2026-01-31",
+  "last_updated": "2026-02-01",
   "capabilities_registry": "capabilities.json",
   "constitution": "CONSTITUTION.md",
   "agents": [
@@ -31,6 +31,10 @@
     { "id": "devrel-advocate", "path": "prompts/fleet/devrel-advocate.txt", "tier": "fleet", "version": "0.0.6", "tags": ["devrel", "community", "content"], "capability_tags": ["documentation"], "activation": "on-demand" },
     { "id": "globalization-lead", "path": "prompts/fleet/globalization-lead.txt", "tier": "fleet", "version": "0.0.6", "tags": ["i18n", "l10n", "globalization"], "capability_tags": ["compliance-check"], "activation": "on-demand" },
     { "id": "growth-marketer", "path": "prompts/fleet/growth-marketer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["marketing", "growth", "seo"], "capability_tags": ["documentation"], "activation": "on-demand" },
-    { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "0.0.6", "tags": ["social", "content", "community"], "capability_tags": ["documentation"], "activation": "on-demand" }
+    { "id": "social-manager", "path": "prompts/fleet/social-manager.txt", "tier": "fleet", "version": "0.0.6", "tags": ["social", "content", "community"], "capability_tags": ["documentation"], "activation": "on-demand" },
+    { "id": "cli-ui-artisan", "path": "prompts/fleet/cli-ui-artisan.txt", "tier": "fleet", "version": "0.0.6", "tags": ["tui", "cli", "terminal", "keyboard", "design"], "capability_tags": ["tui-design", "keyboard-navigation", "code-review"], "activation": "default" },
+    { "id": "web-ui-architect", "path": "prompts/fleet/web-ui-architect.txt", "tier": "fleet", "version": "0.0.6", "tags": ["web", "ui", "design-system", "components", "responsive"], "capability_tags": ["design-system", "code-review", "architecture-review"], "activation": "default" },
+    { "id": "theming-and-motion-engineer", "path": "prompts/fleet/theming-and-motion-engineer.txt", "tier": "fleet", "version": "0.0.6", "tags": ["theming", "color", "motion", "dark-mode", "animation"], "capability_tags": ["theming", "compliance-check"], "activation": "default" },
+    { "id": "interaction-and-input-specialist", "path": "prompts/fleet/interaction-and-input-specialist.txt", "tier": "fleet", "version": "0.0.6", "tags": ["keyboard", "focus", "input", "shortcuts", "navigation"], "capability_tags": ["keyboard-navigation", "compliance-check"], "activation": "default" }
   ]
 }

@@ -228,15 +228,19 @@ fi
 
 # 5j. Open PRs carry branding signature (if gh CLI available)
 if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
-    PR_LIST=$(cd "$EUXIS_HOME" && gh pr list --json number,title,body --jq '.[] | "\(.number)\t\(.title)\t\(.body)"' 2>/dev/null || true)
-    if [[ -n "$PR_LIST" ]]; then
+    PR_JSON=$(cd "$EUXIS_HOME" && gh pr list --json number,title,body 2>/dev/null || true)
+    PR_COUNT=$(echo "$PR_JSON" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "0")
+    if [[ "$PR_COUNT" -gt 0 ]]; then
         UNSIGNED_PRS=0
-        while IFS=$'\t' read -r pr_num pr_title pr_body; do
+        for i in $(seq 0 $((PR_COUNT - 1))); do
+            pr_num=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['number'])")
+            pr_title=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['title'])")
+            pr_body=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['body'])")
             if ! echo "$pr_body" | grep -qF "Sebastien Rousseau" || ! echo "$pr_body" | grep -qF "euxis.co"; then
                 echo "  UNSIGNED PR: #$pr_num $pr_title"
                 ((UNSIGNED_PRS++))
             fi
-        done <<< "$PR_LIST"
+        done
         if [[ $UNSIGNED_PRS -eq 0 ]]; then
             echo "  PASS: All open PRs carry branding signature."
         else
