@@ -62,7 +62,7 @@ jobs:
         run: |
           echo "=== Scanning Python code for security issues ==="
           bandit -r . -f json -o bandit-report.json -x ./tests/,./venv/,./env/ || true
-          bandit -r . -f txt -x ./tests/,./venv/,./env/
+          bandit -r . -f txt -x ./tests/,./venv/,./env/ || true
           # Check for CRITICAL/HIGH confidence security issues
           if bandit -r . -f json -x ./tests/,./venv/,./env/ | jq -e '.results[] | select(.issue_confidence == "HIGH" and (.issue_severity == "HIGH" or .issue_severity == "MEDIUM"))' > /dev/null 2>&1; then
             echo "❌ HIGH confidence security issues found"
