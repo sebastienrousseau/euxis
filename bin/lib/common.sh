@@ -24,8 +24,16 @@ log_warn() {
 # Performance Instrumentation (latency tracking)
 # ============================================================================
 
+# Performance instrumentation can be disabled via EUXIS_PERF_DISABLE=1
+# This eliminates overhead when profiling is not needed
+_perf_enabled() {
+    [[ "${EUXIS_PERF_DISABLE:-0}" != "1" ]]
+}
+
 # Nanosecond timer (falls back to seconds if %N unavailable)
 _euxis_now_ns() {
+    _perf_enabled || { echo "0"; return; }
+
     local ns
     ns=$(date +%s%N 2>/dev/null)
     if [[ "${ns}" == *N ]]; then
@@ -41,22 +49,57 @@ _euxis_now_ns() {
 }
 
 # Start a latency timer. Usage: local t; t=$(_perf_start)
-_perf_start() { _euxis_now_ns; }
+_perf_start() {
+    _perf_enabled || { echo "0"; return; }
+    _euxis_now_ns
+}
 
 # End a latency timer and return elapsed ms. Usage: _perf_elapsed "$t"
 _perf_elapsed_ms() {
+    _perf_enabled || { echo "0"; return; }
     local start="$1"
     local end
     end=$(_euxis_now_ns)
     echo $(( (end - start) / 1000000 ))
 }
 
+# Default performance budgets (milliseconds)
+declare -A EUXIS_PERF_BUDGETS=(
+    ["llm_call"]=5000
+    ["file_read"]=100
+    ["file_write"]=200
+    ["agent_dispatch"]=1000
+    ["cortex_recall"]=500
+)
+
+# Set or get performance budget for an operation
+# Usage: performance_budget "operation_name" [new_budget_ms]
+performance_budget() {
+    local operation="$1"
+    local budget="${2:-}"
+
+    if [[ -n "$budget" ]]; then
+        EUXIS_PERF_BUDGETS["$operation"]="$budget"
+        log_debug "PERF: Set budget for ${operation} to ${budget}ms"
+    else
+        echo "${EUXIS_PERF_BUDGETS[$operation]:-1000}"
+    fi
+}
+
 # Latency budget enforcement. Returns 0 if within budget, 1 if exceeded.
 # Usage: _perf_check_budget "$elapsed_ms" "$budget_ms" "operation_name"
 _perf_check_budget() {
+    _perf_enabled || return 0
+
     local elapsed="$1"
     local budget="$2"
     local operation="${3:-unknown}"
+
+    # Use configured budget if not specified
+    if [[ -z "$budget" ]]; then
+        budget=$(performance_budget "$operation")
+    fi
+
     if (( elapsed > budget )); then
         log_warn "LATENCY BUDGET EXCEEDED: ${operation} took ${elapsed}ms (budget: ${budget}ms)"
         return 1
@@ -74,6 +117,8 @@ EUXIS_PERF_LOG="${EUXIS_HOME}/data/perf/metrics.jsonl"
 
 # Record a performance metric as JSONL
 _perf_record() {
+    _perf_enabled || return 0
+
     local operation="$1"
     local elapsed_ms="$2"
     local agent="${3:-system}"
