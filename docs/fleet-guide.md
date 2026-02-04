@@ -8,48 +8,51 @@ Version 0.0.7
 
 ## Fleet Overview
 
-38 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
+41 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
 
-### Core (7) — Authority-bearing, always present
+### Core (9) — Authority-bearing, always present
 
-Seven core agents define direction and may block progress. If one is missing, the system is incomplete.
+Nine core agents define direction and may block progress. If one is missing, the system is incomplete.
 
 | Agent | What It Does | Model Tier |
 |-------|-------------|------------|
 | `orchestrator` | Breaks down ambitious goals. Routes work to specialists. Delivers complete solutions. | Strategic |
 | `architect` | Designs systems that scale. Creates patterns that last. | Strategic |
-| `product-manager` | Defines intent, scope, and prioritization. Ships what matters. | Strategic |
+| `planner` | Defines intent, scope, and prioritization. Ships what matters. | Strategic |
 | `reviewer` | Truth & quality gate. Guarantees correctness and completeness. | Strategic |
 | `librarian` | Keeps knowledge sharp. Documentation governance. | Utility |
-| `compliance-officer` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
-| `system-critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
+| `auditor` | Legal, privacy, and regulatory authority. Ships with confidence. | Strategic |
+| `critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
+| `arbiter` | Conflict resolution. Final decisions when agents disagree. | Strategic |
+| `historian` | Long-term memory. Temporal patterns. Institutional knowledge. | Utility |
 
-### Default (20) — Auto-available, task-triggered
+### Default (21) — Auto-available, task-triggered
 
 Execute within scope when triggered. Advise but do not define direction.
 
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
-| `automation-engineer` | Zero-touch deployments | Coding |
-| `bug-fixer` | Get to root cause fast | Coding |
-| `crash-investigator` | Post-incident crash forensics and evidence gathering | Standard |
-| `data-steward` | Total system visibility | Math/Logic |
-| `edge-hunter` | Bulletproof security | Standard |
-| `incident-commander` | Handle any crisis | Enterprise |
-| `language-specialist` | Language-specific pattern detection and idiom enforcement | Standard |
-| `legacy-maintainer` | Modernize without breaking | Local Code |
-| `perf-optimizer` | Make it fast | Math/Logic |
-| `qa-coordinator` | Ship with certainty | Standard |
-| `regression-analyst` | Exhaustive pre-merge regression analysis | Standard |
-| `release-manager` | Flawless releases | Standard |
-| `security-lead` | Security policy, threat governance, edge-hunter dispatch | Standard |
-| `tech-writer` | Documentation that delights | Utility |
-| `unit-tester` | Prevent regressions | Coding |
-| `ux-sentinel` | Experiences users love | Standard |
-| `cli-ui-artisan` | Terminal UI design and keyboard navigation | Standard |
-| `web-ui-architect` | Web UI components and design systems | Standard |
-| `theming-and-motion-engineer` | Theming, color systems, and animation | Standard |
-| `interaction-and-input-specialist` | Keyboard navigation and input handling | Standard |
+| `accountant` | Cost analysis and resource efficiency | Standard |
+| `animator` | Theming, color systems, and animation | Standard |
+| `automaton` | Zero-touch deployments | Coding |
+| `debugger` | Get to root cause fast | Coding |
+| `designer` | Web UI components and design systems | Standard |
+| `gatekeeper` | Flawless releases | Standard |
+| `inspector` | Ship with certainty | Standard |
+| `interactor` | Keyboard navigation and input handling | Standard |
+| `investigator` | Post-incident crash forensics | Standard |
+| `maintainer` | Modernize without breaking | Local Code |
+| `optimizer` | Make it fast | Math/Logic |
+| `pentester` | Bulletproof security | Standard |
+| `polyglot` | Language-specific pattern detection | Standard |
+| `repairer` | Automated fixes and self-healing | Standard |
+| `responder` | Handle any crisis | Enterprise |
+| `sentinel` | Security policy and threat governance | Standard |
+| `tactician` | Terminal UI design and keyboard navigation | Standard |
+| `telemetrist` | Total system visibility | Math/Logic |
+| `tester` | Prevent regressions | Coding |
+| `watchdog` | Exhaustive pre-merge regression analysis | Standard |
+| `writer` | Documentation that delights | Utility |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -57,13 +60,13 @@ Add leverage, not safety. Never block, never override core authority.
 
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
-| `brand-evangelist` | Brand voice and storytelling | Standard |
+| `ambassador` | Build community | Standard |
 | `butler` | Perfect voice summaries | Utility |
-| `deep-researcher` | Find what others miss | Research |
-| `devrel-advocate` | Build community | Standard |
-| `globalization-lead` | Global reach | Standard |
-| `growth-marketer` | Scale your impact | Standard |
-| `social-manager` | Amplify your voice | Standard |
+| `evangelist` | Brand voice and storytelling | Standard |
+| `localizer` | Global reach | Standard |
+| `marketer` | Scale your impact | Standard |
+| `researcher` | Find what others miss | Research |
+| `strategist` | Amplify your voice | Standard |
 
 ### Specialist (4) — Domain-specific expertise
 
@@ -71,10 +74,10 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 
 | Agent | Domain | Model Tier |
 |-------|--------|------------|
-| `crypto-cryptography-auditor` | Cryptographic correctness, PQC, hashing | Standard |
-| `payments-domain-steward` | ISO 20022, payments compliance, financial schemas | Standard |
-| `realtime-audio-engineer` | Real-time audio, latency, DSP, voice pipelines | Standard |
-| `rust-crate-steward` | Rust crate publishing, MSRV, docs | Standard |
+| `cryptographer` | Cryptographic correctness, PQC, hashing | Standard |
+| `ledger` | ISO 20022, payments compliance, financial schemas | Standard |
+| `conduit` | Real-time audio, latency, DSP, voice pipelines | Standard |
+| `custodian` | Rust crate publishing, MSRV, docs | Standard |
 
 **For the authoritative agent registry, governance rules, and authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
@@ -102,7 +105,7 @@ Specialists coordinate directly.
 euxis-dispatch --mode mesh manifest.json
 ```
 
-Dispatch-enabled: `architect`, `qa-coordinator`, `incident-commander`, `release-manager`
+Dispatch-enabled: `architect`, `inspector`, `responder`, `gatekeeper`
 
 Best when domain experts know their workflows better than central command.
 
@@ -126,7 +129,7 @@ Every dispatch starts with a manifest. Here is the format:
   "mode": "hierarchical",
   "dispatches": [
     {
-      "agent": "edge-hunter",
+      "agent": "pentester",
       "priority": "P0",
       "task": "Scan for injection vulnerabilities",
       "verify_cmd": "security-scan --critical-only"
@@ -191,7 +194,7 @@ When specialists disagree, Euxis resolves it systematically.
 ### Conflict Response Format
 ```json
 {
-  "agent": "edge-hunter",
+  "agent": "pentester",
   "position": "Reject this change",
   "evidence": "SQL injection in line 42",
   "confidence": "HIGH",
@@ -209,19 +212,19 @@ Route work to the right specialist every time.
 
 | Task | Lead | Support |
 |------|------|---------|
-| Security audit | `security-lead` | `edge-hunter`, `compliance-officer` |
-| Bug investigation | `bug-fixer` | `data-steward` |
-| Architecture design | `architect` | `product-manager` |
-| Release coordination | `release-manager` | `qa-coordinator`, `tech-writer` |
-| Performance optimization | `perf-optimizer` | `architect` |
-| Documentation | `tech-writer` | `librarian` |
-| Research | `deep-researcher` | `architect` |
-| Incident response | `incident-commander` | `bug-fixer`, `edge-hunter` |
-| Test strategy | `qa-coordinator` | `unit-tester`, `edge-hunter` |
-| Cryptographic audit | `crypto-cryptography-auditor` | `edge-hunter`, `reviewer` |
-| Payments integration | `payments-domain-steward` | `compliance-officer`, `unit-tester` |
-| Audio pipeline | `realtime-audio-engineer` | `perf-optimizer`, `automation-engineer` |
-| Rust crate release | `rust-crate-steward` | `unit-tester`, `edge-hunter` |
+| Security audit | `sentinel` | `pentester`, `auditor` |
+| Bug investigation | `debugger` | `telemetrist` |
+| Architecture design | `architect` | `planner` |
+| Release coordination | `gatekeeper` | `inspector`, `writer` |
+| Performance optimization | `optimizer` | `architect` |
+| Documentation | `writer` | `librarian` |
+| Research | `researcher` | `architect` |
+| Incident response | `responder` | `debugger`, `pentester` |
+| Test strategy | `inspector` | `tester`, `pentester` |
+| Cryptographic audit | `cryptographer` | `pentester`, `reviewer` |
+| Payments integration | `ledger` | `auditor`, `tester` |
+| Audio pipeline | `conduit` | `optimizer`, `automaton` |
+| Rust crate release | `custodian` | `tester`, `pentester` |
 
 ---
 
@@ -229,22 +232,22 @@ Route work to the right specialist every time.
 
 ### Security Pipeline
 ```
-security-lead -> edge-hunter -> bug-fixer -> unit-tester -> qa-coordinator -> reviewer
+sentinel -> pentester -> debugger -> tester -> inspector -> reviewer
 ```
 
 ### Release Pipeline
 ```
-qa-coordinator -> release-manager -> tech-writer -> reviewer
+inspector -> gatekeeper -> writer -> reviewer
 ```
 
 ### Incident Response
 ```
-incident-commander -> bug-fixer + edge-hunter -> architect -> qa-coordinator
+responder -> debugger + pentester -> architect -> inspector
 ```
 
 ### Research to Implementation
 ```
-deep-researcher -> architect -> product-manager -> bug-fixer -> reviewer
+researcher -> architect -> planner -> debugger -> reviewer
 ```
 
 ---
@@ -255,12 +258,12 @@ Six cross-functional teams with clear ownership.
 
 | Squad | Purpose | Lead | Members |
 |-------|---------|------|---------|
-| Vision | Strategy | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
-| Build | Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
-| Quality | Assurance | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
-| Growth | Amplification | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
-| Experience | UI Excellence | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
-| Specialist | Domain Expertise | `crypto-cryptography-auditor` | crypto-cryptography-auditor, payments-domain-steward, realtime-audio-engineer, rust-crate-steward |
+| Vision | Strategy | `orchestrator` | orchestrator, architect, planner, researcher, historian, accountant |
+| Build | Execution | `debugger` | debugger, maintainer, automaton, tester, investigator, repairer |
+| Quality | Assurance | `reviewer` | reviewer, inspector, pentester, auditor, optimizer, watchdog, polyglot, arbiter |
+| Growth | Amplification | `writer` | writer, evangelist, strategist, ambassador, marketer, localizer |
+| Experience | UI Excellence | `designer` | designer, tactician, animator, interactor |
+| Specialist | Domain Expertise | `cryptographer` | cryptographer, ledger, conduit, custodian |
 
 Deploy an entire squad with one command. Leads get P0 priority. Members get P1.
 
@@ -309,12 +312,12 @@ Each agent receives the original task plus the previous agent's output (capped a
 
 | Combo | Chain | Use Case |
 |-------|-------|----------|
-| Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
-| Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
-| Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
-| Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI design and interaction |
-| Crypto Fortress | security-lead -> crypto-cryptography-auditor -> edge-hunter -> reviewer | Deep cryptographic audit with security review |
-| SWIFT Payment | payments-domain-steward -> compliance-officer -> unit-tester -> reviewer | End-to-end payments integration validation |
+| Steve Jobs | planner -> architect -> evangelist -> reviewer | Vision to polished review |
+| Fort Knox | pentester -> auditor -> inspector -> reviewer | Maximum security assurance |
+| Content Factory | writer -> evangelist -> strategist -> reviewer | End-to-end content production |
+| Jony Ive | designer -> animator -> interactor -> reviewer | Apple-level UI design and interaction |
+| Crypto Fortress | sentinel -> cryptographer -> pentester -> reviewer | Deep cryptographic audit with security review |
+| SWIFT Payment | ledger -> auditor -> tester -> reviewer | End-to-end payments integration validation |
 
 ```bash
 euxis-combo list                                                # Available combos

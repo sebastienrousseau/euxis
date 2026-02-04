@@ -9,66 +9,68 @@ Agents are specialist AI workers that execute specific domains with defined auth
 - **Single domain task**: Use a specific agent when you need expertise in their domain
 - **Quality gate**: Use `reviewer` to validate outputs before shipping
 - **Coordination**: Use `orchestrator` to break down complex goals into specialist tasks
-- **Risk assessment**: Use `system-critic` to challenge assumptions and surface hidden risks
+- **Risk assessment**: Use `critic` to challenge assumptions and surface hidden risks
 
 ## Quick Example
 
 ```bash
 # Single agent for bug fixing
-euxis bug-fixer "Debug the auth timeout in login.py"
+euxis debugger "Debug the auth timeout in login.py"
 
 # Core agent with blocking authority
 euxis reviewer "Review this PR for correctness and security"
 
 # Agent with specific model tier
-euxis perf-optimizer "Optimize database query performance" ollama
+euxis optimizer "Optimize database query performance" ollama
 ```
 
 ## Agent Tiers
 
-### Core (7) — Authority-bearing, always present
+### Core (9) — Authority-bearing, always present
 Block progress to maintain quality. If one is missing, the system is incomplete.
 
 | Agent | Authority Domain |
 |-------|------------------|
 | `orchestrator` | Coordination, synthesis, final assembly |
 | `architect` | Structure, patterns, design decisions |
-| `product-manager` | Intent, scope, prioritization |
+| `planner` | Intent, scope, prioritization |
 | `reviewer` | Truth & quality gate |
 | `librarian` | Memory, knowledge continuity |
-| `compliance-officer` | Legal, privacy, regulatory |
-| `system-critic` | Risk, pre-mortems, counter-bias |
+| `auditor` | Legal, privacy, regulatory |
+| `critic` | Risk, pre-mortems, counter-bias |
+| `arbiter` | Conflict resolution, final decisions |
+| `historian` | Long-term memory, temporal patterns |
 
-### Default (20) — Auto-available, task-triggered
+### Default (21) — Auto-available, task-triggered
 Execute and advise within scope. Do not define direction.
 
-**Engineering**: `automation-engineer`, `bug-fixer`, `crash-investigator`, `legacy-maintainer`, `unit-tester`
-**Quality**: `data-steward`, `edge-hunter`, `language-specialist`, `perf-optimizer`, `qa-coordinator`, `regression-analyst`
-**Operations**: `incident-commander`, `release-manager`, `security-lead`
-**Experience**: `tech-writer`, `ux-sentinel`, `cli-ui-artisan`, `web-ui-architect`, `theming-and-motion-engineer`, `interaction-and-input-specialist`
+**Engineering**: `automaton`, `debugger`, `investigator`, `maintainer`, `tester`, `repairer`
+**Quality**: `telemetrist`, `pentester`, `polyglot`, `optimizer`, `inspector`, `watchdog`
+**Operations**: `responder`, `gatekeeper`, `sentinel`, `accountant`
+**Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`
 
 ### On-Demand (7) — Explicit invocation only
 Add leverage, not safety. Never block, never override core authority.
 
 | Agent | Domain |
 |-------|--------|
-| `brand-evangelist` | Brand voice and storytelling |
+| `ambassador` | Build community |
 | `butler` | Perfect voice summaries |
-| `deep-researcher` | Find what others miss |
-| `devrel-advocate` | Build community |
-| `globalization-lead` | Global reach |
-| `growth-marketer` | Scale your impact |
-| `social-manager` | Amplify your voice |
+| `evangelist` | Brand voice and storytelling |
+| `localizer` | Global reach |
+| `marketer` | Scale your impact |
+| `researcher` | Find what others miss |
+| `strategist` | Amplify your voice |
 
 ### Specialist (4) — Domain-specific expertise
 Activated for domain-scoped tasks only.
 
 | Agent | Expertise |
 |-------|-----------|
-| `crypto-cryptography-auditor` | Cryptographic correctness, PQC, hashing |
-| `payments-domain-steward` | ISO 20022, payments compliance |
-| `realtime-audio-engineer` | Real-time audio, latency, DSP |
-| `rust-crate-steward` | Rust crate publishing, MSRV |
+| `cryptographer` | Cryptographic correctness, PQC, hashing |
+| `ledger` | ISO 20022, payments compliance |
+| `conduit` | Real-time audio, latency, DSP |
+| `custodian` | Rust crate publishing, MSRV |
 
 ## Model Tier Routing
 

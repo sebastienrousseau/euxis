@@ -1,6 +1,6 @@
 # Build Software at the Speed of Thought
 
-**Your personal team of 38 AI specialists. Every task planned. Every outcome verified. Every lesson remembered.**
+**Your personal team of 41 AI specialists. Every task planned. Every outcome verified. Every lesson remembered.**
 
 Euxis transforms how you build software — from idea to deployment in minutes, not hours. Stop context-switching between tools. Start shipping with confidence.
 
@@ -12,7 +12,7 @@ Euxis transforms how you build software — from idea to deployment in minutes, 
 
 **Plan faster.** The orchestrator breaks your goal into executable tasks. No more wondering where to start.
 
-**Execute smarter.** 38 specialist agents handle architecture, security, testing, and deployment. Each one an expert in their domain.
+**Execute smarter.** 41 specialist agents handle architecture, security, testing, and deployment. Each one an expert in their domain.
 
 **Ship with confidence.** Every change is verified. Every decision is tracked. Every lesson is preserved for next time.
 
@@ -50,20 +50,24 @@ Your specialists handle research, design, implementation, security, testing, and
 
 ## Your Specialist Team
 
-**7 Core Agents** govern the fleet and make strategic decisions:
+**9 Core Agents** govern the fleet and make strategic decisions:
 - **Orchestrator** — Breaks goals into executable plans
 - **Architect** — Designs systems that scale
 - **Reviewer** — Ensures quality before shipping
+- **Arbiter** — Resolves conflicts between agents
+- **Historian** — Maintains long-term memory
 
-**20 Domain Experts** execute specialized work:
-- **Bug-Fixer** — Isolates and resolves issues
-- **Security-Lead** — Audits for vulnerabilities
-- **Unit-Tester** — Creates comprehensive test coverage
+**21 Domain Experts** execute specialized work:
+- **Debugger** — Isolates and resolves issues
+- **Sentinel** — Audits for vulnerabilities
+- **Tester** — Creates comprehensive test coverage
+- **Accountant** — Tracks costs and resources
+- **Repairer** — Automated fixes and self-healing
 
-**11 On-Demand Specialists** provide leverage when needed:
-- **Deep-Researcher** — Analyzes complex technical decisions
-- **Perf-Optimizer** — Eliminates bottlenecks
-- **Incident-Commander** — Manages critical failures
+**11 On-Demand & Specialist Agents** provide leverage when needed:
+- **Researcher** — Analyzes complex technical decisions
+- **Optimizer** — Eliminates bottlenecks
+- **Responder** — Manages critical failures
 
 Each agent remembers every interaction. Your team gets smarter with every project.
 
@@ -169,7 +173,7 @@ euxis-voice
 
 ## What You Get
 
-✓ **38 AI specialists** working as your personal team
+✓ **41 AI specialists** working as your personal team
 ✓ **Instant task decomposition** from goals to execution
 ✓ **Persistent memory** that learns from every interaction
 ✓ **Quality assurance** with automatic verification

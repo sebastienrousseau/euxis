@@ -5,7 +5,7 @@
 ## What You'll Build
 
 By the end of this guide, you'll have:
-- **38 AI agents** ready to execute engineering tasks
+- **41 AI agents** ready to execute engineering tasks
 - **Your first successful task** completed with agent verification
 - **A working knowledge** of how to deploy agents for common workflows
 
@@ -146,7 +146,7 @@ euxis butler "Introduce yourself briefly."
 ```
 Hello! I'm your Euxis Butler, optimized for voice and clear communication.
 I help translate complex system outputs into natural spoken English.
-The fleet has 38 agents ready to assist with your engineering tasks.
+The fleet has 41 agents ready to assist with your engineering tasks.
 ```
 
 <details>
@@ -185,7 +185,7 @@ FINAL ANSWER:
 ## Core Structure
 - **bin/**: 30+ executable tools, symlinked to ~/bin/ for global access
 - **config/**: Operational configuration (codex, patterns, playbooks, templates, branding)
-- **prompts/**: Agent intelligence (7 core + 31 fleet agents)
+- **prompts/**: Agent intelligence (9 core + 32 fleet agents)
 - **registry.json**: Master agent registry with capabilities and routing
 
 [... detailed breakdown continues ...]
@@ -232,7 +232,7 @@ euxis-ui
 ### Learn More
 
 - **[User Guide](user-guide.md)** — Complete CLI reference and advanced features
-- **[Fleet Guide](fleet-guide.md)** — All 38 agents, squads, and coordination modes
+- **[Fleet Guide](fleet-guide.md)** — All 41 agents, squads, and coordination modes
 - **[API Reference](api-reference.md)** — Build custom integrations
 - **[Architecture](ARCHITECTURE.md)** — System design and technical details
 

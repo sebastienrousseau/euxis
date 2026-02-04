@@ -8,21 +8,21 @@
       "name": "Vision Squad",
       "purpose": "Strategy & Discovery",
       "lead": "orchestrator",
-      "members": ["orchestrator", "architect", "planner", "researcher"]
+      "members": ["orchestrator", "architect", "planner", "researcher", "historian", "accountant"]
     },
     {
       "id": "build",
       "name": "Build Squad",
       "purpose": "Engineering & Execution",
       "lead": "debugger",
-      "members": ["debugger", "maintainer", "automaton", "tester", "investigator"]
+      "members": ["debugger", "maintainer", "automaton", "tester", "investigator", "repairer"]
     },
     {
       "id": "quality",
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "inspector", "pentester", "auditor", "optimizer", "watchdog", "polyglot"]
+      "members": ["reviewer", "inspector", "pentester", "auditor", "optimizer", "watchdog", "polyglot", "arbiter"]
     },
     {
       "id": "growth",

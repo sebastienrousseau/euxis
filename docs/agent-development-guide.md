@@ -238,4 +238,4 @@ See the ADR documents for rationale behind key design decisions:
 - `docs/adr/001-intelligence-tiering.md` — Why agents map to specific providers
 - `docs/adr/002-tiered-memory-architecture.md` — Why MemGPT-inspired memory
 - `docs/adr/003-dispatch-modes.md` — Why hierarchical/mesh/federated execution
-- `docs/adr/006-agent-fleet-size.md` — Why 38 agents and when to consolidate
+- `docs/adr/006-agent-fleet-size.md` — Why 41 agents and when to consolidate

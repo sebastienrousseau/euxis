@@ -6,7 +6,7 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 
 **Version:** 0.0.7
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
-**Agent Count:** 38 (7 core + 31 fleet)
+**Agent Count:** 41 (9 core + 32 fleet)
 
 ## System Architecture
 
@@ -29,15 +29,15 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Agent Layer                                │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                    CORE TIER (7)                        │  │
-│   │  orchestrator │ architect │ product-manager │ reviewer  │  │
-│   │  librarian │ compliance-officer │ system-critic         │  │
+│   │                    CORE TIER (9)                        │  │
+│   │  orchestrator │ architect │ planner │ reviewer │ critic │  │
+│   │  librarian │ auditor │ arbiter │ historian              │  │
 │   └─────────────────────────────────────────────────────────┘  │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                   FLEET TIER (31)                       │  │
-│   │  Default (20): bug-fixer, security-lead, tech-writer    │  │
-│   │  On-Demand (7): deep-researcher, growth-marketer        │  │
-│   │  Specialist (4): crypto-auditor, payments-steward       │  │
+│   │                   FLEET TIER (32)                       │  │
+│   │  Default (21): debugger, sentinel, writer, accountant   │  │
+│   │  On-Demand (7): researcher, marketer, ambassador        │  │
+│   │  Specialist (4): cryptographer, ledger, conduit         │  │
 │   └─────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
                                 │
@@ -67,31 +67,30 @@ Core agents handle high-level planning, governance, and quality assurance.
 |-------|------|-----------------|
 | **orchestrator** | Task decomposition, delegation, synthesis | task-decomposition, delegation, replanning |
 | **architect** | System design, architecture review | architecture-review, code-review, design-patterns |
-| **product-manager** | Requirements, planning | documentation, architecture-review |
+| **planner** | Requirements, planning | documentation, architecture-review |
 | **reviewer** | Quality gates, validation | code-review, compliance-check, test-analysis |
 | **librarian** | Memory optimization, knowledge management | documentation, memory-optimization |
-| **compliance-officer** | Security, legal compliance | compliance-check, security-audit |
-| **system-critic** | Risk assessment, challenge assumptions | architecture-review, security-audit |
+| **auditor** | Security, legal compliance | compliance-check, security-audit |
+| **critic** | Risk assessment, challenge assumptions | architecture-review, security-audit |
+| **arbiter** | Conflict resolution, final decisions | conflict-resolution, decision-making |
+| **historian** | Long-term memory, temporal patterns | memory-optimization, documentation, pattern-analysis |
 
 ### Fleet Tier (Tactical)
 
 Fleet agents are specialists for specific domains and tasks.
 
-**Default (20 — Auto-available, task-triggered):**
-- automation-engineer, bug-fixer, crash-investigator, data-steward
-- edge-hunter, incident-commander, language-specialist, legacy-maintainer
-- perf-optimizer, qa-coordinator, regression-analyst, release-manager
-- security-lead, tech-writer, unit-tester, ux-sentinel
-- cli-ui-artisan, web-ui-architect, theming-and-motion-engineer
-- interaction-and-input-specialist
+**Default (21 — Auto-available, task-triggered):**
+- accountant, animator, automaton, debugger, designer
+- gatekeeper, inspector, interactor, investigator, maintainer
+- optimizer, pentester, polyglot, repairer, responder
+- sentinel, tactician, telemetrist, tester, watchdog, writer
 
 **On-Demand (7 — Explicit invocation only):**
-- brand-evangelist, butler, deep-researcher, devrel-advocate
-- globalization-lead, growth-marketer, social-manager
+- ambassador, butler, evangelist, localizer
+- marketer, researcher, strategist
 
 **Specialist (4 — Domain-specific expertise):**
-- crypto-cryptography-auditor, payments-domain-steward
-- realtime-audio-engineer, rust-crate-steward
+- cryptographer, ledger, conduit, custodian
 
 ## Capability System
 

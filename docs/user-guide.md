@@ -110,9 +110,9 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 38 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 41 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
-### Core (7) — Authority-bearing, always present
+### Core (9) — Authority-bearing, always present
 
 Only core agents can block progress. If one is missing, the system is incomplete.
 
@@ -120,38 +120,41 @@ Only core agents can block progress. If one is missing, the system is incomplete
 |-------|------|
 | `orchestrator` | Coordination, synthesis, final assembly |
 | `architect` | Structure, patterns, design decisions |
-| `product-manager` | Intent, scope, prioritization |
+| `planner` | Intent, scope, prioritization |
 | `reviewer` | Truth & quality gate |
 | `librarian` | Memory, knowledge continuity, documentation governance |
-| `compliance-officer` | Legal, privacy, regulatory authority |
-| `system-critic` | Risk, pre-mortems, counter-bias |
+| `auditor` | Legal, privacy, regulatory authority |
+| `critic` | Risk, pre-mortems, counter-bias |
+| `arbiter` | Conflict resolution, final decisions when agents disagree |
+| `historian` | Long-term memory, temporal patterns, institutional knowledge |
 
-### Default (20) — Auto-available, task-triggered
+### Default (21) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
 | Agent | Role |
 |-------|------|
-| `automation-engineer` | CI/CD pipelines, IaC, Docker, Terraform |
-| `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `crash-investigator` | Post-incident crash forensics, stack trace analysis, root cause evidence gathering |
-| `data-steward` | Observability, telemetry, structured logging |
-| `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
-| `incident-commander` | Incident response, root cause analysis, post-mortems |
-| `language-specialist` | Language-specific pattern detection, idiom enforcement, subsystem-aware analysis |
-| `legacy-maintainer` | Non-breaking upgrades, migrations |
-| `perf-optimizer` | Latency, throughput, memory profiling |
-| `qa-coordinator` | E2E testing coordination, quality gate enforcement |
-| `regression-analyst` | Pre-merge exhaustive regression analysis of commits and pull requests |
-| `release-manager` | Changelogs, semantic versioning, release coordination |
-| `security-lead` | Security policy, threat governance, edge-hunter dispatch |
-| `tech-writer` | Documentation, tutorials, API reference, glossary |
-| `unit-tester` | Test coverage, reliability, regression prevention |
-| `ux-sentinel` | Accessibility (WCAG 2.1 AA), design systems, responsive testing |
-| `cli-ui-artisan` | Terminal UI design, keyboard navigation, TUI interaction |
-| `web-ui-architect` | Web UI components, design systems, responsive layouts |
-| `theming-and-motion-engineer` | Theming, color systems, dark mode, animation |
-| `interaction-and-input-specialist` | Keyboard navigation, input handling, accessibility |
+| `accountant` | Cost analysis, budget management, resource efficiency |
+| `animator` | Theming, color systems, dark mode, animation |
+| `automaton` | CI/CD pipelines, IaC, Docker, Terraform |
+| `debugger` | Debugging, root cause analysis, surgical fixes |
+| `designer` | Web UI components, design systems, responsive layouts |
+| `gatekeeper` | Changelogs, semantic versioning, release coordination |
+| `inspector` | E2E testing coordination, quality gate enforcement |
+| `interactor` | Keyboard navigation, input handling, accessibility |
+| `investigator` | Post-incident crash forensics, stack trace analysis |
+| `maintainer` | Non-breaking upgrades, migrations |
+| `optimizer` | Latency, throughput, memory profiling |
+| `pentester` | Security analysis, boundary testing, vulnerability assessment |
+| `polyglot` | Language-specific pattern detection, idiom enforcement |
+| `repairer` | Automated known-fix application, self-healing infrastructure |
+| `responder` | Incident response, root cause analysis, post-mortems |
+| `sentinel` | Security policy, threat governance |
+| `tactician` | Terminal UI design, keyboard navigation, TUI interaction |
+| `telemetrist` | Observability, telemetry, structured logging |
+| `tester` | Test coverage, reliability, regression prevention |
+| `watchdog` | Pre-merge exhaustive regression analysis |
+| `writer` | Documentation, tutorials, API reference, glossary |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -159,13 +162,13 @@ Add leverage, not safety. Never block, never override core authority.
 
 | Agent | Role |
 |-------|------|
-| `brand-evangelist` | Brand voice, visual identity, content design |
+| `ambassador` | Developer relations, tutorials, demos, conferences |
 | `butler` | TTS-optimized summarization, spoken English output |
-| `deep-researcher` | Iterative research with cross-validation |
-| `devrel-advocate` | Developer relations, tutorials, demos, conferences |
-| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy |
-| `social-manager` | Platform-native content, calendars, community engagement |
+| `evangelist` | Brand voice, visual identity, content design |
+| `localizer` | i18n, l10n, RTL support, Unicode validation |
+| `marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `researcher` | Iterative research with cross-validation |
+| `strategist` | Platform-native content, calendars, community engagement |
 
 ### Specialist (4) — Domain-specific expertise
 
@@ -173,10 +176,10 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 
 | Agent | Role |
 |-------|------|
-| `crypto-cryptography-auditor` | Cryptographic correctness, PQC, hashing |
-| `payments-domain-steward` | ISO 20022, payments compliance, financial schemas |
-| `realtime-audio-engineer` | Real-time audio, latency, DSP, voice pipelines |
-| `rust-crate-steward` | Rust crate publishing, MSRV, docs |
+| `cryptographer` | Cryptographic correctness, PQC, hashing |
+| `ledger` | ISO 20022, payments compliance, financial schemas |
+| `conduit` | Real-time audio, latency, DSP, voice pipelines |
+| `custodian` | Rust crate publishing, MSRV, docs |
 
 **For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
@@ -188,7 +191,7 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 38 agents: 7 core + 20 default + 7 on-demand + 4 specialist |
+| **Fleet** | 41 agents: 9 core + 21 default + 7 on-demand + 4 specialist |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |

@@ -4,12 +4,12 @@
 Accepted
 
 ## Context
-Euxis operates a fleet of 38 specialized agents across four tiers (7 core, 20 default, 7 on-demand, 4 specialist). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
+Euxis operates a fleet of 41 specialized agents across four tiers (9 core, 21 default, 7 on-demand, 4 specialist). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
 
 ## Decision
-Maintain the 38-agent architecture with the following constraints:
+Maintain the 41-agent architecture with the following constraints:
 
-1. **Core agents (7) are fixed.** Orchestrator, architect, reviewer, system-critic, compliance-officer, librarian, and product-manager form the governance layer. These are required for multi-agent coordination and quality gates.
+1. **Core agents (9) are fixed.** Orchestrator, architect, reviewer, critic, auditor, librarian, planner, arbiter, and historian form the governance layer. These are required for multi-agent coordination and quality gates.
 
 2. **Fleet agents are demand-loaded.** Fleet agents are only instantiated when dispatched. An idle agent consumes zero resources (it's just a prompt file on disk). Coordination overhead only occurs during active multi-agent dispatch.
 
