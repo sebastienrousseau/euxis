@@ -290,8 +290,6 @@ When agents produce conflicting outputs, Euxis resolves them systematically:
 
 Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
-Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-docs`.
-
 <!-- Reference Links -->
 
 [version-badge]: https://img.shields.io/badge/version-0.0.7-blue?style=for-the-badge
