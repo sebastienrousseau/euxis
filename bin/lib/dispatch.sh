@@ -111,6 +111,20 @@ delegate() {
     local sub_task="$2"
     local provider="${3:-$(resolve_tiered_provider "${sub_agent}")}"
 
+    # Security validation: validate delegate arguments
+    if [[ -z "$sub_agent" ]]; then
+        _perf_record "delegate_error" "$(_perf_elapsed_ms "${_t_delegate}")" "system" "empty_agent"
+        log_error "delegate requires non-empty agent name"
+        exit 1
+    fi
+
+    if [[ -z "$sub_task" ]]; then
+        _perf_record "delegate_error" "$(_perf_elapsed_ms "${_t_delegate}")" "system" "empty_task"
+        log_error "delegate requires non-empty task"
+        exit 1
+    fi
+
+    _perf_record "delegate_start" "$(_perf_elapsed_ms "${_t_delegate}")" "${sub_agent}" "delegated"
     log_info "Delegating to ${sub_agent}..."
 
     EUXIS_PROJECT="${EUXIS_PROJECT:-$(get_project_name)}" \

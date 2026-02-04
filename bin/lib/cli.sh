@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+# Source validation library for security checks
+source "${EUXIS_HOME}/bin/lib/validation.sh"
+
 # ============================================================================
 # Usage Information
 # ============================================================================
@@ -83,14 +86,21 @@ parse_args() {
     TASK="$2"
     PROVIDER="${3:-}"
 
-    if [[ "${AGENT}" =~ [^a-zA-Z0-9_-] ]]; then
-        log_error "Invalid agent name: ${AGENT} (only alphanumeric, hyphens, and underscores allowed)"
+    # Security validation: validate agent name and task input
+    if ! validate_agent_name "${AGENT}"; then
+        _perf_record "cli_error" "$(_perf_elapsed_ms "${_t_parse}")" "cli" "invalid_agent_name"
+        exit 1
+    fi
+
+    if ! validate_task_input "${TASK}"; then
+        _perf_record "cli_error" "$(_perf_elapsed_ms "${_t_parse}")" "cli" "invalid_task_input"
         exit 1
     fi
 
     local prompt_file
     prompt_file=$(resolve_agent_path "${AGENT}") || true
     if [[ -z "${prompt_file}" || "${AGENT}" == _* ]]; then
+        _perf_record "cli_error" "$(_perf_elapsed_ms "${_t_parse}")" "cli" "unknown_agent:${AGENT}"
         log_error "Unknown agent: ${AGENT}"
         echo "Available agents:" >&2
         list_agents >&2

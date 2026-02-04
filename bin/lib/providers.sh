@@ -9,6 +9,9 @@ source "${EUXIS_HOME}/bin/lib/common.sh"
 # Default provider (fallback when no tiering match)
 DEFAULT_PROVIDER="claude"
 
+# Configurable timeouts for provider API calls (in seconds)
+EUXIS_API_TIMEOUT="${EUXIS_API_TIMEOUT:-300}"  # 5 minutes default
+
 # ============================================================================
 # Intelligence Tiering (v4.7)
 # Maps agent -> optimal provider based on task complexity profile.
@@ -107,13 +110,69 @@ resolve_provider_config() {
     esac
 }
 
+# Wrapper function to add configurable timeout to provider commands
+run_with_timeout() {
+    local timeout_seconds="$1"
+    shift
+    local command_description="$1"
+    shift
+
+    if command -v timeout &>/dev/null; then
+        # GNU timeout available (Linux, installed via brew on macOS)
+        if ! timeout "${timeout_seconds}s" "$@"; then
+            local exit_code=$?
+            if [[ $exit_code -eq 124 ]]; then
+                log_error "Provider command timed out after ${timeout_seconds}s: ${command_description}"
+                log_error "Consider increasing EUXIS_API_TIMEOUT or using a different provider"
+                return 1
+            fi
+            return $exit_code
+        fi
+    elif command -v gtimeout &>/dev/null; then
+        # GNU timeout via coreutils on macOS
+        if ! gtimeout "${timeout_seconds}s" "$@"; then
+            local exit_code=$?
+            if [[ $exit_code -eq 124 ]]; then
+                log_error "Provider command timed out after ${timeout_seconds}s: ${command_description}"
+                log_error "Consider increasing EUXIS_API_TIMEOUT or using a different provider"
+                return 1
+            fi
+            return $exit_code
+        fi
+    else
+        # No timeout command available - run without timeout but log warning
+        log_warning "timeout command not available - running without timeout protection"
+        "$@"
+    fi
+}
+
 run_claude() {
     local full_prompt="$1"
-    echo "${full_prompt}" | claude \
+
+    # Check for optional dependencies and adjust tools accordingly
+    local allowed_tools="Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*)"
+
+    # Add jq support if available, otherwise warn
+    if command -v jq &>/dev/null; then
+        allowed_tools="${allowed_tools} Bash(jq:*)"
+    else
+        log_warning "jq not available - JSON processing may be limited"
+    fi
+
+    # Add gh support if available, otherwise warn
+    if command -v gh &>/dev/null; then
+        allowed_tools="${allowed_tools} Bash(gh:*)"
+    else
+        log_warning "gh CLI not available - GitHub operations may be limited"
+    fi
+
+    # Use timeout wrapper for the claude command
+    echo "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
+        claude \
         --print \
         --model "${PROVIDER_MODEL}" \
         --tools "Read,Edit,Write,Bash" \
-        --allowedTools "Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*)" \
+        --allowedTools "${allowed_tools}" \
         --dangerously-skip-permissions \
         --max-turns "${EUXIS_MAX_TURNS:-25}"
 }
