@@ -104,7 +104,7 @@ flowchart LR
 
 ## Your Specialist Team
 
-38 agents across four tiers: 7 core agents govern the fleet, 20 default agents execute domain work, 7 on-demand agents provide leverage when invoked, and 4 specialist agents deliver domain-specific expertise.
+38 agents across three tiers: 7 core agents govern the fleet, 20 default agents execute domain work, and 11 on-demand agents provide specialized leverage when explicitly invoked.
 
 **Authority Model:** Each agent class has distinct operational rules and scope boundaries. Core agents define direction and may block progress, while default agents execute within their domain when triggered. On-demand agents provide specialized leverage only when explicitly invoked.
 
@@ -243,7 +243,7 @@ Euxis provides a complete command-line interface with 30+ tools for agent manage
 │   └── *.md                   Guides (user, fleet, UI, cross-platform, API, lib-arch)
 ├── prompts/                   Agent intelligence
 │   ├── core/                  7 core agents (authority-bearing)
-│   ├── fleet/                 31 agents (20 default + 7 on-demand + 4 specialist)
+│   ├── fleet/                 31 agents (20 default + 11 on-demand)
 │   └── protocols/             Shared protocol and common instructions
 ├── tests/                     Quality assurance
 │   ├── lib/                   16 test suites (363 assertions)
