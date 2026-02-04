@@ -65,9 +65,13 @@ Start here. These three patterns handle most engineering tasks.
 The simplest pattern. One agent, one task, one answer.
 
 ```bash
+euxis <agent> "<task>" [provider]
+
+# Examples:
 euxis debugger "Why does this function return null when the input is empty?"
 euxis researcher "Compare the top 3 Python testing frameworks"
 euxis writer "Document this API endpoint for developers"
+euxis architect "Design the API" gemini  # Override provider
 ```
 
 **When to use:** Quick questions, focused analysis, single-domain work.
@@ -112,6 +116,11 @@ Your Goal → Orchestrator → Specialists → Verified Output
 - Research agents → `gemini` for large context
 - Coding agents → `goose` for tool use
 - Utility agents → `ollama` for speed
+
+You always see which provider is running in the output. Override anytime:
+```bash
+euxis architect "Design the API" gemini  # Third argument overrides default
+```
 
 **Persistent memory.** The Cortex stores three types of knowledge:
 - **Episodic:** What happened ("Fixed bug #42 with null check")
@@ -260,6 +269,23 @@ Deep domain expertise. [See full list →](docs/fleet-guide.md#specialist-4--dom
 | [Crush][crush-url] | `crush` | Multi-model TUI |
 | [Kiro CLI][kiro-cli-url] | `kiro-cli` | AI coding assistant |
 | [Goose][goose-url] | `goose` | MCP-native agent |
+
+**How providers work:**
+
+Euxis automatically selects the best provider for each agent. You see the selection in the output:
+
+```
+[euxis] Provider: claude
+```
+
+Override anytime by adding the provider as a third argument:
+
+```bash
+euxis architect "Design the API" gemini    # Use Gemini instead of default
+euxis debugger "Fix the bug" ollama        # Use local Ollama
+```
+
+**Learn more:** [Provider Routing](docs/concepts/provider-routing.md)
 
 </details>
 

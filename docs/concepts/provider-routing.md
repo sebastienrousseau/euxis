@@ -6,6 +6,22 @@ Euxis automatically selects the best AI provider for each agent. You can overrid
 
 ---
 
+## Quick Reference
+
+**Command syntax:**
+```bash
+euxis <agent> "<task>" [provider]
+```
+
+**Examples:**
+```bash
+euxis architect "Design the API"              # Uses default (claude)
+euxis architect "Design the API" gemini       # Override to gemini
+euxis debugger "Fix the bug" ollama           # Override to ollama
+```
+
+---
+
 ## The Simple Version
 
 Different AI models are good at different things:

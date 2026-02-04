@@ -136,8 +136,14 @@ Fleet Status: HEALTHY (8/8 checks passed)
 
 ## Step 4: Meet Your First Agent
 
-Start with the **Butler**: your friendly introduction agent:
+Start with the **Butler**: your friendly introduction agent.
 
+**Command syntax:**
+```bash
+euxis <agent> "<task>" [provider]
+```
+
+**Try it:**
 ```bash
 euxis butler "Introduce yourself briefly."
 ```
