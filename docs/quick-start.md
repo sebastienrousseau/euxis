@@ -130,6 +130,8 @@ euxis-health
 Fleet Status: HEALTHY (8/8 checks passed)
 ```
 
+✅ **Success checkpoint:** All 8 checks pass. Your fleet is ready.
+
 ---
 
 ## Step 4: Meet Your First Agent
@@ -205,50 +207,52 @@ FINAL ANSWER:
 [... detailed breakdown continues ...]
 ```
 
-**🎉 Success!** You've deployed an agent that analyzed your system structure using the ReAct reasoning pattern.
+✅ **Success checkpoint:** You deployed an agent that reasoned through a task using the ReAct pattern.
 
 ---
 
 ## What's Next
 
-Now that your fleet is running, explore these common workflows:
+You've completed the quick start. Here's where to go from here:
 
-### Quick Tasks
+### Try These Common Tasks
+
 ```bash
-# Get help with code
-euxis debugger "Analyze the auth module for potential issues"
+# Debug a problem
+euxis debugger "Why would a login function return null for valid credentials?"
 
-# Research comparison
-euxis researcher "Compare Python testing frameworks"
+# Research options
+euxis researcher "Compare the top 3 Python web frameworks for a REST API"
 
-# Architecture review
-euxis architect "Evaluate the database design for scalability"
+# Design something
+euxis architect "Design a caching strategy for a high-traffic API"
 ```
 
-### Team Coordination
-```bash
-# Deploy an entire squad for complex work
-euxis-squad deploy build "Refactor the authentication system"
+### Level Up with Coordination
 
-# Run parallel agents
-euxis-dispatch manifest.json
+```bash
+# Chain agents for refined output
+euxis-combo run steve-jobs "Design a user notification system"
+
+# Deploy a full squad for comprehensive work
+euxis-squad deploy quality "Audit the authentication module"
 ```
 
-### Quality Assurance
-```bash
-# Full certification pipeline
-euxis-certify
+### Learn the Concepts
 
-# Interactive mission control
-euxis-ui
-```
+| Guide | What You'll Learn |
+|-------|-------------------|
+| [Choosing Coordination](concepts/choosing-coordination.md) | When to use agents, combos, squads, or playbooks |
+| [Agent Selection](concepts/agent-selection.md) | How to pick the right agent |
+| [Workflows](workflows/) | Problem-to-solution tutorials |
 
-### Learn More
+### Complete Reference
 
-- **[User Guide](user-guide.md)** — Complete CLI reference and advanced features
-- **[Fleet Guide](fleet-guide.md)** — All 41 agents, squads, and coordination modes
-- **[API Reference](api-reference.md)** — Build custom integrations
-- **[Architecture](architecture.md)** — System design and technical details
+| Guide | What You'll Learn |
+|-------|-------------------|
+| [Fleet Guide](fleet-guide.md) | All 41 agents in detail |
+| [User Guide](user-guide.md) | Complete CLI reference |
+| [API Reference](api-reference.md) | Build custom integrations |
 
 ---
 
