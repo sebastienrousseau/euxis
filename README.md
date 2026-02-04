@@ -297,7 +297,7 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis Version 0.0.7 · Build something that matters.*
 
 <!-- Reference Links -->
 
