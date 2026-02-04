@@ -348,7 +348,7 @@ main() {
     # Record performance metrics
     local elapsed_ms
     elapsed_ms=$(_perf_elapsed_ms "$start_time")
-    _perf_record "license_check" "$elapsed_ms" "compliance-officer"
+    _perf_record "license_check" "$elapsed_ms" "auditor"
 
     # Exit with appropriate code
     if [[ $violations -gt 0 ]]; then

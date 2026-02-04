@@ -44,7 +44,7 @@ if [[ "$MODE" == "checkpoints" ]]; then
 
     if [[ -z "$AGENT" || -z "$TASK" || ${#CHECKPOINT_CMDS[@]} -eq 0 ]]; then
         echo "Usage: euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ..."
-        echo "  Example: euxis-loop --checkpoints bug-fixer \"Fix parser\" 3 \\"
+        echo "  Example: euxis-loop --checkpoints debugger \"Fix parser\" 3 \\"
         echo "    \"python -c 'import parser'\" \\"
         echo "    \"pytest tests/test_parser.py\" \\"
         echo "    \"mypy parser.py\""
@@ -61,7 +61,7 @@ else
         echo "       euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ..."
         echo "       euxis-loop --confirm <agent> <task> <verify_cmd> [max_retries]"
         echo ""
-        echo "  Example: euxis-loop bug-fixer \"Fix parser.py\" \"pytest tests/test_parser.py\" 3"
+        echo "  Example: euxis-loop debugger \"Fix parser.py\" \"pytest tests/test_parser.py\" 3"
         exit 1
     fi
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# EUXIS DISPATCH: The Fleet Deployment Engine (v6.0)
+# EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.7)
 # Reads an Architect Mission Manifest and fires agent loops.
 #
 # Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
@@ -16,7 +16,7 @@
 #   "project": "name",
 #   "mode": "hierarchical|mesh|federated",
 #   "dispatches": [
-#     { "agent": "bug-fixer", "priority": "P0", "task": "...", "verify_cmd": "..." }
+#     { "agent": "debugger", "priority": "P0", "task": "...", "verify_cmd": "..." }
 #   ]
 # }
 
@@ -352,7 +352,7 @@ ensure_project_env
 LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
-DISPATCH_AGENTS="architect qa-coordinator incident-commander release-manager"
+DISPATCH_AGENTS="architect inspector responder gatekeeper"
 
 # ============================================================================
 # Dispatch a single agent task

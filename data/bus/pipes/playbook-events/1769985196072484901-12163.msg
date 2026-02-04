@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'verify-everything' completed for: v0.0.6 release readiness","timestamp":"2026-02-01T22:33:16Z","correlation_id":"1769985196-586633-28583"}

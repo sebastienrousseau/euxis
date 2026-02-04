@@ -110,7 +110,7 @@ if command -v euxis &>/dev/null; then
     LOGIC=$(cat "$REPORT_DIR/logic_audit.md" 2>/dev/null || echo "N/A")
     SECURITY=$(cat "$REPORT_DIR/security_probe.txt" 2>/dev/null || echo "N/A")
 
-    euxis tech-writer \
+    euxis writer \
         "Consolidate the following audit results into a structured 'v6.0 Readiness Report' in Markdown. Include a verdict: PASS if no failures, CONDITIONAL if warnings only, FAIL if critical issues. Sections: Performance, Logic, Security, Verdict.
 
 --- PERFORMANCE ---

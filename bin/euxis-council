@@ -48,10 +48,10 @@ echo "  >> Architect speaking..."
 ARCH_R1=$(euxis architect "$TOPIC. Provide your architectural perspective." claude)
 
 echo "  >> Security Officer speaking..."
-SEC_R1=$(euxis edge-hunter "$TOPIC. Review this for security risks." claude)
+SEC_R1=$(euxis pentester "$TOPIC. Review this for security risks." claude)
 
 echo "  >> Performance Engineer speaking..."
-PERF_R1=$(euxis perf-optimizer "$TOPIC. Review for performance bottlenecks." claude)
+PERF_R1=$(euxis optimizer "$TOPIC. Review for performance bottlenecks." claude)
 
 # ──────────────────────────────────────────────────────────
 # Round 2: Rebuttals (the debate step)
@@ -81,7 +81,7 @@ TASK: Write a rebuttal (max 300 words). For each other expert's opinion:
 Do NOT repeat your Round 1 opinion. Focus only on points of disagreement or refinement." claude)
 
 echo "  >> Security Officer rebuttal..."
-SEC_R2=$(euxis edge-hunter "$REBUTTAL_CONTEXT
+SEC_R2=$(euxis pentester "$REBUTTAL_CONTEXT
 
 You are the Security Officer. You have read the Architect and Performance opinions above.
 TASK: Write a rebuttal (max 300 words). For each other expert's opinion:
@@ -91,7 +91,7 @@ TASK: Write a rebuttal (max 300 words). For each other expert's opinion:
 Do NOT repeat your Round 1 opinion. Focus only on points of disagreement or refinement." claude)
 
 echo "  >> Performance Engineer rebuttal..."
-PERF_R2=$(euxis perf-optimizer "$REBUTTAL_CONTEXT
+PERF_R2=$(euxis optimizer "$REBUTTAL_CONTEXT
 
 You are the Performance Engineer. You have read the Architect and Security opinions above.
 TASK: Write a rebuttal (max 300 words). For each other expert's opinion:

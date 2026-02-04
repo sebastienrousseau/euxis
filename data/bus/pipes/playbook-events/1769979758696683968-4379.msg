@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'verify-everything' completed for: euxis","timestamp":"2026-02-01T21:02:38Z","correlation_id":"1769979758-334073-12251"}

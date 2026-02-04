@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-VERSION="${VERSION:-v0.0.6}"
+VERSION="${VERSION:-v0.0.7}"
 LOCAL_ONLY=false
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")" && pwd)"
 EUXIS_ROOT="$(dirname "$SCRIPT_DIR")"

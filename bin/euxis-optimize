@@ -37,7 +37,7 @@ echo "" | tee -a "$LOG_FILE"
 # --- STEP 3: PROMPT COMPRESSION (Token Optimization) ---
 echo "⚡ [3/4] Optimizing Token Performance..." | tee -a "$LOG_FILE"
 euxis librarian "AUDIT TASK:
-1. Read ~/.euxis/prompts/architect.txt and ~/.euxis/prompts/bug-fixer.txt.
+1. Read ~/.euxis/prompts/architect.txt and ~/.euxis/prompts/debugger.txt.
 2. IDENTIFY token bloat: unnecessary polite words, redundant instructions, repeated phrases.
 3. SUGGEST a compressed version of each that saves tokens but keeps accuracy.
 4. COUNT: How many tokens could be saved per prompt?

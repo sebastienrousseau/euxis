@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P0","payload":"Playbook 'verify-everything' aborted at gate 3 (Execution Verification)","timestamp":"2026-02-01T21:10:17Z","correlation_id":"1769980217-373714-8532"}

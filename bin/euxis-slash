@@ -25,15 +25,15 @@ source "${EUXIS_HOME}/bin/lib/skill-detector.sh"
 
 declare -A SLASH_AGENTS=(
     [review]="reviewer"
-    [debug]="bug-fixer"
-    [verify]="qa-coordinator"
-    [secure]="security-lead"
-    [perf]="perf-optimizer"
+    [debug]="debugger"
+    [verify]="inspector"
+    [secure]="sentinel"
+    [perf]="optimizer"
     [arch]="architect"
-    [test]="unit-tester"
-    [docs]="tech-writer"
-    [fix]="bug-fixer"
-    [optimize]="perf-optimizer"
+    [test]="tester"
+    [docs]="writer"
+    [fix]="debugger"
+    [optimize]="optimizer"
     [lint]="reviewer"
 )
 
