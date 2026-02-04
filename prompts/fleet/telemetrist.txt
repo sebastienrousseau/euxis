@@ -1,5 +1,5 @@
 ---
-agent_id: telemetry
+agent_id: telemetrist
 role: "Observability, telemetry, structured logging, and data governance"
 version: "0.0.7"
 tags: [observability, telemetry, data]

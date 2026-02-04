@@ -15,28 +15,28 @@
       "name": "Build Squad",
       "purpose": "Engineering & Execution",
       "lead": "debugger",
-      "members": ["debugger", "maintainer", "automator", "tester", "forensic"]
+      "members": ["debugger", "maintainer", "automaton", "tester", "investigator"]
     },
     {
       "id": "quality",
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "qa", "pentester", "compliance", "optimizer", "watchdog", "polyglot"]
+      "members": ["reviewer", "inspector", "pentester", "auditor", "optimizer", "watchdog", "polyglot"]
     },
     {
       "id": "growth",
       "name": "Growth Squad",
       "purpose": "Branding & Documentation",
       "lead": "writer",
-      "members": ["writer", "evangelist", "social", "ambassador", "marketer", "localizer"]
+      "members": ["writer", "evangelist", "strategist", "ambassador", "marketer", "localizer"]
     },
     {
       "id": "experience",
       "name": "Experience Squad",
       "purpose": "UI Excellence & Interaction Design",
       "lead": "designer",
-      "members": ["designer", "tactician", "animator", "interactor", "ux"]
+      "members": ["designer", "tactician", "animator", "interactor"]
     },
     {
       "id": "specialist",
@@ -57,19 +57,19 @@
       "id": "fort-knox",
       "name": "Fort Knox",
       "description": "Maximum security assurance",
-      "chain": ["pentester", "compliance", "qa", "reviewer"]
+      "chain": ["pentester", "auditor", "inspector", "reviewer"]
     },
     {
       "id": "content-factory",
       "name": "Content Factory",
       "description": "End-to-end content production",
-      "chain": ["writer", "evangelist", "social", "reviewer"]
+      "chain": ["writer", "evangelist", "strategist", "reviewer"]
     },
     {
       "id": "jony-ive",
       "name": "Jony Ive",
       "description": "Apple-level UI from design system to polished interaction",
-      "chain": ["designer", "animator", "interactor", "ux", "reviewer"]
+      "chain": ["designer", "animator", "interactor", "reviewer"]
     },
     {
       "id": "crypto-fortress",
@@ -81,7 +81,7 @@
       "id": "swift-payment",
       "name": "SWIFT Payment",
       "description": "End-to-end payments integration validation",
-      "chain": ["ledger", "compliance", "tester", "reviewer"]
+      "chain": ["ledger", "auditor", "tester", "reviewer"]
     },
     {
       "id": "deep-review",

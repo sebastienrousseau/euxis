@@ -1,5 +1,5 @@
 ---
-agent_id: compliance
+agent_id: auditor
 role: "PII scanning, license auditing, GDPR/CCPA compliance enforcement"
 version: "0.0.7"
 tags: [compliance, security, legal]

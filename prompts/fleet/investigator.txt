@@ -1,5 +1,5 @@
 ---
-agent_id: forensic
+agent_id: investigator
 role: "Post-incident crash forensics, stack trace analysis, and root cause evidence gathering"
 version: "0.0.7"
 tags: [crash, forensics, debugging, investigation]

@@ -1,5 +1,5 @@
 ---
-agent_id: automator
+agent_id: automaton
 role: "CI/CD pipelines, infrastructure as code, Docker, and Terraform"
 version: "0.0.7"
 tags: [automation, cicd, infrastructure]

@@ -11,8 +11,46 @@ echo "STARTING STATIC ANALYSIS..."
 
 # CHECK 1: Agent Registry Integrity
 echo "[1/8] Checking Registry..."
-# Agent list - single source of truth
-AGENTS=("orchestrator" "architect" "planner" "reviewer" "librarian" "compliance" "critic" "automator" "debugger" "forensic" "telemetry" "pentester" "responder" "polyglot" "maintainer" "optimizer" "qa" "watchdog" "gatekeeper" "sentinel" "writer" "tester" "ux" "evangelist" "butler" "researcher" "ambassador" "localizer" "marketer" "social" "tactician" "designer" "animator" "interactor" "cryptographer" "ledger" "conduit" "custodian")
+# Agent list - alphabetically ordered, single source of truth
+AGENTS=(
+  "ambassador"
+  "animator"
+  "architect"
+  "auditor"
+  "automaton"
+  "butler"
+  "conduit"
+  "critic"
+  "cryptographer"
+  "custodian"
+  "debugger"
+  "designer"
+  "evangelist"
+  "gatekeeper"
+  "inspector"
+  "interactor"
+  "investigator"
+  "ledger"
+  "librarian"
+  "localizer"
+  "maintainer"
+  "marketer"
+  "optimizer"
+  "orchestrator"
+  "pentester"
+  "planner"
+  "polyglot"
+  "researcher"
+  "responder"
+  "reviewer"
+  "sentinel"
+  "strategist"
+  "tactician"
+  "telemetrist"
+  "tester"
+  "watchdog"
+  "writer"
+)
 
 for agent in "${AGENTS[@]}"; do
     FOUND=false
