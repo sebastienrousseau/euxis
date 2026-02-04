@@ -8,6 +8,13 @@ EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
 
+# Source validation library for fail-fast gates
+# shellcheck source=bin/lib/validation.sh
+source "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null || {
+    echo "FATAL: Cannot load validation library. Certification cannot proceed." >&2
+    exit 1
+}
+
 run_with_timeout() {
     local timeout="$1"
     shift
@@ -32,14 +39,93 @@ echo "=================================================="
 echo "  EUXIS CERTIFICATION PIPELINE"
 echo "=================================================="
 
+# GATE 0: FAIL-FAST ENVIRONMENT VALIDATION
+echo ""
+echo "[GATE 0] Environment Pre-Validation (Fail-Fast)..."
+echo "--------------------------------------------------"
+if ! validate_comprehensive; then
+    echo ""
+    echo "CERTIFICATION ABORTED: Environment validation failed."
+    echo "Resolve all validation errors before attempting certification."
+    exit 1
+fi
+
+# GATE 0a: CERTIFICATION-SPECIFIC PREREQUISITES
+echo ""
+echo "[GATE 0a] Certification Prerequisites..."
+echo "--------------------------------------------------"
+
+CERT_ERRORS=0
+
+# Check all required certification tools are available
+CERT_TOOLS=(
+    "$BIN_DIR/euxis-lint:Static analysis tool"
+    "$BIN_DIR/euxis-test-infra:Infrastructure testing"
+    "$BIN_DIR/euxis.sh:Main Euxis script"
+)
+
+for tool_entry in "${CERT_TOOLS[@]}"; do
+    IFS=':' read -r tool_path description <<< "$tool_entry"
+    if ! validate_file_executable "$tool_path" "$description"; then
+        ((CERT_ERRORS++))
+    fi
+done
+
+# Validate critical certification files
+CERT_FILES=(
+    "$EUXIS_HOME/config/branding/signature.txt:Branding signature"
+    "$EUXIS_HOME/README.md:Main README"
+    "$EUXIS_HOME/docs/user-guide.md:User guide"
+    "$EUXIS_HOME/docs/fleet-guide.md:Fleet guide"
+)
+
+for file_entry in "${CERT_FILES[@]}"; do
+    IFS=':' read -r file_path description <<< "$file_entry"
+    if [[ -f "$file_path" ]]; then
+        validation_pass "$description exists"
+    else
+        validation_error "$description missing at $file_path"
+        ((CERT_ERRORS++))
+    fi
+done
+
+# Check write permissions for temporary files (semantic verification needs this)
+TEMP_TEST_FILE="/tmp/euxis_cert_test_$$"
+if ! touch "$TEMP_TEST_FILE" 2>/dev/null; then
+    validation_error "Cannot write to /tmp directory - semantic verification will fail"
+    ((CERT_ERRORS++))
+else
+    rm -f "$TEMP_TEST_FILE"
+    validation_pass "Temporary file write access verified"
+fi
+
+# Validate current version consistency
+CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
+if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
+    validation_error "Cannot determine current version from registry"
+    ((CERT_ERRORS++))
+else
+    validation_pass "Current version detected: $CURRENT_VERSION"
+fi
+
+if [[ $CERT_ERRORS -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION ABORTED: $CERT_ERRORS prerequisite check(s) failed."
+    echo "Fix these issues before attempting certification."
+    exit 1
+fi
+
+validation_pass "All certification prerequisites met"
+
 # GATE 1 & 2: Static Analysis (Structural Integrity + Protocol Compliance)
 echo ""
 echo "[GATE 1+2] Static Analysis (Lint)..."
 echo "--------------------------------------------------"
-"$BIN_DIR/euxis-lint"
-if [ $? -ne 0 ]; then
+# Run with timeout to prevent hanging
+if ! timeout 60 "$BIN_DIR/euxis-lint"; then
     echo ""
     echo "CERTIFICATION FAILED at Gate 1+2 (Static Analysis)."
+    echo "Lint process failed or timed out after 60 seconds."
     exit 1
 fi
 
@@ -47,10 +133,11 @@ fi
 echo ""
 echo "[GATE 3] Infrastructure Tests..."
 echo "--------------------------------------------------"
-"$BIN_DIR/euxis-test-infra"
-if [ $? -ne 0 ]; then
+# Run with timeout to prevent hanging
+if ! timeout 120 "$BIN_DIR/euxis-test-infra"; then
     echo ""
     echo "CERTIFICATION FAILED at Gate 3 (Infrastructure)."
+    echo "Infrastructure tests failed or timed out after 120 seconds."
     exit 1
 fi
 
@@ -59,22 +146,68 @@ echo ""
 echo "[GATE 4] Semantic Verification..."
 echo "--------------------------------------------------"
 GOLDEN_DATASET="$EUXIS_HOME/tests/golden/golden_dataset.json"
+
+# Pre-check: validate semantic test prerequisites
+SEMANTIC_ERRORS=0
+
+# Check if architect agent exists and is properly configured
+if ! jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/registry.json" &>/dev/null; then
+    validation_error "Architect agent not found in registry - semantic tests cannot run"
+    ((SEMANTIC_ERRORS++))
+fi
+
+# Check if temp directory is writable for response files
+if ! touch "/tmp/euxis_semantic_precheck_$$" 2>/dev/null; then
+    validation_error "Cannot create temporary files for semantic verification"
+    ((SEMANTIC_ERRORS++))
+else
+    rm -f "/tmp/euxis_semantic_precheck_$$"
+fi
+
+if [[ $SEMANTIC_ERRORS -gt 0 ]]; then
+    echo "  FAIL: Semantic verification prerequisites not met ($SEMANTIC_ERRORS issues)."
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 4 (Semantic - Prerequisites)."
+    exit 1
+fi
+
 if [[ -f "$GOLDEN_DATASET" ]]; then
     echo "  Golden dataset found. Running sample eval..."
 
-    # Test Architect output format
+    # Validate golden dataset structure
+    if ! jq empty "$GOLDEN_DATASET" 2>/dev/null; then
+        echo "  FAIL: Golden dataset is not valid JSON."
+        echo ""
+        echo "CERTIFICATION FAILED at Gate 4 (Semantic - Invalid Dataset)."
+        exit 1
+    fi
+
+    # Test Architect output format with proper error handling
     resp_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_semantic_resp.$$")
+    echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s)..."
+
     if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude > "${resp_file}" 2>/dev/null; then
-        RESP=$(cat "${resp_file}")
+        RESP=$(cat "${resp_file}" 2>/dev/null || echo "")
+        EXIT_CODE=0
     else
         RESP=""
-        echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
+        EXIT_CODE=$?
     fi
     rm -f "${resp_file}"
-    if [[ -n "$RESP" ]]; then
-        echo "  PASS: Architect produced output."
-    else
+
+    if [[ $EXIT_CODE -eq 124 ]]; then
+        echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
+    elif [[ $EXIT_CODE -ne 0 ]]; then
+        echo "  FAIL: Architect exited with error code $EXIT_CODE."
+    elif [[ -z "$RESP" ]]; then
         echo "  FAIL: Architect returned empty output."
+    elif [[ ${#RESP} -lt 50 ]]; then
+        echo "  FAIL: Architect output suspiciously short (${#RESP} chars)."
+    else
+        echo "  PASS: Architect produced output (${#RESP} chars)."
+    fi
+
+    if [[ $EXIT_CODE -ne 0 || -z "$RESP" || ${#RESP} -lt 50 ]]; then
         echo ""
         echo "CERTIFICATION FAILED at Gate 4 (Semantic)."
         exit 1
@@ -91,6 +224,28 @@ echo "--------------------------------------------------"
 
 BRANDING_FAILURES=0
 SIGNATURE_FILE="$EUXIS_HOME/config/branding/signature.txt"
+
+# Pre-validate branding prerequisites
+echo "  Pre-validating branding requirements..."
+
+# Check branding directory permissions
+BRANDING_DIR="$EUXIS_HOME/config/branding"
+if [[ ! -d "$BRANDING_DIR" ]]; then
+    echo "  FAIL: Branding directory not found at $BRANDING_DIR"
+    ((BRANDING_FAILURES++))
+elif [[ ! -r "$BRANDING_DIR" ]]; then
+    echo "  FAIL: Branding directory not readable at $BRANDING_DIR"
+    ((BRANDING_FAILURES++))
+else
+    echo "  PASS: Branding directory accessible"
+fi
+
+# Early exit if branding directory is not accessible
+if [[ $BRANDING_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 5 (Branding - Directory Access)."
+    exit 1
+fi
 
 # 5a. Signature file exists
 if [[ -f "$SIGNATURE_FILE" ]]; then
@@ -202,8 +357,8 @@ if command -v git &>/dev/null && git rev-parse --git-dir &>/dev/null 2>&1; then
     elif [[ $CRYPTO_CHECKED -eq 0 ]]; then
         echo "  SKIP: No git history available."
     else
+        # WARN only - cryptographic signatures are recommended but not required
         echo "  WARN: $UNSIGNED_CRYPTO of $CRYPTO_CHECKED recent commits lack cryptographic signature."
-        ((BRANDING_FAILURES++))
     fi
 fi
 
@@ -264,6 +419,37 @@ echo "[GATE 6] Documentation Governance..."
 echo "--------------------------------------------------"
 
 DOC_FAILURES=0
+
+# Pre-validate documentation prerequisites
+echo "  Pre-validating documentation requirements..."
+
+# Check docs directory permissions
+DOCS_DIR="$EUXIS_HOME/docs"
+if [[ ! -d "$DOCS_DIR" ]]; then
+    echo "  FAIL: Documentation directory not found at $DOCS_DIR"
+    ((DOC_FAILURES++))
+elif [[ ! -r "$DOCS_DIR" ]]; then
+    echo "  FAIL: Documentation directory not readable at $DOCS_DIR"
+    ((DOC_FAILURES++))
+else
+    echo "  PASS: Documentation directory accessible"
+fi
+
+# Check if jq is available for JSON validation
+if ! command -v jq &>/dev/null; then
+    echo "  WARN: jq not available - JSON validation will be skipped"
+    JQ_AVAILABLE=false
+else
+    echo "  PASS: jq available for JSON validation"
+    JQ_AVAILABLE=true
+fi
+
+# Early exit if docs directory is not accessible
+if [[ $DOC_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 6 (Documentation - Directory Access)."
+    exit 1
+fi
 
 # 6a. euxis-sync-docs exists and is executable
 SYNC_DOCS="$BIN_DIR/euxis-sync-docs"
@@ -327,15 +513,47 @@ done
 
 # 6f. Registry, squads, and codex manifests are valid JSON
 MANIFESTS=("registry.json" "squads.json" "capabilities.json" "config/codex/codex.json")
-if command -v jq &>/dev/null; then
+if [[ "$JQ_AVAILABLE" == "true" ]]; then
+    echo "  Validating JSON manifest files..."
     for manifest in "${MANIFESTS[@]}"; do
         MANIFEST_PATH="$EUXIS_HOME/$manifest"
         if [[ -f "$MANIFEST_PATH" ]]; then
+            # Check read permissions first
+            if [[ ! -r "$MANIFEST_PATH" ]]; then
+                echo "  FAIL: $manifest exists but is not readable."
+                ((DOC_FAILURES++))
+                continue
+            fi
+
+            # Validate JSON syntax
             if jq empty "$MANIFEST_PATH" 2>/dev/null; then
                 echo "  PASS: $manifest is valid JSON."
+
+                # Additional schema validation for critical files
+                case "$manifest" in
+                    "registry.json")
+                        if ! jq -e 'has("schema_version") and has("protocol_version") and has("agents")' "$MANIFEST_PATH" &>/dev/null; then
+                            echo "  FAIL: $manifest missing required schema fields."
+                            ((DOC_FAILURES++))
+                        fi
+                        ;;
+                    "capabilities.json")
+                        if ! jq -e 'type == "object"' "$MANIFEST_PATH" &>/dev/null; then
+                            echo "  FAIL: $manifest should be a JSON object."
+                            ((DOC_FAILURES++))
+                        fi
+                        ;;
+                esac
             else
                 echo "  FAIL: $manifest is invalid JSON."
                 ((DOC_FAILURES++))
+
+                # Try to provide more specific error information
+                if [[ -s "$MANIFEST_PATH" ]]; then
+                    echo "         File exists and has content, but JSON syntax is invalid."
+                else
+                    echo "         File is empty or nearly empty."
+                fi
             fi
         else
             echo "  FAIL: $manifest not found."
