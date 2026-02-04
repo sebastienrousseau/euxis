@@ -234,7 +234,7 @@ euxis-ui
 - **[User Guide](user-guide.md)** — Complete CLI reference and advanced features
 - **[Fleet Guide](fleet-guide.md)** — All 41 agents, squads, and coordination modes
 - **[API Reference](api-reference.md)** — Build custom integrations
-- **[Architecture](ARCHITECTURE.md)** — System design and technical details
+- **[Architecture](architecture.md)** — System design and technical details
 
 ---
 
