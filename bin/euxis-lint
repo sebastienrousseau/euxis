@@ -219,7 +219,8 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         esac
 
         # Count detection rules (lines starting with number. under Detection Rules)
-        rules_count=$(sed -n '/^## Detection Rules/,/^## /{/^[0-9]\+\./p}' "$pattern_file" | wc -l | tr -d ' ')
+        # Use awk for portability (BSD/GNU sed have incompatible range syntax)
+        rules_count=$(awk '/^## Detection Rules/{found=1;next} /^## /{found=0} found && /^[0-9]+\./' "$pattern_file" | wc -l | tr -d ' ')
         TOTAL_RULES=$((TOTAL_RULES + rules_count))
     done
 
@@ -245,7 +246,8 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         [[ "$local_name" == "README.md" ]] && continue
 
         # Check that Detection Rules section has numbered rules
-        rule_count=$(sed -n '/^## Detection Rules/,/^## /{/^[0-9]\+\./p}' "$pattern_file" | wc -l | tr -d ' ')
+        # Use awk for portability (BSD/GNU sed have incompatible range syntax)
+        rule_count=$(awk '/^## Detection Rules/{found=1;next} /^## /{found=0} found && /^[0-9]+\./' "$pattern_file" | wc -l | tr -d ' ')
         if [[ "$rule_count" -lt 1 ]]; then
             echo "  NO DETECTION RULES: ${local_name}"
             ((COMPLIANCE_FAILURES++))
@@ -258,7 +260,8 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         fi
 
         # Check that Remediation section is non-empty
-        remediation=$(sed -n '/^## Remediation/,/^## /{//!p}' "$pattern_file" | grep -v '^$' | wc -l | tr -d ' ')
+        # Use awk for portability (BSD/GNU sed have incompatible range syntax)
+        remediation=$(awk '/^## Remediation/{found=1;next} /^## /{found=0} found && !/^$/' "$pattern_file" | wc -l | tr -d ' ')
         if [[ "$remediation" -lt 1 ]]; then
             echo "  EMPTY REMEDIATION: ${local_name}"
             ((COMPLIANCE_FAILURES++))
