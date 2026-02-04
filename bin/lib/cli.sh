@@ -3,6 +3,9 @@
 # Euxis CLI Module - Command-line interface and user interaction
 # Part of the Euxis Multi-Provider AI Agent Framework
 #
+[[ -n "${_EUXIS_LIB_CLI:-}" ]] && return; _EUXIS_LIB_CLI=1
+
+set -euo pipefail
 
 # ============================================================================
 # Usage Information

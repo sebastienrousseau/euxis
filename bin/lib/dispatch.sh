@@ -3,6 +3,9 @@
 # Euxis Dispatch Module - Command routing and main execution flow
 # Part of the Euxis Multi-Provider AI Agent Framework
 #
+[[ -n "${_EUXIS_LIB_DISPATCH:-}" ]] && return; _EUXIS_LIB_DISPATCH=1
+
+set -euo pipefail
 
 # ============================================================================
 # Main Execution Function

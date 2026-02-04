@@ -42,7 +42,8 @@ fi
 
 # 4. Agent Certification (golden dataset + semantic eval)
 echo -n "   [4/5] Certifying Agents...        "
-if "${EUXIS_BIN}/euxis-certify" >/dev/null 2>&1; then
+"${EUXIS_BIN}/euxis-certify" >/dev/null 2>&1 && CERTIFY_RC=0 || CERTIFY_RC=$?
+if [[ $CERTIFY_RC -eq 0 ]]; then
     echo "PASS"
 else
     echo "FAIL"

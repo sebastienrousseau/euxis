@@ -225,6 +225,13 @@ execute_provider() {
     local provider="$1"
     local full_prompt="$2"
 
+    # Mock mode for testing (no API calls)
+    if [[ "${EUXIS_MOCK_PROVIDER:-}" == "true" ]]; then
+        echo "[MOCK] Provider: ${provider}, Model: ${PROVIDER_MODEL:-unknown}"
+        echo "[MOCK] Prompt received (${#full_prompt} chars)"
+        return 0
+    fi
+
     # Resolve model and flags before execution
     resolve_provider_config "${provider}"
 
