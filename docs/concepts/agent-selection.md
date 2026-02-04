@@ -122,10 +122,10 @@ Think about the domain of your task:
 
 If unsure, start with a core agent:
 
-1. `orchestrator` — General coordination
-2. `architect` — System-level thinking
-3. `debugger` — Code-level work
-4. `researcher` — Information gathering
+1. `orchestrator`: General coordination
+2. `architect`: System-level thinking
+3. `debugger`: Code-level work
+4. `researcher`: Information gathering
 
 Then get more specific based on results.
 

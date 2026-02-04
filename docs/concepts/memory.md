@@ -62,7 +62,7 @@ euxis-cortex remember "API rate limit is 1000 requests per minute per user" "pro
 ```bash
 # Examples of procedural memories
 euxis-cortex remember "To debug auth failures: check token expiry → verify signing key → inspect claims" "bug-fixer" --type procedural
-euxis-cortex remember "CONTRAINDICATION: Do NOT retry auth with expired refresh tokens — always re-authenticate" "bug-fixer" --type procedural
+euxis-cortex remember "CONTRAINDICATION: Do NOT retry auth with expired refresh tokens: always re-authenticate" "bug-fixer" --type procedural
 euxis-cortex remember "To deploy: run tests → build → tag → push → verify health" "automation-engineer" --type procedural
 ```
 
@@ -160,7 +160,7 @@ Store proven multi-step processes:
 ### Contraindications
 Mark failed approaches to prevent repetition:
 ```
-"CONTRAINDICATION: Do NOT use synchronous database calls in async routes — causes blocking"
+"CONTRAINDICATION: Do NOT use synchronous database calls in async routes: causes blocking"
 ```
 
 ### System Knowledge

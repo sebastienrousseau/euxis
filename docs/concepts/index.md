@@ -30,7 +30,7 @@ This means you don't need to prompt engineer. You describe what you want, and th
 
 Agents work together. The `orchestrator` breaks down goals. Squads run in parallel. Combos chain in sequence. Playbooks coordinate multi-phase workflows.
 
-This means complex tasks don't require complex prompts. You pick the right coordination pattern, and Euxis handles the orchestration.
+This means complex tasks don't need complex prompts. You pick the right coordination pattern, and Euxis handles the orchestration.
 
 ### 3. Memory Over Forgetting
 
@@ -52,7 +52,7 @@ This means your agents get better over time. They don't repeat mistakes. They re
 → Use a playbook
 
 **I'm not sure what I need:**
-→ Start with `euxis orchestrator "your goal"` — it will figure out the right approach
+→ Start with `euxis orchestrator "your goal"`: it will figure out the right approach
 
 ---
 

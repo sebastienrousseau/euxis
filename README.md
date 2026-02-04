@@ -11,9 +11,9 @@
 
 ## What You Can Build
 
-Euxis gives you 41 specialist AI agents that work together on real engineering tasks. Each agent has deep expertise in one domain — and they coordinate automatically.
+Euxis gives you 41 specialist AI agents that work together on real engineering tasks. Each agent has deep expertise in one domain and they coordinate automatically.
 
-**Ship features faster.** The orchestrator breaks down complex goals and delegates to specialists. You describe what you want; Euxis figures out how to build it.
+**Ship features faster.** The orchestrator breaks down complex goals and delegates to specialists. You describe what you want, Euxis figures out how to build it.
 
 **Catch bugs before users do.** Security agents audit your code. Testing agents verify your logic. Quality gates block broken builds.
 
@@ -48,8 +48,8 @@ euxis architect "What are the key components of a well-designed REST API?"
 ```
 
 Watch the output. You'll see:
-- **Provider selection:** Euxis automatically picks the best AI (`claude` for strategic work)
-- **Reasoning steps:** The agent thinks through the problem systematically
+- **Provider selection:** Euxis picks the best AI (`claude` for strategic work)
+- **Reasoning steps:** The agent thinks through the problem step by step
 - **Structured output:** Clear, actionable recommendations
 
 ✅ **Success checkpoint:** You just deployed an agent that reasoned about software architecture.
@@ -94,7 +94,7 @@ euxis-squad deploy quality "Audit the authentication module"
 
 The Quality squad includes: `reviewer`, `inspector`, `pentester`, `auditor`, `optimizer`, `watchdog`, `polyglot`, `arbiter`
 
-**When to use:** Comprehensive analysis, security audits, pre-release checks.
+**When to use:** Full analysis, security audits, pre-release checks.
 
 ---
 
@@ -107,7 +107,7 @@ Your Goal → Orchestrator → Specialists → Verified Output
            the work       parallel       validate results
 ```
 
-**Automatic provider selection.** Euxis routes each agent to the optimal AI:
+**Smart provider selection.** Euxis routes each agent to the best AI:
 - Strategic agents (orchestrator, architect) → `claude` for reasoning
 - Research agents → `gemini` for large context
 - Coding agents → `goose` for tool use
@@ -164,8 +164,8 @@ euxis-combo run steve-jobs "Build user preferences for notification channels"
 # Quick scan
 euxis pentester "Check for SQL injection in the search endpoint"
 
-# Comprehensive audit
-euxis-squad deploy quality "Full security audit of the payment module"
+# Full audit
+euxis-squad deploy quality "Complete security audit of the payment module"
 ```
 
 **Related:** [Security Audit Workflow](docs/workflows/security-audit-workflow.md)
@@ -183,7 +183,7 @@ euxis-playbook run verify-everything "Prepare v2.0 release" --dry-run
 euxis-playbook run zero-to-one "Launch v2.0 with new auth system"
 ```
 
-**Related:** [Fleet Guide — Playbooks](docs/fleet-guide.md#playbooks)
+**Related:** [Fleet Guide: Playbooks](docs/fleet-guide.md#playbooks)
 
 </details>
 
@@ -217,7 +217,7 @@ Execute domain work when called. [See full list →](docs/fleet-guide.md#default
 
 ### On-Demand Agents (7)
 
-Specialized leverage for growth tasks. [See full list →](docs/fleet-guide.md#on-demand-7--explicit-invocation-only)
+For growth tasks. [See full list →](docs/fleet-guide.md#on-demand-7--explicit-invocation-only)
 
 `ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
 

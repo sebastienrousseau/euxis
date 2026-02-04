@@ -134,9 +134,9 @@ jq '.templates += [{"id": "competitive-analysis", "category": "research", "path"
 
 ## Best Practices
 
-1. **Keep templates focused** — One purpose per template
-2. **Include examples** — Show expected outputs
-3. **Version templates** — Track changes over time
-4. **Test with agents** — Validate templates produce quality results
+1. **Keep templates focused**: One purpose per template
+2. **Include examples**: Show expected outputs
+3. **Version templates**: Track changes over time
+4. **Test with agents**: Validate templates produce quality results
 
 **See Also**: [Combos](combos.md), [Agents](agents.md)

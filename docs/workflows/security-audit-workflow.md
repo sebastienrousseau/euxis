@@ -74,14 +74,14 @@ euxis-squad deploy quality "Full security audit of the payment processing module
 ```
 
 This deploys 8 agents in parallel:
-- `reviewer` — Code quality
-- `inspector` — E2E testing
-- `pentester` — Vulnerability assessment
-- `auditor` — Compliance check
-- `optimizer` — Performance (DoS resistance)
-- `watchdog` — Regression analysis
-- `polyglot` — Language-specific patterns
-- `arbiter` — Conflict resolution
+- `reviewer`: Code quality
+- `inspector`: E2E testing
+- `pentester`: Vulnerability assessment
+- `auditor`: Compliance check
+- `optimizer`: Performance (DoS resistance)
+- `watchdog`: Regression analysis
+- `polyglot`: Language-specific patterns
+- `arbiter`: Conflict resolution
 
 For cryptographic systems:
 

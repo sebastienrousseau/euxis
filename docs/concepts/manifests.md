@@ -206,9 +206,9 @@ cat /tmp/euxis_dispatch_*/agent-name_*.log
 
 ## Best Practices
 
-1. **Start with P0 blockers** — Critical setup tasks should block
-2. **Use verification** — Always add verify_cmd for important tasks
-3. **Keep tasks focused** — One clear objective per dispatch
-4. **Test with dry-run** — Preview before executing
+1. **Start with P0 blockers**: Critical setup tasks should block
+2. **Use verification**: Always add verify_cmd for important tasks
+3. **Keep tasks focused**: One clear objective per dispatch
+4. **Test with dry-run**: Preview before executing
 
 **See Also**: [Squads](squads.md), [Playbooks](playbooks.md), [CLI Reference](../reference/cli-reference.md#euxis-dispatch)

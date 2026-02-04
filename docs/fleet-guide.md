@@ -10,7 +10,7 @@ Version 0.0.7
 
 41 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
 
-### Core (9) — Authority-bearing, always present
+### Core (9): Authority-bearing, always present
 
 Nine core agents define direction and may block progress. If one is missing, the system is incomplete.
 
@@ -26,9 +26,9 @@ Nine core agents define direction and may block progress. If one is missing, the
 | `arbiter` | Conflict resolution. Final decisions when agents disagree. | Strategic |
 | `historian` | Long-term memory. Temporal patterns. Institutional knowledge. | Utility |
 
-### Default (21) — Auto-available, task-triggered
+### Default (21): Auto-available, task-triggered
 
-These agents execute domain-specific work when you call them. They advise and deliver — but don't set strategic direction.
+These agents execute domain-specific work when you call them. They advise and deliver: but don't set strategic direction.
 
 | Agent | What It Does | When to Use It |
 |-------|--------------|----------------|
@@ -54,9 +54,9 @@ These agents execute domain-specific work when you call them. They advise and de
 | `watchdog` | Performs exhaustive pre-merge analysis. Catches regressions, validates behavior changes, blocks risky merges. | "Review this PR thoroughly" or "Check for regressions" |
 | `writer` | Creates documentation that developers actually read. Writes tutorials, API references, and guides that answer real questions. | "Document the API" or "Write a getting started guide" |
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (7): Explicit invocation only
 
-These agents provide specialized leverage for growth and communication tasks. They add capability — not safety gates. Call them when you need their specific expertise.
+These agents provide specialized leverage for growth and communication tasks. They add capability: not safety gates. Call them when you need their specific expertise.
 
 | Agent | What It Does | When to Use It |
 |-------|--------------|----------------|
@@ -68,9 +68,9 @@ These agents provide specialized leverage for growth and communication tasks. Th
 | `researcher` | Conducts deep research with cross-validation. Compares options, benchmarks alternatives, synthesizes findings. Uses Gemini's 2M context. | "Compare React vs Vue vs Svelte" or "Research PDF parsing libraries" |
 | `strategist` | Plans content calendars, manages social presence, builds community engagement. Amplifies your technical work. | "Plan Q1 content strategy" or "Grow our Twitter presence" |
 
-### Specialist (4) — Domain-specific expertise
+### Specialist (4): Domain-specific expertise
 
-These agents have deep expertise in specialized domains. Activate them only when working within their specific area — they know things general agents don't.
+These agents have deep expertise in specialized domains. Activate them only when working within their specific area: they know things general agents don't.
 
 | Agent | What It Does | When to Use It |
 |-------|--------------|----------------|
@@ -186,10 +186,10 @@ Store as procedural memory. Get better every time.
 When specialists disagree, Euxis resolves it systematically.
 
 ### Resolution Order
-1. **Domain Priority** — Security beats performance. Correctness beats speed.
-2. **Evidence Weight** — Verified data beats inference.
-3. **Negotiation** — One round. Both agents state positions.
-4. **Human Escalation** — Present evidence. Let you decide.
+1. **Domain Priority**: Security beats performance. Correctness beats speed.
+2. **Evidence Weight**: Verified data beats inference.
+3. **Negotiation**: One round. Both agents state positions.
+4. **Human Escalation**: Present evidence. Let you decide.
 
 ### Conflict Response Format
 ```json
@@ -351,7 +351,7 @@ Combos are lightweight agent chains. No manifests. No phases. Just agents runnin
 
 ### When to Use Combos
 
-Use a combo when you want a focused pipeline with a predictable flow. Combos are faster than playbooks and simpler than squads — perfect for well-defined tasks that benefit from multiple perspectives in sequence.
+Use a combo when you want a focused pipeline with a predictable flow. Combos are faster than playbooks and simpler than squads: perfect for well-defined tasks that benefit from multiple perspectives in sequence.
 
 ### How Combos Work
 

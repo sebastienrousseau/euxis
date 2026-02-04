@@ -12,7 +12,7 @@ Euxis offers four ways to coordinate work. Each pattern fits different situation
 |---------|-----------|----------|
 | **Single Agent** | One agent, one task | Quick questions, focused work |
 | **Combo** | Sequential chain | Iterative refinement, multiple perspectives |
-| **Squad** | Parallel team | Comprehensive analysis, broad coverage |
+| **Squad** | Parallel team | Full analysis, broad coverage |
 | **Playbook** | Multi-phase workflow | Complex projects, repeatable processes |
 
 ---
@@ -87,7 +87,7 @@ Final Output
 
 ## Squad
 
-**Use when:** You need comprehensive coverage from multiple specialists at once.
+**Use when:** You need full coverage from multiple specialists at once.
 
 ```bash
 euxis-squad deploy quality "Audit the authentication module"

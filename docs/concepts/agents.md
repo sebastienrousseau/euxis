@@ -26,7 +26,7 @@ euxis optimizer "Optimize database query performance" ollama
 
 ## Agent Tiers
 
-### Core (9) — Authority-bearing, always present
+### Core (9): Authority-bearing, always present
 Block progress to maintain quality. If one is missing, the system is incomplete.
 
 | Agent | Authority Domain |
@@ -41,7 +41,7 @@ Block progress to maintain quality. If one is missing, the system is incomplete.
 | `arbiter` | Conflict resolution, final decisions |
 | `historian` | Long-term memory, temporal patterns |
 
-### Default (21) — Auto-available, task-triggered
+### Default (21): Auto-available, task-triggered
 Execute and advise within scope. Do not define direction.
 
 **Engineering**: `automaton`, `debugger`, `investigator`, `maintainer`, `tester`, `repairer`
@@ -49,7 +49,7 @@ Execute and advise within scope. Do not define direction.
 **Operations**: `responder`, `gatekeeper`, `sentinel`, `accountant`
 **Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (7): Explicit invocation only
 Add leverage, not safety. Never block, never override core authority.
 
 | Agent | Domain |
@@ -62,7 +62,7 @@ Add leverage, not safety. Never block, never override core authority.
 | `researcher` | Find what others miss |
 | `strategist` | Amplify your voice |
 
-### Specialist (4) — Domain-specific expertise
+### Specialist (4): Domain-specific expertise
 Activated for domain-scoped tasks only.
 
 | Agent | Expertise |

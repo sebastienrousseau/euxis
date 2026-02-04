@@ -24,8 +24,8 @@ cat ~/.euxis/config/branding/signature.txt
 **Standard Signature:**
 ```
 ---
-🎨 Designed by Sebastien Rousseau — https://sebastienrousseau.com/
-🚀 Engineered with Euxis — Enterprise Unified eXecution Intelligence System — https://euxis.co/
+🎨 Designed by Sebastien Rousseau: https://sebastienrousseau.com/
+🚀 Engineered with Euxis: Enterprise Unified eXecution Intelligence System: https://euxis.co/
 ```
 
 ## Branding Components
@@ -83,9 +83,9 @@ euxis-certify
 
 ## Best Practices
 
-1. **Never skip branding** — It's required for certification
-2. **Use the hook** — Automate signature insertion
-3. **Keep URLs current** — Ensure links are accessible
-4. **Sign cryptographically** — Enable GPG/SSH signing
+1. **Never skip branding**: It's required for certification
+2. **Use the hook**: Automate signature insertion
+3. **Keep URLs current**: Ensure links are accessible
+4. **Sign cryptographically**: Enable GPG/SSH signing
 
 **See Also**: [Certification Gates](../user-guide.md#certification), [Commit Hooks](../reference/cli-reference.md#euxis-hooks)

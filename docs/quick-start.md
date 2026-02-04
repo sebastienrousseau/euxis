@@ -5,9 +5,9 @@
 ## What You'll Build
 
 By the end of this guide, you'll have:
-- **41 AI agents** ready to execute engineering tasks
-- **Your first successful task** completed with agent verification
-- **A working knowledge** of how to deploy agents for common workflows
+- **41 AI agents** ready to run engineering tasks
+- **Your first successful task** completed with verification
+- **Working knowledge** of how to deploy agents for common workflows
 
 Expected time: **5 minutes**
 
@@ -34,7 +34,7 @@ python3 --version # Should show 3.8 or higher
 
 ### AI Providers
 
-Euxis works with **8 providers** out of the box. You need at least one:
+Euxis works with **8 providers** right away. You need at least one:
 
 | Provider | Best For | Install |
 |:---------|:---------|:--------|
@@ -46,16 +46,16 @@ Euxis works with **8 providers** out of the box. You need at least one:
 <summary><strong>See All 8 Providers</strong></summary>
 
 **Cloud Providers:**
-- [Claude](https://docs.anthropic.com/en/docs/claude-cli) — Strategic reasoning
-- [Gemini](https://github.com/google-gemini/gemini-cli) — Research with massive context
-- [Kiro CLI](https://kiro.dev) — AI coding assistant
-- [Codex CLI](https://github.com/openai/codex) — OpenAI models
+- [Claude](https://docs.anthropic.com/en/docs/claude-cli): Strategic reasoning
+- [Gemini](https://github.com/google-gemini/gemini-cli): Research with massive context
+- [Kiro CLI](https://kiro.dev): AI coding assistant
+- [Codex CLI](https://github.com/openai/codex): OpenAI models
 
 **Local Providers:**
-- [Ollama](https://ollama.com/) — Local inference
-- [Qwen](https://github.com/QwenLM/qwen-code) — 256K context coding
-- [Goose](https://github.com/block/goose) — MCP-native agent
-- [Crush](https://github.com/charmbracelet/crush) — Multi-model TUI
+- [Ollama](https://ollama.com/): Local inference
+- [Qwen](https://github.com/QwenLM/qwen-code): 256K context coding
+- [Goose](https://github.com/block/goose): MCP-native agent
+- [Crush](https://github.com/charmbracelet/crush): Multi-model TUI
 
 </details>
 
@@ -136,7 +136,7 @@ Fleet Status: HEALTHY (8/8 checks passed)
 
 ## Step 4: Meet Your First Agent
 
-Start with the **Butler** — your friendly introduction agent:
+Start with the **Butler**: your friendly introduction agent:
 
 ```bash
 euxis butler "Introduce yourself briefly."
@@ -153,7 +153,7 @@ I help translate complex system outputs into natural spoken English.
 The fleet has 41 agents ready to assist with your engineering tasks.
 ```
 
-Notice how Euxis shows you exactly what's happening:
+Notice how Euxis shows you what's happening:
 - **Agent:** Which specialist is working
 - **Provider:** Which AI is running (butler uses `ollama` for fast local execution)
 - **Spinner:** Live status while the agent works
@@ -161,7 +161,7 @@ Notice how Euxis shows you exactly what's happening:
 <details>
 <summary><strong>Understanding Provider Selection</strong></summary>
 
-Euxis automatically picks the best AI provider for each agent:
+Euxis picks the best AI provider for each agent:
 
 | Agent Type | Provider | Why |
 |------------|----------|-----|

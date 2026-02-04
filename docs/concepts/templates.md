@@ -196,9 +196,9 @@ euxis-lint
 
 ## Best Practices
 
-1. **Always start from templates** — Ensures proper structure
-2. **Keep templates updated** — Reflect current schema versions
-3. **Validate after creation** — Run lint/certify checks
-4. **Document customizations** — Note deviations from template
+1. **Always start from templates**: Ensures proper structure
+2. **Keep templates updated**: Reflect current schema versions
+3. **Validate after creation**: Run lint/certify checks
+4. **Document customizations**: Note deviations from template
 
 **See Also**: [Agents](agents.md), [Playbooks](playbooks.md), [Patterns](../user-guide.md#patterns)
