@@ -6,7 +6,7 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 
 **Version:** 0.0.7
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
-**Agent Count:** 45 (7 core + 38 fleet)
+**Agent Count:** 38 (7 core + 31 fleet)
 
 ## System Architecture
 
@@ -34,10 +34,10 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 │   │  librarian │ compliance-officer │ system-critic         │  │
 │   └─────────────────────────────────────────────────────────┘  │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                   FLEET TIER (38)                       │  │
-│   │  Default Activation (24): automation-engineer,          │  │
-│   │    bug-fixer, security-lead, tech-writer, etc.          │  │
-│   │  On-Demand (14): deep-researcher, crypto-auditor, etc.  │  │
+│   │                   FLEET TIER (31)                       │  │
+│   │  Default (20): bug-fixer, security-lead, tech-writer    │  │
+│   │  On-Demand (7): deep-researcher, growth-marketer        │  │
+│   │  Specialist (4): crypto-auditor, payments-steward       │  │
 │   └─────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
                                 │
@@ -77,7 +77,7 @@ Core agents handle high-level planning, governance, and quality assurance.
 
 Fleet agents are specialists for specific domains and tasks.
 
-**Default Activation (Always Available):**
+**Default (20 — Auto-available, task-triggered):**
 - automation-engineer, bug-fixer, crash-investigator, data-steward
 - edge-hunter, incident-commander, language-specialist, legacy-maintainer
 - perf-optimizer, qa-coordinator, regression-analyst, release-manager
@@ -85,9 +85,11 @@ Fleet agents are specialists for specific domains and tasks.
 - cli-ui-artisan, web-ui-architect, theming-and-motion-engineer
 - interaction-and-input-specialist
 
-**On-Demand (Specialized):**
+**On-Demand (7 — Explicit invocation only):**
 - brand-evangelist, butler, deep-researcher, devrel-advocate
 - globalization-lead, growth-marketer, social-manager
+
+**Specialist (4 — Domain-specific expertise):**
 - crypto-cryptography-auditor, payments-domain-steward
 - realtime-audio-engineer, rust-crate-steward
 
