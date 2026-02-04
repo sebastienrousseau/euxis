@@ -18,7 +18,7 @@ The Euxis plugin system allows you to register third-party agents without modify
 
 **Key Benefits:**
 - Non-invasive: no core system modification required
-- Automatic discovery: plugins appear in `euxis health` and `list_agents` output
+- Automatic discovery: plugins appear in `euxis-health` and `list_agents` output
 - Full feature support: plugins inherit all protocol features (ReAct, memory, audit trails)
 - Easy management: register, unregister, and list plugins with simple commands
 
@@ -52,9 +52,9 @@ You MUST identify performance issues, memory inefficiencies, and algorithmic imp
 
 ## Scope Boundaries
 
-- **MUST NOT** make functional changes that alter business logic. Delegate to `bug-fixer`.
+- **MUST NOT** make functional changes that alter business logic. Delegate to `debugger`.
 - **MUST NOT** make architectural decisions. Delegate to `architect`.
-- **MUST NOT** handle security vulnerabilities. Delegate to `edge-hunter`.
+- **MUST NOT** handle security vulnerabilities. Delegate to `pentester`.
 
 ## Primary Directives
 
@@ -89,8 +89,8 @@ Every optimization analysis MUST use this structure:
 ## Escalation Protocol
 
 - If code functionality is unclear, MUST request clarification from `architect`.
-- If optimizations require breaking changes, MUST escalate to `product-manager`.
-- If security implications exist, MUST flag to `edge-hunter` before optimization.
+- If optimizations require breaking changes, MUST escalate to `planner`.
+- If security implications exist, MUST flag to `pentester` before optimization.
 EOF
 ```
 
@@ -122,7 +122,7 @@ register_agent_plugin ~/my-plugins/code-optimizer-manifest.json
 
 ```bash
 # Check if the agent is registered
-euxis health | grep code-optimizer
+euxis-health | grep code-optimizer
 
 # List all plugins
 source ~/.euxis/bin/lib/agents.sh && list_plugins
@@ -322,9 +322,9 @@ You MUST ensure database migrations are safe, reversible, and maintain data inte
 
 ## Scope Boundaries
 
-- **MUST NOT** execute migrations directly. Delegate to `automation-engineer`.
-- **MUST NOT** make application code changes. Delegate to `bug-fixer`.
-- **MUST NOT** handle infrastructure scaling. Delegate to `perf-optimizer`.
+- **MUST NOT** execute migrations directly. Delegate to `automaton`.
+- **MUST NOT** make application code changes. Delegate to `debugger`.
+- **MUST NOT** handle infrastructure scaling. Delegate to `optimizer`.
 
 ## Primary Directives
 
@@ -370,8 +370,8 @@ You MUST ensure database migrations are safe, reversible, and maintain data inte
 ## Escalation Protocol
 
 - If migration affects application logic, MUST consult `architect`.
-- If performance impact is unclear, MUST engage `perf-optimizer`.
-- If data security implications exist, MUST flag to `edge-hunter`.
+- If performance impact is unclear, MUST engage `optimizer`.
+- If data security implications exist, MUST flag to `pentester`.
 ```
 
 **Manifest File (`db-migrator-manifest.json`):**
@@ -409,8 +409,8 @@ You MUST ensure API endpoints are properly tested with comprehensive coverage in
 
 ## Scope Boundaries
 
-- **MUST NOT** write unit tests for business logic. Delegate to `unit-tester`.
-- **MUST NOT** handle performance testing. Delegate to `perf-optimizer`.
+- **MUST NOT** write unit tests for business logic. Delegate to `tester`.
+- **MUST NOT** handle performance testing. Delegate to `optimizer`.
 - **MUST NOT** design API contracts. Delegate to `architect`.
 
 ## Primary Directives
@@ -461,9 +461,9 @@ describe('[Endpoint]', () => {
 
 ## Escalation Protocol
 
-- If API behavior contradicts documentation, MUST flag to `tech-writer`.
-- If security vulnerabilities are found, MUST escalate to `edge-hunter`.
-- If performance issues are discovered, MUST escalate to `perf-optimizer`.
+- If API behavior contradicts documentation, MUST flag to `writer`.
+- If security vulnerabilities are found, MUST escalate to `pentester`.
+- If performance issues are discovered, MUST escalate to `optimizer`.
 ```
 
 **Manifest File (`api-tester-manifest.json`):**
@@ -545,7 +545,7 @@ Choose the appropriate tier for your agent based on its computational requiremen
 source ~/.euxis/bin/lib/agents.sh && list_plugins
 
 # Full health report including plugins
-euxis health
+euxis-health
 
 # Check agent liveness specifically
 source ~/.euxis/bin/lib/agents.sh
@@ -604,7 +604,7 @@ You MUST analyze file system organization and recommend improvements for better 
 ## Scope Boundaries
 
 - **MUST NOT** delete or move files directly. Delegate to user confirmation.
-- **MUST NOT** handle security permissions. Delegate to `edge-hunter`.
+- **MUST NOT** handle security permissions. Delegate to `pentester`.
 
 ## Primary Directives
 
@@ -631,7 +631,7 @@ You MUST analyze file system organization and recommend improvements for better 
 
 ## Escalation Protocol
 
-- For security-related file operations, consult `edge-hunter`.
+- For security-related file operations, consult `pentester`.
 EOF
 
 # Create manifest
@@ -680,9 +680,9 @@ You MUST analyze log files to identify error patterns, performance issues, and o
 
 ## Scope Boundaries
 
-- **MUST NOT** modify application code. Delegate to `bug-fixer`.
-- **MUST NOT** handle infrastructure changes. Delegate to `automation-engineer`.
-- **MUST NOT** address security incidents. Delegate to `incident-commander`.
+- **MUST NOT** modify application code. Delegate to `debugger`.
+- **MUST NOT** handle infrastructure changes. Delegate to `automaton`.
+- **MUST NOT** address security incidents. Delegate to `responder`.
 
 ## Primary Directives
 
@@ -723,9 +723,9 @@ You MUST analyze log files to identify error patterns, performance issues, and o
 
 ## Escalation Protocol
 
-- If security events detected, MUST escalate to `incident-commander`.
-- If application bugs identified, MUST flag to `bug-fixer`.
-- If infrastructure issues found, MUST escalate to `automation-engineer`.
+- If security events detected, MUST escalate to `responder`.
+- If application bugs identified, MUST flag to `debugger`.
+- If infrastructure issues found, MUST escalate to `automaton`.
 EOF
 
 cat > ~/my-plugins/log-analyzer/manifest.json <<'EOF'

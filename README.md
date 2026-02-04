@@ -119,13 +119,13 @@ For the complete agent registry, governance rules, and authority model, see [CON
 ```bash
 euxis orchestrator "Refactor the login module to use JWT"
 euxis architect "Review the authentication module"
-euxis bug-fixer "Fix the null pointer in user.py"
+euxis debugger "Fix the null pointer in user.py"
 ```
 
 ### Research and Analysis
 
 ```bash
-euxis deep-researcher "Compare Python PDF parsing libraries with benchmarks"
+euxis researcher "Compare Python PDF parsing libraries with benchmarks"
 ```
 
 ### Parallel Fleet Deployment
@@ -168,7 +168,7 @@ When you omit the provider argument, Euxis routes each agent to the optimal tier
 
 ```bash
 euxis architect "Review the auth module"          # auto routes to claude
-euxis bug-fixer "Fix user.py" gemini              # explicit override
+euxis debugger "Fix user.py" gemini              # explicit override
 ```
 
 **For the complete intelligence tiering matrix and provider details, see [User Guide](docs/user-guide.md#ai-provider-matrix).**

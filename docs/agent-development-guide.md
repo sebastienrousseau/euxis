@@ -133,13 +133,13 @@ AGENTS=("architect" ... "my-agent")
 bash -n ~/.euxis/prompts/fleet/my-agent.txt
 
 # Lint validation (checks frontmatter, sections, registry)
-euxis lint
+euxis-lint
 
 # Health check
-euxis health
+euxis-health
 
 # Gym evaluation
-euxis gym my-agent "standard-task"
+euxis-gym my-agent "standard-task"
 ```
 
 ### Step 6: Test
@@ -198,7 +198,7 @@ Flow: reviewer reads diff → applies SECURITY-001 and QUALITY-001 patterns → 
 
 ```
 euxis architect "Design a caching layer for the API"
-euxis dispatch plan.json  # architect's output manifest
+euxis-dispatch plan.json  # architect's output manifest
 ```
 
 Flow: architect produces dispatch manifest → euxis-dispatch routes to sub-agents → each sub-agent produces structured intermediate → orchestrator synthesizes
@@ -206,10 +206,10 @@ Flow: architect produces dispatch manifest → euxis-dispatch routes to sub-agen
 ### Example 3: Research + Implementation Pipeline
 
 ```
-euxis deep-researcher "Survey rate limiting approaches for REST APIs"
+euxis researcher "Survey rate limiting approaches for REST APIs"
 euxis architect "Design rate limiter based on research findings"
-euxis bug-fixer "Implement the rate limiter per architect spec"
-euxis unit-tester "Write tests for the new rate limiter"
+euxis debugger "Implement the rate limiter per architect spec"
+euxis tester "Write tests for the new rate limiter"
 euxis reviewer "Final review of rate limiter implementation"
 ```
 
@@ -229,7 +229,7 @@ tail -5 ~/.euxis/data/perf/metrics.jsonl | jq .
 tail -20 ~/.euxis/data/projects/*/my-agent/memory.md
 
 # Run lint for specific issues
-euxis lint 2>&1 | grep my-agent
+euxis-lint 2>&1 | grep my-agent
 ```
 
 ## Architecture Reference

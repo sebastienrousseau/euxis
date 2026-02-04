@@ -49,15 +49,15 @@ Depends on: `common.sh`
 **Intelligence Tiers:**
 | Tier | Provider | Agents |
 |------|----------|--------|
-| S-Tier (Strategic) | `claude` | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer |
-| A-Tier (Research) | `gemini` | deep-researcher |
-| A-Tier (Enterprise) | `amazon-q` | incident-commander |
-| A-Tier (Domain) | `claude` | crypto-cryptography-auditor, payments-domain-steward |
-| B-Tier (Coding) | `goose` | bug-fixer, unit-tester, automation-engineer |
-| B-Tier (Systems) | `goose` | realtime-audio-engineer, rust-crate-steward |
-| B-Tier (Math/Logic) | `qwen` | perf-optimizer, data-steward |
-| B-Tier (Local Code) | `opencode` | legacy-maintainer |
-| C-Tier (Utility) | `ollama` | butler, librarian, tech-writer |
+| S-Tier (Strategic) | `claude` | orchestrator, architect, planner, reviewer, critic, auditor, arbiter, historian |
+| A-Tier (Research) | `gemini` | researcher |
+| A-Tier (Enterprise) | `amazon-q` | responder |
+| A-Tier (Domain) | `claude` | cryptographer, ledger |
+| B-Tier (Coding) | `goose` | debugger, tester, automaton |
+| B-Tier (Systems) | `goose` | conduit, custodian |
+| B-Tier (Math/Logic) | `qwen` | optimizer, telemetrist |
+| B-Tier (Local Code) | `opencode` | maintainer |
+| C-Tier (Utility) | `ollama` | butler, librarian, writer |
 
 ---
 
@@ -157,14 +157,14 @@ Depends on: `common.sh`
 **Detection Rules:**
 | Indicator | Detected Agents |
 |-----------|----------------|
-| `package.json` / `node_modules` | web-ui-architect, cli-ui-artisan |
-| `tsconfig.json` | unit-tester |
-| `pyproject.toml` / `setup.py` | unit-tester, automation-engineer |
-| `Dockerfile` / `docker-compose.yml` | automation-engineer, perf-optimizer |
-| `.env` / `certs/` | security-lead, edge-hunter |
-| `.github/workflows` | automation-engineer, release-manager |
-| `Cargo.toml` | perf-optimizer, bug-fixer, rust-crate-steward |
-| `Gemfile` / `.ruby-version` | legacy-maintainer |
+| `package.json` / `node_modules` | designer, tactician |
+| `tsconfig.json` | tester |
+| `pyproject.toml` / `setup.py` | tester, automaton |
+| `Dockerfile` / `docker-compose.yml` | automaton, optimizer |
+| `.env` / `certs/` | sentinel, pentester |
+| `.github/workflows` | automaton, gatekeeper |
+| `Cargo.toml` | optimizer, debugger, custodian |
+| `Gemfile` / `.ruby-version` | maintainer |
 
 ---
 

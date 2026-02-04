@@ -18,16 +18,16 @@ The Euxis Fleet includes four specialized UI agents working in coordination:
 
 | Agent | Primary Role | Key Outputs |
 |-------|-------------|-------------|
-| `interaction-and-input-specialist` | Keyboard navigation model, focus management, shortcut registry | Focus order maps, command palette design, shortcut documentation |
-| `cli-ui-artisan` | Terminal UI layout and TUI components | Panel layouts, keyboard patterns, terminal adaptation |
-| `web-ui-architect` | Design system and component contracts | Token systems, component APIs, responsive behavior |
-| `theming-and-motion-engineer` | Color tokens, Light/Dark modes, motion rules | Theme definitions, contrast matrices, animation specifications |
+| `interactor` | Keyboard navigation model, focus management, shortcut registry | Focus order maps, command palette design, shortcut documentation |
+| `tactician` | Terminal UI layout and TUI components | Panel layouts, keyboard patterns, terminal adaptation |
+| `designer` | Design system and component contracts | Token systems, component APIs, responsive behavior |
+| `animator` | Color tokens, Light/Dark modes, motion rules | Theme definitions, contrast matrices, animation specifications |
 
 ### Coordination Patterns
 
-- **Design System Flow**: `web-ui-architect` defines tokens → `theming-and-motion-engineer` provides values → `cli-ui-artisan` adapts for terminal
-- **Interaction Flow**: `interaction-and-input-specialist` defines patterns → Both UI architects implement in their domains
-- **Accessibility Flow**: `ux-sentinel` identifies issues → UI agents collaborate on solutions
+- **Design System Flow**: `designer` defines tokens → `animator` provides values → `tactician` adapts for terminal
+- **Interaction Flow**: `interactor` defines patterns → Both UI architects implement in their domains
+- **Accessibility Flow**: `designer` identifies issues → UI agents collaborate on solutions
 
 ---
 
@@ -107,8 +107,8 @@ All Euxis interfaces follow these keyboard navigation rules:
 | `orchestrator` | `Ctrl+F` | Switch to federated mode | Coordination |
 | `architect` | `Ctrl+P` | Create pattern template | Design mode |
 | `architect` | `Ctrl+R` | Review architecture | Analysis mode |
-| `edge-hunter` | `Ctrl+S` | Start security scan | Audit mode |
-| `edge-hunter` | `Ctrl+V` | View vulnerability report | Results |
+| `pentester` | `Ctrl+S` | Start security scan | Audit mode |
+| `pentester` | `Ctrl+V` | View vulnerability report | Results |
 
 ### Accessibility Shortcuts (Planned)
 
@@ -126,7 +126,7 @@ All Euxis interfaces follow these keyboard navigation rules:
 
 ## Command Palette Specification
 
-### Requirements (per interaction-and-input-specialist)
+### Requirements (per interactor)
 
 The command palette MUST support:
 - **Fuzzy Search**: Match commands by name, description, or tags
@@ -138,7 +138,7 @@ The command palette MUST support:
 
 | Category | Description | Example Commands |
 |----------|-------------|------------------|
-| **Agents** | Deploy individual agents | "Run architect", "Deploy edge-hunter" |
+| **Agents** | Deploy individual agents | "Run architect", "Deploy pentester" |
 | **Squads** | Deploy agent teams | "Deploy Vision squad", "Deploy Quality squad" |
 | **Tools** | Run Euxis utilities | "Fleet health", "Run certification", "Lint checks" |
 | **Navigation** | Move between views | "View logs", "Switch provider", "Change directory" |
@@ -158,7 +158,7 @@ The command palette MUST support:
 
 - **CLI**: Not implemented (current euxis-ui uses basic menus)
 - **Web**: Not implemented
-- **Specification**: Defined by `interaction-and-input-specialist`
+- **Specification**: Defined by `interactor`
 
 ---
 

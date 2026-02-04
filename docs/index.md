@@ -128,8 +128,8 @@ euxis-certify     # Full certification pipeline
 ### Single Agent Tasks
 ```bash
 euxis architect "Review the authentication module"
-euxis bug-fixer "Fix the null pointer in user.py"
-euxis deep-researcher "Compare Python PDF parsing libraries"
+euxis debugger "Fix the null pointer in user.py"
+euxis researcher "Compare Python PDF parsing libraries"
 ```
 
 ### Coordinated Fleet Deployment

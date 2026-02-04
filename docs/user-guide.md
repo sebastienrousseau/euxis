@@ -37,7 +37,7 @@ Coordinate multiple agents or run autonomous workflows.
 
 | Command | Description |
 |---------|-------------|
-| `euxis-council "<topic>"` | 3-round adversarial debate between architect, edge-hunter, perf-optimizer |
+| `euxis-council "<topic>"` | 3-round adversarial debate between architect, pentester, optimizer |
 | `euxis-loop <agent> <task> <verify_cmd> [retries]` | Autonomous retry with reflexion and checkpoints |
 | `euxis-dispatch [--mode MODE] <manifest.json>` | Parallel agent execution across hierarchical, mesh, or federated modes |
 | `euxis-kaizen` | 4-gate self-improvement cycle |
@@ -216,7 +216,7 @@ Use for ingesting massive files or enterprise-specific queries.
 
 | Provider | CLI | Best For |
 |----------|-----|---------|
-| `gemini` (Google) | `gemini` | 2M+ token context. Use for deep-researcher or massive codebases |
+| `gemini` (Google) | `gemini` | 2M+ token context. Use for researcher or massive codebases |
 | `amazon-q` (AWS) | `kiro-cli` | AWS infrastructure, enterprise security contexts |
 
 ### B-Tier: Specialist (Coding and Logic)
@@ -245,15 +245,15 @@ When no provider is specified, Euxis routes agents by task complexity:
 
 | Tier | Agents | Provider | Reason |
 |------|--------|----------|--------|
-| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Best reasoning and tool use |
-| A-Tier: Research | deep-researcher | `gemini` | 2M context window for massive analysis |
-| A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
-| A-Tier: Domain | crypto-cryptography-auditor, payments-domain-steward | `claude` | Deep domain reasoning |
-| B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
-| B-Tier: Systems | realtime-audio-engineer, rust-crate-steward | `goose` | Systems-level tool use |
-| B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
-| B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
-| C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |
+| S-Tier: Strategic | orchestrator, architect, planner, reviewer, critic, auditor, arbiter, historian | `claude` | Best reasoning and tool use |
+| A-Tier: Research | researcher | `gemini` | 2M context window for massive analysis |
+| A-Tier: Enterprise | responder | `amazon-q` | AWS-native developer agent |
+| A-Tier: Domain | cryptographer, ledger | `claude` | Deep domain reasoning |
+| B-Tier: Coding | debugger, tester, automaton | `goose` | Agent-native tool use |
+| B-Tier: Systems | conduit, custodian | `goose` | Systems-level tool use |
+| B-Tier: Local Code | maintainer | `opencode` | Fast local code models |
+| B-Tier: Math/Logic | optimizer, telemetrist | `qwen` | Algorithmic optimization |
+| C-Tier: Utility | butler, librarian, writer | `ollama` | Zero latency, no cost |
 | Standard | all others | `claude` | General-purpose fallback |
 
 **P0 Override:** Critical tasks always route to S-Tier (claude).
@@ -270,7 +270,7 @@ Three modes via `euxis-dispatch --mode <mode>`:
 | `mesh` | Agents with dispatch authority coordinate sub-workflows directly | Specialists manage focused sub-workflows |
 | `federated` | Agents operate autonomously across project boundaries | Cross-project tasks |
 
-**Dispatch-authority agents (mesh mode):** `architect`, `qa-coordinator`, `incident-commander`, `release-manager`
+**Dispatch-authority agents (mesh mode):** `architect`, `inspector`, `responder`, `gatekeeper`
 
 ## Tri-Typed Memory System
 
@@ -284,9 +284,9 @@ The Cortex classifies memories into three types:
 
 ```bash
 # Store typed memories
-euxis-cortex remember "Fixed null pointer in auth.py" "bug-fixer" --type episodic
+euxis-cortex remember "Fixed null pointer in auth.py" "debugger" --type episodic
 euxis-cortex remember "API uses OAuth 2.0 with PKCE" "architect" --type semantic
-euxis-cortex remember "CONTRAINDICATION: Never retry with expired tokens" "bug-fixer" --type procedural
+euxis-cortex remember "CONTRAINDICATION: Never retry with expired tokens" "debugger" --type procedural
 
 # Recall with type filter
 euxis-cortex recall "authentication" --type procedural
@@ -306,7 +306,7 @@ Every agent applies layered verification before delivering output.
 
 When multiple agents produce conflicting outputs, Euxis resolves them systematically:
 
-1. **Domain Priority** — Agent with primary scope wins (e.g., security conflicts go to `edge-hunter`)
+1. **Domain Priority** — Agent with primary scope wins (e.g., security conflicts go to `pentester`)
 2. **Evidence Weight** — Verified data > inference > heuristic
 3. **Negotiation Round** — Each agent produces `CONFLICT_RESPONSE` with position, evidence, confidence, and acceptable compromise. Maximum 1 round.
 4. **Human Escalation** — Failed negotiation presents both positions to user

@@ -156,7 +156,7 @@ debugging ←→ performance-profiling ←→ test-analysis
 ### Direct Invocation
 ```bash
 euxis architect "review system design"
-euxis security-lead "audit authentication flow"
+euxis sentinel "audit authentication flow"
 ```
 
 ### Delegation Chain

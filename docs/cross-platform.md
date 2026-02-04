@@ -133,7 +133,7 @@ gh workflow run cross-platform-ci.yml --field version=v0.0.7
 
 This verification system integrates with the Euxis release pipeline:
 
-1. **Gate 3** of `euxis-verify-all` calls automation-engineer
+1. **Gate 3** of `euxis-verify-all` calls automaton
 2. **Release readiness** requires all platforms to pass verification
 3. **Docker images** built for multi-architecture deployment
 4. **CI/CD integration** ensures no platform regressions

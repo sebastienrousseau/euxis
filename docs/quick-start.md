@@ -202,10 +202,10 @@ Now that your fleet is running, explore these common workflows:
 ### Quick Tasks
 ```bash
 # Get help with code
-euxis bug-fixer "Analyze the auth module for potential issues"
+euxis debugger "Analyze the auth module for potential issues"
 
 # Research comparison
-euxis deep-researcher "Compare Python testing frameworks"
+euxis researcher "Compare Python testing frameworks"
 
 # Architecture review
 euxis architect "Evaluate the database design for scalability"
