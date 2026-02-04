@@ -50,8 +50,8 @@ Commands:
 Agent Mode:
     euxis <agent> <task> [provider]
 
-    provider    AI provider: claude, gemini, openai, ollama, opencode,
-                qwen, crush, kilo, amazon-q, goose
+    provider    AI provider: claude, gemini, openai, ollama,
+                qwen, crush, kiro-cli, goose
                 (auto-selected per agent via intelligence tiering if omitted)
 
 Available Agents:
@@ -67,7 +67,6 @@ Environment:
     EUXIS_PROJECT        Project name (default: derived from current directory)
     EUXIS_SESSION_ID     Session identifier (default: timestamp)
     EUXIS_OLLAMA_MODEL   Ollama model name (default: llama3.2)
-    EUXIS_OPENCODE_MODEL OpenCode model name (default: codellama)
 
 EOF
     exit 1
@@ -115,10 +114,10 @@ parse_args() {
     fi
 
     case "${PROVIDER}" in
-        claude|gemini|openai|ollama|opencode|qwen|crush|kilo|amazon-q|goose) ;;
+        claude|gemini|openai|ollama|qwen|crush|kiro-cli|goose) ;;
         *)
             log_error "Unknown provider: ${PROVIDER}"
-            echo "Valid providers: claude, gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose" >&2
+            echo "Valid providers: claude, gemini, openai, ollama, qwen, crush, kiro-cli, goose" >&2
             exit 1
             ;;
     esac

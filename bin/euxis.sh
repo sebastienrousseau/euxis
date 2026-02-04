@@ -5,7 +5,7 @@
 #        euxis delegate <agent> <task> [provider]
 #
 # Agents are discovered dynamically from ~/.euxis/prompts/{core,fleet}/*.txt
-# Providers: claude (default), gemini, openai, ollama, opencode, qwen, crush, kilo, amazon-q, goose
+# Providers: claude (default), gemini, openai, ollama, qwen, crush, amazon-q, goose
 #
 
 set -euo pipefail

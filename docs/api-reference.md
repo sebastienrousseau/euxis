@@ -39,11 +39,9 @@ Depends on: `common.sh`
 | `run_gemini` | `run_gemini "prompt"` | Execute via Gemini CLI in plain-text mode |
 | `run_openai` | `run_openai "prompt"` | Execute via OpenAI Codex CLI |
 | `run_ollama` | `run_ollama "prompt"` | Execute via Ollama (local) |
-| `run_opencode` | `run_opencode "prompt"` | Execute via OpenCode (local coding) |
 | `run_qwen` | `run_qwen "prompt"` | Execute via Qwen CLI |
 | `run_crush` | `run_crush "prompt"` | Execute via Charm Crush TUI |
-| `run_kilo` | `run_kilo "prompt"` | Execute via Kilo Code CLI |
-| `run_amazon_q` | `run_amazon_q "prompt"` | Execute via Amazon Q Developer (kiro-cli) |
+| `run_kiro_cli` | `run_kiro_cli "prompt"` | Execute via Kiro CLI (kiro-cli) |
 | `run_goose` | `run_goose "prompt"` | Execute via Block Goose |
 
 **Intelligence Tiers:**
@@ -56,7 +54,7 @@ Depends on: `common.sh`
 | B-Tier (Coding) | `goose` | debugger, tester, automaton |
 | B-Tier (Systems) | `goose` | conduit, custodian |
 | B-Tier (Math/Logic) | `qwen` | optimizer, telemetrist |
-| B-Tier (Local Code) | `opencode` | maintainer |
+| B-Tier (Coding) | `goose` | maintainer |
 | C-Tier (Utility) | `ollama` | butler, librarian, writer |
 
 ---

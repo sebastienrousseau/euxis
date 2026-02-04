@@ -260,10 +260,10 @@ output=$(source "${EUXIS_HOME}/bin/lib/agents.sh"; resolve_agent_path "!!!invali
 # T6.2: Invalid provider rejected (test parse_args logic)
 # We can't easily test the full main() without actually running a provider,
 # but we can verify the case statement logic
-valid_providers="claude gemini openai ollama opencode qwen crush kilo amazon-q goose"
+valid_providers="claude gemini openai ollama qwen crush goose"
 for p in ${valid_providers}; do
     case "${p}" in
-        claude|gemini|openai|ollama|opencode|qwen|crush|kilo|amazon-q|goose) pass "Valid provider accepted: ${p}" ;;
+        claude|gemini|openai|ollama|qwen|crush|goose) pass "Valid provider accepted: ${p}" ;;
         *) fail "Valid provider rejected: ${p}" ;;
     esac
 done

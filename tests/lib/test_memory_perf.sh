@@ -23,7 +23,7 @@ kw3=$(_extract_keywords "token token token token token")
 assert_eq "deduplication works" "token" "${kw3}"
 
 # Max 10 keywords
-long_task="alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima"
+long_task="alpha bravo charlie delta echo foxtrot golf hotel india juliet mike lima"
 kw4=$(_extract_keywords "${long_task}")
 # Count pipes (separators) — max 10 keywords = max 9 pipes
 pipe_count=$(echo "${kw4}" | tr -cd '|' | wc -c)

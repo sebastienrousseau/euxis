@@ -134,9 +134,9 @@ Any agent that coordinates parallel work MUST use the standard Euxis dispatch ma
 ### Cost-Tiered Model Routing
 When dispatching or delegating tasks, agents MUST consider model cost tiers:
 - **S-Tier (Strategic)**: Complex reasoning, architecture, quality gates → claude.
-- **A-Tier (Research)**: Deep analysis, massive context → gemini. Enterprise/AWS → amazon-q.
-- **B-Tier (Coding)**: Agentic tool use → goose. Local code models → opencode. Math/logic → qwen.
-- **C-Tier (Utility)**: Summaries, formatting, lookups → ollama. High throughput → crush, kilo.
+- **A-Tier (Research)**: Deep analysis, massive context → gemini. Enterprise/AWS → kiro.
+- **B-Tier (Coding)**: Agentic tool use → goose. Math/logic → qwen.
+- **C-Tier (Utility)**: Summaries, formatting, lookups → ollama. High throughput → crush.
 - **Standard**: All other tasks → claude (default).
 - P0 tasks ALWAYS use S-Tier. NEVER use S-Tier for utility tasks.
 - Explicit provider argument ALWAYS overrides tier routing.

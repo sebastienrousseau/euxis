@@ -95,7 +95,6 @@ Euxis integrates with 10 AI providers out of the box. Use local models for priva
 | Claude | Strategic reasoning and architecture |
 | Ollama | Local inference, zero cost |
 | Gemini | Research with massive context |
-| OpenCode | Local code generation |
 
 Automatic intelligence routing picks the right model for each task. Override anytime with explicit provider selection.
 

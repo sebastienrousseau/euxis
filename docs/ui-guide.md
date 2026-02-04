@@ -94,7 +94,7 @@ All Euxis interfaces follow these keyboard navigation rules:
 
 | Shortcut | Action | Notes |
 |----------|--------|-------|
-| `↑/↓` | Navigate provider list | claude, gemini, openai, ollama, opencode |
+| `↑/↓` | Navigate provider list | claude, gemini, openai, ollama, qwen, goose, crush |
 | `Enter` | Choose provider | Sets current provider |
 | `Cancel` | Keep current provider | Select "Cancel" option |
 

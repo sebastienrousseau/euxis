@@ -78,8 +78,8 @@ Agents automatically route to optimal models based on task complexity:
 
 - **S-Tier (Strategic)**: Complex reasoning, architecture → claude
 - **A-Tier (Research)**: Deep analysis, massive context → gemini, amazon-q
-- **B-Tier (Coding)**: Agentic tool use → goose, opencode, qwen
-- **C-Tier (Utility)**: Summaries, formatting → ollama, crush, kilo
+- **B-Tier (Coding)**: Agentic tool use → goose, qwen
+- **C-Tier (Utility)**: Summaries, formatting → ollama, crush
 
 **Override**: Explicit provider argument always overrides tier routing.
 **P0 Priority**: Always uses S-Tier regardless of default routing.

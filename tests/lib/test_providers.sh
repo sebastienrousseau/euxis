@@ -12,12 +12,12 @@ assert_eq "product-manager → claude" "claude" "$(resolve_tiered_provider produ
 # Test resolve_tiered_provider: A-Tier agents
 assert_eq "deep-researcher → gemini" "gemini" "$(resolve_tiered_provider deep-researcher)"
 assert_eq "compliance-officer → gemini" "gemini" "$(resolve_tiered_provider compliance-officer)"
-assert_eq "incident-commander → amazon-q" "amazon-q" "$(resolve_tiered_provider incident-commander)"
+assert_eq "incident-commander → gemini" "gemini" "$(resolve_tiered_provider incident-commander)"
 
 # Test resolve_tiered_provider: B-Tier agents
 assert_eq "bug-fixer → goose" "goose" "$(resolve_tiered_provider bug-fixer)"
 assert_eq "unit-tester → goose" "goose" "$(resolve_tiered_provider unit-tester)"
-assert_eq "legacy-maintainer → opencode" "opencode" "$(resolve_tiered_provider legacy-maintainer)"
+assert_eq "legacy-maintainer → goose" "goose" "$(resolve_tiered_provider legacy-maintainer)"
 assert_eq "perf-optimizer → qwen" "qwen" "$(resolve_tiered_provider perf-optimizer)"
 
 # Test resolve_tiered_provider: C-Tier agents

@@ -53,7 +53,7 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Provider Layer                               │
-│   claude │ gemini │ openai │ ollama │ opencode │ qwen │ ...    │
+│   claude │ gemini │ openai │ ollama │ qwen │ goose │ ...    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 

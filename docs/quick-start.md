@@ -34,7 +34,7 @@ python3 --version # Should show 3.8 or higher
 
 ### AI Providers
 
-Euxis works with **10 providers** out of the box. You need at least one:
+Euxis works with **8 providers** out of the box. You need at least one:
 
 | Provider | Best For | Install |
 |:---------|:---------|:--------|
@@ -43,21 +43,19 @@ Euxis works with **10 providers** out of the box. You need at least one:
 | [Gemini](https://github.com/google-gemini/gemini-cli) | Research, large context | Follow installation guide |
 
 <details>
-<summary><strong>See All 10 Providers</strong></summary>
+<summary><strong>See All 8 Providers</strong></summary>
 
 **Cloud Providers:**
 - [Claude](https://docs.anthropic.com/en/docs/claude-cli) — Strategic reasoning
 - [Gemini](https://github.com/google-gemini/gemini-cli) — Research with massive context
-- [Amazon Q](https://github.com/aws/amazon-q-developer-cli) — AWS-native development
+- [Kiro CLI](https://kiro.dev) — AI coding assistant
 - [Codex CLI](https://github.com/openai/codex) — OpenAI models
 
 **Local Providers:**
 - [Ollama](https://ollama.com/) — Local inference
-- [OpenCode](https://github.com/opencode-ai/opencode) — Code generation
 - [Qwen](https://github.com/QwenLM/qwen-code) — 256K context coding
 - [Goose](https://github.com/block/goose) — MCP-native agent
 - [Crush](https://github.com/charmbracelet/crush) — Multi-model TUI
-- [Kilo](https://github.com/Kilo-Org/kilocode) — Multi-model CLI
 
 </details>
 

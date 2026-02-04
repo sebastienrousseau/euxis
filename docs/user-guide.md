@@ -226,7 +226,6 @@ Use for specific engineering tasks.
 | Provider | CLI | Best For |
 |----------|-----|---------|
 | `goose` (Block) | `goose` | Agent-native tool use for developer workflows |
-| `opencode` | `opencode` | Specialized local coding models (DeepSeek, CodeLlama) |
 | `qwen` (Alibaba) | `qwen` | Mathematical logic and dense algorithmic problems |
 
 ### C-Tier: Utility (Speed and Local)
@@ -237,7 +236,6 @@ Use for summaries, linting, and formatting to save costs and latency.
 |----------|-----|---------|
 | `ollama` | `ollama` | Local standard. Runs Llama 3, Phi, etc. |
 | `crush` (Charm) | `crush` | High-performance multi-model TUI agent |
-| `kilo` (Kilo Code) | `kilo` | Ultra-fast multi-model agentic CLI |
 
 ## Intelligence Tiering
 
@@ -251,7 +249,7 @@ When no provider is specified, Euxis routes agents by task complexity:
 | A-Tier: Domain | cryptographer, ledger | `claude` | Deep domain reasoning |
 | B-Tier: Coding | debugger, tester, automaton | `goose` | Agent-native tool use |
 | B-Tier: Systems | conduit, custodian | `goose` | Systems-level tool use |
-| B-Tier: Local Code | maintainer | `opencode` | Fast local code models |
+| B-Tier: Coding | maintainer | `goose` | Agent-native tool use |
 | B-Tier: Math/Logic | optimizer, telemetrist | `qwen` | Algorithmic optimization |
 | C-Tier: Utility | butler, librarian, writer | `ollama` | Zero latency, no cost |
 | Standard | all others | `claude` | General-purpose fallback |

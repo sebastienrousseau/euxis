@@ -34,15 +34,15 @@ resolve_tiered_provider() {
         # A-Tier: Research — massive context window for deep analysis
         deep-researcher|compliance-officer)
             echo "gemini" ;;
-        # A-Tier: Enterprise — AWS-native, corporate security contexts
+        # A-Tier: Enterprise — corporate security contexts
         incident-commander)
-            echo "amazon-q" ;;
+            echo "kiro-cli" ;;
         # B-Tier: Coding — agent-native tool use for developer workflows
         bug-fixer|unit-tester|automation-engineer)
             echo "goose" ;;
         # B-Tier: Local Code — specialized local models for diffs and migrations
         legacy-maintainer)
-            echo "opencode" ;;
+            echo "goose" ;;
         # A-Tier: Domain Specialists — require deep reasoning for domain correctness
         crypto-cryptography-auditor|payments-domain-steward)
             echo "claude" ;;
@@ -83,10 +83,6 @@ resolve_provider_config() {
             PROVIDER_MODEL="${EUXIS_OLLAMA_MODEL:-llama3.2}"
             PROVIDER_FLAGS="--local"
             ;;
-        opencode) # The Local Specialist (Coding)
-            PROVIDER_MODEL="${EUXIS_OPENCODE_MODEL:-codellama}"
-            PROVIDER_FLAGS="--local"
-            ;;
         qwen)     # Alibaba Qwen3-Coder (Open Source, 256K context)
             PROVIDER_MODEL="${EUXIS_QWEN_MODEL:-qwen3-coder}"
             PROVIDER_FLAGS=""
@@ -95,12 +91,8 @@ resolve_provider_config() {
             PROVIDER_MODEL="${EUXIS_CRUSH_MODEL:-claude-sonnet-4}"
             PROVIDER_FLAGS=""
             ;;
-        kilo)     # Kilo Code (Multi-model agentic CLI)
-            PROVIDER_MODEL="${EUXIS_KILO_MODEL:-claude-sonnet-4}"
-            PROVIDER_FLAGS=""
-            ;;
-        amazon-q) # Amazon Q Developer (AWS-native agent)
-            PROVIDER_MODEL="amazon-q"
+        kiro-cli) # Kiro CLI (AI coding assistant)
+            PROVIDER_MODEL="kiro-cli"
             PROVIDER_FLAGS=""
             ;;
         goose)    # Block Goose (Open source, MCP-native agent)
@@ -220,15 +212,6 @@ run_ollama() {
     fi
 }
 
-run_opencode() {
-    local full_prompt="$1"
-    if command -v opencode &>/dev/null; then
-        echo "${full_prompt}" | opencode --model "${PROVIDER_MODEL}"
-    else
-        log_error "opencode not found. Install from https://github.com/opencode-ai/opencode or use a different provider."
-        exit 1
-    fi
-}
 
 run_qwen() {
     local full_prompt="$1"
@@ -250,22 +233,13 @@ run_crush() {
     fi
 }
 
-run_kilo() {
-    local full_prompt="$1"
-    if command -v kilo &>/dev/null; then
-        echo "${full_prompt}" | kilo --model "${PROVIDER_MODEL}"
-    else
-        log_error "kilo not found. Install via: npm i -g @kilocode/cli"
-        exit 1
-    fi
-}
 
-run_amazon_q() {
+run_kiro_cli() {
     local full_prompt="$1"
     if command -v kiro-cli &>/dev/null; then
         echo "${full_prompt}" | kiro-cli chat
     else
-        log_error "kiro-cli (Amazon Q Developer CLI) not found. Install via: brew install --cask amazon-q"
+        log_error "kiro-cli not found. Install via: https://kiro.dev"
         exit 1
     fi
 }
@@ -299,11 +273,9 @@ execute_provider() {
         gemini)    run_gemini "${full_prompt}" ;;
         openai)    run_openai "${full_prompt}" ;;
         ollama)    run_ollama "${full_prompt}" ;;
-        opencode)  run_opencode "${full_prompt}" ;;
         qwen)      run_qwen "${full_prompt}" ;;
         crush)     run_crush "${full_prompt}" ;;
-        kilo)      run_kilo "${full_prompt}" ;;
-        amazon-q)  run_amazon_q "${full_prompt}" ;;
+        kiro-cli)  run_kiro_cli "${full_prompt}" ;;
         goose)     run_goose "${full_prompt}" ;;
     esac
 }

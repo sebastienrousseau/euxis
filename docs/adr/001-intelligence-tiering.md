@@ -11,9 +11,8 @@ Implement a tiered intelligence routing system that maps each agent to its optim
 
 - **S-Tier (Strategic):** orchestrator, architect, product-manager, reviewer → Claude (best reasoning and tool use)
 - **A-Tier (Research):** deep-researcher, compliance-officer → Gemini (massive context window)
-- **A-Tier (Enterprise):** incident-commander → Amazon Q (AWS-native security context)
+- **A-Tier (Enterprise):** incident-commander → Kiro CLI (AWS-native security context)
 - **B-Tier (Coding):** bug-fixer, unit-tester, automation-engineer → Goose (agent-native tool use)
-- **B-Tier (Local Code):** legacy-maintainer → OpenCode (specialized local models)
 - **B-Tier (Math/Logic):** perf-optimizer, data-steward → Qwen (algorithmic optimization)
 - **C-Tier (Utility):** butler, librarian, tech-writer → Ollama (zero latency, no cost)
 

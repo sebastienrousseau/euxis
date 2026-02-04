@@ -113,7 +113,6 @@ my-agent)
 | Deep research, massive context | A-Tier | gemini |
 | Enterprise/AWS-native | A-Tier | amazon-q |
 | Agentic tool use, coding | B-Tier | goose |
-| Local code models | B-Tier | opencode |
 | Math/logic/optimization | B-Tier | qwen |
 | Summaries, formatting, utility | C-Tier | ollama |
 | Default | Standard | claude |

@@ -40,7 +40,7 @@ Build faster. Ship with confidence.
 
 You need Bash 4.0+ and Python 3.8+, plus at least one AI provider.
 
-Euxis works with 10 providers out of the box:
+Euxis works with 8 providers out of the box:
 
 | Provider | CLI | Best For |
 |:---------|:----|:---------|
@@ -48,11 +48,9 @@ Euxis works with 10 providers out of the box:
 | [Gemini][gemini-url] | `gemini` | Research with large context |
 | [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
 | [Codex CLI][codex-url] | `codex` | OpenAI models |
-| [OpenCode][opencode-url] | `opencode` | Local code generation |
 | [Qwen Code][qwen-url] | `qwen` | Open-source agentic coding (256K context) |
 | [Crush][crush-url] | `crush` | Multi-model TUI agent |
-| [Kilo Code][kilo-url] | `kilo` | Multi-model agentic CLI |
-| [Amazon Q][amazon-q-url] | `kiro-cli` | AWS-native developer agent |
+| [Kiro CLI][kiro-cli-url] | `kiro-cli` | AI coding assistant |
 | [Goose][goose-url] | `goose` | Open-source MCP-native agent |
 
 ### Install
@@ -308,9 +306,7 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 [gemini-url]: https://github.com/google-gemini/gemini-cli
 [ollama-url]: https://ollama.com/
 [codex-url]: https://github.com/openai/codex
-[opencode-url]: https://github.com/opencode-ai/opencode
 [qwen-url]: https://github.com/QwenLM/qwen-code
 [crush-url]: https://github.com/charmbracelet/crush
-[kilo-url]: https://github.com/Kilo-Org/kilocode
-[amazon-q-url]: https://github.com/aws/amazon-q-developer-cli
+[kiro-cli-url]: https://kiro.dev
 [goose-url]: https://github.com/block/goose
