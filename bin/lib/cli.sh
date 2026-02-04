@@ -78,6 +78,9 @@ EOF
 # ============================================================================
 
 parse_args() {
+    local _t_parse
+    _t_parse=$(_perf_start)
+
     if [[ $# -lt 2 ]]; then
         usage
     fi

@@ -248,3 +248,8 @@ validate_full() {
     echo "Full validation passed."
     return 0
 }
+
+# Alias for backward compatibility with euxis-certify
+validate_comprehensive() {
+    validate_full "$@"
+}

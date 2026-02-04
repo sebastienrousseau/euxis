@@ -109,7 +109,7 @@ fi
 
 # TEST 5: Partial files (underscore prefix) rejected
 OUTPUT=$("$EUXIS_SCRIPT" "_protocol" "test" claude 2>&1 || true)
-if [[ "$OUTPUT" == *"Unknown agent"* ]]; then
+if [[ "$OUTPUT" == *"Unknown agent"* ]] || [[ "$OUTPUT" == *"partial files not allowed"* ]]; then
     report "PASS" "Rejects partial files (_protocol)"
 else
     report "FAIL" "Rejects partial files (_protocol)"
