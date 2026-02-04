@@ -32,7 +32,7 @@ MAJOR.MINOR.PATCH
 | Component | Incremented When | Example |
 |-----------|-----------------|---------|
 | **MAJOR** | Breaking changes to protocol, agent contracts, or CLI interface | `1.0.0` — Protocol v2 with incompatible handoff schema |
-| **MINOR** | New agents, new protocols, new capabilities (backward-compatible) | `0.1.0` — Added system-critic agent |
+| **MINOR** | New agents, new protocols, new capabilities (backward-compatible) | `0.1.0` — Added critic agent |
 | **PATCH** | Bug fixes, prompt refinements, documentation corrections | `0.0.7` — Fixed librarian version reference |
 
 ### 3. What Gets Versioned
@@ -58,7 +58,7 @@ MAJOR.MINOR.PATCH
 
 2. **Between releases**, working copies MAY have mixed versions during development. The `librarian` agent MUST flag mismatches.
 
-3. **The `release-manager` agent** is responsible for bumping all version references during a release cycle.
+3. **The `gatekeeper` agent** is responsible for bumping all version references during a release cycle.
 
 ### 5. Version Verification
 
@@ -88,7 +88,7 @@ The following version references are **DEPRECATED** and MUST NOT be used:
 
 1. **PATCH upgrades** (0.0.X): No migration required. Drop-in replacement.
 2. **MINOR upgrades** (0.X.0): New files may be added. Existing files unchanged. Run `euxis-sync-docs` after upgrade.
-3. **MAJOR upgrades** (X.0.0): Breaking changes. MUST include migration guide. `release-manager` MUST coordinate. `system-critic` MUST review.
+3. **MAJOR upgrades** (X.0.0): Breaking changes. MUST include migration guide. `gatekeeper` MUST coordinate. `critic` MUST review.
 
 ### 8. Compatibility Matrix
 
@@ -110,7 +110,7 @@ New permanent agents MUST NOT be added unless they introduce a **new axis of res
 | Introduces a responsibility axis not covered by any existing agent | YES |
 | Cannot be achieved by extending an existing agent's scope | YES |
 | Has at least 2 inbound escalation sources from existing agents | YES |
-| Justified in writing with rationale reviewed by `product-manager` | YES |
+| Justified in writing with rationale reviewed by `planner` | YES |
 | Approved by user | YES |
 
 **Transient agents** (created via `euxis-synthesize compose`) are exempt from this rule — they are temporary by design and dissolved after task completion.
@@ -132,7 +132,7 @@ The `activation` field in `registry.json` records this:
 
 On-demand agents are fully capable — they are not degraded or disabled. The distinction reduces cognitive load during orchestration by narrowing the default candidate set.
 
-**Current on-demand agents:** `brand-evangelist`, `butler`, `deep-researcher`, `devrel-advocate`, `globalization-lead`, `growth-marketer`, `social-manager`.
+**Current on-demand agents:** `evangelist`, `butler`, `researcher`, `ambassador`, `localizer`, `marketer`, `social`.
 
 ### 11. Enforcement
 

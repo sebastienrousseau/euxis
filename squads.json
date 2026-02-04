@@ -1,49 +1,49 @@
 {
   "schema_version": "1.0",
   "protocol_version": "0.0.7",
-  "last_updated": "2026-02-01",
+  "last_updated": "2026-02-04",
   "squads": [
     {
       "id": "vision",
       "name": "Vision Squad",
       "purpose": "Strategy & Discovery",
       "lead": "orchestrator",
-      "members": ["orchestrator", "architect", "product-manager", "deep-researcher"]
+      "members": ["orchestrator", "architect", "planner", "researcher"]
     },
     {
       "id": "build",
       "name": "Build Squad",
       "purpose": "Engineering & Execution",
-      "lead": "bug-fixer",
-      "members": ["bug-fixer", "legacy-maintainer", "automation-engineer", "unit-tester", "crash-investigator"]
+      "lead": "debugger",
+      "members": ["debugger", "maintainer", "automator", "tester", "forensic"]
     },
     {
       "id": "quality",
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "qa-coordinator", "edge-hunter", "compliance-officer", "perf-optimizer", "regression-analyst", "language-specialist"]
+      "members": ["reviewer", "qa", "pentester", "compliance", "optimizer", "watchdog", "polyglot"]
     },
     {
       "id": "growth",
       "name": "Growth Squad",
       "purpose": "Branding & Documentation",
-      "lead": "tech-writer",
-      "members": ["tech-writer", "brand-evangelist", "social-manager", "devrel-advocate", "growth-marketer", "globalization-lead"]
+      "lead": "writer",
+      "members": ["writer", "evangelist", "social", "ambassador", "marketer", "localizer"]
     },
     {
       "id": "experience",
       "name": "Experience Squad",
       "purpose": "UI Excellence & Interaction Design",
-      "lead": "web-ui-architect",
-      "members": ["web-ui-architect", "cli-ui-artisan", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel"]
-    }
-    ,{
+      "lead": "designer",
+      "members": ["designer", "tactician", "animator", "interactor", "ux"]
+    },
+    {
       "id": "specialist",
       "name": "Specialist Squad",
       "purpose": "Domain-Specific Expertise (Crypto, Payments, Audio, Rust)",
-      "lead": "crypto-cryptography-auditor",
-      "members": ["crypto-cryptography-auditor", "payments-domain-steward", "realtime-audio-engineer", "rust-crate-steward"]
+      "lead": "cryptographer",
+      "members": ["cryptographer", "ledger", "conduit", "custodian"]
     }
   ],
   "combos": [
@@ -51,43 +51,43 @@
       "id": "steve-jobs",
       "name": "Steve Jobs",
       "description": "Minimalist design to polished review",
-      "chain": ["product-manager", "architect", "brand-evangelist", "reviewer"]
+      "chain": ["planner", "architect", "evangelist", "reviewer"]
     },
     {
       "id": "fort-knox",
       "name": "Fort Knox",
       "description": "Maximum security assurance",
-      "chain": ["edge-hunter", "compliance-officer", "qa-coordinator", "reviewer"]
+      "chain": ["pentester", "compliance", "qa", "reviewer"]
     },
     {
       "id": "content-factory",
       "name": "Content Factory",
       "description": "End-to-end content production",
-      "chain": ["tech-writer", "brand-evangelist", "social-manager", "reviewer"]
+      "chain": ["writer", "evangelist", "social", "reviewer"]
     },
     {
       "id": "jony-ive",
       "name": "Jony Ive",
       "description": "Apple-level UI from design system to polished interaction",
-      "chain": ["web-ui-architect", "theming-and-motion-engineer", "interaction-and-input-specialist", "ux-sentinel", "reviewer"]
+      "chain": ["designer", "animator", "interactor", "ux", "reviewer"]
     },
     {
       "id": "crypto-fortress",
       "name": "Crypto Fortress",
       "description": "Deep cryptographic audit with security policy review",
-      "chain": ["security-lead", "crypto-cryptography-auditor", "edge-hunter", "reviewer"]
+      "chain": ["sentinel", "cryptographer", "pentester", "reviewer"]
     },
     {
       "id": "swift-payment",
       "name": "SWIFT Payment",
       "description": "End-to-end payments integration validation",
-      "chain": ["payments-domain-steward", "compliance-officer", "unit-tester", "reviewer"]
+      "chain": ["ledger", "compliance", "tester", "reviewer"]
     },
     {
       "id": "deep-review",
       "name": "Deep Review",
       "description": "Exhaustive pre-merge regression and language analysis",
-      "chain": ["language-specialist", "regression-analyst", "edge-hunter", "reviewer"]
+      "chain": ["polyglot", "watchdog", "pentester", "reviewer"]
     }
   ]
 }

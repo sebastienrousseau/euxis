@@ -7,7 +7,7 @@ priority: "GREEN"
 
 ## DOCUMENTATION, BRANDING & PR PROTOCOL (v0.0.7)
 
-This protocol consolidates all documentation governance, branding enforcement, and pull request requirements into a single authoritative source. Previously scattered across `orchestrator.txt`, `release-manager.txt`, and `euxis-certify`, this protocol is now the canonical reference.
+This protocol consolidates all documentation governance, branding enforcement, and pull request requirements into a single authoritative source. Previously scattered across `orchestrator.txt`, `gatekeeper.txt`, and `euxis-certify`, this protocol is now the canonical reference.
 
 ### 1. Branding Signature
 
@@ -32,8 +32,8 @@ ALL external-facing artifacts MUST carry this signature. No exceptions.
 |----------|----------|-------------|
 | Pull request descriptions | Footer of PR body | `euxis-hooks pr` auto-appends |
 | Commit messages | Trailer line: `Engineered with Euxis` | `prepare-commit-msg` hook |
-| Release notes | Footer section | `release-manager` mandate |
-| Changelog entries | Footer of each release entry | `release-manager` mandate |
+| Release notes | Footer section | `gatekeeper` mandate |
+| Changelog entries | Footer of each release entry | `gatekeeper` mandate |
 | README.md | Author attribution section | `euxis-certify` Gate 5 |
 | PR template | Footer | `euxis-certify` Gate 5 |
 
@@ -139,7 +139,7 @@ The following manifests MUST be valid JSON:
 1. **`euxis-certify` Gate 5** — Branding compliance (signature, PR template, README attribution, hooks, signing, commit signatures, URL check, workflow, open PRs).
 2. **`euxis-certify` Gate 6** — Documentation governance (sync-docs, required docs, freshness, version references, JSON manifests).
 3. **`euxis-lint`** — Structural and protocol compliance checks.
-4. **`release-manager`** — Enforces branding on all release artifacts.
+4. **`gatekeeper`** — Enforces branding on all release artifacts.
 5. **`reviewer`** — Verifies branding presence during quality gate reviews.
 
 ### 9. Agents with Branding Responsibilities
@@ -147,11 +147,11 @@ The following manifests MUST be valid JSON:
 | Agent | Responsibility |
 |-------|---------------|
 | `orchestrator` | Enforces `euxis-hooks pr` usage in all delegated PR creation |
-| `release-manager` | Branding on changelogs, release notes, and release artifacts |
+| `gatekeeper` | Branding on changelogs, release notes, and release artifacts |
 | `reviewer` | Validates branding presence during quality gate |
 | `librarian` | Documentation freshness and copyright header compliance |
-| `tech-writer` | Branding in user-facing documentation |
-| `brand-evangelist` | Brand voice and visual consistency |
+| `writer` | Branding in user-facing documentation |
+| `evangelist` | Brand voice and visual consistency |
 
 # (c) 2026 Euxis Fleet. All rights reserved.
 # Enterprise Unified eXecution Intelligence System

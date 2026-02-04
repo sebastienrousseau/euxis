@@ -21,11 +21,11 @@ Every agent MUST publish status events to the bus at these lifecycle points:
 ### Topic Conventions
 | Topic | Purpose | Default Subscribers |
 |-------|---------|-------------------|
-| `agent-status` | Agent lifecycle events | orchestrator, data-steward |
+| `agent-status` | Agent lifecycle events | orchestrator, telemetry |
 | `task-events` | Task creation/assignment/completion | orchestrator |
 | `memory-updates` | Cortex memory changes | librarian, orchestrator |
 | `conflict-alerts` | Inter-agent conflict detection | orchestrator, reviewer |
-| `health-checks` | Periodic health status | data-steward |
+| `health-checks` | Periodic health status | telemetry |
 | `escalations` | Priority escalation requests | orchestrator |
 
 ### Rules

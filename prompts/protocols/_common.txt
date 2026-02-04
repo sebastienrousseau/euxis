@@ -128,7 +128,7 @@ Any agent that coordinates parallel work MUST use the standard Euxis dispatch ma
 - Dispatches with no mutual dependencies MUST be grouped for parallel execution.
 - `mode` MUST be one of:
   - `hierarchical` (default) — All agents report to orchestrator. Use for standard coordination.
-  - `mesh` — Agents with dispatch authority (`architect`, `qa-coordinator`, `incident-commander`, `release-manager`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
+  - `mesh` — Agents with dispatch authority (`architect`, `qa`, `responder`, `gatekeeper`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
   - `federated` — Agents operate autonomously across project boundaries. Use for cross-project tasks.
 
 ### Cost-Tiered Model Routing

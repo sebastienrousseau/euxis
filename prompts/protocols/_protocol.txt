@@ -86,7 +86,7 @@ FINAL ANSWER: The system uses JWT tokens for authentication and handles refresh 
 **GOOD Handoff JSON Example:**
 ```json
 {
-  "agent": "bug-fixer",
+  "agent": "debugger",
   "session": "20260202-203613",
   "status": "SUCCESS",
   "findings": [
@@ -201,12 +201,12 @@ euxis-cortex remember "<concise fact — one sentence>" "<your_agent_id>" --type
 ```
 **Examples:**
 ```bash
-euxis-cortex remember "Deployed v5.0 to staging, all health checks passed" "release-manager" --type episodic
-euxis-cortex remember "The CI pipeline requires Node 20+ for ESM module support" "automation-engineer" --type semantic
-euxis-cortex remember "To fix flaky tests: isolate shared state → add retry → check test ordering" "unit-tester" --type procedural
+euxis-cortex remember "Deployed v5.0 to staging, all health checks passed" "gatekeeper" --type episodic
+euxis-cortex remember "The CI pipeline requires Node 20+ for ESM module support" "automator" --type semantic
+euxis-cortex remember "To fix flaky tests: isolate shared state → add retry → check test ordering" "tester" --type procedural
 ```
 - The fact MUST be a single, self-contained sentence.
-- The source MUST be your agent_id (e.g., `architect`, `bug-fixer`).
+- The source MUST be your agent_id (e.g., `architect`, `debugger`).
 - The type MUST be one of: `episodic`, `semantic`, `procedural`.
 - For multiple facts, output multiple `euxis-cortex remember` commands (one per fact).
 - ALSO append to `{{MEMORY_FILE_PATH}}` as a fallback (the flat file remains the audit-safe backup):
@@ -301,7 +301,7 @@ When two or more agents produce conflicting outputs during orchestrated work, th
 - A conflict exists when agents recommend incompatible actions, report contradictory facts, or produce overlapping artifacts.
 
 **Resolution Hierarchy (apply in order):**
-1. **Priority Framework** — The agent with the higher-priority scope for the specific conflict domain wins. Security (`edge-hunter`) overrides performance (`perf-optimizer`). Correctness (`reviewer`) overrides speed.
+1. **Priority Framework** — The agent with the higher-priority scope for the specific conflict domain wins. Security (`pentester`) overrides performance (`optimizer`). Correctness (`reviewer`) overrides speed.
 2. **Evidence Weight** — The agent with stronger evidence (verified data > inference > heuristic) wins. Every claim MUST cite which OBSERVATION supports it.
 3. **Negotiation Round** — If priority and evidence are equal, the orchestrator MUST request a focused re-evaluation from both agents with the specific conflict as input. Each agent MUST produce a `CONFLICT_RESPONSE` block:
    ```json

@@ -11,7 +11,7 @@ This protocol defines the security perimeter for all Euxis agents. Every agent M
 
 ### 1. Secret Handling
 
-**Secrets include:** API keys, tokens, passwords, private keys, credentials, PII (names, emails, phone numbers, addresses), and any data classified as sensitive by the `compliance-officer`.
+**Secrets include:** API keys, tokens, passwords, private keys, credentials, PII (names, emails, phone numbers, addresses), and any data classified as sensitive by the `compliance`.
 
 | Rule | Enforcement |
 |------|-------------|
@@ -20,7 +20,7 @@ This protocol defines the security perimeter for all Euxis agents. Every agent M
 | Secrets MUST NEVER be published to the message bus | All agents |
 | Secrets MUST NEVER be committed to git | All agents, `euxis-hooks` pre-commit check |
 | Secrets MUST NEVER appear in PR descriptions or comments | All agents, `euxis-hooks pr` |
-| If a secret is accidentally exposed, MUST escalate as S0 (CRITICAL) immediately | All agents → `security-lead` + `compliance-officer` |
+| If a secret is accidentally exposed, MUST escalate as S0 (CRITICAL) immediately | All agents → `sentinel` + `compliance` |
 
 **Detection patterns:**
 ```
@@ -52,7 +52,7 @@ Agents are restricted to the authorized tool belt defined in the Mandatory Proto
 | Project working directory | Read/Write | Delegated agents working on that project |
 | `~/.euxis/bin/` | Execute only | All agents |
 | `~/.euxis/config/branding/` | Read only | All agents |
-| System directories (`/etc`, `/usr`, `/var`) | Read only | `automation-engineer`, `incident-commander` (with justification) |
+| System directories (`/etc`, `/usr`, `/var`) | Read only | `automator`, `responder` (with justification) |
 | Other users' home directories | FORBIDDEN | — |
 | Temporary directories (`/tmp`) | Read/Write | All agents (clean up after use) |
 
@@ -69,7 +69,7 @@ Agents are restricted to the authorized tool belt defined in the Mandatory Proto
 
 ### 5. Mandatory Security Review Triggers
 
-The `security-lead` agent MUST be notified, and MUST dispatch `edge-hunter` for testing, when any of the following conditions are detected:
+The `sentinel` agent MUST be notified, and MUST dispatch `pentester` for testing, when any of the following conditions are detected:
 
 | Trigger | Detection Point | Severity |
 |---------|----------------|----------|
@@ -95,15 +95,15 @@ The `security-lead` agent MUST be notified, and MUST dispatch `edge-hunter` for 
 When a security incident is detected:
 
 1. **HALT** all non-essential work.
-2. **ESCALATE** as S0 to `security-lead`, `incident-commander`, and `edge-hunter`.
+2. **ESCALATE** as S0 to `sentinel`, `responder`, and `pentester`.
 3. **PRESERVE** evidence — do NOT modify, delete, or overwrite affected files.
 4. **LOG** the incident in the audit trail with full context.
 5. **NOTIFY** the user immediately via the orchestrator.
 
 ### 8. Compliance Integration
 
-- The `compliance-officer` agent MUST be consulted for any changes affecting PII handling, data residency, or regulatory requirements.
-- The `security-lead` agent MUST be consulted for any changes to authentication, authorization, or encryption. The `security-lead` dispatches `edge-hunter` for hands-on testing.
+- The `compliance` agent MUST be consulted for any changes affecting PII handling, data residency, or regulatory requirements.
+- The `sentinel` agent MUST be consulted for any changes to authentication, authorization, or encryption. The `sentinel` dispatches `pentester` for hands-on testing.
 - Security findings MUST be stored as SEMANTIC memories in the Cortex for cross-session availability.
 
 ### 9. Enforcement

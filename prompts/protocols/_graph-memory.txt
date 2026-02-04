@@ -28,14 +28,14 @@ You MUST create graph edges when:
 |------|---------|---------|
 | `entity` | Codebase components, concepts | `"auth-module"`, `"JWT-signing"` |
 | `memory` | Cortex memory references | `"bug-42-fix"`, `"deploy-v5"` |
-| `agent` | Fleet agents | `"architect"`, `"bug-fixer"` |
+| `agent` | Fleet agents | `"architect"`, `"debugger"` |
 | `session` | Interaction sessions | `"20260130-133152"` |
 
 ### Relation Types
 | Relation | Meaning | Example |
 |----------|---------|---------|
 | `related_to` | General association | auth-module → JWT-signing |
-| `produced_by` | Creation provenance | bug-42-fix → bug-fixer |
+| `produced_by` | Creation provenance | bug-42-fix → debugger |
 | `depends_on` | Structural dependency | login-service → auth-module |
 | `contradicts` | Conflicting information | finding-A → finding-B |
 | `references` | Citation or mention | memory-X → entity-Y |
