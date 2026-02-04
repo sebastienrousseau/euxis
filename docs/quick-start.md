@@ -140,22 +140,38 @@ Start with the **Butler** — your friendly introduction agent:
 euxis butler "Introduce yourself briefly."
 ```
 
-**Expected output:**
+**What you'll see:**
 ```
+[euxis] Agent: butler
+[euxis] Provider: ollama
+[euxis] ⠋ butler (ollama)...
+
 Hello! I'm your Euxis Butler, optimized for voice and clear communication.
 I help translate complex system outputs into natural spoken English.
 The fleet has 41 agents ready to assist with your engineering tasks.
 ```
 
+Notice how Euxis shows you exactly what's happening:
+- **Agent:** Which specialist is working
+- **Provider:** Which AI is running (butler uses `ollama` for fast local execution)
+- **Spinner:** Live status while the agent works
+
 <details>
-<summary><strong>What Just Happened?</strong></summary>
+<summary><strong>Understanding Provider Selection</strong></summary>
 
-You successfully deployed your first agent! Here's what occurred:
+Euxis automatically picks the best AI provider for each agent:
 
-1. **Agent Selection:** The `butler` agent was loaded from the fleet
-2. **Task Routing:** Your task was automatically routed to the optimal AI provider
-3. **Execution:** The agent processed your request and returned a response
-4. **Audit Trail:** The interaction was logged for future reference
+| Agent Type | Provider | Why |
+|------------|----------|-----|
+| Strategic (orchestrator, architect) | `claude` | Best reasoning |
+| Research (researcher) | `gemini` | Massive context |
+| Coding (debugger, tester) | `goose` | Tool use |
+| Utility (butler, writer) | `ollama` | Fast, local |
+
+**Override anytime** by adding the provider as a third argument:
+```bash
+euxis butler "Introduce yourself" claude  # Force Claude instead
+```
 
 </details>
 
@@ -280,5 +296,4 @@ ollama pull llama2
 
 ---
 
-🎨 Designed by Sebastien Rousseau — https://sebastienrousseau.com/
-🚀 Engineered with Euxis — Enterprise Unified eXecution Intelligence System — https://euxis.co/
+*Euxis v0.0.7 · Build something that matters.*

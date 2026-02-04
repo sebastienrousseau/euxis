@@ -112,26 +112,66 @@ For the complete agent registry, governance rules, and authority model, see [CON
 
 ## Usage
 
-### Single Agent Tasks
+Deploy any agent with a single command. Euxis selects the optimal AI provider automatically.
 
+```bash
+euxis <agent> "<task>" [provider]
+```
+
+### How Provider Selection Works
+
+When you run a command, Euxis routes your agent to the best AI for the job:
+
+```bash
+euxis architect "Review the auth module"
+```
+
+The spinner shows exactly which provider is running:
+
+```
+[euxis] Provider: claude
+[euxis] ⠋ architect (claude)...
+```
+
+**Automatic routing by agent type:**
+
+| Agent Type | Routes To | Why |
+|:-----------|:----------|:----|
+| Strategic (orchestrator, architect, reviewer) | `claude` | Best reasoning for complex decisions |
+| Research (researcher) | `gemini` | 2M token context for deep analysis |
+| Coding (debugger, tester, automaton) | `goose` | Agent-native tool use |
+| Utility (butler, writer, librarian) | `ollama` | Fast, local, zero cost |
+| All others | `claude` | Reliable default |
+
+### Override the Provider
+
+Add the provider name as the third argument:
+
+```bash
+euxis architect "Review the auth module" gemini    # Use Gemini instead
+euxis debugger "Fix user.py" claude                # Force Claude for coding
+euxis researcher "Compare frameworks" ollama       # Use local model
+```
+
+### Example Workflows
+
+**Single agent tasks:**
 ```bash
 euxis orchestrator "Refactor the login module to use JWT"
 euxis architect "Review the authentication module"
 euxis debugger "Fix the null pointer in user.py"
 ```
 
-### Research and Analysis
-
+**Research and analysis:**
 ```bash
 euxis researcher "Compare Python PDF parsing libraries with benchmarks"
 ```
 
-### Parallel Fleet Deployment
-
+**Team coordination:**
 ```bash
-euxis-dispatch manifest.json         # Parallel execution from manifest
-euxis-squad deploy build "Fix auth"  # Deploy entire squad
-euxis-combo run steve-jobs "Design onboarding flow"  # Sequential chain
+euxis-dispatch manifest.json                       # Parallel fleet deployment
+euxis-squad deploy build "Fix auth"                # Deploy entire squad
+euxis-combo run steve-jobs "Design onboarding"     # Sequential agent chain
 ```
 
 **For complete usage examples, workflow patterns, and advanced features, see [User Guide](docs/user-guide.md) and [Fleet Guide](docs/fleet-guide.md).**
@@ -162,12 +202,25 @@ euxis-dispatch --mode federated plan.json     # cross-project
 
 ## Automatic Task Routing
 
-When you omit the provider argument, Euxis routes each agent to the optimal tier automatically. S-Tier agents (orchestrator, architect, reviewer) route to `claude`; research agents route to `gemini`; coding agents to `goose`; utility agents to `ollama`. An explicit provider argument always overrides tiering.
+Euxis matches each agent to the AI provider best suited for its work. You never have to think about which model to use — but you always can.
+
+**The routing logic is simple:**
+
+1. **Check the agent type** — Strategic agents need reasoning. Research agents need context. Coding agents need tool use.
+2. **Select the optimal provider** — Each tier maps to a provider with the right capabilities.
+3. **Show you what's happening** — The spinner displays `agent (provider)` so you always know.
+
+**You're always in control:**
 
 ```bash
-euxis architect "Review the auth module"          # auto routes to claude
-euxis debugger "Fix user.py" gemini              # explicit override
+# Let Euxis choose (recommended)
+euxis architect "Design the API"              # → claude (strategic tier)
+
+# Override when you have a reason
+euxis architect "Design the API" gemini       # → gemini (your choice)
 ```
+
+**Available providers:** `claude` · `gemini` · `ollama` · `goose` · `qwen` · `crush` · `kiro-cli` · `codex`
 
 **For the complete intelligence tiering matrix and provider details, see [User Guide](docs/user-guide.md#ai-provider-matrix).**
 
@@ -287,6 +340,10 @@ When agents produce conflicting outputs, Euxis resolves them systematically:
 ## License
 
 Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
+
+---
+
+*Euxis v0.0.7 · Build something that matters.*
 
 <!-- Reference Links -->
 

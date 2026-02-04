@@ -186,5 +186,4 @@ Stop managing tools. Start building the future.
 
 ---
 
-*Euxis v0.0.7 — Enterprise Unified eXecution Intelligence System*
-*Copyright © 2026 Sebastien Rousseau. All rights reserved.*
+*Euxis v0.0.7 · Build something that matters.*

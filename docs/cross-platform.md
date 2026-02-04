@@ -190,5 +190,4 @@ docker buildx create --name multi-platform --use
 **Last Updated:** 2026-02-01
 **Next Review:** Release candidate testing
 
-> Designed by **Sebastien Rousseau**
-> Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+*Euxis v0.0.7 · Build something that matters.*

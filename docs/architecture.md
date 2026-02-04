@@ -217,3 +217,7 @@ Enables agents to share context and avoid redundant work:
 
 1. Define in `capabilities.json`
 2. Map to relevant agents in `registry.json`
+
+---
+
+*Euxis v0.0.7 · Build something that matters.*

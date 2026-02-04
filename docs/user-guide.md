@@ -366,3 +366,7 @@ euxis-playbook run zero-to-one "Launch auth service" --dry-run
 # Execute a combo chain
 euxis-combo run steve-jobs "Design new onboarding flow"
 ```
+
+---
+
+*Euxis v0.0.7 · Build something that matters.*

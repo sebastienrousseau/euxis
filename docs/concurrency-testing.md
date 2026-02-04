@@ -219,4 +219,4 @@ python3 -m pytest --collect-only test_deterministic_concurrency.py
 
 ---
 
-*This test suite ensures that Euxis concurrency mechanisms work reliably under all conditions, preventing race conditions and ensuring deterministic behavior.*
+*Euxis v0.0.7 · Build something that matters.*

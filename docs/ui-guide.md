@@ -362,4 +362,4 @@ All interactive elements MUST have visible focus indicators meeting:
 
 ---
 
-Designed by Sebastien Rousseau — Engineered with Euxis
+*Euxis v0.0.7 · Build something that matters.*

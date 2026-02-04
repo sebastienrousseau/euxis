@@ -111,5 +111,4 @@ New permanent agents are added only if they introduce a **new axis of responsibi
 
 ---
 
-# (c) 2026 Euxis Fleet. All rights reserved.
-# Enterprise Unified eXecution Intelligence System
+*Euxis v0.0.7 · Build something that matters.*

@@ -109,3 +109,7 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
 - **Always use the guard.** Other scripts (dispatch, loop, combo) may source the same libs.
 - **Keep the interface stable.** Function signatures are the API — changing them breaks callers.
 - **Export nothing.** Libraries define functions, not exported variables. Callers set their own state.
+
+---
+
+*Euxis v0.0.7 · Build something that matters.*

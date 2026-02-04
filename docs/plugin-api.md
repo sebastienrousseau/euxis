@@ -746,4 +746,4 @@ euxis log-analyzer "Analyze the application logs from the last hour for any erro
 
 ---
 
-**Designed by Sebastien Rousseau — Engineered with Euxis**
+*Euxis v0.0.7 · Build something that matters.*

@@ -209,3 +209,7 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 | `bin/euxis-council` | Multi-agent deliberation and voting |
 | `bin/euxis-graph` | Knowledge graph operations (add-edge, query) |
 | `bin/euxis-kaizen` | Automated maintenance (memory pruning, stale cleanup) |
+
+---
+
+*Euxis v0.0.7 · Build something that matters.*
