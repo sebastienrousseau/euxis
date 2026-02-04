@@ -64,6 +64,24 @@ euxis-playbook list
 
 **Use for**: Cryptographic systems, security-critical components, compliance requirements
 
+### Audio Pipeline
+**Phases**: Requirements → Implementation → Testing → Integration
+**Goal**: Build and validate real-time audio processing systems
+
+**Use for**: Audio processing features, real-time streaming, codec implementations
+
+### Payments Integration
+**Phases**: Security Review → Implementation → Compliance → Go-Live
+**Goal**: Secure payment system integration with compliance validation
+
+**Use for**: Payment gateway integrations, financial transactions, PCI compliance
+
+### Rust Release
+**Phases**: Code Review → Testing → Documentation → Publishing
+**Goal**: Validate and publish Rust crate releases
+
+**Use for**: Rust library releases, crate publishing, API documentation
+
 ## Playbook Structure
 
 ### Phase Definition
