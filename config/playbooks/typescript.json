@@ -1,0 +1,399 @@
+{
+  "schema_version": "1.0",
+  "id": "typescript",
+  "name": "TypeScript Excellence",
+  "description": "Ten-gate TypeScript enforcement: architecture, performance, portability, safety, testing, CI, documentation, API design, release readiness, truth. Strict mode mandatory, zero @ts-ignore, zero any escapes, ESM only, exported types for consumers, 100% coverage, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit TypeScript configuration and architecture for: ${goal}. Enforce tsconfig.json with strict: true (enables strictNullChecks, noImplicitAny, strictFunctionTypes, strictBindCallApply, strictPropertyInitialization, noImplicitThis, alwaysStrict). Additionally enforce: noUncheckedIndexedAccess, exactOptionalPropertyTypes, noImplicitReturns, noFallthroughCasesInSwitch, noImplicitOverride, isolatedModules, verbatimModuleSyntax. ESM exclusively: \"module\": \"NodeNext\", \"moduleResolution\": \"NodeNext\". Package.json MUST set \"type\": \"module\" and \"exports\" field with type declarations. Enforce modular src/ layout with barrel index.ts per module. Flag god files (>400 lines), god functions (>50 lines), circular imports. Enforce separation: domain logic MUST NOT import from I/O layers. Split large projects into composite projects (project references) if compilation exceeds 30s. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "strict: true in tsconfig.json",
+            "noUncheckedIndexedAccess enabled",
+            "exactOptionalPropertyTypes enabled",
+            "ESM module resolution (NodeNext)",
+            "\"type\": \"module\" in package.json",
+            "modular src/ structure with barrel exports",
+            "domain logic decoupled from I/O layers",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce TypeScript idioms across the entire codebase for: ${goal}. Flag: any type (explicit or implicit), @ts-ignore without adjacent justification comment, @ts-expect-error without test proving the error, as type assertions where type guards suffice, non-null assertions (!) without justification, enum (prefer const objects with as const or union types), class where interface + function suffices, namespace keyword, /// <reference> directives. Enforce: discriminated unions over type switches, branded types for domain IDs, satisfies operator for type-safe defaults, const assertions for literal types, template literal types for string patterns, conditional types over overload chains where cleaner, readonly by default (Readonly<T>, ReadonlyArray<T>), utility types (Pick, Omit, Partial, Required, Record) over manual retyping.",
+          "verifies": [
+            "zero any (explicit or implicit)",
+            "zero @ts-ignore without justification",
+            "no enum (union types or as const instead)",
+            "discriminated unions for variants",
+            "satisfies operator used for defaults",
+            "readonly by default",
+            "branded types for domain identifiers",
+            "utility types over manual retyping"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current TypeScript best practices for: ${goal}. Research: latest TypeScript release features (5.x decorators, const type parameters, satisfies, verbatimModuleSyntax, isolatedDeclarations), ESM migration patterns and dual CJS/ESM publishing, tsconfig bases (@tsconfig/strictest), type-level programming best practices (conditional types, template literals, mapped types), current build tooling (tsc, tsup, tsx, esbuild, SWC), runtime type validation (Zod, Valibot, ArkType), monorepo patterns with project references. Cross-validate findings against TypeScript handbook, release notes, and community best practices (total-typescript, type-challenges). Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "latest TypeScript 5.x features researched",
+            "ESM migration patterns documented",
+            "tsconfig best practices with citations",
+            "build tooling landscape evaluated",
+            "runtime validation libraries compared",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit TypeScript file organization for: ${goal}. Verify every module has a JSDoc @module comment explaining its purpose. Verify test directories mirror source directories: tests/<module>/ for every src/<module>/. Remove orphaned files not imported anywhere. Enforce consistent file naming (kebab-case.ts, pick ONE convention). Verify barrel exports (index.ts) expose clean public API with explicit re-exports (no export *). Verify type declaration files (.d.ts) colocated or generated. Clean up dist/, node_modules, .tsbuildinfo from repo. Verify tsconfig paths aliases match directory structure. Verify exports field in package.json maps all public entry points with types condition.",
+          "verifies": [
+            "every module has @module JSDoc",
+            "test directories mirror source directories",
+            "no orphaned files",
+            "consistent file naming convention",
+            "barrel exports with explicit re-exports (no export *)",
+            "no dist or .tsbuildinfo in repo",
+            "exports field with types condition in package.json"
+          ]
+        }
+      ],
+      "checkpoint": "Strict TypeScript, ESM-pure, modular, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Enable strict mode, remove any escapes, and fix modularity."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Analyze TypeScript compilation time and runtime performance for: ${goal}. Profile tsc compilation: if >30s, split into composite projects with project references (composite: true, references). Use incremental: true and tsBuildInfoFile. Minimize type-level computation: flag deeply nested conditional types (>4 levels), recursive mapped types, and excessive union expansion. Profile runtime with Node.js --prof or clinic.js. Apply: Set/Map over Object for frequent lookups, ReadableStream for large data, worker_threads for CPU-bound tasks, lazy imports for optional features. If browser-targeted: audit bundle size with size-limit, enforce tree-shaking (sideEffects: false). Profile startup time. Verify no memory leaks: EventEmitter listeners cleaned, intervals cleared, streams destroyed. Target: low memory, low CPU, fast compilation.",
+          "verifies": [
+            "compilation time profiled and within budget (<30s)",
+            "project references for large codebases",
+            "incremental compilation enabled",
+            "no deeply nested conditional types (>4 levels)",
+            "hot paths profiled with evidence",
+            "bundle size audited (if applicable)",
+            "no memory leaks (listeners/intervals/streams cleaned)",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit TypeScript dependency health for: ${goal}. Identify and remove unused dependencies (depcheck, knip). Replace heavy deps with lighter alternatives or native APIs. Verify @types/* packages match their runtime dep versions. Remove @types/* for deps that ship their own types. Verify lock file committed (package-lock.json or pnpm-lock.yaml). Flag excessive dependencies (>50 direct, >200 transitive). Check all deps actively maintained (release within 12 months). Flag deps without TypeScript types (no .d.ts, no @types/*). Verify devDependencies not leaked to production. Verify engines field and types condition in exports.",
+          "verifies": [
+            "no unused dependencies (knip/depcheck clean)",
+            "@types/* versions match runtime deps",
+            "no redundant @types/* for typed deps",
+            "lock file committed",
+            "total dependencies reasonable (<50 direct)",
+            "all deps actively maintained",
+            "all deps have TypeScript types"
+          ]
+        }
+      ],
+      "checkpoint": "Compilation fast, runtime lean, dependencies minimal, types aligned",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Slow compilation, runtime waste, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure tsc --noEmit and tests pass on macOS, Linux, and Windows. Test Node.js version matrix: 20 LTS, 22 LTS, 23 current. Verify no platform-specific behavior leaks: path separators (use node:path), line endings (handle CRLF/LF), file system case sensitivity assumptions, child_process shell differences. Verify no hardcoded absolute paths. Use import.meta.url for file references. Verify tsconfig target and lib match minimum supported runtime. If publishing: verify .d.ts files resolve correctly on all platforms. Test dual ESM/CJS consumption if supporting both. Flag any process.platform checks without corresponding tests. Verify package.json engines field.",
+          "verifies": [
+            "tsc and tests pass on macOS, Linux, Windows",
+            "tests pass on Node.js 20, 22, 23",
+            "node:path used for path operations",
+            "no hardcoded absolute paths",
+            "import.meta.url for file references",
+            ".d.ts files resolve on all platforms",
+            "engines field in package.json"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS, Linux, Windows with Node.js 20-23",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Platform-specific leaks or version incompatibilities detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of the TypeScript codebase for: ${goal}. Scan for: prototype pollution (object merge/spread without safeguards), ReDoS (regex backtracking), XSS (innerHTML, unsanitized template injection), command injection (child_process.exec with user input), path traversal, SQL/NoSQL injection, eval/Function constructor, type assertion abuse (as any to bypass safety), hardcoded secrets, unvalidated URLs (SSRF). Verify: all user input validated at boundaries with runtime validation (Zod/Valibot), all subprocess calls use execFile with array args, Content-Security-Policy headers set. Flag every as any and as unknown as potential safety bypass. Provide severity and remediation for each finding.",
+          "verifies": [
+            "no prototype pollution vectors",
+            "no ReDoS-vulnerable regex",
+            "no XSS vectors",
+            "no command injection (execFile over exec)",
+            "no as any bypasses (or justified)",
+            "no eval/Function on user input",
+            "no hardcoded secrets",
+            "runtime validation at boundaries (Zod/Valibot)"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit TypeScript supply chain security and define security policy for: ${goal}. Run npm audit for known CVEs. Verify: no unmaintained deps (>18 months), all deps have compatible licenses (flag GPL in MIT/Apache projects), transitive deps <200, no typosquatting risks. Verify lock file committed. Check for preinstall/postinstall scripts that execute arbitrary code. Flag @types/* packages from untrusted sources. Verify .npmrc does not expose tokens. Verify .npmignore or files field prevents publishing source maps, tests, or secrets. Classify threat level for each finding using S0-S3 severity. Verify types are not exposing internal implementation details to consumers.",
+          "verifies": [
+            "no known CVEs (npm audit clean)",
+            "no unmaintained dependencies",
+            "license compatibility verified",
+            "no typosquatting risks",
+            "lock file committed",
+            "no suspicious install scripts",
+            "@types/* packages from trusted sources",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "No injection vulnerabilities, no type safety bypasses, supply chain clean",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Security vulnerabilities, type safety bypasses, or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive test coverage for: ${goal}. Achieve 100% line coverage and 90%+ branch coverage using Vitest with c8/istanbul. TEST TYPES: use tsd, expect-type, or @ts-expect-error assertions to verify that types resolve correctly for consumers (return types, parameter types, generic inference, error types). Write property-based tests using fast-check for: data parsing/serialization roundtrips, Zod schema validation invariants, API contract validation. Verify mock discipline: external services MUST be mocked (vi.mock). Test async functions: proper cleanup, AbortController cancellation. Parametrize edge cases: empty inputs, null/undefined, unknown, Unicode, large arrays, concurrent access. Enforce: no test interdependency (randomized order), no setTimeout (use fake timers), type-safe test fixtures. Run mutation testing (Stryker) to verify test effectiveness.",
+          "verifies": [
+            "100% line coverage",
+            "90%+ branch coverage",
+            "type tests verify consumer-facing types (tsd/expect-type)",
+            "property-based tests with fast-check",
+            "external services strictly mocked",
+            "async cleanup and cancellation tested",
+            "edge cases parametrized",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, type tests pass, property tests, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps, type test failures, or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full TypeScript CI pipeline for: ${goal}. Run tsc --noEmit as FIRST CI step to verify type correctness before testing. Disallow @ts-ignore: configure typescript-eslint with @typescript-eslint/ban-ts-comment (allow @ts-expect-error with description only). Configure ESLint with typescript-eslint: strict-type-checked + stylistic-type-checked configs. Prettier for formatting. Vitest with --coverage --coverageThreshold. npm audit in pipeline. Pre-commit hooks via husky + lint-staged: eslint --fix, prettier --write, tsc --noEmit. SLO enforcement: tsc <30s, lint <15s, tests <120s. CI matrix: macOS + Linux at minimum, Node.js LTS versions. Cache node_modules and .tsbuildinfo. Nightly job for dependency updates and TypeScript nightly testing. No '|| true' on any step.",
+          "verifies": [
+            "tsc --noEmit runs before tests in CI",
+            "@ts-ignore banned (@ts-expect-error with description only)",
+            "typescript-eslint strict-type-checked configured",
+            "Prettier formatting enforced",
+            "coverage threshold enforced in CI",
+            "pre-commit hooks configured (husky + lint-staged)",
+            "CI matrix macOS + Linux, Node LTS versions",
+            "nightly TypeScript testing configured"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all TypeScript standards, tsc gates everything, zero tolerance",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Type checking not gating, or pipeline gaps detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all TypeScript documentation for: ${goal}. Every exported function, class, interface, and type MUST have TSDoc comments: @remarks for detailed explanation, @param with type (redundant types omitted when inferable), @returns, @throws, @example with runnable code. Define interface boundaries: ensure all consumer-facing types are exported from package entry points. Configure TypeDoc for API reference generation. README MUST include: one-sentence description, installation (npm install), quickstart with typed examples, configuration reference, license. Verify all @example blocks compile and execute. Build docs without warnings (typedoc --treatWarningsAsErrors). Structure: Getting Started, User Guide, API Reference.",
+          "verifies": [
+            "every export has TSDoc annotation",
+            "@param/@returns/@throws documented",
+            "@example blocks compile and execute",
+            "consumer-facing types exported from entry points",
+            "TypeDoc generates without warnings",
+            "README complete with typed quickstart",
+            "Getting Started / User Guide / API Reference structure"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all TypeScript documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit TSDoc comments, README, guides, error messages, and CLI help text. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All exports documented with TSDoc, types exported for consumers, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing TSDoc, unexported types, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit TypeScript API ergonomics and user experience for: ${goal}. Verify type-driven API design: generic inference works without manual type annotation by consumers, overloads resolve unambiguously, discriminated unions provide exhaustive checking, option bags use Partial<Config> with defaults via satisfies. If CLI: verify commander/yargs/citty used, --help comprehensive, error messages actionable, exit codes follow convention, NO_COLOR respected, stderr/stdout separation. If library: verify errors carry actionable messages with typed error codes, consistent async patterns, options objects reduce boilerplate, builder patterns for complex configuration. Verify exported types enable IDE autocomplete without reading docs. Flag any generic parameter that consumers must specify manually.",
+          "verifies": [
+            "generic inference works without manual annotation",
+            "discriminated unions provide exhaustive checking",
+            "error types are typed with codes",
+            "NO_COLOR respected",
+            "exit codes follow convention",
+            "consistent async patterns (no mixed)",
+            "exported types enable full autocomplete"
+          ]
+        }
+      ],
+      "checkpoint": "API type-driven, errors typed, UX polished, autocomplete complete",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor type inference, untyped errors, or UX issues detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with vitest bench or tinybench. Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load with heap snapshots: no unbounded growth, no leaked listeners, no uncleaned intervals. Measure tsc compilation time and set budget. Check package size: exclude tests, source maps, and dev artifacts via files field. If browser: enforce bundle size budgets (size-limit). Verify .d.ts output size is reasonable (no bloated mapped types). Target: low memory, low CPU, fast compilation under sustained load.",
+          "verifies": [
+            "benchmarks for hot paths (vitest bench/tinybench)",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "tsc compilation time within budget",
+            "package size optimized (files field)",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops, new ESLint violations, new tsc errors, failures on TypeScript nightly or upcoming versions. Classify every change by risk: type narrowing changes, generic constraint modifications, module boundary shifts, error type changes (breaking for consumers), export additions/removals. Scan for deprecated APIs older than 6 months. Verify dead code unreachable by any test or entry point. Check devDependencies not leaked to production. Verify .d.ts output has not regressed (no accidental any or unknown widening). Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "TypeScript nightly tested",
+            "change categories classified by risk",
+            ".d.ts output regression checked",
+            "no stale deprecated code (>6 months)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: tsc --noEmit passes, all tests pass, coverage at 100%, ESLint clean, Prettier clean, npm audit clean, documentation current. Determine correct semantic version bump: MAJOR for breaking type changes (removed exports, narrowed types, changed generics), MINOR for new exports/features, PATCH for fixes. Verify version consistent in package.json. Verify .d.ts files included in package. Verify exports field with types condition. Generate changelog following Keep a Changelog format. Verify upgrade/migration instructions for breaking type changes. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct (including type breaks)",
+            "version consistent in package.json",
+            ".d.ts files included in package",
+            "changelog generated (Keep a Changelog)",
+            "migration instructions for breaking type changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, type regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, type regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), strict: true with all additional strict flags, zero any (explicit or implicit), zero @ts-ignore, ESM-pure, best practices researched with citations, typescript-eslint strict-type-checked clean, cross-platform parity on macOS/Linux/Windows with Node.js 20-23, 100% line coverage, type tests pass (tsd/expect-type), property tests via fast-check, npm audit clean with S0-S3 classification, all exports documented with TSDoc, consumer types exported, brand voice audit passed, TypeDoc builds without warnings, CI gates on tsc --noEmit, stress tests passed, .d.ts regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "strict TypeScript confirmed (zero any, zero @ts-ignore)",
+            "ESM-pure confirmed",
+            "cross-platform parity confirmed",
+            "100% coverage and type tests confirmed",
+            "CI fully enforced (tsc gates everything)",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, API responses, and data stores. Audit all dependency licenses via license-checker or license-report: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers are present and correct across all .ts source files. Check for unauthorized data flows to third-party endpoints. Verify .gitignore excludes sensitive files (.env, .npmrc with tokens, private keys). Verify .npmignore or files field prevents publishing source maps with inlined sources, tests, or secrets. Verify type declarations do not leak internal implementation details. Flag any compliance violation with regulatory reference (GDPR, CCPA) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared (license-checker)",
+            "copyright headers present on all .ts files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo and package",
+            "type declarations do not leak internals",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge type safety claims: does strict: true truly eliminate all unsafe code, or are there as unknown as T escapes, @ts-expect-error suppressions, or Function/Object types hiding? Challenge coverage claims: does 100% line coverage mean all type branches are tested, or are there generic instantiation paths untested? Challenge .d.ts quality: do exported types accurately represent runtime behavior, or do they over-promise (lie about nullability, optionality)? Perform pre-mortem: assume the package caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "type safety challenged (as unknown escapes, Function/Object)",
+            "coverage challenged (generic instantiation paths)",
+            ".d.ts accuracy challenged (lies about nullability)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "schema_version": "1.0",
+  "id": "cpp23",
+  "name": "C++23 Excellence",
+  "description": "Ten-gate C++23 enforcement: modules over headers, std::print over iostream, std::mdspan for arrays, deduced this, ranges/views, CMake strict mode, Clang-Tidy modernize, ASan/UBSan clean, zero undefined behavior, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce strict C++23 architecture and module system for: ${goal}. Mandate C++20/23 modules (import std; or internal modules) over legacy #include headers where compiler support allows. Refactor headers to module interface units (.cppm/.ixx): named modules with export declarations, internal partitions for implementation details. Enforce: one module per logical component, module partitions for large modules, no circular module dependencies, dependency graph depth <=4. Audit class designs for deduced this (explicit object parameters): refactor CRTP patterns to use (this auto&& self), refactor recursive lambdas to use deduced this. Refactor multidimensional array handling: enforce std::mdspan for non-owning views of contiguous data instead of raw pointer arithmetic or nested std::vector. Flag: god classes (>500 lines), god functions (>50 lines), raw new/delete (use smart pointers), C-style casts (use static_cast/dynamic_cast). Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "C++23 modules over #include where supported",
+            "module interface units (.cppm/.ixx) for public API",
+            "deduced this replaces CRTP patterns",
+            "std::mdspan for multidimensional array views",
+            "no raw new/delete (smart pointers only)",
+            "no C-style casts",
+            "no god classes (>500 lines) or functions (>50 lines)",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce C++23 idioms across the entire codebase for: ${goal}. Scan for legacy I/O (std::cout, std::cerr, printf, fprintf): enforce std::print and std::println for type-safe formatted output. Flag: std::bind (use lambdas), std::auto_ptr (use unique_ptr), volatile for synchronization (use atomics), manual RAII (use scope_guard or unique_resource from C++26 preview), NULL or 0 for null (use nullptr), typedef (use using), enum without class, macro constants (use constexpr/consteval), manual type traits (use concepts). Enforce: std::expected<T,E> over exceptions for recoverable errors, std::optional for nullable values, std::variant over union, std::span over pointer+size, std::string_view over const string&, structured bindings for multi-return, constexpr everywhere possible, consteval for compile-time-only functions, if consteval for mixed paths, std::ranges algorithms over std:: algorithms, std::views pipelines, auto(x) for decay-copy.",
+          "verifies": [
+            "std::print/println over cout/printf",
+            "std::expected for recoverable errors",
+            "std::optional for nullable values",
+            "std::span over pointer+size",
+            "std::ranges over legacy algorithms",
+            "constexpr/consteval everywhere possible",
+            "concepts over SFINAE/enable_if",
+            "structured bindings for multi-return"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current C++23 best practices for: ${goal}. Research: C++23 feature support matrix (Clang 17+, GCC 14+, MSVC latest), module system maturity and build system support (CMake 3.28+ modules, Ninja generator), std::print implementation status and performance vs iostream/fmt, std::mdspan usage patterns and layout policies, deduced this advanced patterns (mixins, recursive visitors), std::expected error handling strategies, std::generator for coroutine-based ranges, std::flat_map/flat_set performance characteristics, std::stacktrace for diagnostics, C++23 constexpr math and string changes. Cross-validate against cppreference, ISO C++ papers, CppCon talks, and compiler release notes. Flag features with incomplete compiler support and propose fallbacks.",
+          "verifies": [
+            "C++23 compiler support matrix documented",
+            "module build system support evaluated (CMake 3.28+)",
+            "std::print status and performance compared",
+            "std::mdspan layout policies researched",
+            "deduced this advanced patterns documented",
+            "incomplete features flagged with fallbacks",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit C++23 file organization for: ${goal}. Verify directory structure: src/ for implementation, include/ for public headers (or module interfaces), tests/ mirroring src/ structure, cmake/ for build modules. If using modules: .cppm/.ixx for interfaces, .cpp for implementation partitions. If using headers: .hpp for C++ headers (not .h unless C-compatible), guards use #pragma once (or include guards matching namespace). Remove orphaned files not referenced by CMakeLists.txt or module declarations. Enforce consistent naming (snake_case.cpp or PascalCase.cpp, pick ONE). Clean up build artifacts from repo (build/, CMakeCache.txt, *.o, *.obj). Verify CMakeLists.txt target structure matches directory layout. Verify .clang-format and .clang-tidy exist and are configured.",
+          "verifies": [
+            "src/ and include/ (or modules) directory structure",
+            "test directories mirror source structure",
+            "no orphaned files",
+            "consistent file naming convention",
+            "no build artifacts in repo",
+            "CMakeLists.txt matches directory layout",
+            ".clang-format and .clang-tidy configured"
+          ]
+        }
+      ],
+      "checkpoint": "C++23 modules, deduced this, std::print, std::mdspan, modern idioms, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Adopt C++23 modules, replace legacy patterns, and fix structure."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Audit C++23 performance and resource usage for: ${goal}. Audit std::move and std::forward usage: verify std::forward_like in generic code to correctly preserve value category. Profile with perf, Instruments, or VTune. Apply: move semantics on all non-trivial types, std::pmr allocators for allocation-heavy hot paths, std::ranges::views for lazy evaluation (no intermediate allocations), constexpr evaluation to shift work to compile time, flat containers (std::flat_map/flat_set) for cache-friendly access, std::mdspan with correct layout (layout_right for row-major, layout_left for column-major). Flag: unnecessary copies (pass-by-value without move, string copies), virtual dispatch in hot paths (use CRTP or deduced this), heap allocation in tight loops, exception throwing in hot paths. Profile compile time: flag if >120s. Benchmark hot paths with Google Benchmark. Target: low memory, low CPU, zero unnecessary allocations.",
+          "verifies": [
+            "std::forward_like in generic code",
+            "move semantics on all non-trivial types",
+            "std::ranges::views for lazy evaluation",
+            "constexpr shifts work to compile time",
+            "flat containers for cache-friendly access",
+            "no unnecessary copies in hot paths",
+            "hot paths benchmarked (Google Benchmark)",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit C++23 dependency health for: ${goal}. Review all dependencies in CMakeLists.txt/vcpkg.json/conanfile.txt: verify version pinned, check for known CVEs. Replace external libraries with C++23 stdlib where possible: fmt with std::print, Boost.Optional with std::optional, Boost.Expected with std::expected, range-v3 with std::ranges, gsl::span with std::span, Abseil flat containers with std::flat_map. Flag excessive dependencies (>20 direct). Check all deps actively maintained (release within 12 months). Verify package manager lock file committed (vcpkg.json with builtin-baseline, conan.lock). Verify no header-only mega-libraries included for single features. Flag deps without C++23 module support if project uses modules.",
+          "verifies": [
+            "dependencies version-pinned",
+            "stdlib replacements for external libs where possible",
+            "no known CVEs in dependencies",
+            "total dependencies reasonable (<20 direct)",
+            "all deps actively maintained",
+            "lock file committed (vcpkg/conan)",
+            "no mega-libraries for single features"
+          ]
+        }
+      ],
+      "checkpoint": "Move semantics correct, constexpr maximized, dependencies lean, hot paths benchmarked",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unnecessary copies, missing move semantics, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform C++23 portability for: ${goal}. Test compiler matrix: Clang 17+ (macOS/Linux), GCC 14+ (Linux), MSVC latest (Windows). Verify CMake requires -std=c++23 (or /std:c++latest for MSVC): set(CMAKE_CXX_STANDARD 23) with set(CMAKE_CXX_STANDARD_REQUIRED ON). Flag compiler-specific extensions: __attribute__, __declspec, #pragma region (use [[attributes]] or platform-guard). Verify no platform-specific APIs without #ifdef guards: POSIX-only calls, Windows-only calls. Verify no hardcoded paths. Verify sizeof assumptions documented (ILP32 vs LP64 vs LLP64). Test with different standard library implementations: libc++ (Clang), libstdc++ (GCC), MSVC STL. Flag C++23 features with incomplete support across target compilers and provide fallbacks. Verify endianness handling uses std::endian.",
+          "verifies": [
+            "builds with Clang 17+, GCC 14+, MSVC latest",
+            "CMAKE_CXX_STANDARD 23 required",
+            "no compiler-specific extensions without guards",
+            "no platform-specific APIs without #ifdef",
+            "no hardcoded paths",
+            "works with libc++, libstdc++, MSVC STL",
+            "C++23 feature fallbacks for incomplete support"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-compiler parity verified on Clang, GCC, MSVC with C++23 standard",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Compiler-specific code, missing guards, or feature gaps detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and memory safety audit of C++23 codebase for: ${goal}. Run AddressSanitizer (ASan): detect buffer overflows, use-after-free, use-after-return, memory leaks. Run UndefinedBehaviorSanitizer (UBSan): detect signed overflow, null dereference, alignment violations, type punning. Run ThreadSanitizer (TSan): detect data races, deadlocks. Specifically check for: dangling views (std::string_view, std::span outliving source), iterator invalidation (ranges::views over modified containers), use-after-move, dangling references from temporary materialization. Scan for: format string vulnerabilities, command injection (system/popen), buffer overflows in C interop, hardcoded secrets. Verify: bounds checking on array access (std::at or checked iterators), no raw pointer arithmetic (use std::span), no reinterpret_cast without justification, no void* without type erasure pattern.",
+          "verifies": [
+            "ASan clean (zero buffer overflows, leaks, use-after-free)",
+            "UBSan clean (zero undefined behavior)",
+            "TSan clean (zero data races)",
+            "no dangling views (string_view/span outliving source)",
+            "no iterator invalidation in ranges pipelines",
+            "no use-after-move",
+            "no raw pointer arithmetic (std::span instead)",
+            "no hardcoded secrets"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit C++23 supply chain security for: ${goal}. Verify all dependencies: pinned versions in package manager, known CVE scan (vcpkg audit or manual check), actively maintained, license compatible. If C interop: verify extern \"C\" boundaries are minimal, FFI types validated. Verify no precompiled binaries without provenance. Verify no -Wno-error flags suppressing security warnings. Flag: link-time dependencies not declared, dlopen/LoadLibrary without path validation, network code without TLS. Verify .gitignore excludes build/, credentials, core dumps. Audit CMake for FetchContent downloading unverified sources (require hash verification). Classify threat level using S0-S3 severity. Verify compile flags include stack protection (-fstack-protector-strong) and ASLR compatibility (-fPIE).",
+          "verifies": [
+            "dependencies pinned and CVE-scanned",
+            "all deps actively maintained",
+            "license compatibility verified",
+            "no unverified FetchContent downloads",
+            "stack protection enabled (-fstack-protector-strong)",
+            "ASLR compatible (-fPIE)",
+            "no suppressed security warnings (-Wno-error)",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "ASan/UBSan/TSan clean, no dangling views, supply chain secured",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Sanitizer findings, dangling views, or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive C++23 testing for: ${goal}. Use C++23-capable framework (latest Catch2 v3 or GoogleTest). Achieve 100% line coverage and 90%+ branch coverage (gcov/llvm-cov). Test ranges and views: boundary conditions (empty ranges, single element, max size), views over temporary containers (verify no dangling), chained view pipelines, views with predicates that throw. Test std::expected: both value and error paths, monadic operations (and_then, or_else, transform). Test constexpr functions: compile-time evaluation verified with static_assert. Test move semantics: verify moved-from state, verify no use-after-move. Test concepts: verify constraint satisfaction and rejection (static_assert(!concept<Wrong>)). Parametrize edge cases: integer overflow, empty containers, null pointers, concurrent access. Run with ASan/UBSan enabled during tests. Benchmark tests with Google Benchmark (separate target). Run mutation testing to verify test effectiveness.",
+          "verifies": [
+            "100% line coverage (gcov/llvm-cov)",
+            "90%+ branch coverage",
+            "ranges/views tested (empty, single, boundary)",
+            "std::expected value and error paths tested",
+            "constexpr verified with static_assert",
+            "move semantics and moved-from state tested",
+            "tests run with ASan/UBSan enabled",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, ranges tested, sanitizers in tests, constexpr verified, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps, untested ranges, or missing sanitizer runs detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full C++23 CI pipeline for: ${goal}. CMake configured to require C++23: CMAKE_CXX_STANDARD 23, CMAKE_CXX_STANDARD_REQUIRED ON. Fail build if compiler does not support required features (Clang 17+, GCC 14+, MSVC latest). Clang-Tidy with modern checks: modernize-* (use-trailing-return-type, use-auto, use-nullptr, use-override), cppcoreguidelines-* (avoid-magic-numbers, no-malloc, pro-bounds), bugprone-* (dangling-handle, use-after-move, string-literal-with-embedded-nul). Flag std::format usage if std::print available. Clang-Format enforced. -Wall -Wextra -Werror -pedantic. CI matrix: Clang 17+ (macOS/Linux) + GCC 14+ (Linux) at minimum. ASan + UBSan build in CI. Coverage with threshold. Pre-commit hooks: clang-format, clang-tidy. Cache build (ccache). SLO: build <120s, tests <60s. No '|| true' on any step.",
+          "verifies": [
+            "CMAKE_CXX_STANDARD 23 required",
+            "Clang-Tidy modernize + cppcoreguidelines enforced",
+            "std::format flagged where std::print available",
+            "-Wall -Wextra -Werror -pedantic",
+            "CI matrix Clang 17+ and GCC 14+",
+            "ASan + UBSan build in CI",
+            "pre-commit hooks (clang-format + clang-tidy)",
+            "ccache for build caching"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces C++23, Clang-Tidy, sanitizers, cross-compiler matrix",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Missing C++23 enforcement, Clang-Tidy gaps, or incomplete compiler matrix."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all C++23 documentation for: ${goal}. Every public class, function, concept, and type alias MUST have Doxygen comments: \\brief, \\param, \\return, \\throws, \\tparam for templates, \\code example. Document concept requirements: what types satisfy the concept and why. Document module interfaces: what each module exports, dependency rationale. Document ownership semantics: who owns returned pointers/references, lifetime requirements for views/spans. README MUST include: project description, prerequisites (compiler versions, CMake version), build instructions (cmake --preset), quickstart with code example, API overview, license. Generate docs with Doxygen (WARN_AS_ERROR = YES). Verify all code examples compile.",
+          "verifies": [
+            "every public symbol has Doxygen documentation",
+            "\\param/\\return/\\throws documented",
+            "concept requirements documented",
+            "ownership and lifetime semantics documented",
+            "code examples compile",
+            "README with prerequisites and build instructions",
+            "Doxygen generates with zero warnings"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all C++23 documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit Doxygen comments, README, guides, error messages, and concept documentation. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented, ownership documented, Doxygen clean, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing Doxygen, undocumented ownership, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit C++23 API ergonomics for: ${goal}. Verify type-driven API design: concepts constrain templates at the declaration (not deep in implementation), deduced this enables fluent chaining, std::expected enables monadic error handling (no exception-heavy APIs). Verify naming: snake_case for functions/variables (STL convention), PascalCase for types/concepts, UPPER_CASE for macros only. Verify error reporting: std::expected for recoverable, exceptions for unrecoverable, std::stacktrace in error context. If CLI: verify argument parsing, --help, exit codes, NO_COLOR. If library: verify minimal includes for consumers, no unnecessary template instantiation cost, header/module API matches what Doxygen documents. Verify move semantics expose correct API: sink parameters by value, factory functions return by value, no returning references to locals. Flag any error message without context.",
+          "verifies": [
+            "concepts at declaration site (not deep impl)",
+            "deduced this for fluent chaining",
+            "std::expected for recoverable errors",
+            "consistent naming (snake_case functions, PascalCase types)",
+            "minimal includes/imports for consumers",
+            "move-friendly API (sink by value, return by value)",
+            "error messages include context"
+          ]
+        }
+      ],
+      "checkpoint": "API concept-driven, errors typed, move-friendly, naming consistent",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor concept placement, untyped errors, or naming inconsistencies detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with Google Benchmark (3+ runs, --benchmark_repetitions). Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory with Valgrind massif or Heaptrack: no unbounded growth, no leaked allocations under sustained load. Profile with perf stat: cache miss rates, branch mispredictions, IPC. Verify constexpr evaluation offloads computation to compile time (compile-time vs runtime comparison). Verify module compilation improves build time vs headers. Check binary size: strip debug symbols in release, verify LTO effectiveness. Target: low memory, low CPU, zero allocations in hot paths where possible.",
+          "verifies": [
+            "Google Benchmark baselines (3+ runs)",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth (Valgrind/Heaptrack)",
+            "large input stress tested (10x, 100x)",
+            "cache efficiency profiled (perf stat)",
+            "constexpr offloads verified",
+            "binary size optimized (LTO, stripped)",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (Google Benchmark comparison), coverage drops, new Clang-Tidy violations, new compiler warnings on any target compiler, ASan/UBSan regressions. Classify every change by risk: ownership transfers, lifetime changes, concept constraint modifications, module interface changes (ABI breaks), move semantics changes, concurrency pattern changes. Scan for deprecated C++ patterns older than 6 months (auto_ptr, raw arrays, C headers). Verify dead code unreachable by any test or entry point. Check dev-only deps not leaked to production targets. Verify ABI stability for library releases. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "Clang-Tidy regression blocked",
+            "change categories classified by risk",
+            "ABI stability verified for libraries",
+            "no stale deprecated patterns (>6 months)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass with zero failures on Clang/GCC/MSVC, coverage at target, Clang-Tidy clean, ASan/UBSan clean, Doxygen current, no hardcoded secrets. Determine correct semantic version bump: MAJOR for ABI breaks or module interface changes, MINOR for new features/exports, PATCH for fixes. Verify version consistent in CMakeLists.txt (project VERSION). Generate changelog following Keep a Changelog format. Verify ABI compatibility: symbol visibility, inline namespace versioning for libraries. Draft release notes with highlights, compiler support matrix, and breaking changes. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in CMakeLists.txt",
+            "changelog generated (Keep a Changelog)",
+            "ABI compatibility verified",
+            "release notes with compiler support matrix",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, ABI stable, regressions blocked, release-ready with semver",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review benchmarks, ABI stability, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), C++23 modules adopted where supported, deduced this replaces CRTP, std::print over cout/printf, std::mdspan for array views, std::expected for errors, modern idioms throughout, best practices researched with citations, Clang-Tidy clean (modernize + cppcoreguidelines), -Wall -Wextra -Werror -pedantic clean, cross-compiler parity (Clang 17+, GCC 14+, MSVC), ASan/UBSan/TSan clean, no dangling views, 100% line coverage, ranges tested at boundaries, Doxygen clean, ownership documented, brand voice audit passed, CI enforces all gates, benchmarks baselined, ABI stable, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "C++23 features adopted (modules, print, mdspan, expected)",
+            "ASan/UBSan/TSan clean confirmed",
+            "cross-compiler parity confirmed",
+            "100% coverage and ranges tested",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, diagnostics, and core dumps. Audit all dependency licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers present on all source files. Check for unauthorized data flows to external endpoints. Verify .gitignore excludes build/, .env, credentials, core dumps, .vs/. Verify no secrets in CMake cache or build scripts. If shipping binaries: verify SBOM generated, verify export compliance (cryptography regulations). Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or diagnostics",
+            "all dependency licenses cleared",
+            "copyright headers present on all source files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo",
+            "no secrets in CMake cache or build scripts",
+            "SBOM generated for binary releases",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge module safety: do C++23 modules truly eliminate ODR violations, or are there edge cases with template instantiations across module boundaries? Challenge sanitizer claims: does ASan/UBSan clean mean zero UB, or are there compile-time UB (constexpr evaluation), linker-level issues, or optimizer-introduced UB that sanitizers miss? Challenge std::expected claims: does using expected everywhere mean no exceptions, or are there stdlib functions, third-party libraries, or operator new that still throw? Challenge view safety: does testing spans/string_views prevent dangling, or are there deferred evaluation patterns in ranges pipelines that create dangling on use? Perform pre-mortem: assume the project caused a CVE 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "module safety challenged (ODR across boundaries)",
+            "sanitizer claims challenged (compile-time UB, optimizer UB)",
+            "expected claims challenged (hidden throw paths)",
+            "view safety challenged (deferred dangling in ranges)",
+            "pre-mortem completed (top 5 failure modes)",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

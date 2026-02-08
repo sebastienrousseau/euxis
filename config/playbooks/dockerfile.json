@@ -1,0 +1,400 @@
+{
+  "schema_version": "1.0",
+  "id": "dockerfile",
+  "name": "Dockerfile Excellence",
+  "description": "Ten-gate Dockerfile enforcement: multi-stage architecture, layer optimization, portability, security, testing, CI, documentation, UX design, release readiness, truth. Hadolint zero warnings, pinned base images, non-root runtime, minimal attack surface, small image size, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce multi-stage build architecture for: ${goal}. Every Dockerfile MUST use multi-stage builds: strictly separate build-time dependencies (compilers, headers, dev tools, test frameworks) from the final runtime image. Final stage MUST use minimal base (alpine, distroless, or scratch where possible). Name every stage (FROM ... AS builder, FROM ... AS runtime). Verify: build artifacts COPY --from=builder, no compiler/header packages in final image, no package manager cache in final image. Enforce single responsibility: one process per container, no supervisord or multi-process patterns. Verify ENTRYPOINT + CMD separation (ENTRYPOINT for binary, CMD for default args). Flag: multiple FROM without named stages, COPY from unnamed stages, final image >100MB for compiled languages or >200MB for interpreted. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "multi-stage builds on every Dockerfile",
+            "build deps separated from runtime",
+            "final stage uses minimal base (alpine/distroless/scratch)",
+            "every stage named (FROM ... AS)",
+            "single process per container",
+            "ENTRYPOINT + CMD separation correct",
+            "final image size within budget",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Dockerfile best practices and idioms for: ${goal}. Flag: latest tag on base images (pin exact version: node:22.4-alpine3.20), RUN with apt-get install without --no-install-recommends, RUN apt-get install without && apt-get clean && rm -rf /var/lib/apt/lists/*, ADD where COPY suffices (ADD only for URLs or tar extraction), multiple RUN apt-get update (combine with install), COPY . . without .dockerignore, ENV for secrets (use --mount=type=secret), SHELL instruction without justification, MAINTAINER (use LABEL), using root user in final stage. Enforce: COPY --chown for file ownership, HEALTHCHECK instruction, LABEL for metadata (org.opencontainers.image.*), ARG for build-time variables with defaults, heredoc syntax for multi-line RUN (<<EOF), --mount=type=cache for package managers (apt, pip, npm).",
+          "verifies": [
+            "base images pinned to exact versions (no latest)",
+            "apt-get with --no-install-recommends and cleanup",
+            "COPY over ADD (unless tar/URL)",
+            "no COPY . . without .dockerignore",
+            "no secrets in ENV (use --mount=type=secret)",
+            "HEALTHCHECK defined",
+            "OCI labels for metadata",
+            "--mount=type=cache for package managers"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Dockerfile best practices for: ${goal}. Research: BuildKit features (cache mounts, secret mounts, SSH mounts, heredoc syntax), distroless vs Alpine vs scratch trade-offs, multi-platform builds (docker buildx, --platform), current OCI image spec and label standards, Dockerfile frontend syntax (# syntax=docker/dockerfile:1), Docker Scout and Snyk container scanning, Chainguard images as hardened alternatives, slim toolkit for image analysis, SBOM generation (syft, trivy). Cross-validate findings against Docker official docs, BuildKit docs, and OCI spec. Flag deprecated patterns (MAINTAINER, legacy builder features).",
+          "verifies": [
+            "BuildKit features researched (cache/secret/SSH mounts)",
+            "distroless vs Alpine vs scratch compared",
+            "multi-platform build patterns documented",
+            "OCI image spec and labels verified",
+            "container scanning tools evaluated",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit .dockerignore and build context for: ${goal}. Verify .dockerignore exists and excludes: .git, .gitignore, README*, LICENSE, docs/, tests/, node_modules/, __pycache__/, .env*, *.md, .vscode/, .idea/, .DS_Store, *.log, docker-compose*.yml (not needed in image), Dockerfile* (not needed in image), .dockerignore itself, large temp/data files. Verify build context size is minimal (docker build outputs context size). Verify Dockerfile naming: Dockerfile for single, Dockerfile.<variant> for multi (not dockerfile or DOCKERFILE). Verify docker-compose.yml (if present) references correct Dockerfiles. Remove orphaned Dockerfiles not referenced by any compose or CI config. Verify .env.example exists if .env is gitignored.",
+          "verifies": [
+            ".dockerignore excludes .git, node_modules, tests, docs",
+            "build context size minimal",
+            "Dockerfile naming convention consistent",
+            "docker-compose references correct Dockerfiles",
+            "no orphaned Dockerfiles",
+            ".env.example present if .env gitignored",
+            "no large temp/data files in build context"
+          ]
+        }
+      ],
+      "checkpoint": "Multi-stage, pinned bases, clean context, modern idioms, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Use multi-stage builds, pin base images, and fix .dockerignore."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Audit layer ordering and image size for: ${goal}. Enforce optimal layer caching: least-changing instructions first (FROM, ENV, ARG), dependency manifests next (COPY package.json, COPY requirements.txt), dependency install (RUN npm ci, RUN pip install), frequently changing files last (COPY . .). Combine RUN commands to minimize layer count (single RUN with && for related operations). Use --mount=type=cache for package managers: apt (/var/cache/apt), pip (/root/.cache/pip), npm (/root/.cache/npm), go (/go/pkg/mod). Verify: no unnecessary files in final image (use dive or docker history to inspect layers), no dev dependencies in production, no package manager cache in final layers. Measure image size: flag final images >100MB for Go/Rust/C, >200MB for Node/Python. Verify docker build time with warm cache <30s.",
+          "verifies": [
+            "layer ordering optimized (least-changing first)",
+            "dependency manifests copied before source",
+            "RUN commands combined for related operations",
+            "--mount=type=cache for package managers",
+            "no dev dependencies in final image",
+            "no package manager cache in final layers",
+            "image size within budget (dive inspected)",
+            "build time with warm cache <30s"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit base image health and runtime efficiency for: ${goal}. Verify base images: actively maintained (updated within 3 months), from official or verified publishers, minimal variant used (alpine over debian, slim over full). Flag images with known vulnerabilities (docker scout cves or trivy image). Verify: no unnecessary packages installed (curl/wget removed after use or multi-stage), no debug tools in production (bash, shell, strace), runtime user has minimal filesystem access. Check multi-platform support: verify base images support linux/amd64 and linux/arm64 at minimum. Verify HEALTHCHECK uses lightweight probe (not full application request). Verify resource limits documented (--memory, --cpus recommendations).",
+          "verifies": [
+            "base images actively maintained (<3 months)",
+            "base images from official/verified publishers",
+            "minimal variant used (alpine/slim/distroless)",
+            "no known CVEs in base images (scout/trivy)",
+            "no debug tools in production image",
+            "multi-platform support (amd64 + arm64)",
+            "resource limits documented"
+          ]
+        }
+      ],
+      "checkpoint": "Layers optimized, image lean, base images verified, multi-platform ready",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Poor layer ordering, bloated image, or vulnerable base detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform container portability for: ${goal}. Verify docker buildx build succeeds for: linux/amd64, linux/arm64 (Apple Silicon, AWS Graviton). Test on: Docker Desktop (macOS), Docker Engine (Linux), Podman (rootless). Verify no platform-specific assumptions: no hardcoded architecture paths (/usr/lib/x86_64-linux-gnu), no architecture-specific binaries without multi-arch handling. Verify alpine-based images work without glibc (or use alpine with glibc compat). Test Dockerfile with both BuildKit (DOCKER_BUILDKIT=1) and legacy builder. Verify container runs identically on: Docker, Podman, containerd/nerdctl, Kubernetes (CRI-O). Verify timezone handling (TZ env var, no hardcoded /etc/localtime). Verify locale handling (C.UTF-8 or explicit LANG).",
+          "verifies": [
+            "builds for linux/amd64 and linux/arm64",
+            "runs on Docker Desktop, Docker Engine, Podman",
+            "no architecture-specific hardcoded paths",
+            "alpine glibc compatibility verified (if needed)",
+            "works with BuildKit and legacy builder",
+            "runs on Docker, Podman, Kubernetes",
+            "timezone and locale handling portable"
+          ]
+        }
+      ],
+      "checkpoint": "Multi-arch builds verified, runtime parity on Docker/Podman/Kubernetes",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Architecture-specific assumptions or runtime incompatibilities detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of all Dockerfiles for: ${goal}. Verify: final stage runs as non-root user (USER directive with numeric UID, not root). Flag: EXPOSE 22 (SSH in container is an anti-pattern), secrets in ENV or ARG (use --mount=type=secret), secrets in COPY (credentials, private keys, .env files), privileged operations in final stage, SETUID/SETGID binaries in final image, writable sensitive directories. Verify: read-only root filesystem compatible (no writes to / at runtime), no unnecessary capabilities (drop ALL, add only needed), signal handling correct (PID 1 with tini or --init). Scan final image with trivy/grype: zero critical/high CVEs. Verify no shell in distroless/scratch images (reduces attack surface). Verify COPY --chmod for restrictive file permissions.",
+          "verifies": [
+            "non-root USER in final stage (numeric UID)",
+            "no EXPOSE 22 (SSH anti-pattern)",
+            "no secrets in ENV, ARG, or COPY",
+            "no SETUID/SETGID binaries in final image",
+            "read-only root filesystem compatible",
+            "PID 1 signal handling (tini or --init)",
+            "trivy/grype scan: zero critical/high CVEs",
+            "no shell in minimal images (distroless/scratch)"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit container supply chain security for: ${goal}. Verify: base images pinned by digest (sha256) or exact version tag, image provenance verified (Docker Content Trust or cosign). Verify: SBOM generated for final image (syft or trivy), vulnerability scanning in CI pipeline, image signing configured (cosign or Notary). Audit: no curl | sh patterns in RUN (download, verify checksum, then execute), all downloaded binaries verified (sha256sum/gpg). Verify .dockerignore excludes secrets. Flag images from untrusted registries. Verify no packages installed from untrusted sources (no custom apt repos without GPG verification). Classify threat level using S0-S3 severity. Verify image scanning runs before push to registry.",
+          "verifies": [
+            "base images pinned by digest or exact version",
+            "image provenance verified (DCT/cosign)",
+            "SBOM generated for final image",
+            "vulnerability scanning in CI",
+            "no curl | sh without checksum",
+            "no untrusted registries or apt repos",
+            ".dockerignore excludes secrets",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Non-root runtime, zero CVEs, supply chain signed and verified",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Root user, exposed secrets, CVEs, or unsigned images detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive Dockerfile testing for: ${goal}. Test with container-structure-test (Google): verify file existence, command output, metadata (exposed ports, entrypoint, user, workdir, env vars, labels). Test with dgoss/goss: verify running container behavior (ports listening, processes running, file permissions, package versions). Test HEALTHCHECK: verify health endpoint responds within timeout. Test multi-stage: verify build stage produces expected artifacts, verify final stage excludes build tools. Test image startup: verify container starts within 5s, verify graceful shutdown (SIGTERM handled within 10s). Test with docker run --read-only: verify application works with read-only root. Test environment variable configuration: required vars fail fast with clear error, optional vars use correct defaults. Verify .dockerignore effectiveness: build with --no-cache and verify context size.",
+          "verifies": [
+            "container-structure-test validates metadata",
+            "dgoss/goss validates running behavior",
+            "HEALTHCHECK responds within timeout",
+            "build stage excluded from final image verified",
+            "container starts within 5s",
+            "graceful shutdown on SIGTERM within 10s",
+            "works with --read-only root filesystem",
+            "required env vars fail fast with clear error"
+          ]
+        }
+      ],
+      "checkpoint": "Structure tests pass, runtime behavior verified, startup/shutdown tested, read-only compatible",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Missing structure tests, slow startup, or broken health checks detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full Dockerfile CI pipeline for: ${goal}. Hadolint on ALL Dockerfiles: treat all warnings as errors (hadolint --failure-threshold warning), enforce DL3006 (pin versions), DL3007 (no latest tag), DL3008 (pin apt versions), DL3015 (no-install-recommends), DL3018 (pin apk versions), DL3025 (JSON CMD), DL3002 (non-root). Trivy/grype image scan: fail on critical/high. Container-structure-test in CI. Docker buildx build with --platform linux/amd64,linux/arm64. Image size check with threshold. Pre-commit hooks: hadolint, dockerfile-utils lint. CI caches BuildKit layers. Verify image push only from CI (not local). SLO enforcement: build <120s, scan <30s. No '|| true' on any step. Nightly job for base image CVE monitoring.",
+          "verifies": [
+            "hadolint zero warnings (--failure-threshold warning)",
+            "base images pinned (DL3006/DL3007)",
+            "apt/apk versions pinned (DL3008/DL3018)",
+            "trivy/grype scan in CI (fail on critical/high)",
+            "container-structure-test in CI",
+            "multi-platform build in CI (amd64 + arm64)",
+            "pre-commit hooks configured (hadolint)",
+            "nightly CVE monitoring for base images"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces hadolint, scanning, structure tests, multi-arch builds",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Hadolint not enforced, missing scans, or incomplete build matrix."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Dockerfile documentation for: ${goal}. Every Dockerfile MUST have header comments: purpose, base image rationale, build instructions, runtime configuration. Document: all ARG variables with descriptions and defaults, all ENV variables with purpose and examples, exposed ports with protocol and service, HEALTHCHECK endpoint and expected response, volume mount points with data descriptions. README MUST include: docker build command with all required --build-arg, docker run command with all required -e vars and -v mounts, docker-compose example (if applicable), environment variable reference table, port mapping table, health check verification command, troubleshooting section (common build/run errors). Document image tagging strategy and registry location.",
+          "verifies": [
+            "Dockerfile header comments (purpose, build, run)",
+            "all ARG/ENV variables documented with defaults",
+            "exposed ports documented with protocol",
+            "HEALTHCHECK documented",
+            "README with build, run, and compose examples",
+            "environment variable reference table",
+            "troubleshooting section for common errors"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Dockerfile documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit Dockerfile comments, README, docker-compose.yml comments, and error messages in entrypoint scripts. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "Dockerfiles documented, env vars referenced, build/run examples complete, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing Dockerfile comments, undocumented env vars, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Dockerfile and container UX for: ${goal}. Verify entrypoint script UX: required env vars fail fast with actionable error message listing missing vars, --help flag shows configuration reference, log output uses structured format (JSON) with configurable log level. Verify container lifecycle: starts within 5s, responds to SIGTERM gracefully (connection draining), HEALTHCHECK provides meaningful status. Verify configuration ergonomics: sensible defaults for all env vars, .env.example documents all options, docker-compose.yml ready to use with one command (docker compose up). Verify observability: logs to stdout/stderr (not files), metrics endpoint if applicable, container labels for discovery. Verify developer experience: docker compose up starts full local environment, hot-reload supported in dev mode, clear separation between dev and prod Dockerfiles/targets.",
+          "verifies": [
+            "required env vars fail fast with actionable error",
+            "entrypoint --help shows configuration",
+            "structured logging (JSON) with configurable level",
+            "graceful shutdown with connection draining",
+            "docker compose up works with one command",
+            "logs to stdout/stderr (not files)",
+            "dev vs prod targets clearly separated"
+          ]
+        }
+      ],
+      "checkpoint": "Container UX polished, fail-fast config, graceful lifecycle, compose-ready",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Missing fail-fast errors, poor lifecycle handling, or broken compose setup."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish image baselines for: ${goal}. Measure: final image size (compressed and uncompressed), layer count and individual layer sizes (dive), build time with cold cache and warm cache, container startup time to healthy, memory usage at idle and under load, container shutdown time on SIGTERM. Set budgets: image size (max for language), startup <5s, shutdown <10s, idle memory <50MB (adjust per workload). Test under load: concurrent requests, resource limits (--memory=256m, --cpus=0.5), OOM behavior (graceful or crash). Verify no zombie processes under load. Verify log volume under load (no excessive logging). Target: smallest possible image, fastest startup, graceful degradation under resource pressure, low memory, low CPU.",
+          "verifies": [
+            "image size baselined (compressed/uncompressed)",
+            "layer count and sizes inspected (dive)",
+            "build time baselined (cold/warm cache)",
+            "startup time <5s to healthy",
+            "shutdown time <10s on SIGTERM",
+            "memory usage baselined (idle and load)",
+            "graceful behavior under resource limits"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: image size regressions (threshold check), CVE regressions (new vulnerabilities in base or deps), build time regressions, startup time regressions, hadolint regressions (new warnings). Classify every change by risk: base image updates, dependency version changes, layer reordering, user/permission changes, port changes, env var changes (breaking for consumers). Scan for deprecated Dockerfile instructions or base images approaching EOL. Verify no test/dev artifacts leaked to production image. Check docker-compose.yml version compatibility. Verify CI blocks regression merges.",
+          "verifies": [
+            "image size regression detection active",
+            "CVE regression blocked (base image monitoring)",
+            "build time regression tracked",
+            "change categories classified by risk",
+            "no deprecated instructions or EOL base images",
+            "no test/dev artifacts in production image",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: hadolint clean, trivy/grype zero critical/high, structure tests pass, multi-arch builds succeed, image size within budget, documentation current. Determine correct semantic version bump: MAJOR for breaking env var/port/volume changes, MINOR for new features/config options, PATCH for security patches/bug fixes. Verify image tagged correctly (semver + git SHA + latest). Generate changelog following Keep a Changelog format. Verify upgrade/migration instructions: volume data compatibility, env var renames, port changes. Draft release notes with image size and security scan results. Verify rollback plan (previous image tag accessible). Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "image tagged correctly (semver + SHA)",
+            "changelog generated (Keep a Changelog)",
+            "migration instructions for breaking changes",
+            "release notes with image size and scan results",
+            "rollback plan documented (previous tag accessible)"
+          ]
+        }
+      ],
+      "checkpoint": "Image baselined, regressions blocked, release-ready with tags and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review image baselines, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), multi-stage builds enforced, base images pinned, .dockerignore comprehensive, modern idioms throughout, best practices researched with citations, hadolint zero warnings, non-root runtime, zero critical/high CVEs, no secrets in image, supply chain signed, structure tests and runtime tests pass, multi-arch (amd64 + arm64), image size within budget, startup <5s, graceful shutdown, all env vars documented, brand voice audit passed, CI enforces all gates, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "multi-stage builds confirmed",
+            "non-root and zero CVEs confirmed",
+            "multi-arch parity confirmed",
+            "image size within budget",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in container logs, environment variables, and image layers (docker history --no-trunc). Verify no secrets baked into any image layer (even intermediate layers accessible via docker save). Audit base image licenses: verify compatibility with project license. Verify SBOM (Software Bill of Materials) generated and accurate. Check for unauthorized network access from container (egress rules documented). Verify image registry access controls (no public push of private images). Verify OCI labels include required metadata (maintainer, version, description, source URL). Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or env vars",
+            "no secrets in any image layer (docker history)",
+            "base image licenses compatible",
+            "SBOM generated and accurate",
+            "egress rules documented",
+            "registry access controls verified",
+            "OCI labels complete",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge security claims: does non-root user truly prevent privilege escalation, or are there SETUID binaries, writable /proc, or kernel exploits in the base image? Challenge image size claims: is the image minimal, or are there hidden layers with build artifacts accessible via docker save and layer extraction? Challenge multi-arch claims: does building for arm64 mean it actually runs correctly, or are there architecture-dependent runtime behaviors untested? Perform pre-mortem: assume the container caused a security breach 6 months later, enumerate top 5 reasons. Assess blast radius (lateral movement from compromised container). If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "security challenged (SETUID, writable /proc, kernel exploits)",
+            "image minimality challenged (hidden layers, docker save)",
+            "multi-arch challenged (runtime behavior vs build success)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed (lateral movement)",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+{
+  "schema_version": "1.0",
+  "id": "c",
+  "name": "C Excellence",
+  "description": "Ten-gate C11/C17 enforcement: opaque structs for ABI stability, -Wall -Wextra -Wpedantic -Werror, zero unsafe functions (gets/strcpy/sprintf banned), Valgrind clean, header guards on all .h, Unity/CMocka tested, portable across GCC/Clang/MSVC, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce strict C11/C17 architecture for: ${goal}. Use opaque structs (forward declarations in headers, full definition in .c files) to preserve ABI stability and encapsulation. Public API in headers: only function declarations, opaque typedefs, enums, and macro constants. Implementation details MUST NOT leak into headers. Enforce modular structure: src/ for implementation, include/ for public headers, one .h/.c pair per module. Dependency graph: no circular includes, include depth <=4. Flag: god files (>500 lines), god functions (>50 lines), global mutable state without justification, header files that include more than 5 other headers. Enforce: typedef for opaque pointers (typedef struct foo foo_t), consistent naming convention (module_function_name), static for file-local functions, extern only in headers. Verify -std=c17 (or -std=c11) set in build system. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "opaque structs for public types (ABI stable)",
+            "implementation details hidden from headers",
+            "src/ and include/ directory structure",
+            "no circular includes",
+            "static for file-local functions",
+            "consistent naming (module_function_name)",
+            "-std=c17 or -std=c11 enforced",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce modern C11/C17 idioms across the entire codebase for: ${goal}. Flag: K&R function declarations (use prototypes), implicit function declarations, implicit int return type, // comments in C89 mode (use C11+ consistently), variable-length arrays in production (stack overflow risk), alloca() (non-portable, stack overflow), goto except for error cleanup in resource acquisition patterns, magic numbers without named constants. Enforce: designated initializers for structs (.field = value), compound literals for temporary structs, _Static_assert for compile-time checks, _Noreturn for functions that never return, inline for small functions in headers, restrict for non-aliased pointers in performance-critical code, const correctness (const on all pointers that do not modify data), enum for related constants (not #define chains), sizeof(variable) over sizeof(type) for resilience to type changes.",
+          "verifies": [
+            "function prototypes on all declarations",
+            "designated initializers for structs",
+            "_Static_assert for compile-time checks",
+            "const correctness on all non-mutating pointers",
+            "enum over #define chains for constants",
+            "sizeof(variable) over sizeof(type)",
+            "no variable-length arrays in production",
+            "no alloca() usage"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current C best practices for: ${goal}. Research: C17 changes from C11 (deprecated features, clarifications), C23 preview features (typeof, constexpr, nullptr, auto, #embed, #warning), current static analyzer landscape (Clang Static Analyzer, Coverity, PVS-Studio, cppcheck), modern build system patterns (CMake, Meson, Bazel for C), current sanitizer capabilities (ASan, MSan, UBSan, TSan for C), safe string handling libraries (safe C library, BSD strlcpy/strlcat), embedded C patterns (MISRA C, CERT C), memory management patterns (arena allocators, pool allocators, RAII-like cleanup with __attribute__((cleanup))). Cross-validate against ISO C standard drafts, CERT C Coding Standard, SEI CERT rules, and cppreference C section. Flag deprecated patterns.",
+          "verifies": [
+            "C17 vs C11 differences documented",
+            "C23 preview features evaluated",
+            "static analyzer comparison with citations",
+            "build system patterns evaluated",
+            "safe string alternatives researched",
+            "CERT C coding standard referenced",
+            "deprecated patterns flagged"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit C file organization and header hygiene for: ${goal}. Check header guards: every .h file MUST have #ifndef/#define/#endif wrappers (PROJECTNAME_MODULE_H pattern) or #pragma once. Verify: test directories mirror source structure (tests/<module>/ for every src/<module>/), no .c files in include/ directory, no .h files implementing functions (except inline in headers). Remove orphaned files not compiled or included. Enforce consistent file naming (snake_case.c, snake_case.h). Clean up build artifacts (*.o, *.a, *.so, *.dylib, CMakeCache.txt, build/). Verify CMakeLists.txt or Makefile target structure matches directory layout. Verify .clang-format exists. Verify README lists all public headers and their purpose.",
+          "verifies": [
+            "header guards on every .h (#ifndef or #pragma once)",
+            "test directories mirror source structure",
+            "no .c files in include/ directory",
+            "no orphaned files",
+            "consistent file naming (snake_case)",
+            "no build artifacts in repo",
+            ".clang-format configured"
+          ]
+        }
+      ],
+      "checkpoint": "Opaque structs, C11/C17 idioms, header guards, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Use opaque structs, add header guards, and enforce C11/C17 idioms."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Profile C code performance and resource usage for: ${goal}. Profile with perf, Instruments, or gprof to identify hot paths. Apply: restrict on non-aliased pointers in hot loops (enables vectorization), cache-friendly struct layout (order fields by size, pack with __attribute__((packed)) only when justified), arena/pool allocators for allocation-heavy hot paths, SIMD intrinsics for data-parallel operations (with portable fallback), inline for small functions called in tight loops, branch prediction hints (__builtin_expect) only with profiling evidence. Flag: malloc/free in tight loops (batch or pool), unnecessary memcpy (use pointers/views), cache-hostile access patterns (struct-of-arrays vs array-of-structs analysis), unbounded stack usage (deep recursion without tail call). Profile memory: Valgrind massif for heap profiling, no unbounded growth, no leaked allocations. Verify binary size reasonable: strip debug symbols in release, verify LTO. Target: low memory, low CPU, zero allocation in hot paths where possible.",
+          "verifies": [
+            "hot paths profiled with evidence (perf/Instruments)",
+            "restrict on non-aliased pointers in hot loops",
+            "cache-friendly struct layout",
+            "no malloc/free in tight loops",
+            "no unbounded stack or heap growth",
+            "binary size optimized (stripped, LTO)",
+            "Valgrind massif clean (no leaks)",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit C dependency health for: ${goal}. Review all external libraries: version pinned, actively maintained (release within 12 months), prebuilt or easy to compile on macOS/Linux/Windows. Replace external deps with stdlib where possible. Flag: excessive dependencies (>10 for a library, >20 for an application), vendored source without version tracking, dynamically linked libraries without version compatibility checks (soname/ABI). Verify: lock file or pinned versions for package manager (vcpkg.json, conan.lock, or submodule SHA). Verify build system correctly distinguishes static vs shared library targets. Check no debug libraries linked in release builds. Verify pkgconfig (.pc) files generated for library projects.",
+          "verifies": [
+            "all dependencies version-pinned",
+            "stdlib used where possible (minimal deps)",
+            "total dependencies reasonable",
+            "all deps actively maintained",
+            "prebuilt or cross-platform compilable",
+            "static vs shared correctly configured",
+            "no debug libraries in release",
+            "pkgconfig files for library projects"
+          ]
+        }
+      ],
+      "checkpoint": "Hot paths profiled, memory clean, struct layout optimized, dependencies lean",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Allocation in hot paths, memory leaks, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform C portability for: ${goal}. Test compiler matrix: GCC 12+ (Linux), Clang 15+ (macOS/Linux), MSVC latest (Windows). Verify build system sets -std=c17 (or /std:c17 for MSVC). Flag: POSIX-only functions without portable alternative (e.g., strdup is POSIX not C11), GCC-specific __attribute__ without #ifdef guards, MSVC-specific __declspec without guards, assumptions about sizeof(int)/sizeof(long)/sizeof(pointer) (use stdint.h types: uint32_t, int64_t, size_t, ptrdiff_t), endianness assumptions without runtime check. Verify: no hardcoded paths, path handling uses portable separators, FILE* operations use binary mode when needed (\"rb\"/\"wb\"), signal handling uses only async-signal-safe functions. Test on macOS and Linux at minimum. Verify no platform-specific headers (#include <unistd.h>) without #ifdef.",
+          "verifies": [
+            "builds with GCC 12+, Clang 15+, MSVC latest",
+            "-std=c17 enforced in build system",
+            "stdint.h types for portable sizes (uint32_t, size_t)",
+            "no POSIX-only functions without #ifdef",
+            "no compiler-specific extensions without guards",
+            "no endianness assumptions",
+            "tests pass on macOS and Linux",
+            "no hardcoded paths"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-compiler parity verified on GCC, Clang, MSVC with C11/C17",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Compiler-specific code, size assumptions, or POSIX-only calls detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and memory safety audit of C codebase for: ${goal}. Ban unsafe functions: gets() (removed in C11), strcpy() (use strncpy or strlcpy), strcat() (use strncat or strlcat), sprintf() (use snprintf), scanf without width (use field width specifiers), atoi/atol (use strtol with error checking). Audit buffer handling: every array access must be bounds-checked or provably safe, every string operation must use bounded variant. Run AddressSanitizer (ASan): buffer overflows, use-after-free, double-free, memory leaks. Run UndefinedBehaviorSanitizer (UBSan): signed overflow, null dereference, alignment, shift UB. Run MemorySanitizer (MSan): uninitialized memory reads. Scan for: format string vulnerabilities (printf(user_input)), integer overflow in size calculations, TOCTOU race conditions, command injection (system/popen with user input), hardcoded secrets. Verify: all malloc checked for NULL, all resources freed on error paths, no use-after-free.",
+          "verifies": [
+            "zero banned functions (gets/strcpy/strcat/sprintf)",
+            "bounded alternatives used (snprintf/strncpy/strlcpy)",
+            "ASan clean (buffer overflows, leaks, use-after-free)",
+            "UBSan clean (signed overflow, null deref, alignment)",
+            "MSan clean (no uninitialized reads)",
+            "no format string vulnerabilities",
+            "all malloc checked for NULL",
+            "no hardcoded secrets"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit C supply chain and build security for: ${goal}. Verify: all dependencies pinned (submodule SHAs, package versions), known CVE scan on all deps, no precompiled binaries without provenance. Verify build hardening flags: -fstack-protector-strong (stack canaries), -D_FORTIFY_SOURCE=2 (runtime buffer overflow detection), -fPIE -pie (ASLR), -Wformat-security (format string warnings), -fno-strict-aliasing (if legacy code), -z relro -z now (full RELRO for ELF). Verify: no -Wno-error flags suppressing security warnings, no __attribute__((no_sanitize)) without justification. Flag: link-time dependencies not declared, dlopen without path validation, network code without TLS. Verify .gitignore excludes credentials, core dumps. Run static analyzer (cppcheck --enable=all or Clang Static Analyzer). Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "dependencies pinned and CVE-scanned",
+            "-fstack-protector-strong enabled",
+            "-D_FORTIFY_SOURCE=2 enabled",
+            "-fPIE -pie for ASLR",
+            "full RELRO (-z relro -z now)",
+            "static analyzer clean (cppcheck/Clang SA)",
+            "no suppressed security warnings",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Zero unsafe functions, ASan/UBSan/MSan clean, build hardened, supply chain verified",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Unsafe functions, sanitizer findings, or missing hardening flags detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive C testing for: ${goal}. Integrate Unity (for embedded-friendly) or CMocka (for mocking support) for unit testing. Achieve 100% line coverage and 90%+ branch coverage (gcov + lcov or llvm-cov). Run ALL tests through Valgrind (--leak-check=full --track-origins=yes): certify zero memory leaks, zero invalid reads/writes, zero uninitialized values. Test error paths: verify every malloc failure path, every fopen failure path, every error return code checked. Test boundary conditions: buffer limits, integer overflow (INT_MAX+1, SIZE_MAX), null pointer inputs, empty strings, maximum-length strings. Test with ASan/UBSan enabled. Fuzz testing: use libFuzzer or AFL on parsing/input-processing functions. Verify: no test interdependency, deterministic test order, mock external I/O (file system, network). Verify tests compile and run on all target compilers.",
+          "verifies": [
+            "Unity or CMocka test framework integrated",
+            "100% line coverage (gcov/llvm-cov)",
+            "90%+ branch coverage",
+            "Valgrind clean (zero leaks, zero invalid access)",
+            "every error path tested (malloc fail, fopen fail)",
+            "boundary conditions tested (INT_MAX, NULL, empty)",
+            "fuzz testing on input-processing functions",
+            "tests pass on all target compilers"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, Valgrind clean, error paths tested, fuzz tested, cross-compiler",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Valgrind leaks, coverage gaps, or untested error paths detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full C CI pipeline for: ${goal}. Enable strict compiler warnings: -Wall -Wextra -Wpedantic -Werror -Wformat=2 -Wconversion -Wshadow -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes -Wmissing-declarations. Fail build on ANY warning. Clang-Format enforced. Static analysis: cppcheck --enable=all --error-exitcode=1 AND Clang Static Analyzer (scan-build). ASan + UBSan build in CI. Valgrind test run in CI. Coverage with threshold (gcov + lcov). CI matrix: GCC 12+ (Linux) + Clang 15+ (macOS/Linux) at minimum. Pre-commit hooks: clang-format --dry-run -Werror. Cache build artifacts (ccache). SLO: build <60s, tests <30s, Valgrind <120s. No '|| true' on any step. Nightly job for fuzz testing and dependency CVE monitoring.",
+          "verifies": [
+            "-Wall -Wextra -Wpedantic -Werror enforced",
+            "Clang-Format enforced in CI",
+            "cppcheck + Clang Static Analyzer in CI",
+            "ASan + UBSan build in CI",
+            "Valgrind test run in CI",
+            "coverage threshold enforced",
+            "CI matrix GCC + Clang",
+            "nightly fuzz testing"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces warnings-as-errors, static analysis, sanitizers, Valgrind, cross-compiler matrix",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Warnings not fatal, missing static analysis, or incomplete compiler matrix."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all C documentation for: ${goal}. Every public function MUST have Doxygen comments in the header: @brief, @param (with [in]/[out]/[in,out]), @return, @retval for error codes, @pre for preconditions, @post for postconditions, @note for ownership semantics (caller-frees, library-frees), @warning for thread safety. Document every public enum, struct (opaque or not), and macro. Every header MUST have file-level @file comment. README MUST include: project description, prerequisites (compiler, build tools), build instructions (cmake/make commands), quickstart with C code example, API overview linking to headers, supported platforms, license. Generate docs with Doxygen (WARN_AS_ERROR = YES). Verify all code examples compile.",
+          "verifies": [
+            "every public function has Doxygen in header",
+            "@param [in]/[out] and @return documented",
+            "ownership semantics documented (caller/library frees)",
+            "thread safety documented per function",
+            "every public enum/struct/macro documented",
+            "README with build instructions and quickstart",
+            "Doxygen generates with zero warnings"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all C documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit Doxygen comments, README, guides, error messages, and man pages. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented with Doxygen, ownership clear, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing Doxygen, undocumented ownership, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit C API ergonomics for: ${goal}. Verify consistent error handling: functions return error codes (enum with MODULE_OK, MODULE_ERR_*) or use errno, not both in the same module. Out-parameters documented with [out] and initialized by callee. Verify naming convention: module_verb_noun pattern (e.g., parser_create, parser_parse, parser_destroy), consistent prefixing per module (namespace simulation). Verify resource lifecycle: create/destroy pairs documented, ownership clear (who allocates, who frees), no implicit global state (pass context struct). If CLI: verify argument parsing (getopt_long or manual with --help), exit codes (EXIT_SUCCESS/EXIT_FAILURE), stderr for errors, stdout for data, NO_COLOR respected. Verify: header includes are minimal (no transitive dependency burden on consumers), opaque types reduce recompilation. Flag any error that returns -1 without error code enum.",
+          "verifies": [
+            "consistent error handling (error codes or errno, not both)",
+            "module_verb_noun naming convention",
+            "create/destroy pairs with clear ownership",
+            "no implicit global state (context struct pattern)",
+            "minimal header includes (no transitive burden)",
+            "opaque types for ABI stability",
+            "exit codes and stderr/stdout separation"
+          ]
+        }
+      ],
+      "checkpoint": "API consistent, errors typed, ownership explicit, naming prefixed, ABI stable",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Inconsistent errors, unclear ownership, or naming violations detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with Google Benchmark (C wrapper) or custom timing with clock_gettime. Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory with Valgrind massif: heap baseline, peak, no unbounded growth. Profile with perf stat: cache miss rates, branch mispredictions, IPC. Test under resource constraints: ulimit -v (memory), ulimit -n (file descriptors). Verify no stack overflow under deep input (recursive parsers, deep data structures). Check binary size: strip, verify LTO effectiveness, compare static vs shared linking. Verify release build optimization: -O2 or -O3 with benchmarking evidence. Target: low memory, low CPU, deterministic performance.",
+          "verifies": [
+            "benchmarks for hot paths with timing evidence",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth (Valgrind massif)",
+            "large input stress tested (10x, 100x)",
+            "cache efficiency profiled (perf stat)",
+            "no stack overflow under deep input",
+            "binary size optimized (stripped, LTO)",
+            "release optimization verified (-O2/-O3)"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops, new compiler warnings on any target compiler, Valgrind regressions (new leaks), static analyzer regressions (new findings). Classify every change by risk: public header changes (ABI break), struct layout changes, error code changes, resource lifecycle changes, signal handler changes. Verify ABI stability: no struct size changes in public headers, no function signature changes without version bump, symbol visibility correct (__attribute__((visibility(\"default\")))). Scan for deprecated patterns older than 6 months. Verify dead code unreachable by any test. Check dev-only deps not linked in release. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "Valgrind regression blocked",
+            "compiler warning regression blocked",
+            "change categories classified by risk",
+            "ABI stability verified (no struct/signature changes)",
+            "no stale deprecated patterns (>6 months)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: zero compiler warnings on GCC/Clang/MSVC, cppcheck clean, ASan/UBSan/MSan clean, Valgrind clean, coverage at target, documentation current, no hardcoded secrets. Determine correct semantic version bump: MAJOR for ABI breaks (struct layout, function signature changes), MINOR for new functions/features, PATCH for fixes. Verify version consistent in CMakeLists.txt and pkgconfig. Generate changelog following Keep a Changelog format. Verify ABI compatibility: symbol versioning for shared libraries, soname bump for breaking changes. Draft release notes with highlights, compiler support matrix, ABI notes. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct (ABI-aware)",
+            "version consistent in CMakeLists.txt and pkgconfig",
+            "changelog generated (Keep a Changelog)",
+            "ABI compatibility verified (soname, symbol versioning)",
+            "release notes with compiler matrix and ABI notes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, Valgrind clean, ABI stable, release-ready with semver",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review benchmarks, ABI stability, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), opaque structs for public API, header guards on every .h, C11/C17 idioms enforced, zero banned functions (gets/strcpy/sprintf eliminated), best practices researched with citations, -Wall -Wextra -Wpedantic -Werror clean on GCC and Clang, ASan/UBSan/MSan clean, Valgrind zero leaks, static analyzer clean, cross-compiler parity (GCC/Clang/MSVC), 100% line coverage, fuzz testing on parsers, all public functions documented with Doxygen and ownership semantics, brand voice audit passed, CI enforces all gates, benchmarks baselined, ABI stable, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "opaque structs and header guards confirmed",
+            "zero banned functions confirmed",
+            "ASan/UBSan/MSan/Valgrind clean confirmed",
+            "cross-compiler parity confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, diagnostics, and core dumps. Audit all dependency licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers present on all .c and .h files. Check for unauthorized data flows to external endpoints. Verify .gitignore excludes build/, credentials, core dumps, .vscode/, .vs/. Verify no secrets in build scripts or CMake cache. If safety-critical: verify MISRA C compliance or CERT C coding standard adherence. If shipping binaries: verify SBOM generated. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or diagnostics",
+            "all dependency licenses cleared",
+            "copyright headers on all .c and .h files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo",
+            "MISRA C or CERT C adherence (if safety-critical)",
+            "SBOM generated for binary releases",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge memory safety claims: does Valgrind clean mean zero memory bugs, or are there code paths not exercised by tests, compiler-specific optimizations that introduce UB, or MSan-invisible issues (custom allocators, mmap)? Challenge banned function claims: does eliminating strcpy/sprintf mean no buffer overflows, or are there manual memcpy with incorrect sizes, off-by-one errors in length calculations, or integer overflows in allocation sizes that snprintf does not prevent? Challenge ABI stability claims: does opaque struct pattern guarantee ABI stability, or are there inline functions in headers, enum size changes, or alignment differences across compilers that break ABI? Perform pre-mortem: assume the library caused a CVE 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "memory safety challenged (untested paths, custom allocators)",
+            "banned function claims challenged (off-by-one, integer overflow)",
+            "ABI stability challenged (inline functions, enum sizes, alignment)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

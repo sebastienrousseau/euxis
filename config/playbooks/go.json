@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "id": "go",
+  "name": "Go Excellence",
+  "description": "Ten-gate Go enforcement: standard project layout (cmd/internal/pkg), golangci-lint strict, gofumpt formatted, accept interfaces return structs, table-driven tests with t.Parallel, pprof-profiled, zero goroutine leaks, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit Go project layout and interface design for: ${goal}. Enforce Standard Go Project Layout: cmd/ for application entry points (cmd/<app>/main.go), internal/ for private packages (compiler-enforced encapsulation), pkg/ only if library exports are intentional. Each package has single responsibility with clear package comment. Flag: god packages (>20 files), god files (>500 lines), god functions (>50 lines), circular imports, package names that stutter with exports (package user, func user.NewUser). Audit interface usage: enforce 'accept interfaces, return structs'. Remove large interfaces (>5 methods) in favor of small, focused ones (io.Reader, io.Writer, fmt.Stringer). Define interfaces at consumer site, not provider site. Verify: no init() functions without justification, no global mutable state (use dependency injection), context.Context as first parameter on all public functions that do I/O. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "cmd/internal/pkg layout enforced",
+            "internal/ used for private packages",
+            "accept interfaces, return structs",
+            "interfaces small and focused (<5 methods)",
+            "interfaces defined at consumer site",
+            "no god packages (>20 files) or functions (>50 lines)",
+            "context.Context as first param on I/O functions",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Go idioms across the entire codebase for: ${goal}. Flag: naked returns in functions >5 lines, panic in library code (return errors), error strings starting with uppercase or ending with punctuation, unused error returns (must handle or explicitly _ discard), interface{} (use any), iota misuse, channel of bool (use chan struct{}), sync.Mutex embedded without comment, fmt.Sprintf for simple concatenation (use + or strings.Builder). Enforce: errors.New for simple errors, fmt.Errorf with %w for wrapping, custom error types implementing error interface for typed checking (errors.Is/errors.As), named return values only for documentation in short functions, defer for resource cleanup, struct embedding over inheritance, functional options pattern for complex constructors, table-driven switch over if-else chains, type assertions with ok check (never bare), go:embed for static assets.",
+          "verifies": [
+            "errors wrapped with %w (errors.Is/errors.As compatible)",
+            "no panic in library code (return errors)",
+            "error strings lowercase without punctuation",
+            "all error returns handled (no silent discard)",
+            "defer for all resource cleanup",
+            "functional options for complex constructors",
+            "chan struct{} for signal-only channels",
+            "type assertions with ok check always"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Go best practices for: ${goal}. Research: latest Go release features (generics patterns, range over func, log/slog structured logging, enhanced HTTP routing), current golangci-lint linter recommendations (exhaustive, nilnil, wrapcheck, errcheck, gocritic), Go module best practices (workspace mode, version retraction, GOPROXY/GONOSUMDB), testing patterns (testscript, golden files, integration test tags), concurrency patterns (errgroup, semaphore, fan-out/fan-in, context cancellation), current dependency injection approaches (wire, fx, manual), observability patterns (OpenTelemetry, slog handlers), build patterns (goreleaser, ko for containers). Cross-validate against Effective Go, Go blog, Go wiki (CodeReviewComments, CommonMistakes), and core team talks. Flag deprecated patterns.",
+          "verifies": [
+            "latest Go release features researched",
+            "golangci-lint linter recommendations documented",
+            "Go module best practices verified",
+            "concurrency patterns documented",
+            "testing patterns compared with citations",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit Go file organization for: ${goal}. Verify every package has a doc.go or package-level comment in one file. Verify test files mirror source: foo_test.go for every foo.go, integration tests tagged (//go:build integration). Remove orphaned files not compiled or tested. Enforce Go naming: packages lowercase single-word, files snake_case.go, test files _test.go suffix. Verify go.mod is tidy (go mod tidy produces no diff). Verify go.sum committed. Clean up vendor/ if not used, or verify vendor/ consistent if used (go mod vendor produces no diff). Verify .golangci.yml exists and is configured. Verify Makefile or taskfile documents build/test/lint commands.",
+          "verifies": [
+            "every package has doc.go or package comment",
+            "test files mirror source (_test.go for every .go)",
+            "no orphaned files",
+            "Go naming conventions (lowercase packages, snake_case files)",
+            "go.mod tidy (no diff)",
+            "go.sum committed",
+            ".golangci.yml configured"
+          ]
+        }
+      ],
+      "checkpoint": "Standard layout, small interfaces, error handling idiomatic, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Fix project layout, shrink interfaces, and enforce Go idioms."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Analyze Go performance and goroutine health for: ${goal}. Detect goroutine leaks: goroutines waiting on channels that never close, goroutines blocked on context that is never cancelled, goroutines without exit condition (use goleak in tests). Profile with pprof: CPU profile (go tool pprof cpu.prof), heap profile (allocs and inuse), goroutine profile (blocked, waiting), mutex profile (contention). Apply: sync.Pool for frequently allocated short-lived objects, strings.Builder for string concatenation, pre-allocated slices (make([]T, 0, capacity)), buffer reuse (bytes.Buffer pool), avoid interface boxing in hot paths, reduce allocations (go test -benchmem). Flag: unbounded goroutine spawning without semaphore, channel misuse (unbuffered where buffered needed, or vice versa), reflect usage in hot paths, excessive use of fmt.Sprintf in hot paths (use strconv). Benchmark with testing.B. Target: low memory, low CPU, zero goroutine leaks.",
+          "verifies": [
+            "zero goroutine leaks (goleak verified)",
+            "pprof CPU and heap profiles analyzed",
+            "sync.Pool for hot-path allocations",
+            "pre-allocated slices (make with capacity)",
+            "strings.Builder for concatenation",
+            "no unbounded goroutine spawning",
+            "benchmarks with testing.B and -benchmem",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit Go dependency health for: ${goal}. Verify go.mod is tidy and minimal. Identify and remove unused dependencies (go mod tidy, depaware). Replace heavy deps with stdlib where possible: net/http over frameworks for simple APIs, log/slog over third-party loggers, encoding/json over third-party JSON libraries unless benchmarked. Flag excessive direct dependencies (>30). Check all deps actively maintained (commit within 12 months). Run govulncheck for known vulnerabilities. Verify no retracted module versions in use. Flag deps that pull in CGO (reduces portability). Verify go.sum committed. Check indirect dependency count reasonable (<100). Verify no test dependencies leaked to production (test-only in _test.go imports).",
+          "verifies": [
+            "go.mod tidy and minimal",
+            "stdlib preferred over third-party where possible",
+            "no known vulnerabilities (govulncheck clean)",
+            "total direct dependencies reasonable (<30)",
+            "all deps actively maintained",
+            "no retracted module versions",
+            "CGO deps flagged (portability risk)",
+            "test dependencies not in production imports"
+          ]
+        }
+      ],
+      "checkpoint": "Goroutine-leak-free, pprof-profiled, dependencies lean, allocations minimized",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Goroutine leaks, excessive allocations, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform Go portability for: ${goal}. Test GOOS/GOARCH matrix: darwin/amd64, darwin/arm64, linux/amd64, linux/arm64, windows/amd64 at minimum. Verify: no CGO dependency unless justified and documented (CGO_ENABLED=0 builds cleanly), no platform-specific file paths (use filepath.Join, os.PathSeparator), no hardcoded absolute paths, no os.Getenv for HOME without fallback (use os.UserHomeDir). Flag: build tags (//go:build) without corresponding _test files, _linux.go/_darwin.go files without tests on target platform, syscall package usage without platform guard, unsafe package usage without justification. Verify: go build ./... succeeds for all target GOOS/GOARCH, go vet ./... clean on all platforms. Test Docker build for containerized deployment. Verify go.mod Go version matches minimum supported.",
+          "verifies": [
+            "builds for darwin/linux/windows on amd64 and arm64",
+            "CGO_ENABLED=0 builds cleanly (or CGO justified)",
+            "filepath.Join for all path operations",
+            "no hardcoded absolute paths",
+            "platform-specific files have platform tests",
+            "go vet clean on all platforms",
+            "go.mod Go version matches minimum supported"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS, Linux, Windows for amd64 and arm64",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. CGO dependency, platform-specific paths, or build failures detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of Go codebase for: ${goal}. Scan for: SQL injection (string formatting in queries, use parameterized queries), command injection (os/exec with user input, use exec.Command with args slice), path traversal (filepath.Join with user input without filepath.Clean and base check), SSRF (unvalidated URLs), XSS (html/template not text/template for HTML output), hardcoded secrets, insecure TLS (InsecureSkipVerify: true), race conditions (go test -race). Verify: crypto/rand over math/rand for security, context cancellation propagated (no leaked goroutines on cancel), HTTP timeouts set (ReadTimeout, WriteTimeout, IdleTimeout), input validation at API boundaries. Run gosec for automated security scanning. Run go test -race on entire codebase. Flag severity and provide remediation.",
+          "verifies": [
+            "no SQL injection (parameterized queries only)",
+            "no command injection (exec.Command with args slice)",
+            "no path traversal (filepath.Clean + base check)",
+            "no hardcoded secrets",
+            "no InsecureSkipVerify: true",
+            "go test -race clean (zero data races)",
+            "gosec scan clean",
+            "HTTP timeouts set on all servers"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit Go supply chain security for: ${goal}. Run govulncheck for known CVEs in dependencies. Verify: go.sum committed (tamper detection), GONOSUMDB/GONOSUMCHECK not bypassing checksum database, all deps from trusted sources (no replace directives pointing to forks without justification). Check all deps actively maintained (commit within 12 months). Verify license compatibility (go-licenses or golicense). Flag: deps with CGO (C supply chain risk), deps with unsafe package usage, deps with excessive permissions. Verify no secrets in go.mod, go.sum, or build scripts. Verify .gitignore excludes .env, credentials, vendor/ (if not vendoring). Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "no known CVEs (govulncheck clean)",
+            "go.sum committed (checksum verification)",
+            "no suspicious replace directives",
+            "all deps actively maintained",
+            "license compatibility verified (go-licenses)",
+            "CGO deps flagged for C supply chain risk",
+            "no secrets in go.mod or build scripts",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Zero data races, gosec clean, govulncheck clean, supply chain verified",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Data races, security vulnerabilities, or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive Go testing for: ${goal}. Write table-driven tests: every test function uses []struct{name, input, want} pattern with t.Run(tc.name, ...) subtests. Enforce t.Parallel() where safe (no shared mutable state) to speed up execution. Achieve 100% line coverage and 90%+ branch coverage (go test -coverprofile, go tool cover). Test error paths: verify every error return, test wrapped errors with errors.Is/errors.As, test custom error types. Test concurrency: verify goroutine safety with -race flag, test context cancellation, test channel timeout behavior. Verify mock discipline: interfaces for external dependencies, generated mocks (mockgen or moq), no mocking concrete types. Test edge cases: nil inputs, empty slices, zero values, context.Canceled, context.DeadlineExceeded, large inputs. Verify: no test pollution (t.Cleanup for resources), no t.Fatal in goroutines (use t.Error), golden file tests for complex output (testutil/golden). Run fuzz tests (go test -fuzz) on parsing/input functions.",
+          "verifies": [
+            "table-driven tests with t.Run subtests",
+            "t.Parallel() where safe",
+            "100% line coverage (go test -coverprofile)",
+            "90%+ branch coverage",
+            "error paths tested (errors.Is/errors.As)",
+            "go test -race clean",
+            "interfaces mocked (mockgen/moq)",
+            "fuzz tests on parsing functions"
+          ]
+        }
+      ],
+      "checkpoint": "Table-driven, parallel, 100% coverage, race-free, fuzz tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps, missing parallel tests, or untested error paths detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full Go CI pipeline for: ${goal}. golangci-lint with strict presets: enable errcheck, gocritic, govet, staticcheck, exhaustive, nilnil, wrapcheck, revive, unused, gosec. Enforce gofumpt (strict superset of gofmt): fail CI if code is not formatted (gofumpt -d). go vet ./... as separate step. go test -race -coverprofile=coverage.out ./... with coverage threshold. govulncheck in pipeline. go mod tidy with diff check (no uncommitted changes). Pre-commit hooks: gofumpt, golangci-lint run --fix. CI matrix: Go latest + Go previous release at minimum. GOOS/GOARCH cross-compilation check. Cache Go module downloads and build cache. SLO: lint <15s, tests <120s. No '|| true' on any step. Nightly job for govulncheck and Go tip testing.",
+          "verifies": [
+            "golangci-lint with strict presets (errcheck, gocritic, staticcheck)",
+            "gofumpt formatting enforced (fail on diff)",
+            "go vet clean",
+            "go test -race with coverage threshold",
+            "govulncheck in pipeline",
+            "go mod tidy produces no diff",
+            "CI matrix Go latest + previous",
+            "nightly govulncheck and Go tip testing"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces golangci-lint, gofumpt, race detector, govulncheck, cross-platform",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Linting not strict, formatting not enforced, or missing race detection."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Go documentation for: ${goal}. Every exported function, type, method, and constant MUST have Go doc comments following convention: starts with name ('FooBar does...'), complete sentence, explains behavior not implementation. Every package MUST have package-level doc comment (doc.go for large packages). Write Example functions (func ExampleFoo()) for key public APIs: these serve as executable documentation (go test runs them). README MUST include: project description, installation (go install or go get), quickstart with Go code, CLI usage (if applicable), configuration reference, supported Go versions, license. Verify: go doc ./... renders cleanly, pkg.go.dev preview shows complete documentation, all Example functions pass. No TODO or FIXME in exported doc comments.",
+          "verifies": [
+            "every export has Go doc comment starting with name",
+            "every package has package-level comment",
+            "Example functions for key public APIs",
+            "Example functions pass (go test)",
+            "README with install, quickstart, CLI usage",
+            "go doc renders cleanly",
+            "no TODO/FIXME in exported docs"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Go documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit Go doc comments, README, guides, error messages, and CLI help text. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All exports documented, Example functions pass, pkg.go.dev ready, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing doc comments, broken examples, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Go API ergonomics for: ${goal}. Verify error handling UX: errors implement error interface with context (fmt.Errorf wrapping with %w), sentinel errors for known conditions (var ErrNotFound = errors.New(...)), custom error types for typed checking, no stringly-typed error comparison. Verify API conventions: functional options for complex configuration (WithTimeout, WithLogger pattern), zero-value usability (types work without explicit initialization), context.Context first parameter on blocking/I/O calls. If CLI: verify cobra/urfave/cli used, --help comprehensive, exit codes (0=success, 1=error), NO_COLOR respected, stderr for errors, stdout for data, structured output (--output json). If library: verify minimal exported surface, no exported global variables, constructors return concrete types, methods accept interfaces. Flag any error message without context (what failed, what was expected).",
+          "verifies": [
+            "errors wrapped with context (%w)",
+            "sentinel errors for known conditions",
+            "functional options for complex config",
+            "zero-value usable types",
+            "context.Context first on blocking calls",
+            "minimal exported API surface",
+            "NO_COLOR and structured output (if CLI)",
+            "error messages include context"
+          ]
+        }
+      ],
+      "checkpoint": "API idiomatic, errors contextual, options functional, zero-value usable",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Unclear errors, large exported surface, or missing options pattern detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark with testing.B: -benchmem for allocation counts, -count=5 for statistical significance, -benchtime=3s for stability. Set performance budgets: p50/p95/p99 latencies, allocations per operation. Test with large inputs: 10x and 100x typical workload. Profile with pprof under load: CPU, heap, goroutine, mutex contention. Verify: no goroutine leaks under sustained load (goleak), no unbounded memory growth (heap profile over time), no mutex contention hotspots. Test with GOGC=50 (aggressive GC) and GOMEMLIMIT to verify behavior under memory pressure. Check binary size: strip debug (go build -ldflags='-s -w'), verify UPX or similar if size-critical. Verify CGO_ENABLED=0 for static binaries. Target: low memory, low CPU, zero goroutine leaks under load.",
+          "verifies": [
+            "benchmarks with testing.B (-benchmem, -count=5)",
+            "performance budgets (p50/p95/p99, allocs/op)",
+            "no goroutine leaks under sustained load (goleak)",
+            "no unbounded memory growth (pprof heap)",
+            "no mutex contention hotspots",
+            "behavior under GOGC/GOMEMLIMIT pressure",
+            "binary size optimized (-ldflags='-s -w')"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchstat comparison), coverage drops, new golangci-lint violations, new go vet findings, race condition regressions, govulncheck regressions. Classify every change by risk: interface changes (breaking for implementors), exported type changes, error type changes, context propagation changes, goroutine lifecycle changes. Scan for deprecated patterns older than 6 months (ioutil, deprecated stdlib functions). Verify dead code: unexported functions not called, packages not imported. Check test dependencies not imported in non-test files. Verify CI blocks regression merges. Verify go.mod Go version not accidentally bumped.",
+          "verifies": [
+            "performance regression detection (benchstat)",
+            "coverage regression blocked",
+            "golangci-lint regression blocked",
+            "change categories classified by risk",
+            "no deprecated patterns (ioutil, etc. >6 months)",
+            "no dead code (unused exports, unreachable functions)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: golangci-lint clean, gofumpt formatted, go test -race clean, coverage at target, govulncheck clean, documentation current, no hardcoded secrets. Determine correct semantic version bump following Go module versioning: v0.x for unstable, MAJOR (v2+) for import path breaking changes, MINOR for new exports, PATCH for fixes. Verify version tag matches (git tag v1.2.3). Generate changelog following Keep a Changelog format. Verify go.mod module path matches version (v2+ requires /v2 suffix). If CLI: verify goreleaser configured for cross-platform binaries. Draft release notes with highlights. Verify rollback plan exists (retract directive). Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version correct (Go module conventions)",
+            "version tag matches (git tag)",
+            "changelog generated (Keep a Changelog)",
+            "go.mod module path matches major version",
+            "goreleaser configured (if CLI)",
+            "rollback plan documented (retract directive)"
+          ]
+        }
+      ],
+      "checkpoint": "Benchmarked, goroutine-safe under load, regressions blocked, release-ready with semver",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review benchmarks, goroutine safety, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), standard Go layout (cmd/internal/pkg), small interfaces at consumer site, accept interfaces return structs, error wrapping with %w, best practices researched with citations, golangci-lint strict clean, gofumpt formatted, go test -race clean, zero goroutine leaks (goleak), govulncheck clean, cross-platform builds (darwin/linux/windows amd64+arm64), 100% coverage with table-driven tests and t.Parallel, fuzz tests on parsers, all exports documented with Example functions, brand voice audit passed, CI enforces all gates, benchmarks baselined, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "standard layout and interface design confirmed",
+            "error handling idiomatic (%w wrapping)",
+            "zero data races and goroutine leaks",
+            "cross-platform parity confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs (use log/slog with redaction), error messages, and debug output. Audit all dependency licenses via go-licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers present on all .go files (or LICENSE file covering all). Check for unauthorized data flows to external endpoints. Verify .gitignore excludes .env, credentials, vendor/ (if not vendoring), binary outputs. Verify no secrets in go.mod, go.sum, or embedded files (go:embed). If serving HTTP: verify security headers, CORS configuration, rate limiting documented. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output (slog redaction)",
+            "all dependency licenses cleared (go-licenses)",
+            "copyright headers or LICENSE covering all files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo",
+            "no secrets in embedded files (go:embed)",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge goroutine safety claims: does go test -race mean zero races, or are there races only triggered under production load patterns, specific scheduling, or when GOMAXPROCS > test value? Challenge interface claims: does 'accept interfaces, return structs' mean good design, or are there cases where returning an interface is correct (factory patterns, plugin systems) that were incorrectly flagged? Challenge coverage claims: does 100% line coverage mean all behaviors tested, or are there goroutine interleaving paths, context cancellation timing windows, or GC-dependent finalizer behavior untested? Perform pre-mortem: assume the service caused an outage 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "goroutine safety challenged (load patterns, GOMAXPROCS)",
+            "interface claims challenged (valid return-interface cases)",
+            "coverage challenged (goroutine interleavings, GC finalizers)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

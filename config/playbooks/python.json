@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.0",
+  "id": "python",
+  "name": "Python Excellence",
+  "description": "Ten-gate Python enforcement: architecture, performance, portability, safety, testing, CI, documentation, API design, release readiness, truth. Zero untyped code, zero bare excepts, zero missing docstrings, 100% coverage, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit Python package architecture for: ${goal}. Enforce src/ layout with pyproject.toml as single source of truth (no setup.py, no setup.cfg). Enforce explicit public APIs via __all__ in every __init__.py. Detect and eliminate circular imports. Verify dependency injection over hard-coded imports for external services. Enforce separation: domain logic MUST NOT import from I/O, HTTP, or database layers directly. Flag god modules (>400 lines), god classes (>10 methods), functions >50 lines. Verify entry points declared in pyproject.toml [project.scripts]. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "__all__ defined in every public __init__.py",
+            "no circular imports",
+            "src/ layout with pyproject.toml",
+            "domain logic decoupled from I/O layers",
+            "no god modules (>400 lines)",
+            "no functions >50 lines",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Python idioms across the entire codebase for: ${goal}. Flag: mutable default arguments, bare except clauses, resource leaks (open() without with), blocking calls inside async def, f-strings in logging calls, isinstance chains instead of dispatch or protocols, manual loops where comprehensions suffice, string concatenation in loops. Enforce: pathlib over os.path, dataclasses/attrs for structured data, Enum for fixed sets, Protocol for structural subtyping, contextmanager for resources, __slots__ on performance-critical classes. Verify Python 3.10+ patterns: match/case, union types (X | Y).",
+          "verifies": [
+            "no mutable default arguments",
+            "no bare except clauses",
+            "no resource leaks (open without with)",
+            "no blocking calls in async def",
+            "pathlib over os.path",
+            "dataclasses for structured data",
+            "Python 3.10+ patterns used"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Python best practices for: ${goal}. Research: latest pyproject.toml standards (PEP 621, 660, 723), current Ruff rule recommendations, MyPy vs pyright comparison and optimal config, modern async patterns (asyncio vs trio), packaging best practices (src layout, uv vs poetry vs hatch), current typing features (3.10+ union syntax, TypeGuard, ParamSpec), latest test framework patterns (pytest plugins, Hypothesis strategies). Cross-validate findings against PEPs, Python Packaging Authority docs, and core dev recommendations. Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "latest PEP standards researched",
+            "Ruff rule recommendations documented",
+            "type checker comparison with citations",
+            "packaging best practices verified",
+            "modern typing features identified",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit Python file organization for: ${goal}. Verify every module has a docstring explaining its purpose. Verify test directories mirror source directories: tests/<module>/ for every src/<package>/<module>/. Remove orphaned files not imported anywhere. Enforce consistent file naming (snake_case.py). Verify conftest.py files are scoped properly (not a single root conftest). Clean up __pycache__, .pyc files, and empty __init__.py with no exports. Verify py.typed marker exists for type stub packages.",
+          "verifies": [
+            "every module has docstring",
+            "test directories mirror source directories",
+            "no orphaned files",
+            "consistent file naming (snake_case.py)",
+            "conftest.py properly scoped",
+            "no __pycache__ or .pyc in repo"
+          ]
+        }
+      ],
+      "checkpoint": "Package structure clean, __all__ enforced, idioms verified, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Fix module structure, circular imports, and idiom violations."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Profile Python code for performance for: ${goal}. Profile with cProfile/py-spy to identify hot paths. Apply: vectorization (NumPy/Polars for numeric loops), Cython/PyO3 for CPU-bound hot paths, async/await for I/O-bound ops, functools.lru_cache for expensive pure computations, set/dict lookups over list searches, generators for large datasets, str.join() over concatenation in loops. Profile import time (python -X importtime), lazy-import heavy dependencies. Measure memory footprint: no unbounded growth, no leaked references. Provide pytest-benchmark or timeit evidence. Target: low memory, low CPU, zero waste.",
+          "verifies": [
+            "hot paths profiled with evidence",
+            "numeric loops vectorized where applicable",
+            "async used for I/O-bound operations",
+            "caching applied for expensive computations",
+            "generators used for large datasets",
+            "import time profiled",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit Python dependency health for: ${goal}. Identify and remove unused dependencies (pipdeptree, deptry). Replace heavy deps with lighter alternatives. Verify lock file committed (poetry.lock or uv.lock). Flag excessive transitive deps (>100 total). Check all deps actively maintained (release within 12 months). Flag deps with native extensions without prebuilt wheels for macOS/Linux/Windows. Verify pyproject.toml is sole config source (no scattered rc files).",
+          "verifies": [
+            "no unused dependencies",
+            "heavy deps replaced where possible",
+            "lock file committed",
+            "transitive deps reasonable (<100)",
+            "all deps actively maintained",
+            "prebuilt wheels for all platforms",
+            "pyproject.toml is sole config source"
+          ]
+        }
+      ],
+      "checkpoint": "Hot paths profiled, resources optimized, dependencies lean",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unjustified resource usage or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure tests pass on macOS, Linux, and Windows. Test Python version matrix: 3.10, 3.11, 3.12, 3.13. Verify no platform-specific behavior leaks: path separators (use pathlib), line endings (universal_newlines), locale-dependent string operations, timezone handling (use zoneinfo, not hardcoded offsets), temp directory assumptions. Test with tox or nox for matrix execution. Verify type stubs work across all supported Python versions. Verify no hardcoded absolute paths. Flag any os.name or sys.platform checks without corresponding tests.",
+          "verifies": [
+            "tests pass on macOS, Linux, Windows",
+            "tests pass on Python 3.10-3.13",
+            "no platform-specific path leaks (pathlib used)",
+            "no locale-dependent behavior",
+            "timezone handling uses zoneinfo",
+            "tox or nox matrix configured",
+            "no hardcoded absolute paths"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS, Linux, Windows with Python 3.10-3.13",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Platform-specific leaks or version incompatibilities detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of the Python codebase for: ${goal}. Run bandit -r src/ -ll. Scan for: SQL injection (string formatting in queries), command injection (subprocess with shell=True), unsafe deserialization (pickle.loads, yaml.load without SafeLoader), path traversal, SSRF, hardcoded secrets, eval/exec on user input, insecure tempfile usage. Verify: all user input validated at boundaries, all file operations use context managers, all subprocess calls use list form. Flag severity and provide remediation for each finding.",
+          "verifies": [
+            "bandit scan clean at high confidence",
+            "no SQL injection (parameterized queries only)",
+            "no command injection (no shell=True with user input)",
+            "no unsafe deserialization",
+            "no hardcoded secrets",
+            "no eval/exec on user input",
+            "all subprocess calls use list form",
+            "all file operations use context managers"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit Python supply chain security and define security policy for: ${goal}. Run pip-audit and safety check for known CVEs. Verify: no unmaintained deps (>18 months), all deps have compatible licenses (flag GPL in MIT/Apache projects), transitive deps <100, no typosquatting risks. Verify lock file committed. Audit setup hooks for suspicious behavior. Flag deps with native extensions without prebuilt wheels. Classify threat level for each finding using S0-S3 severity. Verify minimum Python version declared and tested.",
+          "verifies": [
+            "no known CVEs (pip-audit clean)",
+            "no unmaintained dependencies",
+            "license compatibility verified",
+            "no typosquatting risks",
+            "lock file committed",
+            "no suspicious setup hooks",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "No injection vulnerabilities, supply chain clean, dependencies audited",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Security vulnerabilities or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive test coverage for: ${goal}. Achieve 100% line coverage and 90%+ branch coverage using pytest-cov. Generate property-based tests using Hypothesis for: data parsing/serialization roundtrips, mathematical functions, API contract validation. Verify mock discipline: external services MUST be mocked (unittest.mock or pytest-monkeypatch). Test async functions with pytest-asyncio (proper cleanup, cancellation). Parametrize edge cases: empty inputs, None, Unicode, large inputs, concurrent access. Enforce: no test interdependency (pytest-randomly), no sleep() (use freezegun/time-machine), deterministic fixtures. Run mutation testing (mutmut) to verify test effectiveness.",
+          "verifies": [
+            "100% line coverage",
+            "90%+ branch coverage",
+            "property-based tests with Hypothesis",
+            "external services strictly mocked",
+            "async functions tested with cleanup",
+            "edge cases parametrized",
+            "no test interdependency",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, property tests, mocking discipline, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full Python CI pipeline for: ${goal}. Configure: Ruff with ALL rules (select = ['ALL']), Ruff format or Black (line-length=88), import sorting enforced, MyPy in strict mode (disallow_any_generics, disallow_untyped_defs, warn_return_any, strict_equality), pyright as secondary type checker, pytest --cov with fail-under=100, pip-audit for CVEs. Pre-commit hooks for ruff, mypy, pytest smoke. SLO enforcement: lint <10s, type check <30s, tests <120s. CI matrix: macOS + Linux at minimum. Cache .venv. Nightly job for dependency updates and beta Python testing. No '|| true' on any step.",
+          "verifies": [
+            "Ruff ALL rules enforced",
+            "formatter check in CI",
+            "MyPy strict mode configured",
+            "pyright cross-validates types",
+            "coverage threshold 100% enforced",
+            "pip-audit in pipeline",
+            "pre-commit hooks configured",
+            "nightly jobs configured"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all Python standards, zero tolerance",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Pipeline gaps or unenforced standards detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Python documentation for: ${goal}. Enforce consistent docstring style (Google-style or NumPy-style, pick ONE). Every public function, class, and module MUST have a docstring with: one-line summary, Args, Returns, Raises, at least one Example (doctest format). README MUST include: one-sentence description, installation (pip install), quickstart example, configuration reference, license. Configure Sphinx (autodoc + napoleon) or MkDocs (mkdocstrings) for API reference. Verify all examples pass (pytest --doctest-modules). Build docs without warnings (sphinx-build -W or mkdocs build --strict).",
+          "verifies": [
+            "consistent docstring style enforced",
+            "every public function/class documented",
+            "Args/Returns/Raises sections present",
+            "doctest examples pass",
+            "README complete with quickstart",
+            "doc site builds without warnings",
+            "Getting Started / User Guide / API Reference structure"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Python documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit docstrings, README, guides, error messages, and CLI help text. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented, examples verified, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing docstrings, broken examples, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Python API ergonomics and user experience for: ${goal}. If CLI: verify rich/click/typer is used, --help comprehensive with examples, error messages actionable, progress bars for long ops, exit codes follow convention, NO_COLOR respected, stderr for diagnostics, stdout for data. If library: verify exceptions carry actionable messages, custom exception hierarchy from base package exception, warnings use warnings module, __repr__ developer-readable and __str__ user-readable, logging uses proper levels with structured context. Verify type hints enable IDE autocomplete. Flag any 'Error occurred' without context.",
+          "verifies": [
+            "error messages are actionable",
+            "NO_COLOR respected",
+            "exit codes follow convention",
+            "stderr/stdout separation correct",
+            "__repr__ and __str__ properly implemented",
+            "logging uses proper levels",
+            "type hints enable autocomplete"
+          ]
+        }
+      ],
+      "checkpoint": "API ergonomic, errors actionable, UX polished",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor error messages, inconsistent patterns, or UX issues detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with pytest-benchmark. Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load: no unbounded growth, no leaked references. Verify import time acceptable (python -X importtime). Check package size: exclude test data, docs, and dev artifacts from distribution. Target: low memory, low CPU under sustained load.",
+          "verifies": [
+            "benchmarks for hot paths (pytest-benchmark)",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "import time within budget",
+            "package size optimized",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops, new Ruff violations, new MyPy errors, failures on beta Python versions. Classify every change by risk: type safety changes, exception handling modifications, async boundary shifts, resource management patterns. Scan for deprecated code older than 6 months. Verify dead code unreachable by any test or entry point. Check dev deps not leaked to production. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "beta Python version tested",
+            "change categories classified by risk",
+            "no stale deprecated code (>6 months)",
+            "no dead code branches",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass with zero failures, coverage at 100%, Ruff clean, MyPy strict clean, pip-audit clean, documentation current. Determine correct semantic version bump (MAJOR for breaking, MINOR for features, PATCH for fixes). Verify version consistent in pyproject.toml. Generate changelog from commit history following Keep a Changelog format. Verify upgrade/migration instructions for breaking changes. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in pyproject.toml",
+            "changelog generated (Keep a Changelog)",
+            "release notes drafted",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), __all__ enforced, no circular imports, best practices researched with citations, MyPy strict zero errors, Ruff clean, cross-platform parity on macOS/Linux/Windows with Python 3.10-3.13, 100% line coverage, property tests via Hypothesis, bandit and pip-audit clean with S0-S3 classification, all public symbols documented with doctest examples, brand voice audit passed, doc site builds without warnings, CI enforces all gates, stress tests passed, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "architecture scores at target",
+            "type checking clean (MyPy + pyright)",
+            "cross-platform parity confirmed",
+            "100% coverage confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, API responses, and data stores. Audit all dependency licenses via pip-licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers are present and correct across all source files. Check for unauthorized data flows to third-party endpoints. Verify .gitignore excludes sensitive files (.env, credentials, private keys). Flag any compliance violation with regulatory reference (GDPR, CCPA) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared (pip-licenses)",
+            "copyright headers present on all source files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge type safety claims: does MyPy strict truly cover all code paths or are there Any escapes? Challenge coverage claims: does 100% line coverage mean all behaviors are tested, or are there semantic gaps? Perform pre-mortem: assume the package caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. Evaluate reversibility. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "type safety claims challenged (Any escapes)",
+            "coverage claims challenged (semantic gaps)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

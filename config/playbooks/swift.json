@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.0",
+  "id": "swift",
+  "name": "Swift Excellence",
+  "description": "Ten-gate Swift enforcement: SPM architecture, performance, portability, safety, testing, CI, DocC documentation, API design, release readiness, truth. Zero Xcode dependencies, zero completion handlers, zero retain cycles, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce strict Swift Package Manager workflow for: ${goal}. Remove any .xcodeproj, .xcworkspace, .pbxproj files. MUST build via swift build and swift test only. Define modular targets in Package.swift (reference: AudioWaveLib pattern with Core, IO, Utilities, Extensions). Each module has single responsibility and minimal public API. Dependency graph depth <=4. swift-tools-version 5.9+. Flag modules >500 lines, circular dependencies, targets importing >3 internal modules. Products MUST specify .static or .dynamic. Executables use @main. Migrate ALL completion handlers to async/await. Enforce Actor isolation for mutable shared state. Verify Sendable conformance on concurrency boundaries. -strict-concurrency=complete MUST pass. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "no .xcodeproj or .xcworkspace files",
+            "builds via swift build only",
+            "modular target structure in Package.swift",
+            "dependency graph depth <=4",
+            "no completion handlers (async/await only)",
+            "Actor isolation for shared mutable state",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Swift idioms across the entire codebase for: ${goal}. Flag: class where struct suffices (no identity, no inheritance), force-unwrap (!) without justification, force-cast (as!) without justification, force-try (try!) without justification, completion handlers instead of async/await, manual reference counting, mutable state where immutable suffices, stringly-typed APIs instead of enums. Enforce: guard-let for early exit, defer for cleanup, protocol-oriented design over class inheritance, value types by default, Codable for serialization, Result for error propagation. Verify Swift naming: camelCase for functions/variables, PascalCase for types, omit needless words.",
+          "verifies": [
+            "structs preferred over classes where possible",
+            "no unjustified force-unwrap/cast/try",
+            "guard-let for early exit",
+            "protocol-oriented design enforced",
+            "value types by default",
+            "Codable for serialization",
+            "Swift naming conventions consistent"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Swift best practices for: ${goal}. Research: latest Swift concurrency patterns (actors, structured concurrency, isolation regions), SPM plugin ecosystem, Swift-DocC CLI capabilities, cross-platform Linux support status and Foundation feature parity, current SwiftLint vs swift-format comparison, latest Swift API Design Guidelines updates, Swift Evolution proposals for upcoming features. Cross-validate findings against Swift.org documentation, WWDC sessions, and Swift Evolution proposals. Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "latest Swift concurrency patterns researched",
+            "SPM plugin ecosystem evaluated",
+            "Linux support status documented",
+            "SwiftLint vs swift-format compared",
+            "API Design Guidelines updates verified",
+            "deprecated patterns identified",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Organize Sources/ and Tests/ for strict modularity for: ${goal}. Mirror AudioWaveLib pattern: every Sources/<ModuleName>/ has corresponding Tests/<ModuleName>Tests/ in Package.swift. No source files at Sources/ root, no test files at Tests/ root. Test targets depend ONLY on their module plus shared test utilities. Directory names match Package.swift targets exactly (case-sensitive). Remove orphaned files not referenced by any target. Consolidate duplicated test helpers into SharedTestUtilities module.",
+          "verifies": [
+            "every source module has test target",
+            "no files at Sources/ or Tests/ root",
+            "test targets isolated to their module",
+            "directory names match Package.swift",
+            "no orphaned source files",
+            "test utilities consolidated"
+          ]
+        }
+      ],
+      "checkpoint": "SPM-pure, modular, async/await migrated, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Remove Xcode files, fix modularity, and migrate to async/await."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Analyze Swift value types and memory for: ${goal}. Replace every class with struct where no identity/inheritance needed. Implement copy-on-write for large value types (isKnownUniquelyReferenced). Profile retain cycles: flag delegates not marked weak, closures without [weak self]. Verify: no retain cycles in Combine/async pipelines, autoreleasepool for batch processing, lazy properties for expensive computations, no unbounded collection growth. Run address sanitizer analysis. Benchmark hot paths with swift-benchmark or XCTest.measure. Profile build time: flag if debug >45s or release >180s. Target: low memory, low CPU, zero retain cycles.",
+          "verifies": [
+            "classes replaced with structs where possible",
+            "no retain cycles (delegates weak, closures [weak self])",
+            "no unbounded collection growth",
+            "hot paths benchmarked with evidence",
+            "build time within budget",
+            "address sanitizer clean",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit Swift dependency health for: ${goal}. Review every dependency in Package.swift: verify .upToNextMajor or exact version (not .branch or .revision for production). Replace heavy frameworks with lighter alternatives or stdlib/Foundation equivalents. Flag total deps >15. Verify Package.resolved committed. Check all deps maintained (commits within 12 months). Verify release build uses -O or -Osize. Strip debug symbols in release. Verify no debug-only code leaks via #if DEBUG. Check binary size.",
+          "verifies": [
+            "deps use .upToNextMajor or exact version",
+            "heavy deps replaced with stdlib alternatives",
+            "total dependency count <=15",
+            "Package.resolved committed",
+            "all deps actively maintained",
+            "release build optimized",
+            "binary size reasonable"
+          ]
+        }
+      ],
+      "checkpoint": "Value types optimized, zero retain cycles, dependencies lean, builds fast",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Retain cycles, slow builds, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure ALL imports are platform-agnostic in Core modules: use Foundation and Dispatch only, NEVER import Combine, SwiftUI, AppKit, UIKit, or Darwin-only frameworks. Platform-specific code MUST be isolated in dedicated targets gated with #if canImport(). Verify: Date/Calendar use Foundation, file ops use FileManager, networking uses URLSession or cross-platform library. Test on Linux (Docker swift:latest): no linker errors, no missing symbols, identical test results. Flag any #if os(macOS) in non-platform targets. Verify Package.swift avoids unnecessary .when(platforms:). No hardcoded paths. No Xcode-specific tooling required.",
+          "verifies": [
+            "no Combine/SwiftUI/AppKit in Core modules",
+            "platform-specific code in dedicated targets",
+            "#if canImport guards correct",
+            "Foundation APIs used (not Darwin-only)",
+            "tests pass on Linux Docker",
+            "identical test results both platforms",
+            "no hardcoded paths"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS and Linux",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Linux build failures or platform-specific leaks detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of Swift codebase for: ${goal}. Audit every force-unwrap (!), force-cast (as!), force-try (try!): each MUST have documented justification or be replaced with safe alternatives (guard let, as?, do-catch). Scan for: unchecked array indexing, unvalidated URL construction, insecure network config (ATS exceptions, HTTP), hardcoded secrets, file operations without error handling, SQL injection in Core Data predicates. Verify: user input validated at boundaries, Codable handles malformed input. Run swift build -sanitize=address and -sanitize=thread.",
+          "verifies": [
+            "every force-unwrap justified or replaced",
+            "every force-cast justified or replaced",
+            "every force-try justified or replaced",
+            "no unchecked array indexing",
+            "no hardcoded secrets",
+            "Codable handles malformed input",
+            "address sanitizer passes",
+            "thread sanitizer passes"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit Swift supply chain security and define security policy for: ${goal}. Review every Package.swift dependency: verify .upToNextMajor or exact version, check for known vulnerabilities, verify maintained (commits within 12 months), check license compatibility. Flag deps with excessive transitive chains, unsafe Swift or C interop without justification, non-GitHub sources without verification. Verify Package.resolved committed. Audit any binaryTarget for provenance. Classify threat level using S0-S3 severity. Minimize count: flag >15, propose stdlib/Foundation alternatives.",
+          "verifies": [
+            "dependencies version-pinned correctly",
+            "no known vulnerabilities in deps",
+            "all deps actively maintained",
+            "license compatibility verified",
+            "Package.resolved committed",
+            "binary targets audited",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Zero unjustified force operations, supply chain clean, sanitizers pass",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Unjustified force operations or dependency risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive XCTest coverage for: ${goal}. Decouple logic tests from UI/AppKit/UIKit. Tests MUST run via swift test on Linux. Achieve 100% line coverage and 90%+ branch coverage (swift test --enable-code-coverage + llvm-cov). Generate property-based tests for: Codable roundtrips, Equatable/Hashable contracts, collection invariants. Test async: Task cancellation, actor isolation, structured concurrency cleanup. Parametrize edge cases: empty collections, nil optionals, Unicode, Int.max/Int.min, concurrent access. Enforce: no test interdependency, XCTAssertEqual over XCTAssert, every throws function tested. Run mutation testing to verify test effectiveness.",
+          "verifies": [
+            "100% line coverage on Core logic",
+            "90%+ branch coverage",
+            "tests run via swift test on Linux",
+            "Codable roundtrip property tests",
+            "async cancellation tested",
+            "edge cases parametrized",
+            "every throws function tested",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, property tests, Linux parity, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce Swift CI pipeline for: ${goal}. Configure SwiftLint or swift-format: force_unwrapping/force_cast/force_try as errors. CI MUST use swift build and swift test only. Fail if .xcodeproj detected. CI matrix: macOS-latest + Linux (swift:latest Docker). swift test --enable-code-coverage with threshold. swift build -strict-concurrency=complete (fail on warnings). -warnings-as-errors set. SWIFT_DETERMINISTIC_HASHING=1 for reproducible ordering. Address sanitizer on nightly. Cache .build/ directory. Nightly job for Swift nightly toolchain. No '|| true' on any step.",
+          "verifies": [
+            "SwiftLint or swift-format enforced",
+            "force operations are errors not warnings",
+            "CI uses swift build/test only",
+            "CI fails on Xcode project files",
+            "strict concurrency in CI",
+            "warnings-as-errors set",
+            "CI matrix macOS + Linux",
+            "nightly toolchain testing"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all Swift standards, zero tolerance",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Pipeline gaps or unenforced standards detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Swift documentation for: ${goal}. Every public symbol MUST have /// doc comments compatible with DocC: single-line summary, Discussion for complex APIs, - Parameter name:, - Returns:, - Throws:, code examples in fenced blocks. Configure Swift-DocC plugin for CLI generation (not Xcode-hosted). Verify: swift package generate-documentation with zero warnings, static site export works, all public symbols in generated docs. Documentation.docc/ per target with landing page. CI builds docs with --warnings-as-errors. README with SPM installation and quickstart.",
+          "verifies": [
+            "every public symbol has /// doc comment",
+            "Parameter/Returns/Throws documented",
+            "DocC generates with zero warnings via CLI",
+            "static site export works",
+            "all symbols in generated docs",
+            "Documentation.docc per target",
+            "README with SPM quickstart"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Swift documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon. Verify Apple documentation style: short declarative sentences, benefit before mechanism, one idea per sentence. Audit /// doc comments, README, DocC articles, and error messages. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented, DocC generates cleanly via CLI, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing docs, DocC warnings, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Swift API ergonomics for: ${goal}. Verify Swift API Design Guidelines: clarity at point of use, fluent English usage, factory methods use make prefix, boolean properties read as assertions (isEmpty). Verify error handling: custom Error types with LocalizedError (errorDescription), cases named by what went wrong. If CLI: ArgumentParser used, --help comprehensive, exit codes follow convention, NO_COLOR respected. If library: minimal generic constraints, default parameters reduce boilerplate, result builders where DSL improves readability. Verify CustomStringConvertible for user-facing types, CustomDebugStringConvertible for all public types.",
+          "verifies": [
+            "Swift API Design Guidelines followed",
+            "clarity at point of use",
+            "error types implement LocalizedError",
+            "error cases named descriptively",
+            "generic constraints minimal",
+            "default parameters reduce boilerplate",
+            "CustomStringConvertible on public types"
+          ]
+        }
+      ],
+      "checkpoint": "API follows Swift Design Guidelines, errors actionable, UX polished",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Design guideline violations or poor error messages detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with XCTest.measure or swift-benchmark. Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load: no unbounded growth, no leaked references, zero retain cycles under stress. Verify build time budget (debug <45s, release <180s). Check binary size: strip debug symbols, verify #if DEBUG isolation. Target: low memory, low CPU under sustained load.",
+          "verifies": [
+            "benchmarks for hot paths (XCTest.measure)",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "build time within budget",
+            "binary size optimized",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (XCTest baselines), coverage drops, new SwiftLint violations, new compiler warnings on nightly Swift toolchain. Classify every change by risk: actor isolation violations, Sendable conformance gaps, force-unwrap on optionals, retain cycles in closures, concurrency boundary shifts. Verify -strict-concurrency=complete regressions blocked. Scan for deprecated APIs older than 6 months. Verify dead code unreachable by any test. Check dev-only deps not leaked to production targets. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "nightly Swift toolchain tested",
+            "change categories classified by risk",
+            "strict concurrency regressions blocked",
+            "no stale deprecated code (>6 months)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass on macOS AND Linux, coverage at 100% on Core targets, SwiftLint clean, -strict-concurrency=complete clean, sanitizers pass, documentation current. Determine correct semantic version bump (MAJOR for breaking, MINOR for features, PATCH for fixes). Verify version consistent in Package.swift. Generate changelog from commit history following Keep a Changelog format. Verify upgrade/migration instructions for breaking changes. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in Package.swift",
+            "changelog generated (Keep a Changelog)",
+            "release notes drafted",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: no .xcodeproj files (SPM-pure), modular targets with matching Sources/Tests, async/await migration complete, -strict-concurrency=complete passes, zero retain cycles, all force operations justified or eliminated, best practices researched with citations, cross-platform parity macOS + Linux, 100% coverage on Core targets, SwiftLint zero violations, warnings-as-errors set, deps version-pinned and maintained with S0-S3 classification, DocC generates via CLI with zero warnings, brand voice audit passed, every public symbol documented, stress tests passed, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "SPM-pure confirmed",
+            "async/await and strict concurrency confirmed",
+            "zero retain cycles confirmed",
+            "cross-platform parity confirmed",
+            "100% coverage confirmed",
+            "CI fully enforced",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, and debug traces. Audit all dependency licenses in Package.swift: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers are present and correct across all Swift source files. Verify no secrets or credentials in source. Verify .gitignore excludes sensitive files. Check for unauthorized data flows to third-party endpoints. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared",
+            "copyright headers present on all source files",
+            "no secrets or credentials in source",
+            "sensitive files excluded from repo",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge concurrency claims: does -strict-concurrency=complete truly guarantee safety, or are there @unchecked Sendable escapes? Challenge retain cycle claims: are all closure capture lists verified under all calling contexts? Perform pre-mortem: assume the package caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. Evaluate reversibility. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "concurrency claims challenged (@unchecked Sendable)",
+            "retain cycle claims challenged under all contexts",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

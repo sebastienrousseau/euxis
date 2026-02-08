@@ -1,0 +1,400 @@
+{
+  "schema_version": "1.0",
+  "id": "latex",
+  "name": "LaTeX Excellence",
+  "description": "Ten-gate LaTeX enforcement: modular architecture, compilation performance, portability, safety, testing, CI, documentation, typographic design, release readiness, truth. ChkTeX zero warnings, semantic markup only, latexmk automation, vector graphics for diagrams, reproducible builds, accessible PDF output, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Refactor LaTeX document architecture for: ${goal}. Keep root main.tex minimal: documentclass, preamble input, begin/end document, and \\input{} or \\include{} calls only. Enforce modular structure: preamble/ directory for package loading and macro definitions (preamble/packages.tex, preamble/macros.tex, preamble/formatting.tex), chapters/ or sections/ for content, figures/ for graphics, tables/ for tabular data, bib/ for bibliography files. Use \\input{} for fragments that compose a single page flow (preamble, small sections) and \\include{} for chapter-level divisions (enables \\includeonly{} for selective compilation). Flag: monolithic .tex files >500 lines, preamble >100 lines in main.tex, hardcoded formatting in content files (font sizes, spacing), duplicated macro definitions across files. Enforce single document class declaration. Verify no circular \\input{} chains. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "main.tex minimal (preamble + includes only)",
+            "preamble/ directory for packages/macros/formatting",
+            "chapters/ or sections/ for content",
+            "\\input for fragments, \\include for chapters",
+            "no monolithic files >500 lines",
+            "no hardcoded formatting in content files",
+            "no circular \\input chains",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce semantic LaTeX markup across all source files for: ${goal}. Flag: manual bold/italic for structure (\\textbf{Section Title} instead of \\section{}), manual spacing (\\vspace, \\hspace, \\\\[12pt] for layout), hardcoded font commands (\\fontsize, \\large in content), manual numbering, \\newpage for layout control (use proper float placement), double dollar signs $$ for display math (use \\[ \\] or equation environment), eqnarray (use align from amsmath), \\def instead of \\newcommand (no argument checking), \\centerline (use center environment or \\centering). Enforce: semantic environments (theorem, definition, proof, listing, algorithm), \\label/\\ref/\\cref for cross-references (never hardcode numbers), biblatex/biber over natbib/bibtex for bibliography, siunitx for units and numbers, booktabs for tables (\\toprule/\\midrule/\\bottomrule, no \\hline), microtype for typography, hyperref with hidelinks for PDF.",
+          "verifies": [
+            "\\section/\\subsection for structure (no manual bold)",
+            "no manual spacing in content (\\vspace/\\hspace)",
+            "\\[ \\] or equation for display math (no $$)",
+            "align over eqnarray",
+            "\\newcommand over \\def",
+            "\\label/\\ref/\\cref for all cross-references",
+            "booktabs for tables (no \\hline)",
+            "siunitx for all units and numbers"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current LaTeX best practices for: ${goal}. Research: modern LaTeX3 (expl3) programming layer and when to use it, current TikZ/PGFPlots best practices (externalization, standalone), biblatex vs bibtex feature comparison, accessibility in PDF (tagged PDF with tagpdf, accessibility package), modern font loading (fontspec for LuaLaTeX/XeLaTeX vs traditional), latexmk vs arara vs tectonic comparison, current CTAN package recommendations (cleveref vs hyperref, minted vs listings), CI/CD patterns for LaTeX (GitHub Actions, Overleaf Git bridge), reproducible builds (pinned TeX Live versions, Docker texlive images). Cross-validate findings against CTAN documentation, LaTeX Companion 3rd edition, TeX.SE canonical answers, and TUGboat articles. Flag deprecated packages and propose modern replacements.",
+          "verifies": [
+            "LaTeX3 (expl3) applicability evaluated",
+            "TikZ externalization best practices documented",
+            "biblatex vs bibtex comparison with citations",
+            "PDF accessibility techniques researched (tagpdf)",
+            "build tool comparison (latexmk/arara/tectonic)",
+            "deprecated packages flagged with replacements",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit LaTeX file organization for: ${goal}. Verify every .tex file has a header comment explaining its purpose and parent document. Verify directory structure: figures/ (or img/, graphics/) for all image assets, tables/ for standalone tabular files, bib/ for .bib files, preamble/ for configuration, output/ or build/ for generated PDFs (gitignored). Remove orphaned files: .tex files not \\input or \\included anywhere, unused figures, unused .bib entries. Enforce consistent file naming (kebab-case.tex or snake_case.tex, pick ONE). Clean up auxiliary files from repo (.aux, .log, .toc, .lof, .lot, .bbl, .blg, .out, .fdb_latexmk, .fls, .synctex.gz). Verify .gitignore covers all auxiliary and output files. Verify .latexmkrc exists and is configured. Verify figures/ contains only source-quality assets (no low-res screenshots).",
+          "verifies": [
+            "every .tex file has header comment",
+            "figures/ directory for all image assets",
+            "no orphaned .tex files or unused figures",
+            "consistent file naming convention",
+            "no auxiliary files in repo (.aux/.log/.toc)",
+            ".gitignore covers all LaTeX auxiliaries",
+            ".latexmkrc configured"
+          ]
+        }
+      ],
+      "checkpoint": "Modular main.tex, semantic markup, modern packages, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Refactor monolithic files, enforce semantic markup, and clean auxiliaries."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Optimize LaTeX compilation performance and output size for: ${goal}. Optimize image assets: convert bitmap PNGs to vector graphics (TikZ, PGF, PDF) for all diagrams, charts, and schematics. Bitmap images (photos) MUST use JPEG with reasonable quality (85%). Verify all included images specify width/height relative to \\textwidth (not absolute dimensions). Enable TikZ externalization (\\usetikzlibrary{external}) for complex diagrams: compile once, cache result. Use \\includeonly{} for draft compilation of single chapters. Profile compilation time: flag if full build >60s. Verify PDF output size: <5MB for typical documents, <20MB for image-heavy. Flag: uncompressed images embedded in PDF, duplicate fonts, unused packages loaded (each adds compilation time). Enable PDF compression (\\pdfcompresslevel=9 for pdfLaTeX). Verify draft mode available (\\documentclass[draft]{} shows image placeholders).",
+          "verifies": [
+            "vector graphics (TikZ/PDF) for diagrams (no bitmap)",
+            "bitmap images JPEG at reasonable quality",
+            "image dimensions relative to \\textwidth",
+            "TikZ externalization enabled for complex diagrams",
+            "\\includeonly for selective compilation",
+            "full build time <60s",
+            "PDF output size within budget",
+            "draft mode available for fast iteration"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit LaTeX package health and dependencies for: ${goal}. Review all \\usepackage declarations: remove unused packages (each adds compile time and potential conflicts). Flag package conflicts (packages that redefine same commands). Verify package load order (hyperref near last, cleveref after hyperref). Flag excessive packages (>30 for a standard document). Verify all packages available in TeX Live 2024+ (not abandoned or removed). Flag packages with known deprecation: subfigure (use subcaption), epsfig (use graphicx), epsf (use graphicx), t1enc (use fontenc with T1), doublespace (use setspace). Verify .bib files: no orphaned entries, consistent entry formatting, DOI/URL present for modern references. Verify fonts: embed all fonts in PDF (no Type 3 bitmap fonts).",
+          "verifies": [
+            "no unused packages loaded",
+            "no package conflicts",
+            "package load order correct (hyperref near last)",
+            "total packages reasonable (<30)",
+            "all packages in TeX Live 2024+",
+            "no deprecated packages (subfigure/epsfig)",
+            "all fonts embedded in PDF (no Type 3)"
+          ]
+        }
+      ],
+      "checkpoint": "Vector graphics, fast compilation, lean PDF, packages minimal and conflict-free",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Bitmap diagrams, slow compilation, or package bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform LaTeX portability for: ${goal}. Verify document compiles identically with: pdfLaTeX, LuaLaTeX, and XeLaTeX (or document which engine is required and why). Test on macOS (MacTeX) and Linux (TeX Live). Verify no platform-specific path separators in \\input{} or \\includegraphics{} (use forward slashes universally). Verify no hardcoded absolute paths. Verify font availability: if custom fonts used, include them in repo or use only TeX Live bundled fonts. Test with pinned TeX Live version (Docker texlive image for reproducibility). Verify no OS-specific shell escape commands (\\write18, --shell-escape dependencies). Flag: packages that require specific engines without documentation, locale-dependent hyphenation without explicit \\usepackage[english]{babel}, encoding issues (verify UTF-8 with inputenc or native Unicode engine).",
+          "verifies": [
+            "compiles with target engine (pdfLaTeX/LuaLaTeX/XeLaTeX)",
+            "compiles on macOS (MacTeX) and Linux (TeX Live)",
+            "no platform-specific path separators",
+            "no hardcoded absolute paths",
+            "fonts available or bundled",
+            "reproducible with pinned TeX Live version",
+            "UTF-8 encoding verified"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform compilation verified on macOS and Linux with target engine",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Engine-specific code, missing fonts, or path issues detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and typographic quality audit of LaTeX sources for: ${goal}. ChkTeX lint: fix all common typographic errors: incorrect dashes (- vs -- vs ---), missing spaces after macros, inconsistent quotation marks (use `` '' or csquotes \\enquote{}), missing ~ before \\ref and \\cite (non-breaking space), periods after abbreviations (e.g.\\ vs e.g.), ellipsis (use \\ldots or \\dots not ...). Security scan: flag --shell-escape usage (arbitrary command execution), \\write18 calls, \\input from user-controlled paths, external file reads without validation. If using minted or pythontex: verify --shell-escape is documented and justified, verify no untrusted code executed. Verify no hardcoded personal information (email, phone, address) that should be parameterized. Verify no API keys or credentials in .tex or .bib files.",
+          "verifies": [
+            "ChkTeX clean (dashes, spaces, quotes corrected)",
+            "non-breaking spaces before \\ref and \\cite",
+            "csquotes or consistent quotation style",
+            "\\ldots/\\dots over manual ...",
+            "no unjustified --shell-escape",
+            "no \\write18 without documentation",
+            "no hardcoded personal information",
+            "no credentials in .tex or .bib"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit LaTeX supply chain and content integrity for: ${goal}. Verify: all included images are original or properly licensed (check for copyright violations), all .bib entries have correct attribution, no plagiarized content. Verify packages from CTAN only (no random downloads). If using custom .sty or .cls files: verify provenance, check for malicious \\write18 or shell access. Verify .bib sources: DOIs resolve, URLs accessible, no broken references. If collaborative (Overleaf/Git): verify no merge conflict markers in .tex files, verify no editor-specific artifacts (Overleaf comments, TeXShop metadata). Flag any \\url{} pointing to HTTP (should be HTTPS). Classify issues using S0-S3 severity.",
+          "verifies": [
+            "all images properly licensed",
+            "all .bib entries correctly attributed",
+            "packages from CTAN only",
+            "custom .sty/.cls provenance verified",
+            "DOIs resolve and URLs accessible",
+            "no merge conflict markers in source",
+            "URLs use HTTPS",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "ChkTeX clean, typography correct, no shell-escape abuse, content integrity verified",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Typographic errors, shell-escape abuse, or content integrity issues detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive LaTeX testing for: ${goal}. Verify compilation: latexmk -pdf (or -lualatex/-xelatex) exits with zero errors and zero warnings (treat warnings as errors with -Werror or grep). Verify all cross-references resolve: no '??' in output (grep PDF for unresolved refs). Verify bibliography: all \\cite{} keys exist in .bib, no uncited .bib entries (checkcites tool), biber/bibtex exits cleanly. Verify figures: all \\includegraphics{} files exist and are readable. Test edge cases: compile with \\includeonly{} for each chapter independently, compile in draft mode, compile with hyperref bookmarks. Visual regression: compare PDF output against baseline (diff-pdf or pdf-diff). Verify page count matches expectation (no runaway floats pushing content). Verify table of contents, list of figures, list of tables generate correctly. Test auxiliary file cleanup: latexmk -c removes all generated files.",
+          "verifies": [
+            "latexmk compiles with zero errors and warnings",
+            "no unresolved cross-references (no ?? in output)",
+            "all \\cite keys exist in .bib (checkcites clean)",
+            "all \\includegraphics files exist",
+            "each chapter compiles independently (\\includeonly)",
+            "PDF visual regression against baseline",
+            "TOC/LOF/LOT generate correctly",
+            "latexmk -c cleans all auxiliary files"
+          ]
+        }
+      ],
+      "checkpoint": "Compiles cleanly, all references resolve, visual regression baselined, cleanup verified",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Compilation errors, unresolved references, or visual regressions detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full LaTeX CI pipeline for: ${goal}. Setup latexmk for build automation: .latexmkrc configured with target engine, automatic auxiliary cleanup after PDF generation (latexmk -c in post-build), continuous preview mode documented for local dev (latexmk -pvc). ChkTeX in CI: zero warnings (chktex -q -n all). Verify compilation: latexmk -pdf -interaction=nonstopmode -halt-on-error. Verify references: checkcites for orphaned/missing citations. Verify PDF output: page count assertion, file size assertion, no Type 3 fonts (pdffonts check). Use Docker texlive image for reproducible CI builds (pinned year). Pre-commit hooks: chktex, latexindent --check. Archive PDF as CI artifact. SLO: full build <120s. No '|| true' on any step. Nightly job for TeX Live package updates.",
+          "verifies": [
+            "latexmk configured with .latexmkrc",
+            "automatic auxiliary cleanup (latexmk -c)",
+            "ChkTeX zero warnings in CI",
+            "compilation with -halt-on-error in CI",
+            "checkcites for citation integrity",
+            "PDF assertions (page count, size, fonts)",
+            "Docker texlive for reproducible builds",
+            "pre-commit hooks (chktex + latexindent)"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces latexmk, ChkTeX, checkcites, PDF validation, reproducible builds",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Latexmk not automated, ChkTeX not enforced, or non-reproducible builds."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all LaTeX project documentation for: ${goal}. Verify document metadata: \\title, \\author, \\date set correctly, \\hypersetup with pdftitle/pdfauthor/pdfsubject/pdfkeywords for PDF metadata. Verify structural completeness: table of contents, list of figures (if >5 figures), list of tables (if >5 tables), bibliography, index (for books/theses). Every custom macro MUST be documented: preamble/macros.tex has comments explaining purpose, arguments, and usage example for each \\newcommand/\\newenvironment. README MUST include: project description, prerequisites (TeX distribution, required packages), build instructions (latexmk command), directory structure explanation, contribution guidelines for multi-author projects. Verify abstract present (for papers/theses). Verify acknowledgments and appendices properly structured.",
+          "verifies": [
+            "\\hypersetup with PDF metadata (title/author/keywords)",
+            "TOC/LOF/LOT present where appropriate",
+            "every custom macro documented (purpose/args/example)",
+            "README with prerequisites and build instructions",
+            "directory structure documented",
+            "abstract present (papers/theses)",
+            "bibliography complete and formatted"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all LaTeX documentation and content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit README, comments in .tex files, macro documentation, and contribution guidelines. For academic documents: verify formal academic voice is consistent (not mixed with casual language). Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "PDF metadata set, macros documented, README with build instructions, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing PDF metadata, undocumented macros, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit LaTeX typographic design and reader UX for: ${goal}. Verify typography: consistent font family throughout (serif body, matching math font), proper kerning (microtype loaded), correct line spacing (1.2-1.5 for body text), adequate margins (geometry package, not manual). Verify PDF UX: hyperref with colored or boxed links (not hidelinks in digital versions), clickable TOC, clickable cross-references, PDF bookmarks match heading structure, back-references in bibliography (backref package). Verify accessibility: tagged PDF where possible (tagpdf or accessibility package), alt text for figures (\\pdftooltip or equivalent), sufficient contrast, logical reading order. Verify print readiness: crop marks if needed, bleed area, CMYK color mode for print. Verify consistent formatting: theorem/definition/proof environments styled uniformly, captions styled consistently (caption package), code listings styled consistently (minted or listings with uniform config).",
+          "verifies": [
+            "consistent font family with matching math font",
+            "microtype loaded for kerning/protrusion",
+            "geometry package for margins (not manual)",
+            "hyperref with clickable TOC and cross-references",
+            "PDF bookmarks match heading structure",
+            "tagged PDF for accessibility (where possible)",
+            "theorem/definition/proof styled uniformly"
+          ]
+        }
+      ],
+      "checkpoint": "Typography polished, PDF navigable, accessible, print-ready, environments consistent",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Typography inconsistencies, broken PDF navigation, or accessibility gaps detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish document baselines for: ${goal}. Measure: compilation time (cold and warm with latexmk), PDF file size, page count, total figure count and cumulative image size. Test with maximum content: verify no float overflow (all figures placed), no overfull hboxes (\\tolerance, \\emergencystretch tuned), no underfull hboxes in final output. Verify PDF/A compliance if required (pdfx package). Test PDF rendering: open in Preview (macOS), Adobe Reader, Chrome PDF viewer, Firefox PDF viewer. Verify all fonts embedded and subsetted. Verify printed output: margins correct, figures legible at print resolution (300+ DPI for bitmaps). Run latexmk multiple times: verify output stabilizes (no oscillating cross-references). Target: reproducible, visually stable, compact PDF, low memory, low CPU.",
+          "verifies": [
+            "compilation time baselined (cold/warm)",
+            "PDF file size within budget",
+            "no overfull or underfull hboxes in final",
+            "all floats placed (no float overflow)",
+            "PDF renders correctly in multiple viewers",
+            "all fonts embedded and subsetted",
+            "output stabilizes after multiple latexmk runs"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: visual regressions (PDF diff against baseline), page count changes, compilation warning regressions, ChkTeX regressions, broken cross-references. Classify every change by risk: document class changes, package additions/removals, macro redefinitions, bibliography restructuring, figure replacements, font changes. Scan for deprecated packages flagged >6 months ago. Verify no orphaned figures, unused .bib entries, or dead \\label{}s. Check draft-mode artifacts not leaked to final (TODO markers, \\lipsum, margin notes). Verify CI blocks regression merges.",
+          "verifies": [
+            "visual regression detection active (PDF diff)",
+            "page count regression tracked",
+            "compilation warning regression blocked",
+            "change categories classified by risk",
+            "no deprecated packages (>6 months)",
+            "no draft artifacts in final (TODO/\\lipsum)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: latexmk compiles cleanly, ChkTeX zero warnings, all references resolve, all citations present, PDF metadata correct, visual baseline accepted, no draft artifacts. Determine correct version: for papers (submission/revision/camera-ready), for books/reports (semantic version). Generate changelog: list of content changes, structural changes, figure additions. Verify submission requirements met if applicable: page limits, margin requirements, font requirements, figure resolution, bibliography format (conference/journal style). Verify final PDF matches target specification. Draft release notes with highlights. Verify prior version archived. Coordinate content review sign-off.",
+          "verifies": [
+            "pre-release checklist complete",
+            "version or revision correctly labeled",
+            "changelog documenting content changes",
+            "submission requirements met (if applicable)",
+            "final PDF matches target specification",
+            "release notes drafted",
+            "prior version archived"
+          ]
+        }
+      ],
+      "checkpoint": "Visually stable, no hbox issues, PDF validated, release-ready with changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review visual baselines, hbox issues, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), modular structure with minimal main.tex, semantic markup throughout (no manual formatting), vector graphics for diagrams, best practices researched with citations, ChkTeX zero warnings, all cross-references resolve, all citations present, cross-platform compilation verified (macOS + Linux), PDF metadata complete, custom macros documented, brand voice audit passed, latexmk CI fully automated with reproducible builds, visual regression baselined, no overfull hboxes, PDF renders in multiple viewers, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "semantic markup confirmed (no manual formatting)",
+            "vector graphics for all diagrams",
+            "cross-platform compilation confirmed",
+            "all references and citations resolve",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Verify all figures and images are properly licensed (Creative Commons, original, or permission documented). Verify all quotations properly attributed. Verify bibliography entries complete (no missing fields for citation style). If academic: verify institutional formatting requirements met (thesis template, journal style). Verify no PII exposed (author drafts with personal comments, track changes, embedded metadata). Verify PDF metadata does not leak unintended information (\\pdfinfo clean). Verify copyright notice if required. Check for unauthorized reproduction of copyrighted figures. Verify .gitignore excludes personal notes, review comments, and editor swap files. Flag any compliance violation with reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "all figures properly licensed or attributed",
+            "all quotations attributed",
+            "bibliography entries complete",
+            "institutional formatting requirements met",
+            "no PII in PDF metadata or comments",
+            "copyright notice present (if required)",
+            "no unauthorized copyrighted figures",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge portability claims: does compiling on macOS and Linux guarantee identical output, or are there font substitution differences, hyphenation differences, or package version differences that produce subtly different PDFs? Challenge semantic markup claims: does using \\section everywhere mean the document is truly semantic, or are there semantic gaps (custom environments misused, figures without meaningful captions, tables without context)? Challenge visual regression claims: does PDF diff catch all regressions, or are there subtle issues (font hinting differences, color profile mismatches, accessibility tree changes) that pixel comparison misses? Perform pre-mortem: assume the document was rejected or caused embarrassment 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "portability challenged (font/hyphenation differences)",
+            "semantic markup challenged (gaps beyond \\section)",
+            "visual regression challenged (subtle rendering diffs)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

@@ -1,0 +1,399 @@
+{
+  "schema_version": "1.0",
+  "id": "javascript",
+  "name": "JavaScript Excellence",
+  "description": "Ten-gate JavaScript enforcement: architecture, performance, portability, safety, testing, CI, documentation, API design, release readiness, truth. ES2026+ only, ESM only, zero CommonJS, strict JSDoc, 100% coverage, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce ES2026+ standards and ESM architecture for: ${goal}. Deprecate and remove ALL CommonJS (require, module.exports, __dirname, __filename). Enforce ESM exclusively: import/export, import.meta.url, import.meta.dirname. Package.json MUST set \"type\": \"module\". Enforce modular structure: src/ with barrel index.js per module. Each module has single responsibility and minimal public API. Prefer const over let, arrow functions for callbacks, classes only when inheritance is needed. Flag god files (>400 lines), god functions (>50 lines), circular imports. Enforce separation: domain logic MUST NOT import from I/O, HTTP, or database layers directly. Dependency injection over hard-coded imports for external services. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "zero CommonJS (no require/module.exports)",
+            "\"type\": \"module\" in package.json",
+            "ESM imports/exports exclusively",
+            "const preferred over let, no var",
+            "modular src/ structure with barrel exports",
+            "domain logic decoupled from I/O layers",
+            "no god files (>400 lines)",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce modern JavaScript idioms across the entire codebase for: ${goal}. Flag: var declarations, function keyword where arrow suffices, callback pyramids instead of async/await, string concatenation instead of template literals, manual iteration where array methods suffice (map/filter/reduce/flatMap), == instead of ===, typeof checks instead of optional chaining, arguments object instead of rest parameters, for-in on arrays, delete on arrays. Enforce: destructuring for object/array access, default parameters, nullish coalescing (??), optional chaining (?.), Promise.allSettled for parallel ops, structuredClone for deep copies, Object.hasOwn over hasOwnProperty, Array.at() for index access, AbortController for cancellation, top-level await in modules.",
+          "verifies": [
+            "zero var declarations",
+            "async/await over callbacks",
+            "template literals over concatenation",
+            "=== over == everywhere",
+            "destructuring used consistently",
+            "optional chaining and nullish coalescing used",
+            "modern array methods over manual iteration",
+            "ES2026+ features adopted"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current JavaScript best practices for: ${goal}. Research: latest TC39 proposals at Stage 3+ (Temporal, Iterator helpers, Record & Tuple, Pattern Matching, Decorators), current ESLint flat config migration status, Vitest vs Jest comparison and optimal config, modern bundler landscape (Vite, esbuild, Rollup, tsup), current Node.js LTS features (test runner, permissions model, single executable apps), TypeScript vs JSDoc-based typing comparison, monorepo tooling (npm workspaces, pnpm, turborepo). Cross-validate findings against MDN, Node.js docs, and TC39 proposals. Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "TC39 Stage 3+ proposals researched",
+            "ESLint flat config status documented",
+            "test framework comparison with citations",
+            "bundler landscape evaluated",
+            "Node.js LTS features identified",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit JavaScript file organization for: ${goal}. Verify every module has a JSDoc @module comment explaining its purpose. Verify test directories mirror source directories: tests/<module>/ for every src/<module>/. Remove orphaned files not imported anywhere. Enforce consistent file naming (kebab-case.js or camelCase.js, pick ONE). Verify barrel exports (index.js) expose clean public API. Clean up node_modules artifacts, .DS_Store, and dist/ from repo. Verify .nvmrc or engines field specifies Node.js version. Verify exports field in package.json maps all public entry points.",
+          "verifies": [
+            "every module has @module JSDoc",
+            "test directories mirror source directories",
+            "no orphaned files",
+            "consistent file naming convention",
+            "barrel exports define public API",
+            "no node_modules or dist in repo",
+            "exports field maps public entry points"
+          ]
+        }
+      ],
+      "checkpoint": "ESM-pure, modular, modern idioms enforced, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Remove CommonJS, fix modularity, and adopt ES2026+ patterns."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Audit runtime performance and bundle size for: ${goal}. Profile with Node.js --prof or clinic.js to identify hot paths. Apply: Set/Map over Object for frequent lookups, WeakRef/FinalizationRegistry for cache invalidation, ReadableStream for large data, worker_threads for CPU-bound tasks, lazy imports for optional features. If browser-targeted: audit bundle size with bundlephobia or size-limit, enforce tree-shaking (no side effects in module scope), split code by route. Remove unused dependencies. Profile startup time (node --trace-event-categories). Verify no memory leaks: EventEmitter listeners cleaned up, intervals cleared, streams destroyed. Target: low memory, low CPU, zero waste.",
+          "verifies": [
+            "hot paths profiled with evidence",
+            "Set/Map used for frequent lookups",
+            "streams used for large data",
+            "worker_threads for CPU-bound tasks",
+            "bundle size audited (if applicable)",
+            "tree-shaking verified (no side-effect imports)",
+            "no memory leaks (listeners/intervals/streams cleaned)",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit JavaScript dependency health for: ${goal}. Identify and remove unused dependencies (depcheck). Replace heavy deps with lighter alternatives or native APIs (e.g., node:fs/promises over fs-extra, fetch over axios, node:test over heavy frameworks where possible). Verify lock file committed (package-lock.json or pnpm-lock.yaml). Flag excessive dependencies (>50 total, >200 transitive). Check all deps actively maintained (release within 12 months). Flag deps with native addons without prebuilt binaries for macOS/Linux/Windows. Verify no devDependencies leaked to production. Verify engines field in package.json.",
+          "verifies": [
+            "no unused dependencies (depcheck clean)",
+            "heavy deps replaced with native APIs",
+            "lock file committed",
+            "total dependencies reasonable (<50 direct)",
+            "all deps actively maintained",
+            "prebuilt binaries for all platforms",
+            "devDependencies not in production bundle"
+          ]
+        }
+      ],
+      "checkpoint": "Hot paths profiled, bundle lean, dependencies minimal, zero memory leaks",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unjustified resource usage, bundle bloat, or dependency waste detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure tests pass on macOS, Linux, and Windows. Test Node.js version matrix: 20 LTS, 22 LTS, 23 current. Verify no platform-specific behavior leaks: path separators (use node:path or path.posix/path.win32 explicitly), line endings (handle CRLF/LF), file system case sensitivity assumptions, child_process shell differences, signal handling (SIGTERM vs process exit). Verify no hardcoded absolute paths. Use import.meta.url for file references. Flag any process.platform checks without corresponding tests. Verify package.json engines field. Test ESM resolution works identically across runtimes (Node.js, Deno, Bun if applicable).",
+          "verifies": [
+            "tests pass on macOS, Linux, Windows",
+            "tests pass on Node.js 20, 22, 23",
+            "node:path used for path operations",
+            "line endings handled (CRLF/LF)",
+            "no hardcoded absolute paths",
+            "import.meta.url for file references",
+            "engines field in package.json"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS, Linux, Windows with Node.js 20-23",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Platform-specific leaks or version incompatibilities detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of the JavaScript codebase for: ${goal}. Scan for: prototype pollution (object merge without safeguards), ReDoS (regex backtracking), XSS (innerHTML, document.write, unsanitized template injection), command injection (child_process.exec with user input), path traversal (unsanitized path.join with user input), SQL/NoSQL injection, eval/Function constructor on user input, insecure deserialization (JSON.parse without validation), hardcoded secrets, unvalidated URLs (SSRF). Verify: all user input validated at boundaries, all subprocess calls use execFile with array args, Content-Security-Policy headers set. Flag severity and provide remediation for each finding.",
+          "verifies": [
+            "no prototype pollution vectors",
+            "no ReDoS-vulnerable regex",
+            "no XSS vectors (innerHTML/document.write)",
+            "no command injection (execFile over exec)",
+            "no path traversal",
+            "no eval/Function on user input",
+            "no hardcoded secrets",
+            "all user input validated at boundaries"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit JavaScript supply chain security and define security policy for: ${goal}. Run npm audit for known CVEs. Verify: no unmaintained deps (>18 months), all deps have compatible licenses (flag GPL in MIT/Apache projects), transitive deps <200, no typosquatting risks. Verify lock file committed. Check for preinstall/postinstall scripts that execute arbitrary code. Flag deps with excessive permissions or native bindings. Verify .npmrc does not expose tokens. Verify .npmignore or files field prevents publishing secrets. Classify threat level for each finding using S0-S3 severity. Enforce Node.js permissions model (--experimental-permission) where applicable.",
+          "verifies": [
+            "no known CVEs (npm audit clean)",
+            "no unmaintained dependencies",
+            "license compatibility verified",
+            "no typosquatting risks",
+            "lock file committed",
+            "no suspicious install scripts",
+            "no tokens exposed in .npmrc",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "No injection vulnerabilities, supply chain clean, dependencies audited",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Security vulnerabilities or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive test coverage for: ${goal}. Achieve 100% line coverage and 90%+ branch coverage using Vitest or Jest with c8/istanbul. Write property-based tests using fast-check for: data parsing/serialization roundtrips, API contract validation, edge case discovery. Verify mock discipline: external services MUST be mocked (vi.mock or jest.mock). Mock global objects (window, document, fetch) for Node environments. Test async functions: proper cleanup, AbortController cancellation, unhandled rejection detection. Parametrize edge cases: empty inputs, null/undefined, Unicode, large arrays, concurrent access. Enforce: no test interdependency (randomized order), no setTimeout in tests (use fake timers), deterministic fixtures. Run mutation testing (Stryker) to verify test effectiveness.",
+          "verifies": [
+            "100% line coverage",
+            "90%+ branch coverage",
+            "property-based tests with fast-check",
+            "external services strictly mocked",
+            "globals mocked for Node (window/document)",
+            "async cleanup and cancellation tested",
+            "edge cases parametrized",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, property tests, mocking discipline, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full JavaScript CI pipeline for: ${goal}. Configure ESLint with flat config (eslint.config.js): strict ruleset (Airbnb or Standard base + custom overrides), no-var, prefer-const, eqeqeq, no-eval, no-implied-eval, no-new-func. Prettier for formatting (printWidth=80, singleQuote, trailingComma=all). JSDoc validation plugin enforced. Vitest or Jest with --coverage --coverageThreshold. npm audit in pipeline. Pre-commit hooks via husky + lint-staged: eslint --fix, prettier --write. SLO enforcement: lint <10s, tests <120s. CI matrix: macOS + Linux at minimum, Node.js LTS versions. Cache node_modules. Nightly job for dependency updates and Node.js nightly testing. No '|| true' on any step.",
+          "verifies": [
+            "ESLint flat config with strict rules",
+            "Prettier formatting enforced",
+            "JSDoc validation in lint pipeline",
+            "coverage threshold enforced in CI",
+            "npm audit in pipeline",
+            "pre-commit hooks configured (husky + lint-staged)",
+            "CI matrix macOS + Linux, Node LTS versions",
+            "nightly jobs configured"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all JavaScript standards, zero tolerance",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Pipeline gaps or unenforced standards detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all JavaScript documentation for: ${goal}. Annotate ALL exported functions, classes, and constants with strict JSDoc: @description, @param with {type}, @returns with {type}, @throws, @example with runnable code. Ensure types are documented for IntelliSense support. Configure documentation generator (TypeDoc with JSDoc input, or JSDoc with clean template). README MUST include: one-sentence description, installation (npm install), quickstart example, configuration reference, license. Verify all @example blocks execute without errors. Build docs without warnings. Structure: Getting Started, User Guide, API Reference.",
+          "verifies": [
+            "every export has strict JSDoc annotation",
+            "@param/@returns/@throws documented with types",
+            "@example blocks execute without errors",
+            "IntelliSense types complete",
+            "README complete with quickstart",
+            "doc site builds without warnings",
+            "Getting Started / User Guide / API Reference structure"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all JavaScript documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit JSDoc comments, README, guides, error messages, and CLI help text. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All exports documented with JSDoc, examples verified, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing JSDoc, broken examples, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit JavaScript API ergonomics and user experience for: ${goal}. If CLI: verify commander/yargs/citty is used, --help comprehensive with examples, error messages actionable with fix suggestions, progress indicators for long ops, exit codes follow convention (0=success, 1=error, 2=usage), NO_COLOR respected, stderr for diagnostics, stdout for data. If library: verify errors carry actionable messages with context, custom Error subclasses with error codes, consistent async patterns (all-async or all-sync, never mixed), options objects with defaults over positional args, EventEmitter patterns documented. Verify JSDoc types enable IDE autocomplete and IntelliSense. Flag any 'Error occurred' without context or stack trace.",
+          "verifies": [
+            "error messages are actionable with context",
+            "custom Error subclasses with codes",
+            "NO_COLOR respected",
+            "exit codes follow convention",
+            "stderr/stdout separation correct",
+            "consistent async patterns (no mixed)",
+            "JSDoc types enable IntelliSense"
+          ]
+        }
+      ],
+      "checkpoint": "API ergonomic, errors actionable, UX polished, IntelliSense complete",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor error messages, inconsistent patterns, or UX issues detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths with vitest bench or tinybench. Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load with --max-old-space-size and heap snapshots: no unbounded growth, no leaked EventEmitter listeners, no uncleaned intervals/timeouts. Verify startup time (node --trace-event-categories). Check package size: exclude test data, docs, and dev artifacts via files field. If browser: enforce bundle size budgets (size-limit). Target: low memory, low CPU under sustained load.",
+          "verifies": [
+            "benchmarks for hot paths (vitest bench/tinybench)",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "startup time within budget",
+            "package size optimized (files field)",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops, new ESLint violations, failures on Node.js nightly or upcoming LTS. Classify every change by risk: async boundary shifts, error handling modifications, prototype chain changes, event listener management, module loading patterns. Scan for deprecated APIs older than 6 months (Node.js deprecation warnings). Verify dead code unreachable by any test or entry point. Check devDependencies not leaked to production. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "Node.js nightly/upcoming LTS tested",
+            "change categories classified by risk",
+            "no stale deprecated code (>6 months)",
+            "no dead code branches",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass with zero failures, coverage at 100%, ESLint clean, Prettier clean, npm audit clean, documentation current. Determine correct semantic version bump (MAJOR for breaking, MINOR for features, PATCH for fixes). Verify version consistent in package.json. Generate changelog from commit history following Keep a Changelog format. Verify upgrade/migration instructions for breaking changes. Verify exports field maps all public entry points. Draft release notes with highlights. Verify rollback plan exists (npm unpublish window or deprecation). Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in package.json",
+            "changelog generated (Keep a Changelog)",
+            "release notes drafted",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), zero CommonJS (ESM-pure), modern idioms enforced, best practices researched with citations, ESLint strict clean, Prettier clean, cross-platform parity on macOS/Linux/Windows with Node.js 20-23, 100% line coverage, property tests via fast-check, npm audit clean with S0-S3 classification, all exports documented with JSDoc and runnable examples, brand voice audit passed, doc site builds without warnings, CI enforces all gates, stress tests passed, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "architecture scores at target",
+            "ESM-pure confirmed (zero CommonJS)",
+            "cross-platform parity confirmed",
+            "100% coverage confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, API responses, and data stores. Audit all dependency licenses via license-checker or license-report: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers are present and correct across all source files. Check for unauthorized data flows to third-party endpoints. Verify .gitignore excludes sensitive files (.env, .npmrc with tokens, private keys). Verify .npmignore or files field prevents publishing secrets. Flag any compliance violation with regulatory reference (GDPR, CCPA) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared (license-checker)",
+            "copyright headers present on all source files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo and package",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge type safety claims: does JSDoc truly cover all code paths or are there untyped escape hatches? Challenge coverage claims: does 100% line coverage mean all behaviors are tested, or are there semantic gaps (untested error paths, race conditions)? Challenge ESM claims: are there dynamic require() calls or conditional CommonJS fallbacks hiding in dependencies? Perform pre-mortem: assume the package caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. Evaluate reversibility. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "type safety claims challenged (untyped escapes)",
+            "coverage claims challenged (semantic gaps)",
+            "ESM purity challenged (hidden require calls)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.0",
+  "id": "standards",
+  "name": "Repository Standards",
+  "description": "Ten-gate repository-agnostic enforcement: architecture, performance, portability, security, testing, CI, documentation, API design, release readiness, truth. Zero dead code, zero drift, zero untested paths, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit repository architecture for: ${goal}. Enforce Ports-and-Adapters: Core logic MUST NOT import I/O, UI, or infrastructure layers directly. Score Tech Debt (target 10/10) and Modularity (target 100/100). Verify dependency graph depth <=5, no circular dependencies, no god modules (>500 lines). Enforce root directory cleanliness: max 7 top-level items (src, docs, tests, config, README, LICENSE, build manifest). Consolidate scattered config files into config/ directory. Verify single source of truth for project metadata (one manifest file).",
+          "verifies": [
+            "Ports-and-Adapters boundaries enforced",
+            "Tech Debt score 10/10",
+            "Modularity score 100/100",
+            "dependency graph depth <=5",
+            "no circular dependencies",
+            "no god modules (>500 lines)",
+            "root directory <=7 items"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce language idioms appropriate to this repository for: ${goal}. Detect the primary language and enforce its canonical idioms: naming conventions, import style, error handling patterns, modern language features, standard formatting. Flag: dead imports, shadowed variables, unused parameters, mutable state where immutable suffices, stringly-typed APIs, manual loops where higher-order functions apply, blocking calls in async context. Enforce consistent naming: file names, function names, type names, constants follow the language community standard.",
+          "verifies": [
+            "language idioms enforced for primary language",
+            "naming conventions consistent",
+            "no dead imports or unused parameters",
+            "immutable by default",
+            "modern language features used",
+            "no blocking calls in async context",
+            "formatting follows community standard"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current best practices for: ${goal}. Identify the repository's primary language and ecosystem. Research: latest recommended project layouts, current community standards for linting/formatting/testing, modern patterns replacing deprecated approaches, zero-cost architecture patterns that minimize memory and CPU. Cross-validate findings against at least 2 authoritative sources (official docs, core team recommendations). Flag any pattern in the codebase that contradicts current community consensus. Produce actionable recommendations with citations.",
+          "verifies": [
+            "best practices researched with citations",
+            "latest project layout standards verified",
+            "deprecated patterns identified",
+            "community consensus documented",
+            "zero-cost patterns recommended",
+            "findings cross-validated (2+ sources)",
+            "actionable recommendations produced"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit file organization and directory structure for: ${goal}. Verify every source file belongs to a named module or directory with a clear purpose. Remove orphaned files not referenced by any build target or import. Enforce consistent file naming convention (detect dominant style and enforce it globally). Flag empty directories, temporary artifacts (.DS_Store, *.log, *.tmp, *.bak), and abandoned backup files. Verify test directories mirror source directories. Standardize import paths to match directory structure.",
+          "verifies": [
+            "every file belongs to a named module",
+            "no orphaned files",
+            "consistent file naming convention",
+            "no temporary artifacts or backup files",
+            "test directories mirror source directories",
+            "import paths match directory structure"
+          ]
+        }
+      ],
+      "checkpoint": "Architecture clean, idioms enforced, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Fix structure, idioms, and file organization before proceeding."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Profile the codebase for performance and resource efficiency for: ${goal}. Identify hot paths and measure execution time, memory allocation, and CPU usage. Flag: unnecessary allocations, copies where references suffice, synchronous blocking in async contexts, O(n^2) or worse algorithms where O(n log n) is feasible, unbounded collection growth, missing caching for expensive pure computations. Verify startup time is within budget. Measure memory footprint under typical load: flag if resident memory exceeds 2x minimum required. Provide benchmarks as evidence for every optimization claim. Target: low memory, low CPU, zero waste.",
+          "verifies": [
+            "hot paths profiled with evidence",
+            "no unnecessary allocations or copies",
+            "no O(n^2) where O(n log n) is feasible",
+            "no unbounded collection growth",
+            "caching applied for expensive computations",
+            "startup time within budget",
+            "memory footprint reasonable"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit dependency health and bloat for: ${goal}. Identify and remove unused dependencies. Replace heavy dependencies with lighter alternatives where possible. Flag excessive transitive dependency count. Verify all dependencies are actively maintained (release within 12 months). Check for duplicate functionality across dependencies. Verify lock file is committed and reproducible. Audit build scripts for unnecessary work, network access, or filesystem writes.",
+          "verifies": [
+            "no unused dependencies",
+            "heavy deps replaced with lighter alternatives",
+            "transitive dependency count reasonable",
+            "all dependencies actively maintained",
+            "no duplicate functionality across deps",
+            "lock file committed",
+            "build scripts minimal and safe"
+          ]
+        }
+      ],
+      "checkpoint": "Performance profiled, resources optimized, dependencies lean",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unjustified resource usage or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure identical behavior on macOS, Linux, and Windows. Flag platform-specific behavior leaks: path separators, line endings, locale-dependent operations, timezone handling, endianness assumptions, temp directory assumptions. Verify all platform-specific code is isolated behind explicit guards and tested. Test on all target platforms: verify no linker errors, no missing symbols, identical test results. Flag any hardcoded paths (use $HOME or environment variables). Verify no platform-specific tooling required for build or test.",
+          "verifies": [
+            "builds on macOS, Linux, and Windows",
+            "tests pass identically on all platforms",
+            "no platform-specific behavior leaks",
+            "platform-specific code isolated behind guards",
+            "no hardcoded absolute paths",
+            "no platform-specific tooling required",
+            "path handling uses portable APIs"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on macOS, Linux, and Windows",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Platform-specific leaks or build failures detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of the codebase for: ${goal}. Scan for: injection vulnerabilities (SQL, command, path traversal), unsafe deserialization, hardcoded secrets or API keys, eval/exec on user input, insecure temporary file creation, commented-out code blocks >3 lines without dated TODO. Verify: all user input validated at system boundaries, all file operations use safe patterns, all subprocess/shell invocations use parameterized forms (no string interpolation). Flag severity and provide remediation for each finding. Run language-appropriate security scanner.",
+          "verifies": [
+            "no injection vulnerabilities",
+            "no hardcoded secrets",
+            "no unsafe deserialization",
+            "no eval/exec on user input",
+            "user input validated at boundaries",
+            "subprocess calls use safe patterns",
+            "security scanner clean",
+            "no stale commented-out code"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit supply chain security and define security policy for: ${goal}. Scan all dependencies for known CVEs. Check for unmaintained dependencies (>12 months without release). Verify license compatibility (flag copyleft in permissive projects). Flag typosquatting risks on package names. Verify lock file is committed and dependencies are pinned. Audit build hooks and post-install scripts for suspicious behavior. Classify threat level for each finding using S0-S3 severity. Provide security clearance or block with specific requirements.",
+          "verifies": [
+            "no known CVEs in dependency tree",
+            "no unmaintained dependencies",
+            "license compatibility verified",
+            "no typosquatting risks",
+            "lock file committed and pinned",
+            "no suspicious build hooks",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Code security verified, supply chain audited, no vulnerabilities",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Security vulnerabilities or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive test coverage for: ${goal}. Achieve 100% line coverage and 90%+ branch coverage. Generate property-based tests for core logic: serialization roundtrips, parser invariants, mathematical properties. Parametrize edge cases: empty inputs, nil/null/None values, Unicode strings, boundary values, concurrent access. Verify mock discipline: external services (HTTP, databases, filesystems) MUST be mocked in unit tests. Enforce: no test interdependency (tests pass in random order), no sleep()/delay() in tests, deterministic fixtures. Run mutation testing to verify test effectiveness. Add regression tests for every bug fix.",
+          "verifies": [
+            "100% line coverage",
+            "90%+ branch coverage",
+            "property-based tests for core logic",
+            "edge cases parametrized",
+            "external services mocked",
+            "no test interdependency",
+            "no sleep in tests",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, property tests, edge cases, mocking discipline, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce CI pipeline for: ${goal}. Configure: linter with zero-warning policy (deny all warnings), formatter check (fail on unformatted code), test suite with coverage threshold (fail-under 100%), type checker in strict mode (if applicable), security scanner in pipeline, dependency audit in pipeline. Set warnings-as-errors globally. CI matrix MUST include macOS and Linux at minimum. Cache dependencies for faster builds. Set timeout on test jobs (max 10 minutes). Add nightly job for: dependency update checks, beta/nightly compiler testing, extended test runs. Verify CI blocks merge on any failure. No '|| true' on security-critical steps.",
+          "verifies": [
+            "linter enforced with zero warnings",
+            "formatter check in CI",
+            "coverage threshold enforced (100%)",
+            "security scanner in pipeline",
+            "CI matrix includes macOS and Linux",
+            "dependencies cached",
+            "nightly jobs configured",
+            "no || true on critical steps"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all standards, zero tolerance for violations",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Pipeline gaps or unenforced standards detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all documentation for: ${goal}. Every public function, class, type, and module MUST have a doc comment with: one-line summary, parameter descriptions, return description, error/exception conditions, at least one runnable example. README MUST include: one-sentence description, installation command, quickstart example that runs, configuration reference, platform requirements, license. Verify all code examples in docs execute correctly. Build documentation site without warnings. Structure: Getting Started, User Guide, API Reference.",
+          "verifies": [
+            "every public symbol documented",
+            "runnable examples in doc comments",
+            "parameter/return/error sections present",
+            "README complete with quickstart",
+            "all doc examples verified",
+            "doc site builds without warnings",
+            "Getting Started / User Guide / API Reference structure"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit README, guides, error messages, CLI help text, and doc comments. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented, examples verified, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing docs, broken examples, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit API ergonomics and user experience for: ${goal}. Verify: error messages are actionable (state what went wrong, why, and how to fix), output respects NO_COLOR environment variable, exit codes follow convention (0=success, 1=error, 2=usage), diagnostic output goes to stderr, data output goes to stdout. If CLI: verify --help is comprehensive with examples, progress bars for long operations. If library: verify error types carry actionable context, public types implement standard display/debug traits, default values reduce boilerplate, generic constraints are minimal. Verify consistent naming follows language API design guidelines. Flag any 'Error occurred' without context.",
+          "verifies": [
+            "error messages are actionable",
+            "NO_COLOR respected",
+            "exit codes follow convention",
+            "stderr/stdout separation correct",
+            "help output comprehensive",
+            "public types implement display/debug",
+            "consistent API naming"
+          ]
+        }
+      ],
+      "checkpoint": "API ergonomic, errors actionable, UX polished",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor error messages, inconsistent naming, or UX issues detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark all hot paths with language-appropriate tools. Set performance budgets: define acceptable p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load: verify no unbounded growth, no leaks. Verify build time is acceptable. Check output artifact size: strip debug symbols, verify no debug-only code leaks into production. Target: low memory, low CPU under sustained load.",
+          "verifies": [
+            "benchmarks for hot paths",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "build time within budget",
+            "artifact size optimized",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops (fail if coverage decreases), new linter warnings, new compiler warnings on latest/nightly toolchain. Classify every change category and run language-aware pattern analysis (ownership, type safety, concurrency, resource management). Scan for deprecated tags or comments older than 6 months and plan removal. Verify dead code branches are unreachable and remove them. Check for dev dependencies leaked into production. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "nightly/latest toolchain tested",
+            "language-aware pattern analysis complete",
+            "no stale deprecated code (>6 months)",
+            "no dead code branches",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass with zero failures, coverage at 100%, linting clean, no known vulnerabilities, documentation current. Determine correct semantic version bump (MAJOR for breaking, MINOR for features, PATCH for fixes). Verify version number consistent across all manifests. Generate changelog from commit history following Keep a Changelog format. Verify upgrade/migration instructions for breaking changes. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent across manifests",
+            "changelog generated (Keep a Changelog)",
+            "release notes drafted",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), language idioms enforced, best practices researched with citations, performance profiled with evidence, cross-platform parity confirmed (macOS + Linux at minimum), security scans clean with S0-S3 classification, 100% line coverage achieved, CI pipeline enforces all gates, documentation complete with verified examples, brand voice audit passed, API design reviewed, stress tests passed, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Flag any unverified assertion. Issue PASS or FAIL verdict with evidence.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "architecture scores at target",
+            "cross-platform parity confirmed",
+            "security classification complete",
+            "100% coverage confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, API responses, and data stores. Audit all dependency licenses for compatibility with the project's license model (reject copyleft in permissive projects without approval). Verify copyright headers are present and correct across all source files. Check for unauthorized data flows to third-party endpoints. Verify .gitignore excludes sensitive files (.env, credentials, private keys). Flag any compliance violation with regulatory reference (GDPR, CCPA) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared",
+            "copyright headers present on all source files",
+            "no unauthorized data flows",
+            "sensitive files excluded from repo",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if it is wrong. Perform pre-mortem: assume the release failed 6 months from now, enumerate the top 5 reasons why. Assess blast radius of remaining risks. Evaluate reversibility of all decisions made during the playbook run. Identify single points of failure. If all agents agree on a PASS, verify it is not groupthink by testing counter-scenarios. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict with confidence level.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "reversibility of decisions evaluated",
+            "single points of failure identified",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}
