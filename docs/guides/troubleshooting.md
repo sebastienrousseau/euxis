@@ -1,3 +1,4 @@
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Troubleshooting
 
 Common issues and solutions for Euxis.
@@ -99,8 +100,8 @@ git commit --amend -m "$(cat <<'EOF'
 Your commit message here
 
 ---
-🎨 Designed by Sebastien Rousseau — https://sebastienrousseau.com/
-🚀 Engineered with Euxis — Enterprise Unified eXecution Intelligence System — https://euxis.co/
+🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
 EOF
 )"
 ```

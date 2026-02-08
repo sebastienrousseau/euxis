@@ -1,3 +1,4 @@
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis CLI Reference
 
 Complete reference for all Euxis command-line tools.
@@ -756,4 +757,4 @@ euxis-gym train new-agent
 
 ---
 
-*Designed by Sebastien Rousseau — Engineered with Euxis*
+🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)** · 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System

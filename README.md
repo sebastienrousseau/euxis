@@ -1,6 +1,6 @@
 # Euxis
 
-**Your AI engineering team, ready in seconds.**
+**41 AI specialists. Deploy in seconds.**
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
@@ -9,23 +9,23 @@
 
 ---
 
-## What You Can Build
+## What Euxis Delivers
 
-Euxis gives you 41 specialist AI agents that work together on real engineering tasks. Each agent has deep expertise in one domain and they coordinate automatically.
+41 specialist AI agents coordinate automatically on engineering tasks. Each agent masters one domain.
 
-**Ship features faster.** The orchestrator breaks down complex goals and delegates to specialists. You describe what you want, Euxis figures out how to build it.
+**Ship features faster.** Break down complex goals. Delegate to specialists. Deploy solutions.
 
-**Catch bugs before users do.** Security agents audit your code. Testing agents verify your logic. Quality gates block broken builds.
+**Catch bugs before production.** Security agents audit code. Testing agents verify logic. Quality gates block broken builds.
 
-**Never repeat yourself.** The Cortex remembers every decision, every fix, every lesson learned. Your agents get smarter over time.
+**Learn from every interaction.** The Cortex stores decisions, fixes, and lessons. Agents improve over time.
 
 ---
 
-## Get Your First Win
+## Deploy Your First Agent
 
-This takes about 2 minutes. By the end, you'll have deployed your first agent.
+Complete deployment in 2 minutes.
 
-### Step 1: Install
+### Install
 
 ```bash
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
@@ -33,36 +33,36 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-### Step 2: Verify
+### Verify
 
 ```bash
 euxis-health
 ```
 
-You should see 8 green checkmarks. If not, run `euxis-certify` to fix issues.
+Confirm 8 green checkmarks appear. Run `euxis-certify` to resolve issues.
 
-### Step 3: Deploy Your First Agent
+### Deploy
 
 ```bash
 euxis architect "What are the key components of a well-designed REST API?"
 ```
 
-Watch the output. You'll see:
-- **Provider selection:** Euxis picks the best AI (`claude` for strategic work)
-- **Reasoning steps:** The agent thinks through the problem step by step
+Output displays:
+- **Provider selection:** Euxis selects optimal AI (`claude` for strategic work)
+- **Reasoning steps:** Agent analyzes problems systematically
 - **Structured output:** Clear, actionable recommendations
 
-✅ **Success checkpoint:** You just deployed an agent that reasoned about software architecture.
+✅ **Success:** Agent deployment complete. Architecture analysis delivered.
 
 ---
 
 ## Core Capabilities
 
-Start here. These three patterns handle most engineering tasks.
+Three patterns handle most engineering tasks.
 
-### Ask a Single Agent
+### Single Agent
 
-The simplest pattern. One agent, one task, one answer.
+One agent, one task, one answer.
 
 ```bash
 euxis <agent> "<task>" [provider]
@@ -74,31 +74,31 @@ euxis writer "Document this API endpoint for developers"
 euxis architect "Design the API" gemini  # Override provider
 ```
 
-**When to use:** Quick questions, focused analysis, single-domain work.
+**Use for:** Quick questions, focused analysis, single-domain work.
 
-### Run a Combo
+### Combo Chain
 
-Chain agents in sequence. Each agent builds on the previous output.
+Agents execute in sequence. Each agent builds on previous output.
 
 ```bash
 euxis-combo run steve-jobs "Design a user onboarding flow"
 ```
 
-The "Steve Jobs" combo runs: `planner → architect → evangelist → reviewer`
+Steve Jobs combo: `planner → architect → evangelist → reviewer`
 
-**When to use:** Tasks that need multiple perspectives in order.
+**Use for:** Tasks requiring multiple perspectives in order.
 
-### Deploy a Squad
+### Squad Deploy
 
-Parallel execution. Multiple specialists work simultaneously.
+Specialists work simultaneously.
 
 ```bash
 euxis-squad deploy quality "Audit the authentication module"
 ```
 
-The Quality squad includes: `reviewer`, `inspector`, `pentester`, `auditor`, `optimizer`, `watchdog`, `polyglot`, `arbiter`
+Quality squad: `reviewer`, `inspector`, `pentester`, `auditor`, `optimizer`, `watchdog`, `polyglot`, `arbiter`
 
-**When to use:** Full analysis, security audits, pre-release checks.
+**Use for:** Full analysis, security audits, pre-release checks.
 
 ---
 
@@ -111,33 +111,33 @@ Your Goal → Orchestrator → Specialists → Verified Output
            the work       parallel       validate results
 ```
 
-**Smart provider selection.** Euxis routes each agent to the best AI:
+**Smart provider selection.** Euxis routes each agent to optimal AI:
 - Strategic agents (orchestrator, architect) → `claude` for reasoning
 - Research agents → `gemini` for large context
 - Coding agents → `goose` for tool use
 - Utility agents → `ollama` for speed
 
-You always see which provider is running in the output. Override anytime:
+Provider selection appears in output. Override with third argument:
 ```bash
-euxis architect "Design the API" gemini  # Third argument overrides default
+euxis architect "Design the API" gemini  # Override default
 ```
 
-**Persistent memory.** The Cortex stores three types of knowledge:
-- **Episodic:** What happened ("Fixed bug #42 with null check")
-- **Semantic:** What's true ("Auth module uses JWT with RS256")
-- **Procedural:** How to do things ("Deploy sequence: test → build → push")
+**Persistent memory.** Cortex stores three knowledge types:
+- **Episodic:** Events ("Fixed bug #42 with null check")
+- **Semantic:** Facts ("Auth module uses JWT with RS256")
+- **Procedural:** Workflows ("Deploy sequence: test → build → push")
 
-**Quality assurance.** Every output passes through verification:
+**Quality assurance.** Every output passes verification:
 1. Internal consistency check
 2. Cross-reference against stored knowledge
 3. Reviewer validation for multi-agent work
 
 ---
 
-## Choose Your Path
+## Common Tasks
 
 <details>
-<summary><strong>I want to fix a bug</strong></summary>
+<summary><strong>Fix a bug</strong></summary>
 
 ```bash
 # Quick diagnosis
@@ -147,27 +147,27 @@ euxis debugger "Trace why login fails for users with special characters in passw
 euxis-combo run fort-knox "Investigate the authentication bypass vulnerability"
 ```
 
-**Related:** [Debugging Workflow](docs/workflows/debugging-workflow.md)
+**Related:** [Debugging Workflow](docs/guides/workflows/debugging-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>I want to build a new feature</strong></summary>
+<summary><strong>Build a new feature</strong></summary>
 
 ```bash
-# Start with architecture
+# Architecture design
 euxis architect "Design a notification system that supports email, SMS, and push"
 
-# Full feature development
+# Feature development
 euxis-combo run steve-jobs "Build user preferences for notification channels"
 ```
 
-**Related:** [Feature Development Workflow](docs/workflows/feature-development-workflow.md)
+**Related:** [Feature Development Workflow](docs/guides/workflows/feature-development-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>I want to audit for security</strong></summary>
+<summary><strong>Audit for security</strong></summary>
 
 ```bash
 # Quick scan
@@ -177,18 +177,18 @@ euxis pentester "Check for SQL injection in the search endpoint"
 euxis-squad deploy quality "Complete security audit of the payment module"
 ```
 
-**Related:** [Security Audit Workflow](docs/workflows/security-audit-workflow.md)
+**Related:** [Security Audit Workflow](docs/guides/workflows/security-audit-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>I want to ship a release</strong></summary>
+<summary><strong>Ship a release</strong></summary>
 
 ```bash
-# Pre-release checklist
+# Pre-release validation
 euxis-playbook run verify-everything "Prepare v2.0 release" --dry-run
 
-# Execute release pipeline
+# Release execution
 euxis-playbook run zero-to-one "Launch v2.0 with new auth system"
 ```
 
@@ -198,41 +198,41 @@ euxis-playbook run zero-to-one "Launch v2.0 with new auth system"
 
 ---
 
-## The Agent Fleet
+## Agent Fleet
 
 41 specialists organized by authority level.
 
 ### Core Agents (9)
 
-These agents define direction. They can block progress when something is wrong.
+Define direction. Block progress when necessary.
 
-| Agent | What It Does |
-|-------|--------------|
-| `orchestrator` | Breaks down goals, coordinates specialists, synthesizes results |
-| `architect` | Designs systems, defines patterns, reviews structure |
-| `planner` | Scopes work, prioritizes tasks, manages intent |
+| Agent | Function |
+|-------|----------|
+| `orchestrator` | Break down goals, coordinate specialists, synthesize results |
+| `architect` | Design systems, define patterns, review structure |
+| `planner` | Scope work, prioritize tasks, manage intent |
 | `reviewer` | Quality gate for all output |
-| `critic` | Challenges assumptions, surfaces risks |
+| `critic` | Challenge assumptions, surface risks |
 | `auditor` | Legal, privacy, and compliance authority |
-| `arbiter` | Resolves conflicts between agents |
+| `arbiter` | Resolve conflicts between agents |
 | `librarian` | Knowledge governance and documentation |
 | `historian` | Long-term memory and patterns |
 
 ### Default Agents (21)
 
-Execute domain work when called. [See full list →](docs/fleet-guide.md#default-21--auto-available-task-triggered)
+Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--auto-available-task-triggered)
 
 `accountant` · `animator` · `automaton` · `debugger` · `designer` · `gatekeeper` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `watchdog` · `writer`
 
 ### On-Demand Agents (7)
 
-For growth tasks. [See full list →](docs/fleet-guide.md#on-demand-7--explicit-invocation-only)
+Growth and communication tasks. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
 
 `ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
 
 ### Specialist Agents (4)
 
-Deep domain expertise. [See full list →](docs/fleet-guide.md#specialist-4--domain-specific-expertise)
+Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4--domain-specific-expertise)
 
 `cryptographer` · `ledger` · `conduit` · `custodian`
 
@@ -242,12 +242,12 @@ Deep domain expertise. [See full list →](docs/fleet-guide.md#specialist-4--dom
 
 | Guide | What You'll Learn |
 |-------|-------------------|
-| [Quick Start](docs/quick-start.md) | Step-by-step first deployment |
-| [Concepts](docs/concepts/) | When to use agents vs squads vs playbooks |
-| [Workflows](docs/workflows/) | Problem-to-solution tutorials |
-| [Fleet Guide](docs/fleet-guide.md) | All 41 agents in detail |
-| [User Guide](docs/user-guide.md) | Complete CLI reference |
-| [API Reference](docs/api-reference.md) | Build custom integrations |
+| [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
+| [Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
+| [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
+| [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
+| [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
+| [API Reference](docs/reference/api-reference.md) | Build custom integrations |
 
 ---
 
@@ -259,7 +259,7 @@ Deep domain expertise. [See full list →](docs/fleet-guide.md#specialist-4--dom
 <details>
 <summary><strong>Supported Providers</strong></summary>
 
-| Provider | CLI | Best For |
+| Provider | CLI | Function |
 |:---------|:----|:---------|
 | [Claude][claude-url] | `claude` | Reasoning, architecture, strategy |
 | [Gemini][gemini-url] | `gemini` | Research with large context |
@@ -270,22 +270,22 @@ Deep domain expertise. [See full list →](docs/fleet-guide.md#specialist-4--dom
 | [Kiro CLI][kiro-cli-url] | `kiro-cli` | AI coding assistant |
 | [Goose][goose-url] | `goose` | MCP-native agent |
 
-**How providers work:**
+**Provider selection:**
 
-Euxis automatically selects the best provider for each agent. You see the selection in the output:
+Euxis selects optimal provider for each agent. Provider appears in output:
 
 ```
 [euxis] Provider: claude
 ```
 
-Override anytime by adding the provider as a third argument:
+Override with third argument:
 
 ```bash
-euxis architect "Design the API" gemini    # Use Gemini instead of default
+euxis architect "Design the API" gemini    # Use Gemini
 euxis debugger "Fix the bug" ollama        # Use local Ollama
 ```
 
-**Learn more:** [Provider Routing](docs/concepts/provider-routing.md)
+**Learn more:** [Provider Routing](docs/essentials/core-concepts/provider-routing.md)
 
 </details>
 
@@ -296,6 +296,9 @@ euxis debugger "Fix the bug" ollama        # Use local Ollama
 Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
 ---
+
+🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
 
 *Euxis Version 0.0.7 · Build something that matters.*
 
