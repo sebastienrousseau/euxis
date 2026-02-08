@@ -1,0 +1,444 @@
+/* ETX: Euxis Terminal Experience — Main Stylesheet */
+/* (c) 2026 Euxis Fleet. All rights reserved. */
+
+/* ========================================================================
+   GLOBAL VARIABLES
+   ======================================================================== */
+
+/* Dark theme is default — handled via Textual's theme system + overrides */
+
+/* ========================================================================
+   APP LAYOUT
+   ======================================================================== */
+
+Screen {
+    layout: vertical;
+}
+
+/* ========================================================================
+   HEADER BAR
+   ======================================================================== */
+
+#etx-header {
+    dock: top;
+    height: 3;
+    background: $primary-darken-3;
+    color: $text;
+    padding: 0 2;
+    layout: horizontal;
+}
+
+#etx-header-logo {
+    width: auto;
+    min-width: 20;
+    content-align-vertical: middle;
+    padding: 0 1;
+    color: $accent;
+    text-style: bold;
+}
+
+#etx-header-context {
+    width: 1fr;
+    content-align-vertical: middle;
+    padding: 0 2;
+    color: $text-muted;
+}
+
+#etx-header-status {
+    width: auto;
+    min-width: 30;
+    content-align-vertical: middle;
+    content-align: right middle;
+    padding: 0 1;
+    color: $text-muted;
+}
+
+/* ========================================================================
+   FLEET DASHBOARD
+   ======================================================================== */
+
+#dashboard-container {
+    layout: vertical;
+    padding: 1 2;
+}
+
+#fleet-search {
+    dock: top;
+    margin: 0 0 1 0;
+    width: 100%;
+}
+
+#fleet-search Input {
+    width: 100%;
+}
+
+.section-title {
+    height: 1;
+    padding: 0 1;
+    margin: 1 0 0 0;
+    text-style: bold;
+    color: $accent;
+}
+
+.fleet-section {
+    layout: grid;
+    grid-size: 4;
+    grid-gutter: 1;
+    padding: 0 0 1 0;
+    height: auto;
+}
+
+/* ========================================================================
+   AGENT CARDS
+   ======================================================================== */
+
+.agent-card {
+    height: 5;
+    border: round $primary-background-darken-2;
+    padding: 0 1;
+    background: $surface;
+    content-align: left top;
+}
+
+.agent-card:hover {
+    border: round $accent;
+    background: $surface-lighten-1;
+}
+
+.agent-card:focus {
+    border: double $accent;
+    background: $primary-background-darken-1;
+}
+
+.agent-card.tier-core {
+    border: round $warning;
+}
+
+.agent-card.tier-core:hover {
+    border: round $warning-lighten-1;
+}
+
+.agent-card.tier-core:focus {
+    border: double $warning;
+}
+
+.agent-card-name {
+    text-style: bold;
+    color: $text;
+    width: 100%;
+}
+
+.agent-card-tier {
+    color: $text-muted;
+    width: 100%;
+}
+
+.agent-card-tags {
+    color: $text-disabled;
+    width: 100%;
+}
+
+/* ========================================================================
+   AGENT EXECUTION SCREEN
+   ======================================================================== */
+
+#agent-screen {
+    layout: vertical;
+    padding: 1 2;
+}
+
+#agent-info-bar {
+    height: 3;
+    layout: horizontal;
+    padding: 0 1;
+    background: $surface;
+    border: round $primary-background-darken-2;
+    margin: 0 0 1 0;
+}
+
+#agent-name-display {
+    width: 1fr;
+    content-align-vertical: middle;
+    text-style: bold;
+    color: $accent;
+}
+
+#agent-provider-display {
+    width: auto;
+    min-width: 20;
+    content-align: right middle;
+    color: $warning;
+}
+
+#agent-elapsed-display {
+    width: auto;
+    min-width: 12;
+    content-align: right middle;
+    color: $text-muted;
+}
+
+#task-input-container {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+#task-input {
+    width: 100%;
+}
+
+#agent-output {
+    height: 1fr;
+    border: round $primary-background-darken-2;
+    background: $surface;
+    padding: 1;
+    scrollbar-size: 1 1;
+}
+
+#agent-output:focus {
+    border: round $accent;
+}
+
+/* ========================================================================
+   FLEET MONITOR SCREEN
+   ======================================================================== */
+
+#fleet-monitor {
+    layout: vertical;
+    padding: 1 2;
+}
+
+#monitor-header {
+    height: 3;
+    background: $surface;
+    border: round $primary-background-darken-2;
+    padding: 0 1;
+    margin: 0 0 1 0;
+    layout: horizontal;
+}
+
+#monitor-title {
+    width: 1fr;
+    content-align-vertical: middle;
+    text-style: bold;
+    color: $accent;
+}
+
+#monitor-stats {
+    width: auto;
+    min-width: 30;
+    content-align: right middle;
+    color: $text-muted;
+}
+
+#monitor-grid {
+    height: 1fr;
+    layout: vertical;
+    overflow-y: auto;
+}
+
+.monitor-agent-row {
+    height: 3;
+    layout: horizontal;
+    padding: 0 1;
+    margin: 0 0 0 0;
+    border-bottom: solid $primary-background-darken-2;
+}
+
+.monitor-agent-row:hover {
+    background: $surface;
+}
+
+.monitor-agent-name {
+    width: 20;
+    content-align-vertical: middle;
+    text-style: bold;
+}
+
+.monitor-agent-progress {
+    width: 1fr;
+    content-align-vertical: middle;
+}
+
+.monitor-agent-status {
+    width: 16;
+    content-align: right middle;
+}
+
+/* ========================================================================
+   SETTINGS SCREEN
+   ======================================================================== */
+
+#settings-screen {
+    layout: vertical;
+    padding: 1 2;
+}
+
+#settings-container {
+    height: 1fr;
+    padding: 1 2;
+    background: $surface;
+    border: round $primary-background-darken-2;
+}
+
+.settings-group {
+    margin: 0 0 2 0;
+}
+
+.settings-group-title {
+    text-style: bold;
+    color: $accent;
+    margin: 0 0 1 0;
+}
+
+.settings-row {
+    layout: horizontal;
+    height: 3;
+    padding: 0 1;
+}
+
+.settings-label {
+    width: 30;
+    content-align-vertical: middle;
+    color: $text;
+}
+
+.settings-value {
+    width: 1fr;
+    content-align-vertical: middle;
+}
+
+/* ========================================================================
+   LOG VIEWER
+   ======================================================================== */
+
+#log-viewer {
+    layout: vertical;
+    padding: 1 2;
+}
+
+#log-list {
+    width: 30;
+    dock: left;
+    border-right: solid $primary-background-darken-2;
+}
+
+#log-content {
+    height: 1fr;
+    border: round $primary-background-darken-2;
+    background: $surface;
+    padding: 1;
+}
+
+/* ========================================================================
+   COMMAND PALETTE OVERLAY
+   ======================================================================== */
+
+#command-overlay {
+    align: center top;
+    padding: 4 0 0 0;
+}
+
+#command-palette-container {
+    width: 70%;
+    max-width: 80;
+    max-height: 24;
+    background: $surface;
+    border: round $accent;
+    padding: 0;
+}
+
+#command-search {
+    dock: top;
+    padding: 1;
+    border-bottom: solid $primary-background-darken-2;
+}
+
+#command-search Input {
+    width: 100%;
+}
+
+#command-results {
+    height: 1fr;
+    padding: 0;
+}
+
+/* ========================================================================
+   NOTIFICATION TOASTS
+   ======================================================================== */
+
+.toast-success {
+    background: $success;
+    color: $text;
+}
+
+.toast-error {
+    background: $error;
+    color: $text;
+}
+
+.toast-warning {
+    background: $warning;
+    color: $text;
+}
+
+/* ========================================================================
+   UTILITY CLASSES
+   ======================================================================== */
+
+.hidden {
+    display: none;
+}
+
+.muted {
+    color: $text-muted;
+}
+
+.bold {
+    text-style: bold;
+}
+
+.accent-text {
+    color: $accent;
+}
+
+.success-text {
+    color: $success;
+}
+
+.warning-text {
+    color: $warning;
+}
+
+.error-text {
+    color: $error;
+}
+
+/* ========================================================================
+   SCROLLBAR STYLING
+   ======================================================================== */
+
+* {
+    scrollbar-background: $surface;
+    scrollbar-color: $primary-background-darken-1;
+    scrollbar-color-hover: $accent;
+    scrollbar-color-active: $accent;
+    scrollbar-size-vertical: 1;
+}
+
+/* ========================================================================
+   FOOTER / STATUS BAR
+   ======================================================================== */
+
+Footer {
+    background: $primary-darken-3;
+}
+
+Footer > .footer--highlight {
+    background: $accent;
+    color: $text;
+}
+
+Footer > .footer--key {
+    background: $primary-darken-2;
+    color: $text;
+}
