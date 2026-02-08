@@ -104,10 +104,13 @@ class SystemCommandProvider(Provider):
         ("Lint Fleet", "Run euxis-lint to check fleet integrity", "lint"),
         ("Cortex Status", "Check semantic memory status", "cortex_status"),
         ("Sync Docs", "Synchronize documentation", "sync_docs"),
-        ("Toggle Theme", "Switch between dark and light themes", "toggle_theme"),
+        ("Toggle Theme", "Switch between dark/light/contrast themes", "toggle_theme"),
         ("Settings", "Open settings panel", "settings"),
         ("Fleet Monitor", "Monitor active agent execution", "fleet_monitor"),
         ("View Logs", "Browse agent output logs", "view_logs"),
+        ("Help", "Open keyboard shortcut reference", "help"),
+        ("About", "View system information and version", "about"),
+        ("Refresh", "Reload fleet registry", "refresh"),
     ]
 
     @property

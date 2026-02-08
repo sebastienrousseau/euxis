@@ -8,13 +8,10 @@ command palette, and streaming agent execution.
 
 from __future__ import annotations
 
-import asyncio
-import subprocess
 from pathlib import Path
 
-from textual.app import App, ComposeResult
+from textual.app import App
 from textual.binding import Binding
-from textual.widgets import Footer
 
 from tui.commands import AgentCommandProvider, SquadCommandProvider, SystemCommandProvider
 from tui.core.config import ETXConfig
@@ -160,11 +157,16 @@ class EuxisApp(App):
         self.push_screen(LogViewerScreen())
 
     def action_help(self) -> None:
-        """Show help information."""
-        self.notify(
-            "Ctrl+K: Commands | /: Search | Tab: Navigate | Enter: Select | Esc: Back",
-            timeout=8,
-        )
+        """Open the help screen."""
+        from tui.screens.help import HelpScreen
+
+        self.push_screen(HelpScreen())
+
+    def action_about(self) -> None:
+        """Open the about screen."""
+        from tui.screens.about import AboutScreen
+
+        self.push_screen(AboutScreen())
 
     def action_refresh(self) -> None:
         """Reload registry and refresh display."""
@@ -175,32 +177,19 @@ class EuxisApp(App):
 
     def run_system_command(self, command: str) -> None:
         """Execute a system command from the command palette."""
-        from tui.screens.agent import AgentScreen
+        from tui.screens.tool_runner import ToolRunnerScreen
 
-        EUXIS_HOME = Path.home() / ".euxis"
+        tool_map = {
+            "health": ("euxis-health", "Fleet Health Check"),
+            "certify": ("euxis-certify", "Certification Pipeline"),
+            "lint": ("euxis-lint", "Fleet Lint"),
+            "cortex_status": ("euxis-cortex", "Cortex Status"),
+            "sync_docs": ("euxis-sync-docs", "Documentation Sync"),
+        }
 
-        if command == "health":
-            # Run health check inline
-            agent = self.fleet_registry.get_agent("reviewer")
-            if agent:
-                screen = AgentScreen(agent, "claude")
-                self.push_screen(screen)
-            self.notify("Running euxis-health...", timeout=2)
-
-        elif command == "certify":
-            self.notify("Running euxis-certify...", timeout=2)
-            agent = self.fleet_registry.get_agent("reviewer")
-            if agent:
-                self.push_screen(AgentScreen(agent, "claude"))
-
-        elif command == "lint":
-            self.notify("Running euxis-lint...", timeout=2)
-
-        elif command == "cortex_status":
-            self.notify("Checking Cortex status...", timeout=2)
-
-        elif command == "sync_docs":
-            self.notify("Syncing documentation...", timeout=2)
+        if command in tool_map:
+            tool_name, label = tool_map[command]
+            self.push_screen(ToolRunnerScreen(tool_name, label))
 
         elif command == "toggle_theme":
             self.action_toggle_theme()
@@ -213,3 +202,12 @@ class EuxisApp(App):
 
         elif command == "view_logs":
             self.action_open_logs()
+
+        elif command == "help":
+            self.action_help()
+
+        elif command == "about":
+            self.action_about()
+
+        elif command == "refresh":
+            self.action_refresh()
