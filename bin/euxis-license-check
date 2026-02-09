@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS LICENSE CHECK: Python Dependency License Compatibility Checker
 # Validates Python dependencies against license policy
 set -euo pipefail

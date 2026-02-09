@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Agent discovery and resolution
 [[ -n "${_EUXIS_LIB_AGENTS:-}" ]] && return; _EUXIS_LIB_AGENTS=1
 

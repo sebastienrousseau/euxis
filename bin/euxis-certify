@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS CERTIFY: The Final Toll Gate
 # Runs all 6 gates in sequence. All must pass for certification.
 

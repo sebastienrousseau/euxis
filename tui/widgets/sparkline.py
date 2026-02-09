@@ -19,6 +19,11 @@ def sparkline_text(values: list[float], width: int = 20) -> str:
     if not values or width <= 0:
         return ""
 
+    # Filter out None values
+    values = [v for v in values if v is not None]
+    if not values:
+        return ""
+
     # Normalize to fit the spark character range
     min_val = min(values)
     max_val = max(values)

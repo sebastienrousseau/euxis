@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Common utilities (logging, spinner, paths)
 [[ -n "${_EUXIS_LIB_COMMON:-}" ]] && return; _EUXIS_LIB_COMMON=1
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Tiered memory retrieval (MemGPT-inspired)
 # Optimized: pure-bash keyword extraction, no subprocess forks in hot path
 [[ -n "${_EUXIS_LIB_MEMORY:-}" ]] && return; _EUXIS_LIB_MEMORY=1

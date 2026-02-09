@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 #
 # Euxis - Multi-Provider AI Agent Framework
 # Usage: euxis <agent> <task> [provider]

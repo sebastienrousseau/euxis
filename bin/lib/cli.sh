@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 #
 # Euxis CLI Module - Command-line interface and user interaction
 # Part of the Euxis Multi-Provider AI Agent Framework

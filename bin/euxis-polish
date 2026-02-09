@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS POLISH: Apply the Euxis Standard to any content.
 # Usage: euxis-polish [file_or_directory]
 

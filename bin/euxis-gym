@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS GYM: Automated Evaluation Framework with A/B Testing
 # Usage: euxis-gym <agent> <test_case_path>
 #        euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>

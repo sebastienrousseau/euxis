@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS VERIFY-ALL: The canonical verification pipeline.
 # Runs every gate sequentially. Docs first, reviewer last. Fails fast.
 #

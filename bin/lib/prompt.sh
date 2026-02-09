@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Prompt assembly with conditional protocol loading, caching, and token budgets
 [[ -n "${_EUXIS_LIB_PROMPT:-}" ]] && return; _EUXIS_LIB_PROMPT=1
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS HEALTH: Fleet Integrity & Configuration Health Check
 # Validates naming, hardening, orphans, headers, and certification readiness.
 

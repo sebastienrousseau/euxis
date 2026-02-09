@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 set -uo pipefail
 
 EUXIS_DIR="$HOME/.euxis"

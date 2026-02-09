@@ -19,6 +19,9 @@ docs/audits/v4.5-readiness-report.md
 tmp/
 .pytest_cache/
 **/.pytest_cache/
+.hypothesis/
+.coverage
+htmlcov/
 
 # Security-sensitive manifests (never commit)
 internal_manifest.json

@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.7)
 # Reads an Architect Mission Manifest and fires agent loops.
 #

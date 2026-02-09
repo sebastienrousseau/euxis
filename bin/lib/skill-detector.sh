@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Skill-based auto-detection
 # Examines the working directory to suggest domain-relevant agents.
 # Optimized: bash arrays for deduplication, no subprocess forks

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Session and project management
 [[ -n "${_EUXIS_LIB_SESSION:-}" ]] && return; _EUXIS_LIB_SESSION=1
 

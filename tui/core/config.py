@@ -44,6 +44,8 @@ class ETXConfig:
 
     def add_recent_agent(self, agent_id: str) -> None:
         """Track a recently used agent, moving it to front of list."""
+        if not isinstance(agent_id, str) or not agent_id.strip():
+            return
         if agent_id in self.recent_agents:
             self.recent_agents.remove(agent_id)
         self.recent_agents.insert(0, agent_id)
@@ -51,6 +53,8 @@ class ETXConfig:
 
     def add_recent_command(self, command: str) -> None:
         """Track a recently used command, moving it to front of list."""
+        if not isinstance(command, str) or not command.strip():
+            return
         if command in self.recent_commands:
             self.recent_commands.remove(command)
         self.recent_commands.insert(0, command)

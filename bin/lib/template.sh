@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Library: Template variable substitution (pure bash — zero forks)
 [[ -n "${_EUXIS_LIB_TEMPLATE:-}" ]] && return; _EUXIS_LIB_TEMPLATE=1
 

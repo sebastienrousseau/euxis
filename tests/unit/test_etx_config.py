@@ -327,22 +327,23 @@ class TestETXConfigEdgeCases(unittest.TestCase):
         """Test handling of empty strings in recent items."""
         config = ETXConfig()
 
-        # Empty strings should still be added (they're valid)
+        # Empty strings should be rejected
         config.add_recent_agent("")
         config.add_recent_command("")
 
-        assert config.recent_agents == [""]
-        assert config.recent_commands == [""]
+        assert config.recent_agents == []
+        assert config.recent_commands == []
 
     def test_whitespace_only_recent_items(self):
         """Test handling of whitespace-only recent items."""
         config = ETXConfig()
 
+        # Whitespace-only strings should be rejected
         config.add_recent_agent("   ")
         config.add_recent_command("\t\n")
 
-        assert config.recent_agents == ["   "]
-        assert config.recent_commands == ["\t\n"]
+        assert config.recent_agents == []
+        assert config.recent_commands == []
 
     def test_max_recent_boundary(self):
         """Test behavior exactly at MAX_RECENT boundary."""

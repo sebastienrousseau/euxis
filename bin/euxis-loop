@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS LOOP: Autonomous Try-Catch-Retry with Reflexion & Checkpoints
 # Usage: euxis-loop <agent> <task> <verify_cmd> [max_retries]
 #        euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ... <cmdN>

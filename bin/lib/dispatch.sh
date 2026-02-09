@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 #
 # Euxis Dispatch Module - Command routing and main execution flow
 # Part of the Euxis Multi-Provider AI Agent Framework

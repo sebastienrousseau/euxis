@@ -8,6 +8,9 @@ This test suite verifies:
 3. Dependency resolution in manifest execution
 4. Failure handling and cleanup
 5. Log file generation and cleanup
+
+These tests require a working euxis-dispatch binary and are skipped
+when the binary is not found or does not support manifest mode.
 """
 
 import json
@@ -18,6 +21,15 @@ import time
 import unittest
 from pathlib import Path
 
+import pytest
+
+# Skip entire module — integration tests require manual environment setup
+_DISPATCH_BIN = Path.home() / ".euxis" / "bin" / "euxis-dispatch"
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("EUXIS_INTEGRATION_TESTS"),
+    reason="Set EUXIS_INTEGRATION_TESTS=1 to run dispatch integration tests"
+)
+
 
 class DispatchIntegrationTest(unittest.TestCase):
     """Integration tests for euxis-dispatch concurrency mechanisms."""
@@ -27,7 +39,7 @@ class DispatchIntegrationTest(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp(prefix="euxis_dispatch_integration_")
         self.test_manifests_dir = Path(self.temp_dir) / "manifests"
         self.test_manifests_dir.mkdir()
-        self.euxis_dispatch = Path.home() / ".euxis" / "bin" / "euxis-dispatch"
+        self.euxis_dispatch = _DISPATCH_BIN
 
         # Create mock agent scripts for testing
         self.mock_agents_dir = Path(self.temp_dir) / "mock_agents"

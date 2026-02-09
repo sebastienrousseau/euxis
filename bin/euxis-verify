@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS VERIFY: Pre-Commit Quality Gate
 # Runs: Health -> Lint -> Unit Tests -> Certify -> Doc Check
 set -uo pipefail

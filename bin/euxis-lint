@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS LINT: Static Analysis for Agent Fleet
 # Enforces Protocol v0.0.7 Compliance
 
