@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, OptionList
@@ -21,10 +20,10 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 
-class LogViewerScreen(Screen):
+class LogViewerScreen(Screen[None]):
     """Browse and view agent output logs."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]

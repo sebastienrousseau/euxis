@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, Input, Static
@@ -22,10 +21,10 @@ if TYPE_CHECKING:
     from tui.core.registry import Agent
 
 
-class AgentScreen(Screen):
+class AgentScreen(Screen[None]):
     """Screen for executing an agent and viewing streaming output."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("ctrl+k", "app.command_palette", "Commands"),
         ("escape", "go_back", "Back"),
         ("ctrl+l", "clear_output", "Clear"),

@@ -6,9 +6,8 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, Input, Static
@@ -23,10 +22,10 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 
-class CortexScreen(Screen):
+class CortexScreen(Screen[None]):
     """Browse and interact with the Cortex semantic memory system."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]

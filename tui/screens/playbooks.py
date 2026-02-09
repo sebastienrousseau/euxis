@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, OptionList
@@ -22,10 +21,10 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 
-class PlaybookScreen(Screen):
+class PlaybookScreen(Screen[None]):
     """Browse and inspect available playbooks."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]

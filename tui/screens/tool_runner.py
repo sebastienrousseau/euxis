@@ -6,9 +6,8 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
-from textual.binding import Binding
 from textual.containers import Container
 from textual.screen import Screen
 from textual.widgets import Footer, Static
@@ -24,10 +23,10 @@ if TYPE_CHECKING:
 EUXIS_HOME = Path.home() / ".euxis"
 
 
-class ToolRunnerScreen(Screen):
+class ToolRunnerScreen(Screen[None]):
     """Run an euxis CLI tool and stream output."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+l", "clear_output", "Clear"),
     ]

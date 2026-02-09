@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
-from textual.binding import Binding
 from textual.containers import Container
 from textual.message import Message
 from textual.screen import ModalScreen
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from textual.app import ComposeResult
 
 
-class ProviderSelectModal(ModalScreen):
+class ProviderSelectModal(ModalScreen[str]):
     """Modal dialog for selecting an AI provider."""
 
     DEFAULT_CSS = """
@@ -55,7 +54,7 @@ class ProviderSelectModal(ModalScreen):
             super().__init__()
             self.provider = provider
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "dismiss", "Cancel"),
     ]
 

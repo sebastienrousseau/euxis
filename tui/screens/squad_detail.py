@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Container, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Static
@@ -18,10 +17,10 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 
-class SquadDetailScreen(Screen):
+class SquadDetailScreen(Screen[None]):
     """Detailed view of squads and combos with composition diagrams."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]

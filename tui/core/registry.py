@@ -104,7 +104,7 @@ class FleetRegistry:
             registry._parse_squads(squads_data)
         return registry
 
-    def _parse_agents(self, data: dict[str, Any]) -> None:
+    def _parse_agents(self, data: Any) -> None:
         """Parse agent entries from a dictionary."""
         if not isinstance(data, dict):
             msg = f"Expected dict for agent data, got {type(data).__name__}"
@@ -122,7 +122,7 @@ class FleetRegistry:
                 )
             )
 
-    def _parse_squads(self, data: dict[str, Any]) -> None:
+    def _parse_squads(self, data: Any) -> None:
         """Parse squad and combo entries from a dictionary."""
         if not isinstance(data, dict):
             msg = f"Expected dict for squad data, got {type(data).__name__}"

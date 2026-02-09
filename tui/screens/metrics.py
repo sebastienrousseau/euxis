@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Static
@@ -21,10 +20,10 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 
-class MetricsScreen(Screen):
+class MetricsScreen(Screen[None]):
     """Performance metrics dashboard with agent execution history."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]

@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.screen import Screen
 from textual.widgets import Footer
@@ -20,10 +19,10 @@ if TYPE_CHECKING:
     from tui.widgets.agent_card import AgentCard
 
 
-class DashboardScreen(Screen):
+class DashboardScreen(Screen[None]):
     """Main dashboard displaying the agent fleet grid."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("ctrl+k", "app.command_palette", "Commands"),
         ("slash", "focus_search", "Search"),
         ("f1", "app.action_help", "Help"),

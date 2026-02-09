@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Center, Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Static
@@ -29,7 +28,7 @@ SPLASH_LOGO = """\
 """
 
 
-class WelcomeScreen(Screen):
+class WelcomeScreen(Screen[None]):
     """Welcome splash with quick actions for first-time experience."""
 
     DEFAULT_CSS = """
@@ -73,7 +72,7 @@ class WelcomeScreen(Screen):
     }
     """
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("enter", "go_dashboard", "Dashboard"),
         ("ctrl+k", "app.command_palette", "Commands"),
         ("escape", "app.quit", "Quit"),

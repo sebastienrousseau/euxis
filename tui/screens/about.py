@@ -5,9 +5,8 @@ from __future__ import annotations
 
 import platform
 import sys
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Center, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Static
@@ -31,10 +30,10 @@ EUXIS_LOGO = """\
 """
 
 
-class AboutScreen(Screen):
+class AboutScreen(Screen[None]):
     """About screen with system info and version details."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("q", "go_back", "Close"),
     ]

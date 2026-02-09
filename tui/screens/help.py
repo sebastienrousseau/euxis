@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Markdown
@@ -115,10 +114,10 @@ HELP_CONTENT = """\
 """
 
 
-class HelpScreen(Screen):
+class HelpScreen(Screen[None]):
     """Comprehensive help and keyboard shortcut reference."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("q", "go_back", "Close"),
     ]

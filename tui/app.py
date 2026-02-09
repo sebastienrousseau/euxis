@@ -8,7 +8,7 @@ command palette, and streaming agent execution.
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import Any
 
 from textual.app import App, InvalidThemeError
 from textual.binding import Binding
@@ -32,11 +32,11 @@ class EuxisApp(App):
 
     CSS_PATH = "etx.tcss"
 
-    COMMANDS: ClassVar[set[type]] = {
+    COMMANDS = {
         AgentCommandProvider, SquadCommandProvider, SystemCommandProvider,
     }
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         Binding("ctrl+k", "command_palette", "Commands", show=True, priority=True),
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),

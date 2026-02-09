@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Label, Select, Static, Switch
@@ -25,10 +24,10 @@ THEME_OPTIONS = [
 ]
 
 
-class SettingsScreen(Screen):
+class SettingsScreen(Screen[None]):
     """Configuration and preferences screen."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+s", "save_settings", "Save"),
         ("ctrl+k", "app.command_palette", "Commands"),

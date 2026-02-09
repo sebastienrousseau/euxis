@@ -41,7 +41,7 @@ class AgentCommandProvider(Provider):
                 yield Hit(
                     match,
                     matcher.highlight(agent.id),
-                    partial=self._make_agent_callback(agent.id),
+                    self._make_agent_callback(agent.id),
                     help=f"[{tier_badge}] {', '.join(agent.tags[:3])}",
                 )
 
@@ -71,7 +71,7 @@ class SquadCommandProvider(Provider):
                 yield Hit(
                     match,
                     matcher.highlight(squad.name),
-                    partial=self._make_squad_callback(squad.id),
+                    self._make_squad_callback(squad.id),
                     help=f"{squad.purpose} — {members_str}",
                 )
 
@@ -83,7 +83,7 @@ class SquadCommandProvider(Provider):
                 yield Hit(
                     match,
                     matcher.highlight(f"{combo.name} (combo)"),
-                    partial=self._make_combo_callback(combo.id),
+                    self._make_combo_callback(combo.id),
                     help=f"{combo.description} — {chain_str}",
                 )
 
@@ -134,7 +134,7 @@ class SystemCommandProvider(Provider):
                 yield Hit(
                     match,
                     matcher.highlight(name),
-                    partial=self._make_command_callback(action),
+                    self._make_command_callback(action),
                     help=description,
                 )
 

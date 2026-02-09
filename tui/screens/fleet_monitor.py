@@ -3,9 +3,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any
 
-from textual.binding import Binding
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.css.query import NoMatches
 from textual.screen import Screen
@@ -68,10 +67,10 @@ class AgentMonitorRow(Horizontal):
             progress_bar.progress = 0
 
 
-class FleetMonitorScreen(Screen):
+class FleetMonitorScreen(Screen[None]):
     """Monitor screen for squad deployments and dispatch operations."""
 
-    BINDINGS: ClassVar[list[Binding]] = [
+    BINDINGS = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
@@ -81,14 +80,14 @@ class FleetMonitorScreen(Screen):
         operation_type: str = "squad",
         operation_id: str = "",
         members: list[str] | None = None,
-        task: str = "",
+        task_description: str = "",
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.operation_type = operation_type
         self.operation_id = operation_id
         self.members = members or []
-        self.task = task
+        self.task_description = task_description
 
     @property
     def euxis_app(self) -> EuxisApp:
@@ -130,19 +129,19 @@ class FleetMonitorScreen(Screen):
             grid.mount(row)
 
         # Start the operation
-        if self.task:
+        if self.task_description:
             self.run_worker(self._execute_operation(), exclusive=True)
 
     async def _execute_operation(self) -> None:
         output = self.query_one("#monitor-output", OutputPanel)
         output.write_status(f"Starting {self.operation_type}: {self.operation_id}")
-        output.write_status(f"Task: {self.task}", "dim")
+        output.write_status(f"Task: {self.task_description}", "dim")
         output.write_separator()
 
         if self.operation_type == "squad":
-            stream = run_squad(self.operation_id, self.task)
+            stream = run_squad(self.operation_id, self.task_description)
         else:
-            stream = run_combo(self.operation_id, self.task)
+            stream = run_combo(self.operation_id, self.task_description)
 
         current_agent = None
         try:
