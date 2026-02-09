@@ -232,7 +232,7 @@ addopts = [
     "--tb=short",
     "--cov=tui",
     "--cov-report=term-missing",
-    "--cov-fail-under=60",
+    "--cov-fail-under=95",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]

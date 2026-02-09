@@ -232,7 +232,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=html:htmlcov-${{ matrix.os }} \
             --cov-report=xml:coverage-${{ matrix.os }}.xml \
-            --cov-fail-under=60 \
+            --cov-fail-under=95 \
             --maxfail=5 \
             --tb=short
 
