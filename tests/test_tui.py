@@ -390,6 +390,95 @@ class TestScreenImports:
 
         assert WelcomeScreen is not None
 
+    def test_playbooks_import(self):
+        from tui.screens.playbooks import PlaybookScreen
+
+        assert PlaybookScreen is not None
+
+    def test_cortex_import(self):
+        from tui.screens.cortex import CortexScreen
+
+        assert CortexScreen is not None
+
+    def test_provider_select_import(self):
+        from tui.widgets.provider_select import ProviderSelectModal
+
+        assert ProviderSelectModal is not None
+
+
+# ============================================================================
+# Integration Tests
+# ============================================================================
+
+
+class TestIntegration:
+    """Integration tests for the full TUI stack."""
+
+    @pytest.mark.asyncio
+    async def test_app_deploy_unknown_agent(self):
+        from tui.app import EuxisApp
+
+        app = EuxisApp()
+        async with app.run_test():
+            app.action_deploy_agent("nonexistent")
+            # Should not crash
+
+    @pytest.mark.asyncio
+    async def test_app_deploy_unknown_squad(self):
+        from tui.app import EuxisApp
+
+        app = EuxisApp()
+        async with app.run_test():
+            app.action_deploy_squad("nonexistent")
+            # Should not crash
+
+    @pytest.mark.asyncio
+    async def test_app_deploy_unknown_combo(self):
+        from tui.app import EuxisApp
+
+        app = EuxisApp()
+        async with app.run_test():
+            app.action_deploy_combo("nonexistent")
+            # Should not crash
+
+    @pytest.mark.asyncio
+    async def test_app_refresh(self):
+        from tui.app import EuxisApp
+
+        app = EuxisApp()
+        async with app.run_test():
+            app.action_refresh()
+            assert len(app.fleet_registry.agents) == 41
+
+    def test_fleet_registry_immutable_agents(self):
+        from tui.core.registry import FleetRegistry
+
+        reg = FleetRegistry.load()
+        agent = reg.get_agent("architect")
+        # Frozen dataclass should be immutable
+        with pytest.raises(AttributeError):
+            agent.id = "hacked"
+
+    def test_playbook_files_exist(self):
+        playbook_dir = Path.home() / ".euxis" / "config" / "playbooks"
+        assert playbook_dir.exists()
+        playbooks = list(playbook_dir.glob("*.json"))
+        assert len(playbooks) >= 16  # 16 language playbooks created earlier
+
+    def test_registry_json_valid(self):
+        registry_path = Path.home() / ".euxis" / "registry.json"
+        assert registry_path.exists()
+        data = json.loads(registry_path.read_text())
+        assert "agents" in data
+        assert len(data["agents"]) == 41
+
+    def test_squads_json_valid(self):
+        squads_path = Path.home() / ".euxis" / "squads.json"
+        assert squads_path.exists()
+        data = json.loads(squads_path.read_text())
+        assert "squads" in data
+        assert "combos" in data
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

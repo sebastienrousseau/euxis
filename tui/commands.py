@@ -110,6 +110,7 @@ class SystemCommandProvider(Provider):
         ("View Logs", "Browse agent output logs", "view_logs"),
         ("Help", "Open keyboard shortcut reference", "help"),
         ("About", "View system information and version", "about"),
+        ("Playbooks", "Browse and inspect playbooks", "playbooks"),
         ("Refresh", "Reload fleet registry", "refresh"),
     ]
 

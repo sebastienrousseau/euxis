@@ -41,6 +41,7 @@ class EuxisApp(App):
         Binding("ctrl+s", "open_settings", "Settings"),
         Binding("ctrl+m", "fleet_monitor_screen", "Monitor"),
         Binding("ctrl+o", "open_logs", "Logs"),
+        Binding("ctrl+p", "open_playbooks", "Playbooks"),
         Binding("f1", "help", "Help"),
         Binding("f5", "refresh", "Refresh"),
     ]
@@ -156,6 +157,18 @@ class EuxisApp(App):
 
         self.push_screen(LogViewerScreen())
 
+    def action_open_playbooks(self) -> None:
+        """Open the playbook browser."""
+        from tui.screens.playbooks import PlaybookScreen
+
+        self.push_screen(PlaybookScreen())
+
+    def action_open_cortex(self) -> None:
+        """Open the Cortex memory browser."""
+        from tui.screens.cortex import CortexScreen
+
+        self.push_screen(CortexScreen())
+
     def action_help(self) -> None:
         """Open the help screen."""
         from tui.screens.help import HelpScreen
@@ -187,6 +200,10 @@ class EuxisApp(App):
             "sync_docs": ("euxis-sync-docs", "Documentation Sync"),
         }
 
+        if command == "cortex_status":
+            self.action_open_cortex()
+            return
+
         if command in tool_map:
             tool_name, label = tool_map[command]
             self.push_screen(ToolRunnerScreen(tool_name, label))
@@ -208,6 +225,9 @@ class EuxisApp(App):
 
         elif command == "about":
             self.action_about()
+
+        elif command == "playbooks":
+            self.action_open_playbooks()
 
         elif command == "refresh":
             self.action_refresh()
