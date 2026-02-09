@@ -52,7 +52,11 @@ class TestSubprocessCancellation:
         """Test handling of subprocess output backpressure."""
         large_output = "x" * 1000000
 
-        cmd = ["python3", "-c", f"print('{large_output}')"]
+        script = os.path.join(self.temp_dir, "gen_output.py")
+        with open(script, "w") as f:
+            f.write(f"print('{'x' * 1000000}')\n")
+
+        cmd = ["python3", script]
 
         start_time = time.time()
         proc = subprocess.Popen(

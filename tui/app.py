@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from textual.app import App
+from textual.app import App, InvalidThemeError
 from textual.binding import Binding
 
 from tui.commands import AgentCommandProvider, SquadCommandProvider, SystemCommandProvider
@@ -58,7 +58,7 @@ class EuxisApp(App):
         if self.config.theme:
             try:
                 self.theme = self.config.theme
-            except (ValueError, KeyError):
+            except (ValueError, KeyError, InvalidThemeError):
                 self.theme = "textual-dark"
 
         # Push the dashboard as the default screen

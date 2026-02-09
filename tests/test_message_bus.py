@@ -9,7 +9,7 @@ class TestMessageBusConcurrency:
     """Test concurrent message bus operations."""
 
     def setup_method(self):
-        self.message_queue = Queue(maxsize=10)
+        self.message_queue = Queue(maxsize=100)
         self.published_messages = []
         self.consumed_messages = []
 
