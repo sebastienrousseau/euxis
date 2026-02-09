@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
+from textual.css.query import NoMatches
 from textual.screen import Screen
 from textual.widgets import Footer, ProgressBar, Static
 
@@ -165,8 +166,8 @@ class FleetMonitorScreen(Screen):
         try:
             row = self.query_one(f"#monitor-{agent_id}", AgentMonitorRow)
             row.set_status(status, progress)
-        except Exception:
-            pass
+        except NoMatches:
+            pass  # Agent not in monitor grid
 
     def action_go_back(self) -> None:
         self.app.pop_screen()

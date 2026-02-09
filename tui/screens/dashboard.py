@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from textual.app import ComposeResult
+from textual.css.query import NoMatches
 from textual.screen import Screen
 from textual.widgets import Footer, Static
 
@@ -60,5 +61,5 @@ class DashboardScreen(Screen):
         try:
             search_input = grid.query_one("#fleet-filter-input")
             search_input.focus()
-        except Exception:
-            pass
+        except NoMatches:
+            pass  # Search input not yet mounted

@@ -183,7 +183,7 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
     fi
 
     # Test Architect output format with proper error handling
-    resp_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_semantic_resp.$$")
+    resp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_semantic_resp.XXXXXX" 2>/dev/null) || { echo "  [FAIL] Failed to create temp file" >&2; return 1; }
     echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s)..."
 
     if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude > "${resp_file}" 2>/dev/null; then

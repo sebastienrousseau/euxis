@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -24,6 +25,9 @@ PROVIDERS = {
     "kiro-cli": "Kiro",
     "goose": "Goose",
 }
+
+# Pattern for valid identifiers (agent IDs, squad IDs, combo IDs)
+_SAFE_ID = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
 DEFAULT_PROVIDER = "claude"
 
@@ -56,6 +60,18 @@ class AgentRun:
         return f"{s // 60}m {s % 60}s"
 
 
+def _validate_id(value: str, label: str) -> None:
+    """Validate an identifier against the safe pattern."""
+    if not _SAFE_ID.match(value):
+        raise ValueError(f"Invalid {label}: {value!r}")
+
+
+def _validate_provider(provider: str) -> None:
+    """Validate provider against known list."""
+    if provider not in PROVIDERS:
+        raise ValueError(f"Unknown provider: {provider!r}")
+
+
 async def run_agent(
     agent_id: str,
     task: str,
@@ -63,6 +79,9 @@ async def run_agent(
     working_dir: str | None = None,
 ) -> AsyncIterator[str]:
     """Run an agent and yield output lines as they arrive."""
+    _validate_id(agent_id, "agent_id")
+    _validate_provider(provider)
+
     euxis_bin = Path.home() / "bin" / "euxis"
     if not euxis_bin.exists():
         euxis_bin = EUXIS_HOME / "bin" / "euxis"
@@ -80,7 +99,8 @@ async def run_agent(
         env=env,
     )
 
-    assert process.stdout is not None
+    if process.stdout is None:
+        return
     while True:
         line = await process.stdout.readline()
         if not line:
@@ -97,6 +117,8 @@ async def run_squad(
     working_dir: str | None = None,
 ) -> AsyncIterator[str]:
     """Run a squad deployment and yield output lines."""
+    _validate_id(squad_id, "squad_id")
+
     squad_bin = Path.home() / "bin" / "euxis-squad"
     if not squad_bin.exists():
         squad_bin = EUXIS_HOME / "bin" / "euxis-squad"
@@ -114,7 +136,8 @@ async def run_squad(
         env=env,
     )
 
-    assert process.stdout is not None
+    if process.stdout is None:
+        return
     while True:
         line = await process.stdout.readline()
         if not line:
@@ -131,6 +154,8 @@ async def run_combo(
     working_dir: str | None = None,
 ) -> AsyncIterator[str]:
     """Run a combo chain and yield output lines."""
+    _validate_id(combo_id, "combo_id")
+
     combo_bin = Path.home() / "bin" / "euxis-combo"
     if not combo_bin.exists():
         combo_bin = EUXIS_HOME / "bin" / "euxis-combo"
@@ -148,7 +173,8 @@ async def run_combo(
         env=env,
     )
 
-    assert process.stdout is not None
+    if process.stdout is None:
+        return
     while True:
         line = await process.stdout.readline()
         if not line:

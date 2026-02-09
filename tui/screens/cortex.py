@@ -81,7 +81,8 @@ class CortexScreen(Screen):
                 stderr=asyncio.subprocess.STDOUT,
                 env=env,
             )
-            assert process.stdout is not None
+            if process.stdout is None:
+                return
             while True:
                 line = await process.stdout.readline()
                 if not line:
@@ -124,7 +125,8 @@ class CortexScreen(Screen):
                 stderr=asyncio.subprocess.STDOUT,
                 env=env,
             )
-            assert process.stdout is not None
+            if process.stdout is None:
+                return
             while True:
                 line = await process.stdout.readline()
                 if not line:

@@ -175,7 +175,7 @@ run_gemini() {
         local guard
         guard="IMPORTANT: This is plain-text mode. Do not call tools or output ACTION/OBSERVATION steps. Respond only with the final answer in the required Output Format."
         local err_file
-        err_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_gemini_err.$$")
+        err_file=$(mktemp "${TMPDIR:-/tmp}/euxis_gemini_err.XXXXXX" 2>/dev/null) || { echo "[euxis] Error: failed to create temp file" >&2; return 1; }
         local out
         out=$(printf '%s\n\n%s' "${guard}" "${full_prompt}" | NODE_OPTIONS="--no-deprecation" \
             gemini --output-format text -p "" 2> "${err_file}")

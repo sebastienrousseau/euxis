@@ -79,7 +79,9 @@ class ToolRunnerScreen(Screen):
             env=env,
         )
 
-        assert process.stdout is not None
+        if process.stdout is None:
+            output.write_status("Failed to capture output", "red")
+            return
         while True:
             line = await process.stdout.readline()
             if not line:
