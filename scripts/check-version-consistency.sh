@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Euxis Version Consistency Checker
 # Validates that all version references match the protocol_version in registry.json

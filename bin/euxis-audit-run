@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. Deep-Dive Audit Runner.
 # Runs benchmarks, logical integrity, security probes, and consolidates a report.
 

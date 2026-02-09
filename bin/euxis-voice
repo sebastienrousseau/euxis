@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# (c) 2026 Euxis Fleet. All rights reserved.
 """Euxis Voice Interface: Record -> Local STT -> Orchestrator -> Butler -> Local TTS"""
 
 import os
@@ -254,7 +255,7 @@ VOICE_SYSTEM_PROMPT = (
 )
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 # Keywords that indicate the user wants multi-agent orchestration, not a quick answer.
@@ -267,6 +268,9 @@ _ORCHESTRATOR_KEYWORDS = {
 
 def _call_groq(user_message):
     """Call Groq API directly via urllib. Returns response text (~0.3s)."""
+    if not GROQ_API_KEY:
+        print("Error: GROQ_API_KEY environment variable is not set.", file=sys.stderr)
+        return ""
     payload = json.dumps({
         "model": GROQ_MODEL,
         "max_tokens": 150,

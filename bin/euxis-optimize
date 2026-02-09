@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS OPTIMIZE v4.1: System-Wide Tune-Up
 # 1. Benchmarks Accuracy (Certify)

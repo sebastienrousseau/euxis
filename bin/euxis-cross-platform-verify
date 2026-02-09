@@ -12,7 +12,13 @@ set -euo pipefail
 
 VERSION="${VERSION:-v0.0.7}"
 LOCAL_ONLY=false
-SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")" && pwd)"
+_self="$0"
+while [ -L "$_self" ]; do
+    _dir="$(cd "$(dirname "$_self")" && pwd)"
+    _self="$(readlink "$_self")"
+    [[ "$_self" != /* ]] && _self="$_dir/$_self"
+done
+SCRIPT_DIR="$(cd "$(dirname "$_self")" && pwd)"
 EUXIS_ROOT="$(dirname "$SCRIPT_DIR")"
 
 usage() {

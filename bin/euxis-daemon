@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS DAEMON: Safe, Periodic Self-Improvement
 # Runs 'euxis-kaizen' every X minutes with safety stops.

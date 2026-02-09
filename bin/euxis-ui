@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS CONSOLE: Mission Control TUI
 # Version: 2.1

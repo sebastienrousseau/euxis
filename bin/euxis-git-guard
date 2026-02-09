@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS GIT GUARD: Enforce Feature Branch Workflow (Smart Mode)
 # Standalone script — callable from any Euxis entry point.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Euxis prepare-commit-msg hook
 # Appends the Euxis branding signature to every commit message.
 # Install: euxis-hooks install (or manually symlink into .git/hooks/)

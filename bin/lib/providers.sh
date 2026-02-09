@@ -134,7 +134,7 @@ run_with_timeout() {
         fi
     else
         # No timeout command available - run without timeout but log warning
-        log_warning "timeout command not available - running without timeout protection"
+        log_warn "timeout command not available - running without timeout protection"
         "$@"
     fi
 }
@@ -149,18 +149,18 @@ run_claude() {
     if command -v jq &>/dev/null; then
         allowed_tools="${allowed_tools} Bash(jq:*)"
     else
-        log_warning "jq not available - JSON processing may be limited"
+        log_warn "jq not available - JSON processing may be limited"
     fi
 
     # Add gh support if available, otherwise warn
     if command -v gh &>/dev/null; then
         allowed_tools="${allowed_tools} Bash(gh:*)"
     else
-        log_warning "gh CLI not available - GitHub operations may be limited"
+        log_warn "gh CLI not available - GitHub operations may be limited"
     fi
 
     # Use timeout wrapper for the claude command
-    echo "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
+    printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
         claude \
         --print \
         --model "${PROVIDER_MODEL}" \
@@ -196,7 +196,7 @@ run_gemini() {
 run_openai() {
     local full_prompt="$1"
     if command -v codex &>/dev/null; then
-        echo "${full_prompt}" | codex --model "${PROVIDER_MODEL}"
+        printf '%s\n' "${full_prompt}" | codex --model "${PROVIDER_MODEL}"
     else
         log_error "codex (OpenAI Codex CLI) not found. Install via: npm i -g @openai/codex"
         exit 1
@@ -206,7 +206,7 @@ run_openai() {
 run_ollama() {
     local full_prompt="$1"
     if command -v ollama &>/dev/null; then
-        echo "${full_prompt}" | ollama run "${PROVIDER_MODEL}"
+        printf '%s\n' "${full_prompt}" | ollama run "${PROVIDER_MODEL}"
     else
         log_error "ollama not found. Install from https://ollama.com or use a different provider."
         exit 1
@@ -217,7 +217,7 @@ run_ollama() {
 run_qwen() {
     local full_prompt="$1"
     if command -v qwen &>/dev/null; then
-        echo "${full_prompt}" | qwen --model "${PROVIDER_MODEL}" -p ""
+        printf '%s\n' "${full_prompt}" | qwen --model "${PROVIDER_MODEL}" -p ""
     else
         log_error "qwen not found. Install via: brew install qwen-code"
         exit 1
@@ -227,7 +227,7 @@ run_qwen() {
 run_crush() {
     local full_prompt="$1"
     if command -v crush &>/dev/null; then
-        echo "${full_prompt}" | crush --model "${PROVIDER_MODEL}"
+        printf '%s\n' "${full_prompt}" | crush --model "${PROVIDER_MODEL}"
     else
         log_error "crush not found. Install via: brew install charmbracelet/tap/crush"
         exit 1
@@ -238,7 +238,7 @@ run_crush() {
 run_kiro_cli() {
     local full_prompt="$1"
     if command -v kiro-cli &>/dev/null; then
-        echo "${full_prompt}" | kiro-cli chat
+        printf '%s\n' "${full_prompt}" | kiro-cli chat
     else
         log_error "kiro-cli not found. Install via: https://kiro.dev"
         exit 1
@@ -248,7 +248,7 @@ run_kiro_cli() {
 run_goose() {
     local full_prompt="$1"
     if command -v goose &>/dev/null; then
-        echo "${full_prompt}" | goose run --model "${PROVIDER_MODEL}"
+        printf '%s\n' "${full_prompt}" | goose run --model "${PROVIDER_MODEL}"
     else
         log_error "goose not found. Install from: https://github.com/block/goose"
         exit 1

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS INFRA TEST: Branch Coverage for euxis.sh
 # Uses mocked providers to verify routing logic without spending money.

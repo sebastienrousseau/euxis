@@ -1,5 +1,5 @@
 {
-  "theme": "textual-dark",
+  "theme": "textual-ansi",
   "default_provider": "claude",
   "show_agent_tags": true,
   "reduced_motion": false,

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Euxis Plugin Registration Test Suite
 # Tests register_agent_plugin, unregister_agent_plugin, and list_plugins functions

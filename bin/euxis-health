@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS HEALTH: Fleet Integrity & Configuration Health Check
 # Validates naming, hardening, orphans, headers, and certification readiness.
@@ -286,7 +286,7 @@ if [[ -d "$BUS_DIR" ]]; then
         pipe_msgs=$(find "$pipe" -name "*.msg" -type f 2>/dev/null | wc -l | tr -d ' ')
         MSG_COUNT=$((MSG_COUNT + pipe_msgs))
         # Check for stale pipes (no messages in 7 days)
-        LATEST=$(find "$pipe" -name "*.msg" -type f -printf '%T@\n' 2>/dev/null | sort -rn | head -1)
+        LATEST=$({ find "$pipe" -name "*.msg" -type f -exec stat -f '%m' {} \; 2>/dev/null || find "$pipe" -name "*.msg" -type f -exec stat -c '%Y' {} \; 2>/dev/null; } | sort -rn | head -1)
         if [[ -n "$LATEST" ]]; then
             LATEST_INT=${LATEST%.*}
             if (( NOW - LATEST_INT > 604800 )); then

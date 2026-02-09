@@ -6,6 +6,24 @@
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
+# Validate memory file path: reject path traversal and paths outside EUXIS_HOME
+_validate_memory_path() {
+    local path="$1"
+    # Reject path traversal
+    if [[ "$path" == *".."* ]]; then
+        log_error "Path traversal rejected: ${path}"
+        return 1
+    fi
+    # Ensure path is under EUXIS_HOME
+    local resolved
+    resolved="$(cd "$(dirname "$path")" 2>/dev/null && pwd)/$(basename "$path")"
+    if [[ "$resolved" != "${EUXIS_HOME}"/* ]]; then
+        log_error "Path outside EUXIS_HOME rejected: ${path}"
+        return 1
+    fi
+    return 0
+}
+
 # Tier 1: Hot memory — most recent entries (always included)
 get_hot_memory() {
     local memory_file="$1"
@@ -56,7 +74,7 @@ get_relevant_memory() {
     fi
 
     # grep is unavoidable here — searching file content (not a hot-path fork issue)
-    grep -iE "${pattern}" "${memory_file}" 2>/dev/null | \
+    grep -iE -- "${pattern}" "${memory_file}" 2>/dev/null | \
         sort -u | head -n 10 || true
 }
 
@@ -87,7 +105,7 @@ get_cross_agent_memory() {
         [[ "${sibling_agent}" == "${current_agent}" ]] && continue
 
         local matches
-        matches=$(grep -iE "${pattern}" "${sibling_mem}" 2>/dev/null | head -n 3 || true)
+        matches=$(grep -iE -- "${pattern}" "${sibling_mem}" 2>/dev/null | head -n 3 || true)
         if [[ -n "${matches}" ]]; then
             printf '  [%s]:\n' "${sibling_agent}"
             while IFS= read -r line; do
@@ -136,6 +154,7 @@ prune_memory() {
     local max_lines="${2:-${EUXIS_MEMORY_MAX_LINES}}"
     local recent_keep="${3:-${EUXIS_MEMORY_RECENT_KEEP}}"
 
+    _validate_memory_path "${memory_file}" || return 1
     [[ -f "${memory_file}" ]] || return 0
 
     local total_lines
@@ -144,22 +163,22 @@ prune_memory() {
     # No pruning needed if under threshold
     (( total_lines <= max_lines )) && return 0
 
-    local temp_file="${memory_file}.prune.$$"
+    local temp_file
+    temp_file=$(mktemp "${memory_file}.prune.XXXXXX") || { log_error "Failed to create temp file for pruning"; return 1; }
+    trap 'rm -f "${temp_file}"' RETURN
+
     local header_line
 
     # Always keep the first line (header: "# Memory: agent-name")
     header_line=$(head -n 1 "${memory_file}")
 
     {
-        echo "${header_line}"
-        echo ""
+        printf '%s\n\n' "${header_line}"
 
         # 1. Extract all permanent entries (REFLECTION, CONTRAINDICATION, PROCEDURAL with CONTRAINDICATION)
-        grep -iE '(REFLECTION|CONTRAINDICATION)' "${memory_file}" | grep -v '^#' || true
+        grep -iE '(REFLECTION|CONTRAINDICATION)' -- "${memory_file}" | grep -v '^#' || true
 
-        echo ""
-        echo "# --- Pruned on $(date +%Y-%m-%d) (retained ${recent_keep} recent + permanent entries) ---"
-        echo ""
+        printf '\n# --- Pruned on %s (retained %s recent + permanent entries) ---\n\n' "$(date +%Y-%m-%d)" "${recent_keep}"
 
         # 2. Keep the most recent N entries (excluding header and permanent entries already captured)
         tail -n "${recent_keep}" "${memory_file}" | grep -viE '(REFLECTION|CONTRAINDICATION)' || true
@@ -209,7 +228,7 @@ detect_semantic_drift() {
 
     # Search existing memories for matching entities
     local matches
-    matches=$(grep -iE "${entities}" "${memory_file}" 2>/dev/null | grep -v '^#' | head -20) || true
+    matches=$(grep -iE -- "${entities}" "${memory_file}" 2>/dev/null | grep -v '^#' | head -20) || true
 
     [[ -z "${matches}" ]] && return 0
 
@@ -255,6 +274,7 @@ resolve_memory_contradiction() {
     local agent="$3"
     local resolution="${4:-supersede}"  # supersede | keep_both | reject
 
+    _validate_memory_path "${memory_file}" || return 1
     case "${resolution}" in
         supersede)
             # Mark old contradicting entries as superseded
@@ -302,7 +322,7 @@ auto_evolve_graph() {
     while IFS= read -r line; do
         # Extract entity-like terms (capitalized words or quoted strings)
         local entities
-        entities=$(echo "${line}" | grep -oE '\b[A-Z][a-z]+([A-Z][a-z]+)+\b' 2>/dev/null | head -3) || true
+        entities=$(printf '%s\n' "${line}" | grep -oE '\b[A-Z][a-z]+([A-Z][a-z]+)+\b' 2>/dev/null | head -3) || true
 
         if [[ -n "${entities}" ]]; then
             local prev=""
