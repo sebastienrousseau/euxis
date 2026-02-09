@@ -34,8 +34,25 @@ HELP_CONTENT = """\
 | `Ctrl+S` | Open settings |
 | `Ctrl+M` | Open fleet monitor |
 | `Ctrl+O` | Open log viewer |
+| `Ctrl+P` | Browse playbooks |
 | `Ctrl+Q` | Quit ETX |
 | `F1` | Show this help |
+
+## Screens Available
+
+| Screen | Access | Description |
+|--------|--------|-------------|
+| Dashboard | Default | Fleet grid with all 41 agents |
+| Agent Execution | Click agent / command palette | Deploy and stream agent output |
+| Fleet Monitor | `Ctrl+M` / command palette | Monitor squad/dispatch operations |
+| Settings | `Ctrl+S` / command palette | Theme, provider, accessibility |
+| Log Viewer | `Ctrl+O` / command palette | Browse agent output history |
+| Playbook Browser | `Ctrl+P` / command palette | Inspect playbook gate structure |
+| Metrics Dashboard | Command palette | Performance sparklines and stats |
+| Squad Details | Command palette | Squad compositions and combo chains |
+| Cortex Memory | Command palette | Browse and query semantic memory |
+| Help | `F1` / command palette | This keyboard reference |
+| About | Command palette | Version and system information |
 
 ## Agent Execution
 

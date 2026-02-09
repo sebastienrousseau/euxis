@@ -238,6 +238,18 @@ Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist
 
 ---
 
+## Terminal Experience (ETX)
+
+Modern TUI built on Python Textual with 11 screens and 51 tests.
+
+```bash
+euxis-tui
+```
+
+Features: fleet dashboard, command palette (`Ctrl+K`), streaming agent execution, squad monitoring, playbook browser, performance sparklines, cortex memory browser, dark/light/contrast themes.
+
+---
+
 ## Learn More
 
 | Guide | What You'll Learn |
@@ -247,6 +259,7 @@ Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist
 | [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
 | [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
+| [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |
 
 ---
