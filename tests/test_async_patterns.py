@@ -14,7 +14,7 @@ class TestAsyncConcurrencyPatterns:
         """Test cancellation of concurrent async tasks."""
         results = []
 
-        async def slow_task(task_id, delay):
+        async def slow_task(task_id, delay) -> None:
             try:
                 await asyncio.sleep(delay)
                 results.append(f"task_{task_id}_completed")
@@ -43,11 +43,11 @@ class TestAsyncConcurrencyPatterns:
         """Test async queue backpressure handling."""
         queue = asyncio.Queue(maxsize=2)
 
-        async def producer():
+        async def producer() -> str:
             for i in range(10):
                 try:
                     await asyncio.wait_for(queue.put(f"item_{i}"), timeout=0.1)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     return f"backpressure_at_{i}"
             return "all_produced"
 
@@ -69,15 +69,15 @@ class TestAsyncConcurrencyPatterns:
     async def test_concurrent_voice_pipeline_stages(self):
         """Test concurrent execution of voice pipeline stages."""
 
-        async def whisper_transcribe(audio_data):
+        async def whisper_transcribe(audio_data) -> str:
             await asyncio.sleep(0.2)
             return f"transcribed: {audio_data}"
 
-        async def llm_process(text):
+        async def llm_process(text) -> str:
             await asyncio.sleep(0.3)
             return f"response: {text}"
 
-        async def tts_synthesize(response):
+        async def tts_synthesize(response) -> str:
             await asyncio.sleep(0.1)
             return f"audio: {response}"
 
@@ -86,8 +86,7 @@ class TestAsyncConcurrencyPatterns:
         async def process_request(audio_data):
             transcribed = await whisper_transcribe(audio_data)
             response = await llm_process(transcribed)
-            audio = await tts_synthesize(response)
-            return audio
+            return await tts_synthesize(response)
 
         start_time = time.time()
         results = await asyncio.gather(*[process_request(req) for req in requests])

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from rich.markup import escape
 from rich.text import Text
 from textual.widgets import RichLog
@@ -30,7 +32,7 @@ class OutputPanel(RichLog):
     }
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             highlight=True,
             markup=True,
@@ -48,16 +50,16 @@ class OutputPanel(RichLog):
                 cleaned = cleaned.replace(char, "")
             safe = escape(cleaned.strip())
             self.write(Text.from_markup(f"[bold cyan]{safe}[/]"))
-        elif line.startswith("ERROR") or line.startswith("[ERROR"):
+        elif line.startswith(("ERROR", "[ERROR")):
             safe = escape(line)
             self.write(Text.from_markup(f"[bold red]{safe}[/]"))
-        elif line.startswith("WARNING") or line.startswith("[WARNING"):
+        elif line.startswith(("WARNING", "[WARNING")):
             safe = escape(line)
             self.write(Text.from_markup(f"[yellow]{safe}[/]"))
-        elif line.startswith("PASS") or line.startswith("✅"):
+        elif line.startswith(("PASS", "✅")):
             safe = escape(line)
             self.write(Text.from_markup(f"[green]{safe}[/]"))
-        elif line.startswith("FAIL") or line.startswith("✗"):
+        elif line.startswith(("FAIL", "✗")):
             safe = escape(line)
             self.write(Text.from_markup(f"[bold red]{safe}[/]"))
         elif line.startswith("#"):
@@ -67,7 +69,7 @@ class OutputPanel(RichLog):
         elif line.startswith("```"):
             safe = escape(line)
             self.write(Text.from_markup(f"[dim]{safe}[/]"))
-        elif line.startswith("- ") or line.startswith("* "):
+        elif line.startswith(("- ", "* ")):
             safe = escape(line)
             self.write(Text.from_markup(f"  {safe}"))
         else:

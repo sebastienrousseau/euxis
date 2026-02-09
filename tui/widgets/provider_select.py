@@ -3,14 +3,19 @@
 
 from __future__ import annotations
 
-from textual.app import ComposeResult
-from textual.containers import Center, Container
+from typing import TYPE_CHECKING, Any, ClassVar
+
+from textual.binding import Binding
+from textual.containers import Container
 from textual.message import Message
 from textual.screen import ModalScreen
-from textual.widgets import Button, Footer, Label, OptionList, Static
+from textual.widgets import OptionList, Static
 from textual.widgets.option_list import Option
 
 from tui.core.runner import PROVIDERS
+
+if TYPE_CHECKING:
+    from textual.app import ComposeResult
 
 
 class ProviderSelectModal(ModalScreen):
@@ -50,15 +55,16 @@ class ProviderSelectModal(ModalScreen):
             super().__init__()
             self.provider = provider
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "dismiss", "Cancel"),
     ]
 
-    def __init__(self, current: str = "claude", **kwargs) -> None:
+    def __init__(self, current: str = "claude", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.current = current
 
     def compose(self) -> ComposeResult:
+        """Build the provider selection dialog."""
         with Container(id="provider-dialog"):
             yield Static("[bold cyan]Select Provider[/]", id="provider-title")
             option_list = OptionList(id="provider-list")
@@ -68,5 +74,6 @@ class ProviderSelectModal(ModalScreen):
             yield option_list
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        """Dismiss the modal with the selected provider."""
         if event.option.id:
             self.dismiss(event.option.id)

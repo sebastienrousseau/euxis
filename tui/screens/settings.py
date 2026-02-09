@@ -3,18 +3,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.binding import Binding
+from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Label, Select, Static, Switch
 
-from tui.core.config import ETXConfig
 from tui.core.runner import PROVIDERS
 from tui.widgets.header import ETXHeader
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 THEME_OPTIONS = [
@@ -27,7 +28,7 @@ THEME_OPTIONS = [
 class SettingsScreen(Screen):
     """Configuration and preferences screen."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+s", "save_settings", "Save"),
         ("ctrl+k", "app.command_palette", "Commands"),
@@ -35,9 +36,11 @@ class SettingsScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the settings form layout."""
         config = self.euxis_app.config
 
         yield ETXHeader(id="header")
@@ -88,18 +91,21 @@ class SettingsScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header with current project context."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
         header.provider = self.euxis_app.config.default_provider
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle save and cancel button presses."""
         if event.button.id == "save-btn":
             self.action_save_settings()
         elif event.button.id == "cancel-btn":
             self.action_go_back()
 
     def action_save_settings(self) -> None:
+        """Persist current form values to configuration file."""
         config = self.euxis_app.config
 
         theme_select = self.query_one("#theme-select", Select)
@@ -120,4 +126,5 @@ class SettingsScreen(Screen):
         self.app.pop_screen()
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

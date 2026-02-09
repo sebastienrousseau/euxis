@@ -4,13 +4,12 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.binding import Binding
+from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, OptionList, Static
+from textual.widgets import Footer, OptionList
 from textual.widgets.option_list import Option
 
 from tui.core.runner import EUXIS_HOME
@@ -18,30 +17,34 @@ from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 
 class PlaybookScreen(Screen):
     """Browse and inspect available playbooks."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the playbook browser layout."""
         yield ETXHeader(id="header")
-        with Container(id="log-viewer"):
-            with Horizontal():
-                yield OptionList(id="log-list")
-                yield OutputPanel(id="log-content")
+        with Container(id="log-viewer"), Horizontal():
+            yield OptionList(id="log-list")
+            yield OutputPanel(id="log-content")
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and load playbook list."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
@@ -65,6 +68,7 @@ class PlaybookScreen(Screen):
                 option_list.add_option(Option(pb_file.stem, id=pb_file.stem))
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        """Display the selected playbook's details and gate structure."""
         pb_id = event.option.id
         if not pb_id:
             return
@@ -110,4 +114,5 @@ class PlaybookScreen(Screen):
                     output.write_line(f"    Delegates: {', '.join(delegate_names)}")
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

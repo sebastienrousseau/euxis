@@ -1,18 +1,18 @@
 """Tests for stage-based concurrent execution with dependency resolution."""
 
 import json
-import os
 import shutil
 import tempfile
 import threading
 import time
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 
 class MockFileSystem:
     """Mock filesystem with deterministic locking behavior."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.files = {}
         self.locks = {}
         self.operations = []
@@ -44,16 +44,16 @@ class MockFileSystem:
 class DeterministicDispatchTester:
     """Tests for the euxis-dispatch concurrent execution patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.temp_dir = None
         self.mock_fs = MockFileSystem()
 
     def setup(self):
         self.temp_dir = tempfile.mkdtemp(prefix="euxis_test_")
-        self.manifest_path = os.path.join(self.temp_dir, "test_manifest.json")
+        self.manifest_path = Path(self.temp_dir) / "test_manifest.json"
 
     def teardown(self):
-        if self.temp_dir and os.path.exists(self.temp_dir):
+        if self.temp_dir and Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
     def create_test_manifest(self, stages_config):
@@ -77,7 +77,7 @@ class DeterministicDispatchTester:
                 dispatch["locks"] = stage_info["locks"]
             manifest["dispatches"].append(dispatch)
 
-        with open(self.manifest_path, "w") as f:
+        with self.manifest_path.open("w") as f:
             json.dump(manifest, f, indent=2)
 
         return self.manifest_path
@@ -106,7 +106,7 @@ class TestConcurrentStageExecution:
 
         execution_order = []
 
-        def mock_execute_agent(agent_name):
+        def mock_execute_agent(agent_name) -> None:
             execution_order.append((agent_name, time.time()))
             time.sleep(0.1)
 
@@ -136,11 +136,11 @@ class TestConcurrentStageExecution:
         assert abs(stage1_times[0] - stage1_times[1]) < 0.05
 
         stage1_end = max(stage1_times) + 0.1
-        stage2_start = [t for agent, t in execution_order if agent == "stage2-agent1"][0]
+        stage2_start = next(t for agent, t in execution_order if agent == "stage2-agent1")
         assert stage2_start > stage1_end
 
         stage2_end = stage2_start + 0.1
-        stage3_start = [t for agent, t in execution_order if agent == "stage3-agent1"][0]
+        stage3_start = next(t for agent, t in execution_order if agent == "stage3-agent1")
         assert stage3_start > stage2_end
 
     def test_parallel_execution_within_stage(self):
@@ -156,7 +156,7 @@ class TestConcurrentStageExecution:
         execution_times = {}
         barrier = threading.Barrier(3)
 
-        def mock_execute_agent(agent_name):
+        def mock_execute_agent(agent_name) -> None:
             barrier.wait()
             start_time = time.time()
             execution_times[agent_name] = start_time

@@ -11,7 +11,8 @@ Implements the quick-action pattern system:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
+from typing import TYPE_CHECKING, ClassVar
 
 from textual.command import Hit, Hits, Provider
 
@@ -27,6 +28,7 @@ class AgentCommandProvider(Provider):
         return self.screen.app  # type: ignore[return-value]
 
     async def search(self, query: str) -> Hits:
+        """Search agents by name and tags."""
         registry = self._app.fleet_registry
         matcher = self.matcher(query)
 
@@ -43,7 +45,7 @@ class AgentCommandProvider(Provider):
                     help=f"[{tier_badge}] {', '.join(agent.tags[:3])}",
                 )
 
-    def _make_agent_callback(self, agent_id: str):
+    def _make_agent_callback(self, agent_id: str) -> Callable[[], None]:
         def callback() -> None:
             self._app.action_deploy_agent(agent_id)
         return callback
@@ -57,6 +59,7 @@ class SquadCommandProvider(Provider):
         return self.screen.app  # type: ignore[return-value]
 
     async def search(self, query: str) -> Hits:
+        """Search squads and combos by name and purpose."""
         registry = self._app.fleet_registry
         matcher = self.matcher(query)
 
@@ -84,12 +87,12 @@ class SquadCommandProvider(Provider):
                     help=f"{combo.description} — {chain_str}",
                 )
 
-    def _make_squad_callback(self, squad_id: str):
+    def _make_squad_callback(self, squad_id: str) -> Callable[[], None]:
         def callback() -> None:
             self._app.action_deploy_squad(squad_id)
         return callback
 
-    def _make_combo_callback(self, combo_id: str):
+    def _make_combo_callback(self, combo_id: str) -> Callable[[], None]:
         def callback() -> None:
             self._app.action_deploy_combo(combo_id)
         return callback
@@ -98,7 +101,7 @@ class SquadCommandProvider(Provider):
 class SystemCommandProvider(Provider):
     """Command provider for system commands via > prefix."""
 
-    SYSTEM_COMMANDS = [
+    SYSTEM_COMMANDS: ClassVar[list[tuple[str, str, str]]] = [
         ("Health Check", "Run euxis-health to verify system status", "health"),
         ("Certification", "Run euxis-certify to validate all gates", "certify"),
         ("Lint Fleet", "Run euxis-lint to check fleet integrity", "lint"),
@@ -122,6 +125,7 @@ class SystemCommandProvider(Provider):
         return self.screen.app  # type: ignore[return-value]
 
     async def search(self, query: str) -> Hits:
+        """Search system commands by name and description."""
         matcher = self.matcher(query)
 
         for name, description, action in self.SYSTEM_COMMANDS:
@@ -134,7 +138,7 @@ class SystemCommandProvider(Provider):
                     help=description,
                 )
 
-    def _make_command_callback(self, action: str):
+    def _make_command_callback(self, action: str) -> Callable[[], None]:
         def callback() -> None:
             self._app.run_system_command(action)
         return callback

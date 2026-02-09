@@ -126,23 +126,50 @@ ignore = [
     "D104",   # Missing docstring in public package — re-enable gradually
     "D105",   # Missing docstring in magic method
     "D107",   # Missing docstring in __init__
-    "ANN101", # Missing type annotation for self
-    "ANN102", # Missing type annotation for cls
+    "D203",   # Incompatible with D211 (no-blank-line-before-class)
+    "D213",   # Incompatible with D212 (multi-line-summary-first-line)
+    "ANN401", # Dynamically typed expressions (Any) in **kwargs — standard for super() forwarding
     "FBT001", # Boolean positional arg in function definition
     "FBT002", # Boolean default arg in function definition
     "COM812", # Trailing comma missing
     "ISC001", # Implicitly concatenated string literals on one line
+    "TC002",  # Move third-party import into TYPE_CHECKING — causes runtime ClassVar issues
+    "TC003",  # Move stdlib import into TYPE_CHECKING — causes runtime ClassVar issues
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-    "S101",   # Use of assert detected
+"tui/app.py" = [
+    "PLC0415", # Lazy imports in action methods — intentional for screen loading
+    "PLR0912", # Too many branches in run_system_command — dispatch switch
+]
+"tests/**" = [
+    "S101",    # Use of assert detected
+    "S108",    # Hardcoded temp file — tests use /tmp intentionally
+    "S603",    # subprocess call without shell check
+    "S607",    # Starting a process with a partial executable path
     "PLR2004", # Magic value used in comparison
-    "ANN001", # Missing type annotation for function argument
-    "ANN201", # Missing return type annotation for public function
-    "D101",   # Missing docstring in public class
-    "D102",   # Missing docstring in public method
-    "D103",   # Missing docstring in public function
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments
+    "PLR0915", # Too many statements
+    "PLW1510", # subprocess.run without explicit check argument
+    "PLC0415", # import outside top-level — lazy imports common in tests
+    "ANN001",  # Missing type annotation for function argument
+    "ANN002",  # Missing type annotation for *args
+    "ANN003",  # Missing type annotation for **kwargs
+    "ANN201",  # Missing return type annotation for public function
+    "ANN202",  # Missing return type annotation for private function
+    "ANN204",  # Missing return type for special method
+    "ARG001",  # Unused function argument
+    "ARG002",  # Unused method argument
+    "SLF001",  # Private member accessed
+    "EXE001",  # Shebang present but file is not executable
+    "D101",    # Missing docstring in public class
+    "D102",    # Missing docstring in public method
+    "D103",    # Missing docstring in public function
+    "D205",    # 1 blank line required between summary and description
+    "A002",    # Argument shadowing builtin — test helpers may use `help` etc.
+    "PERF401", # Manual list comprehension — readability in tests
+    "RUF059",  # Unused unpacked variable
 ]
 
 # MyPy configuration

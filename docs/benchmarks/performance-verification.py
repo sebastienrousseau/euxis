@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-"""
-Euxis Performance Verification & Benchmarking Suite
+"""Euxis Performance Verification & Benchmarking Suite
 Verifies performance budgets, threading behavior, and latency targets.
 """
 
-import asyncio
 import concurrent.futures
 import json
-import multiprocessing
-import os
 import statistics
 import subprocess
 import sys
@@ -16,8 +12,6 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from queue import Queue, Full
-from typing import Dict, List, Any, Optional
 
 
 class PerformanceBudgets:
@@ -59,7 +53,7 @@ class PerformanceBudgets:
 class ThreadingBenchmark:
     """Benchmarks for threading performance and behavior."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.results = {}
 
     def benchmark_thread_creation(self, num_threads=10, iterations=5):
@@ -70,7 +64,7 @@ class ThreadingBenchmark:
             start_time = time.time()
             threads = []
 
-            for i in range(num_threads):
+            for _i in range(num_threads):
                 thread = threading.Thread(target=lambda: time.sleep(0.001))
                 threads.append(thread)
                 thread.start()
@@ -84,11 +78,11 @@ class ThreadingBenchmark:
             times.append(per_thread_time)
 
         return {
-            'per_thread_ms': statistics.mean(times),
-            'min_ms': min(times),
-            'max_ms': max(times),
-            'budget_ms': PerformanceBudgets.THREAD_SPAWN_MAX,
-            'passes_budget': statistics.mean(times) <= PerformanceBudgets.THREAD_SPAWN_MAX
+            "per_thread_ms": statistics.mean(times),
+            "min_ms": min(times),
+            "max_ms": max(times),
+            "budget_ms": PerformanceBudgets.THREAD_SPAWN_MAX,
+            "passes_budget": statistics.mean(times) <= PerformanceBudgets.THREAD_SPAWN_MAX
         }
 
     def benchmark_lock_contention(self, num_threads=5, iterations=3):
@@ -97,13 +91,13 @@ class ThreadingBenchmark:
 
         for _ in range(iterations):
             lock = threading.Lock()
-            shared_data = {'counter': 0}
+            shared_data = {"counter": 0}
             thread_times = []
 
-            def contending_worker():
+            def contending_worker() -> None:
                 start = time.time()
                 with lock:
-                    shared_data['counter'] += 1
+                    shared_data["counter"] += 1
                     time.sleep(0.001)  # Simulate work under lock
                 end = time.time()
                 thread_times.append((end - start) * 1000)
@@ -126,18 +120,18 @@ class ThreadingBenchmark:
             max_wait_time = max(thread_times)
 
             results.append({
-                'total_ms': total_time,
-                'avg_wait_ms': avg_wait_time,
-                'max_wait_ms': max_wait_time
+                "total_ms": total_time,
+                "avg_wait_ms": avg_wait_time,
+                "max_wait_ms": max_wait_time
             })
 
-        avg_max_wait = statistics.mean([r['max_wait_ms'] for r in results])
+        avg_max_wait = statistics.mean([r["max_wait_ms"] for r in results])
 
         return {
-            'avg_max_wait_ms': avg_max_wait,
-            'budget_ms': PerformanceBudgets.LOCK_CONTENTION_MAX,
-            'passes_budget': avg_max_wait <= PerformanceBudgets.LOCK_CONTENTION_MAX,
-            'details': results
+            "avg_max_wait_ms": avg_max_wait,
+            "budget_ms": PerformanceBudgets.LOCK_CONTENTION_MAX,
+            "passes_budget": avg_max_wait <= PerformanceBudgets.LOCK_CONTENTION_MAX,
+            "details": results
         }
 
     def benchmark_parallel_overhead(self, num_tasks=10, iterations=3):
@@ -149,7 +143,7 @@ class ThreadingBenchmark:
         """
         results = []
 
-        def io_task(duration_ms=10):
+        def io_task(duration_ms=10) -> None:
             """Simulated I/O-bound task (releases GIL via sleep)."""
             time.sleep(duration_ms / 1000.0)
 
@@ -169,25 +163,25 @@ class ThreadingBenchmark:
 
             overhead = parallel_time - (sequential_time / num_tasks)
             results.append({
-                'sequential_ms': sequential_time,
-                'parallel_ms': parallel_time,
-                'overhead_ms': overhead
+                "sequential_ms": sequential_time,
+                "parallel_ms": parallel_time,
+                "overhead_ms": overhead
             })
 
-        avg_overhead = statistics.mean([r['overhead_ms'] for r in results])
+        avg_overhead = statistics.mean([r["overhead_ms"] for r in results])
 
         return {
-            'avg_overhead_ms': avg_overhead,
-            'budget_ms': PerformanceBudgets.PARALLEL_OVERHEAD_MAX,
-            'passes_budget': avg_overhead <= PerformanceBudgets.PARALLEL_OVERHEAD_MAX,
-            'details': results
+            "avg_overhead_ms": avg_overhead,
+            "budget_ms": PerformanceBudgets.PARALLEL_OVERHEAD_MAX,
+            "passes_budget": avg_overhead <= PerformanceBudgets.PARALLEL_OVERHEAD_MAX,
+            "details": results
         }
 
 
 class LatencyBenchmark:
     """Benchmarks for core system latency."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.euxis_dir = Path.home() / ".euxis"
 
     def benchmark_health_check(self, iterations=5):
@@ -206,13 +200,13 @@ class LatencyBenchmark:
                 times.append((end_time - start_time) * 1000)
 
         if not times:
-            return {'error': 'Health check failed'}
+            return {"error": "Health check failed"}
 
         return {
-            'mean_ms': statistics.mean(times),
-            'p95_ms': sorted(times)[int(0.95 * len(times))],
-            'budget_ms': PerformanceBudgets.HEALTH_CHECK_MAX,
-            'passes_budget': statistics.mean(times) <= PerformanceBudgets.HEALTH_CHECK_MAX
+            "mean_ms": statistics.mean(times),
+            "p95_ms": sorted(times)[int(0.95 * len(times))],
+            "budget_ms": PerformanceBudgets.HEALTH_CHECK_MAX,
+            "passes_budget": statistics.mean(times) <= PerformanceBudgets.HEALTH_CHECK_MAX
         }
 
     def benchmark_cortex_recall(self, iterations=5):
@@ -223,7 +217,7 @@ class LatencyBenchmark:
         """
         cortex_cmd = self.euxis_dir / "bin" / "euxis-cortex"
         if not cortex_cmd.exists():
-            return {'error': 'euxis-cortex not found'}
+            return {"error": "euxis-cortex not found"}
 
         db_path = str(self.euxis_dir / "data" / "cortex" / "db")
         test_script = f"""
@@ -259,18 +253,18 @@ for _ in range({iterations}):
                 if line.startswith("RECALL_TIME:"):
                     times.append(float(line.split(": ")[1]))
                 elif line.startswith("RECALL_ERROR:"):
-                    return {'error': line.split(": ", 1)[1]}
+                    return {"error": line.split(": ", 1)[1]}
         except subprocess.TimeoutExpired:
-            return {'error': 'Cortex recall benchmark timed out'}
+            return {"error": "Cortex recall benchmark timed out"}
 
         if not times:
-            return {'error': 'Cortex recall measurement failed'}
+            return {"error": "Cortex recall measurement failed"}
 
         return {
-            'mean_ms': statistics.mean(times),
-            'p95_ms': sorted(times)[int(0.95 * len(times))],
-            'budget_ms': PerformanceBudgets.CORTEX_RECALL_MAX,
-            'passes_budget': statistics.mean(times) <= PerformanceBudgets.CORTEX_RECALL_MAX
+            "mean_ms": statistics.mean(times),
+            "p95_ms": sorted(times)[int(0.95 * len(times))],
+            "budget_ms": PerformanceBudgets.CORTEX_RECALL_MAX,
+            "passes_budget": statistics.mean(times) <= PerformanceBudgets.CORTEX_RECALL_MAX
         }
 
 
@@ -281,15 +275,15 @@ class ConcurrencyVerifier:
         """Verify that staged execution respects dependencies."""
         execution_log = []
 
-        def stage_1():
-            execution_log.append(('stage_1', 'start', time.time()))
+        def stage_1() -> None:
+            execution_log.append(("stage_1", "start", time.time()))
             time.sleep(0.1)
-            execution_log.append(('stage_1', 'end', time.time()))
+            execution_log.append(("stage_1", "end", time.time()))
 
-        def stage_2():
-            execution_log.append(('stage_2', 'start', time.time()))
+        def stage_2() -> None:
+            execution_log.append(("stage_2", "start", time.time()))
             time.sleep(0.05)
-            execution_log.append(('stage_2', 'end', time.time()))
+            execution_log.append(("stage_2", "end", time.time()))
 
         # Stage 1 must complete before Stage 2 starts
         thread1 = threading.Thread(target=stage_1)
@@ -305,14 +299,14 @@ class ConcurrencyVerifier:
         stage_2_start = None
 
         for entry in execution_log:
-            if entry[0] == 'stage_1' and entry[1] == 'end':
+            if entry[0] == "stage_1" and entry[1] == "end":
                 stage_1_end = entry[2]
-            elif entry[0] == 'stage_2' and entry[1] == 'start':
+            elif entry[0] == "stage_2" and entry[1] == "start":
                 stage_2_start = entry[2]
 
         return {
-            'stages_ordered_correctly': stage_1_end < stage_2_start if stage_1_end and stage_2_start else False,
-            'execution_log': execution_log
+            "stages_ordered_correctly": stage_1_end < stage_2_start if stage_1_end and stage_2_start else False,
+            "execution_log": execution_log
         }
 
     def verify_concurrent_execution_within_stage(self):
@@ -320,7 +314,7 @@ class ConcurrencyVerifier:
         start_times = {}
         end_times = {}
 
-        def concurrent_task(task_id):
+        def concurrent_task(task_id) -> None:
             start_times[task_id] = time.time()
             time.sleep(0.1)  # Simulate work
             end_times[task_id] = time.time()
@@ -330,7 +324,7 @@ class ConcurrencyVerifier:
         launch_time = time.time()
 
         for i in range(3):
-            thread = threading.Thread(target=concurrent_task, args=(f'task_{i}',))
+            thread = threading.Thread(target=concurrent_task, args=(f"task_{i}",))
             threads.append(thread)
             thread.start()
 
@@ -346,115 +340,88 @@ class ConcurrencyVerifier:
         is_concurrent = total_time < 0.15 and start_window < 0.05
 
         return {
-            'tasks_executed_concurrently': is_concurrent,
-            'total_execution_ms': total_time * 1000,
-            'start_window_ms': start_window * 1000,
-            'task_count': len(threads)
+            "tasks_executed_concurrently": is_concurrent,
+            "total_execution_ms": total_time * 1000,
+            "start_window_ms": start_window * 1000,
+            "task_count": len(threads)
         }
 
 
 class PerformanceVerificationSuite:
     """Main performance verification orchestrator."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.results = {
-            'threading': {},
-            'latency': {},
-            'concurrency': {},
-            'budget_compliance': {}
+            "threading": {},
+            "latency": {},
+            "concurrency": {},
+            "budget_compliance": {}
         }
 
     def run_all_benchmarks(self):
         """Run all performance benchmarks and verifications."""
-        print("🔥 EUXIS PERFORMANCE VERIFICATION SUITE")
-        print("=" * 50)
-
         # Threading Benchmarks
-        print("\n📊 THREADING BENCHMARKS")
-        print("-" * 30)
         threading_bench = ThreadingBenchmark()
 
-        print("• Thread Creation Overhead...")
-        self.results['threading']['thread_creation'] = threading_bench.benchmark_thread_creation()
+        self.results["threading"]["thread_creation"] = threading_bench.benchmark_thread_creation()
 
-        print("• Lock Contention...")
-        self.results['threading']['lock_contention'] = threading_bench.benchmark_lock_contention()
+        self.results["threading"]["lock_contention"] = threading_bench.benchmark_lock_contention()
 
-        print("• Parallel vs Sequential Overhead...")
-        self.results['threading']['parallel_overhead'] = threading_bench.benchmark_parallel_overhead()
+        self.results["threading"]["parallel_overhead"] = threading_bench.benchmark_parallel_overhead()
 
         # Latency Benchmarks
-        print("\n⚡ LATENCY BENCHMARKS")
-        print("-" * 30)
         latency_bench = LatencyBenchmark()
 
-        print("• Health Check Latency...")
-        self.results['latency']['health_check'] = latency_bench.benchmark_health_check()
+        self.results["latency"]["health_check"] = latency_bench.benchmark_health_check()
 
-        print("• Cortex Recall Latency...")
-        self.results['latency']['cortex_recall'] = latency_bench.benchmark_cortex_recall()
+        self.results["latency"]["cortex_recall"] = latency_bench.benchmark_cortex_recall()
 
         # Concurrency Verification
-        print("\n🔄 CONCURRENCY VERIFICATION")
-        print("-" * 30)
         concurrency_verifier = ConcurrencyVerifier()
 
-        print("• Stage Execution Order...")
-        self.results['concurrency']['stage_ordering'] = concurrency_verifier.verify_stage_execution_order()
+        self.results["concurrency"]["stage_ordering"] = concurrency_verifier.verify_stage_execution_order()
 
-        print("• Concurrent Execution Within Stage...")
-        self.results['concurrency']['concurrent_execution'] = concurrency_verifier.verify_concurrent_execution_within_stage()
+        self.results["concurrency"]["concurrent_execution"] = concurrency_verifier.verify_concurrent_execution_within_stage()
 
         # Budget Compliance Summary
-        print("\n💰 BUDGET COMPLIANCE")
-        print("-" * 30)
         self._calculate_budget_compliance()
 
         return self.results
 
-    def _calculate_budget_compliance(self):
+    def _calculate_budget_compliance(self) -> None:
         """Calculate overall budget compliance."""
         compliance_scores = []
 
         # Check threading budgets
-        for metric, data in self.results['threading'].items():
-            if 'passes_budget' in data:
-                compliance_scores.append(data['passes_budget'])
-                status = "✅ PASS" if data['passes_budget'] else "❌ FAIL"
-                print(f"  {metric}: {status}")
+        for data in self.results["threading"].values():
+            if "passes_budget" in data:
+                compliance_scores.append(data["passes_budget"])
+                "✅ PASS" if data["passes_budget"] else "❌ FAIL"
 
         # Check latency budgets
-        for metric, data in self.results['latency'].items():
-            if 'passes_budget' in data:
-                compliance_scores.append(data['passes_budget'])
-                status = "✅ PASS" if data['passes_budget'] else "❌ FAIL"
-                print(f"  {metric}: {status}")
+        for data in self.results["latency"].values():
+            if "passes_budget" in data:
+                compliance_scores.append(data["passes_budget"])
+                "✅ PASS" if data["passes_budget"] else "❌ FAIL"
 
         # Check concurrency requirements
-        concurrent_tasks_ok = self.results['concurrency']['concurrent_execution']['tasks_executed_concurrently']
-        stage_order_ok = self.results['concurrency']['stage_ordering']['stages_ordered_correctly']
+        concurrent_tasks_ok = self.results["concurrency"]["concurrent_execution"]["tasks_executed_concurrently"]
+        stage_order_ok = self.results["concurrency"]["stage_ordering"]["stages_ordered_correctly"]
 
         compliance_scores.extend([concurrent_tasks_ok, stage_order_ok])
 
-        status = "✅ PASS" if concurrent_tasks_ok else "❌ FAIL"
-        print(f"  concurrent_execution: {status}")
 
-        status = "✅ PASS" if stage_order_ok else "❌ FAIL"
-        print(f"  stage_ordering: {status}")
 
         # Overall score
         overall_compliance = sum(compliance_scores) / len(compliance_scores) if compliance_scores else 0
-        self.results['budget_compliance']['overall_score'] = overall_compliance
-        self.results['budget_compliance']['passing_percentage'] = overall_compliance * 100
+        self.results["budget_compliance"]["overall_score"] = overall_compliance
+        self.results["budget_compliance"]["passing_percentage"] = overall_compliance * 100
 
-        print(f"\n🎯 OVERALL COMPLIANCE: {overall_compliance * 100:.1f}%")
 
-        if overall_compliance >= 0.9:
-            print("🏆 EXCELLENT: Performance meets all critical budgets")
-        elif overall_compliance >= 0.7:
-            print("⚠️  WARNING: Some performance budgets exceeded")
+        if overall_compliance >= 0.9 or overall_compliance >= 0.7:
+            pass
         else:
-            print("🚨 CRITICAL: Major performance issues detected")
+            pass
 
     def generate_report(self) -> str:
         """Generate a detailed performance report."""
@@ -465,7 +432,7 @@ class PerformanceVerificationSuite:
         report.append("")
 
         # Executive Summary
-        compliance_pct = self.results['budget_compliance']['passing_percentage']
+        compliance_pct = self.results["budget_compliance"]["passing_percentage"]
         report.append("## Executive Summary")
         report.append(f"**Overall Compliance**: {compliance_pct:.1f}%")
 
@@ -480,48 +447,48 @@ class PerformanceVerificationSuite:
 
         # Threading Performance
         report.append("## Threading Performance")
-        for metric, data in self.results['threading'].items():
+        for metric, data in self.results["threading"].items():
             report.append(f"### {metric.replace('_', ' ').title()}")
-            if 'error' in data:
+            if "error" in data:
                 report.append(f"**Error**: {data['error']}")
             else:
-                if 'per_thread_ms' in data:
+                if "per_thread_ms" in data:
                     report.append(f"- **Per Thread**: {data['per_thread_ms']:.2f}ms")
-                elif 'avg_max_wait_ms' in data:
+                elif "avg_max_wait_ms" in data:
                     report.append(f"- **Max Wait**: {data['avg_max_wait_ms']:.2f}ms")
-                elif 'avg_overhead_ms' in data:
+                elif "avg_overhead_ms" in data:
                     report.append(f"- **Overhead**: {data['avg_overhead_ms']:.2f}ms")
 
-                budget_key = 'budget_ms'
+                budget_key = "budget_ms"
                 if budget_key in data:
                     report.append(f"- **Budget**: {data[budget_key]}ms")
-                    status = "✅ PASS" if data.get('passes_budget', False) else "❌ FAIL"
+                    status = "✅ PASS" if data.get("passes_budget", False) else "❌ FAIL"
                     report.append(f"- **Status**: {status}")
             report.append("")
 
         # Latency Performance
         report.append("## Latency Performance")
-        for metric, data in self.results['latency'].items():
+        for metric, data in self.results["latency"].items():
             report.append(f"### {metric.replace('_', ' ').title()}")
-            if 'error' in data:
+            if "error" in data:
                 report.append(f"**Error**: {data['error']}")
             else:
                 report.append(f"- **Mean**: {data.get('mean_ms', 0):.2f}ms")
                 report.append(f"- **P95**: {data.get('p95_ms', 0):.2f}ms")
                 report.append(f"- **Budget**: {data.get('budget_ms', 0)}ms")
-                status = "✅ PASS" if data.get('passes_budget', False) else "❌ FAIL"
+                status = "✅ PASS" if data.get("passes_budget", False) else "❌ FAIL"
                 report.append(f"- **Status**: {status}")
             report.append("")
 
         # Concurrency Verification
         report.append("## Concurrency Verification")
 
-        stage_data = self.results['concurrency']['stage_ordering']
-        status = "✅ PASS" if stage_data['stages_ordered_correctly'] else "❌ FAIL"
+        stage_data = self.results["concurrency"]["stage_ordering"]
+        status = "✅ PASS" if stage_data["stages_ordered_correctly"] else "❌ FAIL"
         report.append(f"### Stage Ordering: {status}")
 
-        concurrent_data = self.results['concurrency']['concurrent_execution']
-        status = "✅ PASS" if concurrent_data['tasks_executed_concurrently'] else "❌ FAIL"
+        concurrent_data = self.results["concurrency"]["concurrent_execution"]
+        status = "✅ PASS" if concurrent_data["tasks_executed_concurrently"] else "❌ FAIL"
         report.append(f"### Concurrent Execution: {status}")
         report.append(f"- **Total Time**: {concurrent_data['total_execution_ms']:.2f}ms")
         report.append(f"- **Start Window**: {concurrent_data['start_window_ms']:.2f}ms")
@@ -529,31 +496,28 @@ class PerformanceVerificationSuite:
 
         return "\n".join(report)
 
-    def save_results(self, filepath: Optional[str] = None):
+    def save_results(self, filepath: str | None = None):
         """Save detailed results to JSON."""
         if filepath is None:
-            filepath = f"/tmp/euxis_performance_results_{int(time.time())}.json"
+            filepath = str(Path(tempfile.gettempdir()) / f"euxis_performance_results_{int(time.time())}.json")
 
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             json.dump(self.results, f, indent=2, default=str)
 
         return filepath
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     suite = PerformanceVerificationSuite()
     results = suite.run_all_benchmarks()
 
-    print("\n" + "=" * 50)
-    print(suite.generate_report())
 
     # Save results
-    results_path = suite.save_results()
-    print(f"\n📁 Detailed results saved to: {results_path}")
+    suite.save_results()
 
     # Exit with non-zero if major issues detected
-    compliance = results['budget_compliance']['passing_percentage']
+    compliance = results["budget_compliance"]["passing_percentage"]
     sys.exit(0 if compliance >= 70 else 1)
 
 

@@ -1,16 +1,16 @@
 """Tests for deterministic file locking behavior under concurrent access."""
 
-import os
 import shutil
 import tempfile
 import threading
 import time
+from pathlib import Path
 
 
 class MockFileSystem:
     """Mock filesystem with deterministic locking behavior."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.files = {}
         self.locks = {}
         self.operations = []
@@ -41,7 +41,7 @@ class TestFileLockingConcurrency:
         self.temp_dir = tempfile.mkdtemp(prefix="euxis_lock_test_")
 
     def teardown_method(self):
-        if os.path.exists(self.temp_dir):
+        if Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
     def test_exclusive_lock_access(self):
@@ -49,7 +49,7 @@ class TestFileLockingConcurrency:
         results = {}
         barrier = threading.Barrier(3)
 
-        def attempt_lock(thread_id):
+        def attempt_lock(thread_id) -> None:
             barrier.wait()
             start_time = time.time()
 
@@ -81,7 +81,7 @@ class TestFileLockingConcurrency:
     def test_lock_timeout_behavior(self):
         """Test that lock acquisition respects timeout values."""
 
-        def hold_lock():
+        def hold_lock() -> None:
             assert self.mock_fs.acquire_lock("test_resource", timeout=5.0)
             time.sleep(0.5)
             self.mock_fs.release_lock("test_resource")

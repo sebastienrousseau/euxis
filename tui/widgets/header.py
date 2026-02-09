@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
-from textual.app import ComposeResult
+from typing import TYPE_CHECKING
+
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
+
+if TYPE_CHECKING:
+    from textual.app import ComposeResult
 
 
 class ETXHeader(Widget):
@@ -29,20 +33,25 @@ class ETXHeader(Widget):
     version: reactive[str] = reactive("0.0.7")
 
     def compose(self) -> ComposeResult:
+        """Build header bar with logo, context, and status areas."""
         yield Static(id="etx-header-logo")
         yield Static(id="etx-header-context")
         yield Static(id="etx-header-status")
 
     def on_mount(self) -> None:
+        """Render initial header content."""
         self._update_display()
 
     def watch_project(self) -> None:
+        """Refresh display when project changes."""
         self._update_display()
 
     def watch_branch(self) -> None:
+        """Refresh display when branch changes."""
         self._update_display()
 
     def watch_provider(self) -> None:
+        """Refresh display when provider changes."""
         self._update_display()
 
     def _update_display(self) -> None:

@@ -4,26 +4,27 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.binding import Binding
+from textual.containers import VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Static
 
 from tui.core.runner import EUXIS_HOME
 from tui.widgets.header import ETXHeader
-from tui.widgets.sparkline import Sparkline, sparkline_text
+from tui.widgets.sparkline import sparkline_text
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 
 class MetricsScreen(Screen):
     """Performance metrics dashboard with agent execution history."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
@@ -75,9 +76,11 @@ class MetricsScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the metrics dashboard layout."""
         yield ETXHeader(id="header")
         with VerticalScroll(id="metrics-container"):
             yield Static(
@@ -89,6 +92,7 @@ class MetricsScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and load performance metrics."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
@@ -176,4 +180,5 @@ class MetricsScreen(Screen):
         providers_view.update("\n".join(prov_lines))
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

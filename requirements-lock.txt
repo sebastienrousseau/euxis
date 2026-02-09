@@ -1,3 +1,89 @@
+# ============================================================================
+# Unmaintained Dependencies Analysis (2026-02-09)
+# ============================================================================
+#
+# This lock file contains transitive dependencies flagged as "unmaintained"
+# (>12 months without a PyPI release). ALL are transitive -- none are direct
+# project dependencies. They cannot be independently upgraded; they will only
+# change when their parent packages release new versions that alter their
+# dependency trees.
+#
+# Direct dependencies (from requirements.txt):
+#   chromadb, sentence-transformers, textual, rich
+#
+# --- Unmaintained transitive dependencies and their dependency chains ---
+#
+# 1. coloredlogs==15.0.1 (last release: 2021-06-11, ~1,703 days)
+#    Chain: chromadb -> onnxruntime 1.23.2 -> coloredlogs -> humanfriendly
+#    STATUS: RESOLVED. onnxruntime >=1.24.0 dropped coloredlogs. Upgrading
+#    onnxruntime (via chromadb) removes both coloredlogs and humanfriendly.
+#
+# 2. humanfriendly==10.0 (last release: 2021-09-17, ~1,605 days)
+#    Chain: coloredlogs -> humanfriendly
+#    STATUS: RESOLVED. Removed when coloredlogs is removed (see #1 above).
+#
+# 3. sortedcontainers==2.4.0 (last release: 2021-05-16, ~1,729 days)
+#    Chain: test/build tooling (hypothesis, cyclonedx-python-lib) -- not a
+#    runtime dependency. Mature, stable library with no known issues.
+#    No action needed.
+#
+# 4. backoff==2.2.1 (last release: 2022-10-05, ~1,222 days)
+#    Chain: chromadb -> posthog -> backoff
+#    Note: Stable retry library, no maintained alternative needed by posthog.
+#    Cannot be replaced independently; posthog would need to switch.
+#
+# 5. mdurl==0.1.2 (last release: 2022-08-14, ~1,284 days)
+#    Chain: rich/textual -> markdown-it-py -> mdurl
+#    Note: Tiny URL-parsing utility for markdown-it-py. Stable and complete.
+#    Cannot be replaced independently.
+#
+# 6. mpmath==1.3.0 (last release: 2023-03-07, ~1,070 days)
+#    Chain: chromadb -> onnxruntime -> sympy -> mpmath
+#    Note: Mature arbitrary-precision math library. v1.4.0b3 in pre-release
+#    (Jan 2026). Actively developed, just slow stable-release cadence.
+#
+# 7. shellingham==1.5.4 (last release: 2023-10-24, ~869 days)
+#    Chain: chromadb -> typer -> shellingham
+#    Note: Shell-detection utility for typer. Functionally complete, stable.
+#
+# 8. aiohttp-jinja2==1.6 (last release: 2023-11-18, ~808 days)
+#    Chain: textual -> textual-serve -> aiohttp-jinja2
+#    Note: Thin integration layer. Stable, no replacement needed.
+#
+# 9. overrides==7.7.0 (last release: 2024-01-27, ~741 days)
+#    Chain: chromadb -> overrides
+#    Note: Method-override decorator. Chromadb uses it internally.
+#
+# 10. linkify-it-py==2.0.3 (last release: 2024-02-04, ~736 days)
+#     Chain: textual -> mdit-py-plugins[linkify] -> linkify-it-py -> uc-micro-py
+#     Note: Link-detection plugin for markdown rendering in textual/rich.
+#
+# 11. uc-micro-py==1.0.3 (last release: 2024-02-09, ~730 days)
+#     Chain: linkify-it-py -> uc-micro-py
+#     Note: Unicode micro-category data for linkify-it-py. Stable data package.
+#
+# 12. python-dateutil==2.9.0.post0 (last release: 2024-03-01, ~711 days)
+#     Chain: chromadb -> kubernetes -> python-dateutil
+#            chromadb -> posthog -> python-dateutil
+#     Note: Extremely widely used, mature library. Stable and complete.
+#
+# 13. requests-oauthlib==2.0.0 (last release: 2024-03-22, ~689 days)
+#     Chain: chromadb -> kubernetes -> requests-oauthlib -> oauthlib
+#     Note: OAuth integration for requests. Stable, widely used.
+#
+# --- Summary ---
+# - NONE of the unmaintained deps are direct project dependencies.
+# - coloredlogs + humanfriendly are resolved by upgrading onnxruntime (already
+#   done in the venv; lock file needs regeneration to reflect this).
+# - The remaining packages are mature/stable libraries that happen to have
+#   slow release cadences. They are pulled in by chromadb, textual, or rich
+#   and cannot be independently replaced or upgraded.
+# - No security vulnerabilities are known in any of these packages.
+# - Action: regenerate lock file after next `pip install` to drop coloredlogs
+#   and humanfriendly. All others require upstream changes by chromadb,
+#   textual, or their sub-dependencies.
+# ============================================================================
+
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
 aiohttp-jinja2==1.6

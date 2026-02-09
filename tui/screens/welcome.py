@@ -3,14 +3,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
-from textual.containers import Center, Container, Horizontal, Vertical
+from textual.binding import Binding
+from textual.containers import Center, Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Static
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 SPLASH_LOGO = """\
@@ -71,7 +73,7 @@ class WelcomeScreen(Screen):
     }
     """
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("enter", "go_dashboard", "Dashboard"),
         ("ctrl+k", "app.command_palette", "Commands"),
         ("escape", "app.quit", "Quit"),
@@ -79,36 +81,38 @@ class WelcomeScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
-        with Center():
-            with Container(id="welcome-container"):
-                yield Static(SPLASH_LOGO, id="welcome-logo")
-                yield Static(id="welcome-version")
-                with Horizontal(id="welcome-actions"):
-                    yield Button(
-                        "Fleet Dashboard",
-                        variant="primary",
-                        id="btn-dashboard",
-                    )
-                    yield Button(
-                        "Deploy Agent",
-                        variant="default",
-                        id="btn-agent",
-                    )
-                    yield Button(
-                        "Help",
-                        variant="default",
-                        id="btn-help",
-                    )
-                yield Static(
-                    "[dim]Press Enter or Ctrl+K to begin[/]",
-                    id="welcome-hint",
+        """Build the welcome splash screen layout."""
+        with Center(), Container(id="welcome-container"):
+            yield Static(SPLASH_LOGO, id="welcome-logo")
+            yield Static(id="welcome-version")
+            with Horizontal(id="welcome-actions"):
+                yield Button(
+                    "Fleet Dashboard",
+                    variant="primary",
+                    id="btn-dashboard",
                 )
+                yield Button(
+                    "Deploy Agent",
+                    variant="default",
+                    id="btn-agent",
+                )
+                yield Button(
+                    "Help",
+                    variant="default",
+                    id="btn-help",
+                )
+            yield Static(
+                "[dim]Press Enter or Ctrl+K to begin[/]",
+                id="welcome-hint",
+            )
         yield Footer()
 
     def on_mount(self) -> None:
+        """Display version and fleet statistics."""
         reg = self.euxis_app.fleet_registry
         version = self.query_one("#welcome-version", Static)
         version.update(
@@ -119,6 +123,7 @@ class WelcomeScreen(Screen):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Route button presses to the appropriate action."""
         if event.button.id == "btn-dashboard":
             self.action_go_dashboard()
         elif event.button.id == "btn-agent":
@@ -129,4 +134,5 @@ class WelcomeScreen(Screen):
             self.euxis_app.action_help()
 
     def action_go_dashboard(self) -> None:
+        """Dismiss welcome and show the main dashboard."""
         self.dismiss()

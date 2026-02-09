@@ -1,10 +1,10 @@
 """Tests for subprocess cancellation and cleanup behavior."""
 
-import os
 import shutil
 import subprocess
 import tempfile
 import time
+from pathlib import Path
 
 
 class TestSubprocessCancellation:
@@ -14,7 +14,7 @@ class TestSubprocessCancellation:
         self.temp_dir = tempfile.mkdtemp(prefix="euxis_subprocess_test_")
 
     def teardown_method(self):
-        if os.path.exists(self.temp_dir):
+        if Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
     def test_subprocess_cancellation_cleanup(self):
@@ -52,8 +52,8 @@ class TestSubprocessCancellation:
         """Test handling of subprocess output backpressure."""
         large_output = "x" * 1000000
 
-        script = os.path.join(self.temp_dir, "gen_output.py")
-        with open(script, "w") as f:
+        script = Path(self.temp_dir) / "gen_output.py"
+        with script.open("w") as f:
             f.write(f"print('{'x' * 1000000}')\n")
 
         cmd = ["python3", script]

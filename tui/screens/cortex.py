@@ -6,9 +6,9 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, Input, Static
@@ -18,22 +18,26 @@ from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 
 class CortexScreen(Screen):
     """Browse and interact with the Cortex semantic memory system."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the cortex browser layout."""
         yield ETXHeader(id="header")
         with Container(id="agent-screen"):
             with Horizontal(id="agent-info-bar"):
@@ -51,6 +55,7 @@ class CortexScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and load cortex status."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
@@ -91,13 +96,14 @@ class CortexScreen(Screen):
                 output.write_line(decoded)
 
             await process.wait()
-        except Exception as exc:
+        except (OSError, RuntimeError) as exc:
             output.write_status(f"Error loading cortex: {exc}", "red")
 
         output.write_separator()
         output.write_status("Enter a query to search memory", "dim")
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle query submission and recall from cortex memory."""
         if event.input.id != "cortex-input":
             return
 
@@ -135,8 +141,9 @@ class CortexScreen(Screen):
                 output.write_line(decoded)
 
             await process.wait()
-        except Exception as exc:
+        except (OSError, RuntimeError) as exc:
             output.write_status(f"Error: {exc}", "red")
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

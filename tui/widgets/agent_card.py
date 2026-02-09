@@ -3,13 +3,17 @@
 
 from __future__ import annotations
 
-from textual.app import ComposeResult
+from typing import TYPE_CHECKING, Any
+
+from textual.events import Key
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 
-from tui.core.registry import Agent
+if TYPE_CHECKING:
+    from textual.app import ComposeResult
 
+    from tui.core.registry import Agent
 
 # Provider tier indicators
 TIER_STYLES = {
@@ -60,13 +64,14 @@ class AgentCard(Widget, can_focus=True):
             super().__init__()
             self.agent = agent
 
-    def __init__(self, agent: Agent, **kwargs) -> None:
+    def __init__(self, agent: Agent, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.agent = agent
         if agent.tier == "core":
             self.add_class("tier-core")
 
     def compose(self) -> ComposeResult:
+        """Build the agent card display with tier badge and tags."""
         style, label = TIER_STYLES.get(self.agent.tier, ("dim", "FLEET"))
         icon = ACTIVATION_ICONS.get(self.agent.activation, "●")
 
@@ -85,9 +90,11 @@ class AgentCard(Widget, can_focus=True):
         )
 
     def on_click(self) -> None:
+        """Post selection message on mouse click."""
         self.post_message(self.Selected(self.agent))
 
-    def on_key(self, event) -> None:
+    def on_key(self, event: Key) -> None:
+        """Post selection message on Enter key press."""
         if event.key == "enter":
             self.post_message(self.Selected(self.agent))
             event.stop()

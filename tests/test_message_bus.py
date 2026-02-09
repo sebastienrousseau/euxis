@@ -16,7 +16,7 @@ class TestMessageBusConcurrency:
     def test_producer_consumer_pattern(self):
         """Test producer-consumer pattern with backpressure."""
 
-        def producer(producer_id):
+        def producer(producer_id) -> None:
             for i in range(20):
                 message = f"producer_{producer_id}_msg_{i}"
                 try:
@@ -25,7 +25,7 @@ class TestMessageBusConcurrency:
                 except Full:
                     break
 
-        def consumer():
+        def consumer() -> None:
             while True:
                 try:
                     message = self.message_queue.get(timeout=0.5)
@@ -52,7 +52,7 @@ class TestMessageBusConcurrency:
     def test_multiple_publishers_ordering(self):
         """Test message ordering with multiple publishers."""
 
-        def publisher(publisher_id):
+        def publisher(publisher_id) -> None:
             for i in range(5):
                 message = f"pub_{publisher_id}_msg_{i}"
                 self.message_queue.put(message)

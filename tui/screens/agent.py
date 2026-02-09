@@ -4,32 +4,34 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Footer, Input, Static
 
-from tui.core.registry import Agent
 from tui.core.runner import AgentRun, run_agent
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
+    from tui.core.registry import Agent
 
 
 class AgentScreen(Screen):
     """Screen for executing an agent and viewing streaming output."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("ctrl+k", "app.command_palette", "Commands"),
         ("escape", "go_back", "Back"),
         ("ctrl+l", "clear_output", "Clear"),
     ]
 
-    def __init__(self, agent: Agent, provider: str = "claude", **kwargs) -> None:
+    def __init__(self, agent: Agent, provider: str = "claude", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.agent = agent
         self.provider = provider
@@ -38,9 +40,11 @@ class AgentScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the agent execution screen layout."""
         yield ETXHeader(id="header")
         with Container(id="agent-screen"):
             with Horizontal(id="agent-info-bar"):
@@ -56,6 +60,7 @@ class AgentScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and agent info display."""
         # Set header
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
@@ -89,6 +94,7 @@ class AgentScreen(Screen):
         output.write_status("Enter a task and press Enter to begin.", "dim")
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle task submission and start agent execution."""
         if event.input.id != "task-input":
             return
 
@@ -147,7 +153,7 @@ class AgentScreen(Screen):
             output.write_status("Execution complete.", "green")
             self.notify("Agent execution complete", severity="information")
 
-        except Exception as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             if self._run:
                 self._run.return_code = 1
             output.write_separator()
@@ -175,7 +181,9 @@ class AgentScreen(Screen):
             elapsed_display.update(f"[green]{self._run.elapsed_display}[/]")
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()
 
     def action_clear_output(self) -> None:
+        """Clear the output panel."""
         self.query_one(OutputPanel).clear()

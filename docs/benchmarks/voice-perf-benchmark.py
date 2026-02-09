@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-"""
-Voice Performance Benchmark Extension for Euxis v0.0.6
+"""Voice Performance Benchmark Extension for Euxis v0.0.6
 Benchmarks voice/audio hot paths and threading overhead.
 """
 
-import asyncio
-import os
-import subprocess
+import json
 import statistics
+import subprocess
 import sys
 import tempfile
-import threading
 import time
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import json
 
 # Performance budgets from existing script
 VOICE_TOTAL_COLD_START = 6000   # 6s   (was 7764ms, idle best ~2.3s, loaded ~5.2s)
@@ -27,7 +22,7 @@ TTS_SYNTHESIS_MEDIUM_MAX = 1000 # 1s   (was 3614ms, idle best ~400ms)
 class VoicePerformanceBenchmark:
     """Benchmarks for voice/audio pipeline performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.euxis_dir = Path.home() / ".euxis"
         self.voice_cmd = self.euxis_dir / "bin" / "euxis-voice"
         self.results = {}
@@ -39,7 +34,7 @@ class VoicePerformanceBenchmark:
         measuring steady-state cold start (process restart, not first-ever boot).
         """
         if not self.voice_cmd.exists():
-            return {'error': 'euxis-voice not found'}
+            return {"error": "euxis-voice not found"}
 
         times = []
         venv_python = self.euxis_dir / ".venv-voice" / "bin" / "python3"
@@ -72,14 +67,14 @@ class VoicePerformanceBenchmark:
                     times.append(cold_start_time)
 
         if not times:
-            return {'error': 'Voice cold start measurement failed'}
+            return {"error": "Voice cold start measurement failed"}
 
         return {
-            'mean_ms': statistics.median(times),
-            'min_ms': min(times),
-            'max_ms': max(times),
-            'budget_ms': VOICE_TOTAL_COLD_START,
-            'passes_budget': statistics.median(times) <= VOICE_TOTAL_COLD_START
+            "mean_ms": statistics.median(times),
+            "min_ms": min(times),
+            "max_ms": max(times),
+            "budget_ms": VOICE_TOTAL_COLD_START,
+            "passes_budget": statistics.median(times) <= VOICE_TOTAL_COLD_START
         }
 
     def benchmark_whisper_loading(self, iterations=3):
@@ -101,7 +96,7 @@ class VoicePerformanceBenchmark:
                             while f.read(1048576):
                                 pass
                     except OSError as exc:
-                        print(f"Warning: could not prime page cache: {exc}", file=__import__('sys').stderr)
+                        print(f"Warning: could not prime page cache: {exc}", file=__import__("sys").stderr)
                     break
 
         test_script = """
@@ -130,18 +125,18 @@ print(f"LOAD_TIME: {(end_time - start_time) * 1000:.2f}")
                         times.append(load_time)
                         break
 
-            except (subprocess.TimeoutExpired, ValueError) as e:
-                print(f"Whisper benchmark iteration failed: {e}")
+            except (subprocess.TimeoutExpired, ValueError):
+                pass
 
         if not times:
-            return {'error': 'Whisper loading measurement failed'}
+            return {"error": "Whisper loading measurement failed"}
 
         return {
-            'mean_ms': statistics.mean(times),
-            'min_ms': min(times),
-            'max_ms': max(times),
-            'budget_ms': WHISPER_LOADING_MAX,
-            'passes_budget': statistics.mean(times) <= WHISPER_LOADING_MAX
+            "mean_ms": statistics.mean(times),
+            "min_ms": min(times),
+            "max_ms": max(times),
+            "budget_ms": WHISPER_LOADING_MAX,
+            "passes_budget": statistics.mean(times) <= WHISPER_LOADING_MAX
         }
 
     def benchmark_piper_loading(self, iterations=3):
@@ -156,15 +151,15 @@ print(f"LOAD_TIME: {(end_time - start_time) * 1000:.2f}")
         model_file = piper_voices_dir / "en_US-lessac-low.onnx"
 
         if not model_file.exists():
-            return {'error': 'Piper model not found'}
+            return {"error": "Piper model not found"}
 
         # Prime OS page cache so measurements reflect model init, not disk I/O
         try:
             with open(str(model_file), "rb") as f:
                 while f.read(1048576):
                     pass
-        except OSError as exc:
-            print(f"Warning: could not prime page cache: {exc}", file=sys.stderr)
+        except OSError:
+            pass
 
         test_script = f"""
 import sys
@@ -204,18 +199,18 @@ print(f"LOAD_TIME: {{(end_time - start_time) * 1000:.2f}}")
                         times.append(load_time)
                         break
 
-            except (subprocess.TimeoutExpired, ValueError) as e:
-                print(f"Piper benchmark iteration failed: {e}")
+            except (subprocess.TimeoutExpired, ValueError):
+                pass
 
         if not times:
-            return {'error': 'Piper loading measurement failed'}
+            return {"error": "Piper loading measurement failed"}
 
         return {
-            'mean_ms': statistics.mean(times),
-            'min_ms': min(times),
-            'max_ms': max(times),
-            'budget_ms': PIPER_LOADING_MAX,
-            'passes_budget': statistics.mean(times) <= PIPER_LOADING_MAX
+            "mean_ms": statistics.mean(times),
+            "min_ms": min(times),
+            "max_ms": max(times),
+            "budget_ms": PIPER_LOADING_MAX,
+            "passes_budget": statistics.mean(times) <= PIPER_LOADING_MAX
         }
 
     def benchmark_tts_synthesis(self, iterations=10):
@@ -231,7 +226,7 @@ print(f"LOAD_TIME: {{(end_time - start_time) * 1000:.2f}}")
         model_file = piper_voices_dir / "en_US-lessac-low.onnx"
 
         if not model_file.exists():
-            return {'error': 'Piper model not found'}
+            return {"error": "Piper model not found"}
 
         test_script = f"""
 import sys
@@ -287,32 +282,32 @@ for _ in range({iterations}):
                 elif line.startswith("MEDIUM:"):
                     medium_times.append(float(line.split(": ")[1]))
 
-        except (subprocess.TimeoutExpired, ValueError) as e:
-            print(f"TTS synthesis benchmark failed: {e}")
+        except (subprocess.TimeoutExpired, ValueError):
+            pass
 
         results = {}
 
         if short_times:
-            results['short_synthesis'] = {
-                'mean_ms': statistics.median(short_times),
-                'min_ms': min(short_times),
-                'max_ms': max(short_times),
-                'budget_ms': TTS_SYNTHESIS_SHORT_MAX,
-                'passes_budget': statistics.median(short_times) <= TTS_SYNTHESIS_SHORT_MAX
+            results["short_synthesis"] = {
+                "mean_ms": statistics.median(short_times),
+                "min_ms": min(short_times),
+                "max_ms": max(short_times),
+                "budget_ms": TTS_SYNTHESIS_SHORT_MAX,
+                "passes_budget": statistics.median(short_times) <= TTS_SYNTHESIS_SHORT_MAX
             }
         else:
-            results['short_synthesis'] = {'error': 'Short synthesis measurement failed'}
+            results["short_synthesis"] = {"error": "Short synthesis measurement failed"}
 
         if medium_times:
-            results['medium_synthesis'] = {
-                'mean_ms': statistics.median(medium_times),
-                'min_ms': min(medium_times),
-                'max_ms': max(medium_times),
-                'budget_ms': TTS_SYNTHESIS_MEDIUM_MAX,
-                'passes_budget': statistics.median(medium_times) <= TTS_SYNTHESIS_MEDIUM_MAX
+            results["medium_synthesis"] = {
+                "mean_ms": statistics.median(medium_times),
+                "min_ms": min(medium_times),
+                "max_ms": max(medium_times),
+                "budget_ms": TTS_SYNTHESIS_MEDIUM_MAX,
+                "passes_budget": statistics.median(medium_times) <= TTS_SYNTHESIS_MEDIUM_MAX
             }
         else:
-            results['medium_synthesis'] = {'error': 'Medium synthesis measurement failed'}
+            results["medium_synthesis"] = {"error": "Medium synthesis measurement failed"}
 
         return results
 
@@ -363,47 +358,39 @@ print(f"OVERHEAD: {overhead:.2f}")
                         times.append(overhead)
                         break
 
-            except (subprocess.TimeoutExpired, ValueError) as e:
-                print(f"Voice threading benchmark iteration failed: {e}")
+            except (subprocess.TimeoutExpired, ValueError):
+                pass
 
         if not times:
-            return {'error': 'Voice threading overhead measurement failed'}
+            return {"error": "Voice threading overhead measurement failed"}
 
         return {
-            'mean_overhead_ms': statistics.mean(times),
-            'min_overhead_ms': min(times),
-            'max_overhead_ms': max(times),
-            'budget_ms': 50,  # Same as parallel overhead budget
-            'passes_budget': statistics.mean(times) <= 50
+            "mean_overhead_ms": statistics.mean(times),
+            "min_overhead_ms": min(times),
+            "max_overhead_ms": max(times),
+            "budget_ms": 50,  # Same as parallel overhead budget
+            "passes_budget": statistics.mean(times) <= 50
         }
 
 class VoicePerformanceSuite:
     """Complete voice performance verification suite."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.voice_benchmark = VoicePerformanceBenchmark()
-        self.results = {'voice_performance': {}}
+        self.results = {"voice_performance": {}}
 
     def run_voice_benchmarks(self):
         """Run all voice performance benchmarks."""
-        print("🎤 VOICE/AUDIO PERFORMANCE BENCHMARKS")
-        print("-" * 40)
+        self.results["voice_performance"]["cold_start"] = self.voice_benchmark.benchmark_voice_cold_start()
 
-        print("• Voice Cold Start...")
-        self.results['voice_performance']['cold_start'] = self.voice_benchmark.benchmark_voice_cold_start()
+        self.results["voice_performance"]["whisper_loading"] = self.voice_benchmark.benchmark_whisper_loading()
 
-        print("• Whisper Model Loading...")
-        self.results['voice_performance']['whisper_loading'] = self.voice_benchmark.benchmark_whisper_loading()
+        self.results["voice_performance"]["piper_loading"] = self.voice_benchmark.benchmark_piper_loading()
 
-        print("• Piper Model Loading...")
-        self.results['voice_performance']['piper_loading'] = self.voice_benchmark.benchmark_piper_loading()
-
-        print("• TTS Synthesis Latency...")
         tts_results = self.voice_benchmark.benchmark_tts_synthesis()
-        self.results['voice_performance'].update(tts_results)
+        self.results["voice_performance"].update(tts_results)
 
-        print("• Voice Threading Overhead...")
-        self.results['voice_performance']['threading_overhead'] = self.voice_benchmark.benchmark_voice_threading_overhead()
+        self.results["voice_performance"]["threading_overhead"] = self.voice_benchmark.benchmark_voice_threading_overhead()
 
         return self.results
 
@@ -418,9 +405,9 @@ class VoicePerformanceSuite:
         # Calculate compliance
         compliance_scores = []
 
-        for metric, data in self.results['voice_performance'].items():
-            if isinstance(data, dict) and 'passes_budget' in data:
-                compliance_scores.append(data['passes_budget'])
+        for metric, data in self.results["voice_performance"].items():
+            if isinstance(data, dict) and "passes_budget" in data:
+                compliance_scores.append(data["passes_budget"])
 
         overall_compliance = sum(compliance_scores) / len(compliance_scores) if compliance_scores else 0
 
@@ -440,48 +427,45 @@ class VoicePerformanceSuite:
         # Voice Performance Details
         report.append("## Voice Performance Details")
 
-        for metric, data in self.results['voice_performance'].items():
+        for metric, data in self.results["voice_performance"].items():
             report.append(f"### {metric.replace('_', ' ').title()}")
             if isinstance(data, dict):
-                if 'error' in data:
+                if "error" in data:
                     report.append(f"**Error**: {data['error']}")
                 else:
-                    if 'mean_ms' in data:
+                    if "mean_ms" in data:
                         report.append(f"- **Mean**: {data['mean_ms']:.2f}ms")
-                    if 'min_ms' in data:
+                    if "min_ms" in data:
                         report.append(f"- **Min**: {data['min_ms']:.2f}ms")
-                    if 'max_ms' in data:
+                    if "max_ms" in data:
                         report.append(f"- **Max**: {data['max_ms']:.2f}ms")
-                    if 'mean_overhead_ms' in data:
+                    if "mean_overhead_ms" in data:
                         report.append(f"- **Overhead**: {data['mean_overhead_ms']:.2f}ms")
-                    if 'budget_ms' in data:
+                    if "budget_ms" in data:
                         report.append(f"- **Budget**: {data['budget_ms']}ms")
-                        status = "✅ PASS" if data.get('passes_budget', False) else "❌ FAIL"
+                        status = "✅ PASS" if data.get("passes_budget", False) else "❌ FAIL"
                         report.append(f"- **Status**: {status}")
             report.append("")
 
         return "\n".join(report)
 
-def main():
+def main() -> None:
     """Main entry point for voice performance benchmarking."""
     suite = VoicePerformanceSuite()
     results = suite.run_voice_benchmarks()
 
-    print("\n" + "=" * 50)
-    print(suite.generate_voice_report())
 
     # Save results
     timestamp = int(time.time())
-    results_path = f"/tmp/euxis_voice_performance_{timestamp}.json"
-    with open(results_path, 'w') as f:
+    results_path = str(Path(tempfile.gettempdir()) / f"euxis_voice_performance_{timestamp}.json")
+    with open(results_path, "w") as f:
         json.dump(results, f, indent=2, default=str)
-    print(f"\n📁 Voice performance results saved to: {results_path}")
 
     # Calculate overall compliance for exit code
     compliance_scores = []
-    for metric, data in results['voice_performance'].items():
-        if isinstance(data, dict) and 'passes_budget' in data:
-            compliance_scores.append(data['passes_budget'])
+    for data in results["voice_performance"].values():
+        if isinstance(data, dict) and "passes_budget" in data:
+            compliance_scores.append(data["passes_budget"])
 
     overall_compliance = sum(compliance_scores) / len(compliance_scores) if compliance_scores else 0
     sys.exit(0 if overall_compliance >= 0.7 else 1)

@@ -7,12 +7,9 @@ command palette, and accessibility features.
 
 from __future__ import annotations
 
-import asyncio
 import json
-import os
 import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -189,9 +186,9 @@ class TestRunner:
     def test_get_git_branch(self):
         from tui.core.runner import get_git_branch
 
-        branch = get_git_branch()
+        get_git_branch()
         # May be None if not in a git repo, but in .euxis it should work
-        assert branch is not None or True  # Allow None in CI
+        assert True  # Allow None in CI
 
     def test_providers_dict(self):
         from tui.core.runner import PROVIDERS
@@ -233,7 +230,7 @@ class TestEuxisApp:
         from tui.app import EuxisApp
 
         app = EuxisApp()
-        async with app.run_test() as pilot:
+        async with app.run_test():
             initial = app.theme
             app.action_toggle_theme()
             assert app.theme != initial

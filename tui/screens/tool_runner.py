@@ -6,9 +6,9 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container
 from textual.screen import Screen
 from textual.widgets import Footer, Static
@@ -17,6 +17,8 @@ from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 EUXIS_HOME = Path.home() / ".euxis"
@@ -25,21 +27,23 @@ EUXIS_HOME = Path.home() / ".euxis"
 class ToolRunnerScreen(Screen):
     """Run an euxis CLI tool and stream output."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+l", "clear_output", "Clear"),
     ]
 
-    def __init__(self, tool_name: str, tool_label: str = "", **kwargs) -> None:
+    def __init__(self, tool_name: str, tool_label: str = "", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.tool_name = tool_name
         self.tool_label = tool_label or tool_name
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the tool runner layout."""
         yield ETXHeader(id="header")
         with Container(id="agent-screen"):
             yield Static(id="tool-title")
@@ -47,6 +51,7 @@ class ToolRunnerScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and start tool execution."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
@@ -101,7 +106,9 @@ class ToolRunnerScreen(Screen):
             self.notify(f"{self.tool_label} failed", severity="error")
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()
 
     def action_clear_output(self) -> None:
+        """Clear the output panel."""
         self.query_one(OutputPanel).clear()

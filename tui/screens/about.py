@@ -5,16 +5,18 @@ from __future__ import annotations
 
 import platform
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
-from textual.containers import Center, Container, VerticalScroll
+from textual.binding import Binding
+from textual.containers import Center, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Footer, Static
 
 from tui.widgets.header import ETXHeader
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 EUXIS_LOGO = """\
@@ -32,16 +34,18 @@ EUXIS_LOGO = """\
 class AboutScreen(Screen):
     """About screen with system info and version details."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("q", "go_back", "Close"),
     ]
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the about screen layout."""
         yield ETXHeader(id="header")
         with VerticalScroll():
             with Center():
@@ -50,6 +54,7 @@ class AboutScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Populate system information display on mount."""
         header = self.query_one(ETXHeader)
         header.project = "About"
 
@@ -75,4 +80,5 @@ class AboutScreen(Screen):
         )
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

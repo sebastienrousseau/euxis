@@ -3,20 +3,21 @@
 
 from __future__ import annotations
 
-import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.css.query import NoMatches
 from textual.screen import Screen
 from textual.widgets import Footer, ProgressBar, Static
 
-from tui.core.runner import run_squad, run_combo
+from tui.core.runner import run_combo, run_squad
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
 
 
@@ -34,12 +35,13 @@ class AgentMonitorRow(Horizontal):
     }
     """
 
-    def __init__(self, agent_id: str, **kwargs) -> None:
+    def __init__(self, agent_id: str, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.agent_id = agent_id
         self._status = "pending"
 
     def compose(self) -> ComposeResult:
+        """Build the agent monitor row layout."""
         yield Static(
             f"[bold]{self.agent_id}[/]",
             classes="monitor-agent-name",
@@ -48,6 +50,7 @@ class AgentMonitorRow(Horizontal):
         yield Static("[dim]Pending[/]", classes="monitor-agent-status")
 
     def set_status(self, status: str, progress: int = 0) -> None:
+        """Update the agent status indicator and progress bar."""
         self._status = status
         status_widget = self.query(".monitor-agent-status").first(Static)
         progress_bar = self.query_one(ProgressBar)
@@ -68,7 +71,7 @@ class AgentMonitorRow(Horizontal):
 class FleetMonitorScreen(Screen):
     """Monitor screen for squad deployments and dispatch operations."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
@@ -79,7 +82,7 @@ class FleetMonitorScreen(Screen):
         operation_id: str = "",
         members: list[str] | None = None,
         task: str = "",
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.operation_type = operation_type
@@ -89,9 +92,11 @@ class FleetMonitorScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the fleet monitor layout."""
         yield ETXHeader(id="header")
         with Container(id="fleet-monitor"):
             with Horizontal(id="monitor-header"):
@@ -105,6 +110,7 @@ class FleetMonitorScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header and build agent monitor rows."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""
@@ -158,7 +164,7 @@ class FleetMonitorScreen(Screen):
             output.write_status("Operation complete.", "green")
             self.notify("Fleet operation complete", severity="information")
 
-        except Exception as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             output.write_status(f"Error: {exc}", "red")
             self.notify(f"Fleet error: {exc}", severity="error")
 
@@ -170,4 +176,5 @@ class FleetMonitorScreen(Screen):
             pass  # Agent not in monitor grid
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

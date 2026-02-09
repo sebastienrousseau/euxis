@@ -1,8 +1,8 @@
 """Tests for prevention of race conditions in shared resources."""
 
-import os
 import tempfile
 import threading
+from pathlib import Path
 
 
 class TestRaceConditionPrevention:
@@ -17,7 +17,7 @@ class TestRaceConditionPrevention:
         """Test that proper locking prevents counter race conditions."""
         iterations = 1000
 
-        def increment_counter():
+        def increment_counter() -> None:
             for _ in range(iterations):
                 with self.lock:
                     self.shared_counter += 1
@@ -37,7 +37,7 @@ class TestRaceConditionPrevention:
     def test_dictionary_race_condition_with_lock(self):
         """Test that proper locking prevents dictionary race conditions."""
 
-        def worker(worker_id):
+        def worker(worker_id) -> None:
             for i in range(100):
                 key = f"worker_{worker_id}_item_{i}"
                 with self.lock:
@@ -60,15 +60,14 @@ class TestRaceConditionPrevention:
 
     def test_file_write_race_condition_prevention(self):
         """Test prevention of race conditions in concurrent file writes."""
-        temp_file = os.path.join(tempfile.gettempdir(), "race_test.txt")
+        temp_file = Path(tempfile.gettempdir()) / "race_test.txt"
         file_lock = threading.Lock()
 
-        def write_to_file(writer_id):
+        def write_to_file(writer_id) -> None:
             for i in range(10):
                 line = f"writer_{writer_id}_line_{i}\n"
-                with file_lock:
-                    with open(temp_file, "a") as f:
-                        f.write(line)
+                with file_lock, temp_file.open("a") as f:
+                    f.write(line)
 
         try:
             threads = []
@@ -80,7 +79,7 @@ class TestRaceConditionPrevention:
             for thread in threads:
                 thread.join()
 
-            with open(temp_file) as f:
+            with temp_file.open() as f:
                 lines = f.readlines()
 
             assert len(lines) == 50
@@ -90,5 +89,5 @@ class TestRaceConditionPrevention:
                 assert line.endswith("_line_" + line.split("_line_")[1])
 
         finally:
-            if os.path.exists(temp_file):
-                os.remove(temp_file)
+            if temp_file.exists():
+                temp_file.unlink()

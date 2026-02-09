@@ -24,5 +24,18 @@ tmp/
 internal_manifest.json
 edge-hunter-fixes.json
 
+# Secrets and credentials (never commit)
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+config.ini
+secrets.yaml
+secrets.yml
+*.secret
+
 # Override global gitignore that excludes /bin/ (Rust/Go convention)
 !bin/

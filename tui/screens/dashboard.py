@@ -3,25 +3,27 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.screen import Screen
-from textual.widgets import Footer, Static
+from textual.widgets import Footer
 
-from tui.widgets.agent_card import AgentCard
 from tui.widgets.fleet_grid import FleetGrid
 from tui.widgets.header import ETXHeader
 
 if TYPE_CHECKING:
+    from textual.app import ComposeResult
+
     from tui.app import EuxisApp
+    from tui.widgets.agent_card import AgentCard
 
 
 class DashboardScreen(Screen):
     """Main dashboard displaying the agent fleet grid."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("ctrl+k", "app.command_palette", "Commands"),
         ("slash", "focus_search", "Search"),
         ("f1", "app.action_help", "Help"),
@@ -30,14 +32,17 @@ class DashboardScreen(Screen):
 
     @property
     def euxis_app(self) -> EuxisApp:
+        """Return the typed application instance."""
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
+        """Build the dashboard layout with header, fleet grid, and footer."""
         yield ETXHeader(id="header")
         yield FleetGrid(self.euxis_app.fleet_registry, id="fleet-grid")
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header with project context and announce for accessibility."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
         header.branch = self.euxis_app.git_branch or ""

@@ -3,29 +3,40 @@
 
 from __future__ import annotations
 
+import math
+from typing import Any
+
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Static
 
 SPARK_CHARS = "▁▂▃▄▅▆▇█"
+
+_MAX_SPARKLINE_VALUES = 100
 
 
 def sparkline_text(values: list[float], width: int = 20) -> str:
     """Generate a sparkline string from values."""
-    if not values:
+    if not values or width <= 0:
         return ""
 
     # Normalize to fit the spark character range
     min_val = min(values)
     max_val = max(values)
-    val_range = max_val - min_val if max_val != min_val else 1
+    val_range = max_val - min_val
 
     # Take the last `width` values
     recent = values[-width:]
 
+    # Guard against overflow (extreme floats) or zero range
+    if not math.isfinite(val_range) or val_range == 0:
+        return SPARK_CHARS[0] * len(recent)
+
     chars = []
     for v in recent:
         normalized = (v - min_val) / val_range
+        if not math.isfinite(normalized):
+            normalized = 0.0
+        normalized = max(0.0, min(1.0, normalized))
         idx = min(int(normalized * (len(SPARK_CHARS) - 1)), len(SPARK_CHARS) - 1)
         chars.append(SPARK_CHARS[idx])
 
@@ -45,12 +56,13 @@ class Sparkline(Widget):
     values: reactive[list[float]] = reactive(list, always_update=True)
     label: reactive[str] = reactive("")
 
-    def __init__(self, label: str = "", **kwargs) -> None:
+    def __init__(self, label: str = "", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.label = label
         self._values: list[float] = []
 
     def render(self) -> str:
+        """Render the sparkline as a text string."""
         spark = sparkline_text(self._values, width=30)
         if self.label:
             return f"{self.label}: {spark}"
@@ -59,7 +71,7 @@ class Sparkline(Widget):
     def add_value(self, value: float) -> None:
         """Add a new data point."""
         self._values.append(value)
-        # Keep last 100 values
-        if len(self._values) > 100:
-            self._values = self._values[-100:]
+        # Keep last N values
+        if len(self._values) > _MAX_SPARKLINE_VALUES:
+            self._values = self._values[-_MAX_SPARKLINE_VALUES:]
         self.refresh()

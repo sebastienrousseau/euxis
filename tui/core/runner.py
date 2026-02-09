@@ -9,8 +9,10 @@ import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import AsyncIterator
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 EUXIS_HOME = Path.home() / ".euxis"
 
@@ -31,6 +33,8 @@ _SAFE_ID = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]{0,63}$")
 
 DEFAULT_PROVIDER = "claude"
 
+_SECONDS_PER_MINUTE = 60
+
 
 @dataclass
 class AgentRun:
@@ -46,30 +50,35 @@ class AgentRun:
 
     @property
     def is_running(self) -> bool:
+        """Return whether the agent is still executing."""
         return self.return_code is None
 
     @property
     def elapsed(self) -> float:
+        """Return seconds since execution started."""
         return time.time() - self.started_at
 
     @property
     def elapsed_display(self) -> str:
+        """Return human-readable elapsed time string."""
         s = int(self.elapsed)
-        if s < 60:
+        if s < _SECONDS_PER_MINUTE:
             return f"{s}s"
-        return f"{s // 60}m {s % 60}s"
+        return f"{s // _SECONDS_PER_MINUTE}m {s % _SECONDS_PER_MINUTE}s"
 
 
 def _validate_id(value: str, label: str) -> None:
     """Validate an identifier against the safe pattern."""
     if not _SAFE_ID.match(value):
-        raise ValueError(f"Invalid {label}: {value!r}")
+        msg = f"Invalid {label}: {value!r}"
+        raise ValueError(msg)
 
 
 def _validate_provider(provider: str) -> None:
     """Validate provider against known list."""
     if provider not in PROVIDERS:
-        raise ValueError(f"Unknown provider: {provider!r}")
+        msg = f"Unknown provider: {provider!r}"
+        raise ValueError(msg)
 
 
 async def run_agent(
@@ -95,7 +104,7 @@ async def run_agent(
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
-        cwd=working_dir or os.getcwd(),
+        cwd=working_dir or str(Path.cwd()),
         env=env,
     )
 
@@ -132,7 +141,7 @@ async def run_squad(
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
-        cwd=working_dir or os.getcwd(),
+        cwd=working_dir or str(Path.cwd()),
         env=env,
     )
 
@@ -169,7 +178,7 @@ async def run_combo(
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
-        cwd=working_dir or os.getcwd(),
+        cwd=working_dir or str(Path.cwd()),
         env=env,
     )
 
@@ -187,13 +196,13 @@ async def run_combo(
 
 def get_project_name(working_dir: str | None = None) -> str:
     """Get the current project name from directory."""
-    cwd = Path(working_dir or os.getcwd())
+    cwd = Path(working_dir or str(Path.cwd()))
     return cwd.name
 
 
 def get_git_branch(working_dir: str | None = None) -> str | None:
     """Get the current git branch."""
-    cwd = Path(working_dir or os.getcwd())
+    cwd = Path(working_dir or str(Path.cwd()))
     head = cwd / ".git" / "HEAD"
     if head.exists():
         content = head.read_text().strip()

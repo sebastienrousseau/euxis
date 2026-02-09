@@ -3,12 +3,17 @@
 
 from __future__ import annotations
 
-from textual.app import ComposeResult
-from textual.containers import Container, VerticalScroll
+from typing import TYPE_CHECKING, ClassVar
+
+from textual.binding import Binding
+from textual.containers import VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Footer, Markdown, Static
+from textual.widgets import Footer, Markdown
 
 from tui.widgets.header import ETXHeader
+
+if TYPE_CHECKING:
+    from textual.app import ComposeResult
 
 HELP_CONTENT = """\
 # ETX Keyboard Reference
@@ -90,10 +95,10 @@ HELP_CONTENT = """\
 
 | Squad | Purpose | Members |
 |-------|---------|---------|
-| Vision | Strategy & Discovery | orchestrator, architect, planner, researcher, historian, accountant |
-| Build | Engineering & Execution | debugger, maintainer, automaton, tester, investigator, repairer |
-| Quality | Assurance & Security | reviewer, inspector, pentester, auditor, optimizer, watchdog, polyglot, arbiter |
-| Growth | Branding & Documentation | writer, evangelist, strategist, ambassador, marketer, localizer |
+| Vision | Strategy & Discovery | orchestrator, architect, planner, researcher |
+| Build | Engineering & Execution | debugger, maintainer, automaton, tester |
+| Quality | Assurance & Security | reviewer, inspector, pentester, auditor |
+| Growth | Branding & Documentation | writer, evangelist, strategist, ambassador |
 | Experience | UI Excellence | designer, tactician, animator, interactor |
 | Specialist | Domain Expertise | cryptographer, ledger, conduit, custodian |
 
@@ -113,20 +118,23 @@ HELP_CONTENT = """\
 class HelpScreen(Screen):
     """Comprehensive help and keyboard shortcut reference."""
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         ("escape", "go_back", "Back"),
         ("q", "go_back", "Close"),
     ]
 
     def compose(self) -> ComposeResult:
+        """Build the help screen layout."""
         yield ETXHeader(id="header")
         with VerticalScroll():
             yield Markdown(HELP_CONTENT, id="help-content")
         yield Footer()
 
     def on_mount(self) -> None:
+        """Configure header for help screen."""
         header = self.query_one(ETXHeader)
         header.project = "Help"
 
     def action_go_back(self) -> None:
+        """Return to the previous screen."""
         self.app.pop_screen()

@@ -8,7 +8,7 @@ command palette, and streaming agent execution.
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import Any, ClassVar
 
 from textual.app import App, InvalidThemeError
 from textual.binding import Binding
@@ -32,9 +32,11 @@ class EuxisApp(App):
 
     CSS_PATH = "etx.tcss"
 
-    COMMANDS = {AgentCommandProvider, SquadCommandProvider, SystemCommandProvider}
+    COMMANDS: ClassVar[set[type]] = {
+        AgentCommandProvider, SquadCommandProvider, SystemCommandProvider,
+    }
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[Binding]] = [
         Binding("ctrl+k", "command_palette", "Commands", show=True, priority=True),
         Binding("ctrl+q", "quit", "Quit", show=True),
         Binding("ctrl+t", "toggle_theme", "Theme", show=True),
@@ -46,7 +48,7 @@ class EuxisApp(App):
         Binding("f5", "refresh", "Refresh"),
     ]
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.config = ETXConfig.load()
         self.fleet_registry = FleetRegistry.load()
@@ -54,6 +56,7 @@ class EuxisApp(App):
         self.git_branch = get_git_branch()
 
     def on_mount(self) -> None:
+        """Handle application mount and apply saved configuration."""
         # Apply saved theme
         if self.config.theme:
             try:

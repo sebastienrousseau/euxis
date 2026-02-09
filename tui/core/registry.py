@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
-
 EUXIS_HOME = Path.home() / ".euxis"
 
 
@@ -36,10 +35,12 @@ class Agent:
 
     @property
     def tier_label(self) -> str:
+        """Return human-readable tier label."""
         return self.TIER_LABELS.get(self.tier, self.tier.upper())
 
     @property
     def activation_label(self) -> str:
+        """Return human-readable activation label."""
         return self.ACTIVATION_LABELS.get(self.activation, self.activation)
 
 
@@ -105,6 +106,9 @@ class FleetRegistry:
 
     def _parse_agents(self, data: dict[str, Any]) -> None:
         """Parse agent entries from a dictionary."""
+        if not isinstance(data, dict):
+            msg = f"Expected dict for agent data, got {type(data).__name__}"
+            raise TypeError(msg)
         self.version = data.get("protocol_version", self.version)
         for entry in data.get("agents", []):
             self.agents.append(
@@ -120,6 +124,9 @@ class FleetRegistry:
 
     def _parse_squads(self, data: dict[str, Any]) -> None:
         """Parse squad and combo entries from a dictionary."""
+        if not isinstance(data, dict):
+            msg = f"Expected dict for squad data, got {type(data).__name__}"
+            raise TypeError(msg)
         for entry in data.get("squads", []):
             self.squads.append(
                 Squad(
@@ -140,24 +147,32 @@ class FleetRegistry:
                 )
             )
 
+    def _rebuild_index(self) -> None:
+        """Rebuild the agent lookup index after agents change."""
+        self._agents_by_id: dict[str, Agent] = {a.id: a for a in self.agents}
+
     def get_agent(self, agent_id: str) -> Agent | None:
-        for agent in self.agents:
-            if agent.id == agent_id:
-                return agent
-        return None
+        """Look up an agent by ID, rebuilding the index if needed."""
+        if not hasattr(self, "_agents_by_id") or len(self._agents_by_id) != len(self.agents):
+            self._rebuild_index()
+        return self._agents_by_id.get(agent_id)
 
     @property
     def core_agents(self) -> list[Agent]:
+        """Return agents with core tier designation."""
         return [a for a in self.agents if a.tier == "core"]
 
     @property
     def default_agents(self) -> list[Agent]:
+        """Return non-core agents with default activation."""
         return [a for a in self.agents if a.activation == "default" and a.tier != "core"]
 
     @property
     def ondemand_agents(self) -> list[Agent]:
+        """Return agents with on-demand activation."""
         return [a for a in self.agents if a.activation == "on-demand"]
 
     @property
     def specialist_agents(self) -> list[Agent]:
+        """Return agents with specialist activation."""
         return [a for a in self.agents if a.activation == "specialist"]
