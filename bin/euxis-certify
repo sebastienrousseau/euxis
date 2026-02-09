@@ -513,7 +513,7 @@ for doc in docs/user-guide.md docs/fleet-guide.md; do
 done
 
 # 6f. Registry, squads, and codex manifests are valid JSON
-MANIFESTS=("registry.json" "squads.json" "capabilities.json" "config/codex/codex.json")
+MANIFESTS=("registry.json" "squads.json" "config/capabilities.json" "config/codex/codex.json")
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
     echo "  Validating JSON manifest files..."
     for manifest in "${MANIFESTS[@]}"; do
@@ -538,7 +538,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
                             ((DOC_FAILURES++))
                         fi
                         ;;
-                    "capabilities.json")
+                    "config/capabilities.json")
                         if ! jq -e 'type == "object"' "$MANIFEST_PATH" &>/dev/null; then
                             echo "  FAIL: $manifest should be a JSON object."
                             ((DOC_FAILURES++))
