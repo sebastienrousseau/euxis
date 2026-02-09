@@ -111,6 +111,9 @@ class SystemCommandProvider(Provider):
         ("Help", "Open keyboard shortcut reference", "help"),
         ("About", "View system information and version", "about"),
         ("Playbooks", "Browse and inspect playbooks", "playbooks"),
+        ("Metrics", "View performance metrics dashboard", "metrics"),
+        ("Cortex Memory", "Browse semantic memory system", "cortex"),
+        ("Squad & Combo Details", "View squad compositions and combo chains", "squad_detail"),
         ("Refresh", "Reload fleet registry", "refresh"),
     ]
 

@@ -169,6 +169,18 @@ class EuxisApp(App):
 
         self.push_screen(CortexScreen())
 
+    def action_open_metrics(self) -> None:
+        """Open the performance metrics dashboard."""
+        from tui.screens.metrics import MetricsScreen
+
+        self.push_screen(MetricsScreen())
+
+    def action_open_squad_detail(self) -> None:
+        """Open the squad and combo detail view."""
+        from tui.screens.squad_detail import SquadDetailScreen
+
+        self.push_screen(SquadDetailScreen())
+
     def action_help(self) -> None:
         """Open the help screen."""
         from tui.screens.help import HelpScreen
@@ -228,6 +240,15 @@ class EuxisApp(App):
 
         elif command == "playbooks":
             self.action_open_playbooks()
+
+        elif command == "metrics":
+            self.action_open_metrics()
+
+        elif command == "cortex":
+            self.action_open_cortex()
+
+        elif command == "squad_detail":
+            self.action_open_squad_detail()
 
         elif command == "refresh":
             self.action_refresh()
