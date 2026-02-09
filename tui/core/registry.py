@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 
 EUXIS_HOME = Path.home() / ".euxis"
@@ -75,16 +75,36 @@ class FleetRegistry:
 
     @classmethod
     def load(cls, euxis_home: Path | None = None) -> FleetRegistry:
+        """Load registry from JSON files under euxis_home."""
         home = euxis_home or EUXIS_HOME
         registry = cls()
-        registry._load_agents(home / "registry.json")
-        registry._load_squads(home / "squads.json")
+
+        registry_path = home / "registry.json"
+        if registry_path.exists():
+            registry._parse_agents(json.loads(registry_path.read_text()))
+
+        squads_path = home / "squads.json"
+        if squads_path.exists():
+            registry._parse_squads(json.loads(squads_path.read_text()))
+
         return registry
 
-    def _load_agents(self, path: Path) -> None:
-        if not path.exists():
-            return
-        data = json.loads(path.read_text())
+    @classmethod
+    def from_dicts(
+        cls,
+        agents_data: dict[str, Any] | None = None,
+        squads_data: dict[str, Any] | None = None,
+    ) -> FleetRegistry:
+        """Create a registry from pre-loaded dictionaries (no file I/O)."""
+        registry = cls()
+        if agents_data:
+            registry._parse_agents(agents_data)
+        if squads_data:
+            registry._parse_squads(squads_data)
+        return registry
+
+    def _parse_agents(self, data: dict[str, Any]) -> None:
+        """Parse agent entries from a dictionary."""
         self.version = data.get("protocol_version", self.version)
         for entry in data.get("agents", []):
             self.agents.append(
@@ -98,10 +118,8 @@ class FleetRegistry:
                 )
             )
 
-    def _load_squads(self, path: Path) -> None:
-        if not path.exists():
-            return
-        data = json.loads(path.read_text())
+    def _parse_squads(self, data: dict[str, Any]) -> None:
+        """Parse squad and combo entries from a dictionary."""
         for entry in data.get("squads", []):
             self.squads.append(
                 Squad(

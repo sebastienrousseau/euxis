@@ -27,7 +27,7 @@ PROVIDERS = {
 }
 
 # Pattern for valid identifiers (agent IDs, squad IDs, combo IDs)
-_SAFE_ID = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
+_SAFE_ID = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]{0,63}$")
 
 DEFAULT_PROVIDER = "claude"
 

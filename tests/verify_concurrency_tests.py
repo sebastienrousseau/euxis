@@ -28,9 +28,14 @@ class ConcurrencyTestVerifier:
         self.tests_dir = self.euxis_root / "tests"
         self.results = {}
         self.test_modules = [
-            "test_deterministic_concurrency.py",
+            "test_stage_execution.py",
+            "test_file_locking.py",
+            "test_subprocess_cancel.py",
+            "test_async_patterns.py",
+            "test_race_conditions.py",
+            "test_message_bus.py",
             "test_dispatch_integration.py",
-            "test_dispatch_concurrency.sh"  # Existing bash test
+            "test_dispatch_concurrency.sh",
         ]
 
     def run_python_test_module(self, module_path: Path, runs: int = 3) -> Dict[str, Any]:
@@ -232,7 +237,7 @@ class ConcurrencyTestVerifier:
             for i in range(3):  # 3 concurrent pytest processes
                 cmd = [
                     sys.executable, "-m", "pytest",
-                    str(self.tests_dir / "test_deterministic_concurrency.py::TestRaceConditionPrevention"),
+                    str(self.tests_dir / "test_race_conditions.py::TestRaceConditionPrevention"),
                     "-q"
                 ]
                 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

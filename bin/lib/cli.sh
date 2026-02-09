@@ -69,7 +69,7 @@ Environment:
     EUXIS_OLLAMA_MODEL   Ollama model name (default: llama3.2)
 
 EOF
-    exit 1
+    exit 2
 }
 
 # ============================================================================
@@ -91,12 +91,12 @@ parse_args() {
     # Security validation: validate agent name and task input
     if ! validate_agent_name "${AGENT}"; then
         _perf_record "cli_error" "$(_perf_elapsed_ms "${_t_parse}")" "cli" "invalid_agent_name"
-        exit 1
+        exit 2
     fi
 
     if ! validate_task_input "${TASK}"; then
         _perf_record "cli_error" "$(_perf_elapsed_ms "${_t_parse}")" "cli" "invalid_task_input"
-        exit 1
+        exit 2
     fi
 
     local prompt_file
@@ -179,9 +179,14 @@ show_context() {
     branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "no-git")
     relative_path=".${PWD#"$repo_root"}"
 
-    local CYAN='\033[0;36m'
-    local YELLOW='\033[1;33m'
-    local NC='\033[0m'
+    local CYAN YELLOW NC
+    if [[ -n "${NO_COLOR:-}" ]]; then
+        CYAN='' YELLOW='' NC=''
+    else
+        CYAN='\033[0;36m'
+        YELLOW='\033[1;33m'
+        NC='\033[0m'
+    fi
 
     echo -e "Scope: ${CYAN}${repo_root##*/}${NC}/${relative_path}  Branch: ${YELLOW}${branch}${NC}"
     echo "---------------------------------------------------"

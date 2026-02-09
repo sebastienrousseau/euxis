@@ -100,8 +100,8 @@ class VoicePerformanceBenchmark:
                         with open(str(model_bin), "rb") as f:
                             while f.read(1048576):
                                 pass
-                    except OSError:
-                        pass
+                    except OSError as exc:
+                        print(f"Warning: could not prime page cache: {exc}", file=__import__('sys').stderr)
                     break
 
         test_script = """
@@ -163,8 +163,8 @@ print(f"LOAD_TIME: {(end_time - start_time) * 1000:.2f}")
             with open(str(model_file), "rb") as f:
                 while f.read(1048576):
                     pass
-        except OSError:
-            pass
+        except OSError as exc:
+            print(f"Warning: could not prime page cache: {exc}", file=sys.stderr)
 
         test_script = f"""
 import sys

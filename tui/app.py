@@ -58,7 +58,7 @@ class EuxisApp(App):
         if self.config.theme:
             try:
                 self.theme = self.config.theme
-            except Exception:
+            except (ValueError, KeyError):
                 self.theme = "textual-dark"
 
         # Push the dashboard as the default screen
