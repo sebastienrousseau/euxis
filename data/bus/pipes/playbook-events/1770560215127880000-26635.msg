@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 8 (Hardening & Release) completed","timestamp":"2026-02-08T14:16:55Z","correlation_id":"1770560215-22740-28211"}

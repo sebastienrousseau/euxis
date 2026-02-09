@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 0 (Architecture & Idioms) completed","timestamp":"2026-02-08T23:47:32Z","correlation_id":"1770594452-89291-2402"}

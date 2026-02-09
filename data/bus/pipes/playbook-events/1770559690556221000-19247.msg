@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 5 (CI & Automation) completed","timestamp":"2026-02-08T14:08:10Z","correlation_id":"1770559690-79565-29303"}

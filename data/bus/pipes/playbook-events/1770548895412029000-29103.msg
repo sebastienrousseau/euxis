@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 1 (Documentation Verification) completed","timestamp":"2026-02-08T11:08:15Z","correlation_id":"1770548895-17826-9228"}

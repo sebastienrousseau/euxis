@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 1 (Performance & Resources) completed","timestamp":"2026-02-08T23:51:20Z","correlation_id":"1770594680-46729-7135"}

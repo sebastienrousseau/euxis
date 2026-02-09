@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 8 (Hardening & Release) completed","timestamp":"2026-02-09T07:28:04Z","correlation_id":"1770622084-68182-20122"}

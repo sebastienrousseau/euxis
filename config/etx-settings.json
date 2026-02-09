@@ -1,0 +1,10 @@
+{
+  "theme": "textual-dark",
+  "default_provider": "claude",
+  "show_agent_tags": true,
+  "reduced_motion": false,
+  "accessible_mode": false,
+  "grid_columns": 4,
+  "recent_agents": [],
+  "recent_commands": []
+}

@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 4 (Security & Hygiene) completed","timestamp":"2026-02-08T11:22:53Z","correlation_id":"1770549773-57621-7114"}
