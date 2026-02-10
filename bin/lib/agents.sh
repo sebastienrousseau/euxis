@@ -23,7 +23,7 @@ list_agents() {
     for dir in "${PROMPTS_DIR}/core" "${PROMPTS_DIR}/fleet"; do
         for f in "${dir}"/*.txt; do
             [[ -f "${f}" ]] || continue
-            name=$(basename "${f}" .txt)
+            name="${f##*/}"; name="${name%.txt}"
             [[ "${name}" == _* ]] && continue
             echo "    ${name}"
         done
@@ -87,7 +87,7 @@ list_active_agents() {
         [[ -f "${state_file}" ]] || continue
         state=$(< "${state_file}")
         if [[ "${state}" == "active" ]]; then
-            agent=$(basename "${state_file}" .state)
+            agent="${state_file##*/}"; agent="${agent%.state}"
             echo "${agent}"
         fi
     done
@@ -121,7 +121,7 @@ cleanup_stale_agents() {
         age=$(( now - mtime ))
 
         if (( age > timeout_seconds )); then
-            agent=$(basename "${state_file}" .state)
+            agent="${state_file##*/}"; agent="${agent%.state}"
             agent_lifecycle_transition "${agent}" "timeout"
             log_warn "Agent ${agent} timed out after ${age}s (threshold: ${timeout_seconds}s)"
         fi
@@ -192,7 +192,7 @@ list_plugins() {
     local manifest agent_id
     for manifest in "${EUXIS_PLUGINS_DIR}"/*.json; do
         [[ -f "${manifest}" ]] || continue
-        agent_id=$(basename "${manifest}" .json)
+        agent_id="${manifest##*/}"; agent_id="${agent_id%.json}"
         echo "    ${agent_id} (plugin)"
     done
 }
@@ -271,7 +271,7 @@ agent_health_report() {
     for dir in "${PROMPTS_DIR}/core" "${PROMPTS_DIR}/fleet"; do
         for f in "${dir}"/*.txt; do
             [[ -f "${f}" ]] || continue
-            name=$(basename "${f}" .txt)
+            name="${f##*/}"; name="${name%.txt}"
             [[ "${name}" == _* ]] && continue
             (( total++ ))
 

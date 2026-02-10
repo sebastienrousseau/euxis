@@ -5,6 +5,23 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-lint — Static analysis for agent fleet
+
+Usage:
+  euxis-lint
+
+Enforces Protocol v0.0.7 compliance: registry integrity,
+agent count, prompt headers, version alignment, and more.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 FAILURES=0
 

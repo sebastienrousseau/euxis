@@ -2,6 +2,7 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
 """Euxis Voice Interface: Record -> Local STT -> Orchestrator -> Butler -> Local TTS"""
 
+import argparse
 import os
 import sys
 import subprocess
@@ -456,4 +457,9 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="euxis-voice",
+        description="Voice interface: Record -> Local STT -> Orchestrator -> Butler -> Local TTS",
+    )
+    parser.parse_args()
     main()

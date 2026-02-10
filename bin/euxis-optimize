@@ -8,6 +8,23 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-optimize — System-wide tune-up
+
+Usage:
+  euxis-optimize
+
+Runs accuracy baseline, memory GC, prompt compression,
+and architect self-reflection.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 # Ensure ~/bin is in PATH for euxis commands
 export PATH="$PATH:$HOME/bin"
 

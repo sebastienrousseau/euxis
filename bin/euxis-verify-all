@@ -14,6 +14,25 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-verify-all — Canonical verification pipeline
+
+Usage:
+  euxis-verify-all "<goal>" [--dry-run] [--from-gate N]
+
+Runs every verification gate sequentially.
+Uses the playbook engine if available, falls back to direct delegation.
+
+Options:
+  --dry-run       Preview without executing
+  --from-gate N   Start from gate N
+  -h, --help      Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 if [[ -z "${1:-}" ]]; then
   echo "Usage: euxis-verify-all \"<goal>\" [--dry-run] [--from-gate N]" >&2
   exit 1

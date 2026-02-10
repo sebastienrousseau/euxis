@@ -5,6 +5,23 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-daemon — Periodic self-improvement daemon
+
+Usage:
+  euxis-daemon [interval_seconds]
+
+Runs euxis-kaizen on a timer with smart change detection.
+Default interval: 1800 seconds (30 minutes).
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first arg.

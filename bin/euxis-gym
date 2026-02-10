@@ -10,6 +10,26 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-gym — Evaluation framework with A/B testing
+
+Usage:
+  euxis-gym <agent> <test_case_path>
+  euxis-gym --ab <agent> <test_case_path> <provider_a> <provider_b>
+
+Modes:
+  Single eval: Run one agent against a test case and score 0-100
+  A/B testing:  Compare the same agent across two providers
+
+Options:
+  --ab        Enable A/B testing mode
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 MODE="single"
 LOG_FILE="/tmp/euxis_gym_result.md"
 

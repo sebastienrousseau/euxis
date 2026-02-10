@@ -6,6 +6,22 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-ui — Console mission control TUI
+
+Usage:
+  euxis-ui
+
+Interactive terminal UI for managing the Euxis agent fleet.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 # --- CONFIGURATION & COLORS ---
 EUXIS_HOME="$HOME/.euxis"
 PROJECT_ROOT=$(pwd)

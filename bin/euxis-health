@@ -5,6 +5,24 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-health — Fleet health check
+
+Usage:
+  euxis-health [options]
+
+Validates naming, hardening, orphans, headers, and certification readiness.
+
+Options:
+  --silent    Exit code only, no output
+  --json      JSON output (implies --silent)
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="${HOME}/.euxis"
 BIN_DIR="${EUXIS_HOME}/bin"
 REGISTRY="${EUXIS_HOME}/registry.json"

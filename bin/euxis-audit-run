@@ -4,6 +4,23 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-audit-run — Deep-dive audit runner
+
+Usage:
+  euxis-audit-run
+
+Runs benchmarks, logical integrity checks, security probes,
+and consolidates a readiness report.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 REPORT_DIR="$EUXIS_HOME/docs/audits/$(date +%Y%m%d_%H%M)"

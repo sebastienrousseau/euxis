@@ -5,6 +5,23 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-polish — Apply the Euxis Standard to content
+
+Usage:
+  euxis-polish [file_or_directory]
+
+Rewrites content to align with the Euxis Standard using the
+brand-evangelist agent. Default target: ~/.euxis/README.md
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 _self="$0"
 while [ -L "$_self" ]; do
     _dir="$(cd "$(dirname "$_self")" && pwd)"

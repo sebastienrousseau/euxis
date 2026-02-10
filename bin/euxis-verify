@@ -4,6 +4,22 @@
 # Runs: Health -> Lint -> Unit Tests -> Certify -> Doc Check
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-verify — Pre-commit quality gate
+
+Usage:
+  euxis-verify
+
+Runs health, lint, unit tests, certification, and doc checks.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="${HOME}/.euxis"
 EUXIS_BIN="${EUXIS_HOME}/bin"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin:${EUXIS_BIN}:${PATH}"

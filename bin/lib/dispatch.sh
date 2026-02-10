@@ -61,11 +61,11 @@ main() {
     if [[ ! -t 1 ]]; then
         local extracted=""
 
-        if echo "${output}" | grep -q '```json'; then
+        if [[ "${output}" == *'```json'* ]]; then
             extracted=$(echo "${output}" | awk '/^```json$/{found=""; capture=1; next} /^```$/ && capture{capture=0} capture{found=found (found?"\n":"") $0} END{print found}')
         fi
 
-        if [[ -z "$extracted" ]] && echo "${output}" | grep -q 'EUXIS_HANDOFF'; then
+        if [[ -z "$extracted" ]] && [[ "${output}" == *'EUXIS_HANDOFF'* ]]; then
             local handoff
             handoff=$(echo "${output}" | sed -n '/<!-- EUXIS_HANDOFF/,/-->/p' | sed '1d;$d')
             if echo "$handoff" | jq -e 'has("dispatches")' &>/dev/null; then

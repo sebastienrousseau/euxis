@@ -21,6 +21,26 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-loop — Autonomous try-catch-retry with reflexion
+
+Usage:
+  euxis-loop <agent> <task> <verify_cmd> [max_retries]
+  euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> ... <cmdN>
+
+Implements the Reflexion pattern with optional checkpoint mode
+and human-in-the-loop confirmation.
+
+Options:
+  --checkpoints  Multi-checkpoint verification mode
+  --confirm      Pause for user confirmation before each retry
+  -h, --help     Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="${HOME}/.euxis"
 PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 

@@ -10,6 +10,25 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-council — Multi-agent consensus protocol
+
+Usage:
+  euxis-council "<topic>"
+
+Implements a 3-round debate protocol:
+  Round 1: Independent opinions from each expert
+  Round 2: Rebuttals with cross-expert feedback
+  Round 3: Chairman synthesizes a binding decision
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 export PATH="$PATH:$HOME/bin"
 
 # Sanitize input: reject shell metacharacters to prevent injection

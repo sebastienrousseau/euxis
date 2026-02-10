@@ -3,6 +3,24 @@
 
 set -uo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-bench — Performance benchmarking suite
+
+Usage:
+  euxis-bench
+
+Measures latency for health checks, lint, cortex recall,
+provider round-trips, agent coordination, prompt assembly,
+and memory retrieval.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 

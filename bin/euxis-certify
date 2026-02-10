@@ -5,6 +5,28 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-certify — Certification toll gate pipeline
+
+Usage:
+  euxis-certify
+
+Runs all 6 certification gates in sequence:
+  Gate 0:   Environment validation
+  Gate 1+2: Static analysis (lint)
+  Gate 3:   Infrastructure tests
+  Gate 4:   Semantic verification (golden dataset)
+  Gate 5:   Branding compliance
+  Gate 6:   Documentation governance
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"

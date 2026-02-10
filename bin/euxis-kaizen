@@ -5,6 +5,23 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-kaizen — Continuous improvement loop
+
+Usage:
+  euxis-kaizen
+
+Runs certification, AI-driven analysis, and applies improvements.
+Guarded against unbounded recursion (max depth: 3).
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 DATE=$(date +%Y-%m-%d)

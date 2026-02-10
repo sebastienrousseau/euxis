@@ -5,6 +5,22 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-test-infra — Infrastructure test suite
+
+Usage:
+  euxis-test-infra
+
+Runs branch coverage tests for euxis.sh using mocked providers.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 EUXIS_SCRIPT="$EUXIS_HOME/bin/euxis.sh"
 PASS=0
