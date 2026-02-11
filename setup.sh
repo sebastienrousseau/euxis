@@ -139,7 +139,7 @@ log_info() {
 }
 
 log_verbose() {
-    [[ "$VERBOSE" == "true" ]] && printf '  %s\n' "$*"
+    [[ "$VERBOSE" == "true" ]] && printf '  %s\n' "$*" || true
 }
 
 log_error() {
@@ -185,7 +185,7 @@ main() {
             else
                 ln -sf "${script}" "${HOME}/bin/${name}"
                 log_info "  - ${name}"
-                ((linked_count++))
+                ((++linked_count))
             fi
         fi
     done
