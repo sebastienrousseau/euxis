@@ -10,7 +10,7 @@ on:
       version:
         description: 'Release version to verify'
         required: true
-        default: 'v0.0.6'
+        default: 'v0.0.7'
 
 jobs:
   security-scan:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -82,13 +82,13 @@ jobs:
 
           # Check for any error-level issues
           error_count=0
-          find . -name "shellcheck-*.json" -type f | while read -r report; do
+          while IFS= read -r report; do
             if jq -e '.[] | select(.level == "error")' "$report" > /dev/null 2>&1; then
               echo "❌ ERROR-level issues found in $(basename "$report")"
               jq '.[] | select(.level == "error")' "$report"
               error_count=$((error_count + 1))
             fi
-          done
+          done < <(find . -name "shellcheck-*.json" -type f)
 
           # Fail if any ERROR-level shellcheck issues found
           if [ "$error_count" -gt 0 ]; then
@@ -133,10 +133,10 @@ jobs:
 
           echo "## Shell Script Issues (shellcheck)" >> security-report.md
           shell_issues=0
-          find . -name "shellcheck-*.json" -type f | while read -r report; do
+          while IFS= read -r report; do
             issue_count=$(jq '. | length' "$report" 2>/dev/null || echo "0")
             shell_issues=$((shell_issues + issue_count))
-          done
+          done < <(find . -name "shellcheck-*.json" -type f)
           echo "**Total Issues Found:** $shell_issues" >> security-report.md
           echo "" >> security-report.md
 
@@ -173,7 +173,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
 
@@ -254,7 +254,7 @@ jobs:
 
       - name: Generate platform report
         run: |
-          echo "=== EUXIS v0.0.6 Platform Report: ${{ matrix.platform }} ===" > platform-report-${{ matrix.platform }}.md
+          echo "=== EUXIS v0.0.7 Platform Report: ${{ matrix.platform }} ===" > platform-report-${{ matrix.platform }}.md
           echo "" >> platform-report-${{ matrix.platform }}.md
           echo "**Platform:** ${{ matrix.platform }}" >> platform-report-${{ matrix.platform }}.md
           echo "**OS:** ${{ matrix.os }}" >> platform-report-${{ matrix.platform }}.md
@@ -284,7 +284,7 @@ jobs:
 
       - name: Generate consolidated report
         run: |
-          echo "# Euxis v0.0.6 Cross-Platform Verification Report" > cross-platform-summary.md
+          echo "# Euxis v0.0.7 Cross-Platform Verification Report" > cross-platform-summary.md
           echo "" >> cross-platform-summary.md
           echo "Generated: $(date -u)" >> cross-platform-summary.md
           echo "" >> cross-platform-summary.md
@@ -311,7 +311,7 @@ jobs:
           done
 
           echo "## Summary" >> cross-platform-summary.md
-          echo "Cross-platform verification and security scanning completed for Euxis v0.0.6 release." >> cross-platform-summary.md
+          echo "Cross-platform verification and security scanning completed for Euxis v0.0.7 release." >> cross-platform-summary.md
           echo "" >> cross-platform-summary.md
           echo "**Security Status:** $([ -f "security-scan-report/security-report.md" ] && echo "✅ Scanned" || echo "❌ Failed")" >> cross-platform-summary.md
           echo "**Platform Status:** Linux & macOS verification completed" >> cross-platform-summary.md
