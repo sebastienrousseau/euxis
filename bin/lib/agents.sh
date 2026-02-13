@@ -6,8 +6,31 @@
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 
+# Source SQL registry functions if available
+if [[ -f "${EUXIS_HOME}/bin/lib/registry_sql.sh" ]]; then
+    source "${EUXIS_HOME}/bin/lib/registry_sql.sh"
+    EUXIS_SQL_AVAILABLE=1
+else
+    EUXIS_SQL_AVAILABLE=0
+fi
+
+# ============================================================================
+# Agent Discovery Functions (with SQL optimization)
+# ============================================================================
+
 resolve_agent_path() {
     local agent="$1"
+
+    # Try SQL first if available (with connection pooling)
+    if [[ "${EUXIS_SQL_AVAILABLE}" == "1" ]] && [[ "${EUXIS_FORCE_FILESYSTEM:-}" != "1" ]]; then
+        local result
+        result=$(resolve_agent_path_sql "${agent}" 2>/dev/null) && {
+            echo "${result}"
+            return 0
+        }
+    fi
+
+    # Fallback to filesystem search
     for dir in "${PROMPTS_DIR}/core" "${PROMPTS_DIR}/fleet"; do
         if [[ -f "${dir}/${agent}.txt" ]]; then
             echo "${dir}/${agent}.txt"
@@ -19,6 +42,16 @@ resolve_agent_path() {
 }
 
 list_agents() {
+    # Try SQL first if available (much faster with large registries)
+    if [[ "${EUXIS_SQL_AVAILABLE}" == "1" ]] && [[ "${EUXIS_FORCE_FILESYSTEM:-}" != "1" ]]; then
+        local agents
+        agents=$(list_agents_sql 2>/dev/null) && {
+            echo "${agents}" | sed 's/^/    /'
+            return 0
+        }
+    fi
+
+    # Fallback to filesystem scan
     local name
     for dir in "${PROMPTS_DIR}/core" "${PROMPTS_DIR}/fleet"; do
         for f in "${dir}"/*.txt; do
@@ -28,6 +61,65 @@ list_agents() {
             echo "    ${name}"
         done
     done
+}
+
+# New optimized functions (only available with SQL backend)
+find_agents_by_tag() {
+    local tag="$1"
+    [[ -z "${tag}" ]] && { log_error "find_agents_by_tag requires tag name"; return 1; }
+
+    if [[ "${EUXIS_SQL_AVAILABLE}" == "1" ]]; then
+        find_agents_by_tag_sql "${tag}"
+    else
+        log_error "find_agents_by_tag requires SQLite backend. Run: python3 migrate-registry-to-sqlite.py"
+        return 1
+    fi
+}
+
+find_agents_by_tier() {
+    local tier="$1"
+    [[ -z "${tier}" ]] && { log_error "find_agents_by_tier requires tier name"; return 1; }
+
+    if [[ "${EUXIS_SQL_AVAILABLE}" == "1" ]]; then
+        find_agents_by_tier_sql "${tier}"
+    else
+        log_error "find_agents_by_tier requires SQLite backend. Run: python3 migrate-registry-to-sqlite.py"
+        return 1
+    fi
+}
+
+find_agents_by_capability() {
+    local capability="$1"
+    [[ -z "${capability}" ]] && { log_error "find_agents_by_capability requires capability name"; return 1; }
+
+    if [[ "${EUXIS_SQL_AVAILABLE}" == "1" ]]; then
+        find_agents_by_capability_sql "${capability}"
+    else
+        log_error "find_agents_by_capability requires SQLite backend. Run: python3 migrate-registry-to-sqlite.py"
+        return 1
+    fi
+}
+
+# Performance-optimized agent search
+search_agents() {
+    local query_type="$1"
+    shift
+
+    case "${query_type}" in
+        "all")
+            list_agents ;;
+        "tier")
+            find_agents_by_tier "$1" ;;
+        "tag")
+            find_agents_by_tag "$1" ;;
+        "capability")
+            find_agents_by_capability "$1" ;;
+        *)
+            log_error "Unknown query type: ${query_type}"
+            log_error "Valid types: all, tier, tag, capability"
+            return 1
+            ;;
+    esac
 }
 
 # ============================================================================

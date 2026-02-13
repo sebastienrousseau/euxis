@@ -80,10 +80,10 @@ fi
 
 # Test: _get_fleet_roster works
 roster=$(_get_fleet_roster)
-if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
+if [[ -f "${EUXIS_HOME}/registry.db" ]] || { [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; }; then
     assert_contains "fleet roster has agents" "architect" "${roster}"
 else
-    assert_eq "fleet roster skipped (no registry.json or jq)" "ok" "ok"
+    assert_eq "fleet roster skipped (no registry)" "ok" "ok"
 fi
 
 # Test: log_debug exists in common.sh

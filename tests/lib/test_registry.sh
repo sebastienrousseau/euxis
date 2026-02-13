@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-# Tests for registry.json integrity
+# Tests for registry integrity (SQLite + JSON)
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 registry="${EUXIS_HOME}/registry.json"
+registry_db="${EUXIS_HOME}/registry.db"
+
+# ============================================================================
+# JSON Tests (original)
+# ============================================================================
 
 # Valid JSON
 if jq empty "${registry}" 2>/dev/null; then
@@ -55,3 +60,33 @@ assert_contains "audio has realtime tag" "realtime" "${audio_tags}"
 
 rust_tags=$(jq -r '.agents[] | select(.id == "rust-crate-steward") | .tags | join(",")' "${registry}" 2>/dev/null)
 assert_contains "rust has publishing tag" "publishing" "${rust_tags}"
+
+# ============================================================================
+# SQLite Tests (parallel verification)
+# ============================================================================
+
+if [[ -f "${registry_db}" ]]; then
+    # SQLite DB is accessible
+    sql_agent_count=$(sqlite3 -init /dev/null "${registry_db}" "SELECT COUNT(*) FROM agents" 2>/dev/null)
+    assert_eq "SQLite DB has agents" "true" "$([[ "${sql_agent_count}" -gt 0 ]] && echo true || echo false)"
+
+    # Agent counts match between JSON and SQLite
+    json_count=$(jq '.agents | length' "${registry}" 2>/dev/null)
+    assert_eq "JSON/SQLite agent count match" "${json_count}" "${sql_agent_count}"
+
+    # All SQLite agents have required fields (no NULL id/path/tier/version)
+    sql_null_fields=$(sqlite3 -init /dev/null "${registry_db}" "SELECT COUNT(*) FROM agents WHERE id IS NULL OR path IS NULL OR tier IS NULL OR version IS NULL" 2>/dev/null)
+    assert_eq "SQLite agents have required fields" "0" "${sql_null_fields}"
+
+    # SQLite version matches JSON version
+    sql_version=$(sqlite3 -init /dev/null "${registry_db}" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null)
+    json_version=$(jq -r '.protocol_version' "${registry}" 2>/dev/null)
+    assert_eq "SQLite/JSON version match" "${json_version}" "${sql_version}"
+
+    # Agent IDs match between backends
+    json_ids=$(jq -r '.agents[].id' "${registry}" 2>/dev/null | sort)
+    sql_ids=$(sqlite3 -init /dev/null "${registry_db}" "SELECT id FROM agents ORDER BY id" 2>/dev/null)
+    assert_eq "SQLite/JSON agent IDs match" "${json_ids}" "${sql_ids}"
+else
+    assert_eq "SQLite DB exists (optional)" "skip" "skip"
+fi

@@ -137,24 +137,42 @@ resolve_protocols() {
 # ============================================================================
 
 _get_fleet_roster() {
+    # Return cached result if available
+    if [[ -n "${_EUXIS_REGISTRY_CACHE}" ]]; then
+        # Check mtime for cache invalidation
+        local registry_file="${EUXIS_HOME}/registry.db"
+        [[ -f "${registry_file}" ]] || registry_file="${EUXIS_HOME}/registry.json"
+        if [[ -f "${registry_file}" ]]; then
+            local current_mtime
+            current_mtime=$(stat -c '%Y' "${registry_file}" 2>/dev/null || stat -f '%m' "${registry_file}" 2>/dev/null)
+            if [[ "${_EUXIS_REGISTRY_MTIME}" == "${current_mtime}" ]]; then
+                printf '%s' "${_EUXIS_REGISTRY_CACHE}"
+                return
+            fi
+        fi
+    fi
+
+    # Try SQLite first
+    local db_file="${EUXIS_HOME}/registry.db"
+    if [[ -f "${db_file}" ]]; then
+        local ids
+        ids=$(sqlite3 -init /dev/null "${db_file}" "SELECT id FROM agents ORDER BY id" 2>/dev/null)
+        if [[ -n "${ids}" ]]; then
+            # Join newline-separated IDs with ", "
+            _EUXIS_REGISTRY_CACHE=$(echo "${ids}" | paste -sd',' - | sed 's/,/, /g')
+            _EUXIS_REGISTRY_MTIME=$(stat -c '%Y' "${db_file}" 2>/dev/null || stat -f '%m' "${db_file}" 2>/dev/null)
+            printf '%s' "${_EUXIS_REGISTRY_CACHE}"
+            return
+        fi
+    fi
+
+    # Fall back to JSON
     local registry_file="${EUXIS_HOME}/registry.json"
-    if [[ ! -f "${registry_file}" ]] || ! command -v jq &>/dev/null; then
-        return
-    fi
-
-    # Check if cached and file hasn't changed
-    local current_mtime
-    current_mtime=$(stat -c '%Y' "${registry_file}" 2>/dev/null || stat -f '%m' "${registry_file}" 2>/dev/null)
-    if [[ -n "${_EUXIS_REGISTRY_CACHE}" && "${_EUXIS_REGISTRY_MTIME}" == "${current_mtime}" ]]; then
+    if [[ -f "${registry_file}" ]] && command -v jq &>/dev/null; then
+        _EUXIS_REGISTRY_CACHE=$(jq -r '[.agents[].id] | join(", ")' "${registry_file}" 2>/dev/null)
+        _EUXIS_REGISTRY_MTIME=$(stat -c '%Y' "${registry_file}" 2>/dev/null || stat -f '%m' "${registry_file}" 2>/dev/null)
         printf '%s' "${_EUXIS_REGISTRY_CACHE}"
-        return
     fi
-
-    # Parse and cache
-    # Parse registry and join with commas (jq only, no tr/sed forks)
-    _EUXIS_REGISTRY_CACHE=$(jq -r '[.agents[].id] | join(", ")' "${registry_file}" 2>/dev/null)
-    _EUXIS_REGISTRY_MTIME="${current_mtime}"
-    printf '%s' "${_EUXIS_REGISTRY_CACHE}"
 }
 
 # ============================================================================

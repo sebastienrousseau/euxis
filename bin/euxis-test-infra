@@ -71,13 +71,20 @@ if ! validate_file_executable "$EUXIS_SCRIPT" "Main Euxis script"; then
     exit 1
 fi
 
-# Validate registry contains test-required agents
+# Validate registry contains test-required agents (SQLite-first, JSON fallback)
 REQUIRED_TEST_AGENTS=("architect" "orchestrator")
 for agent in "${REQUIRED_TEST_AGENTS[@]}"; do
-    if ! jq -e ".agents[] | select(.id == \"$agent\")" "$EUXIS_HOME/registry.json" &>/dev/null; then
-        validation_error "Required test agent '$agent' not found in registry"
-    else
+    _agent_found=false
+    if [[ -f "$EUXIS_HOME/registry.db" ]]; then
+        [[ -n "$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT 1 FROM agents WHERE id='${agent}'" 2>/dev/null)" ]] && _agent_found=true
+    fi
+    if [[ "$_agent_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; then
+        jq -e ".agents[] | select(.id == \"$agent\")" "$EUXIS_HOME/registry.json" &>/dev/null && _agent_found=true
+    fi
+    if [[ "$_agent_found" == "true" ]]; then
         validation_pass "Test agent '$agent' found in registry"
+    else
+        validation_error "Required test agent '$agent' not found in registry"
     fi
 done
 

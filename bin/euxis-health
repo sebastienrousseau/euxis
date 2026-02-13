@@ -98,49 +98,54 @@ fi
 log ""
 log "[3/10] Orphan Detection..."
 
-if [[ ! -f "$REGISTRY" ]]; then
-    log "  MISSING: registry.json not found at $REGISTRY"
+REGISTRY_DB="${EUXIS_HOME}/registry.db"
+
+# Try to get registered agent IDs (SQLite-first, JSON fallback)
+REGISTERED=""
+if [[ -f "$REGISTRY_DB" ]]; then
+    REGISTERED=$(sqlite3 -init /dev/null "$REGISTRY_DB" "SELECT id FROM agents ORDER BY id" 2>/dev/null | sort)
+fi
+if [[ -z "$REGISTERED" ]] && [[ -f "$REGISTRY" ]]; then
+    if command -v jq &>/dev/null; then
+        REGISTERED=$(jq -r '.agents[].id' "$REGISTRY" 2>/dev/null | sort)
+    fi
+fi
+
+if [[ -z "$REGISTERED" ]]; then
+    log "  MISSING: No registry found (neither registry.db nor registry.json)"
     ((FAILURES++))
 else
-    if ! command -v jq &>/dev/null; then
-        log "  SKIP: jq not installed, cannot parse registry.json"
-        ((WARNINGS++))
-    else
-        # Get registered agent IDs
-        REGISTERED=$(jq -r '.agents[].id' "$REGISTRY" | sort)
-
-        # Get actual agent files
-        ACTUAL=""
-        for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
-            for f in "${dir}"/*.txt; do
-                [[ -f "$f" ]] || continue
-                name=$(basename "$f" .txt)
-                ACTUAL="${ACTUAL}${name}"$'\n'
-            done
+    # Get actual agent files
+    ACTUAL=""
+    for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+        for f in "${dir}"/*.txt; do
+            [[ -f "$f" ]] || continue
+            name=$(basename "$f" .txt)
+            ACTUAL="${ACTUAL}${name}"$'\n'
         done
-        ACTUAL=$(echo "$ACTUAL" | sort | sed '/^$/d')
+    done
+    ACTUAL=$(echo "$ACTUAL" | sort | sed '/^$/d')
 
-        # Find orphans (in filesystem but not in registry)
-        ORPHANS=$(comm -23 <(echo "$ACTUAL") <(echo "$REGISTERED"))
-        if [[ -n "$ORPHANS" ]]; then
-            log "  ORPHAN AGENTS (not in registry.json):"
-            log "$ORPHANS" | sed 's/^/    /'
-            ORPHAN_COUNT=$(echo "$ORPHANS" | wc -l | tr -d ' ')
-            FAILURES=$((FAILURES + ORPHAN_COUNT))
-        fi
+    # Find orphans (in filesystem but not in registry)
+    ORPHANS=$(comm -23 <(echo "$ACTUAL") <(echo "$REGISTERED"))
+    if [[ -n "$ORPHANS" ]]; then
+        log "  ORPHAN AGENTS (not in registry):"
+        log "$ORPHANS" | sed 's/^/    /'
+        ORPHAN_COUNT=$(echo "$ORPHANS" | wc -l | tr -d ' ')
+        FAILURES=$((FAILURES + ORPHAN_COUNT))
+    fi
 
-        # Find ghosts (in registry but not in filesystem)
-        GHOSTS=$(comm -13 <(echo "$ACTUAL") <(echo "$REGISTERED"))
-        if [[ -n "$GHOSTS" ]]; then
-            log "  GHOST ENTRIES (in registry but no file):"
-            log "$GHOSTS" | sed 's/^/    /'
-            GHOST_COUNT=$(echo "$GHOSTS" | wc -l | tr -d ' ')
-            FAILURES=$((FAILURES + GHOST_COUNT))
-        fi
+    # Find ghosts (in registry but not in filesystem)
+    GHOSTS=$(comm -13 <(echo "$ACTUAL") <(echo "$REGISTERED"))
+    if [[ -n "$GHOSTS" ]]; then
+        log "  GHOST ENTRIES (in registry but no file):"
+        log "$GHOSTS" | sed 's/^/    /'
+        GHOST_COUNT=$(echo "$GHOSTS" | wc -l | tr -d ' ')
+        FAILURES=$((FAILURES + GHOST_COUNT))
+    fi
 
-        if [[ -z "$ORPHANS" && -z "$GHOSTS" ]]; then
-            log "  All agents are registered. No orphans or ghosts."
-        fi
+    if [[ -z "$ORPHANS" && -z "$GHOSTS" ]]; then
+        log "  All agents are registered. No orphans or ghosts."
     fi
 fi
 

@@ -12,16 +12,17 @@ cd "$PROJECT_ROOT"
 
 echo "=== Euxis Version Consistency Check ==="
 
-# Extract the authoritative version from registry.json
-if [ ! -f "registry.json" ]; then
-    echo "❌ FATAL: registry.json not found"
-    exit 1
+# Extract the authoritative version (SQLite-first, JSON fallback)
+REGISTRY_VERSION=""
+if [ -f "registry.db" ]; then
+    REGISTRY_VERSION=$(sqlite3 -init /dev/null "registry.db" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null || echo "")
+fi
+if [ -z "$REGISTRY_VERSION" ] && [ -f "registry.json" ]; then
+    REGISTRY_VERSION=$(python3 -c "import json; print(json.load(open('registry.json'))['protocol_version'])" 2>/dev/null || echo "")
 fi
 
-REGISTRY_VERSION=$(python3 -c "import json; print(json.load(open('registry.json'))['protocol_version'])" 2>/dev/null || echo "")
-
 if [ -z "$REGISTRY_VERSION" ]; then
-    echo "❌ FATAL: Could not extract protocol_version from registry.json"
+    echo "❌ FATAL: Could not extract protocol_version from registry"
     exit 1
 fi
 

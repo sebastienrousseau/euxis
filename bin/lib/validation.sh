@@ -170,15 +170,25 @@ validate_euxis_structure() {
         fi
     done
 
-    # Check registry file exists
-    if [[ ! -f "$euxis_home/registry.json" ]]; then
-        validation_error "Registry file missing: $euxis_home/registry.json"
-        return 1
-    fi
-
-    # Check registry is valid JSON
-    if ! jq empty "$euxis_home/registry.json" &>/dev/null; then
-        validation_error "Registry file is not valid JSON: $euxis_home/registry.json"
+    # Check registry exists (SQLite or JSON)
+    if [[ -f "$euxis_home/registry.db" ]]; then
+        # Validate SQLite database
+        local agent_count
+        agent_count=$(sqlite3 -init /dev/null "$euxis_home/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null)
+        if [[ -n "$agent_count" && "$agent_count" -gt 0 ]]; then
+            validation_pass "Registry database valid ($agent_count agents)"
+        else
+            validation_error "Registry database empty or corrupt: $euxis_home/registry.db"
+            return 1
+        fi
+    elif [[ -f "$euxis_home/registry.json" ]]; then
+        # Fall back to JSON validation
+        if ! jq empty "$euxis_home/registry.json" &>/dev/null; then
+            validation_error "Registry file is not valid JSON: $euxis_home/registry.json"
+            return 1
+        fi
+    else
+        validation_error "Registry not found (neither registry.db nor registry.json)"
         return 1
     fi
 

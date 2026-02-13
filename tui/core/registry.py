@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
@@ -76,19 +77,65 @@ class FleetRegistry:
 
     @classmethod
     def load(cls, euxis_home: Path | None = None) -> FleetRegistry:
-        """Load registry from JSON files under euxis_home."""
+        """Load registry (SQLite-first, JSON fallback) and squads from JSON."""
         home = euxis_home or EUXIS_HOME
         registry = cls()
 
-        registry_path = home / "registry.json"
-        if registry_path.exists():
-            registry._parse_agents(json.loads(registry_path.read_text()))
+        # Try SQLite first
+        db_path = home / "registry.db"
+        loaded = False
+        if db_path.exists():
+            try:
+                loaded = registry._load_from_sqlite(db_path)
+            except (sqlite3.Error, OSError):
+                loaded = False
+
+        # Fall back to JSON
+        if not loaded:
+            registry_path = home / "registry.json"
+            if registry_path.exists():
+                registry._parse_agents(json.loads(registry_path.read_text()))
 
         squads_path = home / "squads.json"
         if squads_path.exists():
             registry._parse_squads(json.loads(squads_path.read_text()))
 
         return registry
+
+    def _load_from_sqlite(self, db_path: Path) -> bool:
+        """Load agents from SQLite registry database."""
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+
+        # Get protocol version
+        row = conn.execute(
+            "SELECT value FROM registry_metadata WHERE key='protocol_version'"
+        ).fetchone()
+        if row:
+            self.version = row[0]
+
+        # Load agents via the agents_complete view
+        rows = conn.execute(
+            "SELECT id, path, tier, version, activation, tags, capability_tags "
+            "FROM agents_complete ORDER BY id"
+        ).fetchall()
+
+        for row in rows:
+            tags = tuple(row["tags"].split(",")) if row["tags"] else ()
+            caps = tuple(row["capability_tags"].split(",")) if row["capability_tags"] else ()
+            self.agents.append(
+                Agent(
+                    id=row["id"],
+                    tier=row["tier"] or "fleet",
+                    version=row["version"] or self.version,
+                    tags=tags,
+                    activation=row["activation"] or "default",
+                    capability_tags=caps,
+                )
+            )
+
+        conn.close()
+        return len(self.agents) > 0
 
     @classmethod
     def from_dicts(
