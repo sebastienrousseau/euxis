@@ -15,11 +15,12 @@ CONFIG_PATH = EUXIS_HOME / "config" / "etx-settings.json"
 class ETXConfig:
     """User-configurable ETX settings."""
 
-    theme: str = "etx-dark"
+    theme: str = "etx-liquid-glass"
     default_provider: str = "claude"
     show_agent_tags: bool = True
     reduced_motion: bool = False
     accessible_mode: bool = False
+    locale: str = "en"
     grid_columns: int = 4
     recent_agents: list[str] = field(default_factory=list)
     recent_commands: list[str] = field(default_factory=list)

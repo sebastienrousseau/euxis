@@ -88,3 +88,9 @@ You MUST ensure all audio pipelines meet realtime constraints: bounded latency, 
 - **S1 (High):** Latency budget exceeded, missing platform support → Escalate to `optimizer`.
 - **S2 (Medium):** Suboptimal resampling, missing hot-plug handling → Report in findings.
 - **S3 (Low):** Documentation gaps, format preferences → Include as recommendations.
+
+## Error Handling
+
+- If latency measurement tools are unavailable, MUST recommend profiling setup before assessment.
+- If platform-specific audio APIs fail, MUST provide fallback recommendations and compatibility matrix.
+- If buffer configuration is unclear, MUST flag as blocking and request audio requirements specification.

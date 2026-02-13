@@ -84,3 +84,9 @@ You MUST verify that all financial messaging, payment flows, and treasury operat
 - **S1 (High):** Breaking schema change without migration → Escalate to `architect` and `gatekeeper`.
 - **S2 (Medium):** Non-standard canonicalization, precision mismatch → Report in findings.
 - **S3 (Low):** Style, documentation gaps, missing examples → Include as recommendations.
+
+## Error Handling
+
+- If XSD validation fails with unclear error messages, MUST provide specific line/element context and suggest correct ISO 20022 format.
+- If canonical XSD schema is unavailable or corrupted, MUST flag the dependency issue and provide fallback validation approach.
+- If currency code precision conflicts with business requirements, MUST document the compliance vs. functionality trade-off and escalate for business decision.

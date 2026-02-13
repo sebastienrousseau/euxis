@@ -28,6 +28,19 @@ PROVIDERS = {
     "goose": "Goose",
 }
 
+# Full model identifiers per provider (sourced from providers.sh)
+PROVIDER_MODELS = {
+    "claude": "claude-sonnet-4-20250514",
+    "openai": "gpt-4o",
+    "gemini": "gemini-2.0-flash",
+    "ollama": "llama3.2",
+    "qwen": "qwen3-coder",
+    "goose": "claude-sonnet-4",
+    "crush": "claude-sonnet-4",
+    "kiro-cli": "kiro-cli",
+    "codex": "codex-mini-latest",
+}
+
 # Pattern for valid identifiers (agent IDs, squad IDs, combo IDs)
 _SAFE_ID = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]{0,63}$")
 
@@ -198,6 +211,15 @@ def get_project_name(working_dir: str | None = None) -> str:
     """Get the current project name from directory."""
     cwd = Path(working_dir or str(Path.cwd()))
     return cwd.name
+
+
+def get_project_path(working_dir: str | None = None) -> str:
+    """Get the current project path, abbreviated with ~ for home directory."""
+    cwd = Path(working_dir or str(Path.cwd()))
+    try:
+        return "~/" + str(cwd.relative_to(Path.home()))
+    except ValueError:
+        return str(cwd)
 
 
 def get_git_branch(working_dir: str | None = None) -> str | None:

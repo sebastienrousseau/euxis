@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 from textual.containers import Container
 from textual.screen import Screen
-from textual.widgets import Footer, Static
+from textual.widgets import Static
 
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
@@ -47,7 +47,9 @@ class ToolRunnerScreen(Screen[None]):
         with Container(id="agent-screen"):
             yield Static(id="tool-title")
             yield OutputPanel(id="agent-output")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and start tool execution."""

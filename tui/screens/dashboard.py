@@ -1,15 +1,24 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
-"""Main fleet dashboard screen."""
+"""Main fleet dashboard screen with tip bar."""
 
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING
 
 from textual.css.query import NoMatches
 from textual.screen import Screen
-from textual.widgets import Footer
+from textual.widgets import Static
 
-from tui.widgets.fleet_grid import FleetGrid
+from tui.core.runner import PROVIDER_MODELS, get_project_path
+from tui.i18n import _
+from tui.widgets.fleet_grid import (
+    AgentSelected,
+    ComboSelected,
+    FleetGrid,
+    SquadSelected,
+    SystemCommandRequested,
+)
 from tui.widgets.header import ETXHeader
 
 if TYPE_CHECKING:
@@ -19,6 +28,32 @@ if TYPE_CHECKING:
     from tui.widgets.agent_card import AgentCard
 
 
+class TipBar(Static):
+    """Rotating contextual tip bar."""
+
+    def __init__(self, tips: list[str], **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._tips = tips
+        self._index = random.randint(0, max(0, len(tips) - 1))  # noqa: S311
+
+    def on_mount(self) -> None:
+        """Show first tip and start rotation timer."""
+        self._show_tip()
+        self.set_interval(30, self._rotate)
+
+    def on_click(self) -> None:
+        """Advance to next tip on click."""
+        self._rotate()
+
+    def _rotate(self) -> None:
+        self._index = (self._index + 1) % len(self._tips)
+        self._show_tip()
+
+    def _show_tip(self) -> None:
+        tip = self._tips[self._index] if self._tips else ""
+        self.update(f"[dim italic]💡 {_('Tip')}: {tip}[/]")
+
+
 class DashboardScreen(Screen[None]):
     """Main dashboard displaying the agent fleet grid."""
 
@@ -26,7 +61,7 @@ class DashboardScreen(Screen[None]):
         ("ctrl+k", "app.command_palette", "Commands"),
         ("slash", "focus_search", "Search"),
         ("f1", "app.action_help", "Help"),
-        ("escape", "app.pop_screen", "Back"),
+        ("escape", "app.quit", "Quit"),
     ]
 
     @property
@@ -35,29 +70,60 @@ class DashboardScreen(Screen[None]):
         return self.app  # type: ignore[return-value]
 
     def compose(self) -> ComposeResult:
-        """Build the dashboard layout with header, fleet grid, and footer."""
+        """Build the dashboard layout with header, tip bar, fleet grid, and footer."""
+        from tui.app import TIPS
+
         yield ETXHeader(id="header")
+        yield TipBar(TIPS, classes="tip-bar")
         yield FleetGrid(self.euxis_app.fleet_registry, id="fleet-grid")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header with project context and announce for accessibility."""
         header = self.query_one(ETXHeader)
         header.project = self.euxis_app.project_name
+        header.project_path = get_project_path()
         header.branch = self.euxis_app.git_branch or ""
         header.provider = self.euxis_app.config.default_provider
+        header.model = PROVIDER_MODELS.get(self.euxis_app.config.default_provider, "")
         header.agent_count = len(self.euxis_app.fleet_registry.agents)
         header.version = self.euxis_app.fleet_registry.version
 
         # Announce for screen readers
         self.notify(
-            f"Fleet Dashboard: {len(self.euxis_app.fleet_registry.agents)} agents ready",
+            _("Fleet Dashboard: {} agents ready").format(
+                len(self.euxis_app.fleet_registry.agents)
+            ),
             timeout=3,
         )
+
+        # Show welcome screen on first visit (after dashboard is fully composed)
+        if not self.euxis_app._welcome_shown:
+            self.euxis_app._welcome_shown = True
+            from tui.screens.welcome import WelcomeScreen
+            self.app.push_screen(WelcomeScreen())
 
     def on_agent_card_selected(self, event: AgentCard.Selected) -> None:
         """Handle agent card selection."""
         self.euxis_app.action_deploy_agent(event.agent.id)
+
+    def on_agent_selected(self, event: AgentSelected) -> None:
+        """Handle agent selection from search bar."""
+        self.euxis_app.action_deploy_agent(event.agent_id, task=event.task)
+
+    def on_squad_selected(self, event: SquadSelected) -> None:
+        """Handle squad row selection."""
+        self.euxis_app.action_deploy_squad(event.squad_id, task=event.task)
+
+    def on_combo_selected(self, event: ComboSelected) -> None:
+        """Handle combo row selection."""
+        self.euxis_app.action_deploy_combo(event.combo_id, task=event.task)
+
+    def on_system_command_requested(self, event: SystemCommandRequested) -> None:
+        """Handle system command from search bar."""
+        self.euxis_app.run_system_command(event.command)
 
     def action_focus_search(self) -> None:
         """Focus the search input."""

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, Input, Static
+from textual.widgets import Input, Static
 
 from tui.core.runner import AgentRun, run_agent
 from tui.widgets.header import ETXHeader
@@ -30,10 +30,17 @@ class AgentScreen(Screen[None]):
         ("ctrl+l", "clear_output", "Clear"),
     ]
 
-    def __init__(self, agent: Agent, provider: str = "claude", **kwargs: Any) -> None:
+    def __init__(
+        self,
+        agent: Agent,
+        provider: str = "claude",
+        initial_task: str = "",
+        **kwargs: Any,
+    ) -> None:
         super().__init__(**kwargs)
         self.agent = agent
         self.provider = provider
+        self.initial_task = initial_task
         self._run: AgentRun | None = None
         self._timer_task: asyncio.Task | None = None
 
@@ -56,7 +63,9 @@ class AgentScreen(Screen[None]):
                     id="task-input",
                 )
             yield OutputPanel(id="agent-output")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and agent info display."""
@@ -81,8 +90,11 @@ class AgentScreen(Screen[None]):
         elapsed_display = self.query_one("#agent-elapsed-display", Static)
         elapsed_display.update("[dim]Ready[/]")
 
-        # Focus the task input
-        self.query_one("#task-input", Input).focus()
+        # Focus the task input and pre-fill if launched with a task
+        task_input = self.query_one("#task-input", Input)
+        if self.initial_task:
+            task_input.value = self.initial_task
+        task_input.focus()
 
         # Welcome message
         output = self.query_one(OutputPanel)
@@ -90,7 +102,11 @@ class AgentScreen(Screen[None]):
         output.write_status(f"Tier: {self.agent.tier_label}")
         output.write_status(f"Provider: {self.provider}")
         output.write_separator()
-        output.write_status("Enter a task and press Enter to begin.", "dim")
+        if self.initial_task:
+            output.write_status(f"Task ready: {self.initial_task}", "cyan")
+            output.write_status("Press Enter to deploy.", "dim")
+        else:
+            output.write_status("Enter a task and press Enter to begin.", "dim")
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle task submission and start agent execution."""

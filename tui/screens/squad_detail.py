@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from textual.containers import Container, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Footer, Static
+from textual.widgets import Static
 
 from tui.widgets.header import ETXHeader
 
@@ -86,7 +86,9 @@ class SquadDetailScreen(Screen[None]):
                 classes="section-title",
             )
             yield Container(id="combos-list")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Populate squad and combo cards from registry."""

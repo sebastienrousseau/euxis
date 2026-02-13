@@ -141,7 +141,7 @@ class TestETXConfig:
         from tui.core.config import ETXConfig
 
         config = ETXConfig()
-        assert config.theme == "etx-dark"
+        assert config.theme == "etx-liquid-glass"
         assert config.default_provider == "claude"
         assert config.show_agent_tags is True
 

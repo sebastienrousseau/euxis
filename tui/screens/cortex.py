@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, Input, Static
+from textual.widgets import Input, Static
 
 from tui.core.runner import EUXIS_HOME
 from tui.widgets.header import ETXHeader
@@ -51,7 +51,9 @@ class CortexScreen(Screen[None]):
                     id="cortex-input",
                 )
             yield OutputPanel(id="agent-output")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and load cortex status."""

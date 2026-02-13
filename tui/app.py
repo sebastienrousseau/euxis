@@ -15,9 +15,32 @@ from textual.binding import Binding
 
 from tui.commands import AgentCommandProvider, SquadCommandProvider, SystemCommandProvider
 from tui.core.config import ETXConfig
+from tui.i18n import _
+from tui.themes import ETX_THEMES, THEME_CYCLE
 from tui.core.registry import FleetRegistry
 from tui.core.runner import get_git_branch, get_project_name
 from tui.screens.dashboard import DashboardScreen
+
+
+TIPS = [
+    "Press Ctrl+K to open the command palette",
+    "Type @ to search agents by name",
+    "Type # to search squads and combos",
+    "Use Ctrl+T to cycle between themes",
+    "Press / on the dashboard to focus search",
+    "Use Ctrl+M to open the fleet monitor",
+    "Press F1 for the full keyboard reference",
+    "Use Ctrl+P to browse playbooks",
+    "Press F5 to refresh the fleet registry",
+    "Use Ctrl+O to view agent output logs",
+    "Deploy a squad for multi-agent operations",
+    "Press Escape to go back from any screen",
+    "Use Ctrl+S to open settings",
+    "Squads and combos are shown below agents — scroll down on the dashboard",
+    "Press F2 to return to the welcome screen anytime",
+    "Press ? to see all keyboard shortcuts",
+    "Playbooks define multi-gate quality pipelines — Ctrl+P to browse",
+]
 
 
 class EuxisApp(App):
@@ -45,7 +68,9 @@ class EuxisApp(App):
         Binding("ctrl+o", "open_logs", "Logs"),
         Binding("ctrl+p", "open_playbooks", "Playbooks"),
         Binding("f1", "help", "Help"),
+        Binding("f2", "welcome", "Welcome"),
         Binding("f5", "refresh", "Refresh"),
+        Binding("question_mark", "help", "?", show=False),
     ]
 
     def __init__(self, **kwargs: Any) -> None:
@@ -55,44 +80,50 @@ class EuxisApp(App):
         self.project_name = get_project_name()
         self.git_branch = get_git_branch()
 
-    def on_mount(self) -> None:
-        """Handle application mount and apply saved configuration."""
-        # Apply saved theme
-        if self.config.theme:
-            try:
-                self.theme = self.config.theme
-            except (ValueError, KeyError, InvalidThemeError):
-                self.theme = "textual-dark"
+        # Register custom Liquid Glass themes and apply immediately
+        for theme in ETX_THEMES.values():
+            self.register_theme(theme)
 
+        # Set theme in __init__ so it's active before first render
+        try:
+            self.theme = self.config.theme or "etx-liquid-glass"
+        except (ValueError, KeyError, InvalidThemeError):
+            self.theme = "etx-liquid-glass"
+
+        # Apply saved locale
+        from tui.i18n import set_locale
+        set_locale(self.config.locale)
+
+    def on_mount(self) -> None:
+        """Handle application mount."""
         # Push the dashboard as the default screen
+        self._welcome_shown = False
         self.push_screen(DashboardScreen())
 
     def action_toggle_theme(self) -> None:
-        """Toggle between dark and light themes."""
-        if self.theme == "textual-dark":
-            self.theme = "textual-light"
-            self.config.theme = "textual-light"
-        elif self.theme == "textual-light":
-            self.theme = "textual-ansi"
-            self.config.theme = "textual-ansi"
-        else:
-            self.theme = "textual-dark"
-            self.config.theme = "textual-dark"
+        """Cycle through all ETX themes."""
+        try:
+            idx = THEME_CYCLE.index(self.theme)
+            next_theme = THEME_CYCLE[(idx + 1) % len(THEME_CYCLE)]
+        except ValueError:
+            next_theme = THEME_CYCLE[0]
+        self.theme = next_theme
+        self.config.theme = next_theme
         self.config.save()
-        self.notify(f"Theme: {self.theme}", timeout=2)
+        self.notify(_("Theme: {}").format(self.theme), timeout=2)
 
-    def action_deploy_agent(self, agent_id: str) -> None:
+    def action_deploy_agent(self, agent_id: str, task: str = "") -> None:
         """Open the agent execution screen for a specific agent."""
         from tui.screens.agent import AgentScreen
 
         agent = self.fleet_registry.get_agent(agent_id)
         if not agent:
-            self.notify(f"Unknown agent: {agent_id}", severity="error")
+            self.notify(_("Unknown agent: {}").format(agent_id), severity="error")
             return
 
-        self.push_screen(AgentScreen(agent, self.config.default_provider))
+        self.push_screen(AgentScreen(agent, self.config.default_provider, initial_task=task))
 
-    def action_deploy_squad(self, squad_id: str) -> None:
+    def action_deploy_squad(self, squad_id: str, task: str = "") -> None:
         """Open the fleet monitor for a squad deployment."""
         from tui.screens.fleet_monitor import FleetMonitorScreen
 
@@ -103,7 +134,7 @@ class EuxisApp(App):
                 break
 
         if not squad:
-            self.notify(f"Unknown squad: {squad_id}", severity="error")
+            self.notify(_("Unknown squad: {}").format(squad_id), severity="error")
             return
 
         self.push_screen(
@@ -111,10 +142,11 @@ class EuxisApp(App):
                 operation_type="squad",
                 operation_id=squad_id,
                 members=list(squad.members),
+                task_description=task,
             )
         )
 
-    def action_deploy_combo(self, combo_id: str) -> None:
+    def action_deploy_combo(self, combo_id: str, task: str = "") -> None:
         """Open the fleet monitor for a combo chain."""
         from tui.screens.fleet_monitor import FleetMonitorScreen
 
@@ -125,7 +157,7 @@ class EuxisApp(App):
                 break
 
         if not combo:
-            self.notify(f"Unknown combo: {combo_id}", severity="error")
+            self.notify(_("Unknown combo: {}").format(combo_id), severity="error")
             return
 
         self.push_screen(
@@ -133,6 +165,7 @@ class EuxisApp(App):
                 operation_type="combo",
                 operation_id=combo_id,
                 members=list(combo.chain),
+                task_description=task,
             )
         )
 
@@ -184,6 +217,12 @@ class EuxisApp(App):
 
         self.push_screen(SquadDetailScreen())
 
+    def action_welcome(self) -> None:
+        """Return to the welcome screen."""
+        from tui.screens.welcome import WelcomeScreen
+
+        self.push_screen(WelcomeScreen())
+
     def action_help(self) -> None:
         """Open the help screen."""
         from tui.screens.help import HelpScreen
@@ -201,7 +240,7 @@ class EuxisApp(App):
         self.fleet_registry = FleetRegistry.load()
         self.project_name = get_project_name()
         self.git_branch = get_git_branch()
-        self.notify("Fleet registry refreshed", timeout=2)
+        self.notify(_("Fleet registry refreshed"), timeout=2)
 
     def run_system_command(self, command: str) -> None:
         """Execute a system command from the command palette."""

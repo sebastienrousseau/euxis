@@ -23,7 +23,7 @@
           ]
         },
         {
-          "agent": "tech-writer",
+          "agent": "writer",
           "task_template": "Sync all documentation to current fleet, protocols, and registry; validate snippets; update glossary/terms for: ${goal}",
           "verifies": [
             "docs match current fleet composition",
@@ -45,7 +45,7 @@
       "mode": "hierarchical",
       "delegates": [
         {
-          "agent": "product-manager",
+          "agent": "strategist",
           "task_template": "Verify requirements and acceptance criteria match current product behavior; flag scope creep for: ${goal}",
           "verifies": [
             "acceptance criteria still match reality",
@@ -91,7 +91,7 @@
       "mode": "parallel",
       "delegates": [
         {
-          "agent": "perf-optimizer",
+          "agent": "optimizer",
           "task_template": "Verify performance budgets with benchmarks; validate voice/audio hot path and threading overhead for: ${goal}",
           "verifies": [
             "measurable speed (p95/p99)",
@@ -101,7 +101,7 @@
           ]
         },
         {
-          "agent": "data-steward",
+          "agent": "custodian",
           "task_template": "Verify telemetry coverage for latency, jitter, underruns, queue depth, thread saturation, regressions for: ${goal}",
           "verifies": [
             "observability coverage",
@@ -109,7 +109,7 @@
           ]
         },
         {
-          "agent": "automation-engineer",
+          "agent": "automaton",
           "task_template": "Verify cross-platform build/package/runtime parity for macOS, Linux, and WSL for: ${goal}",
           "verifies": [
             "platform parity",
@@ -118,7 +118,7 @@
           ]
         },
         {
-          "agent": "edge-hunter",
+          "agent": "investigator",
           "task_template": "Verify security boundaries, secrets handling, provider isolation, dependency risk for: ${goal}",
           "verifies": [
             "security boundaries",
@@ -128,7 +128,7 @@
           ]
         },
         {
-          "agent": "ux-sentinel",
+          "agent": "sentinel",
           "task_template": "Verify UI usability and a11y: keyboard-only, mouse, touch, auto light/dark, focus, contrast for: ${goal}",
           "verifies": [
             "keyboard-only navigation",
@@ -150,7 +150,7 @@
       "mode": "hierarchical",
       "delegates": [
         {
-          "agent": "qa-coordinator",
+          "agent": "tester",
           "task_template": "Run full test strategy (unit/integration/e2e/smoke) and issue PASS/FAIL verdict for: ${goal}",
           "verifies": [
             "unit test coverage",
@@ -195,7 +195,7 @@
       "trigger": "UI changes detected",
       "delegates": [
         {
-          "agent": "ux-sentinel",
+          "agent": "sentinel",
           "task_template": "Verify UI accessibility, keyboard navigation, light/dark behavior, and interaction quality for: ${goal}"
         }
       ]
@@ -209,7 +209,7 @@
           "task_template": "Verify memory, registry, and docs truth for: ${goal}"
         },
         {
-          "agent": "tech-writer",
+          "agent": "writer",
           "task_template": "Verify documentation reflects actual behavior for: ${goal}"
         }
       ]
@@ -219,11 +219,11 @@
       "trigger": "Release candidate or version bump",
       "delegates": [
         {
-          "agent": "qa-coordinator",
+          "agent": "tester",
           "task_template": "Verify full test coverage and quality gates for: ${goal}"
         },
         {
-          "agent": "release-manager",
+          "agent": "orchestrator",
           "task_template": "Verify changelog, versioning, and release readiness for: ${goal}"
         }
       ]

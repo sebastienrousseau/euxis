@@ -1,5 +1,5 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
-"""Agent card widget for the fleet grid."""
+"""Agent card widget for the fleet grid with Liquid Glass styling."""
 
 from __future__ import annotations
 
@@ -10,15 +10,17 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Static
 
+from tui.i18n import _
+
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
     from tui.core.registry import Agent
 
-# Provider tier indicators
+# Tier indicators — styled by weight, colors from CSS theme
 TIER_STYLES = {
-    "core": ("bold yellow", "CORE"),
-    "fleet": ("dim cyan", "FLEET"),
+    "core": ("bold", "CORE"),
+    "fleet": ("", "FLEET"),
 }
 
 ACTIVATION_ICONS = {
@@ -33,27 +35,24 @@ class AgentCard(Widget, can_focus=True):
 
     DEFAULT_CSS = """
     AgentCard {
-        height: 5;
-        border: round $primary-background-darken-2;
-        padding: 0 1;
-        background: $surface;
+        height: 7;
+        padding: 1 1;
+        border: round $accent 40%;
     }
     AgentCard:hover {
         border: round $accent;
-        background: $surface-lighten-1;
     }
     AgentCard:focus {
-        border: double $accent;
-        background: $primary-background-darken-1;
+        border: round $accent;
     }
     AgentCard.tier-core {
-        border: round $warning-darken-2;
+        border: round $secondary 50%;
     }
     AgentCard.tier-core:hover {
-        border: round $warning;
+        border: round $accent;
     }
     AgentCard.tier-core:focus {
-        border: double $warning;
+        border: round $accent;
     }
     """
 
@@ -79,13 +78,14 @@ class AgentCard(Widget, can_focus=True):
             f"{icon} [bold]{self.agent.id}[/]",
             classes="agent-card-name",
         )
+        tier_text = f"[{style}]{label}[/]" if style else label
         yield Static(
-            f"  [{style}]{label}[/] [dim]·[/] [dim]{self.agent.activation_label}[/]",
+            f"  {tier_text} · {_(self.agent.activation_label)}",
             classes="agent-card-tier",
         )
         tags_display = " ".join(self.agent.tags[:3])
         yield Static(
-            f"  [dim italic]{tags_display}[/]",
+            f"  [italic]{tags_display}[/]",
             classes="agent-card-tags",
         )
 

@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Button, Footer, Label, Select, Static, Switch
+from textual.widgets import Button, Label, Select, Static, Switch
 
 from tui.core.runner import PROVIDERS
+from tui.i18n import _
 from tui.widgets.header import ETXHeader
 
 if TYPE_CHECKING:
@@ -18,9 +19,24 @@ if TYPE_CHECKING:
     from tui.app import EuxisApp
 
 THEME_OPTIONS = [
-    ("ETX Dark", "textual-dark"),
-    ("ETX Light", "textual-light"),
-    ("High Contrast", "textual-ansi"),
+    ("Liquid Glass", "etx-liquid-glass"),
+    ("Liquid Glass Light", "etx-liquid-light"),
+    ("Catppuccin Mocha", "etx-catppuccin-mocha"),
+    ("Catppuccin Latte", "etx-catppuccin-latte"),
+    ("Tokyo Night", "etx-tokyo-night"),
+    ("Dracula", "etx-dracula"),
+    ("Nord", "etx-nord"),
+    ("Gruvbox Dark", "etx-gruvbox"),
+    ("Rosé Pine", "etx-rose-pine"),
+    ("Ayu Mirage", "etx-ayu-mirage"),
+]
+
+LOCALE_OPTIONS = [
+    ("English", "en"),
+    ("Français", "fr"),
+    ("Deutsch", "de"),
+    ("Español", "es"),
+    ("日本語", "ja"),
 ]
 
 
@@ -44,13 +60,13 @@ class SettingsScreen(Screen[None]):
 
         yield ETXHeader(id="header")
         with Container(id="settings-screen"):
-            yield Static("[bold]Settings[/]", classes="section-title")
+            yield Static(f"[bold]{_('Settings')}[/]", classes="section-title")
 
             with Container(id="settings-container"):
                 # Theme selection
-                yield Static("[bold cyan]Appearance[/]", classes="settings-group-title")
+                yield Static(f"[bold]{_('Appearance')}[/]", classes="settings-group-title")
                 with Horizontal(classes="settings-row"):
-                    yield Label("Theme", classes="settings-label")
+                    yield Label(_("Theme"), classes="settings-label")
                     yield Select(
                         [(name, value) for name, value in THEME_OPTIONS],
                         value=config.theme,
@@ -58,36 +74,47 @@ class SettingsScreen(Screen[None]):
                     )
 
                 # Provider selection
-                yield Static("[bold cyan]Provider[/]", classes="settings-group-title")
+                yield Static(f"[bold]{_('Provider')}[/]", classes="settings-group-title")
                 with Horizontal(classes="settings-row"):
-                    yield Label("Default Provider", classes="settings-label")
+                    yield Label(_("Default Provider"), classes="settings-label")
                     yield Select(
                         [(display, key) for key, display in PROVIDERS.items()],
                         value=config.default_provider,
                         id="provider-select",
                     )
 
-                # Display options
-                yield Static("[bold cyan]Display[/]", classes="settings-group-title")
+                # Language selection
+                yield Static(f"[bold]{_('Language')}[/]", classes="settings-group-title")
                 with Horizontal(classes="settings-row"):
-                    yield Label("Show Agent Tags", classes="settings-label")
+                    yield Label(_("Language"), classes="settings-label")
+                    yield Select(
+                        [(name, code) for name, code in LOCALE_OPTIONS],
+                        value=config.locale,
+                        id="locale-select",
+                    )
+
+                # Display options
+                yield Static(f"[bold]{_('Display')}[/]", classes="settings-group-title")
+                with Horizontal(classes="settings-row"):
+                    yield Label(_("Show Agent Tags"), classes="settings-label")
                     yield Switch(value=config.show_agent_tags, id="tags-switch")
                 with Horizontal(classes="settings-row"):
-                    yield Label("Reduced Motion", classes="settings-label")
+                    yield Label(_("Reduced Motion"), classes="settings-label")
                     yield Switch(value=config.reduced_motion, id="motion-switch")
 
                 # Accessibility
-                yield Static("[bold cyan]Accessibility[/]", classes="settings-group-title")
+                yield Static(f"[bold]{_('Accessibility')}[/]", classes="settings-group-title")
                 with Horizontal(classes="settings-row"):
-                    yield Label("Accessible Mode", classes="settings-label")
+                    yield Label(_("Accessible Mode"), classes="settings-label")
                     yield Switch(value=config.accessible_mode, id="accessible-switch")
 
                 # Actions
                 with Horizontal(classes="settings-row"):
-                    yield Button("Save", variant="primary", id="save-btn")
-                    yield Button("Cancel", id="cancel-btn")
+                    yield Button(_("Save"), variant="primary", id="save-btn")
+                    yield Button(_("Cancel"), id="cancel-btn")
 
-        yield Footer()
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header with current project context."""
@@ -116,12 +143,18 @@ class SettingsScreen(Screen[None]):
         if provider_select.value is not Select.BLANK:
             config.default_provider = str(provider_select.value)
 
+        locale_select = self.query_one("#locale-select", Select)
+        if locale_select.value is not Select.BLANK:
+            config.locale = str(locale_select.value)
+            from tui.i18n import set_locale
+            set_locale(config.locale)
+
         config.show_agent_tags = self.query_one("#tags-switch", Switch).value
         config.reduced_motion = self.query_one("#motion-switch", Switch).value
         config.accessible_mode = self.query_one("#accessible-switch", Switch).value
 
         config.save()
-        self.notify("Settings saved", severity="information")
+        self.notify(_("Settings saved"), severity="information")
         self.app.pop_screen()
 
     def action_go_back(self) -> None:

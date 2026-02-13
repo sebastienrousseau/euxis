@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, ClassVar
 
 from textual.command import Hit, Hits, Provider
 
+from tui.i18n import _
+
 if TYPE_CHECKING:
     from tui.app import EuxisApp
 
@@ -82,7 +84,7 @@ class SquadCommandProvider(Provider):
                 chain_str = " → ".join(combo.chain)
                 yield Hit(
                     match,
-                    matcher.highlight(f"{combo.name} (combo)"),
+                    matcher.highlight(f"{combo.name} ({_('combo')})"),
                     self._make_combo_callback(combo.id),
                     help=f"{combo.description} — {chain_str}",
                 )
@@ -129,13 +131,13 @@ class SystemCommandProvider(Provider):
         matcher = self.matcher(query)
 
         for name, description, action in self.SYSTEM_COMMANDS:
-            match = matcher.match(f"{name} {description}")
+            match = matcher.match(f"{_(name)} {_(description)}")
             if match > 0:
                 yield Hit(
                     match,
-                    matcher.highlight(name),
+                    matcher.highlight(_(name)),
                     self._make_command_callback(action),
-                    help=description,
+                    help=_(description),
                 )
 
     def _make_command_callback(self, action: str) -> Callable[[], None]:

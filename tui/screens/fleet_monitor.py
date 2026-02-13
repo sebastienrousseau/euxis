@@ -3,12 +3,13 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.css.query import NoMatches
 from textual.screen import Screen
-from textual.widgets import Footer, ProgressBar, Static
+from textual.widgets import Input, ProgressBar, Static
 
 from tui.core.runner import run_combo, run_squad
 from tui.widgets.header import ETXHeader
@@ -71,7 +72,7 @@ class FleetMonitorScreen(Screen[None]):
     """Monitor screen for squad deployments and dispatch operations."""
 
     BINDINGS = [
-        ("escape", "go_back", "Back"),
+        ("escape", "go_back", "Dashboard"),
         ("ctrl+k", "app.command_palette", "Commands"),
     ]
 
@@ -106,7 +107,8 @@ class FleetMonitorScreen(Screen[None]):
 
             yield OutputPanel(id="monitor-output")
 
-        yield Footer()
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and build agent monitor rows."""
@@ -132,6 +134,13 @@ class FleetMonitorScreen(Screen[None]):
         if self.task_description:
             self.run_worker(self._execute_operation(), exclusive=True)
 
+    # Patterns from euxis-combo / euxis-squad / dispatch.sh output
+    _RE_STEP = re.compile(r"\s*Step\s+(\d+)/(\d+):\s+(\S+)")
+    _RE_AGENT = re.compile(r"Agent:\s*(\S+)")
+    _RE_DELEGATING = re.compile(r"Delegating to\s+(\S+)")
+    _RE_COMPLETE = re.compile(r"(?:complete|finished|done)\b", re.IGNORECASE)
+    _RE_ERROR = re.compile(r"(?:error|failed|abort)", re.IGNORECASE)
+
     async def _execute_operation(self) -> None:
         output = self.query_one("#monitor-output", OutputPanel)
         output.write_status(f"Starting {self.operation_type}: {self.operation_id}")
@@ -144,28 +153,137 @@ class FleetMonitorScreen(Screen[None]):
             stream = run_combo(self.operation_id, self.task_description)
 
         current_agent = None
+        completed_count = 0
+        total = len(self.members) or 1
+
         try:
             async for line in stream:
                 output.write_line(line)
 
-                # Parse agent status from output lines
-                if "[euxis]" in line and "Agent:" in line:
-                    agent_name = line.split("Agent:")[-1].strip()
+                # ── Combo step: "  Step 1/4: planner" ──
+                step_match = self._RE_STEP.search(line)
+                if step_match:
+                    step_num = int(step_match.group(1))
+                    step_total = int(step_match.group(2))
+                    agent_name = step_match.group(3)
                     if current_agent and current_agent != agent_name:
                         self._set_agent_status(current_agent, "complete")
+                        completed_count += 1
                     current_agent = agent_name
-                    self._set_agent_status(agent_name, "running", 50)
+                    progress = int((step_num / step_total) * 100)
+                    self._set_agent_status(agent_name, "running", max(progress, 10))
+                    continue
 
+                # ── Dispatch-style: "[euxis] ... Agent: orchestrator" ──
+                if "Agent:" in line:
+                    agent_match = self._RE_AGENT.search(line)
+                    if agent_match:
+                        agent_name = agent_match.group(1)
+                        if current_agent and current_agent != agent_name:
+                            self._set_agent_status(current_agent, "complete")
+                            completed_count += 1
+                        current_agent = agent_name
+                        progress = int(((completed_count + 1) / total) * 100)
+                        self._set_agent_status(agent_name, "running", max(progress, 10))
+                        continue
+
+                # ── Delegation: "Delegating to sub-agent..." ──
+                if "Delegating to" in line:
+                    deleg_match = self._RE_DELEGATING.search(line)
+                    if deleg_match:
+                        agent_name = deleg_match.group(1)
+                        if current_agent and current_agent != agent_name:
+                            self._set_agent_status(current_agent, "complete")
+                            completed_count += 1
+                        current_agent = agent_name
+                        self._set_agent_status(agent_name, "running", 50)
+                        continue
+
+                # ── Error in output ──
+                if current_agent and self._RE_ERROR.search(line) and "[euxis]" in line:
+                    self._set_agent_status(current_agent, "error")
+
+            # Mark final agent complete
             if current_agent:
                 self._set_agent_status(current_agent, "complete")
+
+            # Mark any remaining agents as complete
+            for member in self.members:
+                try:
+                    row = self.query_one(f"#monitor-{member}", AgentMonitorRow)
+                    if row._status == "pending":
+                        row.set_status("complete")
+                except NoMatches:
+                    pass
 
             output.write_separator()
             output.write_status("Operation complete.", "green")
             self.notify("Fleet operation complete", severity="information")
+            self._show_next_actions(output)
 
         except (OSError, RuntimeError, ValueError) as exc:
+            if current_agent:
+                self._set_agent_status(current_agent, "error")
+            output.write_separator()
             output.write_status(f"Error: {exc}", "red")
             self.notify(f"Fleet error: {exc}", severity="error")
+            self._show_next_actions(output)
+
+    def _show_next_actions(self, output: OutputPanel) -> None:
+        """Show post-completion hints and mount command input."""
+        output.write_separator()
+        output.write_status("What's next?")
+        output.write_line(
+            "  Type a new task below to re-run, "
+            "or press Esc to return to the dashboard."
+        )
+
+        # Mount the command input above the shortcut bar
+        container = self.query_one("#fleet-monitor", Container)
+        task_input = Input(
+            placeholder=f"Re-run {self.operation_id}, or Esc → Dashboard, ^K → Commands",
+            id="next-task-input",
+        )
+        container.mount(task_input)
+        task_input.focus()
+
+        # Update shortcut bar for post-completion context
+        from tui.widgets.shortcut_bar import ShortcutBar
+        try:
+            bar = self.query_one(ShortcutBar)
+            bar.update(
+                "[bold] Esc [/][dim] Dashboard[/]  "
+                "[bold] Enter [/][dim] Re-run[/]  "
+                "[bold] ^K [/][dim] Commands[/]  "
+                "[bold] ^P [/][dim] Playbooks[/]  "
+                "[bold] ^Q [/][dim] Quit[/]"
+            )
+        except NoMatches:
+            pass
+
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Re-run the operation with a new task."""
+        if event.input.id != "next-task-input":
+            return
+
+        task = event.value.strip()
+        if not task:
+            return
+
+        # Reset the UI for a fresh run
+        self.task_description = task
+        event.input.remove()
+
+        # Reset agent rows
+        for member in self.members:
+            self._set_agent_status(member, "pending")
+
+        # Clear output
+        output = self.query_one("#monitor-output", OutputPanel)
+        output.clear()
+
+        # Re-run
+        self.run_worker(self._execute_operation(), exclusive=True)
 
     def _set_agent_status(self, agent_id: str, status: str, progress: int = 0) -> None:
         try:
@@ -175,5 +293,5 @@ class FleetMonitorScreen(Screen[None]):
             pass  # Agent not in monitor grid
 
     def action_go_back(self) -> None:
-        """Return to the previous screen."""
+        """Return to the dashboard."""
         self.app.pop_screen()

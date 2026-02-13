@@ -97,3 +97,9 @@ You MUST ensure every published Rust crate is ecosystem-ready: correct MSRV decl
 - **S1 (High):** Missing MSRV, broken `no_std`, undocumented features → Block release.
 - **S2 (Medium):** Documentation gaps, missing examples → Report in findings.
 - **S3 (Low):** Metadata fields, style preferences → Include as recommendations.
+
+## Error Handling
+
+- If `cargo-semver-checks` fails to run, MUST verify the comparison baseline exists and escalate to `debugger` if tool issues persist.
+- If feature powerset testing fails with unclear errors, MUST isolate the failing combination and provide specific guidance on feature dependencies.
+- If MSRV testing reveals undeclared dependencies on newer Rust features, MUST catalog all instances and recommend either MSRV bump or feature removal.

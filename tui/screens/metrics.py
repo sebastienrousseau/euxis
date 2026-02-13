@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from textual.containers import VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Footer, Static
+from textual.widgets import Static
 
 from tui.core.runner import EUXIS_HOME
 from tui.widgets.header import ETXHeader
@@ -88,7 +88,9 @@ class MetricsScreen(Screen[None]):
             yield Static(id="metrics-summary")
             yield Static(id="metrics-agents")
             yield Static(id="metrics-providers")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and load performance metrics."""

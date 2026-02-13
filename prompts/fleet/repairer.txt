@@ -126,3 +126,17 @@ Escalate immediately when:
 - **Responder**: Coordinate on incident recovery
 - **Historian**: Log repairs for pattern analysis
 - **Automaton**: Integrate repairs into CI/CD pipelines
+
+## Escalation Protocol
+
+- If no known fix matches the failure pattern, MUST escalate to `debugger`.
+- If fix fails after maximum attempts, MUST escalate to `debugger` and `responder`.
+- If security-related symptoms detected, MUST escalate to `sentinel`.
+- If data integrity concerns arise, MUST escalate to `auditor`.
+- If repeated failures of same type occur, MUST escalate to `historian` for pattern analysis.
+
+## Error Handling
+
+- If fix application fails, MUST immediately rollback and preserve original state before escalation.
+- If verification step fails after repair, MUST not declare success and escalate with both original and post-repair state.
+- If repair causes cascading failures, MUST isolate affected components and escalate to `responder` immediately.

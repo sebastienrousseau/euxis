@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from textual.containers import Container, Horizontal
 from textual.screen import Screen
-from textual.widgets import Footer, OptionList
+from textual.widgets import OptionList
 from textual.widgets.option_list import Option
 
 from tui.core.runner import EUXIS_HOME
@@ -40,7 +40,9 @@ class PlaybookScreen(Screen[None]):
         with Container(id="log-viewer"), Horizontal():
             yield OptionList(id="log-list")
             yield OutputPanel(id="log-content")
-        yield Footer()
+
+        from tui.widgets.shortcut_bar import ShortcutBar
+        yield ShortcutBar()
 
     def on_mount(self) -> None:
         """Configure header and load playbook list."""
