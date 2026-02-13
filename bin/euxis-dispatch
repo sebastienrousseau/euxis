@@ -150,7 +150,8 @@ REGISTRY_FILE="$EUXIS_HOME/registry.json"
 if [[ -f "$REGISTRY_FILE" ]]; then
     INVALID_AGENTS=()
     for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-        AGENT_NAME=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+        AGENT_NAME=$(jq -r ".dispatches[$i].agent // empty" "$MANIFEST_FILE")
+        [[ -z "$AGENT_NAME" ]] && continue
         if ! jq -e --arg id "$AGENT_NAME" '.agents[] | select(.id == $id)' "$REGISTRY_FILE" &>/dev/null; then
             INVALID_AGENTS+=("$AGENT_NAME")
         fi
@@ -167,8 +168,10 @@ fi
 # Pre-flight: verify that each dispatch's verify_cmd binary exists
 MISSING_CMDS=()
 for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-    VERIFY_CMD=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
-    AGENT_NAME=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
+    VERIFY_CMD=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
+    AGENT_NAME=$(jq -r ".dispatches[$i].agent // empty" "$MANIFEST_FILE")
+    # Skip dispatches with no verify command or no agent
+    [[ -z "$VERIFY_CMD" || -z "$AGENT_NAME" ]] && continue
     # Extract the first binary from the command (skip leading ! and whitespace)
     BINARY=$(echo "$VERIFY_CMD" | sed 's/^[[:space:]]*!*[[:space:]]*//' | awk '{print $1}')
     if [[ -n "$BINARY" ]] && ! command -v "$BINARY" &>/dev/null; then
@@ -388,7 +391,7 @@ dispatch_agent() {
 
     AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
     TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-    VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+    VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
     PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
     echo "  [$PRIORITY] -> $AGENT ($MODE)"
@@ -424,7 +427,7 @@ dispatch_agent_with_cleanup() {
 
     AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
     TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-    VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+    VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
     PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
     LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
@@ -736,13 +739,13 @@ else
     for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
         AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
         TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-        VERIFY=$(jq -r ".dispatches[$i].verify_cmd" "$MANIFEST_FILE")
+        VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
         PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
         echo "---------------------------------------------------"
         echo "  [$PRIORITY] -> $AGENT ($MODE)"
         echo "  Task: $TASK"
-        echo "  Verify: $VERIFY"
+        [[ -n "$VERIFY" ]] && echo "  Verify: $VERIFY"
 
         LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
 
@@ -851,8 +854,8 @@ else
     # Give monitor a moment to render final state, then stop
     sleep 2
     if [[ -n "${_monitor_pid:-}" ]]; then
-        kill "$_monitor_pid" 2>/dev/null
-        wait "$_monitor_pid" 2>/dev/null
+        kill "$_monitor_pid" 2>/dev/null || true
+        wait "$_monitor_pid" 2>/dev/null || true
     fi
     echo ""
 
