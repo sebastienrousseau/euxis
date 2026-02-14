@@ -90,9 +90,9 @@ resolve_provider_config() {
             PROVIDER_MODEL="claude-sonnet-4-20250514"
             PROVIDER_FLAGS="--cache-prompt --stream"
             ;;
-        gemini)   # The Researcher (Massive Context)
+        gemini)   # The Researcher (Massive Context, built-in search grounding)
             PROVIDER_MODEL="gemini-2.0-flash"
-            PROVIDER_FLAGS="--search-web"
+            PROVIDER_FLAGS=""
             ;;
         openai)   # The Generalist
             PROVIDER_MODEL="gpt-4o"
