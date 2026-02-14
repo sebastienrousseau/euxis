@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
@@ -172,6 +176,7 @@ jobs:
             pip-audit-report.json
             safety-report.json
             bandit-report.json
+          retention-days: 1
 
   # ========================================
   # TEST SUITE WITH COVERAGE REQUIREMENT
@@ -234,6 +239,7 @@ jobs:
           path: |
             htmlcov-${{ matrix.os }}/
             coverage-${{ matrix.os }}.xml
+          retention-days: 1
 
   # ========================================
   # INTEGRATION & END-TO-END TESTS
@@ -377,3 +383,4 @@ jobs:
         with:
           name: merge-gate-report
           path: merge-gate-report.md
+          retention-days: 1

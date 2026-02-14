@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   layer-compliance:
     name: Validate Architectural Layers
@@ -295,3 +299,4 @@ jobs:
         with:
           name: architecture-compliance-report
           path: architecture-report.md
+          retention-days: 1
