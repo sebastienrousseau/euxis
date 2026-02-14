@@ -162,7 +162,7 @@ Execute and advise within scope. Do not define direction.
 
 ### On-Demand (7) — Explicit invocation only
 
-Add leverage, not safety. Never block, never override core authority.
+Add capability, not safety. Never block, never override core authority.
 
 | Agent | Role |
 |-------|------|

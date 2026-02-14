@@ -76,7 +76,7 @@ REQUIRED_TEST_AGENTS=("architect" "orchestrator")
 for agent in "${REQUIRED_TEST_AGENTS[@]}"; do
     _agent_found=false
     if [[ -f "$EUXIS_HOME/registry.db" ]]; then
-        [[ -n "$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT 1 FROM agents WHERE id='${agent}'" 2>/dev/null)" ]] && _agent_found=true
+        [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='${agent}'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _agent_found=true
     fi
     if [[ "$_agent_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; then
         jq -e ".agents[] | select(.id == \"$agent\")" "$EUXIS_HOME/registry.json" &>/dev/null && _agent_found=true

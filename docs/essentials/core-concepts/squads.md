@@ -169,7 +169,7 @@ euxis-squad deploy <squad-id> "<task description>"
 
 - **Squad lead** coordinates execution and resolves conflicts
 - **Core agents** in squad maintain blocking authority for quality
-- **Mixed tiers** provide balanced perspective (authority + execution + leverage)
+- **Mixed tiers** provide balanced perspective (authority + execution + capability)
 - **Escalation** follows individual agent escalation protocols
 
 ## Available Options

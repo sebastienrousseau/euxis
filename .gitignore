@@ -3,6 +3,10 @@ data/projects/
 data/cortex/db/
 data/lifecycle/
 data/perf/
+data/bus/pipes/
+
+# Vector database (runtime data)
+cortex_db/
 
 # Audit artifacts (session-specific, not committed)
 docs/audits/

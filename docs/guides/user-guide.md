@@ -159,7 +159,7 @@ Execute and advise within scope. Direction comes from core agents.
 
 ### On-Demand (7) — Explicit invocation only
 
-Add leverage without blocking. Do not override core authority.
+Add capability without blocking. Do not override core authority.
 
 | Agent | Role |
 |-------|------|

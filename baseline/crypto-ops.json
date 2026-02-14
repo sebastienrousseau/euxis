@@ -1,0 +1,38 @@
+[
+  {
+    "test_id": 0,
+    "input_data": "test",
+    "key_pattern": "a",
+    "algorithm": "AES-256-GCM",
+    "iv_length": 12,
+    "ciphertext_length": 20,
+    "successful_roundtrip": true
+  },
+  {
+    "test_id": 1,
+    "input_data": "Hello, World!",
+    "key_pattern": "b",
+    "algorithm": "AES-256-GCM",
+    "iv_length": 12,
+    "ciphertext_length": 29,
+    "successful_roundtrip": true
+  },
+  {
+    "test_id": 2,
+    "input_data": "Multi-line\ntest\ndata",
+    "key_pattern": "c",
+    "algorithm": "AES-256-GCM",
+    "iv_length": 12,
+    "ciphertext_length": 36,
+    "successful_roundtrip": true
+  },
+  {
+    "test_id": 3,
+    "input_data": "Special chars: \u00e0\u00e1\u00e2\u00e3\u00e4\u00e5 \u03b1\u03b2\u03b3\u03b4\u03b5\u03b6",
+    "key_pattern": "d",
+    "algorithm": "AES-256-GCM",
+    "iv_length": 12,
+    "ciphertext_length": 56,
+    "successful_roundtrip": true
+  }
+]

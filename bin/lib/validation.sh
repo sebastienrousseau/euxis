@@ -219,7 +219,8 @@ validate_euxis_structure() {
     if [[ -f "$euxis_home/registry.db" ]]; then
         # Validate SQLite database
         local agent_count
-        agent_count=$(sqlite3 -init /dev/null "$euxis_home/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null)
+        # Use Python for SQLite access (more portable than sqlite3 CLI)
+        agent_count=$(python3 -c "import sqlite3; conn = sqlite3.connect('$euxis_home/registry.db'); print(conn.execute('SELECT COUNT(*) FROM agents').fetchone()[0])" 2>/dev/null)
         if [[ -n "$agent_count" && "$agent_count" -gt 0 ]]; then
             validation_pass "Registry database valid ($agent_count agents)"
         else

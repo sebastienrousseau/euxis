@@ -123,7 +123,7 @@ else
 fi
 
 # Validate current version consistency (SQLite-first, JSON fallback)
-CURRENT_VERSION=$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null) || true
+CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
 [[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
 if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
     validation_error "Cannot determine current version from registry"
@@ -270,7 +270,7 @@ SEMANTIC_ERRORS=0
 # Check if architect agent exists (SQLite-first, JSON fallback)
 _architect_found=false
 if [[ -f "$EUXIS_HOME/registry.db" ]]; then
-    [[ -n "$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT 1 FROM agents WHERE id='architect'" 2>/dev/null)" ]] && _architect_found=true
+    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
 fi
 if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; then
     jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/registry.json" &>/dev/null && _architect_found=true
@@ -612,7 +612,7 @@ if [[ $DOC_FAILURES -eq 0 ]]; then
 fi
 
 # 6d. README references correct version (SQLite-first, JSON fallback)
-CURRENT_VERSION=$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null) || true
+CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
 [[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
     if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then

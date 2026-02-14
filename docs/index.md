@@ -64,7 +64,7 @@ Your specialists handle research, design, implementation, security, testing, and
 - **Accountant** — Tracks costs and resources
 - **Repairer** — Automated fixes and self-healing
 
-**11 On-Demand & Specialist Agents** provide leverage when needed:
+**11 On-Demand & Specialist Agents** handle specialized work:
 - **Researcher** — Analyzes complex technical decisions
 - **Optimizer** — Eliminates bottlenecks
 - **Responder** — Manages critical failures

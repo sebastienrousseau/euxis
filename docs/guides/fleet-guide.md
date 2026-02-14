@@ -57,7 +57,7 @@ These agents execute domain-specific work when you call them. They advise and de
 
 ### On-Demand (7): Explicit invocation only
 
-These agents provide specialized leverage for growth and communication tasks. They add capability: not safety gates. Call them when you need their specific expertise.
+These agents handle specialized growth and communication tasks. They add capability: not safety gates. Call them when you need their specific expertise.
 
 | Agent | What It Does | When to Use It |
 |-------|--------------|----------------|
@@ -143,7 +143,7 @@ Every dispatch starts with a manifest. Here is the format:
 
 ## Memory-Driven Operation
 
-Agents leverage the Cortex for persistent, tri-typed memory across sessions. Before starting complex tasks, agents recall proven patterns and contraindications to avoid repeating failed approaches.
+Agents use the Cortex for persistent, tri-typed memory across sessions. Before starting complex tasks, agents recall proven patterns and contraindications to avoid repeating failed approaches.
 
 **For complete memory system documentation, commands, and type classification, see [User Guide](user-guide.md#tri-typed-memory-system).**
 

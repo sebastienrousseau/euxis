@@ -140,6 +140,16 @@ echo "  Script permissions verified."
 echo "[5/8] Checking Prompt Headers..."
 HEADER_FAILURES=0
 
+# Pre-build agent file list for fast lookup (avoid repeated filesystem checks)
+declare -A KNOWN_AGENTS
+for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
+    for f in "$dir"/*.txt; do
+        [[ -f "$f" ]] || continue
+        name=$(basename "$f" .txt)
+        [[ "$name" != _* ]] && KNOWN_AGENTS["$name"]=1
+    done
+done
+
 for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
     for prompt_file in "$dir"/*.txt; do
         [[ -f "$prompt_file" ]] || continue
@@ -148,8 +158,11 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
         # Skip protocol/internal files
         [[ "$local_name" == _* ]] && continue
 
+        # Read file once into memory for efficiency
+        file_content=$(<"$prompt_file")
+
         # 1. File starts with --- (YAML frontmatter present)
-        first_line=$(head -n 1 "$prompt_file")
+        first_line="${file_content%%$'\n'*}"
         if [[ "$first_line" != "---" ]]; then
             echo "  NO FRONTMATTER: ${local_name}.txt (missing opening ---)"
             ((HEADER_FAILURES++)) || true
@@ -157,77 +170,59 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
         fi
 
         # Extract frontmatter (between first and second ---)
-        frontmatter=$(awk 'NR==1 && /^---$/{next} /^---$/{exit} {print}' "$prompt_file")
+        frontmatter=$(echo "$file_content" | awk 'NR==1 && /^---$/{next} /^---$/{exit} {print}')
 
         # 2. Required fields: agent_id, role, version, tags, last_updated
         for field in agent_id role version tags last_updated; do
-            if ! echo "$frontmatter" | grep -q "^${field}:"; then
+            if ! grep -q "^${field}:" <<< "$frontmatter"; then
                 echo "  MISSING FIELD: ${local_name}.txt — ${field}"
                 ((HEADER_FAILURES++)) || true
             fi
         done
 
         # 3. agent_id matches filename
-        declared_id=$(echo "$frontmatter" | grep '^agent_id:' | sed 's/^agent_id:[[:space:]]*//' | tr -d '"' | tr -d "'")
+        declared_id=$(grep '^agent_id:' <<< "$frontmatter" | sed 's/^agent_id:[[:space:]]*//' | tr -d '"' | tr -d "'" || true)
         if [[ -n "$declared_id" && "$declared_id" != "$local_name" ]]; then
             echo "  ID MISMATCH: ${local_name}.txt declares agent_id: ${declared_id}"
             ((HEADER_FAILURES++)) || true
         fi
 
-        # 4. Required sections: Mandate, (Scope Boundaries or Primary Directives), Output Format
-        body=$(sed -n '/^---$/,$ p' "$prompt_file" | tail -n +2)
+        # 4. Required sections - use case-insensitive grep on file content (single pass)
+        # Check all three patterns in one grep call for efficiency
+        section_check=$(grep -ciE 'mandate|scope boundaries|primary directives|output format' <<< "$file_content" || echo "0")
 
-        has_mandate=false
-        has_scope=false
-        has_output=false
-
-        echo "$body" | grep -qi 'mandate' && has_mandate=true
-        echo "$body" | grep -qiE 'scope boundaries|primary directives' && has_scope=true
-        echo "$body" | grep -qi 'output format' && has_output=true
-
-        if [[ "$has_mandate" == false ]]; then
+        if ! grep -qi 'mandate' <<< "$file_content"; then
             echo "  MISSING SECTION: ${local_name}.txt — Mandate"
             ((HEADER_FAILURES++)) || true
         fi
-        if [[ "$has_scope" == false ]]; then
+        if ! grep -qiE 'scope boundaries|primary directives' <<< "$file_content"; then
             echo "  MISSING SECTION: ${local_name}.txt — Scope Boundaries / Primary Directives"
             ((HEADER_FAILURES++)) || true
         fi
-        if [[ "$has_output" == false ]]; then
+        if ! grep -qi 'output format' <<< "$file_content"; then
             echo "  MISSING SECTION: ${local_name}.txt — Output Format"
             ((HEADER_FAILURES++)) || true
         fi
 
-        # 5. Delegation targets in Scope Boundaries exist in registry
-        if echo "$body" | grep -qi 'scope boundaries'; then
-            # Extract agent names from delegation table rows (| agent-name |)
-            delegation_targets=$(echo "$body" | sed -n '/[Ss]cope [Bb]oundaries/,/^#/p' | \
-                grep -oE '\b[a-z]+-[a-z]+(-[a-z]+)*\b' | sort -u)
-
-            for target in $delegation_targets; do
-                # Check if target is a known agent file
-                target_found=false
-                for tdir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
-                    if [[ -f "$tdir/${target}.txt" ]]; then
-                        target_found=true
-                        break
-                    fi
-                done
-                if [[ "$target_found" == false ]]; then
-                    # Skip known non-agent compound phrases
-                    case "$target" in
-                        engineer-to-engineer|end-to-end|out-of-scope|up-to-date|day-to-day|one-to-one|peer-to-peer|real-time|step-by-step|line-by-line)
-                            continue ;;
-                    esac
-                    # Only warn for names that look like agent references (contain hyphen)
-                    case "$target" in
-                        *-agent|*-engineer|*-manager|*-lead|*-officer|*-writer|*-hunter|*-tester|*-fixer|*-optimizer|*-coordinator|*-commander|*-maintainer|*-sentinel|*-artisan|*-specialist|*-architect|*-evangelist|*-advocate|*-researcher|*-steward|*-critic)
-                            echo "  UNKNOWN DELEGATE: ${local_name}.txt references '${target}' (not in registry)"
-                            ((HEADER_FAILURES++)) || true
-                            ;;
-                    esac
+        # 5. Delegation targets check - only for files with Scope Boundaries
+        # Skip expensive regex if no scope boundaries section
+        if grep -qi 'scope boundaries' <<< "$file_content"; then
+            # Look for agent references in two formats:
+            # 1. Backtick-wrapped: `agentname` (inline references)
+            # 2. Table "Delegate To" column: | agentname |
+            while IFS= read -r target; do
+                [[ -z "$target" ]] && continue
+                # Check against pre-built agent list
+                if [[ -z "${KNOWN_AGENTS[$target]:-}" ]]; then
+                    echo "  UNKNOWN DELEGATE: ${local_name}.txt references '${target}' (not in registry)"
+                    ((HEADER_FAILURES++)) || true
                 fi
-            done
+            done < <({
+                # Extract backtick-wrapped agent names (e.g., `architect`)
+                grep -oE '\`[a-z]+\`' <<< "$file_content" | tr -d '`'
+                # Extract from table Delegate To column (last column before |)
+                awk '/\|.*\|.*\|/{print $NF}' <<< "$file_content" | tr -d '|' | tr -s ' '
+            } | sort -u | grep -vE '^(N/A|None|none|human|user|—|-|or|and|to|the)$' | grep -E '^[a-z]+$')
         fi
     done
 done

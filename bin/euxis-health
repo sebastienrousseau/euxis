@@ -103,7 +103,8 @@ REGISTRY_DB="${EUXIS_HOME}/registry.db"
 # Try to get registered agent IDs (SQLite-first, JSON fallback)
 REGISTERED=""
 if [[ -f "$REGISTRY_DB" ]]; then
-    REGISTERED=$(sqlite3 -init /dev/null "$REGISTRY_DB" "SELECT id FROM agents ORDER BY id" 2>/dev/null | sort)
+    # Use Python for SQLite access (more portable than sqlite3 CLI)
+    REGISTERED=$(python3 -c "import sqlite3; conn = sqlite3.connect('$REGISTRY_DB'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id').fetchall()]))" 2>/dev/null | sort)
 fi
 if [[ -z "$REGISTERED" ]] && [[ -f "$REGISTRY" ]]; then
     if command -v jq &>/dev/null; then

@@ -50,7 +50,7 @@ Execute and advise within scope. Do not define direction.
 **Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`
 
 ### On-Demand (7): Explicit invocation only
-Add leverage, not safety. Never block, never override core authority.
+Add capability, not safety. Never block, never override core authority.
 
 | Agent | Domain |
 |-------|--------|
@@ -147,7 +147,7 @@ For permanent fleet addition, place prompt in `~/.euxis/prompts/fleet/<agent-id>
 
 - **Core agents** can block progress to maintain quality
 - **Default agents** execute within scope, advise but don't override
-- **On-demand agents** add leverage without safety authority
+- **On-demand agents** add capability without safety authority
 - **Specialist agents** provide deep domain expertise only
 
 **Escalation**: Every agent must know when to delegate outside their scope and to whom.

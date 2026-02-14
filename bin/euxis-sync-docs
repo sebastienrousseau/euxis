@@ -4,6 +4,37 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-sync-docs — Secure Documentation Synchronization
+
+Usage:
+  euxis-sync-docs [OPTIONS]
+
+Uses the Librarian agent to generate and apply documentation patches
+with human-in-the-loop approval.
+
+Options:
+  -h, --help    Show this help text
+
+Security:
+  - Validates patches against destructive command patterns
+  - Requires interactive approval before execution
+  - Blocks: rm -rf, mkfs, dd, chmod 777, curl|bash, etc.
+
+Examples:
+  euxis-sync-docs           # Generate and review doc patches
+  euxis-sync-docs --help    # Show this help
+EOF
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
 export PATH="$PATH:$HOME/bin"
 
 PATCH_FILE=$(mktemp /tmp/euxis_doc_patch.XXXXXX)
