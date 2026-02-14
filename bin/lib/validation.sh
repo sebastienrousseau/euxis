@@ -85,7 +85,7 @@ validate_agent_name() {
     return 0
 }
 
-# Validate task input for security
+# Validate task input for security (including prompt injection detection)
 validate_task_input() {
     local task="$1"
 
@@ -101,8 +101,53 @@ validate_task_input() {
         return 1
     fi
 
+    # Prompt injection detection: block common goal-hijacking patterns
+    local task_lower
+    task_lower=$(printf '%s' "$task" | tr '[:upper:]' '[:lower:]')
+    local -a injection_patterns=(
+        "ignore previous"
+        "ignore all previous"
+        "ignore your instructions"
+        "disregard previous"
+        "disregard your"
+        "forget your instructions"
+        "override your"
+        "new instructions:"
+        "system prompt:"
+        "you are now"
+        "pretend you are"
+        "act as if"
+        "bypass approval"
+        "skip verification"
+        "skip all gates"
+        "disable security"
+        "dangerously"
+    )
+    for pattern in "${injection_patterns[@]}"; do
+        if [[ "$task_lower" == *"$pattern"* ]]; then
+            validation_error "Task input rejected: potential prompt injection detected (pattern: '$pattern')"
+            return 1
+        fi
+    done
+
+    # Block shell metacharacters in task input (prevent command injection via task)
+    if [[ "$task" =~ [\`\$\(] && "$task" =~ [\)\'] ]]; then
+        validation_warning "Task input contains shell metacharacters — treating as literal text"
+    fi
+
     validation_pass "Task input is valid"
     return 0
+}
+
+# Sanitize task input for safe embedding in prompts
+# Strips dangerous sequences while preserving legitimate content
+sanitize_task_input() {
+    local task="$1"
+    # Remove null bytes and control characters (except newline/tab)
+    task=$(printf '%s' "$task" | tr -d '\000-\010\013\014\016-\037')
+    # Escape backticks to prevent shell expansion in prompts
+    task="${task//\`/\\\\}"
+    printf '%s' "$task"
 }
 
 # Validate file exists and is executable

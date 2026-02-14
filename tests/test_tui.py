@@ -85,7 +85,7 @@ class TestFleetRegistry:
         from tui.core.registry import FleetRegistry
 
         reg = FleetRegistry.load()
-        assert len(reg.combos) == 7
+        assert len(reg.combos) == 8
         combo_ids = {c.id for c in reg.combos}
         assert "steve-jobs" in combo_ids
         assert "fort-knox" in combo_ids

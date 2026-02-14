@@ -12,6 +12,9 @@ from typing import Any
 
 from textual.app import App, InvalidThemeError
 from textual.binding import Binding
+from textual.containers import Center, Vertical
+from textual.screen import ModalScreen
+from textual.widgets import Button, Label, Static
 
 from tui.commands import AgentCommandProvider, SquadCommandProvider, SystemCommandProvider
 from tui.core.config import ETXConfig
@@ -20,6 +23,64 @@ from tui.themes import ETX_THEMES, THEME_CYCLE
 from tui.core.registry import FleetRegistry
 from tui.core.runner import get_git_branch, get_project_name
 from tui.screens.dashboard import DashboardScreen
+
+
+class ConfirmDeployScreen(ModalScreen[bool]):
+    """Confirmation dialog before deploying agents, squads, or combos."""
+
+    DEFAULT_CSS = """
+    ConfirmDeployScreen {
+        align: center middle;
+    }
+    ConfirmDeployScreen > Vertical {
+        width: 60;
+        height: auto;
+        max-height: 16;
+        border: round $accent;
+        background: $panel;
+        padding: 1 2;
+    }
+    ConfirmDeployScreen .title {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+    ConfirmDeployScreen .buttons {
+        margin-top: 1;
+        height: 3;
+    }
+    """
+
+    def __init__(
+        self, operation: str, name: str, task: str = "", **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self._operation = operation
+        self._name = name
+        self._task = task
+
+    def compose(self):  # noqa: ANN201
+        """Build the confirmation dialog."""
+        task_preview = self._task[:80] + "..." if len(self._task) > 80 else self._task
+        with Vertical():
+            yield Label(f"Deploy {self._operation}?", classes="title")
+            yield Static(f"  {self._operation.capitalize()}: {self._name}")
+            if task_preview:
+                yield Static(f"  Task: {task_preview}")
+            with Center(classes="buttons"):
+                yield Button("Confirm", variant="success", id="confirm")
+                yield Button("Cancel", variant="error", id="cancel")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button press."""
+        self.dismiss(event.button.id == "confirm")
+
+    def key_escape(self) -> None:
+        """Cancel on Escape."""
+        self.dismiss(False)
+
+    def key_enter(self) -> None:
+        """Confirm on Enter."""
+        self.dismiss(True)
 
 
 TIPS = [
@@ -113,7 +174,7 @@ class EuxisApp(App):
         self.notify(_("Theme: {}").format(self.theme), timeout=2)
 
     def action_deploy_agent(self, agent_id: str, task: str = "") -> None:
-        """Open the agent execution screen for a specific agent."""
+        """Open the agent execution screen for a specific agent (with confirmation)."""
         from tui.screens.agent import AgentScreen
 
         agent = self.fleet_registry.get_agent(agent_id)
@@ -121,10 +182,21 @@ class EuxisApp(App):
             self.notify(_("Unknown agent: {}").format(agent_id), severity="error")
             return
 
-        self.push_screen(AgentScreen(agent, self.config.default_provider, initial_task=task))
+        def _on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self.push_screen(
+                    AgentScreen(agent, self.config.default_provider, initial_task=task)
+                )
+
+        self.push_screen(
+            ConfirmDeployScreen(
+                operation="agent", name=agent_id, task=task,
+            ),
+            callback=_on_confirm,
+        )
 
     def action_deploy_squad(self, squad_id: str, task: str = "") -> None:
-        """Open the fleet monitor for a squad deployment."""
+        """Open the fleet monitor for a squad deployment (with confirmation)."""
         from tui.screens.fleet_monitor import FleetMonitorScreen
 
         squad = None
@@ -137,17 +209,26 @@ class EuxisApp(App):
             self.notify(_("Unknown squad: {}").format(squad_id), severity="error")
             return
 
+        def _on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self.push_screen(
+                    FleetMonitorScreen(
+                        operation_type="squad",
+                        operation_id=squad_id,
+                        members=list(squad.members),
+                        task_description=task,
+                    )
+                )
+
         self.push_screen(
-            FleetMonitorScreen(
-                operation_type="squad",
-                operation_id=squad_id,
-                members=list(squad.members),
-                task_description=task,
-            )
+            ConfirmDeployScreen(
+                operation="squad", name=squad_id, task=task,
+            ),
+            callback=_on_confirm,
         )
 
     def action_deploy_combo(self, combo_id: str, task: str = "") -> None:
-        """Open the fleet monitor for a combo chain."""
+        """Open the fleet monitor for a combo chain (with confirmation)."""
         from tui.screens.fleet_monitor import FleetMonitorScreen
 
         combo = None
@@ -160,13 +241,22 @@ class EuxisApp(App):
             self.notify(_("Unknown combo: {}").format(combo_id), severity="error")
             return
 
+        def _on_confirm(confirmed: bool) -> None:
+            if confirmed:
+                self.push_screen(
+                    FleetMonitorScreen(
+                        operation_type="combo",
+                        operation_id=combo_id,
+                        members=list(combo.chain),
+                        task_description=task,
+                    )
+                )
+
         self.push_screen(
-            FleetMonitorScreen(
-                operation_type="combo",
-                operation_id=combo_id,
-                members=list(combo.chain),
-                task_description=task,
-            )
+            ConfirmDeployScreen(
+                operation="combo", name=combo_id, task=task,
+            ),
+            callback=_on_confirm,
         )
 
     def action_open_settings(self) -> None:

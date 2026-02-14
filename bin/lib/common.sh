@@ -15,6 +15,41 @@ set -euo pipefail
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # ============================================================================
+# PII Sanitization (applied to all log output)
+# ============================================================================
+
+# _sanitize_pii - Redact sensitive patterns from log messages
+#
+# DESCRIPTION:
+#     Strips email addresses, API keys, bearer tokens, IP addresses,
+#     and other PII from log messages before output. Enabled by default;
+#     disable with EUXIS_LOG_SANITIZE=0 for debugging.
+#
+# ARGUMENTS:
+#     $* (string)    Raw log message
+#
+# OUTPUTS:
+#     stdout         Sanitized log message
+_sanitize_pii() {
+    local msg="$*"
+    if [[ "${EUXIS_LOG_SANITIZE:-1}" == "0" ]]; then
+        printf '%s' "$msg"
+        return
+    fi
+    # Redact email addresses
+    msg=$(printf '%s' "$msg" | sed -E 's/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/[REDACTED_EMAIL]/g')
+    # Redact API keys (sk-*, key-*, AKIA*, etc.)
+    msg=$(printf '%s' "$msg" | sed -E 's/(sk-|key-|AKIA)[a-zA-Z0-9]{16,}/[REDACTED_KEY]/g')
+    # Redact bearer tokens
+    msg=$(printf '%s' "$msg" | sed -E 's/[Bb]earer [a-zA-Z0-9._-]{20,}/Bearer [REDACTED_TOKEN]/g')
+    # Redact IPv4 addresses (except localhost)
+    msg=$(printf '%s' "$msg" | sed -E 's/([0-9]{1,3}\.){3}[0-9]{1,3}/[REDACTED_IP]/g')
+    # Restore localhost
+    msg=$(printf '%s' "$msg" | sed 's/\[REDACTED_IP\]:/<localhost>:/g; s/\[REDACTED_IP\]/<localhost>/g')
+    printf '%s' "$msg"
+}
+
+# ============================================================================
 # Logging Functions
 # ============================================================================
 
@@ -34,7 +69,7 @@ EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 #     log_info "Starting deployment"
 #     log_info "Processed" $count "files"
 log_info() {
-    echo "[euxis] $*" >&2
+    echo "[euxis] $(_sanitize_pii "$*")" >&2
 }
 
 # log_error - Log error message to stderr
@@ -53,7 +88,7 @@ log_info() {
 #     log_error "Failed to connect to provider"
 #     log_error "Invalid agent:" "$agent_name"
 log_error() {
-    echo "[euxis] ERROR: $*" >&2
+    echo "[euxis] ERROR: $(_sanitize_pii "$*")" >&2
 }
 
 # log_debug - Log debug message to stderr (conditional)
@@ -75,7 +110,7 @@ log_error() {
 #     log_debug "Processing file" "$filename"
 #     EUXIS_DEBUG=1 script.sh  # Enable debug output
 log_debug() {
-    [[ "${EUXIS_DEBUG:-0}" == "1" ]] && echo "[euxis] DEBUG: $*" >&2 || true
+    [[ "${EUXIS_DEBUG:-0}" == "1" ]] && echo "[euxis] DEBUG: $(_sanitize_pii "$*")" >&2 || true
 }
 
 # log_warn - Log warning message to stderr
@@ -94,7 +129,7 @@ log_debug() {
 #     log_warn "Performance budget exceeded"
 #     log_warn "Deprecated feature used:" "$feature"
 log_warn() {
-    echo "[euxis] WARN: $*" >&2
+    echo "[euxis] WARN: $(_sanitize_pii "$*")" >&2
 }
 
 # ============================================================================
@@ -350,13 +385,32 @@ _perf_record() {
     local perf_dir="${EUXIS_HOME}/data/perf"
     [[ -d "${perf_dir}" ]] || mkdir -p "${perf_dir}"
 
-    printf '{"ts":"%s","op":"%s","agent":"%s","ms":%s,"status":"%s"}\n' \
-        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-        "${operation}" \
-        "${agent}" \
-        "${elapsed_ms}" \
-        "${status}" \
-        >> "${EUXIS_PERF_LOG}"
+    # Sanitize agent name and status for metrics (anonymize when enabled)
+    local safe_agent="${agent}"
+    local safe_status="${status}"
+    if [[ "${EUXIS_PERF_ANONYMIZE:-0}" == "1" ]]; then
+        safe_agent="agent-$(printf '%s' "${agent}" | cksum | cut -d' ' -f1)"
+        safe_status="ok"
+    fi
+
+    if command -v jq &>/dev/null; then
+        jq -n \
+            --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg op "${operation}" \
+            --arg agent "${safe_agent}" \
+            --argjson ms "${elapsed_ms}" \
+            --arg status "${safe_status}" \
+            '{ts:$ts,op:$op,agent:$agent,ms:$ms,status:$status}' \
+            >> "${EUXIS_PERF_LOG}"
+    else
+        printf '{"ts":"%s","op":"%s","agent":"%s","ms":%s,"status":"%s"}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            "${operation}" \
+            "${safe_agent}" \
+            "${elapsed_ms}" \
+            "${safe_status}" \
+            >> "${EUXIS_PERF_LOG}"
+    fi
 }
 
 # ============================================================================

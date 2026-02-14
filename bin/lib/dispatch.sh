@@ -28,6 +28,9 @@ main() {
     log_info "Session: ${SESSION_ID}"
     log_info "Output: ${OUTPUT_PATH}"
 
+    # Sanitize task input before prompt assembly (goal hijacking prevention)
+    TASK=$(sanitize_task_input "${TASK}")
+
     _t_prompt=$(_perf_start)
     local full_prompt
     full_prompt=$(prepare_prompt "${AGENT}" "${TASK}" "${AUDIT_PATH}" "${MEMORY_PATH}" "${SESSION_ID}" "${MODEL_NAME}")
@@ -127,6 +130,9 @@ delegate() {
         log_error "delegate requires non-empty task"
         exit 1
     fi
+
+    # Sanitize delegate task input (goal hijacking prevention)
+    sub_task=$(sanitize_task_input "${sub_task}")
 
     _perf_record "delegate_start" "$(_perf_elapsed_ms "${_t_delegate}")" "${sub_agent}" "delegated"
     log_info "Delegating to ${sub_agent}..."

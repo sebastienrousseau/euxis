@@ -141,6 +141,99 @@ fi
 
 validation_pass "All certification prerequisites met"
 
+# GATE 0b: MANDATORY SECURITY & QUALITY ENFORCEMENT
+echo ""
+echo "[GATE 0b] Security & Quality Enforcement..."
+echo "--------------------------------------------------"
+
+SEC_FAILURES=0
+
+# SEC-1: No printf-based JSON generation in message bus (command injection)
+if grep -q 'printf.*{.*sender.*topic.*payload' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    if ! grep -q 'jq -n' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+        echo "  FAIL: euxis-bus uses printf for JSON generation (command injection risk)"
+        echo "        Fix: use jq for JSON envelope construction"
+        ((SEC_FAILURES++)) || true
+    else
+        echo "  PASS: euxis-bus uses jq for safe JSON generation"
+    fi
+else
+    echo "  PASS: euxis-bus JSON generation is safe"
+fi
+
+# SEC-2: Model name validation exists in providers.sh
+if grep -q '_validate_model_name' "$EUXIS_HOME/bin/lib/providers.sh" 2>/dev/null; then
+    echo "  PASS: Provider model name validation present"
+else
+    echo "  FAIL: providers.sh missing _validate_model_name() (env var injection risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-3: Task input sanitization in dispatch.sh
+if grep -q 'sanitize_task_input' "$EUXIS_HOME/bin/lib/dispatch.sh" 2>/dev/null; then
+    echo "  PASS: Task input sanitization in dispatch pipeline"
+else
+    echo "  FAIL: dispatch.sh missing sanitize_task_input (goal hijacking risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-4: PII sanitization in logging
+if grep -q '_sanitize_pii' "$EUXIS_HOME/bin/lib/common.sh" 2>/dev/null; then
+    echo "  PASS: PII sanitization in logging functions"
+else
+    echo "  FAIL: common.sh logging lacks PII sanitization"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-5: Project license declared in pyproject.toml
+if grep -q 'license' "$EUXIS_HOME/pyproject.toml" 2>/dev/null; then
+    echo "  PASS: Project license declared in pyproject.toml"
+else
+    echo "  FAIL: Missing license declaration in pyproject.toml"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-6: Prompt injection detection in validation.sh
+if grep -q 'injection_patterns' "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null; then
+    echo "  PASS: Prompt injection detection in task validation"
+else
+    echo "  FAIL: validation.sh missing prompt injection detection"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-7: Message bus sender validation
+if grep -q 'validate.*sender\|sender.*match' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    echo "  PASS: Message bus sender validation present"
+else
+    echo "  FAIL: euxis-bus missing sender name validation"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-8: Message bus retention/cleanup capability
+if grep -q 'cmd_cleanup\|cleanup' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    echo "  PASS: Message bus retention policy (cleanup) present"
+else
+    echo "  FAIL: euxis-bus missing message retention/cleanup"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-9: TUI deployment confirmation gates
+if grep -q 'ConfirmDeployScreen\|confirm.*deploy' "$EUXIS_HOME/tui/app.py" 2>/dev/null; then
+    echo "  PASS: TUI deployment confirmation gates present"
+else
+    echo "  FAIL: TUI deploys agents without confirmation (governance bypass risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+if [[ $SEC_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 0b (Security): $SEC_FAILURES mandatory check(s) failed."
+    echo "All security controls MUST pass before certification can proceed."
+    exit 1
+fi
+
+validation_pass "All mandatory security controls verified"
+
 # GATE 1 & 2: Static Analysis (Structural Integrity + Protocol Compliance)
 echo ""
 echo "[GATE 1+2] Static Analysis (Lint)..."

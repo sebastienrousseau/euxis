@@ -13,6 +13,8 @@ tui = ["*.tcss", "*.css", "*.json"]
 name = "euxis"
 version = "0.0.7"
 description = "Enterprise Unified eXecution Intelligence System"
+license = {text = "Proprietary"}
+authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
