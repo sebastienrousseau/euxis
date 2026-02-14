@@ -13,7 +13,16 @@ tui = ["*.tcss", "*.css", "*.json"]
 name = "euxis"
 version = "0.0.7"
 description = "Enterprise Unified eXecution Intelligence System"
-license = {text = "Proprietary"}
+license = {text = "Apache-2.0"}
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
 authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.11"
