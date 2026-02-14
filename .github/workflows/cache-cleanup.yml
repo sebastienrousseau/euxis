@@ -1,0 +1,103 @@
+name: Cache Cleanup
+
+on:
+  schedule:
+    # Weekly on Sunday at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: 'Delete caches older than N days'
+        required: false
+        default: '7'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup-caches:
+    name: Cleanup Old Caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cleanup old caches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const maxAgeDays = parseInt('${{ github.event.inputs.max_age_days }}' || '7');
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+
+            console.log(`Deleting caches older than ${maxAgeDays} days (before ${cutoffDate.toISOString()})`);
+
+            // List all caches
+            const caches = await github.paginate(
+              github.rest.actions.getActionsCacheList,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100
+              }
+            );
+
+            let deletedCount = 0;
+            let freedBytes = 0;
+
+            for (const cache of caches) {
+              const cacheDate = new Date(cache.last_accessed_at || cache.created_at);
+
+              if (cacheDate < cutoffDate) {
+                console.log(`Deleting: ${cache.key} (${(cache.size_in_bytes / 1024 / 1024).toFixed(2)} MB, last accessed: ${cacheDate.toISOString()})`);
+
+                try {
+                  await github.rest.actions.deleteActionsCacheById({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    cache_id: cache.id
+                  });
+                  deletedCount++;
+                  freedBytes += cache.size_in_bytes;
+                } catch (error) {
+                  console.log(`Failed to delete ${cache.key}: ${error.message}`);
+                }
+              }
+            }
+
+            const freedMB = (freedBytes / 1024 / 1024).toFixed(2);
+            console.log(`\n=== Cleanup Summary ===`);
+            console.log(`Caches deleted: ${deletedCount}`);
+            console.log(`Space freed: ${freedMB} MB`);
+
+            if (deletedCount === 0) {
+              console.log('No stale caches found - storage is already optimized.');
+            }
+
+      - name: Report cache status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get current cache usage
+            const { data: caches } = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            let totalBytes = 0;
+            for (const cache of caches.actions_caches || []) {
+              totalBytes += cache.size_in_bytes || 0;
+            }
+
+            const totalMB = (totalBytes / 1024 / 1024).toFixed(2);
+            const cacheCount = (caches.actions_caches || []).length;
+
+            console.log(`\n=== Current Cache Status ===`);
+            console.log(`Active caches: ${cacheCount}`);
+            console.log(`Total storage: ${totalMB} MB`);
+            console.log(`Free tier limit: 500 MB`);
+            console.log(`Utilization: ${((totalBytes / (500 * 1024 * 1024)) * 100).toFixed(1)}%`);
