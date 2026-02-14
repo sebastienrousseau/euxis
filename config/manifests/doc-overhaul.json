@@ -17,8 +17,8 @@
     {
       "agent": "devrel-advocate",
       "priority": "P1",
-      "task": "Create concept definitions in docs/concepts/ for: agents.md, squads.md, playbooks.md, combos.md, memory.md. Each should include: definition, when to use, quick example, available options, and create-your-own section.",
-      "verify_cmd": "test -d docs/concepts"
+      "task": "Create concept definitions in docs/essentials/core-concepts/ for: agents.md, squads.md, playbooks.md, combos.md, memory.md. Each should include: definition, when to use, quick example, available options, and create-your-own section.",
+      "verify_cmd": "test -d docs/essentials/core-concepts"
     },
     {
       "agent": "brand-evangelist",

@@ -52,7 +52,7 @@ This analysis is based on:
 **Score: 80/100**
 
 **Gaps to Fix:**
-- [ ] Consolidate duplicate concept files (`/docs/concepts/` and `/docs/essentials/core-concepts/`)
+- [x] Consolidate duplicate concept files (consolidated to `/docs/essentials/core-concepts/`)
 - [ ] Expand troubleshooting with more error scenarios and solutions
 - [ ] Add "Common Mistakes" section to Quick Start
 
@@ -311,8 +311,8 @@ This analysis is based on:
    - /docs/essentials/quick-start.md: Get running in 5 minutes
 
    ## Core Concepts
-   - /docs/concepts/agents.md: Understanding agents
-   - /docs/concepts/squads.md: Team coordination
+   - /docs/essentials/core-concepts/agents.md: Understanding agents
+   - /docs/essentials/core-concepts/squads.md: Team coordination
    ...
    ```
 
