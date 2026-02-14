@@ -4,6 +4,9 @@
 # Optimized: pure-bash keyword extraction, no subprocess forks in hot path
 [[ -n "${_EUXIS_LIB_MEMORY:-}" ]] && return; _EUXIS_LIB_MEMORY=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # Validate memory file path: reject path traversal and paths outside EUXIS_HOME

@@ -5,6 +5,9 @@
 # Optimized: bash arrays for deduplication, no subprocess forks
 [[ -n "${_EUXIS_LIB_SKILL_DETECTOR:-}" ]] && return; _EUXIS_LIB_SKILL_DETECTOR=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # Detect project domain from working directory contents.

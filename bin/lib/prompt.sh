@@ -3,6 +3,9 @@
 # Euxis Library: Prompt assembly with conditional protocol loading, caching, and token budgets
 [[ -n "${_EUXIS_LIB_PROMPT:-}" ]] && return; _EUXIS_LIB_PROMPT=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 
@@ -201,7 +204,8 @@ prepare_prompt() {
     protocol_content=$(resolve_protocols "${task}")
 
     # Build prompt: protocols first (cache-friendly), then agent
-    local prompt="${protocol_content}$(< "${prompt_file}")"
+    local prompt
+    prompt="${protocol_content}$(< "${prompt_file}")"
 
     # Replace template variables via pure bash (no sed fork)
     prompt=$(template_substitute "${prompt}" "${audit_path}" "${memory_path}" "${session_id}" "${model_name}")

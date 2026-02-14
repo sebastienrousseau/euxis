@@ -86,8 +86,14 @@
     {
       "id": "deep-review",
       "name": "Deep Review",
-      "description": "Exhaustive pre-merge regression and language analysis",
-      "chain": ["polyglot", "watchdog", "pentester", "reviewer"]
+      "description": "Exhaustive pre-merge regression, language analysis, and external research",
+      "chain": ["researcher", "polyglot", "watchdog", "pentester", "reviewer"]
+    },
+    {
+      "id": "research-roadmap",
+      "name": "Research Roadmap",
+      "description": "External research synthesis into architectural roadmap",
+      "chain": ["researcher", "architect", "reviewer"]
     }
   ]
 }

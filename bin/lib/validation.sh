@@ -202,8 +202,6 @@ validate_euxis_structure() {
 
 # Minimal validation required for operation
 validate_minimal() {
-    local validation_failed=false
-
     echo "Running minimal validation..."
 
     # Reset validation state

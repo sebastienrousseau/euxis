@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Euxis Version Consistency Checker
-# Validates that all version references match the protocol_version in registry.json
+# Validates that all version references match the protocol_version in the registry
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ if [ -z "$REGISTRY_VERSION" ]; then
     exit 1
 fi
 
-echo "✅ Authoritative version from registry.json: $REGISTRY_VERSION"
+echo "✅ Authoritative version from registry: $REGISTRY_VERSION"
 
 violation_count=0
 
@@ -34,7 +34,7 @@ violation_count=0
 if [ -f "VERSION" ]; then
     VERSION_FILE_CONTENT=$(cat VERSION | tr -d '\n')
     if [ "$VERSION_FILE_CONTENT" != "$REGISTRY_VERSION" ]; then
-        echo "❌ VIOLATION: VERSION file ($VERSION_FILE_CONTENT) != registry.json ($REGISTRY_VERSION)"
+        echo "❌ VIOLATION: VERSION file ($VERSION_FILE_CONTENT) != registry ($REGISTRY_VERSION)"
         violation_count=$((violation_count + 1))
     else
         echo "✅ VERSION file matches registry.json"
@@ -87,7 +87,7 @@ for prompt_file in "${prompt_files[@]}"; do
         # Extract version from YAML frontmatter
         prompt_version=$(awk '/^---$/{flag=!flag;next} flag && /^version:/{gsub(/[" ]/, "", $2); print $2}' "$prompt_file" 2>/dev/null || echo "")
         if [ -n "$prompt_version" ] && [ "$prompt_version" != "$REGISTRY_VERSION" ]; then
-            echo "❌ VIOLATION: $(basename "$prompt_file") version ($prompt_version) != registry.json ($REGISTRY_VERSION)"
+            echo "❌ VIOLATION: $(basename "$prompt_file") version ($prompt_version) != registry ($REGISTRY_VERSION)"
             violation_count=$((violation_count + 1))
         fi
     fi
@@ -97,16 +97,16 @@ done
 echo ""
 echo "=== Version Consistency Summary ==="
 if [ $violation_count -eq 0 ]; then
-    echo "✅ All version references are consistent with registry.json ($REGISTRY_VERSION)"
+    echo "✅ All version references are consistent with registry ($REGISTRY_VERSION)"
     echo "✅ No hardcoded versions found in workflows"
     exit 0
 else
     echo "❌ $violation_count version consistency violations found"
     echo ""
     echo "Resolution steps:"
-    echo "  1. Update registry.json protocol_version if this is a version bump"
+    echo "  1. Update registry protocol_version if this is a version bump"
     echo "  2. Run 'scripts/sync-versions.sh' to update all references"
     echo "  3. Use \$EUXIS_VERSION environment variable in workflows instead of hardcoding"
-    echo "  4. Ensure VERSION file matches registry.json"
+    echo "  4. Ensure VERSION file matches the registry"
     exit 1
 fi

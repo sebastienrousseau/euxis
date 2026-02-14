@@ -167,8 +167,12 @@ echo "--------------------------------------------------"
 
 DRIFT_ERRORS=0
 
-# Check if registry was modified during tests
-REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/registry.json" 2>/dev/null | cut -d' ' -f1 || echo "")
+# Check if registry was modified during tests (SQLite-first, JSON fallback)
+REGISTRY_HASH_BEFORE=""
+if [[ -f "$EUXIS_HOME/registry.db" ]]; then
+    REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/registry.db" 2>/dev/null | cut -d' ' -f1 || echo "")
+fi
+[[ -z "$REGISTRY_HASH_BEFORE" ]] && REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/registry.json" 2>/dev/null | cut -d' ' -f1 || echo "")
 if [[ -n "$REGISTRY_HASH_BEFORE" ]]; then
     validation_pass "Registry integrity maintained during tests"
 else

@@ -8,9 +8,9 @@ Falls back to English when no translation is available.
 from __future__ import annotations
 
 import gettext
-from pathlib import Path
 
-EUXIS_HOME = Path.home() / ".euxis"
+from tui.core import EUXIS_HOME
+
 LOCALES_DIR = EUXIS_HOME / "locales"
 
 # Ensure locales directory exists

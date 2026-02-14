@@ -3,7 +3,7 @@
 # EUXIS DAEMON: Safe, Periodic Self-Improvement
 # Runs 'euxis-kaizen' every X minutes with safety stops.
 
-set -uo pipefail
+set -euo pipefail
 
 usage() {
     cat <<'EOF'

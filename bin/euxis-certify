@@ -90,7 +90,7 @@ CERT_TOOLS=(
 for tool_entry in "${CERT_TOOLS[@]}"; do
     IFS=':' read -r tool_path description <<< "$tool_entry"
     if ! validate_file_executable "$tool_path" "$description"; then
-        ((CERT_ERRORS++))
+        ((CERT_ERRORS++)) || true
     fi
 done
 
@@ -108,7 +108,7 @@ for file_entry in "${CERT_FILES[@]}"; do
         validation_pass "$description exists"
     else
         validation_error "$description missing at $file_path"
-        ((CERT_ERRORS++))
+        ((CERT_ERRORS++)) || true
     fi
 done
 
@@ -116,7 +116,7 @@ done
 TEMP_TEST_FILE="/tmp/euxis_cert_test_$$"
 if ! touch "$TEMP_TEST_FILE" 2>/dev/null; then
     validation_error "Cannot write to /tmp directory - semantic verification will fail"
-    ((CERT_ERRORS++))
+    ((CERT_ERRORS++)) || true
 else
     rm -f "$TEMP_TEST_FILE"
     validation_pass "Temporary file write access verified"
@@ -127,7 +127,7 @@ CURRENT_VERSION=$(sqlite3 -init /dev/null "$EUXIS_HOME/registry.db" "SELECT valu
 [[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
 if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
     validation_error "Cannot determine current version from registry"
-    ((CERT_ERRORS++))
+    ((CERT_ERRORS++)) || true
 else
     validation_pass "Current version detected: $CURRENT_VERSION"
 fi
@@ -184,13 +184,13 @@ if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; 
 fi
 if [[ "$_architect_found" != "true" ]]; then
     validation_error "Architect agent not found in registry - semantic tests cannot run"
-    ((SEMANTIC_ERRORS++))
+    ((SEMANTIC_ERRORS++)) || true
 fi
 
 # Check if temp directory is writable for response files
 if ! touch "/tmp/euxis_semantic_precheck_$$" 2>/dev/null; then
     validation_error "Cannot create temporary files for semantic verification"
-    ((SEMANTIC_ERRORS++))
+    ((SEMANTIC_ERRORS++)) || true
 else
     rm -f "/tmp/euxis_semantic_precheck_$$"
 fi
@@ -263,10 +263,10 @@ echo "  Pre-validating branding requirements..."
 BRANDING_DIR="$EUXIS_HOME/config/branding"
 if [[ ! -d "$BRANDING_DIR" ]]; then
     echo "  FAIL: Branding directory not found at $BRANDING_DIR"
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 elif [[ ! -r "$BRANDING_DIR" ]]; then
     echo "  FAIL: Branding directory not readable at $BRANDING_DIR"
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 else
     echo "  PASS: Branding directory accessible"
 fi
@@ -283,7 +283,7 @@ if [[ -f "$SIGNATURE_FILE" ]]; then
     echo "  PASS: config/branding/signature.txt exists."
 else
     echo "  FAIL: config/branding/signature.txt not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5b. PR template contains signature
@@ -293,11 +293,11 @@ if [[ -f "$PR_TEMPLATE" ]]; then
         echo "  PASS: PR template carries branding signature."
     else
         echo "  FAIL: PR template missing branding signature."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 else
     echo "  FAIL: .github/pull_request_template.md not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5c. README contains signature/branding
@@ -307,11 +307,11 @@ if [[ -f "$README_FILE" ]]; then
         echo "  PASS: README.md carries author attribution."
     else
         echo "  FAIL: README.md missing author attribution."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 else
     echo "  FAIL: README.md not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5d. Git hook installed and executable
@@ -320,7 +320,7 @@ if [[ -x "$HOOK_FILE" ]]; then
     echo "  PASS: prepare-commit-msg hook is present and executable."
 else
     echo "  FAIL: prepare-commit-msg hook missing or not executable."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5e. commit.gpgsign MUST be true globally
@@ -331,7 +331,7 @@ if command -v git &>/dev/null; then
     else
         echo "  FAIL: commit.gpgsign is not set to true globally."
         echo "        Run: git config --global commit.gpgsign true"
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 
     GPG_FORMAT=$(git config --global gpg.format 2>/dev/null || echo "")
@@ -341,7 +341,7 @@ if command -v git &>/dev/null; then
     else
         echo "  FAIL: No signing key configured."
         echo "        Run: git config --global user.signingkey <your-key>"
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -365,7 +365,7 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
         echo "  SKIP: No git history available."
     else
         echo "  FAIL: $UNSIGNED_COMMITS of $CHECKED recent commits missing signature."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -399,7 +399,7 @@ if [[ -f "$SIGNATURE_FILE" ]]; then
         echo "  PASS: Signature URL points to euxis.co."
     else
         echo "  FAIL: Signature URL does not point to euxis.co."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -409,7 +409,7 @@ if [[ -f "$BRANDING_WORKFLOW" ]]; then
     echo "  PASS: GitHub Actions branding-check workflow exists."
 else
     echo "  FAIL: .github/workflows/branding-check.yml not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5j. Open PRs carry branding signature (if gh CLI available)
@@ -424,14 +424,14 @@ if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/
             pr_body=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['body'])")
             if ! echo "$pr_body" | grep -qF "Sebastien Rousseau" || ! echo "$pr_body" | grep -qF "euxis.co"; then
                 echo "  UNSIGNED PR: #$pr_num $pr_title"
-                ((UNSIGNED_PRS++))
+                ((UNSIGNED_PRS++)) || true
             fi
         done
         if [[ $UNSIGNED_PRS -eq 0 ]]; then
             echo "  PASS: All open PRs carry branding signature."
         else
             echo "  FAIL: $UNSIGNED_PRS open PR(s) missing branding signature."
-            ((BRANDING_FAILURES++))
+            ((BRANDING_FAILURES++)) || true
         fi
     else
         echo "  PASS: No open PRs to check."
@@ -458,10 +458,10 @@ echo "  Pre-validating documentation requirements..."
 DOCS_DIR="$EUXIS_HOME/docs"
 if [[ ! -d "$DOCS_DIR" ]]; then
     echo "  FAIL: Documentation directory not found at $DOCS_DIR"
-    ((DOC_FAILURES++))
+    ((DOC_FAILURES++)) || true
 elif [[ ! -r "$DOCS_DIR" ]]; then
     echo "  FAIL: Documentation directory not readable at $DOCS_DIR"
-    ((DOC_FAILURES++))
+    ((DOC_FAILURES++)) || true
 else
     echo "  PASS: Documentation directory accessible"
 fi
@@ -488,7 +488,7 @@ if [[ -x "$SYNC_DOCS" ]]; then
     echo "  PASS: euxis-sync-docs is present and executable."
 else
     echo "  FAIL: euxis-sync-docs missing or not executable."
-    ((DOC_FAILURES++))
+    ((DOC_FAILURES++)) || true
 fi
 
 # 6b. Core documentation files exist
@@ -498,7 +498,7 @@ for doc in "${REQUIRED_DOCS[@]}"; do
         echo "  PASS: $doc exists."
     else
         echo "  FAIL: $doc not found."
-        ((DOC_FAILURES++))
+        ((DOC_FAILURES++)) || true
     fi
 done
 
@@ -511,7 +511,6 @@ for doc in "${REQUIRED_DOCS[@]}"; do
         AGE_DAYS=$(( (NOW - LAST_MOD) / 86400 ))
         if (( AGE_DAYS > 7 )); then
             echo "  WARN: $doc is ${AGE_DAYS} days old. Run 'euxis-sync-docs' to refresh."
-            ((DOC_FAILURES++))
         fi
     fi
 done
@@ -527,7 +526,7 @@ if [[ -f "$EUXIS_HOME/README.md" ]]; then
         echo "  PASS: README.md references version $CURRENT_VERSION."
     else
         echo "  FAIL: README.md does not reference version $CURRENT_VERSION."
-        ((DOC_FAILURES++))
+        ((DOC_FAILURES++)) || true
     fi
 fi
 
@@ -538,7 +537,7 @@ for doc in docs/user-guide.md docs/fleet-guide.md; do
             echo "  PASS: $doc references version $CURRENT_VERSION."
         else
             echo "  FAIL: $doc does not reference version $CURRENT_VERSION."
-            ((DOC_FAILURES++))
+            ((DOC_FAILURES++)) || true
         fi
     fi
 done
@@ -553,7 +552,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
             # Check read permissions first
             if [[ ! -r "$MANIFEST_PATH" ]]; then
                 echo "  FAIL: $manifest exists but is not readable."
-                ((DOC_FAILURES++))
+                ((DOC_FAILURES++)) || true
                 continue
             fi
 
@@ -566,19 +565,19 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
                     "registry.json")
                         if ! jq -e 'has("schema_version") and has("protocol_version") and has("agents")' "$MANIFEST_PATH" &>/dev/null; then
                             echo "  FAIL: $manifest missing required schema fields."
-                            ((DOC_FAILURES++))
+                            ((DOC_FAILURES++)) || true
                         fi
                         ;;
                     "config/capabilities.json")
                         if ! jq -e 'type == "object"' "$MANIFEST_PATH" &>/dev/null; then
                             echo "  FAIL: $manifest should be a JSON object."
-                            ((DOC_FAILURES++))
+                            ((DOC_FAILURES++)) || true
                         fi
                         ;;
                 esac
             else
                 echo "  FAIL: $manifest is invalid JSON."
-                ((DOC_FAILURES++))
+                ((DOC_FAILURES++)) || true
 
                 # Try to provide more specific error information
                 if [[ -s "$MANIFEST_PATH" ]]; then
@@ -589,7 +588,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
             fi
         else
             echo "  FAIL: $manifest not found."
-            ((DOC_FAILURES++))
+            ((DOC_FAILURES++)) || true
         fi
     done
 else

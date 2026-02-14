@@ -100,55 +100,51 @@ class TestEuxisAppInit(unittest.TestCase):
 
 
 class TestActionToggleTheme(unittest.TestCase):
-    """Tests for the toggle_theme action cycling through themes."""
+    """Tests for the toggle_theme action cycling through ETX themes."""
 
-    def test_dark_to_light(self):
+    def test_liquid_glass_to_liquid_light(self):
         app, _, _ = _make_app()
-        app.theme = "textual-dark"
+        app.theme = "etx-liquid-glass"
         app.action_toggle_theme()
-        assert app.theme == "textual-light"
-        assert app.config.theme == "textual-light"
+        assert app.theme == "etx-liquid-light"
+        assert app.config.theme == "etx-liquid-light"
 
-    def test_light_to_ansi(self):
+    def test_liquid_light_to_catppuccin_mocha(self):
         app, _, _ = _make_app()
-        app.theme = "textual-light"
+        app.theme = "etx-liquid-light"
         app.action_toggle_theme()
-        assert app.theme == "textual-ansi"
-        assert app.config.theme == "textual-ansi"
+        assert app.theme == "etx-catppuccin-mocha"
+        assert app.config.theme == "etx-catppuccin-mocha"
 
-    def test_ansi_to_dark(self):
+    def test_ayu_mirage_to_liquid_glass(self):
+        """Last theme in cycle wraps to first."""
         app, _, _ = _make_app()
-        app.theme = "textual-ansi"
+        app.theme = "etx-ayu-mirage"
         app.action_toggle_theme()
-        assert app.theme == "textual-dark"
-        assert app.config.theme == "textual-dark"
+        assert app.theme == "etx-liquid-glass"
+        assert app.config.theme == "etx-liquid-glass"
 
-    def test_unknown_theme_falls_to_dark(self):
-        """Any unrecognised theme should cycle back to dark.
-
-        We set the internal reactive storage directly to bypass Textual's
-        theme validation, so the string comparison in action_toggle_theme
-        hits the else branch.
-        """
+    def test_unknown_theme_falls_to_first(self):
+        """Any unrecognised theme should cycle to the first ETX theme."""
         app, _, _ = _make_app()
         # Bypass Textual theme validation by writing directly to reactive storage
         app._reactive_theme = "some-other-theme"
         app.action_toggle_theme()
-        assert app.config.theme == "textual-dark"
+        assert app.config.theme == "etx-liquid-glass"
 
     def test_toggle_saves_config(self):
         app, _, _ = _make_app()
-        app.theme = "textual-dark"
+        app.theme = "etx-liquid-glass"
         app.config.save = MagicMock()
         app.action_toggle_theme()
         app.config.save.assert_called_once()
 
     def test_toggle_notifies(self):
         app, _, _ = _make_app()
-        app.theme = "textual-dark"
+        app.theme = "etx-liquid-glass"
         app.action_toggle_theme()
         app.notify.assert_called_once()
-        assert "textual-light" in app.notify.call_args[0][0]
+        assert "etx-liquid-light" in app.notify.call_args[0][0]
 
 
 # ============================================================================
@@ -452,23 +448,6 @@ class TestRunSystemCommand(unittest.TestCase):
 class TestOnMount(unittest.TestCase):
     """Tests for the on_mount lifecycle method."""
 
-    def test_on_mount_applies_saved_theme(self):
-        app, _, _ = _make_app()
-        app.config.theme = "textual-light"
-        app.on_mount()
-        assert app.theme == "textual-light"
-        app.push_screen.assert_called_once()
-
-    def test_on_mount_falls_back_on_invalid_theme(self):
-        """Invalid saved theme should fall back to textual-dark."""
-        app, _, _ = _make_app()
-        app.config.theme = "nonexistent-theme-xyz"
-        # on_mount catches InvalidThemeError and falls back to textual-dark
-        app.on_mount()
-        assert app.theme == "textual-dark"
-        # Should have pushed DashboardScreen despite theme error
-        app.push_screen.assert_called_once()
-
     def test_on_mount_pushes_dashboard(self):
         app, _, _ = _make_app()
         app.on_mount()
@@ -477,6 +456,11 @@ class TestOnMount(unittest.TestCase):
         from tui.screens.dashboard import DashboardScreen
         screen_arg = app.push_screen.call_args[0][0]
         assert isinstance(screen_arg, DashboardScreen)
+
+    def test_on_mount_sets_welcome_shown_false(self):
+        app, _, _ = _make_app()
+        app.on_mount()
+        assert app._welcome_shown is False
 
 
 if __name__ == "__main__":

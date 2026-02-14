@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
-EUXIS_HOME = Path.home() / ".euxis"
+from tui.core import EUXIS_HOME
 
 
 @dataclass(frozen=True)

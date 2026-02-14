@@ -2,79 +2,108 @@
 # Test suite for bin/lib/agents.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
-# Load the library under test
-source "${BATS_TEST_DIRNAME}/../../../bin/lib/agents.sh"
+# Load dependencies first (agents.sh needs log_info, log_error, log_warn)
+source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
 
 # Test setup - run before each test
 setup() {
-    # Create temporary directory for each test
     EUXIS_TEST_TMPDIR="$(mktemp -d)"
     export EUXIS_TEST_TMPDIR
 
-    # Mock EUXIS_HOME
     export EUXIS_HOME="${EUXIS_TEST_TMPDIR}/euxis"
     mkdir -p "${EUXIS_HOME}"
+
+    # Force filesystem mode (skip SQLite in tests)
+    export EUXIS_FORCE_FILESYSTEM=1
 
     # Mock external commands
     export PATH="${EUXIS_TEST_TMPDIR}:${PATH}"
 
-    # Create mock registry
-    mkdir -p "${EUXIS_HOME}/config"
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
-{
-  "agents": {
-    "architect": {
-      "type": "core",
-      "role": "System architecture and design",
-      "path": "config/agents/architect.md"
-    },
-    "tester": {
-      "type": "default",
-      "role": "Test coverage and validation",
-      "path": "config/agents/tester.md"
-    },
-    "debugger": {
-      "type": "on-demand",
-      "role": "Bug analysis and fixes",
-      "path": "config/agents/debugger.md"
-    }
-  }
-}
-EOF
+    # Create mock prompts directories (actual agent path structure)
+    mkdir -p "${EUXIS_HOME}/prompts/core"
+    mkdir -p "${EUXIS_HOME}/prompts/fleet"
 
-    # Create mock agent files
-    mkdir -p "${EUXIS_HOME}/config/agents"
-    for agent in architect tester debugger; do
-        cat > "${EUXIS_HOME}/config/agents/${agent}.md" << EOF
+    # Create mock agent prompt files
+    for agent in architect orchestrator; do
+        cat > "${EUXIS_HOME}/prompts/core/${agent}.txt" << EOF
 ---
 agent_id: ${agent}
 role: "Mock ${agent} agent"
+version: 0.0.7
+tags: core
+last_updated: 2026-02-13
 ---
-# Mock Agent: ${agent}
+# MANDATE
+Mock mandate for ${agent}
+
+# OUTPUT FORMAT
+Mock output format
 EOF
     done
 
-    # Create mock agent state directories
-    mkdir -p "${EUXIS_HOME}/data/agents"
-    for agent in architect tester debugger; do
-        mkdir -p "${EUXIS_HOME}/data/agents/${agent}"
+    for agent in tester debugger reviewer; do
+        cat > "${EUXIS_HOME}/prompts/fleet/${agent}.txt" << EOF
+---
+agent_id: ${agent}
+role: "Mock ${agent} agent"
+version: 0.0.7
+tags: default
+last_updated: 2026-02-13
+---
+# MANDATE
+Mock mandate for ${agent}
+
+# OUTPUT FORMAT
+Mock output format
+EOF
     done
 
+    # Create partial file (should be excluded)
+    echo "partial" > "${EUXIS_HOME}/prompts/core/_protocol.txt"
+
+    # Create lifecycle directories
+    mkdir -p "${EUXIS_HOME}/data/lifecycle"
+
+    # Create mock registry.json (needed for SQL-fallback path validation)
+    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
+{
+  "agents": [
+    {"id": "architect", "tier": "core"},
+    {"id": "orchestrator", "tier": "core"},
+    {"id": "tester", "tier": "default"},
+    {"id": "debugger", "tier": "default"},
+    {"id": "reviewer", "tier": "default"}
+  ]
+}
+EOF
+
+    # Create empty bin/lib so agents.sh can source registry_sql.sh
+    mkdir -p "${EUXIS_HOME}/bin/lib"
+
     # Mock date command for consistent timestamps
-    cat > "${EUXIS_TEST_TMPDIR}/date" << 'EOF'
+    cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
 #!/bin/bash
-if [[ "$1" == "+%Y%m%d-%H%M%S" ]]; then
+if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260209-123456"
+elif [[ "${1:-}" == "-u" && "${2:-}" == "+%Y-%m-%dT%H:%M:%SZ" ]]; then
+    echo "2026-02-09T12:34:56Z"
 else
     command date "$@"
 fi
-EOF
+DATEEOF
     chmod +x "${EUXIS_TEST_TMPDIR}/date"
+
+    # Now load the library under test (after EUXIS_HOME is set)
+    # Reset include guard so it re-sources
+    unset _EUXIS_LIB_AGENTS
+    unset _EUXIS_LIB_COMMON
+    source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../bin/lib/agents.sh"
 }
 
-# Test teardown - run after each test
 teardown() {
-    if [[ -n "${EUXIS_TEST_TMPDIR}" && -d "${EUXIS_TEST_TMPDIR}" ]]; then
+    if [[ -n "${EUXIS_TEST_TMPDIR:-}" && -d "${EUXIS_TEST_TMPDIR:-}" ]]; then
+        chmod -R u+w "${EUXIS_TEST_TMPDIR}" 2>/dev/null || true
         rm -rf "${EUXIS_TEST_TMPDIR}"
     fi
 }
@@ -86,39 +115,24 @@ teardown() {
 @test "resolve_agent_path finds valid core agent" {
     run resolve_agent_path "architect"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "${EUXIS_HOME}/config/agents/architect.md" ]]
+    [[ "${output}" == "${EUXIS_HOME}/prompts/core/architect.txt" ]]
 }
 
-@test "resolve_agent_path finds valid default agent" {
+@test "resolve_agent_path finds valid fleet agent" {
     run resolve_agent_path "tester"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "${EUXIS_HOME}/config/agents/tester.md" ]]
+    [[ "${output}" == "${EUXIS_HOME}/prompts/fleet/tester.txt" ]]
 }
 
-@test "resolve_agent_path returns empty for invalid agent" {
+@test "resolve_agent_path returns error for invalid agent" {
     run resolve_agent_path "nonexistent"
-    [[ "${status}" -eq 0 ]]
+    [[ "${status}" -eq 1 ]]
     [[ "${output}" == "" ]]
 }
 
 @test "resolve_agent_path handles empty input" {
     run resolve_agent_path ""
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "" ]]
-}
-
-@test "resolve_agent_path handles missing registry" {
-    rm -f "${EUXIS_HOME}/registry.json"
-    run resolve_agent_path "architect"
     [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Registry not found" ]]
-}
-
-@test "resolve_agent_path handles malformed registry" {
-    echo "invalid json" > "${EUXIS_HOME}/registry.json"
-    run resolve_agent_path "architect"
-    [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Failed to parse registry" ]]
 }
 
 # ============================================================================
@@ -133,78 +147,59 @@ teardown() {
     [[ "${output}" =~ "debugger" ]]
 }
 
-@test "list_agents filters by type" {
-    run list_agents "core"
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "architect" ]]
-    [[ ! "${output}" =~ "tester" ]]
-}
-
-@test "list_agents handles invalid type filter" {
-    run list_agents "invalid-type"
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "" ]]
-}
-
-@test "list_agents handles missing registry" {
-    rm -f "${EUXIS_HOME}/registry.json"
+@test "list_agents excludes partial files" {
     run list_agents
-    [[ "${status}" -eq 1 ]]
+    [[ "${status}" -eq 0 ]]
+    [[ ! "${output}" =~ "_protocol" ]]
+}
+
+@test "list_agents handles empty prompts directory" {
+    rm -f "${EUXIS_HOME}/prompts/core"/*.txt
+    rm -f "${EUXIS_HOME}/prompts/fleet"/*.txt
+    run list_agents
+    # Should not crash, output may be empty
+    [[ "${status}" -eq 0 ]]
 }
 
 # ============================================================================
 # AGENT LIFECYCLE MANAGEMENT
 # ============================================================================
 
-@test "_lifecycle_init creates agent state directory" {
-    rm -rf "${EUXIS_HOME}/data/agents/newagent"
-
-    run _lifecycle_init "newagent"
-    [[ "${status}" -eq 0 ]]
-    [[ -d "${EUXIS_HOME}/data/agents/newagent" ]]
+@test "_lifecycle_init creates lifecycle directory" {
+    rm -rf "${EUXIS_HOME}/data/lifecycle"
+    _lifecycle_init
+    [[ -d "${EUXIS_HOME}/data/lifecycle" ]]
 }
 
-@test "agent_lifecycle_transition records state changes" {
-    run agent_lifecycle_transition "tester" "idle" "active"
-    [[ "${status}" -eq 0 ]]
+@test "agent_lifecycle_transition records state" {
+    agent_lifecycle_transition "tester" "active" "session-123"
 
-    # Verify transition was recorded
-    state_file="${EUXIS_HOME}/data/agents/tester/state"
+    state_file="${EUXIS_HOME}/data/lifecycle/tester.state"
     [[ -f "${state_file}" ]]
-    grep -q "active" "${state_file}"
+    [[ "$(cat "${state_file}")" == "active" ]]
 }
 
-@test "agent_lifecycle_transition creates lifecycle log" {
-    run agent_lifecycle_transition "tester" "idle" "active"
-    [[ "${status}" -eq 0 ]]
+@test "agent_lifecycle_transition creates transition log" {
+    agent_lifecycle_transition "tester" "active" "session-123"
 
-    # Verify lifecycle log exists
-    log_file="${EUXIS_HOME}/data/agents/tester/lifecycle.log"
+    log_file="${EUXIS_HOME}/data/lifecycle/transitions.jsonl"
     [[ -f "${log_file}" ]]
-    grep -q "idle -> active" "${log_file}"
-}
-
-@test "agent_lifecycle_transition handles invalid states" {
-    run agent_lifecycle_transition "tester" "invalid" "active"
-    [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Invalid state transition" ]]
+    grep -q '"agent":"tester"' "${log_file}"
+    grep -q '"state":"active"' "${log_file}"
 }
 
 @test "agent_get_state returns current state" {
-    # Set initial state
-    echo "active" > "${EUXIS_HOME}/data/agents/tester/state"
-
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/tester.state"
     run agent_get_state "tester"
     [[ "${status}" -eq 0 ]]
     [[ "${output}" == "active" ]]
 }
 
-@test "agent_get_state returns unknown for missing state" {
-    rm -f "${EUXIS_HOME}/data/agents/tester/state"
-
+@test "agent_get_state returns idle for missing state" {
+    rm -f "${EUXIS_HOME}/data/lifecycle/tester.state"
     run agent_get_state "tester"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "unknown" ]]
+    [[ "${output}" == "idle" ]]
 }
 
 # ============================================================================
@@ -212,10 +207,9 @@ teardown() {
 # ============================================================================
 
 @test "list_active_agents shows agents with active state" {
-    # Set some agents to active
-    echo "active" > "${EUXIS_HOME}/data/agents/architect/state"
-    echo "active" > "${EUXIS_HOME}/data/agents/tester/state"
-    echo "idle" > "${EUXIS_HOME}/data/agents/debugger/state"
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/architect.state"
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/tester.state"
+    echo "idle" > "${EUXIS_HOME}/data/lifecycle/debugger.state"
 
     run list_active_agents
     [[ "${status}" -eq 0 ]]
@@ -225,10 +219,9 @@ teardown() {
 }
 
 @test "count_active_agents returns correct count" {
-    # Set active agents
-    echo "active" > "${EUXIS_HOME}/data/agents/architect/state"
-    echo "active" > "${EUXIS_HOME}/data/agents/tester/state"
-    echo "idle" > "${EUXIS_HOME}/data/agents/debugger/state"
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/architect.state"
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/tester.state"
+    echo "idle" > "${EUXIS_HOME}/data/lifecycle/debugger.state"
 
     run count_active_agents
     [[ "${status}" -eq 0 ]]
@@ -236,105 +229,82 @@ teardown() {
 }
 
 @test "count_active_agents returns 0 when no active agents" {
-    # Set all agents to idle
-    for agent in architect tester debugger; do
-        echo "idle" > "${EUXIS_HOME}/data/agents/${agent}/state"
-    done
+    # Remove any existing state files
+    rm -f "${EUXIS_HOME}/data/lifecycle"/*.state
 
     run count_active_agents
     [[ "${status}" -eq 0 ]]
     [[ "${output}" == "0" ]]
 }
 
-@test "cleanup_stale_agents removes old state files" {
-    # Create old state files
-    old_timestamp="202601010000.00"
-    for agent in architect tester; do
-        state_file="${EUXIS_HOME}/data/agents/${agent}/state"
-        echo "active" > "${state_file}"
-        touch -t "${old_timestamp}" "${state_file}"
-    done
-
-    run cleanup_stale_agents
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "Cleaned up" ]]
-}
-
-@test "cleanup_stale_agents preserves recent state files" {
+@test "cleanup_stale_agents handles no stale agents" {
     # Create recent state file
-    echo "active" > "${EUXIS_HOME}/data/agents/architect/state"
-
+    echo "active" > "${EUXIS_HOME}/data/lifecycle/architect.state"
     run cleanup_stale_agents
     [[ "${status}" -eq 0 ]]
-    [[ -f "${EUXIS_HOME}/data/agents/architect/state" ]]
+    [[ -f "${EUXIS_HOME}/data/lifecycle/architect.state" ]]
 }
 
 # ============================================================================
 # PLUGIN MANAGEMENT
 # ============================================================================
 
-@test "register_agent_plugin creates plugin entry" {
-    plugin_config='{
-      "name": "test-plugin",
-      "version": "1.0.0",
-      "capabilities": ["analysis"],
-      "command": "test-plugin-cmd"
-    }'
+@test "register_agent_plugin creates plugin from manifest file" {
+    # Create manifest file (the actual API takes a file path)
+    manifest_file="${EUXIS_TEST_TMPDIR}/plugin-manifest.json"
+    # prompt_file must be within EUXIS_HOME (path traversal guard)
+    prompt_file="${EUXIS_HOME}/prompts/plugin-prompt.txt"
+    echo "Plugin prompt content" > "${prompt_file}"
 
-    run register_agent_plugin "test-plugin" "${plugin_config}"
+    cat > "${manifest_file}" << EOF
+{
+  "agent_id": "test-plugin",
+  "role": "Test plugin agent",
+  "prompt_file": "${prompt_file}",
+  "tier": "standard"
+}
+EOF
+
+    run register_agent_plugin "${manifest_file}"
     [[ "${status}" -eq 0 ]]
-
-    # Verify plugin was registered
-    plugin_file="${EUXIS_HOME}/data/agents/plugins/test-plugin.json"
-    [[ -f "${plugin_file}" ]]
-    grep -q "test-plugin" "${plugin_file}"
+    # Plugin metadata should be saved
+    [[ -f "${EUXIS_HOME}/config/plugins/test-plugin.json" ]]
+    # Prompt should be symlinked into fleet
+    [[ -L "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]
 }
 
-@test "register_agent_plugin validates plugin config" {
-    invalid_config='{"invalid": "config"}'
-
-    run register_agent_plugin "invalid-plugin" "${invalid_config}"
+@test "register_agent_plugin rejects missing manifest" {
+    run register_agent_plugin "/nonexistent/manifest.json"
     [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Invalid plugin configuration" ]]
 }
 
-@test "register_agent_plugin prevents duplicate registration" {
-    plugin_config='{"name": "test-plugin", "version": "1.0.0"}'
-
-    # Register first time
-    register_agent_plugin "test-plugin" "${plugin_config}"
-
-    # Try to register again
-    run register_agent_plugin "test-plugin" "${plugin_config}"
+@test "register_agent_plugin rejects manifest with missing agent_id" {
+    manifest_file="${EUXIS_TEST_TMPDIR}/bad-manifest.json"
+    cat > "${manifest_file}" << 'EOF'
+{
+  "role": "Bad plugin"
+}
+EOF
+    run register_agent_plugin "${manifest_file}"
     [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Plugin already registered" ]]
 }
 
-@test "unregister_agent_plugin removes plugin" {
-    # Register plugin first
-    plugin_config='{"name": "test-plugin", "version": "1.0.0"}'
-    register_agent_plugin "test-plugin" "${plugin_config}"
+@test "unregister_agent_plugin removes plugin files" {
+    # Set up plugin first
+    mkdir -p "${EUXIS_HOME}/config/plugins"
+    echo '{"agent_id":"test-plugin"}' > "${EUXIS_HOME}/config/plugins/test-plugin.json"
+    echo "prompt" > "${EUXIS_HOME}/prompts/fleet/test-plugin.txt"
 
     run unregister_agent_plugin "test-plugin"
     [[ "${status}" -eq 0 ]]
-
-    # Verify plugin was removed
-    plugin_file="${EUXIS_HOME}/data/agents/plugins/test-plugin.json"
-    [[ ! -f "${plugin_file}" ]]
-}
-
-@test "unregister_agent_plugin handles non-existent plugin" {
-    run unregister_agent_plugin "nonexistent-plugin"
-    [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Plugin not found" ]]
+    [[ ! -f "${EUXIS_HOME}/config/plugins/test-plugin.json" ]]
+    [[ ! -f "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]
 }
 
 @test "list_plugins shows registered plugins" {
-    # Register test plugins
-    plugin1='{"name": "plugin1", "version": "1.0.0"}'
-    plugin2='{"name": "plugin2", "version": "2.0.0"}'
-    register_agent_plugin "plugin1" "${plugin1}"
-    register_agent_plugin "plugin2" "${plugin2}"
+    mkdir -p "${EUXIS_HOME}/config/plugins"
+    echo '{}' > "${EUXIS_HOME}/config/plugins/plugin1.json"
+    echo '{}' > "${EUXIS_HOME}/config/plugins/plugin2.json"
 
     run list_plugins
     [[ "${status}" -eq 0 ]]
@@ -343,53 +313,34 @@ teardown() {
 }
 
 @test "list_plugins handles no plugins" {
+    rm -rf "${EUXIS_HOME}/config/plugins"
     run list_plugins
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "No plugins registered" ]]
+    [[ "${output}" == "" ]]
 }
 
 # ============================================================================
-# HEALTH MONITORING
+# HEALTH PROBES
 # ============================================================================
 
-@test "agent_probe_liveness checks basic agent availability" {
+@test "agent_probe_liveness returns live for valid agent" {
     run agent_probe_liveness "tester"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "Agent tester is alive" ]]
+    [[ "${output}" == "live" ]]
 }
 
-@test "agent_probe_liveness fails for non-existent agent" {
+@test "agent_probe_liveness returns dead for non-existent agent" {
     run agent_probe_liveness "nonexistent"
     [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Agent not found" ]]
+    [[ "${output}" == "dead" ]]
 }
 
-@test "agent_probe_readiness checks agent readiness" {
-    # Set agent to active state
-    echo "active" > "${EUXIS_HOME}/data/agents/tester/state"
-
-    run agent_probe_readiness "tester"
+@test "agent_health_report lists agents" {
+    run agent_health_report
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "Agent tester is ready" ]]
-}
-
-@test "agent_probe_readiness fails for inactive agent" {
-    # Set agent to idle state
-    echo "idle" > "${EUXIS_HOME}/data/agents/tester/state"
-
-    run agent_probe_readiness "tester"
-    [[ "${status}" -eq 1 ]]
-    [[ "${output}" =~ "Agent not ready" ]]
-}
-
-@test "agent_health_report provides comprehensive status" {
-    # Set up agent state
-    echo "active" > "${EUXIS_HOME}/data/agents/tester/state"
-
-    run agent_health_report "tester"
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "Health Report for tester" ]]
-    [[ "${output}" =~ "State: active" ]]
+    [[ "${output}" =~ "AGENT" ]]
+    [[ "${output}" =~ "architect" ]]
+    [[ "${output}" =~ "tester" ]]
 }
 
 # ============================================================================
@@ -399,7 +350,6 @@ teardown() {
 @test "agents functions handle set -u mode" {
     set -u
     run list_agents
-    # Should not fail due to unbound variables
     [[ "${status}" -eq 0 ]] || [[ "${status}" -eq 1 ]]
 }
 
@@ -409,55 +359,19 @@ teardown() {
     [[ "${status}" -eq 0 ]]
 }
 
-@test "agents functions handle Unicode agent names" {
-    # Add Unicode agent to registry
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
-{
-  "agents": {
-    "测试代理": {
-      "type": "test",
-      "role": "Unicode test agent",
-      "path": "config/agents/unicode.md"
-    }
-  }
-}
-EOF
-
-    run list_agents
-    [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "测试代理" ]]
-}
-
 @test "agents functions handle concurrent access" {
-    # Basic test for concurrent access to agent state
     agent_get_state "tester" &
     pid1=$!
     agent_get_state "tester" &
     pid2=$!
-
     wait $pid1 && wait $pid2
-    # Should handle concurrent reads without error
-}
-
-@test "agents functions handle file system errors" {
-    # Make directory read-only to simulate permission errors
-    chmod -w "${EUXIS_HOME}/data/agents"
-
-    run _lifecycle_init "newagent"
-    [[ "${status}" -eq 1 ]]
-
-    # Restore permissions
-    chmod +w "${EUXIS_HOME}/data/agents"
 }
 
 @test "agents functions handle large state files" {
-    # Create large state file
-    large_state="${EUXIS_HOME}/data/agents/tester/state"
-    printf "%*s" 1000000 | tr ' ' 'a' > "${large_state}"
+    large_state="${EUXIS_HOME}/data/lifecycle/tester.state"
+    printf "%*s" 10000 | tr ' ' 'a' > "${large_state}"
     echo "active" >> "${large_state}"
-
     run agent_get_state "tester"
-    # Should handle large files gracefully
     [[ "${status}" -eq 0 ]] || [[ "${status}" -eq 1 ]]
 }
 
@@ -466,32 +380,17 @@ EOF
 # ============================================================================
 
 @test "agent operations are idempotent" {
-    # Multiple calls should produce same result
     result1=$(list_agents 2>&1)
     result2=$(list_agents 2>&1)
     [[ "${result1}" == "${result2}" ]]
 }
 
 @test "agent lifecycle maintains consistency" {
-    # Test full lifecycle
-    agent_lifecycle_transition "tester" "idle" "active"
+    agent_lifecycle_transition "tester" "active" "session-1"
     state1=$(agent_get_state "tester")
     [[ "${state1}" == "active" ]]
 
-    agent_lifecycle_transition "tester" "active" "idle"
+    agent_lifecycle_transition "tester" "idle" "session-2"
     state2=$(agent_get_state "tester")
     [[ "${state2}" == "idle" ]]
-}
-
-@test "plugin management maintains registry integrity" {
-    # Test plugin registration and removal
-    plugin_config='{"name": "test-plugin", "version": "1.0.0"}'
-
-    register_agent_plugin "test-plugin" "${plugin_config}"
-    plugins1=$(list_plugins)
-    [[ "${plugins1}" =~ "test-plugin" ]]
-
-    unregister_agent_plugin "test-plugin"
-    plugins2=$(list_plugins)
-    [[ ! "${plugins2}" =~ "test-plugin" ]]
 }

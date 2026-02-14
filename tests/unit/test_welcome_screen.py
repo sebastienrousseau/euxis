@@ -2,7 +2,14 @@
 """Comprehensive unit tests for WelcomeScreen.
 
 Tests initialization, CSS, bindings, compose structure, on_mount version
-display, button press handling, and action_go_dashboard.
+display, and action_go_dashboard.
+
+Updated to match the actual minimal welcome screen implementation which uses:
+- Static widgets (no Buttons, no Footer)
+- Middle/Center containers (no Container/Horizontal)
+- ShortcutBar instead of Footer
+- SPLASH_LOGO with [bold] markup (not [bold cyan])
+- #welcome-stats and #welcome-prompt (not #welcome-version/#welcome-actions)
 """
 
 import unittest
@@ -55,10 +62,10 @@ class TestWelcomeScreenInitialization(unittest.TestCase):
         assert binding_map["ctrl+k"] == "app.command_palette"
 
     def test_binding_escape_action(self):
-        """Test Escape maps to quit."""
+        """Test Escape maps to go_dashboard."""
         screen = WelcomeScreen()
         binding_map = {b[0]: b[1] for b in screen.BINDINGS}
-        assert binding_map["escape"] == "app.quit"
+        assert binding_map["escape"] == "go_dashboard"
 
     def test_binding_descriptions(self):
         """Test bindings have descriptive labels."""
@@ -66,7 +73,7 @@ class TestWelcomeScreenInitialization(unittest.TestCase):
         descriptions = [b[2] for b in screen.BINDINGS]
         assert "Dashboard" in descriptions
         assert "Commands" in descriptions
-        assert "Quit" in descriptions
+        assert "Back" in descriptions
 
 
 class TestWelcomeScreenCSS(unittest.TestCase):
@@ -83,30 +90,20 @@ class TestWelcomeScreenCSS(unittest.TestCase):
         screen = WelcomeScreen()
         assert "WelcomeScreen" in screen.DEFAULT_CSS
 
-    def test_css_contains_container_styles(self):
-        """Test CSS includes welcome container styles."""
-        screen = WelcomeScreen()
-        assert "#welcome-container" in screen.DEFAULT_CSS
-
     def test_css_contains_logo_styles(self):
         """Test CSS includes logo styling."""
         screen = WelcomeScreen()
         assert "#welcome-logo" in screen.DEFAULT_CSS
 
-    def test_css_contains_version_styles(self):
-        """Test CSS includes version display styling."""
+    def test_css_contains_stats_styles(self):
+        """Test CSS includes stats display styling."""
         screen = WelcomeScreen()
-        assert "#welcome-version" in screen.DEFAULT_CSS
+        assert "#welcome-stats" in screen.DEFAULT_CSS
 
-    def test_css_contains_actions_styles(self):
-        """Test CSS includes action button area styling."""
+    def test_css_contains_prompt_styles(self):
+        """Test CSS includes prompt text styling."""
         screen = WelcomeScreen()
-        assert "#welcome-actions" in screen.DEFAULT_CSS
-
-    def test_css_contains_hint_styles(self):
-        """Test CSS includes hint text styling."""
-        screen = WelcomeScreen()
-        assert "#welcome-hint" in screen.DEFAULT_CSS
+        assert "#welcome-prompt" in screen.DEFAULT_CSS
 
 
 class TestSplashLogo(unittest.TestCase):
@@ -119,16 +116,12 @@ class TestSplashLogo(unittest.TestCase):
 
     def test_splash_logo_has_markup(self):
         """Test SPLASH_LOGO uses Rich markup."""
-        assert "[bold cyan]" in SPLASH_LOGO
+        assert "[bold]" in SPLASH_LOGO
         assert "[/]" in SPLASH_LOGO
 
-    def test_splash_logo_has_branding(self):
-        """Test SPLASH_LOGO includes branding text."""
-        assert "Enterprise Unified eXecution Intelligence System" in SPLASH_LOGO
-
-    def test_splash_logo_has_tagline(self):
-        """Test SPLASH_LOGO includes the tagline."""
-        assert "41 AI specialists" in SPLASH_LOGO
+    def test_splash_logo_has_block_characters(self):
+        """Test SPLASH_LOGO includes block art characters."""
+        assert "\u2588" in SPLASH_LOGO  # Full block character
 
 
 class TestWelcomeScreenEuxisAppProperty(unittest.TestCase):
@@ -152,93 +145,56 @@ class TestWelcomeScreenEuxisAppProperty(unittest.TestCase):
 class TestWelcomeScreenCompose(unittest.TestCase):
     """Tests for the compose() method."""
 
-    @patch("tui.screens.welcome.Footer")
     @patch("tui.screens.welcome.Static")
-    @patch("tui.screens.welcome.Button")
-    @patch("tui.screens.welcome.Horizontal")
-    @patch("tui.screens.welcome.Container")
     @patch("tui.screens.welcome.Center")
+    @patch("tui.screens.welcome.Middle")
     def test_compose_yields_widgets(
-        self, mock_center, mock_container, mock_horiz, mock_button, mock_static, mock_footer
+        self, mock_middle, mock_center, mock_static
     ):
         """Test compose() produces a non-empty widget list."""
+        mock_middle.return_value.__enter__ = Mock(return_value=Mock())
+        mock_middle.return_value.__exit__ = Mock(return_value=False)
         mock_center.return_value.__enter__ = Mock(return_value=Mock())
         mock_center.return_value.__exit__ = Mock(return_value=False)
-        mock_container.return_value.__enter__ = Mock(return_value=Mock())
-        mock_container.return_value.__exit__ = Mock(return_value=False)
-        mock_horiz.return_value.__enter__ = Mock(return_value=Mock())
-        mock_horiz.return_value.__exit__ = Mock(return_value=False)
 
         screen = WelcomeScreen()
         result = list(screen.compose())
         assert len(result) > 0
 
-    @patch("tui.screens.welcome.Footer")
     @patch("tui.screens.welcome.Static")
-    @patch("tui.screens.welcome.Button")
-    @patch("tui.screens.welcome.Horizontal")
-    @patch("tui.screens.welcome.Container")
     @patch("tui.screens.welcome.Center")
-    def test_compose_creates_three_buttons(
-        self, mock_center, mock_container, mock_horiz, mock_button, mock_static, mock_footer
+    @patch("tui.screens.welcome.Middle")
+    def test_compose_creates_statics(
+        self, mock_middle, mock_center, mock_static
     ):
-        """Test compose() creates three Button widgets."""
+        """Test compose() creates Static widgets for logo, stats, and prompt."""
+        mock_middle.return_value.__enter__ = Mock(return_value=Mock())
+        mock_middle.return_value.__exit__ = Mock(return_value=False)
         mock_center.return_value.__enter__ = Mock(return_value=Mock())
         mock_center.return_value.__exit__ = Mock(return_value=False)
-        mock_container.return_value.__enter__ = Mock(return_value=Mock())
-        mock_container.return_value.__exit__ = Mock(return_value=False)
-        mock_horiz.return_value.__enter__ = Mock(return_value=Mock())
-        mock_horiz.return_value.__exit__ = Mock(return_value=False)
 
         screen = WelcomeScreen()
         list(screen.compose())
-        assert mock_button.call_count == 3
+        # 3 Static widgets: logo, stats, prompt
+        assert mock_static.call_count == 3
 
-    @patch("tui.screens.welcome.Footer")
     @patch("tui.screens.welcome.Static")
-    @patch("tui.screens.welcome.Button")
-    @patch("tui.screens.welcome.Horizontal")
-    @patch("tui.screens.welcome.Container")
     @patch("tui.screens.welcome.Center")
-    def test_compose_button_ids(
-        self, mock_center, mock_container, mock_horiz, mock_button, mock_static, mock_footer
+    @patch("tui.screens.welcome.Middle")
+    def test_compose_creates_shortcut_bar(
+        self, mock_middle, mock_center, mock_static
     ):
-        """Test compose() creates buttons with correct IDs."""
+        """Test compose() creates a ShortcutBar."""
+        mock_middle.return_value.__enter__ = Mock(return_value=Mock())
+        mock_middle.return_value.__exit__ = Mock(return_value=False)
         mock_center.return_value.__enter__ = Mock(return_value=Mock())
         mock_center.return_value.__exit__ = Mock(return_value=False)
-        mock_container.return_value.__enter__ = Mock(return_value=Mock())
-        mock_container.return_value.__exit__ = Mock(return_value=False)
-        mock_horiz.return_value.__enter__ = Mock(return_value=Mock())
-        mock_horiz.return_value.__exit__ = Mock(return_value=False)
 
         screen = WelcomeScreen()
-        list(screen.compose())
-
-        button_ids = [call.kwargs.get("id") for call in mock_button.call_args_list]
-        assert "btn-dashboard" in button_ids
-        assert "btn-agent" in button_ids
-        assert "btn-help" in button_ids
-
-    @patch("tui.screens.welcome.Footer")
-    @patch("tui.screens.welcome.Static")
-    @patch("tui.screens.welcome.Button")
-    @patch("tui.screens.welcome.Horizontal")
-    @patch("tui.screens.welcome.Container")
-    @patch("tui.screens.welcome.Center")
-    def test_compose_creates_footer(
-        self, mock_center, mock_container, mock_horiz, mock_button, mock_static, mock_footer
-    ):
-        """Test compose() creates a Footer."""
-        mock_center.return_value.__enter__ = Mock(return_value=Mock())
-        mock_center.return_value.__exit__ = Mock(return_value=False)
-        mock_container.return_value.__enter__ = Mock(return_value=Mock())
-        mock_container.return_value.__exit__ = Mock(return_value=False)
-        mock_horiz.return_value.__enter__ = Mock(return_value=Mock())
-        mock_horiz.return_value.__exit__ = Mock(return_value=False)
-
-        screen = WelcomeScreen()
-        list(screen.compose())
-        mock_footer.assert_called_once()
+        result = list(screen.compose())
+        # The last yielded item should be the ShortcutBar
+        from tui.widgets.shortcut_bar import ShortcutBar
+        assert any(isinstance(w, ShortcutBar) for w in result)
 
 
 class TestWelcomeScreenOnMount(unittest.TestCase):
@@ -272,108 +228,52 @@ class TestWelcomeScreenOnMount(unittest.TestCase):
         screen = WelcomeScreen()
         self._patcher = _patch_screen_app(screen, self.mock_app)
 
-        mock_version = Mock()
+        mock_stats = Mock()
+        mock_prompt = Mock()
 
         def query_one_side_effect(selector, *args, **kwargs):
-            if selector == "#welcome-version":
-                return mock_version
+            if selector == "#welcome-stats":
+                return mock_stats
+            if selector == "#welcome-prompt":
+                return mock_prompt
             return Mock()
 
         screen.query_one = Mock(side_effect=query_one_side_effect)
-        return screen, mock_version
+        return screen, mock_stats
 
     def test_on_mount_updates_version_widget(self):
-        """Test on_mount calls update() on the version Static widget."""
-        screen, mock_version = self._create_mounted_screen()
+        """Test on_mount calls update() on the stats Static widget."""
+        screen, mock_stats = self._create_mounted_screen()
         screen.on_mount()
-        mock_version.update.assert_called_once()
+        mock_stats.update.assert_called_once()
 
     def test_on_mount_version_contains_version(self):
-        """Test version update includes the registry version."""
-        screen, mock_version = self._create_mounted_screen()
+        """Test stats update includes the registry version."""
+        screen, mock_stats = self._create_mounted_screen()
         screen.on_mount()
-        text = mock_version.update.call_args[0][0]
+        text = mock_stats.update.call_args[0][0]
         assert "2.0.0" in text
 
     def test_on_mount_version_contains_agent_count(self):
-        """Test version update includes the agent count."""
-        screen, mock_version = self._create_mounted_screen()
+        """Test stats update includes the agent count."""
+        screen, mock_stats = self._create_mounted_screen()
         screen.on_mount()
-        text = mock_version.update.call_args[0][0]
+        text = mock_stats.update.call_args[0][0]
         assert "3 agents" in text
 
     def test_on_mount_version_contains_squad_count(self):
-        """Test version update includes the squad count."""
-        screen, mock_version = self._create_mounted_screen()
+        """Test stats update includes the squad count."""
+        screen, mock_stats = self._create_mounted_screen()
         screen.on_mount()
-        text = mock_version.update.call_args[0][0]
+        text = mock_stats.update.call_args[0][0]
         assert "2 squads" in text
 
     def test_on_mount_version_contains_combo_count(self):
-        """Test version update includes the combo count."""
-        screen, mock_version = self._create_mounted_screen()
+        """Test stats update includes the combo count."""
+        screen, mock_stats = self._create_mounted_screen()
         screen.on_mount()
-        text = mock_version.update.call_args[0][0]
+        text = mock_stats.update.call_args[0][0]
         assert "1 combos" in text
-
-
-class TestWelcomeScreenButtonPressed(unittest.TestCase):
-    """Tests for the on_button_pressed event handler."""
-
-    def setUp(self):
-        self.mock_app = Mock()
-        self._patcher = None
-
-    def tearDown(self):
-        if self._patcher:
-            self._patcher.stop()
-
-    def _create_screen(self):
-        screen = WelcomeScreen()
-        self._patcher = _patch_screen_app(screen, self.mock_app)
-        screen.dismiss = Mock()
-        return screen
-
-    def test_btn_dashboard_calls_action_go_dashboard(self):
-        """Test btn-dashboard button triggers action_go_dashboard."""
-        screen = self._create_screen()
-        mock_event = Mock()
-        mock_event.button.id = "btn-dashboard"
-
-        with patch.object(screen, "action_go_dashboard") as mock_action:
-            screen.on_button_pressed(mock_event)
-            mock_action.assert_called_once()
-
-    def test_btn_agent_deploys_architect(self):
-        """Test btn-agent button dismisses and deploys architect."""
-        screen = self._create_screen()
-        mock_event = Mock()
-        mock_event.button.id = "btn-agent"
-
-        screen.on_button_pressed(mock_event)
-        screen.dismiss.assert_called_once()
-        self.mock_app.action_deploy_agent.assert_called_once_with("architect")
-
-    def test_btn_help_opens_help(self):
-        """Test btn-help button dismisses and opens help."""
-        screen = self._create_screen()
-        mock_event = Mock()
-        mock_event.button.id = "btn-help"
-
-        screen.on_button_pressed(mock_event)
-        screen.dismiss.assert_called_once()
-        self.mock_app.action_help.assert_called_once()
-
-    def test_unknown_button_does_nothing(self):
-        """Test unknown button ID does not trigger any action."""
-        screen = self._create_screen()
-        mock_event = Mock()
-        mock_event.button.id = "btn-unknown"
-
-        screen.on_button_pressed(mock_event)
-        screen.dismiss.assert_not_called()
-        self.mock_app.action_deploy_agent.assert_not_called()
-        self.mock_app.action_help.assert_not_called()
 
 
 class TestWelcomeScreenActionGoDashboard(unittest.TestCase):

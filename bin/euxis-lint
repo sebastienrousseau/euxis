@@ -3,7 +3,7 @@
 # EUXIS LINT: Static Analysis for Agent Fleet
 # Enforces Protocol v0.0.7 Compliance
 
-set -uo pipefail
+set -euo pipefail
 
 usage() {
     cat <<'EOF'
@@ -84,7 +84,7 @@ for agent in "${AGENTS[@]}"; do
     done
     if [[ "$FOUND" == false ]]; then
         echo "  MISSING: ${agent}.txt"
-        ((FAILURES++))
+        ((FAILURES++)) || true
     fi
 done
 
@@ -97,13 +97,13 @@ echo "[2/8] Checking Protocol..."
 PROTOCOL_FILE="$EUXIS_HOME/prompts/protocols/_protocol.txt"
 if [[ ! -f "$PROTOCOL_FILE" ]]; then
     echo "  MISSING: _protocol.txt"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 else
     # Verify protocol contains key sections
     for section in "EUXIS MANDATORY PROTOCOL" "AUDIT_FILE_PATH" "MEMORY_FILE_PATH" "SESSION_ID" "MODEL_NAME" "AUTHORIZED TOOL BELT" "FALLBACK BEHAVIOR" "CORTEX" "ReAct REASONING LOOP" "INTER-AGENT MESSAGE SCHEMA"; do
         if ! grep -q "$section" "$PROTOCOL_FILE"; then
             echo "  PROTOCOL GAP: Missing section — $section"
-            ((FAILURES++))
+            ((FAILURES++)) || true
         fi
     done
     if [[ $FAILURES -eq 0 ]]; then
@@ -118,7 +118,7 @@ VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/
 
 if [[ "$VERSION_COUNT" -ne 1 ]]; then
     echo "  VERSION MISMATCH: Found multiple versions: $VERSIONS"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 else
     echo "  All agents at version: $VERSIONS"
 fi
@@ -131,7 +131,7 @@ for script in "$EUXIS_HOME/bin/"*; do
     PERMS=$(stat -c "%a" "$script" 2>/dev/null || stat -f "%Lp" "$script" 2>/dev/null)
     if [[ "$PERMS" != "755" && "$PERMS" != "700" && "$PERMS" != "775" ]]; then
         echo "  BAD PERMS: $(basename "$script") is $PERMS (expected 755, 775, or 700)"
-        ((FAILURES++))
+        ((FAILURES++)) || true
     fi
 done
 echo "  Script permissions verified."
@@ -152,7 +152,7 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
         first_line=$(head -n 1 "$prompt_file")
         if [[ "$first_line" != "---" ]]; then
             echo "  NO FRONTMATTER: ${local_name}.txt (missing opening ---)"
-            ((HEADER_FAILURES++))
+            ((HEADER_FAILURES++)) || true
             continue
         fi
 
@@ -163,7 +163,7 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
         for field in agent_id role version tags last_updated; do
             if ! echo "$frontmatter" | grep -q "^${field}:"; then
                 echo "  MISSING FIELD: ${local_name}.txt — ${field}"
-                ((HEADER_FAILURES++))
+                ((HEADER_FAILURES++)) || true
             fi
         done
 
@@ -171,7 +171,7 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
         declared_id=$(echo "$frontmatter" | grep '^agent_id:' | sed 's/^agent_id:[[:space:]]*//' | tr -d '"' | tr -d "'")
         if [[ -n "$declared_id" && "$declared_id" != "$local_name" ]]; then
             echo "  ID MISMATCH: ${local_name}.txt declares agent_id: ${declared_id}"
-            ((HEADER_FAILURES++))
+            ((HEADER_FAILURES++)) || true
         fi
 
         # 4. Required sections: Mandate, (Scope Boundaries or Primary Directives), Output Format
@@ -187,15 +187,15 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
 
         if [[ "$has_mandate" == false ]]; then
             echo "  MISSING SECTION: ${local_name}.txt — Mandate"
-            ((HEADER_FAILURES++))
+            ((HEADER_FAILURES++)) || true
         fi
         if [[ "$has_scope" == false ]]; then
             echo "  MISSING SECTION: ${local_name}.txt — Scope Boundaries / Primary Directives"
-            ((HEADER_FAILURES++))
+            ((HEADER_FAILURES++)) || true
         fi
         if [[ "$has_output" == false ]]; then
             echo "  MISSING SECTION: ${local_name}.txt — Output Format"
-            ((HEADER_FAILURES++))
+            ((HEADER_FAILURES++)) || true
         fi
 
         # 5. Delegation targets in Scope Boundaries exist in registry
@@ -223,7 +223,7 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
                     case "$target" in
                         *-agent|*-engineer|*-manager|*-lead|*-officer|*-writer|*-hunter|*-tester|*-fixer|*-optimizer|*-coordinator|*-commander|*-maintainer|*-sentinel|*-artisan|*-specialist|*-architect|*-evangelist|*-advocate|*-researcher|*-steward|*-critic)
                             echo "  UNKNOWN DELEGATE: ${local_name}.txt references '${target}' (not in registry)"
-                            ((HEADER_FAILURES++))
+                            ((HEADER_FAILURES++)) || true
                             ;;
                     esac
                 fi
@@ -253,19 +253,19 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         # Skip README
         [[ "$local_name" == "README.md" ]] && continue
 
-        ((PATTERN_COUNT++))
+        ((PATTERN_COUNT++)) || true
 
         # Validate naming: CATEGORY-NNN.md
         if ! echo "$local_name" | grep -qE '^[A-Z]+-[0-9]{3}\.md$'; then
             echo "  BAD NAME: ${local_name} (expected FORMAT-NNN.md)"
-            ((PATTERN_FAILURES++))
+            ((PATTERN_FAILURES++)) || true
         fi
 
         # Required sections
         for section in "## Pattern" "## Severity" "## Detection Rules" "## Validation" "## Remediation"; do
             if ! grep -q "$section" "$pattern_file"; then
                 echo "  MISSING SECTION: ${local_name} — ${section}"
-                ((PATTERN_FAILURES++))
+                ((PATTERN_FAILURES++)) || true
             fi
         done
 
@@ -275,7 +275,7 @@ if [[ -d "$PATTERNS_DIR" ]]; then
             CRITICAL|HIGH|MEDIUM|LOW) ;;
             *)
                 echo "  BAD SEVERITY: ${local_name} — '${severity}' (expected CRITICAL|HIGH|MEDIUM|LOW)"
-                ((PATTERN_FAILURES++))
+                ((PATTERN_FAILURES++)) || true
                 ;;
         esac
 
@@ -311,13 +311,13 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         rule_count=$(awk '/^## Detection Rules/{found=1;next} /^## /{found=0} found && /^[0-9]+\./' "$pattern_file" | wc -l | tr -d ' ')
         if [[ "$rule_count" -lt 1 ]]; then
             echo "  NO DETECTION RULES: ${local_name}"
-            ((COMPLIANCE_FAILURES++))
+            ((COMPLIANCE_FAILURES++)) || true
         fi
 
         # Check that each pattern has a Validation checklist
         if ! grep -q '\- \[ \]' "$pattern_file"; then
             echo "  NO VALIDATION CHECKLIST: ${local_name}"
-            ((COMPLIANCE_FAILURES++))
+            ((COMPLIANCE_FAILURES++)) || true
         fi
 
         # Check that Remediation section is non-empty
@@ -325,7 +325,7 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         remediation=$(awk '/^## Remediation/{found=1;next} /^## /{found=0} found && !/^$/' "$pattern_file" | wc -l | tr -d ' ')
         if [[ "$remediation" -lt 1 ]]; then
             echo "  EMPTY REMEDIATION: ${local_name}"
-            ((COMPLIANCE_FAILURES++))
+            ((COMPLIANCE_FAILURES++)) || true
         fi
     done
 
@@ -335,7 +335,7 @@ if [[ -d "$PATTERNS_DIR" ]]; then
         for ref_pattern in $(grep -oE '[A-Z]+-[0-9]{3}' "$PROTOCOL_FILE" | sort -u); do
             if [[ ! -f "$PATTERNS_DIR/${ref_pattern}.md" ]]; then
                 echo "  DANGLING REFERENCE: Protocol references ${ref_pattern} but file missing"
-                ((COMPLIANCE_FAILURES++))
+                ((COMPLIANCE_FAILURES++)) || true
             fi
         done
     fi
@@ -368,14 +368,14 @@ if [[ -d "$LIB_DIR" ]]; then
             sourced_file=$(echo "$sourced" | grep -oE '[a-z-]+\.sh' | head -1)
             if [[ -n "$sourced_file" && ! -f "$LIB_DIR/$sourced_file" ]]; then
                 echo "  MISSING DEP: ${lib_name}.sh sources ${sourced_file} (not found)"
-                ((DEP_FAILURES++))
+                ((DEP_FAILURES++)) || true
             fi
         done < <(grep -E '^source ' "$lib_file" 2>/dev/null || true)
 
         # Verify source guard is present
         if ! grep -q '_EUXIS_LIB_' "$lib_file"; then
             echo "  NO SOURCE GUARD: ${lib_name}.sh"
-            ((DEP_FAILURES++))
+            ((DEP_FAILURES++)) || true
         fi
     done
 

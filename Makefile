@@ -1,11 +1,16 @@
-# Euxis Zero-Tolerance Development Makefile
-# Enforces strict code quality standards
+# Euxis Zero-Tolerance Development Makefile with UV
+# Enforces strict code quality standards with modern dependency management
 
-.PHONY: help install install-dev clean lint format type-check test test-coverage security audit ci-local
+.PHONY: help install install-dev install-api install-db clean lint format type-check test test-coverage security audit ci-local setup-env lock sync update
 
-# Default Python interpreter
-PYTHON := python3
+# Default Python interpreter and package manager
+PYTHON := $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
+UV := $(shell command -v uv 2>/dev/null)
 PIP := $(PYTHON) -m pip
+
+# Project directories
+PROJECT_DIR := $(shell pwd)
+VENV_DIR := $(PROJECT_DIR)/.venv
 
 # Directories
 SRC_DIR := tui
@@ -17,13 +22,65 @@ help: ## Show this help message
 	@echo "=================================================="
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install production dependencies
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
+check-uv: ## Check if UV is installed
+	@if [ -z "$(UV)" ]; then \
+		echo "❌ UV is not installed"; \
+		echo "Install UV with: curl -LsSf https://astral.sh/uv/install.sh | sh"; \
+		exit 1; \
+	fi
 
-install-dev: ## Install development dependencies
-	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements-dev.txt
+setup-env: ## Complete environment setup with UV
+	@echo "=== Setting up UV-based environment ==="
+	@chmod +x scripts/setup-env.sh
+	@scripts/setup-env.sh
+	@echo "✅ Environment setup complete"
+
+install: check-uv ## Install production dependencies with UV
+	@echo "=== Installing production dependencies ==="
+	$(UV) pip install -e .
+	@echo "✅ Production dependencies installed"
+
+install-dev: check-uv ## Install development dependencies with UV
+	@echo "=== Installing development dependencies ==="
+	$(UV) pip install -e ".[dev]"
+	@echo "✅ Development dependencies installed"
+
+install-api: check-uv ## Install API dependencies with UV
+	@echo "=== Installing API dependencies ==="
+	$(UV) pip install -e ".[api]"
+	@echo "✅ API dependencies installed"
+
+install-db: check-uv ## Install database dependencies with UV
+	@echo "=== Installing database dependencies ==="
+	$(UV) pip install -e ".[db]"
+	@echo "✅ Database dependencies installed"
+
+install-all: check-uv ## Install all dependencies with UV
+	@echo "=== Installing all dependencies ==="
+	$(UV) pip install -e ".[dev,api,db]"
+	@echo "✅ All dependencies installed"
+
+lock: check-uv ## Generate UV lock files
+	@echo "=== Generating UV lock files ==="
+	$(UV) pip compile pyproject.toml --output-file requirements.lock
+	$(UV) pip compile pyproject.toml --extra dev --output-file requirements-dev.lock
+	$(UV) pip compile pyproject.toml --extra api --output-file requirements-api.lock
+	$(UV) pip compile pyproject.toml --extra db --output-file requirements-db.lock
+	@echo "✅ Lock files generated"
+
+sync: check-uv ## Sync dependencies from lock files
+	@echo "=== Syncing dependencies from lock files ==="
+	@if [ -f "requirements.lock" ]; then \
+		$(UV) pip sync requirements.lock; \
+		echo "✅ Dependencies synced"; \
+	else \
+		echo "⚠️  No lock file found, run 'make lock' first"; \
+	fi
+
+update: check-uv ## Update all dependencies
+	@echo "=== Updating all dependencies ==="
+	$(UV) pip install --upgrade -e ".[dev,api,db]"
+	@echo "✅ Dependencies updated"
 
 clean: ## Clean up generated files
 	find . -type f -name "*.pyc" -delete

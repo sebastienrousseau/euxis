@@ -90,7 +90,6 @@ class TestAgentScreenInit(unittest.TestCase):
 class TestAgentScreenCompose(unittest.TestCase):
     """Tests for AgentScreen compose method."""
 
-    @patch("tui.screens.agent.Footer")
     @patch("tui.screens.agent.OutputPanel")
     @patch("tui.screens.agent.Input")
     @patch("tui.screens.agent.Static")

@@ -2,7 +2,7 @@
 # (c) 2026 Euxis Fleet. Deep-Dive Audit Runner.
 # Runs benchmarks, logical integrity, security probes, and consolidates a report.
 
-set -uo pipefail
+set -euo pipefail
 
 usage() {
     cat <<'EOF'
@@ -33,10 +33,10 @@ gate_result() {
     local name="$1" exit_code="$2"
     if [[ $exit_code -eq 0 ]]; then
         echo "  PASS: $name"
-        ((GATE_PASS++))
+        ((GATE_PASS++)) || true
     else
         echo "  FAIL: $name"
-        ((GATE_FAIL++))
+        ((GATE_FAIL++)) || true
     fi
 }
 
@@ -54,7 +54,7 @@ if [[ -x "$BIN_DIR/euxis-bench" ]]; then
 else
     echo "  SKIP: euxis-bench not found."
     echo "Skipped — euxis-bench not available." > "$REPORT_DIR/benchmarks.txt"
-    ((GATE_FAIL++))
+    ((GATE_FAIL++)) || true
 fi
 
 # ── GATE 2: Logical Integrity (Architect auditing Fleet) ──
@@ -69,7 +69,7 @@ if command -v euxis &>/dev/null; then
 else
     echo "  SKIP: euxis CLI not available."
     echo "Skipped — euxis CLI not available." > "$REPORT_DIR/logic_audit.md"
-    ((GATE_FAIL++))
+    ((GATE_FAIL++)) || true
 fi
 
 # ── GATE 3: Security Red-Teaming (Injection Probing) ──
@@ -90,10 +90,10 @@ echo "--------------------------------------------------"
     RESULT=$(euxis "; echo $CANARY" "test" claude 2>&1 || true)
     if echo "$RESULT" | grep -qx "$CANARY"; then
         echo "  FAIL: Shell injection succeeded (canary found as command output)."
-        ((PROBE_FAIL++))
+        ((PROBE_FAIL++)) || true
     else
         echo "  PASS: Agent argument is not injectable."
-        ((PROBE_PASS++))
+        ((PROBE_PASS++)) || true
     fi
 
     # Probe 2: Path traversal in agent name
@@ -101,17 +101,17 @@ echo "--------------------------------------------------"
     RESULT=$(euxis "../../etc/passwd" "test" claude 2>&1 || true)
     if echo "$RESULT" | grep -q "root:"; then
         echo "  FAIL: Path traversal succeeded."
-        ((PROBE_FAIL++))
+        ((PROBE_FAIL++)) || true
     else
         echo "  PASS: Path traversal blocked."
-        ((PROBE_PASS++))
+        ((PROBE_PASS++)) || true
     fi
 
     # Probe 3: Null byte injection
     echo "## Probe 3: Null byte injection"
     RESULT=$(euxis architect $'test\x00injected' claude 2>&1 || true)
     echo "  PASS: Null byte handled without crash."
-    ((PROBE_PASS++))
+    ((PROBE_PASS++)) || true
 
     echo ""
     echo "## Summary: $PROBE_PASS passed, $PROBE_FAIL failed"

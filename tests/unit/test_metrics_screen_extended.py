@@ -238,7 +238,6 @@ class TestMetricsScreenLoadMetrics(unittest.TestCase):
 
 
 class TestMetricsScreenCompose(unittest.TestCase):
-    @patch("tui.screens.metrics.Footer")
     @patch("tui.screens.metrics.Static")
     @patch("tui.screens.metrics.VerticalScroll")
     @patch("tui.screens.metrics.ETXHeader")

@@ -60,7 +60,6 @@ class TestToolRunnerScreenInit(unittest.TestCase):
 
 
 class TestToolRunnerScreenCompose(unittest.TestCase):
-    @patch("tui.screens.tool_runner.Footer")
     @patch("tui.screens.tool_runner.OutputPanel")
     @patch("tui.screens.tool_runner.Static")
     @patch("tui.screens.tool_runner.Container")

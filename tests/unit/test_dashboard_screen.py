@@ -65,10 +65,10 @@ class TestDashboardScreenInitialization(unittest.TestCase):
         assert binding_map["f1"] == "app.action_help"
 
     def test_binding_escape_action(self):
-        """Test Escape maps to pop_screen."""
+        """Test Escape maps to app.quit."""
         screen = DashboardScreen()
         binding_map = {b[0]: b[1] for b in screen.BINDINGS}
-        assert binding_map["escape"] == "app.pop_screen"
+        assert binding_map["escape"] == "app.quit"
 
     def test_binding_descriptions(self):
         """Test bindings have descriptive labels."""
@@ -77,7 +77,7 @@ class TestDashboardScreenInitialization(unittest.TestCase):
         assert "Commands" in descriptions
         assert "Search" in descriptions
         assert "Help" in descriptions
-        assert "Back" in descriptions
+        assert "Quit" in descriptions
 
 
 class TestDashboardScreenEuxisAppProperty(unittest.TestCase):
@@ -114,45 +114,46 @@ class TestDashboardScreenCompose(unittest.TestCase):
         if self._patcher:
             self._patcher.stop()
 
-    @patch("tui.screens.dashboard.Footer")
     @patch("tui.screens.dashboard.FleetGrid")
+    @patch("tui.screens.dashboard.TipBar")
     @patch("tui.screens.dashboard.ETXHeader")
-    def test_compose_yields_widgets(self, mock_header, mock_grid, mock_footer):
+    def test_compose_yields_widgets(self, mock_header, mock_tipbar, mock_grid):
         """Test compose() produces a non-empty widget list."""
         screen = DashboardScreen()
         self._patcher = _patch_screen_app(screen, self.mock_app)
         result = list(screen.compose())
         assert len(result) > 0
 
-    @patch("tui.screens.dashboard.Footer")
     @patch("tui.screens.dashboard.FleetGrid")
+    @patch("tui.screens.dashboard.TipBar")
     @patch("tui.screens.dashboard.ETXHeader")
-    def test_compose_creates_header(self, mock_header, mock_grid, mock_footer):
+    def test_compose_creates_header(self, mock_header, mock_tipbar, mock_grid):
         """Test compose() creates ETXHeader with id='header'."""
         screen = DashboardScreen()
         self._patcher = _patch_screen_app(screen, self.mock_app)
         list(screen.compose())
         mock_header.assert_called_once_with(id="header")
 
-    @patch("tui.screens.dashboard.Footer")
     @patch("tui.screens.dashboard.FleetGrid")
+    @patch("tui.screens.dashboard.TipBar")
     @patch("tui.screens.dashboard.ETXHeader")
-    def test_compose_creates_fleet_grid(self, mock_header, mock_grid, mock_footer):
+    def test_compose_creates_fleet_grid(self, mock_header, mock_tipbar, mock_grid):
         """Test compose() creates FleetGrid with registry and id."""
         screen = DashboardScreen()
         self._patcher = _patch_screen_app(screen, self.mock_app)
         list(screen.compose())
         mock_grid.assert_called_once_with(self.registry, id="fleet-grid")
 
-    @patch("tui.screens.dashboard.Footer")
     @patch("tui.screens.dashboard.FleetGrid")
+    @patch("tui.screens.dashboard.TipBar")
     @patch("tui.screens.dashboard.ETXHeader")
-    def test_compose_creates_footer(self, mock_header, mock_grid, mock_footer):
-        """Test compose() creates a Footer."""
+    def test_compose_creates_shortcut_bar(self, mock_header, mock_tipbar, mock_grid):
+        """Test compose() creates a ShortcutBar."""
         screen = DashboardScreen()
         self._patcher = _patch_screen_app(screen, self.mock_app)
-        list(screen.compose())
-        mock_footer.assert_called_once()
+        result = list(screen.compose())
+        from tui.widgets.shortcut_bar import ShortcutBar
+        assert any(isinstance(w, ShortcutBar) for w in result)
 
 
 class TestDashboardScreenOnMount(unittest.TestCase):

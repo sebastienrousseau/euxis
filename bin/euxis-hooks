@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
-set -uo pipefail
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 HOOKS_DIR="$EUXIS_DIR/bin/hooks"
@@ -87,7 +87,7 @@ cmd_install() {
 
     ln -sf "$hook" "$target"
     echo "  INSTALLED: $hook_name"
-    ((installed++))
+    ((installed++)) || true
   done
 
   if [[ $installed -eq 0 ]]; then
@@ -123,7 +123,7 @@ cmd_uninstall() {
       if [[ "$existing" == "$hook" ]]; then
         rm "$target"
         echo "  REMOVED: $hook_name"
-        ((removed++))
+        ((removed++)) || true
 
         # Restore backup if it exists
         if [[ -f "$target.pre-euxis" ]]; then
@@ -253,7 +253,7 @@ cmd_check_pr() {
       echo "  PASS: PR #$pr_number carries branding signature."
     else
       echo "  FAIL: PR #$pr_number missing branding signature."
-      ((failures++))
+      ((failures++)) || true
     fi
   else
     # Check all open PRs
@@ -273,7 +273,7 @@ cmd_check_pr() {
         echo "  PASS: #$num $title"
       else
         echo "  FAIL: #$num $title — missing branding signature"
-        ((failures++))
+        ((failures++)) || true
       fi
     done <<< "$pr_list"
   fi

@@ -22,11 +22,12 @@ class TestETXConfig(unittest.TestCase):
     def test_default_initialization(self):
         """Test ETXConfig initializes with default values."""
         config = ETXConfig()
-        assert config.theme == "etx-dark"
+        assert config.theme == "etx-liquid-glass"
         assert config.default_provider == "claude"
         assert config.show_agent_tags
         assert not config.reduced_motion
         assert not config.accessible_mode
+        assert config.locale == "en"
         assert config.grid_columns == 4
         assert config.recent_agents == []
         assert config.recent_commands == []
@@ -109,7 +110,7 @@ class TestETXConfig(unittest.TestCase):
             mock_path.exists.return_value = False
             config = ETXConfig.load()
 
-        assert config.theme == "etx-dark"
+        assert config.theme == "etx-liquid-glass"
         assert config.default_provider == "claude"
         assert config.recent_agents == []
 

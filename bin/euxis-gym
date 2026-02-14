@@ -8,7 +8,7 @@
 #   Single eval: Run one agent against a test case and score 0-100
 #   A/B testing:  Run the same agent with two providers, compare scores
 
-set -uo pipefail
+set -euo pipefail
 
 usage() {
     cat <<'EOF'

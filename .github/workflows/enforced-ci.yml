@@ -99,11 +99,10 @@ jobs:
 
       - name: Run mypy type checker (Strict mode)
         run: |
-          echo "=== Running mypy in strict mode ==="
-          mypy --strict --show-error-codes --no-error-summary tui/ || true
-          # For now, run mypy in non-strict mode to avoid blocking, but flag issues
           echo "=== Running mypy with basic checking (enforced) ==="
           mypy --ignore-missing-imports tui/
+          echo "=== Running mypy in strict mode (advisory) ==="
+          mypy --strict --show-error-codes --no-error-summary tui/ || echo "Strict mode violations detected - see output above"
 
   # ========================================
   # SECURITY SCANNING (NO || true allowed)
@@ -136,41 +135,33 @@ jobs:
       - name: Dependency vulnerability scan (pip-audit)
         run: |
           echo "=== Scanning dependencies for vulnerabilities ==="
-          pip-audit --format=json --output=pip-audit-report.json || true
-          pip-audit --format=table || true
-          # Check for fixable vulnerabilities only (transitive deps may have unfixable issues)
-          if [ -f "pip-audit-report.json" ]; then
-            fixable=$(python3 -c "
-          import json, sys
-          data = json.load(open('pip-audit-report.json'))
-          deps = data if isinstance(data, list) else data.get('dependencies', [])
-          fixable = [v for d in deps for v in d.get('vulns', []) if v.get('fix_versions')]
-          print(len(fixable))
-          " 2>/dev/null || echo "0")
-            if [ "$fixable" -gt 0 ]; then
-              echo "WARNING: $fixable fixable vulnerabilities found"
-            fi
-          fi
+          pip-audit --format=json --output=pip-audit-report.json
+          pip-audit --format=table
 
       - name: Alternative dependency scan (safety)
         run: |
           echo "=== Running safety dependency scan ==="
-          safety check --json --output=safety-report.json || true
-          safety check || true
+          safety check --json --output=safety-report.json
+          safety check
 
       - name: Python security scan (bandit)
         run: |
           echo "=== Scanning Python code for security issues ==="
-          bandit -r . -f json -o bandit-report.json -ll -x ./tests/,./venv/,./env/,./docs/,./projects/ || true
-          bandit -r . -f txt -ll -x ./tests/,./venv/,./env/,./docs/,./projects/ || true
+          bandit -r . -f json -o bandit-report.json -ll -x ./tests/,./venv/,./env/,./docs/,./projects/
+          bandit -r . -f txt -ll -x ./tests/,./venv/,./env/,./docs/,./projects/
 
       - name: Shell script security scan (shellcheck)
         run: |
           echo "=== Scanning shell scripts ==="
+          exit_code=0
           find . -name "*.sh" -type f -not -path "./tests/*" -not -path "./venv/*" -not -path "./docs/*" -not -path "./projects/*" | while IFS= read -r script; do
             echo "Scanning: $script"
-            shellcheck "$script" || echo "shellcheck warning in $script"
+            if ! shellcheck "$script"; then
+              echo "❌ shellcheck failed for $script"
+              exit_code=1
+            fi
           done
+          exit $exit_code
 
       - name: Upload security reports
         if: always()
@@ -186,7 +177,7 @@ jobs:
   # TEST SUITE WITH COVERAGE REQUIREMENT
   # ========================================
   test-coverage:
-    name: Test Suite (60% Coverage)
+    name: Test Suite (95% Coverage)
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -232,7 +223,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=html:htmlcov-${{ matrix.os }} \
             --cov-report=xml:coverage-${{ matrix.os }}.xml \
-            --cov-fail-under=60 \
+            --cov-fail-under=95 \
             --maxfail=5 \
             --tb=short
 

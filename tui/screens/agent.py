@@ -145,7 +145,7 @@ class AgentScreen(Screen[None]):
         self._timer_task = asyncio.create_task(self._update_elapsed())
 
         # Run agent in background
-        self.run_worker(self._execute_agent(task), exclusive=True)
+        self.run_worker(lambda: self._execute_agent(task), exclusive=True)
 
     async def _execute_agent(self, task: str) -> None:
         output = self.query_one(OutputPanel)

@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
+import shlex
 import sqlite3
 import subprocess
 import tempfile
@@ -29,8 +31,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-EUXIS_HOME = Path.home() / ".euxis"
+EUXIS_HOME = Path(os.environ.get("EUXIS_HOME", Path.home() / ".euxis"))
 DEFAULT_DISPATCH_MODES = {"hierarchical", "mesh", "federated"}
+SHELL_METACHARACTERS = re.compile(r'[;&|`$(){}[\]<>*?~!#]')
 
 
 class DispatchError(Exception):
@@ -191,14 +194,26 @@ class DispatchEngine:
 
         # Validate agents
         invalid_agents = []
+        unsafe_agents = []
         for dispatch in manifest.dispatches:
+            # Check if agent exists in registry
             if valid_agents and dispatch.agent not in valid_agents:
                 invalid_agents.append(dispatch.agent)
+
+            # Check for shell metacharacters in agent names
+            if SHELL_METACHARACTERS.search(dispatch.agent):
+                unsafe_agents.append(dispatch.agent)
 
         if invalid_agents:
             raise ValidationError(
                 f"Manifest references unknown agents: {', '.join(invalid_agents)}. "
                 f"Valid agents: {', '.join(sorted(valid_agents))}"
+            )
+
+        if unsafe_agents:
+            raise ValidationError(
+                f"Agent names contain shell metacharacters: {', '.join(unsafe_agents)}. "
+                f"Agent names must be alphanumeric with hyphens/underscores only."
             )
 
         # Validate verify commands
@@ -231,6 +246,47 @@ class DispatchEngine:
             return True
         except subprocess.CalledProcessError:
             return False
+
+    def _resolve_euxis_loop_path(self) -> Path:
+        """Resolve path to euxis-loop executable using configurable strategy.
+
+        Search order:
+        1. EUXIS_LOOP_PATH environment variable (if set)
+        2. ~/bin/euxis-loop (user binary location)
+        3. ${EUXIS_HOME}/bin/euxis-loop (local installation)
+
+        Raises:
+            AgentError: If euxis-loop executable cannot be found
+
+        Returns:
+            Path to euxis-loop executable
+        """
+        # Check environment variable override first
+        env_path = os.environ.get("EUXIS_LOOP_PATH")
+        if env_path:
+            loop_path = Path(env_path)
+            if loop_path.is_file():
+                return loop_path
+            logger.warning(f"EUXIS_LOOP_PATH points to non-existent file: {env_path}")
+
+        # Check user bin directory
+        user_bin_loop = Path.home() / "bin" / "euxis-loop"
+        if user_bin_loop.exists():
+            return user_bin_loop
+
+        # Check EUXIS_HOME bin directory
+        local_loop = self.euxis_home / "bin" / "euxis-loop"
+        if local_loop.exists():
+            return local_loop
+
+        # Not found - raise error with helpful context
+        raise AgentError(
+            f"euxis-loop executable not found. Searched:\n"
+            f"  - EUXIS_LOOP_PATH: {env_path or '(not set)'}\n"
+            f"  - User bin: {user_bin_loop}\n"
+            f"  - EUXIS_HOME: {local_loop}\n"
+            f"Run 'make install' to set up symlinks."
+        )
 
     def check_branch_protection(self) -> None:
         """Check if current branch is protected."""
@@ -306,15 +362,17 @@ ATOMIC FILE OPERATIONS REQUIRED:
         task += atomic_instructions
 
         # Build command
-        euxis_loop = Path.home() / "bin" / "euxis-loop"
-        if not euxis_loop.exists():
-            euxis_loop = self.euxis_home / "bin" / "euxis-loop"
+        euxis_loop = self._resolve_euxis_loop_path()
 
+        # Security: Agent names validated against registry allowlist and shell
+        # metacharacter regex in validate_manifest(). subprocess.Popen with a list
+        # (no shell=True) passes args directly to execvp — no shell interpretation
+        # occurs, so shlex.quote() is NOT needed and would add literal quotes.
         cmd = [
             str(euxis_loop),
             dispatch.agent,
             task,
-            dispatch.verify_cmd or "",
+            dispatch.verify_cmd or "true",
             "3"  # max attempts
         ]
 

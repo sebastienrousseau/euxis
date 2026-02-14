@@ -110,7 +110,7 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 41 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 41 agents organized into three tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
 ### Core (9) — Authority-bearing, always present
 
@@ -128,7 +128,7 @@ Only core agents can block progress. If one is missing, the system is incomplete
 | `arbiter` | Conflict resolution, final decisions when agents disagree |
 | `historian` | Long-term memory, temporal patterns, institutional knowledge |
 
-### Default (21) — Auto-available, task-triggered
+### Default (25) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
@@ -155,6 +155,10 @@ Execute and advise within scope. Do not define direction.
 | `tester` | Test coverage, reliability, regression prevention |
 | `watchdog` | Pre-merge exhaustive regression analysis |
 | `writer` | Documentation, tutorials, API reference, glossary |
+| `cryptographer` | Cryptographic correctness, PQC, hashing |
+| `ledger` | ISO 20022, payments compliance, financial schemas |
+| `conduit` | Real-time audio, latency, DSP, voice pipelines |
+| `custodian` | Rust crate publishing, MSRV, docs |
 
 ### On-Demand (7) — Explicit invocation only
 
@@ -170,16 +174,6 @@ Add leverage, not safety. Never block, never override core authority.
 | `researcher` | Iterative research with cross-validation |
 | `strategist` | Platform-native content, calendars, community engagement |
 
-### Specialist (4) — Domain-specific expertise
-
-Activated for domain-scoped tasks only. Deep expertise in vertical domains.
-
-| Agent | Role |
-|-------|------|
-| `cryptographer` | Cryptographic correctness, PQC, hashing |
-| `ledger` | ISO 20022, payments compliance, financial schemas |
-| `conduit` | Real-time audio, latency, DSP, voice pipelines |
-| `custodian` | Rust crate publishing, MSRV, docs |
 
 **For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
@@ -191,7 +185,7 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 41 agents: 9 core + 21 default + 7 on-demand + 4 specialist |
+| **Fleet** | 41 agents: 9 core + 25 default + 7 on-demand |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |

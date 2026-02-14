@@ -4,7 +4,7 @@
 # Version: 2.1
 # Author: Euxis System
 
-set -uo pipefail
+set -euo pipefail
 
 usage() {
     cat <<'EOF'

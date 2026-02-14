@@ -163,13 +163,13 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         return header, mock_logo, mock_context, mock_status
 
     def test_update_display_sets_logo(self):
-        """Test _update_display sets logo to EUXIS ETX."""
+        """Test _update_display sets logo with EUXIS branding and version."""
         header, mock_logo, _, _ = self._create_header_with_mocks()
         header._update_display()
         assert mock_logo.update.called
         text = mock_logo.update.call_args[0][0]
         assert "EUXIS" in text
-        assert "ETX" in text
+        assert "0.0.7" in text
 
     def test_update_display_context_contains_project(self):
         """Test _update_display includes project name in context."""
@@ -197,11 +197,11 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         assert "feature/test" in text
         assert "on" in text
 
-    def test_update_display_status_contains_version(self):
-        """Test _update_display includes version in status."""
-        header, _, _, mock_status = self._create_header_with_mocks()
+    def test_update_display_logo_contains_version(self):
+        """Test _update_display includes version in logo."""
+        header, mock_logo, _, _ = self._create_header_with_mocks()
         header._update_display()
-        text = mock_status.update.call_args[0][0]
+        text = mock_logo.update.call_args[0][0]
         assert "0.0.7" in text
 
     def test_update_display_status_contains_agent_count(self):
@@ -221,7 +221,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
 
     def test_update_display_with_custom_values(self):
         """Test _update_display uses current reactive values."""
-        header, _, mock_context, mock_status = self._create_header_with_mocks()
+        header, mock_logo, mock_context, mock_status = self._create_header_with_mocks()
         header.project = "my-project"
         header.branch = "main"
         header.provider = "gemini"
@@ -229,9 +229,13 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         # before calling _update_display explicitly
         header.agent_count = 10
         header.version = "3.0.0"
+        mock_logo.reset_mock()
         mock_context.reset_mock()
         mock_status.reset_mock()
         header._update_display()
+
+        logo_text = mock_logo.update.call_args[0][0]
+        assert "3.0.0" in logo_text
 
         context_text = mock_context.update.call_args[0][0]
         assert "my-project" in context_text
@@ -240,7 +244,6 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         status_text = mock_status.update.call_args[0][0]
         assert "gemini" in status_text
         assert "10" in status_text
-        assert "3.0.0" in status_text
 
 
 class TestETXHeaderWatchers(unittest.TestCase):

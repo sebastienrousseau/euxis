@@ -11,10 +11,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from tui.core import EUXIS_HOME
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-
-EUXIS_HOME = Path.home() / ".euxis"
 
 # Provider display names
 PROVIDERS = {

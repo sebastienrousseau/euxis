@@ -3,6 +3,9 @@
 # Euxis Library: Template variable substitution (pure bash — zero forks)
 [[ -n "${_EUXIS_LIB_TEMPLATE:-}" ]] && return; _EUXIS_LIB_TEMPLATE=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # Pure-bash template expansion for {{VAR}} patterns.

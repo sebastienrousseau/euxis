@@ -3,6 +3,9 @@
 # Euxis Library: Session and project management
 [[ -n "${_EUXIS_LIB_SESSION:-}" ]] && return; _EUXIS_LIB_SESSION=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 

@@ -12,7 +12,7 @@ from textual.containers import Container, Horizontal
 from textual.screen import Screen
 from textual.widgets import Input, Static
 
-from tui.core.runner import EUXIS_HOME
+from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
@@ -62,7 +62,7 @@ class CortexScreen(Screen[None]):
         header.branch = self.euxis_app.git_branch or ""
 
         # Load cortex status
-        self.run_worker(self._load_status(), exclusive=True)
+        self.run_worker(self._load_status, exclusive=True)
 
     async def _load_status(self) -> None:
         output = self.query_one(OutputPanel)

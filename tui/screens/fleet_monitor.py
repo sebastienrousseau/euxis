@@ -132,7 +132,7 @@ class FleetMonitorScreen(Screen[None]):
 
         # Start the operation
         if self.task_description:
-            self.run_worker(self._execute_operation(), exclusive=True)
+            self.run_worker(self._execute_operation, exclusive=True)
 
     # Patterns from euxis-combo / euxis-squad / dispatch.sh output
     _RE_STEP = re.compile(r"\s*Step\s+(\d+)/(\d+):\s+(\S+)")
@@ -283,7 +283,7 @@ class FleetMonitorScreen(Screen[None]):
         output.clear()
 
         # Re-run
-        self.run_worker(self._execute_operation(), exclusive=True)
+        self.run_worker(self._execute_operation, exclusive=True)
 
     def _set_agent_status(self, agent_id: str, status: str, progress: int = 0) -> None:
         try:

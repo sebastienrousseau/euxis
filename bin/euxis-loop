@@ -195,7 +195,7 @@ run_checkpoints() {
         else
             echo "  ✔ Checkpoint $i passed"
         fi
-        ((i++))
+        ((i++)) || true
     done
 
     return 0
@@ -264,7 +264,7 @@ $ORIGINAL_TASK
 4. The failure occurred at checkpoint $FAILED_CHECKPOINT_NUM — focus your fix on what that checkpoint validates.
 5. This is retry attempt $((ATTEMPT + 1)) of $MAX_RETRIES."
 
-        ((ATTEMPT++))
+        ((ATTEMPT++)) || true
     fi
 done
 

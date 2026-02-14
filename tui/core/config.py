@@ -5,9 +5,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from pathlib import Path
+from tui.core import EUXIS_HOME
 
-EUXIS_HOME = Path.home() / ".euxis"
 CONFIG_PATH = EUXIS_HOME / "config" / "etx-settings.json"
 
 

@@ -12,6 +12,7 @@ from textual.containers import Container
 from textual.screen import Screen
 from textual.widgets import Static
 
+from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 
@@ -19,8 +20,6 @@ if TYPE_CHECKING:
     from textual.app import ComposeResult
 
     from tui.app import EuxisApp
-
-EUXIS_HOME = Path.home() / ".euxis"
 
 
 class ToolRunnerScreen(Screen[None]):
@@ -60,7 +59,7 @@ class ToolRunnerScreen(Screen[None]):
         title = self.query_one("#tool-title", Static)
         title.update(f"[bold cyan]{self.tool_label}[/]")
 
-        self.run_worker(self._execute_tool(), exclusive=True)
+        self.run_worker(self._execute_tool, exclusive=True)
 
     async def _execute_tool(self) -> None:
         output = self.query_one(OutputPanel)

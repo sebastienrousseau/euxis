@@ -100,7 +100,6 @@ class TestSquadDetailScreen(unittest.TestCase):
     @patch("tui.screens.squad_detail.VerticalScroll")
     @patch("tui.screens.squad_detail.Container")
     @patch("tui.screens.squad_detail.Static")
-    @patch("tui.screens.squad_detail.Footer")
     def test_compose_structure(self, *mocks):
         """Test screen composition structure."""
         screen = SquadDetailScreen()
@@ -111,17 +110,18 @@ class TestSquadDetailScreen(unittest.TestCase):
     @patch("tui.screens.squad_detail.VerticalScroll")
     @patch("tui.screens.squad_detail.Container")
     @patch("tui.screens.squad_detail.Static")
-    @patch("tui.screens.squad_detail.Footer")
     def test_compose_components(
-        self, mock_footer, mock_static, mock_container, mock_scroll, mock_header,
+        self, mock_static, mock_container, mock_scroll, mock_header,
     ):
         """Test compose creates expected components."""
         screen = SquadDetailScreen()
-        list(screen.compose())
+        result = list(screen.compose())
 
         mock_header.assert_called_once()
         mock_scroll.assert_called_once()
-        mock_footer.assert_called_once()
+        # Verify a ShortcutBar is yielded
+        from tui.widgets.shortcut_bar import ShortcutBar
+        assert any(isinstance(w, ShortcutBar) for w in result)
 
     def test_action_go_back(self):
         """Test go_back action calls app.pop_screen."""

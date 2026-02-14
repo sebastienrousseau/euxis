@@ -50,7 +50,6 @@ class TestCortexScreenInit(unittest.TestCase):
 
 
 class TestCortexScreenCompose(unittest.TestCase):
-    @patch("tui.screens.cortex.Footer")
     @patch("tui.screens.cortex.OutputPanel")
     @patch("tui.screens.cortex.Input")
     @patch("tui.screens.cortex.Static")

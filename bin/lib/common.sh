@@ -9,6 +9,9 @@
 # Include guard
 [[ -n "${_EUXIS_LIB_COMMON:-}" ]] && return; _EUXIS_LIB_COMMON=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # ============================================================================
@@ -249,6 +252,8 @@ declare -A EUXIS_PERF_BUDGETS=(
 performance_budget() {
     local operation="$1"
     local budget="${2:-}"
+    # Associative array subscript access triggers set -u for non-existent keys
+    local _prev_u=false; [[ -o nounset ]] && _prev_u=true; set +u
 
     if [[ -n "$budget" ]]; then
         EUXIS_PERF_BUDGETS["$operation"]="$budget"
@@ -256,6 +261,8 @@ performance_budget() {
     else
         echo "${EUXIS_PERF_BUDGETS[$operation]:-1000}"
     fi
+
+    $_prev_u && set -u || true
 }
 
 # _perf_check_budget - Verify operation completed within budget

@@ -248,7 +248,7 @@ check_health_fast() {
     [[ "${EUXIS_HEALTH_CHECK:-}" == "skip" ]] && return 0
     [[ "${EUXIS_DISPATCH:-}" == "true" ]] && return 0
 
-    local hash_file="/tmp/euxis_health_hash"
+    local hash_file="${TMPDIR:-/tmp}/euxis_health_hash"
     local current_hash
     current_hash=$(ls -lR "${PROMPTS_DIR}" 2>/dev/null | md5sum 2>/dev/null | awk '{print $1}')
 

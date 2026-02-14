@@ -161,7 +161,6 @@ class TestFleetMonitorScreenInit(unittest.TestCase):
 
 
 class TestFleetMonitorScreenCompose(unittest.TestCase):
-    @patch("tui.screens.fleet_monitor.Footer")
     @patch("tui.screens.fleet_monitor.OutputPanel")
     @patch("tui.screens.fleet_monitor.VerticalScroll")
     @patch("tui.screens.fleet_monitor.Static")
@@ -258,8 +257,24 @@ class TestFleetMonitorExecuteOperation(unittest.TestCase):
         self.mock_app = _make_mock_app()
         self._patcher = _patch_screen_app(self.screen, self.mock_app)
         self.mock_output = Mock()
-        self.screen.query_one = Mock(return_value=self.mock_output)
+
+        # Mock query_one to handle OutputPanel, Container, and ShortcutBar queries
+        mock_container = Mock()
+        mock_task_input = Mock()
+        mock_container.mount = Mock(return_value=None)
+
+        def query_one_side_effect(selector, *args, **kwargs):
+            if selector == "#monitor-output":
+                return self.mock_output
+            if selector == "#fleet-monitor":
+                return mock_container
+            # For ShortcutBar and other class selectors
+            return Mock()
+
+        self.screen.query_one = Mock(side_effect=query_one_side_effect)
         self.screen.notify = Mock()
+        # Mock _show_next_actions to avoid Input.focus() needing active Textual app
+        self.screen._show_next_actions = Mock()
 
     def tearDown(self):
         self._patcher.stop()

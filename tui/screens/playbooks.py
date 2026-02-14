@@ -11,7 +11,7 @@ from textual.screen import Screen
 from textual.widgets import OptionList
 from textual.widgets.option_list import Option
 
-from tui.core.runner import EUXIS_HOME
+from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
 

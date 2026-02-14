@@ -152,8 +152,8 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
                 with patch("tui.widgets.fleet_grid.AgentCard"):
                     grid._rebuild_grid()
 
-        # 1 section label + 2 rows = 3 mount calls
-        assert mock_scroll.mount.call_count == 3
+        # 1 section label + 1 section desc + 2 rows = 4 mount calls
+        assert mock_scroll.mount.call_count == 4
 
     def test_filtered_grid(self):
         agents = [
@@ -170,8 +170,8 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
                     grid._rebuild_grid()
 
         # Only core section with 1 agent should appear
-        # Section label + 1 row = 2 mount calls
-        assert mock_scroll.mount.call_count == 2
+        # Section label + 1 section desc + 1 row = 3 mount calls
+        assert mock_scroll.mount.call_count == 3
 
 
 # ===========================================================================

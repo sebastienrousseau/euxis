@@ -3,6 +3,9 @@
 # Euxis Library: Provider routing and execution
 [[ -n "${_EUXIS_LIB_PROVIDERS:-}" ]] && return; _EUXIS_LIB_PROVIDERS=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 source "${EUXIS_HOME}/bin/lib/common.sh"
@@ -32,8 +35,8 @@ resolve_tiered_provider() {
         # S-Tier: Strategic — best-in-class reasoning and tool use
         orchestrator|architect|product-manager|reviewer)
             echo "claude" ;;
-        # A-Tier: Research — massive context window for deep analysis
-        deep-researcher|compliance-officer)
+        # A-Tier: Research — massive context window for deep analysis + web search
+        researcher|deep-researcher|compliance-officer)
             echo "gemini" ;;
         # A-Tier: Enterprise — corporate security contexts
         incident-commander)
@@ -60,6 +63,21 @@ resolve_tiered_provider() {
         *)
             echo "${DEFAULT_PROVIDER}" ;;
     esac
+}
+
+# Validate model name against safe character allowlist.
+# Allows: alphanumeric, dash, dot, slash, underscore, colon (covers all
+# known model naming conventions: org/model, model:tag, model-version).
+_validate_model_name() {
+    local model="$1"
+    if [[ ! "${model}" =~ ^[a-zA-Z0-9._/:@-]+$ ]]; then
+        log_error "Invalid model name: '${model}' — contains disallowed characters"
+        exit 1
+    fi
+    if [[ "${#model}" -gt 128 ]]; then
+        log_error "Invalid model name: '${model}' — exceeds 128 character limit"
+        exit 1
+    fi
 }
 
 # Resolve provider-specific model name and CLI flags.
@@ -98,9 +116,15 @@ resolve_provider_config() {
             ;;
         goose)    # Block Goose (Open source, MCP-native agent)
             PROVIDER_MODEL="${EUXIS_GOOSE_MODEL:-claude-sonnet-4}"
-            PROVIDER_FLAGS=""
+            ;;
+        *)
+            log_error "Unknown provider: '${provider}'"
+            exit 1
             ;;
     esac
+
+    # Validate model name (especially important for env-var-sourced values)
+    _validate_model_name "${PROVIDER_MODEL}"
 }
 
 # Wrapper function to add configurable timeout to provider commands
@@ -143,7 +167,7 @@ run_claude() {
     local full_prompt="$1"
 
     # Check for optional dependencies and adjust tools accordingly
-    local allowed_tools="Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*)"
+    local allowed_tools="Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*) Bash(curl:*)"
 
     # Add jq support if available, otherwise warn
     if command -v jq &>/dev/null; then
@@ -160,11 +184,12 @@ run_claude() {
     fi
 
     # Use timeout wrapper for the claude command
+    # Tools include WebSearch and WebFetch for external research capability
     printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
         claude \
         --print \
         --model "${PROVIDER_MODEL}" \
-        --tools "Read,Edit,Write,Bash" \
+        --tools "Read,Edit,Write,Bash,WebSearch,WebFetch" \
         --allowedTools "${allowed_tools}" \
         --dangerously-skip-permissions \
         --max-turns "${EUXIS_MAX_TURNS:-25}"
@@ -175,11 +200,15 @@ run_gemini() {
     if command -v gemini &>/dev/null; then
         local guard
         guard="IMPORTANT: This is plain-text mode. Do not call tools or output ACTION/OBSERVATION steps. Respond only with the final answer in the required Output Format."
-        local err_file
-        err_file=$(mktemp "${TMPDIR:-/tmp}/euxis_gemini_err.XXXXXX" 2>/dev/null) || { echo "[euxis] Error: failed to create temp file" >&2; return 1; }
+        local err_file old_umask
+        old_umask=$(umask)
+        umask 077
+        err_file=$(mktemp "${TMPDIR:-/tmp}/euxis_gemini_err.XXXXXX" 2>/dev/null) || { umask "${old_umask}"; echo "[euxis] Error: failed to create temp file" >&2; return 1; }
+        umask "${old_umask}"
         local out
+        # shellcheck disable=SC2086
         out=$(printf '%s\n\n%s' "${guard}" "${full_prompt}" | NODE_OPTIONS="--no-deprecation" \
-            gemini --output-format text -p "" 2> "${err_file}")
+            gemini ${PROVIDER_FLAGS} --output-format text -p "" 2> "${err_file}")
         local rc=$?
         if [[ -s "${err_file}" ]]; then
             grep -vE '^(Error executing tool|Tool execution denied by policy|Tool ".*" not found in registry|Loaded cached credentials|Hook registry initialized|\\(node:.*\\) \\[DEP0040\\])' "${err_file}" >&2 || true
@@ -188,7 +217,7 @@ run_gemini() {
         printf '%s' "${out}" | grep -vE '^(Error executing tool|Tool execution denied by policy|Tool ".*" not found in registry|Loaded cached credentials|Hook registry initialized)$' || true
         return "${rc}"
     else
-        log_error "Gemini CLI not found. Install it or use a different provider."
+        log_error "gemini CLI not found — install via: npm i -g @anthropic-ai/gemini-cli"
         exit 1
     fi
 }
@@ -198,7 +227,7 @@ run_openai() {
     if command -v codex &>/dev/null; then
         printf '%s\n' "${full_prompt}" | codex --model "${PROVIDER_MODEL}"
     else
-        log_error "codex (OpenAI Codex CLI) not found. Install via: npm i -g @openai/codex"
+        log_error "codex CLI not found — install via: npm i -g @openai/codex"
         exit 1
     fi
 }
@@ -208,7 +237,7 @@ run_ollama() {
     if command -v ollama &>/dev/null; then
         printf '%s\n' "${full_prompt}" | ollama run "${PROVIDER_MODEL}"
     else
-        log_error "ollama not found. Install from https://ollama.com or use a different provider."
+        log_error "ollama not found — install via: brew install ollama"
         exit 1
     fi
 }
@@ -219,7 +248,7 @@ run_qwen() {
     if command -v qwen &>/dev/null; then
         printf '%s\n' "${full_prompt}" | qwen --model "${PROVIDER_MODEL}" -p ""
     else
-        log_error "qwen not found. Install via: brew install qwen-code"
+        log_error "qwen not found — install via: brew install qwen-code"
         exit 1
     fi
 }
@@ -229,7 +258,7 @@ run_crush() {
     if command -v crush &>/dev/null; then
         printf '%s\n' "${full_prompt}" | crush --model "${PROVIDER_MODEL}"
     else
-        log_error "crush not found. Install via: brew install charmbracelet/tap/crush"
+        log_error "crush not found — install via: brew install charmbracelet/tap/crush"
         exit 1
     fi
 }
@@ -240,7 +269,7 @@ run_kiro_cli() {
     if command -v kiro-cli &>/dev/null; then
         printf '%s\n' "${full_prompt}" | kiro-cli chat
     else
-        log_error "kiro-cli not found. Install via: https://kiro.dev"
+        log_error "kiro-cli not found — install via: npm i -g kiro-cli"
         exit 1
     fi
 }
@@ -250,7 +279,7 @@ run_goose() {
     if command -v goose &>/dev/null; then
         printf '%s\n' "${full_prompt}" | goose run --model "${PROVIDER_MODEL}"
     else
-        log_error "goose not found. Install from: https://github.com/block/goose"
+        log_error "goose not found — install via: brew install block/tap/goose"
         exit 1
     fi
 }
@@ -278,5 +307,9 @@ execute_provider() {
         crush)     run_crush "${full_prompt}" ;;
         kiro-cli)  run_kiro_cli "${full_prompt}" ;;
         goose)     run_goose "${full_prompt}" ;;
+        *)
+            log_error "Unknown provider: '${provider}'"
+            exit 1
+            ;;
     esac
 }

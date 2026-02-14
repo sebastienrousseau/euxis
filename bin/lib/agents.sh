@@ -3,6 +3,9 @@
 # Euxis Library: Agent discovery and resolution
 [[ -n "${_EUXIS_LIB_AGENTS:-}" ]] && return; _EUXIS_LIB_AGENTS=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 
@@ -242,9 +245,8 @@ register_agent_plugin() {
         return 1
     fi
 
-    local agent_id role prompt_file tier
+    local agent_id prompt_file tier
     agent_id=$(jq -r '.agent_id' "${manifest}")
-    role=$(jq -r '.role' "${manifest}")
     prompt_file=$(jq -r '.prompt_file' "${manifest}")
     tier=$(jq -r '.tier // "standard"' "${manifest}")
 
@@ -253,8 +255,28 @@ register_agent_plugin() {
         log_error "Plugin manifest missing 'agent_id'"
         return 1
     fi
+
+    # Security: validate agent_id against path traversal (alphanumeric, dash, underscore only)
+    if [[ ! "${agent_id}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        log_error "Invalid agent_id '${agent_id}' — must be alphanumeric, dash, or underscore only"
+        return 1
+    fi
+
     if [[ -z "${prompt_file}" || "${prompt_file}" == "null" || ! -f "${prompt_file}" ]]; then
         log_error "Plugin manifest 'prompt_file' not found: ${prompt_file}"
+        return 1
+    fi
+
+    # Security: resolve prompt_file to real path and verify it doesn't escape EUXIS_HOME
+    local real_prompt
+    real_prompt=$(realpath "${prompt_file}" 2>/dev/null) || {
+        log_error "Cannot resolve prompt_file path: ${prompt_file}"
+        return 1
+    }
+    local real_euxis
+    real_euxis=$(realpath "${EUXIS_HOME}" 2>/dev/null) || real_euxis="${EUXIS_HOME}"
+    if [[ "${real_prompt}" != "${real_euxis}"/* ]]; then
+        log_error "prompt_file must be within EUXIS_HOME: ${prompt_file} resolves outside ${EUXIS_HOME}"
         return 1
     fi
 
@@ -271,6 +293,12 @@ register_agent_plugin() {
 # Unregister a plugin agent
 unregister_agent_plugin() {
     local agent_id="$1"
+
+    # Security: validate agent_id against path traversal
+    if [[ ! "${agent_id}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        log_error "Invalid agent_id '${agent_id}' — must be alphanumeric, dash, or underscore only"
+        return 1
+    fi
 
     rm -f "${PROMPTS_DIR}/fleet/${agent_id}.txt"
     rm -f "${EUXIS_PLUGINS_DIR}/${agent_id}.json"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
-set -uo pipefail
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/squads.json"
@@ -86,7 +86,7 @@ build_delegate_manifest() {
       --arg priority "$priority" \
       --arg task "$task" \
       '. + [{"agent": $agent, "priority": $priority, "task": $task, "verify_cmd": "true"}]')
-    ((i++))
+    ((i++)) || true
   done
 
   local manifest_file
@@ -126,7 +126,7 @@ run_delegates_sequential() {
         return 1
       fi
     fi
-    ((i++))
+    ((i++)) || true
   done
   return 0
 }
@@ -294,7 +294,7 @@ cmd_info() {
         agent=$(echo "$phase" | jq -r ".delegates[$d].agent")
         invariant_count=$(echo "$phase" | jq ".delegates[$d].verifies // [] | length")
         echo "    Delegate: $agent ($invariant_count invariants)"
-        ((d++))
+        ((d++)) || true
       done
 
       echo "    Checkpoint: $checkpoint"
@@ -305,7 +305,7 @@ cmd_info() {
       echo "$phase" | jq -r '"  Phase \(.phase): \(.name)\n    Squad: \(.squad)\n    Mode: \(.mode)\n    Checkpoint: \(.checkpoint)\n    Abort on failure: \(.abort_on_failure)\n"'
     fi
 
-    ((phase_idx++))
+    ((phase_idx++)) || true
   done
 
   # Optional sub-gates
@@ -320,7 +320,7 @@ cmd_info() {
       sg_trigger=$(echo "$playbook" | jq -r ".optional_sub_gates[$s].trigger")
       sg_delegates=$(echo "$playbook" | jq -r ".optional_sub_gates[$s].delegates | length")
       echo "  $sg_id (trigger: $sg_trigger, delegates: $sg_delegates)"
-      ((s++))
+      ((s++)) || true
     done
     echo ""
   fi
@@ -390,7 +390,7 @@ cmd_run() {
     if [[ "$from_gate" -gt 0 && "$phase_num" -lt "$from_gate" ]]; then
       echo "  Skipping phase $phase_num (resuming from gate $from_gate)"
       echo ""
-      ((phase_idx++))
+      ((phase_idx++)) || true
       continue
     fi
 
@@ -507,7 +507,7 @@ cmd_run() {
     fi
 
     echo ""
-    ((phase_idx++))
+    ((phase_idx++)) || true
   done
 
   echo "═══════════════════════════════════════════════════════"

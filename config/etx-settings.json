@@ -1,18 +1,11 @@
 {
-  "theme": "etx-catppuccin-mocha",
+  "theme": "etx-liquid-glass",
   "default_provider": "claude",
   "show_agent_tags": true,
   "reduced_motion": false,
   "accessible_mode": false,
   "locale": "en",
   "grid_columns": 4,
-  "recent_agents": [
-    "architect"
-  ],
-  "recent_commands": [
-    "architect: euxis architect \"fix all the issues\"",
-    "architect: euxis architect \"ensure everything is at 10/10, 10",
-    "architect: euxis combo run verify-everything",
-    "architect: dispacth the fixes based on latest status"
-  ]
+  "recent_agents": [],
+  "recent_commands": []
 }

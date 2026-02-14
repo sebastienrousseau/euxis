@@ -55,7 +55,6 @@ class TestSettingsScreenInit(unittest.TestCase):
 
 
 class TestSettingsScreenCompose(unittest.TestCase):
-    @patch("tui.screens.settings.Footer")
     @patch("tui.screens.settings.Button")
     @patch("tui.screens.settings.Switch")
     @patch("tui.screens.settings.Select")

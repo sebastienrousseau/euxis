@@ -51,7 +51,6 @@ class TestPlaybookScreenInit(unittest.TestCase):
 
 
 class TestPlaybookScreenCompose(unittest.TestCase):
-    @patch("tui.screens.playbooks.Footer")
     @patch("tui.screens.playbooks.OutputPanel")
     @patch("tui.screens.playbooks.OptionList")
     @patch("tui.screens.playbooks.Horizontal")

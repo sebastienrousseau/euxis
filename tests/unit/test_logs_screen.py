@@ -51,7 +51,6 @@ class TestLogViewerScreenInit(unittest.TestCase):
 
 
 class TestLogViewerScreenCompose(unittest.TestCase):
-    @patch("tui.screens.logs.Footer")
     @patch("tui.screens.logs.OutputPanel")
     @patch("tui.screens.logs.OptionList")
     @patch("tui.screens.logs.Horizontal")

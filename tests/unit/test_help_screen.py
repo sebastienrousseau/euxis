@@ -64,7 +64,7 @@ class TestHelpContent(unittest.TestCase):
 
     def test_help_content_has_title(self):
         """Test HELP_CONTENT starts with the main heading."""
-        assert "# ETX Keyboard Reference" in HELP_CONTENT
+        assert "# Welcome to ETX" in HELP_CONTENT
 
     def test_help_content_navigation_section(self):
         """Test HELP_CONTENT includes the Navigation section."""
@@ -132,12 +132,11 @@ class TestHelpContent(unittest.TestCase):
 class TestHelpScreenCompose(unittest.TestCase):
     """Tests for the compose() method."""
 
-    @patch("tui.screens.help.Footer")
     @patch("tui.screens.help.Markdown")
     @patch("tui.screens.help.VerticalScroll")
     @patch("tui.screens.help.ETXHeader")
     def test_compose_yields_widgets(
-        self, mock_header, mock_vscroll, mock_markdown, mock_footer
+        self, mock_header, mock_vscroll, mock_markdown
     ):
         """Test compose() produces widget output."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
@@ -147,12 +146,11 @@ class TestHelpScreenCompose(unittest.TestCase):
         result = list(screen.compose())
         assert len(result) > 0
 
-    @patch("tui.screens.help.Footer")
     @patch("tui.screens.help.Markdown")
     @patch("tui.screens.help.VerticalScroll")
     @patch("tui.screens.help.ETXHeader")
     def test_compose_creates_header(
-        self, mock_header, mock_vscroll, mock_markdown, mock_footer
+        self, mock_header, mock_vscroll, mock_markdown
     ):
         """Test compose() creates ETXHeader with id='header'."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
@@ -162,12 +160,11 @@ class TestHelpScreenCompose(unittest.TestCase):
         list(screen.compose())
         mock_header.assert_called_once_with(id="header")
 
-    @patch("tui.screens.help.Footer")
     @patch("tui.screens.help.Markdown")
     @patch("tui.screens.help.VerticalScroll")
     @patch("tui.screens.help.ETXHeader")
     def test_compose_creates_markdown_with_content(
-        self, mock_header, mock_vscroll, mock_markdown, mock_footer
+        self, mock_header, mock_vscroll, mock_markdown
     ):
         """Test compose() creates Markdown widget with HELP_CONTENT."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
@@ -177,20 +174,20 @@ class TestHelpScreenCompose(unittest.TestCase):
         list(screen.compose())
         mock_markdown.assert_called_once_with(HELP_CONTENT, id="help-content")
 
-    @patch("tui.screens.help.Footer")
     @patch("tui.screens.help.Markdown")
     @patch("tui.screens.help.VerticalScroll")
     @patch("tui.screens.help.ETXHeader")
-    def test_compose_creates_footer(
-        self, mock_header, mock_vscroll, mock_markdown, mock_footer
+    def test_compose_creates_shortcut_bar(
+        self, mock_header, mock_vscroll, mock_markdown
     ):
-        """Test compose() creates a Footer."""
+        """Test compose() creates a ShortcutBar."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
         mock_vscroll.return_value.__exit__ = Mock(return_value=False)
 
         screen = HelpScreen()
-        list(screen.compose())
-        mock_footer.assert_called_once()
+        result = list(screen.compose())
+        from tui.widgets.shortcut_bar import ShortcutBar
+        assert any(isinstance(w, ShortcutBar) for w in result)
 
 
 class TestHelpScreenOnMount(unittest.TestCase):

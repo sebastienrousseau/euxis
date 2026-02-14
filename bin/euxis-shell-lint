@@ -177,12 +177,12 @@ check_security() {
     # Check for dangerous patterns
     if grep -n "eval\s*\$" "${file}"; then
         log_error "Dangerous eval usage in ${file}"
-        ((security_issues++))
+        ((security_issues++)) || true
     fi
 
     if grep -n "curl.*|.*sh\|wget.*|.*sh" "${file}"; then
         log_error "Dangerous pipe-to-shell pattern in ${file}"
-        ((security_issues++))
+        ((security_issues++)) || true
     fi
 
     # Check for unquoted variables in dangerous contexts
@@ -202,22 +202,22 @@ process_file() {
 
     # ShellCheck analysis
     if ! run_shellcheck "${file}"; then
-        ((failed_checks++))
+        ((failed_checks++)) || true
     fi
 
     # Format checking/fixing
     if ! check_format "${file}"; then
-        ((failed_checks++))
+        ((failed_checks++)) || true
     fi
 
     # Error handling check
     if [[ "${STRICT_MODE}" == true ]]; then
         if ! check_error_handling "${file}"; then
-            ((failed_checks++))
+            ((failed_checks++)) || true
         fi
 
         if ! check_security "${file}"; then
-            ((failed_checks++))
+            ((failed_checks++)) || true
         fi
     fi
 
@@ -332,9 +332,9 @@ main() {
     local processed_files=0
 
     for script in "${all_scripts[@]}"; do
-        ((processed_files++))
+        ((processed_files++)) || true
         if ! process_file "${script}"; then
-            ((total_failures++))
+            ((total_failures++)) || true
         fi
     done
 

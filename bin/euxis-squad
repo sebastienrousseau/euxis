@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
-set -uo pipefail
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/squads.json"
@@ -214,7 +214,7 @@ cmd_validate() {
     while IFS= read -r member; do
       if ! echo "$registry_agents" | grep -qx "$member"; then
         echo "  ERROR: '$member' in squad '$squad_name' not found in registry"
-        ((errors++))
+        ((errors++)) || true
       fi
     done < <(jq -r --arg id "$squad_id" '.squads[] | select(.id == $id) | .members[]' "$SQUADS_FILE")
   done < <(jq -r '.squads[].id' "$SQUADS_FILE")

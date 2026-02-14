@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Euxis Version Synchronization Script
-# Updates all version references to match registry.json protocol_version
+# Updates all version references to match registry protocol_version
 
 set -euo pipefail
 

@@ -7,7 +7,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from hypothesis import given
@@ -72,16 +72,15 @@ class TestMetricsScreen(unittest.TestCase):
         result = screen.compose()
         assert result is not None
 
-    @pytest.mark.asyncio
-    async def test_action_go_back(self):
+    def test_action_go_back(self):
         """Test go_back action properly navigates back."""
-        app = App()
         screen = MetricsScreen()
+        mock_app = Mock()
 
-        with patch.object(app, "pop_screen"):
-            await screen.action_go_back()
-            # Note: In real implementation, this would call app.pop_screen()
-            # This test verifies the action exists and is callable
+        # Mock the app property on the screen
+        with patch.object(type(screen), "app", new_callable=PropertyMock, return_value=mock_app):
+            screen.action_go_back()
+            mock_app.pop_screen.assert_called_once()
 
 
 class TestMetricsScreenPropertyBased(unittest.TestCase):

@@ -72,7 +72,7 @@ class TestAboutScreenLogo(unittest.TestCase):
 
     def test_logo_has_markup(self):
         """Test the logo uses Rich markup for styling."""
-        assert "[bold cyan]" in EUXIS_LOGO
+        assert "[bold]" in EUXIS_LOGO
         assert "[/]" in EUXIS_LOGO
 
 
@@ -97,13 +97,12 @@ class TestAboutScreenEuxisAppProperty(unittest.TestCase):
 class TestAboutScreenCompose(unittest.TestCase):
     """Tests for the compose() method."""
 
-    @patch("tui.screens.about.Footer")
     @patch("tui.screens.about.Static")
     @patch("tui.screens.about.Center")
     @patch("tui.screens.about.VerticalScroll")
     @patch("tui.screens.about.ETXHeader")
     def test_compose_yields_widgets(
-        self, mock_header, mock_vscroll, mock_center, mock_static, mock_footer
+        self, mock_header, mock_vscroll, mock_center, mock_static
     ):
         """Test compose() produces a non-empty widget list."""
         # Make context managers return mocks that yield nothing on __enter__
@@ -116,13 +115,12 @@ class TestAboutScreenCompose(unittest.TestCase):
         result = list(screen.compose())
         assert len(result) > 0
 
-    @patch("tui.screens.about.Footer")
     @patch("tui.screens.about.Static")
     @patch("tui.screens.about.Center")
     @patch("tui.screens.about.VerticalScroll")
     @patch("tui.screens.about.ETXHeader")
     def test_compose_creates_header(
-        self, mock_header, mock_vscroll, mock_center, mock_static, mock_footer
+        self, mock_header, mock_vscroll, mock_center, mock_static
     ):
         """Test compose() creates an ETXHeader with id='header'."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
@@ -134,23 +132,23 @@ class TestAboutScreenCompose(unittest.TestCase):
         list(screen.compose())
         mock_header.assert_called_once_with(id="header")
 
-    @patch("tui.screens.about.Footer")
     @patch("tui.screens.about.Static")
     @patch("tui.screens.about.Center")
     @patch("tui.screens.about.VerticalScroll")
     @patch("tui.screens.about.ETXHeader")
-    def test_compose_creates_footer(
-        self, mock_header, mock_vscroll, mock_center, mock_static, mock_footer
+    def test_compose_creates_shortcut_bar(
+        self, mock_header, mock_vscroll, mock_center, mock_static
     ):
-        """Test compose() creates a Footer."""
+        """Test compose() creates a ShortcutBar."""
         mock_vscroll.return_value.__enter__ = Mock(return_value=Mock())
         mock_vscroll.return_value.__exit__ = Mock(return_value=False)
         mock_center.return_value.__enter__ = Mock(return_value=Mock())
         mock_center.return_value.__exit__ = Mock(return_value=False)
 
         screen = AboutScreen()
-        list(screen.compose())
-        mock_footer.assert_called_once()
+        result = list(screen.compose())
+        from tui.widgets.shortcut_bar import ShortcutBar
+        assert any(isinstance(w, ShortcutBar) for w in result)
 
 
 class TestAboutScreenOnMount(unittest.TestCase):

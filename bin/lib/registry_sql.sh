@@ -3,6 +3,9 @@
 # Euxis Library: SQLite-backed registry queries with connection pooling
 [[ -n "${_EUXIS_LIB_REGISTRY_SQL:-}" ]] && return; _EUXIS_LIB_REGISTRY_SQL=1
 
+set -euo pipefail
+
+
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 REGISTRY_DB="${EUXIS_HOME}/registry.db"
 
@@ -17,29 +20,52 @@ REGISTRY_POOL_SIZE="${EUXIS_REGISTRY_POOL_SIZE:-3}"
 _registry_pool_init() {
     [[ -d "${REGISTRY_POOL_DIR}" ]] || mkdir -p "${REGISTRY_POOL_DIR}"
 
-    # Clean stale connections
-    find "${REGISTRY_POOL_DIR}" -name "conn_*.lock" -mmin +30 -delete 2>/dev/null || true
+    # Resolve real pool path once for traversal validation
+    local real_pool
+    real_pool=$(cd "${REGISTRY_POOL_DIR}" 2>/dev/null && pwd -P) || return 0
 
-    # Pre-warm connection pool
-    local i
-    for ((i = 0; i < REGISTRY_POOL_SIZE; i++)); do
-        local lockfile="${REGISTRY_POOL_DIR}/conn_${i}.lock"
-        [[ -f "${lockfile}" ]] && continue
+    # Clean stale connections (check for dead processes)
+    local lockdir pid real_lockdir
+    for lockdir in "${REGISTRY_POOL_DIR}"/conn_*.lock; do
+        [[ -d "${lockdir}" ]] || continue
 
-        # Touch lockfile to mark connection as available
-        touch "${lockfile}" 2>/dev/null || true
+        # Validate lock directory is within pool directory (prevent traversal)
+        real_lockdir=$(cd "${lockdir}" 2>/dev/null && pwd -P) || continue
+        [[ "${real_lockdir}" == "${real_pool}"/* ]] || continue
+
+        if [[ -f "${lockdir}/pid" ]]; then
+            pid=$(cat "${lockdir}/pid" 2>/dev/null) || continue
+            # Validate PID is numeric before kill -0
+            [[ "${pid}" =~ ^[0-9]+$ ]] || { rm -rf "${lockdir}" 2>/dev/null || true; continue; }
+            # Check if process is still alive
+            if ! kill -0 "${pid}" 2>/dev/null; then
+                # Process dead, remove stale lock
+                rm -rf "${lockdir}" 2>/dev/null || true
+            fi
+        else
+            # No pid file — clean up if older than 30 minutes
+            if [[ $(find "${lockdir}" -maxdepth 0 -mmin +30 -print 2>/dev/null | wc -l) -gt 0 ]]; then
+                rm -rf "${lockdir}" 2>/dev/null || true
+            fi
+        fi
     done
 }
 
 _registry_get_connection() {
     _registry_pool_init
 
-    local i lockfile
+    local i lockdir
     for ((i = 0; i < REGISTRY_POOL_SIZE; i++)); do
-        lockfile="${REGISTRY_POOL_DIR}/conn_${i}.lock"
+        lockdir="${REGISTRY_POOL_DIR}/conn_${i}.lock"
 
-        # Try to acquire exclusive lock (non-blocking)
-        if (set -C; echo $$ > "${lockfile}") 2>/dev/null; then
+        # Try to acquire exclusive lock using atomic mkdir operation
+        # mkdir is atomic - either succeeds completely or fails completely
+        if mkdir "${lockdir}" 2>/dev/null; then
+            # Write PID immediately; if this fails, release lock and try next slot
+            if ! printf '%s\n' "$$" > "${lockdir}/pid" 2>/dev/null; then
+                rm -rf "${lockdir}" 2>/dev/null || true
+                continue
+            fi
             echo "${i}"
             return 0
         fi
@@ -54,8 +80,8 @@ _registry_release_connection() {
     local conn_id="$1"
     [[ "${conn_id}" == "-1" ]] && return 0  # No lock to release
 
-    local lockfile="${REGISTRY_POOL_DIR}/conn_${conn_id}.lock"
-    rm -f "${lockfile}" 2>/dev/null || true
+    local lockdir="${REGISTRY_POOL_DIR}/conn_${conn_id}.lock"
+    rm -rf "${lockdir}" 2>/dev/null || true
 }
 
 # ============================================================================
@@ -78,8 +104,12 @@ registry_query() {
     conn_id=$(_registry_get_connection)
 
     # Execute query with timeout and error handling
-    local temp_file
-    temp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_registry_query.XXXXXX")
+    # Use restrictive umask for temp file creation (owner-only read/write)
+    local temp_file old_umask
+    old_umask=$(umask)
+    umask 077
+    temp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_registry_query.XXXXXX") || { umask "${old_umask}"; log_error "mktemp failed for registry query"; _registry_release_connection "${conn_id}"; return 1; }
+    umask "${old_umask}"
 
     {
         if [[ ${#args[@]} -gt 0 ]]; then
@@ -385,12 +415,13 @@ registry_rebuild() {
     echo "Rebuilding registry database..."
 
     if [[ -f "${REGISTRY_DB}" ]]; then
-        local backup_file="${REGISTRY_DB}.backup.$(date +%Y%m%d-%H%M%S)"
+        local backup_file
+        backup_file="${REGISTRY_DB}.backup.$(date +%Y%m%d-%H%M%S)"
         cp "${REGISTRY_DB}" "${backup_file}"
         echo "Created backup: ${backup_file}"
     fi
 
-    if python3 "${EUXIS_HOME}/migrate-registry-to-sqlite.py"; then
+    if python3 "${EUXIS_HOME}/migrate-registry-to-sqlite.py" --force; then
         echo "✅ Registry database rebuilt successfully"
         registry_health_sql
     else
@@ -432,7 +463,7 @@ registry_get_version() {
 registry_agent_exists() {
     local agent="$1"
     if [[ -f "${REGISTRY_DB}" ]]; then
-        [[ -n "$(sqlite3 -init /dev/null "${REGISTRY_DB}" "SELECT 1 FROM agents WHERE id='${agent//\'/\'\'}'" 2>/dev/null)" ]] && return 0
+        [[ -n "$(registry_query "SELECT 1 FROM agents WHERE id = ?" "${agent}" 2>/dev/null)" ]] && return 0
     fi
     if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
         jq -e --arg id "${agent}" '.agents[] | select(.id == $id)' "${EUXIS_HOME}/registry.json" &>/dev/null && return 0

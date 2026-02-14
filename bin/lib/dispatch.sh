@@ -103,6 +103,9 @@ for m in re.finditer(r'\{[^{}]*\"dispatches\"[^{}]*\[.*?\].*?\}', text, re.DOTAL
 # ============================================================================
 
 delegate() {
+    local _t_delegate
+    _t_delegate=$(_perf_start)
+
     if [[ $# -lt 2 ]]; then
         log_error "delegate requires: <agent> <task> [provider]"
         exit 1
@@ -136,6 +139,27 @@ delegate() {
 # Command Dispatcher - Route commands to appropriate modules
 # ============================================================================
 
+# Run a Python script through the project venv interpreter (for scripts needing
+# venv-installed packages like chromadb, textual, etc.)
+_exec_python() {
+    local script="$1"; shift
+    local venv_python="${EUXIS_HOME}/.venv/bin/python3"
+    if [[ -x "${venv_python}" ]]; then
+        exec "${venv_python}" "${script}" "$@"
+    else
+        log_error "Python venv not found at ${venv_python##*/} — required packages (chromadb, textual) may be missing"
+        log_error "Run: python3 -m venv ${EUXIS_HOME}/.venv && ${EUXIS_HOME}/.venv/bin/pip install -r ${EUXIS_HOME}/requirements.txt"
+        # Fall back to system python3 but only if it exists
+        if command -v python3 &>/dev/null; then
+            log_warn "Falling back to system python3 — some features may not work"
+            exec python3 "${script}" "$@"
+        else
+            log_error "No python3 found. Install Python 3.12+ and create the venv."
+            exit 1
+        fi
+    fi
+}
+
 dispatch_command() {
     local command="${1:-}"
     shift || true
@@ -155,7 +179,7 @@ dispatch_command() {
         squad)      exec "${EUXIS_BIN}/euxis-squad" "$@" ;;
         playbook)   exec "${EUXIS_BIN}/euxis-playbook" "$@" ;;
         combo)      exec "${EUXIS_BIN}/euxis-combo" "$@" ;;
-        synthesize) exec "${EUXIS_BIN}/euxis-synthesize" "$@" ;;
+        synthesize) _exec_python "${EUXIS_BIN}/euxis-synthesize" "$@" ;;
         codex)      exec "${EUXIS_BIN}/euxis-codex" "$@" ;;
         hooks)      exec "${EUXIS_BIN}/euxis-hooks" "$@" ;;
         # Quality
@@ -167,7 +191,7 @@ dispatch_command() {
         audit)      exec "${EUXIS_BIN}/euxis-audit-run" "$@" ;;
         bench)      exec "${EUXIS_BIN}/euxis-bench" "$@" ;;
         # Memory
-        cortex)     exec "${EUXIS_BIN}/euxis-cortex" "$@" ;;
+        cortex)     _exec_python "${EUXIS_BIN}/euxis-cortex" "$@" ;;
         # Maintenance
         kaizen)     exec "${EUXIS_BIN}/euxis-kaizen" "$@" ;;
         daemon)     exec "${EUXIS_BIN}/euxis-daemon" "$@" ;;

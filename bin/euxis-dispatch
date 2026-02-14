@@ -1,25 +1,9 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.7)
-# Reads an Architect Mission Manifest and fires agent loops.
+# Shell wrapper for Python DispatchEngine core
 #
 # Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
-#
-# Dispatch Modes:
-#   hierarchical (default) — Central orchestrator coordinates all agents in parallel.
-#   mesh                   — Agents with dispatch authority coordinate sub-workflows
-#                            directly. Parent manifest spawns child manifests.
-#   federated              — Agents operate autonomously on separate project scopes.
-#                            Results aggregate into shared synthesis.
-#
-# The manifest is a JSON file with this structure:
-# {
-#   "project": "name",
-#   "mode": "hierarchical|mesh|federated",
-#   "dispatches": [
-#     { "agent": "debugger", "priority": "P0", "task": "...", "verify_cmd": "..." }
-#   ]
-# }
 
 set -euo pipefail
 
@@ -40,14 +24,21 @@ Dispatch Modes:
 Options:
   -h, --help    Show this help text
   --mode MODE   Set dispatch mode
+  --legacy      Use original shell implementation (for debugging)
 EOF
 }
 
-export PATH="$PATH:$HOME/bin"
+# Determine Python executable
+PYTHON_CMD="python3"
+if ! command -v "$PYTHON_CMD" &>/dev/null; then
+    echo "Error: python3 is required but not installed."
+    exit 1
+fi
 
 # Parse arguments
 MANIFEST_FILE=""
 DISPATCH_MODE=""
+USE_LEGACY=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -59,6 +50,15 @@ while [[ $# -gt 0 ]]; do
             DISPATCH_MODE="${2:-}"
             shift 2
             ;;
+        --legacy)
+            USE_LEGACY=true
+            shift
+            ;;
+        hierarchical|mesh|federated)
+            # Accept mode as positional arg (euxis dispatch manifest.json hierarchical)
+            DISPATCH_MODE="$1"
+            shift
+            ;;
         *)
             MANIFEST_FILE="$1"
             shift
@@ -66,6 +66,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Validate arguments
 if [[ -z "$MANIFEST_FILE" || ! -f "$MANIFEST_FILE" ]]; then
     echo "Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]"
     echo ""
@@ -79,227 +80,29 @@ if [[ -z "$MANIFEST_FILE" || ! -f "$MANIFEST_FILE" ]]; then
     exit 1
 fi
 
-# Verify jq is available
-if ! command -v jq &>/dev/null; then
-    echo "Error: jq is required but not installed."
-    echo "  Install: sudo apt install jq  (Linux)  /  brew install jq  (macOS)"
-    exit 1
+# Set up environment
+export PATH="$PATH:$HOME/bin"
+export EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+
+# Resolve script directory (follow symlinks to find real location)
+SCRIPT_DIR="${EUXIS_HOME}/bin"
+PYTHON_CORE="$SCRIPT_DIR/euxis_core.py"
+LEGACY_DISPATCH="$SCRIPT_DIR/euxis-dispatch.bak"
+
+# Legacy fallback for testing/debugging
+if [[ "$USE_LEGACY" == true ]]; then
+    echo "Using legacy shell implementation..."
+    exec "$LEGACY_DISPATCH" "$MANIFEST_FILE" ${DISPATCH_MODE:+--mode "$DISPATCH_MODE"}
 fi
 
-# Validate JSON
-if ! jq empty "$MANIFEST_FILE" 2>/dev/null; then
-    echo "Error: Invalid JSON in $MANIFEST_FILE"
-    exit 1
+if [[ ! -f "$PYTHON_CORE" ]]; then
+    echo "Error: Python core not found at $PYTHON_CORE"
+    echo "Falling back to legacy implementation..."
+    exec "$LEGACY_DISPATCH" "$MANIFEST_FILE" ${DISPATCH_MODE:+--mode "$DISPATCH_MODE"}
 fi
 
-PROJECT=$(jq -r '.project // "unknown"' "$MANIFEST_FILE")
-DISPATCH_COUNT=$(jq '.dispatches | length' "$MANIFEST_FILE")
-HAS_PHASES=$(jq 'has("rollout_phases")' "$MANIFEST_FILE")
-PHASE_COUNT=$(jq '.rollout_phases // [] | length' "$MANIFEST_FILE")
-
-# Resolve dispatch mode: CLI flag > manifest field > default
-MANIFEST_MODE=$(jq -r '.mode // "hierarchical"' "$MANIFEST_FILE")
-MODE="${DISPATCH_MODE:-$MANIFEST_MODE}"
-
-# Validate mode
-case "$MODE" in
-    hierarchical|mesh|federated) ;;
-    *)
-        echo "Error: Invalid dispatch mode '$MODE'. Must be: hierarchical, mesh, or federated."
-        exit 1
-        ;;
-esac
-
-# Branch guard: refuse to run on protected branches
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-if [[ -n "$CURRENT_BRANCH" ]]; then
-    case "$CURRENT_BRANCH" in
-        feat/*|fix/*|refactor/*|chore/*) ;;  # compliant — pass
-        main|master|develop|production|staging)
-            echo "ERROR: Dispatch cannot run on protected branch '${CURRENT_BRANCH}'."
-            echo "  Switch to a feature branch first: git checkout -b feat/<version>"
-            exit 1
-            ;;
-        *)
-            echo "Warning: Non-standard branch name '${CURRENT_BRANCH}'. Proceeding..."
-            ;;
-    esac
-fi
-
-echo "EUXIS FLEET DEPLOYMENT"
-echo "  Project:    $PROJECT"
-echo "  Mode:       $MODE"
-echo "  Dispatches: $DISPATCH_COUNT"
-if [[ -n "$CURRENT_BRANCH" ]]; then
-    echo "  Branch:     $CURRENT_BRANCH"
-fi
-if [[ "$HAS_PHASES" == "true" ]]; then
-    echo "  Phases:     $PHASE_COUNT (phased rollout)"
-fi
-echo ""
-
-if [[ "$DISPATCH_COUNT" -eq 0 ]]; then
-    echo "No dispatches found in manifest."
-    exit 0
-fi
-
-EUXIS_HOME="$HOME/.euxis"
-
-# Validate agent names against registry
-REGISTRY_FILE="$EUXIS_HOME/registry.json"
-if [[ -f "$REGISTRY_FILE" ]]; then
-    INVALID_AGENTS=()
-    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-        AGENT_NAME=$(jq -r ".dispatches[$i].agent // empty" "$MANIFEST_FILE")
-        [[ -z "$AGENT_NAME" ]] && continue
-        if ! jq -e --arg id "$AGENT_NAME" '.agents[] | select(.id == $id)' "$REGISTRY_FILE" &>/dev/null; then
-            INVALID_AGENTS+=("$AGENT_NAME")
-        fi
-    done
-    if [[ ${#INVALID_AGENTS[@]} -gt 0 ]]; then
-        echo "Error: Manifest references unknown agents: ${INVALID_AGENTS[*]}" >&2
-        echo "  Valid agents: $(jq -r '.agents[].id' "$REGISTRY_FILE" | tr '\n' ', ' | sed 's/,$//')" >&2
-        echo "" >&2
-        echo "  Hint: Re-run the architect to regenerate the manifest with valid agent names." >&2
-        exit 1
-    fi
-fi
-
-# Pre-flight: verify that each dispatch's verify_cmd binary exists
-MISSING_CMDS=()
-for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-    VERIFY_CMD=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
-    AGENT_NAME=$(jq -r ".dispatches[$i].agent // empty" "$MANIFEST_FILE")
-    # Skip dispatches with no verify command or no agent
-    [[ -z "$VERIFY_CMD" || -z "$AGENT_NAME" ]] && continue
-    # Extract the first binary from the command (skip leading ! and whitespace)
-    BINARY=$(echo "$VERIFY_CMD" | sed 's/^[[:space:]]*!*[[:space:]]*//' | awk '{print $1}')
-    if [[ -n "$BINARY" ]] && ! command -v "$BINARY" &>/dev/null; then
-        MISSING_CMDS+=("  [$AGENT_NAME] $BINARY (from: $VERIFY_CMD)")
-    fi
-done
-if [[ ${#MISSING_CMDS[@]} -gt 0 ]]; then
-    echo "" >&2
-    echo "Error: Manifest verify commands reference missing tools:" >&2
-    for line in "${MISSING_CMDS[@]}"; do
-        echo "$line" >&2
-    done
-    echo "" >&2
-    echo "  Install the missing tools, or re-run the architect to generate" >&2
-    echo "  verify commands using only standard tools (python3, grep, test, etc.)." >&2
-    exit 1
-fi
-
-# ============================================================================
-# File Locking Infrastructure
-# ============================================================================
-LOCK_DIR="$HOME/.euxis/locks"
-LOCK_TIMEOUT=10  # seconds
-
-# Sanitize file paths for use as lock file names (prevent shell injection)
-sanitize_lock_path() {
-    printf '%s' "$1" | tr -cs 'a-zA-Z0-9._-' '_'
-}
-
-ensure_lock_dir() {
-    mkdir -p "$LOCK_DIR"
-}
-
-# Cleanup all locks on unexpected exit
-cleanup_all_locks() {
-    local _exit_code=$?
-    echo "  [CLEANUP] Releasing all locks due to process termination..."
-    if [[ -d "$LOCK_DIR" ]]; then
-        find "$LOCK_DIR" -name '*.lock' -newer "/tmp/.euxis_dispatch_start_$$" -delete 2>/dev/null || true
-    fi
-    rm -f "/tmp/.euxis_dispatch_start_$$" 2>/dev/null || true
-    exit "$_exit_code"
-}
-
-trap cleanup_all_locks EXIT INT TERM HUP
-
-acquire_file_lock() {
-    local file_path="$1"
-    local agent_name="$2"
-    local lock_file="$LOCK_DIR/$(sanitize_lock_path "$file_path").lock"
-
-    # Create lock file with agent metadata
-    (
-        if flock -w "$LOCK_TIMEOUT" 200; then
-            echo "agent=$agent_name" >&200
-            echo "pid=$$" >&200
-            echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >&200
-            echo "file_path=$file_path" >&200
-            return 0
-        else
-            echo "ERROR: Failed to acquire lock for $file_path within ${LOCK_TIMEOUT}s" >&2
-            return 1
-        fi
-    ) 200>"$lock_file"
-}
-
-acquire_agent_locks() {
-    local agent_name="$1"
-    local dispatch_index="$2"
-
-    # Get lock paths for this agent from manifest
-    local lock_paths
-    lock_paths=$(jq -r ".dispatches[$dispatch_index].locks[]? // empty" "$MANIFEST_FILE")
-
-    if [[ -z "$lock_paths" ]]; then
-        return 0  # No locks required
-    fi
-
-    echo "  [LOCK] $agent_name acquiring locks..."
-    while IFS= read -r lock_path; do
-        if [[ -n "$lock_path" ]]; then
-            if ! acquire_file_lock "$lock_path" "$agent_name"; then
-                echo "  [LOCK] $agent_name failed to acquire lock: $lock_path"
-                release_agent_locks "$agent_name" "$dispatch_index"
-                return 1
-            fi
-            echo "  [LOCK] $agent_name acquired: $lock_path"
-        fi
-    done <<< "$lock_paths"
-
-    return 0
-}
-
-release_agent_locks() {
-    local agent_name="$1"
-    local dispatch_index="$2"
-
-    local lock_paths
-    lock_paths=$(jq -r ".dispatches[$dispatch_index].locks[]? // empty" "$MANIFEST_FILE")
-
-    while IFS= read -r lock_path; do
-        if [[ -n "$lock_path" ]]; then
-            local lock_file="$LOCK_DIR/$(sanitize_lock_path "$lock_path").lock"
-            if [[ -f "$lock_file" ]]; then
-                rm -f "$lock_file"
-                echo "  [UNLOCK] $agent_name released: $lock_path"
-            fi
-        fi
-    done <<< "$lock_paths"
-}
-
-# Dependency tracking
-COMPLETED_AGENTS_FILE=""
-
-mark_agent_completed() {
-    local agent="$1"
-    echo "$agent" >> "$COMPLETED_AGENTS_FILE"
-}
-
-check_agent_completed() {
-    local agent="$1"
-    [[ -f "$COMPLETED_AGENTS_FILE" ]] && grep -q "^$agent$" "$COMPLETED_AGENTS_FILE"
-}
-
-# ============================================================================
-# Pre-dispatch: ensure project environment is ready
-# ============================================================================
-ensure_project_env() {
+# Ensure Python environment for the project if needed
+ensure_python_env() {
     # Only act for Python projects
     if [[ ! -f "pyproject.toml" && ! -f "setup.py" && ! -f "requirements.txt" ]]; then
         return 0
@@ -321,550 +124,38 @@ ensure_project_env() {
         return 0
     fi
 
-    # Determine Python version constraint from pyproject.toml
-    local py_version=""
-    if [[ -f "pyproject.toml" ]] && command -v python3 &>/dev/null; then
-        # Extract upper bound (e.g. <3.13 → 3.12)
-        local upper_bound
-        upper_bound=$(python3 -c "
-import re, sys
-try:
-    text = open('pyproject.toml').read()
-    m = re.search(r'python\s*=\s*\"[^\"]*<\s*(\d+\.\d+)', text)
-    if m:
-        parts = m.group(1).split('.')
-        major, minor = int(parts[0]), int(parts[1])
-        print(f'{major}.{minor - 1}')
-except Exception:
-    pass
-" 2>/dev/null)
-        if [[ -n "$upper_bound" ]]; then
-            py_version="$upper_bound"
-        fi
-    fi
-
-    # Create venv
-    if [[ -n "$py_version" ]]; then
-        echo "  [env] Creating .venv with Python $py_version (from pyproject.toml constraint)"
-        if ! uv venv --python "$py_version" .venv 2>&1 | sed 's/^/  [env] /'; then
-            echo "  [env] WARNING: Failed to create venv with Python $py_version. Trying default..." >&2
-            uv venv .venv 2>&1 | sed 's/^/  [env] /'
-        fi
-    else
-        echo "  [env] Creating .venv"
-        uv venv .venv 2>&1 | sed 's/^/  [env] /'
+    # Create and activate venv
+    if ! uv venv .venv &>/dev/null; then
+        echo "  [env] WARNING: Failed to create .venv" >&2
+        return 0
     fi
 
     # shellcheck disable=SC1091
     source .venv/bin/activate
 
-    # Install project dependencies
+    # Install dependencies quietly
     if [[ -f "pyproject.toml" ]]; then
-        echo "  [env] Installing project (editable) + dependencies..."
-        uv pip install -e . 2>&1 | tail -3 | sed 's/^/  [env] /'
+        echo "  [env] Installing project dependencies..."
+        uv pip install -e . &>/dev/null || echo "  [env] WARNING: Failed to install project" >&2
     elif [[ -f "requirements.txt" ]]; then
         echo "  [env] Installing from requirements.txt..."
-        uv pip install -r requirements.txt 2>&1 | tail -3 | sed 's/^/  [env] /'
+        uv pip install -r requirements.txt &>/dev/null || echo "  [env] WARNING: Failed to install requirements" >&2
     fi
 
-    # Install common dev tools into the venv
-    echo "  [env] Installing dev tools (pytest, pytest-cov)..."
-    uv pip install pytest pytest-cov 2>&1 | tail -1 | sed 's/^/  [env] /'
-
+    # Install dev tools
+    uv pip install pytest pytest-cov &>/dev/null || true
     echo "  [env] Environment ready: $(python --version)"
     echo ""
 }
 
-ensure_project_env
-
-LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
-
-# Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
-DISPATCH_AGENTS="architect inspector responder gatekeeper"
-
-# ============================================================================
-# Dispatch a single agent task
-# ============================================================================
-dispatch_agent() {
-    local i="$1"
-    local AGENT TASK VERIFY PRIORITY LOG_FILE
-
-    AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
-    TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-    VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
-    PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
-
-    echo "  [$PRIORITY] -> $AGENT ($MODE)"
-    LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
-
-    case "$MODE" in
-        hierarchical)
-            euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            ;;
-        mesh)
-            if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
-                euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            else
-                euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            fi
-            ;;
-        federated)
-            FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $TASK"
-            euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            ;;
-    esac
-
-    __dispatch_pid="$!"
-}
-
-# ============================================================================
-# Dispatch a single agent task with atomic file operations
-# ============================================================================
-dispatch_agent_with_cleanup() {
-    local i="$1"
-    local AGENT TASK VERIFY PRIORITY LOG_FILE
-
-    AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
-    TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-    VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
-    PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
-
-    LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
-
-    # Wrap task with atomic file operation instructions
-    local ATOMIC_TASK="$TASK
-
-ATOMIC FILE OPERATIONS REQUIRED:
-- Use temp files for all write operations: write to 'file.tmp' then rename to 'file'
-- This prevents corruption if your process is interrupted
-- Pattern: write_content > temp_file && mv temp_file final_file"
-
-    case "$MODE" in
-        hierarchical)
-            euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            ;;
-        mesh)
-            if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $ATOMIC_TASK"
-                euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            else
-                euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            fi
-            ;;
-        federated)
-            FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $ATOMIC_TASK"
-            euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-            ;;
-    esac
-
-    __dispatch_pid="$!"
-}
-
-# ============================================================================
-# Wait for a group of PIDs and report results
-# ============================================================================
-wait_for_group() {
-    local group_failed=0
-    local pids=("$@")
-    for entry in "${pids[@]}"; do
-        local pid agent idx
-        pid=$(echo "$entry" | cut -d' ' -f1)
-        agent=$(echo "$entry" | cut -d' ' -f2)
-        idx=$(echo "$entry" | cut -d' ' -f3)
-        if wait "$pid"; then
-            echo "  [PASS] $agent (dispatch #$idx)"
-        else
-            echo "  [FAIL] $agent (dispatch #$idx — see $LOG_DIR/${agent}_${idx}.log)"
-            ((group_failed++))
-        fi
-    done
-    return "$group_failed"
-}
-
-# ============================================================================
-# Stage-Based Sequential Execution
-# ============================================================================
-execute_by_stages() {
-    ensure_lock_dir
-    touch /tmp/.euxis_dispatch_start_$$
-    COMPLETED_AGENTS_FILE="$LOG_DIR/.completed_agents"
-    : > "$COMPLETED_AGENTS_FILE"  # Initialize empty file
-
-    # Build stage groups from manifest
-    local max_stage=1
-    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-        local stage
-        stage=$(jq -r ".dispatches[$i].stage // 1" "$MANIFEST_FILE")
-        if [[ $stage -gt $max_stage ]]; then
-            max_stage=$stage
-        fi
-    done
-
-    echo "=== STAGE-BASED EXECUTION ==="
-    echo "  Stages: 1-$max_stage"
-    echo ""
-
-    local total_failed=0
-
-    for current_stage in $(seq 1 "$max_stage"); do
-        echo "---------------------------------------------------"
-        echo "  STAGE $current_stage"
-        echo "---------------------------------------------------"
-
-        # Get agents for this stage
-        local stage_agents=()
-        local stage_indices=()
-
-        for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-            local agent_stage
-            agent_stage=$(jq -r ".dispatches[$i].stage // 1" "$MANIFEST_FILE")
-            if [[ $agent_stage -eq $current_stage ]]; then
-                # Verify dependencies are met
-                local depends_on
-                depends_on=$(jq -r ".dispatches[$i].depends_on[]? // empty" "$MANIFEST_FILE")
-                local deps_met=true
-
-                while IFS= read -r dep_agent; do
-                    if [[ -n "$dep_agent" ]] && ! check_agent_completed "$dep_agent"; then
-                        echo "  [SKIP] Agent $(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE") waiting for dependency: $dep_agent"
-                        deps_met=false
-                        break
-                    fi
-                done <<< "$depends_on"
-
-                if [[ "$deps_met" == "true" ]]; then
-                    stage_agents+=($(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE"))
-                    stage_indices+=("$i")
-                fi
-            fi
-        done
-
-        if [[ ${#stage_agents[@]} -eq 0 ]]; then
-            echo "  No agents ready for Stage $current_stage"
-            continue
-        fi
-
-        # Execute stage agents in parallel (within stage)
-        local stage_pids=()
-        for i in "${!stage_indices[@]}"; do
-            local idx="${stage_indices[$i]}"
-            local agent="${stage_agents[$i]}"
-
-            if acquire_agent_locks "$agent" "$idx"; then
-                dispatch_agent_with_cleanup "$idx"
-                stage_pids+=("$__dispatch_pid $agent $idx")
-                sleep 1  # Stagger startup
-            else
-                echo "  [FAIL] $agent - could not acquire required locks"
-                ((total_failed++))
-            fi
-        done
-
-        # Wait for stage completion
-        local stage_failed=0
-        for entry in "${stage_pids[@]}"; do
-            local pid agent idx
-            pid=$(echo "$entry" | cut -d' ' -f1)
-            agent=$(echo "$entry" | cut -d' ' -f2)
-            idx=$(echo "$entry" | cut -d' ' -f3)
-
-            if wait "$pid"; then
-                echo "  [PASS] $agent"
-                mark_agent_completed "$agent"
-            else
-                echo "  [FAIL] $agent (see $LOG_DIR/${agent}_${idx}.log)"
-                ((stage_failed++))
-            fi
-
-            # Always release locks after completion/failure
-            release_agent_locks "$agent" "$idx"
-        done
-
-        total_failed=$((total_failed + stage_failed))
-
-        if [[ $stage_failed -gt 0 ]]; then
-            echo "  [STAGE $current_stage FAILED] $stage_failed agent(s) failed"
-            echo "  ABORTING remaining stages due to failures"
-            break
-        fi
-
-        echo "  [STAGE $current_stage COMPLETE] ${#stage_agents[@]} agent(s) succeeded"
-        echo ""
-    done
-
-    if [[ $total_failed -eq 0 ]]; then
-        echo "ALL STAGES COMPLETE. $DISPATCH_COUNT dispatches succeeded."
-        exit 0
-    else
-        echo "$total_failed dispatch(es) failed. Check logs in $LOG_DIR/"
-        exit 1
-    fi
-}
-
-# ============================================================================
-# Phased Rollout (v6.0)
-# ============================================================================
-if [[ "$HAS_PHASES" == "true" && "$PHASE_COUNT" -gt 0 ]]; then
-    echo "=== PHASED ROLLOUT ==="
-    echo ""
-
-    TOTAL_FAILED=0
-
-    for phase_idx in $(seq 0 $((PHASE_COUNT - 1))); do
-        PHASE_NAME=$(jq -r ".rollout_phases[$phase_idx].name" "$MANIFEST_FILE")
-        PHASE_NUM=$(jq -r ".rollout_phases[$phase_idx].phase" "$MANIFEST_FILE")
-        CHECKPOINT=$(jq -r ".rollout_phases[$phase_idx].checkpoint // \"\"" "$MANIFEST_FILE")
-
-        echo "---------------------------------------------------"
-        echo "  PHASE $PHASE_NUM: $PHASE_NAME"
-        echo "---------------------------------------------------"
-
-        # Get dispatch indices for this phase
-        DISPATCH_INDICES=$(jq -r ".rollout_phases[$phase_idx].parallel_group | .[]" "$MANIFEST_FILE")
-
-        GROUP_ENTRIES=()
-        for i in $DISPATCH_INDICES; do
-            dispatch_agent "$i"
-            GROUP_ENTRIES+=("$__dispatch_pid $(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE") $i")
-            sleep 2
-        done
-
-        echo ""
-        echo "  Waiting for Phase $PHASE_NUM to complete..."
-
-        # Phase progress monitor: live table
-        _phase_monitor_pid=""
-        if [[ -t 1 ]]; then
-            PHASE_PID_FILE="$LOG_DIR/.phase_pids"
-            : > "$PHASE_PID_FILE"
-            phase_total=0
-            for entry in "${GROUP_ENTRIES[@]}"; do
-                echo "$entry" >> "$PHASE_PID_FILE"
-                phase_total=$((phase_total + 1))
-            done
-
-            printf "  %-22s %s\n" "AGENT" "STATUS"
-            printf "  %-22s %s\n" "—————" "——————"
-            while IFS=' ' read -r pid agent idx; do
-                printf "  %-22s %s\n" "$agent" "waiting..."
-            done < "$PHASE_PID_FILE"
-
-            (
-                chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-                tick=0
-                while true; do
-                    sleep 1
-                    tick=$((tick + 1))
-                    spin="${chars:tick%10:1}"
-                    printf '\033[%dA' "$phase_total"
-                    all_done=true
-                    while IFS=' ' read -r pid agent idx; do
-                        if ! kill -0 "$pid" 2>/dev/null; then
-                            printf '\r  %-22s %-12s\033[K\n' "$agent" "done"
-                        else
-                            all_done=false
-                            printf '\r  %-22s %s %-12s\033[K\n' "$agent" "$spin" "running"
-                        fi
-                    done < "$PHASE_PID_FILE"
-                    if [[ "$all_done" == true ]]; then break; fi
-                done
-            ) &
-            _phase_monitor_pid=$!
-        fi
-
-        phase_failed=0
-        for entry in "${GROUP_ENTRIES[@]}"; do
-            pid=$(echo "$entry" | cut -d' ' -f1)
-            agent=$(echo "$entry" | cut -d' ' -f2)
-            idx=$(echo "$entry" | cut -d' ' -f3)
-            if wait "$pid"; then
-                echo "  [PASS] $agent (dispatch #$idx)"
-            else
-                echo "  [FAIL] $agent (dispatch #$idx — see $LOG_DIR/${agent}_${idx}.log)"
-                ((phase_failed++))
-            fi
-        done
-
-        # Stop phase monitor and clear its line
-        if [[ -n "${_phase_monitor_pid:-}" ]]; then
-            kill "$_phase_monitor_pid" 2>/dev/null
-            wait "$_phase_monitor_pid" 2>/dev/null
-            printf '\r%80s\r' "" 2>/dev/null
-        fi
-
-        if [[ $phase_failed -gt 0 ]]; then
-            echo ""
-            echo "  [PHASE $PHASE_NUM FAILED] $phase_failed dispatch(es) failed."
-            echo "  Checkpoint: $CHECKPOINT"
-            echo "  ABORTING remaining phases."
-            TOTAL_FAILED=$((TOTAL_FAILED + phase_failed))
-            break
-        fi
-
-        # Evaluate checkpoint
-        if [[ -n "$CHECKPOINT" ]]; then
-            echo ""
-            echo "  [CHECKPOINT] Phase $PHASE_NUM — $CHECKPOINT"
-            echo "  [CHECKPOINT] Phase $PHASE_NUM → CONTINUE"
-        fi
-
-        echo ""
-    done
-
-    echo ""
-    if [[ $TOTAL_FAILED -eq 0 ]]; then
-        echo "ALL $PHASE_COUNT PHASES COMPLETE. $DISPATCH_COUNT dispatches succeeded ($MODE mode)."
-    else
-        echo "$TOTAL_FAILED dispatch(es) failed across phases. Check logs in $LOG_DIR/"
-        exit 1
-    fi
-
-# ============================================================================
-# Stage-based execution engine (v6.1)
-# ============================================================================
-elif jq -e '.dispatches[] | select(has("stage") or has("depends_on") or has("locks"))' "$MANIFEST_FILE" &>/dev/null; then
-    echo "=== STAGE-BASED EXECUTION MODE DETECTED ==="
-    echo "  Found stage, depends_on, or locks fields in manifest"
-    echo ""
-    execute_by_stages
-
-# ============================================================================
-# Legacy flat dispatch (v5.0 backward compatibility)
-# ============================================================================
-else
-    PIDS=()
-    AGENTS=()
-
-    for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
-        AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
-        TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-        VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
-        PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
-
-        echo "---------------------------------------------------"
-        echo "  [$PRIORITY] -> $AGENT ($MODE)"
-        echo "  Task: $TASK"
-        [[ -n "$VERIFY" ]] && echo "  Verify: $VERIFY"
-
-        LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
-
-        case "$MODE" in
-            hierarchical)
-                euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-                ;;
-            mesh)
-                if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                    MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
-                    euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-                else
-                    euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-                fi
-                ;;
-            federated)
-                FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $TASK"
-                euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
-                ;;
-        esac
-
-        PIDS+=($!)
-        AGENTS+=("$AGENT")
-        sleep 2
-    done
-
-    echo ""
-    echo "---------------------------------------------------"
-    echo "  All $DISPATCH_COUNT agents deployed ($MODE mode). Waiting for completion..."
-    echo "  Logs: $LOG_DIR/"
-    echo ""
-
-    # Write PID manifest for progress monitor (pid agent idx priority)
-    PID_MANIFEST="$LOG_DIR/.pids"
-    DONE_DIR="$LOG_DIR/.done"
-    RESULT_DIR="$LOG_DIR/.results"
-    mkdir -p "$DONE_DIR" "$RESULT_DIR"
-    for i in "${!PIDS[@]}"; do
-        local_priority=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
-        echo "${PIDS[$i]} ${AGENTS[$i]} ${i} ${local_priority}" >> "$PID_MANIFEST"
-    done
-
-    # Background live table: redraws agent status table in place using ANSI escapes
-    _monitor_pid=""
-    TABLE_LINES=$DISPATCH_COUNT
-    if [[ -t 1 ]]; then
-        # Print initial table
-        printf "  %-4s %-22s %-10s %s\n" "#" "AGENT" "PRIORITY" "STATUS"
-        printf "  %-4s %-22s %-10s %s\n" "—" "—————" "————————" "——————"
-        while IFS=' ' read -r pid agent idx priority; do
-            printf "  %-4s %-22s %-10s %s\n" "$idx" "$agent" "$priority" "waiting..."
-        done < "$PID_MANIFEST"
-
-        HEADER_LINES=2
-        TOTAL_TABLE_LINES=$((HEADER_LINES + TABLE_LINES))
-
-        (
-            chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-            tick=0
-            while true; do
-                sleep 1
-                tick=$((tick + 1))
-                spin="${chars:tick%10:1}"
-
-                # Move cursor up to top of table body (skip header)
-                printf '\033[%dA' "$TABLE_LINES"
-
-                all_done=true
-                while IFS=' ' read -r pid agent idx priority; do
-                    if [[ -f "$RESULT_DIR/${agent}_${idx}" ]]; then
-                        result=$(cat "$RESULT_DIR/${agent}_${idx}")
-                        if [[ "$result" == "pass" ]]; then
-                            printf '\r  %-4s %-22s %-10s \033[32m%-12s\033[0m\033[K\n' "$idx" "$agent" "$priority" "PASS"
-                        else
-                            printf '\r  %-4s %-22s %-10s \033[31m%-12s\033[0m\033[K\n' "$idx" "$agent" "$priority" "FAIL"
-                        fi
-                    elif ! kill -0 "$pid" 2>/dev/null; then
-                        printf '\r  %-4s %-22s %-10s %-12s\033[K\n' "$idx" "$agent" "$priority" "done"
-                    else
-                        all_done=false
-                        log_file="$LOG_DIR/${agent}_${idx}.log"
-                        attempt="0"
-                        if [[ -f "$log_file" ]]; then
-                            attempt=$(grep -c "Loop Attempt" "$log_file" 2>/dev/null || true)
-                        fi
-                        printf '\r  %-4s %-22s %-10s %s %-12s\033[K\n' "$idx" "$agent" "$priority" "$spin" "attempt $attempt"
-                    fi
-                done < "$PID_MANIFEST"
-
-                if [[ "$all_done" == true ]]; then break; fi
-            done
-        ) &
-        _monitor_pid=$!
-    fi
-
-    FAILED=0
-    for i in "${!PIDS[@]}"; do
-        if wait "${PIDS[$i]}"; then
-            echo "pass" > "$RESULT_DIR/${AGENTS[$i]}_${i}"
-        else
-            echo "fail" > "$RESULT_DIR/${AGENTS[$i]}_${i}"
-            ((FAILED++))
-        fi
-    done
-
-    # Give monitor a moment to render final state, then stop
-    sleep 2
-    if [[ -n "${_monitor_pid:-}" ]]; then
-        kill "$_monitor_pid" 2>/dev/null || true
-        wait "$_monitor_pid" 2>/dev/null || true
-    fi
-    echo ""
-
-    echo ""
-    if [[ $FAILED -eq 0 ]]; then
-        echo "ALL $DISPATCH_COUNT MISSIONS COMPLETE ($MODE mode)."
-        exit 0
-    else
-        echo "$FAILED of $DISPATCH_COUNT missions failed. Check logs in $LOG_DIR/"
-        exit 1
-    fi
+# Setup environment
+ensure_python_env
+
+# Build Python command
+PYTHON_ARGS=("$PYTHON_CORE" "$MANIFEST_FILE")
+if [[ -n "$DISPATCH_MODE" ]]; then
+    PYTHON_ARGS+=(--mode "$DISPATCH_MODE")
 fi
+
+# Execute Python core
+exec "$PYTHON_CMD" "${PYTHON_ARGS[@]}"

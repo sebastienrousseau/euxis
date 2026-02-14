@@ -10,7 +10,7 @@ from textual.containers import VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Static
 
-from tui.core.runner import EUXIS_HOME
+from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
 from tui.widgets.sparkline import sparkline_text
 
