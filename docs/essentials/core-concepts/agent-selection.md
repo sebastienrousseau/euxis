@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Agent Selection
 
 **How to pick the right agent for your task.**

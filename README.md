@@ -9,212 +9,359 @@
 
 ---
 
-## What Euxis Delivers
+## What Euxis Does
 
-41 specialist AI agents coordinate automatically on engineering tasks. Each agent masters one domain.
+Euxis coordinates 41 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
 
-**Ship features faster.** Break down complex goals. Delegate to specialists. Deploy solutions.
+**Ship features faster.** Break complex goals into tasks. Delegate to specialists. Get working solutions.
+
+```bash
+euxis architect "Design a caching layer for our API"
+```
 
 **Catch bugs before production.** Security agents audit code. Testing agents verify logic. Quality gates block broken builds.
-
-**Learn from every interaction.** The Cortex stores decisions, fixes, and lessons. Agents improve over time.
-
----
-
-## Deploy Your First Agent
-
-Complete deployment in 2 minutes.
-
-### Install
-
-```bash
-git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
-~/.euxis/setup.sh
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
-```
-
-### Verify
-
-```bash
-euxis-health
-```
-
-Confirm 8 green checkmarks appear. Run `euxis-certify` to resolve issues.
-
-### Deploy
-
-```bash
-euxis architect "What are the key components of a well-designed REST API?"
-```
-
-Output displays:
-- **Provider selection:** Euxis selects optimal AI (`claude` for strategic work)
-- **Reasoning steps:** Agent analyzes problems systematically
-- **Structured output:** Clear, actionable recommendations
-
-✅ **Success:** Agent deployment complete. Architecture analysis delivered.
-
----
-
-## Core Capabilities
-
-Three patterns handle most engineering tasks.
-
-### Single Agent
-
-One agent, one task, one answer.
-
-```bash
-euxis <agent> "<task>" [provider]
-
-# Examples:
-euxis debugger "Why does this function return null when the input is empty?"
-euxis researcher "Compare the top 3 Python testing frameworks"
-euxis writer "Document this API endpoint for developers"
-euxis architect "Design the API" gemini  # Override provider
-```
-
-**Use for:** Quick questions, focused analysis, single-domain work.
-
-### Combo Chain
-
-Agents execute in sequence. Each agent builds on previous output.
-
-```bash
-euxis-combo run steve-jobs "Design a user onboarding flow"
-```
-
-Steve Jobs combo: `planner → architect → evangelist → reviewer`
-
-**Use for:** Tasks requiring multiple perspectives in order.
-
-### Squad Deploy
-
-Specialists work simultaneously.
 
 ```bash
 euxis-squad deploy quality "Audit the authentication module"
 ```
 
-Quality squad: `reviewer`, `inspector`, `pentester`, `auditor`, `optimizer`, `watchdog`, `polyglot`, `arbiter`
+**Learn from every interaction.** The Cortex stores decisions, fixes, and lessons. Agents improve over time.
 
-**Use for:** Full analysis, security audits, pre-release checks.
+```bash
+euxis-cortex remember "Fixed race condition with mutex lock" "debugger" --type procedural
+```
 
 ---
 
-## How It Works
+## Quick Start
 
-```
-Your Goal → Orchestrator → Specialists → Verified Output
-                ↓              ↓              ↓
-           Breaks down    Execute in     Quality gates
-           the work       parallel       validate results
-```
+Get your first agent running in 2 minutes.
 
-**Smart provider selection.** Euxis routes each agent to optimal AI:
-- Strategic agents (orchestrator, architect) → `claude` for reasoning
-- Research agents → `gemini` for large context
-- Coding agents → `goose` for tool use
-- Utility agents → `ollama` for speed
+### 1. Install
 
-Provider selection appears in output. Override with third argument:
 ```bash
-euxis architect "Design the API" gemini  # Override default
+git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
+~/.euxis/setup.sh
 ```
 
-**Persistent memory.** Cortex stores three knowledge types:
-- **Episodic:** Events ("Fixed bug #42 with null check")
-- **Semantic:** Facts ("Auth module uses JWT with RS256")
-- **Procedural:** Workflows ("Deploy sequence: test → build → push")
+### 2. Add to PATH
 
-**Quality assurance.** Every output passes verification:
-1. Internal consistency check
-2. Cross-reference against stored knowledge
-3. Reviewer validation for multi-agent work
+```bash
+# For Zsh (macOS default)
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+
+# For Bash
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+### 3. Verify Installation
+
+```bash
+euxis-health
+```
+
+**Expected output:**
+```
+✅ Agent Naming Convention
+✅ Script Hardening
+✅ Orphaned Executables
+✅ Protocol Headers
+✅ Documentation Drift
+✅ Certification Status
+✅ Provider Dependencies
+✅ Codex Integration
+
+Fleet Status: HEALTHY (8/8 checks passed)
+```
+
+### 4. Run Your First Agent
+
+```bash
+euxis architect "What makes a good REST API?"
+```
+
+**Expected output:**
+```
+[euxis] Agent: architect
+[euxis] Provider: claude
+[euxis] ⠋ architect (claude)...
+
+THOUGHT 1: I need to outline the key principles that make REST APIs well-designed...
+
+FINAL ANSWER:
+A well-designed REST API follows these principles:
+
+1. **Resource-Oriented Design**: URLs represent resources, not actions
+   - Good: GET /users/123
+   - Avoid: GET /getUser?id=123
+
+2. **Proper HTTP Methods**: Use verbs correctly
+   - GET for retrieval, POST for creation, PUT for updates, DELETE for removal
+
+3. **Consistent Response Format**: JSON with predictable structure
+   - Always include status, data, and error fields
+
+[... continues with detailed recommendations ...]
+```
+
+---
+
+## How to Use Euxis
+
+Three patterns cover most engineering tasks.
+
+### Pattern 1: Single Agent
+
+One agent, one task, one answer. Use for focused questions.
+
+```bash
+euxis <agent> "<task>" [provider]
+```
+
+**Examples:**
+
+```bash
+# Debug a problem
+euxis debugger "Why does login return null when password contains special characters?"
+
+# Research options
+euxis researcher "Compare PostgreSQL vs MySQL for a write-heavy workload"
+
+# Write documentation
+euxis writer "Create API documentation for the /users endpoint"
+
+# Override provider
+euxis architect "Design the API" gemini
+```
+
+### Pattern 2: Combo Chain
+
+Agents execute in sequence. Each builds on previous output.
+
+```bash
+euxis-combo run <combo-name> "<task>"
+```
+
+**Available Combos:**
+
+| Combo | Chain | Best For |
+|-------|-------|----------|
+| `steve-jobs` | planner → architect → evangelist → reviewer | Product design, feature specs |
+| `fort-knox` | pentester → auditor → inspector → reviewer | Security reviews |
+| `jony-ive` | designer → animator → interactor → reviewer | UI/UX design |
+
+**Example:**
+
+```bash
+euxis-combo run steve-jobs "Design a user onboarding flow"
+```
+
+**What happens:**
+1. **Planner** scopes requirements
+2. **Architect** designs the structure
+3. **Evangelist** refines the narrative
+4. **Reviewer** validates the output
+
+### Pattern 3: Squad Deploy
+
+Multiple specialists work simultaneously.
+
+```bash
+euxis-squad deploy <squad> "<task>"
+```
+
+**Available Squads:**
+
+| Squad | Members | Best For |
+|-------|---------|----------|
+| `quality` | reviewer, inspector, pentester, auditor + 4 more | Full audits |
+| `build` | debugger, maintainer, automaton, tester + 2 more | Implementation |
+| `vision` | orchestrator, architect, planner, researcher + 2 more | Strategy |
+
+**Example:**
+
+```bash
+euxis-squad deploy quality "Complete security audit of the payment module"
+```
+
+**What happens:**
+- All squad members run in parallel
+- Lead agent (reviewer) coordinates output
+- Results synthesized into comprehensive report
 
 ---
 
 ## Common Tasks
 
 <details>
-<summary><strong>Fix a bug</strong></summary>
+<summary><strong>Fix a Bug</strong></summary>
 
+**Quick diagnosis:**
 ```bash
-# Quick diagnosis
 euxis debugger "Trace why login fails for users with special characters in passwords"
-
-# Deep investigation with forensics
-euxis-combo run fort-knox "Investigate the authentication bypass vulnerability"
 ```
+
+**Deep investigation:**
+```bash
+euxis-combo run fort-knox "Investigate the session timeout issue"
+```
+
+**What you get:**
+- Root cause analysis
+- Fix recommendations
+- Test suggestions
 
 **Related:** [Debugging Workflow](docs/guides/workflows/debugging-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>Build a new feature</strong></summary>
+<summary><strong>Build a Feature</strong></summary>
 
+**Design first:**
 ```bash
-# Architecture design
-euxis architect "Design a notification system that supports email, SMS, and push"
+euxis architect "Design a notification system supporting email, SMS, and push"
+```
 
-# Feature development
+**Then implement:**
+```bash
 euxis-combo run steve-jobs "Build user preferences for notification channels"
 ```
+
+**What you get:**
+- Architecture diagram
+- Implementation plan
+- API contracts
 
 **Related:** [Feature Development Workflow](docs/guides/workflows/feature-development-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>Audit for security</strong></summary>
+<summary><strong>Security Audit</strong></summary>
 
+**Quick scan:**
 ```bash
-# Quick scan
 euxis pentester "Check for SQL injection in the search endpoint"
+```
 
-# Full audit
+**Full audit:**
+```bash
 euxis-squad deploy quality "Complete security audit of the payment module"
 ```
+
+**What you get:**
+- Vulnerability report
+- Risk assessment
+- Remediation steps
 
 **Related:** [Security Audit Workflow](docs/guides/workflows/security-audit-workflow.md)
 
 </details>
 
 <details>
-<summary><strong>Ship a release</strong></summary>
+<summary><strong>Prepare a Release</strong></summary>
 
+**Validate everything:**
 ```bash
-# Pre-release validation
 euxis-playbook run verify-everything "Prepare v2.0 release" --dry-run
-
-# Release execution
-euxis-playbook run zero-to-one "Launch v2.0 with new auth system"
 ```
 
-**Related:** [Fleet Guide: Playbooks](docs/fleet-guide.md#playbooks)
+**Execute release:**
+```bash
+euxis-playbook run zero-to-one "Launch v2.0"
+```
+
+**What you get:**
+- Pre-release checklist
+- Quality gates passed
+- Release notes
+
+**Related:** [Fleet Guide: Playbooks](docs/guides/fleet-guide.md#playbooks)
 
 </details>
 
 ---
 
+## How It Works
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Your Task  │ ──▶ │ Orchestrator│ ──▶ │ Specialists │ ──▶ │   Output    │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+                          │                   │                   │
+                    Breaks down          Execute in         Quality gates
+                     the work            parallel           validate results
+```
+
+### Provider Selection
+
+Euxis routes each agent to the optimal AI provider:
+
+| Agent Type | Provider | Reason |
+|------------|----------|--------|
+| Strategic (orchestrator, architect) | `claude` | Best reasoning |
+| Research (researcher) | `gemini` | Large context (2M tokens) |
+| Coding (debugger, tester) | `goose` | Tool use |
+| Utility (butler, writer) | `ollama` | Fast, local |
+
+Provider appears in output:
+```
+[euxis] Provider: claude
+```
+
+Override anytime:
+```bash
+euxis architect "Design the API" gemini
+```
+
+### Memory System
+
+The Cortex stores three types of knowledge:
+
+| Type | What It Stores | Example |
+|------|----------------|---------|
+| `episodic` | Events | "Fixed bug #42 with null check" |
+| `semantic` | Facts | "Auth module uses JWT with RS256" |
+| `procedural` | Workflows | "Deploy: test → build → push" |
+
+**Store knowledge:**
+```bash
+euxis-cortex remember "API uses OAuth 2.0 with PKCE" "architect" --type semantic
+```
+
+**Recall knowledge:**
+```bash
+euxis-cortex recall "authentication patterns" --type procedural
+```
+
+### Quality Assurance
+
+Every output passes three verification layers:
+
+1. **Internal consistency** — Claims supported by evidence
+2. **Cross-reference** — Validated against stored knowledge
+3. **Reviewer checkpoint** — Multi-agent work validated before delivery
+
+---
+
 ## Agent Fleet
 
-41 specialists organized by authority level.
+41 specialists organized by authority.
 
 ### Core Agents (9)
 
-Define direction. Block progress when necessary.
+Define direction. May block progress when necessary.
 
 | Agent | Function |
 |-------|----------|
-| `orchestrator` | Break down goals, coordinate specialists, synthesize results |
-| `architect` | Design systems, define patterns, review structure |
-| `planner` | Scope work, prioritize tasks, manage intent |
+| `orchestrator` | Breaks down goals, coordinates specialists, synthesizes results |
+| `architect` | Designs systems, defines patterns, reviews structure |
+| `planner` | Scopes work, prioritizes tasks, manages intent |
 | `reviewer` | Quality gate for all output |
-| `critic` | Challenge assumptions, surface risks |
+| `critic` | Challenges assumptions, surfaces risks |
 | `auditor` | Legal, privacy, and compliance authority |
-| `arbiter` | Resolve conflicts between agents |
+| `arbiter` | Resolves conflicts between agents |
 | `librarian` | Knowledge governance and documentation |
 | `historian` | Long-term memory and patterns |
 
@@ -226,7 +373,7 @@ Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--
 
 ### On-Demand Agents (7)
 
-Growth and communication tasks. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
+Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
 
 `ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
 
@@ -238,15 +385,32 @@ Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist
 
 ---
 
-## Terminal Experience (ETX)
+## Terminal Interface (ETX)
 
-Modern TUI built on Python Textual with 11 screens and 51 tests.
+Modern TUI built on Python Textual.
 
 ```bash
 euxis-tui
 ```
 
-Features: fleet dashboard, command palette (`Ctrl+K`), streaming agent execution, squad monitoring, playbook browser, performance sparklines, cortex memory browser, dark/light/contrast themes.
+**Features:**
+- Fleet dashboard with all 41 agents
+- Command palette (`Ctrl+K`)
+- Streaming agent execution
+- Squad monitoring
+- Playbook browser
+- Performance sparklines
+- Cortex memory browser
+- Dark/light/contrast themes
+
+**Keyboard shortcuts:**
+| Key | Action |
+|-----|--------|
+| `Ctrl+K` | Command palette |
+| `Ctrl+T` | Toggle theme |
+| `/` | Search |
+| `?` | Help |
+| `Ctrl+Q` | Quit |
 
 ---
 
@@ -255,7 +419,7 @@ Features: fleet dashboard, command palette (`Ctrl+K`), streaming agent execution
 | Guide | What You'll Learn |
 |-------|-------------------|
 | [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
-| [Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
+| [Core Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
 | [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
 | [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
@@ -283,22 +447,56 @@ Features: fleet dashboard, command palette (`Ctrl+K`), streaming agent execution
 | [Kiro CLI][kiro-cli-url] | `kiro-cli` | AI coding assistant |
 | [Goose][goose-url] | `goose` | MCP-native agent |
 
-**Provider selection:**
-
-Euxis selects optimal provider for each agent. Provider appears in output:
-
-```
-[euxis] Provider: claude
-```
-
-Override with third argument:
-
+**Install the quickest option:**
 ```bash
-euxis architect "Design the API" gemini    # Use Gemini
-euxis debugger "Fix the bug" ollama        # Use local Ollama
+# Local, free, no API key needed
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama2
 ```
 
-**Learn more:** [Provider Routing](docs/essentials/core-concepts/provider-routing.md)
+</details>
+
+---
+
+## Troubleshooting
+
+<details>
+<summary><strong>Command not found: euxis</strong></summary>
+
+**Problem:** Shell can't find Euxis commands.
+
+**Solution:**
+1. Verify PATH: `echo $PATH | grep "$HOME/bin"`
+2. Restart terminal
+3. Re-run: `source ~/.zshrc` (or `~/.bashrc`)
+
+</details>
+
+<details>
+<summary><strong>Health check failures</strong></summary>
+
+**Problem:** `euxis-health` reports issues.
+
+**Solution:**
+```bash
+euxis-certify
+```
+
+This identifies and resolves common configuration problems.
+
+</details>
+
+<details>
+<summary><strong>No AI provider available</strong></summary>
+
+**Problem:** Agents can't execute.
+
+**Solution:**
+```bash
+# Install Ollama (free, local)
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama2
+```
 
 </details>
 
@@ -310,10 +508,10 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
 ---
 
-🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
 
-*Euxis Version 0.0.7 · Build something that matters.*
+*Euxis v0.0.7 · Build something that matters.*
 
 <!-- Reference Links -->
 
@@ -327,7 +525,7 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
 [agents-badge]: https://img.shields.io/badge/agents-41-blueviolet?style=for-the-badge
-[agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/fleet-guide.md
+[agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/guides/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli
 [gemini-url]: https://github.com/google-gemini/gemini-cli

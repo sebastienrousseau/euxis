@@ -751,10 +751,30 @@ euxis-gym train new-agent
 
 ## Platform Information
 
-- **Platform:** Darwin
-- **Database:** `/Users/seb/.euxis/data/cortex/db`
-- **Configuration:** `~/.euxis/config/`
+Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically.
+
+| Item | Location |
+|------|----------|
+| Installation | `~/.euxis/` |
+| Executables | `~/bin/` (symlinked from `~/.euxis/bin/`) |
+| Configuration | `~/.euxis/config/` |
+| Cortex Database | `~/.euxis/data/cortex/db/` |
+| Agent Outputs | `~/.euxis/data/projects/` |
+| Logs | `~/.euxis/data/logs/` |
+
+**Environment Variables:**
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `EUXIS_HOME` | `~/.euxis` | Installation directory |
+| `EUXIS_PROVIDER` | `claude` | Default AI provider |
+| `EUXIS_PROJECT` | current dir | Active project context |
 
 ---
 
-🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)** · 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+*Euxis v0.0.7 · Build something that matters.*
+
+---
+
+Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System

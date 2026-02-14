@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Feature Development Workflow
 
 **From idea to shipped feature.**

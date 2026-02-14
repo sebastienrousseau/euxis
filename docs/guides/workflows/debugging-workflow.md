@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Debugging Workflow
 
 **From bug report to verified fix.**

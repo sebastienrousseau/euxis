@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis Concepts
 
 **Understand the mental model behind Euxis.**

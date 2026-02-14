@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Branding
 
 ## What It Is
@@ -25,8 +24,8 @@ cat ~/.euxis/config/branding/signature.txt
 **Standard Signature:**
 ```
 ---
-🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+🎨 Designed by Sebastien Rousseau: https://sebastienrousseau.com/
+🚀 Engineered with Euxis: Enterprise Unified eXecution Intelligence System: https://euxis.co/
 ```
 
 ## Branding Components

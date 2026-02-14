@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Choosing Coordination Patterns
 
 **When to use agents, combos, squads, or playbooks.**

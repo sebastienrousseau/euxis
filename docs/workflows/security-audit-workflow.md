@@ -31,6 +31,38 @@ Start by understanding what you're protecting.
 euxis sentinel "Identify threat vectors for the user authentication system"
 ```
 
+**Expected output:**
+```
+[euxis] Agent: sentinel
+[euxis] Provider: claude
+
+FINAL ANSWER:
+# Threat Model: User Authentication System
+
+## Attack Surface
+1. Login endpoint (/api/auth/login)
+2. Password reset flow (/api/auth/reset)
+3. Session token storage (client-side)
+4. OAuth callback handlers
+
+## Trust Boundaries
+- Browser ↔ API Gateway (untrusted)
+- API Gateway ↔ Auth Service (semi-trusted)
+- Auth Service ↔ Database (trusted)
+
+## Prioritized Risks
+| Risk | Impact | Likelihood | Priority |
+|------|--------|------------|----------|
+| Credential stuffing | HIGH | HIGH | P0 |
+| Session hijacking | HIGH | MEDIUM | P1 |
+| Password reset abuse | MEDIUM | MEDIUM | P2 |
+
+## Recommended Mitigations
+1. Rate limiting on login endpoint
+2. Secure, HttpOnly session cookies
+3. Token expiry and rotation
+```
+
 The sentinel will:
 - Map attack surfaces
 - Identify trust boundaries

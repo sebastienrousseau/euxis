@@ -111,7 +111,11 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 
 Add to your PATH:
 ```bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile && source ~/.profile
+# For Zsh (macOS default)
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+
+# For Bash
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 Verify installation:

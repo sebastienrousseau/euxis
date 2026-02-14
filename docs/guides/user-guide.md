@@ -14,7 +14,8 @@ Complete command-line toolkit. Each tool serves one function.
 | Command | Function |
 |---------|----------|
 | `euxis <agent> <task> [provider]` | Deploy agent with automatic intelligence routing |
-| `euxis-ui` | Mission Control TUI for agent deployment and log browsing |
+| `euxis-tui` | Modern Terminal UI for fleet management (Python Textual) |
+| `euxis-ui` | Legacy menu-based interface (Bash) |
 
 **See also**: [UI Guide](ui-guide.md)
 

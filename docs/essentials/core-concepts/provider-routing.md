@@ -1,4 +1,3 @@
-# (c) 2026 Euxis Fleet. All rights reserved.
 # Provider Routing
 
 **How Euxis matches agents to AI providers.**
