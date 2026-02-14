@@ -1,8 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS GIT GUARD: Enforce Feature Branch Workflow (Smart Mode)
 # Standalone script — callable from any Euxis entry point.
 # Exits 0 if safe to proceed, 1 if on a protected branch and user declines.
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-git-guard — Feature branch workflow enforcer
+
+Usage:
+  euxis-git-guard
+
+Validates the current Git branch and enforces feature branch workflow.
+Exits 0 if safe to proceed, 1 if on a protected branch.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 # 0. Skip in non-interactive contexts (CI, tests, pipes)
 [[ -t 0 ]] || exit 0

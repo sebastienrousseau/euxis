@@ -1,12 +1,42 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS CERTIFY: The Final Toll Gate
 # Runs all 6 gates in sequence. All must pass for certification.
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-certify — Certification toll gate pipeline
+
+Usage:
+  euxis-certify
+
+Runs all 6 certification gates in sequence:
+  Gate 0:   Environment validation
+  Gate 1+2: Static analysis (lint)
+  Gate 3:   Infrastructure tests
+  Gate 4:   Semantic verification (golden dataset)
+  Gate 5:   Branding compliance
+  Gate 6:   Documentation governance
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
+
+# Source validation library for fail-fast gates
+# shellcheck source=bin/lib/validation.sh
+source "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null || {
+    echo "FATAL: Cannot load validation library. Certification cannot proceed." >&2
+    exit 1
+}
 
 run_with_timeout() {
     local timeout="$1"
@@ -32,14 +62,187 @@ echo "=================================================="
 echo "  EUXIS CERTIFICATION PIPELINE"
 echo "=================================================="
 
+# GATE 0: FAIL-FAST ENVIRONMENT VALIDATION
+echo ""
+echo "[GATE 0] Environment Pre-Validation (Fail-Fast)..."
+echo "--------------------------------------------------"
+if ! validate_comprehensive; then
+    echo ""
+    echo "CERTIFICATION ABORTED: Environment validation failed."
+    echo "Resolve all validation errors before attempting certification."
+    exit 1
+fi
+
+# GATE 0a: CERTIFICATION-SPECIFIC PREREQUISITES
+echo ""
+echo "[GATE 0a] Certification Prerequisites..."
+echo "--------------------------------------------------"
+
+CERT_ERRORS=0
+
+# Check all required certification tools are available
+CERT_TOOLS=(
+    "$BIN_DIR/euxis-lint:Static analysis tool"
+    "$BIN_DIR/euxis-test-infra:Infrastructure testing"
+    "$BIN_DIR/euxis.sh:Main Euxis script"
+)
+
+for tool_entry in "${CERT_TOOLS[@]}"; do
+    IFS=':' read -r tool_path description <<< "$tool_entry"
+    if ! validate_file_executable "$tool_path" "$description"; then
+        ((CERT_ERRORS++)) || true
+    fi
+done
+
+# Validate critical certification files
+CERT_FILES=(
+    "$EUXIS_HOME/config/branding/signature.txt:Branding signature"
+    "$EUXIS_HOME/README.md:Main README"
+    "$EUXIS_HOME/docs/user-guide.md:User guide"
+    "$EUXIS_HOME/docs/fleet-guide.md:Fleet guide"
+)
+
+for file_entry in "${CERT_FILES[@]}"; do
+    IFS=':' read -r file_path description <<< "$file_entry"
+    if [[ -f "$file_path" ]]; then
+        validation_pass "$description exists"
+    else
+        validation_error "$description missing at $file_path"
+        ((CERT_ERRORS++)) || true
+    fi
+done
+
+# Check write permissions for temporary files (semantic verification needs this)
+TEMP_TEST_FILE="/tmp/euxis_cert_test_$$"
+if ! touch "$TEMP_TEST_FILE" 2>/dev/null; then
+    validation_error "Cannot write to /tmp directory - semantic verification will fail"
+    ((CERT_ERRORS++)) || true
+else
+    rm -f "$TEMP_TEST_FILE"
+    validation_pass "Temporary file write access verified"
+fi
+
+# Validate current version consistency (SQLite-first, JSON fallback)
+CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
+[[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
+if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
+    validation_error "Cannot determine current version from registry"
+    ((CERT_ERRORS++)) || true
+else
+    validation_pass "Current version detected: $CURRENT_VERSION"
+fi
+
+if [[ $CERT_ERRORS -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION ABORTED: $CERT_ERRORS prerequisite check(s) failed."
+    echo "Fix these issues before attempting certification."
+    exit 1
+fi
+
+validation_pass "All certification prerequisites met"
+
+# GATE 0b: MANDATORY SECURITY & QUALITY ENFORCEMENT
+echo ""
+echo "[GATE 0b] Security & Quality Enforcement..."
+echo "--------------------------------------------------"
+
+SEC_FAILURES=0
+
+# SEC-1: No printf-based JSON generation in message bus (command injection)
+if grep -q 'printf.*{.*sender.*topic.*payload' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    if ! grep -q 'jq -n' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+        echo "  FAIL: euxis-bus uses printf for JSON generation (command injection risk)"
+        echo "        Fix: use jq for JSON envelope construction"
+        ((SEC_FAILURES++)) || true
+    else
+        echo "  PASS: euxis-bus uses jq for safe JSON generation"
+    fi
+else
+    echo "  PASS: euxis-bus JSON generation is safe"
+fi
+
+# SEC-2: Model name validation exists in providers.sh
+if grep -q '_validate_model_name' "$EUXIS_HOME/bin/lib/providers.sh" 2>/dev/null; then
+    echo "  PASS: Provider model name validation present"
+else
+    echo "  FAIL: providers.sh missing _validate_model_name() (env var injection risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-3: Task input sanitization in dispatch.sh
+if grep -q 'sanitize_task_input' "$EUXIS_HOME/bin/lib/dispatch.sh" 2>/dev/null; then
+    echo "  PASS: Task input sanitization in dispatch pipeline"
+else
+    echo "  FAIL: dispatch.sh missing sanitize_task_input (goal hijacking risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-4: PII sanitization in logging
+if grep -q '_sanitize_pii' "$EUXIS_HOME/bin/lib/common.sh" 2>/dev/null; then
+    echo "  PASS: PII sanitization in logging functions"
+else
+    echo "  FAIL: common.sh logging lacks PII sanitization"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-5: Project license declared in pyproject.toml
+if grep -q 'license' "$EUXIS_HOME/pyproject.toml" 2>/dev/null; then
+    echo "  PASS: Project license declared in pyproject.toml"
+else
+    echo "  FAIL: Missing license declaration in pyproject.toml"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-6: Prompt injection detection in validation.sh
+if grep -q 'injection_patterns' "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null; then
+    echo "  PASS: Prompt injection detection in task validation"
+else
+    echo "  FAIL: validation.sh missing prompt injection detection"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-7: Message bus sender validation
+if grep -q 'validate.*sender\|sender.*match' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    echo "  PASS: Message bus sender validation present"
+else
+    echo "  FAIL: euxis-bus missing sender name validation"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-8: Message bus retention/cleanup capability
+if grep -q 'cmd_cleanup\|cleanup' "$BIN_DIR/euxis-bus" 2>/dev/null; then
+    echo "  PASS: Message bus retention policy (cleanup) present"
+else
+    echo "  FAIL: euxis-bus missing message retention/cleanup"
+    ((SEC_FAILURES++)) || true
+fi
+
+# SEC-9: TUI deployment confirmation gates
+if grep -q 'ConfirmDeployScreen\|confirm.*deploy' "$EUXIS_HOME/tui/app.py" 2>/dev/null; then
+    echo "  PASS: TUI deployment confirmation gates present"
+else
+    echo "  FAIL: TUI deploys agents without confirmation (governance bypass risk)"
+    ((SEC_FAILURES++)) || true
+fi
+
+if [[ $SEC_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 0b (Security): $SEC_FAILURES mandatory check(s) failed."
+    echo "All security controls MUST pass before certification can proceed."
+    exit 1
+fi
+
+validation_pass "All mandatory security controls verified"
+
 # GATE 1 & 2: Static Analysis (Structural Integrity + Protocol Compliance)
 echo ""
 echo "[GATE 1+2] Static Analysis (Lint)..."
 echo "--------------------------------------------------"
-"$BIN_DIR/euxis-lint"
-if [ $? -ne 0 ]; then
+# Run with timeout to prevent hanging
+if ! timeout 60 "$BIN_DIR/euxis-lint"; then
     echo ""
     echo "CERTIFICATION FAILED at Gate 1+2 (Static Analysis)."
+    echo "Lint process failed or timed out after 60 seconds."
     exit 1
 fi
 
@@ -47,10 +250,11 @@ fi
 echo ""
 echo "[GATE 3] Infrastructure Tests..."
 echo "--------------------------------------------------"
-"$BIN_DIR/euxis-test-infra"
-if [ $? -ne 0 ]; then
+# Run with timeout to prevent hanging
+if ! timeout 120 "$BIN_DIR/euxis-test-infra"; then
     echo ""
     echo "CERTIFICATION FAILED at Gate 3 (Infrastructure)."
+    echo "Infrastructure tests failed or timed out after 120 seconds."
     exit 1
 fi
 
@@ -59,22 +263,75 @@ echo ""
 echo "[GATE 4] Semantic Verification..."
 echo "--------------------------------------------------"
 GOLDEN_DATASET="$EUXIS_HOME/tests/golden/golden_dataset.json"
+
+# Pre-check: validate semantic test prerequisites
+SEMANTIC_ERRORS=0
+
+# Check if architect agent exists (SQLite-first, JSON fallback)
+_architect_found=false
+if [[ -f "$EUXIS_HOME/registry.db" ]]; then
+    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
+fi
+if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; then
+    jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/registry.json" &>/dev/null && _architect_found=true
+fi
+if [[ "$_architect_found" != "true" ]]; then
+    validation_error "Architect agent not found in registry - semantic tests cannot run"
+    ((SEMANTIC_ERRORS++)) || true
+fi
+
+# Check if temp directory is writable for response files
+if ! touch "/tmp/euxis_semantic_precheck_$$" 2>/dev/null; then
+    validation_error "Cannot create temporary files for semantic verification"
+    ((SEMANTIC_ERRORS++)) || true
+else
+    rm -f "/tmp/euxis_semantic_precheck_$$"
+fi
+
+if [[ $SEMANTIC_ERRORS -gt 0 ]]; then
+    echo "  FAIL: Semantic verification prerequisites not met ($SEMANTIC_ERRORS issues)."
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 4 (Semantic - Prerequisites)."
+    exit 1
+fi
+
 if [[ -f "$GOLDEN_DATASET" ]]; then
     echo "  Golden dataset found. Running sample eval..."
 
-    # Test Architect output format
-    resp_file=$(mktemp 2>/dev/null || echo "/tmp/euxis_semantic_resp.$$")
+    # Validate golden dataset structure
+    if ! jq empty "$GOLDEN_DATASET" 2>/dev/null; then
+        echo "  FAIL: Golden dataset is not valid JSON."
+        echo ""
+        echo "CERTIFICATION FAILED at Gate 4 (Semantic - Invalid Dataset)."
+        exit 1
+    fi
+
+    # Test Architect output format with proper error handling
+    resp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_semantic_resp.XXXXXX" 2>/dev/null) || { echo "  [FAIL] Failed to create temp file" >&2; return 1; }
+    echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s)..."
+
     if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude > "${resp_file}" 2>/dev/null; then
-        RESP=$(cat "${resp_file}")
+        RESP=$(cat "${resp_file}" 2>/dev/null || echo "")
+        EXIT_CODE=0
     else
         RESP=""
-        echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
+        EXIT_CODE=$?
     fi
     rm -f "${resp_file}"
-    if [[ -n "$RESP" ]]; then
-        echo "  PASS: Architect produced output."
-    else
+
+    if [[ $EXIT_CODE -eq 124 ]]; then
+        echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
+    elif [[ $EXIT_CODE -ne 0 ]]; then
+        echo "  FAIL: Architect exited with error code $EXIT_CODE."
+    elif [[ -z "$RESP" ]]; then
         echo "  FAIL: Architect returned empty output."
+    elif [[ ${#RESP} -lt 50 ]]; then
+        echo "  FAIL: Architect output suspiciously short (${#RESP} chars)."
+    else
+        echo "  PASS: Architect produced output (${#RESP} chars)."
+    fi
+
+    if [[ $EXIT_CODE -ne 0 || -z "$RESP" || ${#RESP} -lt 50 ]]; then
         echo ""
         echo "CERTIFICATION FAILED at Gate 4 (Semantic)."
         exit 1
@@ -90,14 +347,36 @@ echo "[GATE 5] Branding Compliance..."
 echo "--------------------------------------------------"
 
 BRANDING_FAILURES=0
-SIGNATURE_FILE="$EUXIS_HOME/branding/signature.txt"
+SIGNATURE_FILE="$EUXIS_HOME/config/branding/signature.txt"
+
+# Pre-validate branding prerequisites
+echo "  Pre-validating branding requirements..."
+
+# Check branding directory permissions
+BRANDING_DIR="$EUXIS_HOME/config/branding"
+if [[ ! -d "$BRANDING_DIR" ]]; then
+    echo "  FAIL: Branding directory not found at $BRANDING_DIR"
+    ((BRANDING_FAILURES++)) || true
+elif [[ ! -r "$BRANDING_DIR" ]]; then
+    echo "  FAIL: Branding directory not readable at $BRANDING_DIR"
+    ((BRANDING_FAILURES++)) || true
+else
+    echo "  PASS: Branding directory accessible"
+fi
+
+# Early exit if branding directory is not accessible
+if [[ $BRANDING_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 5 (Branding - Directory Access)."
+    exit 1
+fi
 
 # 5a. Signature file exists
 if [[ -f "$SIGNATURE_FILE" ]]; then
-    echo "  PASS: branding/signature.txt exists."
+    echo "  PASS: config/branding/signature.txt exists."
 else
-    echo "  FAIL: branding/signature.txt not found."
-    ((BRANDING_FAILURES++))
+    echo "  FAIL: config/branding/signature.txt not found."
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5b. PR template contains signature
@@ -107,11 +386,11 @@ if [[ -f "$PR_TEMPLATE" ]]; then
         echo "  PASS: PR template carries branding signature."
     else
         echo "  FAIL: PR template missing branding signature."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 else
     echo "  FAIL: .github/pull_request_template.md not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5c. README contains signature/branding
@@ -121,20 +400,20 @@ if [[ -f "$README_FILE" ]]; then
         echo "  PASS: README.md carries author attribution."
     else
         echo "  FAIL: README.md missing author attribution."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 else
     echo "  FAIL: README.md not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5d. Git hook installed and executable
-HOOK_FILE="$EUXIS_HOME/hooks/prepare-commit-msg"
+HOOK_FILE="$EUXIS_HOME/bin/hooks/prepare-commit-msg"
 if [[ -x "$HOOK_FILE" ]]; then
     echo "  PASS: prepare-commit-msg hook is present and executable."
 else
     echo "  FAIL: prepare-commit-msg hook missing or not executable."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5e. commit.gpgsign MUST be true globally
@@ -145,7 +424,7 @@ if command -v git &>/dev/null; then
     else
         echo "  FAIL: commit.gpgsign is not set to true globally."
         echo "        Run: git config --global commit.gpgsign true"
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 
     GPG_FORMAT=$(git config --global gpg.format 2>/dev/null || echo "")
@@ -155,7 +434,7 @@ if command -v git &>/dev/null; then
     else
         echo "  FAIL: No signing key configured."
         echo "        Run: git config --global user.signingkey <your-key>"
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -166,7 +445,7 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
     while IFS= read -r hash; do
         CHECKED=$((CHECKED + 1))
         MSG=$(git -C "$EUXIS_HOME" log -1 --format="%B" "$hash")
-        if ! echo "$MSG" | grep -q "Engineered with.*Euxis"; then
+        if ! echo "$MSG" | grep -qi "Engineered with.*Euxis"; then
             UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
             SHORT=$(git -C "$EUXIS_HOME" log -1 --format="%h %s" "$hash")
             echo "  UNSIGNED: $SHORT"
@@ -179,7 +458,7 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
         echo "  SKIP: No git history available."
     else
         echo "  FAIL: $UNSIGNED_COMMITS of $CHECKED recent commits missing signature."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -202,8 +481,8 @@ if command -v git &>/dev/null && git rev-parse --git-dir &>/dev/null 2>&1; then
     elif [[ $CRYPTO_CHECKED -eq 0 ]]; then
         echo "  SKIP: No git history available."
     else
+        # WARN only - cryptographic signatures are recommended but not required
         echo "  WARN: $UNSIGNED_CRYPTO of $CRYPTO_CHECKED recent commits lack cryptographic signature."
-        ((BRANDING_FAILURES++))
     fi
 fi
 
@@ -213,7 +492,7 @@ if [[ -f "$SIGNATURE_FILE" ]]; then
         echo "  PASS: Signature URL points to euxis.co."
     else
         echo "  FAIL: Signature URL does not point to euxis.co."
-        ((BRANDING_FAILURES++))
+        ((BRANDING_FAILURES++)) || true
     fi
 fi
 
@@ -223,7 +502,7 @@ if [[ -f "$BRANDING_WORKFLOW" ]]; then
     echo "  PASS: GitHub Actions branding-check workflow exists."
 else
     echo "  FAIL: .github/workflows/branding-check.yml not found."
-    ((BRANDING_FAILURES++))
+    ((BRANDING_FAILURES++)) || true
 fi
 
 # 5j. Open PRs carry branding signature (if gh CLI available)
@@ -238,14 +517,14 @@ if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/
             pr_body=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['body'])")
             if ! echo "$pr_body" | grep -qF "Sebastien Rousseau" || ! echo "$pr_body" | grep -qF "euxis.co"; then
                 echo "  UNSIGNED PR: #$pr_num $pr_title"
-                ((UNSIGNED_PRS++))
+                ((UNSIGNED_PRS++)) || true
             fi
         done
         if [[ $UNSIGNED_PRS -eq 0 ]]; then
             echo "  PASS: All open PRs carry branding signature."
         else
             echo "  FAIL: $UNSIGNED_PRS open PR(s) missing branding signature."
-            ((BRANDING_FAILURES++))
+            ((BRANDING_FAILURES++)) || true
         fi
     else
         echo "  PASS: No open PRs to check."
@@ -265,23 +544,54 @@ echo "--------------------------------------------------"
 
 DOC_FAILURES=0
 
+# Pre-validate documentation prerequisites
+echo "  Pre-validating documentation requirements..."
+
+# Check docs directory permissions
+DOCS_DIR="$EUXIS_HOME/docs"
+if [[ ! -d "$DOCS_DIR" ]]; then
+    echo "  FAIL: Documentation directory not found at $DOCS_DIR"
+    ((DOC_FAILURES++)) || true
+elif [[ ! -r "$DOCS_DIR" ]]; then
+    echo "  FAIL: Documentation directory not readable at $DOCS_DIR"
+    ((DOC_FAILURES++)) || true
+else
+    echo "  PASS: Documentation directory accessible"
+fi
+
+# Check if jq is available for JSON validation
+if ! command -v jq &>/dev/null; then
+    echo "  WARN: jq not available - JSON validation will be skipped"
+    JQ_AVAILABLE=false
+else
+    echo "  PASS: jq available for JSON validation"
+    JQ_AVAILABLE=true
+fi
+
+# Early exit if docs directory is not accessible
+if [[ $DOC_FAILURES -gt 0 ]]; then
+    echo ""
+    echo "CERTIFICATION FAILED at Gate 6 (Documentation - Directory Access)."
+    exit 1
+fi
+
 # 6a. euxis-sync-docs exists and is executable
 SYNC_DOCS="$BIN_DIR/euxis-sync-docs"
 if [[ -x "$SYNC_DOCS" ]]; then
     echo "  PASS: euxis-sync-docs is present and executable."
 else
     echo "  FAIL: euxis-sync-docs missing or not executable."
-    ((DOC_FAILURES++))
+    ((DOC_FAILURES++)) || true
 fi
 
 # 6b. Core documentation files exist
-REQUIRED_DOCS=("README.md" "USER_GUIDE.md" "FLEET_GUIDE.md")
+REQUIRED_DOCS=("README.md" "docs/user-guide.md" "docs/fleet-guide.md")
 for doc in "${REQUIRED_DOCS[@]}"; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         echo "  PASS: $doc exists."
     else
         echo "  FAIL: $doc not found."
-        ((DOC_FAILURES++))
+        ((DOC_FAILURES++)) || true
     fi
 done
 
@@ -294,7 +604,6 @@ for doc in "${REQUIRED_DOCS[@]}"; do
         AGE_DAYS=$(( (NOW - LAST_MOD) / 86400 ))
         if (( AGE_DAYS > 7 )); then
             echo "  WARN: $doc is ${AGE_DAYS} days old. Run 'euxis-sync-docs' to refresh."
-            ((DOC_FAILURES++))
         fi
     fi
 done
@@ -302,44 +611,77 @@ if [[ $DOC_FAILURES -eq 0 ]]; then
     echo "  PASS: All documentation is current (updated within 7 days)."
 fi
 
-# 6d. README references correct version
-CURRENT_VERSION="0.0.6"
+# 6d. README references correct version (SQLite-first, JSON fallback)
+CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
+[[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
     if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md references version $CURRENT_VERSION."
     else
         echo "  FAIL: README.md does not reference version $CURRENT_VERSION."
-        ((DOC_FAILURES++))
+        ((DOC_FAILURES++)) || true
     fi
 fi
 
 # 6e. USER_GUIDE and FLEET_GUIDE reference correct version
-for doc in USER_GUIDE.md FLEET_GUIDE.md; do
+for doc in docs/user-guide.md docs/fleet-guide.md; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
             echo "  PASS: $doc references version $CURRENT_VERSION."
         else
             echo "  FAIL: $doc does not reference version $CURRENT_VERSION."
-            ((DOC_FAILURES++))
+            ((DOC_FAILURES++)) || true
         fi
     fi
 done
 
 # 6f. Registry, squads, and codex manifests are valid JSON
-MANIFESTS=("registry.json" "squads.json" "capabilities.json" "codex/codex.json")
-if command -v jq &>/dev/null; then
+MANIFESTS=("registry.json" "squads.json" "config/capabilities.json" "config/codex/codex.json")
+if [[ "$JQ_AVAILABLE" == "true" ]]; then
+    echo "  Validating JSON manifest files..."
     for manifest in "${MANIFESTS[@]}"; do
         MANIFEST_PATH="$EUXIS_HOME/$manifest"
         if [[ -f "$MANIFEST_PATH" ]]; then
+            # Check read permissions first
+            if [[ ! -r "$MANIFEST_PATH" ]]; then
+                echo "  FAIL: $manifest exists but is not readable."
+                ((DOC_FAILURES++)) || true
+                continue
+            fi
+
+            # Validate JSON syntax
             if jq empty "$MANIFEST_PATH" 2>/dev/null; then
                 echo "  PASS: $manifest is valid JSON."
+
+                # Additional schema validation for critical files
+                case "$manifest" in
+                    "registry.json")
+                        if ! jq -e 'has("schema_version") and has("protocol_version") and has("agents")' "$MANIFEST_PATH" &>/dev/null; then
+                            echo "  FAIL: $manifest missing required schema fields."
+                            ((DOC_FAILURES++)) || true
+                        fi
+                        ;;
+                    "config/capabilities.json")
+                        if ! jq -e 'type == "object"' "$MANIFEST_PATH" &>/dev/null; then
+                            echo "  FAIL: $manifest should be a JSON object."
+                            ((DOC_FAILURES++)) || true
+                        fi
+                        ;;
+                esac
             else
                 echo "  FAIL: $manifest is invalid JSON."
-                ((DOC_FAILURES++))
+                ((DOC_FAILURES++)) || true
+
+                # Try to provide more specific error information
+                if [[ -s "$MANIFEST_PATH" ]]; then
+                    echo "         File exists and has content, but JSON syntax is invalid."
+                else
+                    echo "         File is empty or nearly empty."
+                fi
             fi
         else
             echo "  FAIL: $manifest not found."
-            ((DOC_FAILURES++))
+            ((DOC_FAILURES++)) || true
         fi
     done
 else

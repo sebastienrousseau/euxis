@@ -1,0 +1,42 @@
+{
+  "project": "documentation-overhaul",
+  "description": "Apple-style documentation improvement with progressive disclosure",
+  "dispatches": [
+    {
+      "agent": "librarian",
+      "priority": "P0",
+      "task": "Audit all documentation for accuracy, completeness, and consistency. Flag gaps, errors, and outdated content. Produce /tmp/doc-audit-report.md",
+      "verify_cmd": "test -f /tmp/doc-audit-report.md"
+    },
+    {
+      "agent": "tech-writer",
+      "priority": "P0",
+      "task": "Create Apple-style quick start guide with progressive disclosure at docs/quick-start.md. Focus on 5-minute success path with clear outcomes. Include: What You'll Build, Before You Begin, Step 1-5 with clear examples and expected outputs. End with What's Next links.",
+      "verify_cmd": "test -f docs/quick-start.md"
+    },
+    {
+      "agent": "devrel-advocate",
+      "priority": "P1",
+      "task": "Create concept definitions in docs/essentials/core-concepts/ for: agents.md, squads.md, playbooks.md, combos.md, memory.md. Each should include: definition, when to use, quick example, available options, and create-your-own section.",
+      "verify_cmd": "test -d docs/essentials/core-concepts"
+    },
+    {
+      "agent": "brand-evangelist",
+      "priority": "P1",
+      "task": "Transform docs/index.md into Apple-style landing page. Lead with outcomes not features. Use benefit-driven headlines. Add clear hero section explaining what Euxis does in one sentence.",
+      "verify_cmd": "test -f docs/index.md"
+    },
+    {
+      "agent": "tech-writer",
+      "priority": "P2",
+      "task": "Create comprehensive CLI reference at docs/reference/cli-reference.md. Document all 30+ tools with: synopsis, description, options, examples, and see also sections. Follow man page style.",
+      "verify_cmd": "test -f docs/reference/cli-reference.md"
+    },
+    {
+      "agent": "qa-coordinator",
+      "priority": "P2",
+      "task": "Create troubleshooting guide at docs/guides/troubleshooting.md. Document common issues with problem/solution pairs. Include real scenarios from validation errors.",
+      "verify_cmd": "test -f docs/guides/troubleshooting.md"
+    }
+  ]
+}

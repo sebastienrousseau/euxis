@@ -1,8 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. Secure Documentation Sync.
 # Dry-Run & Validation pattern: stage, verify, approve, execute.
 
 set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-sync-docs — Secure Documentation Synchronization
+
+Usage:
+  euxis-sync-docs [OPTIONS]
+
+Uses the Librarian agent to generate and apply documentation patches
+with human-in-the-loop approval.
+
+Options:
+  -h, --help    Show this help text
+
+Security:
+  - Validates patches against destructive command patterns
+  - Requires interactive approval before execution
+  - Blocks: rm -rf, mkfs, dd, chmod 777, curl|bash, etc.
+
+Examples:
+  euxis-sync-docs           # Generate and review doc patches
+  euxis-sync-docs --help    # Show this help
+EOF
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
 
 export PATH="$PATH:$HOME/bin"
 
@@ -16,8 +47,8 @@ echo "LIBRARIAN: Generating documentation and compliance patch..."
 # 1. Ask Librarian for a bash patch
 euxis librarian "Scan ~/.euxis. Output ONLY a valid bash script that:
 1. Inserts '# (c) 2026 Euxis Fleet.' at the top of scripts missing it.
-2. Updates version tags to v6.0 in all prompts.
-3. Updates USER_GUIDE.md with any new agents found in prompts/fleet/.
+2. Updates version tags to v0.0.7 in all prompts.
+3. Updates docs/user-guide.md with any new agents found in prompts/fleet/.
 Do NOT include comments or conversational text outside of code." claude > "$PATCH_FILE" 2>/dev/null
 
 if [[ ! -s "$PATCH_FILE" ]]; then

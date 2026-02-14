@@ -1,0 +1,232 @@
+{
+  "schema_version": "1.0",
+  "id": "verify-everything",
+  "name": "Verify Everything",
+  "description": "Six-gate verification: Docs → Intent → Structure → Execution → Quality → Truth. Docs first, reviewer last, nothing ships unverified.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Documentation Truth",
+      "gate": "docs",
+      "principle": "Is the documentation honest and current?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "librarian",
+          "task_template": "Sync agent registry, verify versions, reconcile documentation truth, and update docs/user-guide.md registry sections if needed for: ${goal}",
+          "verifies": [
+            "registry matches actual agents",
+            "version numbers are current",
+            "no stale or orphaned docs",
+            "USER_GUIDE reflects reality"
+          ]
+        },
+        {
+          "agent": "writer",
+          "task_template": "Sync all documentation to current fleet, protocols, and registry; validate snippets; update glossary/terms for: ${goal}",
+          "verifies": [
+            "docs match current fleet composition",
+            "code snippets are tested and current",
+            "glossary and terms are accurate",
+            "no contradictions between docs"
+          ]
+        }
+      ],
+      "checkpoint": "All documentation synced, verified, and committed",
+      "abort_on_failure": true,
+      "failure_message": "Documentation truth failed. Nothing else is trustworthy until docs are current."
+    },
+    {
+      "phase": 1,
+      "name": "Intent Verification",
+      "gate": "intent",
+      "principle": "Are we building the right thing?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "strategist",
+          "task_template": "Verify requirements and acceptance criteria match current product behavior; flag scope creep for: ${goal}",
+          "verifies": [
+            "acceptance criteria still match reality",
+            "no silent scope creep",
+            "no feature exists without intent",
+            "no intent exists without acceptance criteria"
+          ]
+        }
+      ],
+      "checkpoint": "All acceptance criteria verified and scope confirmed",
+      "abort_on_failure": true,
+      "failure_message": "Intent verification failed. Nothing else matters until this passes."
+    },
+    {
+      "phase": 2,
+      "name": "Structural Verification",
+      "gate": "structure",
+      "principle": "Is the system sound?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Verify architectural integrity, modularity, provider abstraction boundaries, concurrency model, and cross-platform assumptions for: ${goal}",
+          "verifies": [
+            "separation of concerns",
+            "concurrency and threading correctness",
+            "provider abstraction integrity",
+            "no platform-specific hacks",
+            "tech debt and modularity scores acceptable",
+            "ADRs still match implementation"
+          ]
+        }
+      ],
+      "checkpoint": "Architectural integrity confirmed and ADRs current",
+      "abort_on_failure": true,
+      "failure_message": "Structural verification failed. Do NOT optimize, ship, or document until this passes."
+    },
+    {
+      "phase": 3,
+      "name": "Execution Verification",
+      "gate": "execution",
+      "principle": "Does it actually work fast, everywhere?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Verify performance budgets with benchmarks; validate voice/audio hot path and threading overhead for: ${goal}",
+          "verifies": [
+            "measurable speed (p95/p99)",
+            "real parallelism (not fake async)",
+            "no race conditions or deadlocks",
+            "voice/audio performance stability"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Verify telemetry coverage for latency, jitter, underruns, queue depth, thread saturation, regressions for: ${goal}",
+          "verifies": [
+            "observability coverage",
+            "regression signal availability"
+          ]
+        },
+        {
+          "agent": "automaton",
+          "task_template": "Verify cross-platform build/package/runtime parity for macOS, Linux, and WSL for: ${goal}",
+          "verifies": [
+            "platform parity",
+            "build reproducibility",
+            "packaging correctness"
+          ]
+        },
+        {
+          "agent": "investigator",
+          "task_template": "Verify security boundaries, secrets handling, provider isolation, dependency risk for: ${goal}",
+          "verifies": [
+            "security boundaries",
+            "secrets handling",
+            "provider isolation",
+            "no security regressions"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Verify UI usability and a11y: keyboard-only, mouse, touch, auto light/dark, focus, contrast for: ${goal}",
+          "verifies": [
+            "keyboard-only navigation",
+            "mouse and touch parity",
+            "light/dark mode correctness",
+            "focus management and contrast"
+          ]
+        }
+      ],
+      "checkpoint": "All execution delegates pass with evidence",
+      "abort_on_failure": true,
+      "failure_message": "Execution verification failed. Any failure here blocks release."
+    },
+    {
+      "phase": 4,
+      "name": "Release Quality Gates",
+      "gate": "quality",
+      "principle": "Do all tests pass and quality gates hold?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Run full test strategy (unit/integration/e2e/smoke) and issue PASS/FAIL verdict for: ${goal}",
+          "verifies": [
+            "unit test coverage",
+            "integration test pass rate",
+            "e2e smoke tests",
+            "quality gate verdicts"
+          ]
+        }
+      ],
+      "checkpoint": "All test strategies pass with PASS verdict",
+      "abort_on_failure": true,
+      "failure_message": "Release quality gates failed. Fix tests before proceeding."
+    },
+    {
+      "phase": 5,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is everything honest, verified, and consistent?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final verification across docs, intent, architecture, performance, security, UX, and test evidence for: ${goal}",
+          "verifies": [
+            "claims vs evidence across all gates",
+            "UI acceptance criteria (CLI + Web)",
+            "accessibility and keyboard/touch parity",
+            "documentation accuracy (validated against Gate 0)",
+            "no contradictions between agents",
+            "no unverified assertions"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off with evidence for all claims",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Nothing ships."
+    }
+  ],
+  "optional_sub_gates": [
+    {
+      "id": "ui-accessibility",
+      "trigger": "UI changes detected",
+      "delegates": [
+        {
+          "agent": "sentinel",
+          "task_template": "Verify UI accessibility, keyboard navigation, light/dark behavior, and interaction quality for: ${goal}"
+        }
+      ]
+    },
+    {
+      "id": "documentation-truth",
+      "trigger": "Documentation or registry changes detected",
+      "delegates": [
+        {
+          "agent": "librarian",
+          "task_template": "Verify memory, registry, and docs truth for: ${goal}"
+        },
+        {
+          "agent": "writer",
+          "task_template": "Verify documentation reflects actual behavior for: ${goal}"
+        }
+      ]
+    },
+    {
+      "id": "release-readiness",
+      "trigger": "Release candidate or version bump",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Verify full test coverage and quality gates for: ${goal}"
+        },
+        {
+          "agent": "orchestrator",
+          "task_template": "Verify changelog, versioning, and release readiness for: ${goal}"
+        }
+      ]
+    }
+  ]
+}

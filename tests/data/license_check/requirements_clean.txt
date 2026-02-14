@@ -1,0 +1,4 @@
+# Clean requirements with only permissive licenses
+requests>=2.25.0
+pyyaml>=5.4.0
+click>=7.0

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Euxis prepare-commit-msg hook
+# Appends the Euxis branding signature to every commit message.
+# Install: euxis-hooks install (or manually symlink into .git/hooks/)
+
+set -uo pipefail
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="${2:-}"
+
+# Only append to user-authored commits (not merges, squashes, or amends)
+case "$COMMIT_SOURCE" in
+  merge|squash) exit 0 ;;
+esac
+
+SIGNATURE_FILE="${HOME}/.euxis/branding/signature.txt"
+
+if [[ ! -f "$SIGNATURE_FILE" ]]; then
+  exit 0
+fi
+
+# Don't append if the signature is already present
+if grep -qF "Engineered with Euxis" "$COMMIT_MSG_FILE" 2>/dev/null; then
+  exit 0
+fi
+
+# Append a blank line and the signature
+printf '\n' >> "$COMMIT_MSG_FILE"
+cat "$SIGNATURE_FILE" >> "$COMMIT_MSG_FILE"

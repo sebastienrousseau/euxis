@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 6 (Documentation) completed","timestamp":"2026-02-08T14:11:45Z","correlation_id":"1770559905-34861-220"}

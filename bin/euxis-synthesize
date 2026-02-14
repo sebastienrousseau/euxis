@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import sqlite3
 import sys
 from datetime import date
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 EUXIS_ROOT = Path.home() / ".euxis"
 CAPABILITIES_FILE = EUXIS_ROOT / "capabilities.json"
 REGISTRY_FILE = EUXIS_ROOT / "registry.json"
+REGISTRY_DB = EUXIS_ROOT / "registry.db"
 SYNTHESIZED_DIR = EUXIS_ROOT / "prompts" / "synthesized"
 COMMON_PROTOCOL = EUXIS_ROOT / "prompts" / "protocols" / "_common.txt"
 
@@ -26,17 +28,74 @@ def load_capabilities():
 
 
 def load_registry():
+    """Load registry from SQLite-first, JSON fallback."""
+    # Try SQLite first
+    if REGISTRY_DB.exists():
+        try:
+            conn = sqlite3.connect(str(REGISTRY_DB))
+            conn.row_factory = sqlite3.Row
+            agents = []
+            for row in conn.execute("SELECT id, path, tier, version, activation FROM agents ORDER BY id"):
+                # Get tags
+                tags = [r[0] for r in conn.execute(
+                    "SELECT t.name FROM tags t JOIN agent_tags at ON t.id = at.tag_id WHERE at.agent_id = ?",
+                    (row["id"],)
+                )]
+                agents.append({
+                    "id": row["id"], "path": row["path"], "tier": row["tier"],
+                    "version": row["version"], "tags": tags,
+                })
+                if row["activation"]:
+                    agents[-1]["activation"] = row["activation"]
+            meta = {}
+            for r in conn.execute("SELECT key, value FROM registry_metadata"):
+                meta[r["key"]] = r["value"]
+            conn.close()
+            result = {"agents": agents}
+            if "protocol_version" in meta:
+                result["protocol_version"] = meta["protocol_version"]
+            if "schema_version" in meta:
+                result["schema_version"] = meta["schema_version"]
+            return result
+        except sqlite3.Error:
+            pass  # Fall through to JSON
+
     if not REGISTRY_FILE.exists():
-        print(f"ERROR: Registry file not found: {REGISTRY_FILE}", file=sys.stderr)
+        print(f"ERROR: Registry not found (neither registry.db nor registry.json)", file=sys.stderr)
         sys.exit(1)
     with open(REGISTRY_FILE) as f:
         return json.load(f)
 
 
 def save_registry(registry):
+    """Save registry to JSON and sync to SQLite if DB exists."""
     with open(REGISTRY_FILE, "w") as f:
         json.dump(registry, f, indent=2)
         f.write("\n")
+
+    # Sync to SQLite if database exists
+    if REGISTRY_DB.exists():
+        try:
+            conn = sqlite3.connect(str(REGISTRY_DB))
+            for agent in registry.get("agents", []):
+                conn.execute(
+                    "INSERT OR REPLACE INTO agents (id, path, tier, version, activation) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (agent["id"], agent.get("path", ""), agent.get("tier", "fleet"),
+                     agent.get("version", "0.0.7"), agent.get("activation"))
+                )
+                # Sync tags
+                for tag in agent.get("tags", []):
+                    conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (tag,))
+                    conn.execute(
+                        "INSERT OR IGNORE INTO agent_tags (agent_id, tag_id) "
+                        "SELECT ?, id FROM tags WHERE name = ?",
+                        (agent["id"], tag)
+                    )
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f"WARNING: Failed to sync to registry.db: {e}", file=sys.stderr)
 
 
 def cmd_list_capabilities(args):
@@ -174,9 +233,21 @@ def cmd_dissolve(args):
     after = len(registry["agents"])
     if before > after:
         save_registry(registry)
-        print(f"Agent '{name}' removed from registry.json")
+        print(f"Agent '{name}' removed from registry")
     else:
-        print(f"WARNING: Agent '{name}' was not found in registry.json")
+        print(f"WARNING: Agent '{name}' was not found in registry")
+
+    # Also remove from SQLite if present
+    if REGISTRY_DB.exists():
+        try:
+            conn = sqlite3.connect(str(REGISTRY_DB))
+            conn.execute("DELETE FROM agent_tags WHERE agent_id = ?", (name,))
+            conn.execute("DELETE FROM agent_capabilities WHERE agent_id = ?", (name,))
+            conn.execute("DELETE FROM agents WHERE id = ?", (name,))
+            conn.commit()
+            conn.close()
+        except sqlite3.Error:
+            pass
 
     print(f"Dissolved agent: {name}")
 

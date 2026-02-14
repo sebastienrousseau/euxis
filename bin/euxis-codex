@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# (c) 2026 Euxis Fleet. All rights reserved.
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
-CODEX_DIR="$EUXIS_DIR/codex"
+CODEX_DIR="$EUXIS_DIR/config/codex"
 CODEX_MANIFEST="$CODEX_DIR/codex.json"
 
 usage() {

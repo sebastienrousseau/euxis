@@ -1,0 +1,302 @@
+name: Architecture Guardrails
+
+on:
+  push:
+    branches: [ main, feat/*, release/* ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  layer-compliance:
+    name: Validate Architectural Layers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Core Layer Dependencies
+        run: |
+          echo "=== Validating Core Layer Architectural Boundaries ==="
+          echo "Core Layer: Fundamental libraries that provide basic functionality"
+          echo "UI Layer: User interface, rendering, interactive components"
+          echo "Network Layer: HTTP requests, API calls, provider communication"
+          echo "Filesystem Layer: Advanced file operations, system manipulation"
+          echo ""
+
+          # Define core layer files (fundamental system components)
+          # These provide basic functionality and should not import higher-level concerns
+          core_files=(
+            "bin/lib/session.sh"
+            "bin/lib/template.sh"
+            "bin/euxis-audit-run"
+            "bin/euxis-bench"
+            "bin/euxis-codex"
+          )
+
+          # Define forbidden UI layer patterns for core layer
+          ui_patterns=(
+            "whiptail"
+            "dialog"
+            "zenity"
+            "ncurses"
+            "tput clear"
+            "tput cup"
+            "interactive_menu"
+            "display_menu"
+            "user_choice"
+            "read -p.*choice"
+          )
+
+          # Define forbidden Network layer patterns for core layer
+          network_patterns=(
+            "curl "
+            "wget "
+            "http://"
+            "https://"
+            "api\."
+            "request_"
+            "response_"
+            "fetch_"
+            "download_"
+            "upload_"
+            "execute_provider"
+            "resolve_tiered_provider"
+            "run_claude"
+            "run_gemini"
+            "run_openai"
+          )
+
+          # Define forbidden Filesystem layer patterns for core layer
+          filesystem_patterns=(
+            "find . -exec"
+            "find / "
+            "rm -rf"
+            "sudo "
+            "mount "
+            "umount "
+            "mkfs\."
+            "fdisk "
+            "lsblk"
+            "blkid"
+            "disk_usage"
+            "volume_mount"
+            "partition_"
+            "filesystem_check"
+          )
+
+          violation_count=0
+
+          echo "Scanning Core Layer files for architectural violations..."
+
+          for core_file in "${core_files[@]}"; do
+            if [ -f "$core_file" ]; then
+              echo "Validating: $core_file"
+
+              # Check for UI layer violations (interactive components)
+              for pattern in "${ui_patterns[@]}"; do
+                if grep -q "$pattern" "$core_file" 2>/dev/null; then
+                  echo "❌ VIOLATION: $core_file imports UI layer pattern: $pattern"
+                  echo "  Core layer MUST NOT import UI interactive components"
+                  violation_count=$((violation_count + 1))
+                fi
+              done
+
+              # Check for Network layer violations (HTTP/API calls)
+              for pattern in "${network_patterns[@]}"; do
+                if grep -q "$pattern" "$core_file" 2>/dev/null; then
+                  echo "❌ VIOLATION: $core_file imports Network layer pattern: $pattern"
+                  echo "  Core layer MUST NOT import Network HTTP/API operations"
+                  violation_count=$((violation_count + 1))
+                fi
+              done
+
+              # Check for Filesystem layer violations (advanced operations)
+              for pattern in "${filesystem_patterns[@]}"; do
+                if grep -q "$pattern" "$core_file" 2>/dev/null; then
+                  echo "❌ VIOLATION: $core_file imports Filesystem layer pattern: $pattern"
+                  echo "  Core layer MUST NOT import advanced Filesystem operations"
+                  violation_count=$((violation_count + 1))
+                fi
+              done
+
+            else
+              echo "⚠️  Core file not found: $core_file"
+            fi
+          done
+
+          # Validate library dependency constraints
+          echo ""
+          echo "Validating library source constraints in core files..."
+
+          for core_file in "${core_files[@]}"; do
+            if [ -f "$core_file" ] && [[ "$core_file" == *".sh" ]]; then
+              # Core libraries should not source higher-level libraries
+              forbidden_sources=$(grep -n "source.*lib/\(providers\|agents\|memory\|prompt\)\.sh" "$core_file" 2>/dev/null || true)
+              if [ -n "$forbidden_sources" ]; then
+                echo "❌ VIOLATION: $core_file has forbidden library dependencies:"
+                echo "$forbidden_sources"
+                echo "  Core libraries MUST NOT source providers, agents, memory, or prompt modules"
+                violation_count=$((violation_count + 1))
+              fi
+            fi
+          done
+
+          # Report results
+          echo ""
+          echo "=== Architecture Validation Summary ==="
+          if [ $violation_count -eq 0 ]; then
+            echo "✅ All architectural boundaries respected"
+            echo "✅ Core layer maintains proper isolation"
+            echo "✅ No violations found in $((${#core_files[@]})) core files"
+          else
+            echo "❌ $violation_count architectural violations found"
+            echo ""
+            echo "Architectural Rules:"
+            echo "  1. Core layer MUST NOT import UI interactive components (whiptail, dialog, ncurses)"
+            echo "  2. Core layer MUST NOT import Network operations (curl, wget, HTTP calls)"
+            echo "  3. Core layer MUST NOT import advanced Filesystem operations (mount, partition, etc.)"
+            echo "  4. Core library files MUST NOT source higher-level library modules"
+            echo ""
+            echo "Fix these violations before merging."
+            exit 1
+          fi
+
+      - name: Validate Library Dependency Graph
+        run: |
+          echo "=== Validating Library Dependency Graph ==="
+
+          # Map of allowed dependencies for each library
+          # Key: library file, Value: space-separated list of allowed dependencies
+          declare -A allowed_deps
+          allowed_deps["bin/lib/common.sh"]=""  # Foundation - no dependencies
+          allowed_deps["bin/lib/session.sh"]="" # Core - no dependencies
+          allowed_deps["bin/lib/template.sh"]="" # Core - no dependencies
+          allowed_deps["bin/lib/skill-detector.sh"]="" # Core - no dependencies
+          allowed_deps["bin/lib/agents.sh"]="" # Core - no dependencies
+          allowed_deps["bin/lib/memory.sh"]="" # Core - no dependencies
+          allowed_deps["bin/lib/providers.sh"]="common.sh" # Network layer - can use foundation
+          allowed_deps["bin/lib/prompt.sh"]="agents.sh memory.sh template.sh" # High-level coordination
+
+          violation_count=0
+
+          for lib_file in "${!allowed_deps[@]}"; do
+            if [ -f "$lib_file" ]; then
+              echo "Checking dependency graph for: $lib_file"
+
+              # Extract all source statements for lib files
+              actual_deps=$(grep -o "source.*lib/[^/]*\.sh" "$lib_file" 2>/dev/null | sed 's/.*lib\///' | sed 's/\.sh$//' | sort | uniq || true)
+              allowed="${allowed_deps[$lib_file]}"
+
+              # Convert to arrays for comparison
+              if [ -n "$actual_deps" ]; then
+                read -ra actual_array <<< "$actual_deps"
+              else
+                actual_array=()
+              fi
+
+              if [ -n "$allowed" ]; then
+                read -ra allowed_array <<< "$allowed"
+              else
+                allowed_array=()
+              fi
+
+              # Check each actual dependency
+              for dep in "${actual_array[@]}"; do
+                if [ -n "$dep" ]; then
+                  dep_allowed=false
+                  for allowed_dep in "${allowed_array[@]}"; do
+                    if [ "$dep" = "$allowed_dep" ]; then
+                      dep_allowed=true
+                      break
+                    fi
+                  done
+
+                  if [ "$dep_allowed" = false ]; then
+                    echo "❌ VIOLATION: $lib_file has unauthorized dependency on $dep.sh"
+                    echo "  Allowed dependencies: ${allowed:-'(none)'}"
+                    violation_count=$((violation_count + 1))
+                  fi
+                fi
+              done
+
+            fi
+          done
+
+          # Report results
+          echo ""
+          if [ $violation_count -eq 0 ]; then
+            echo "✅ All library dependencies follow architectural constraints"
+            echo "✅ No circular dependencies detected"
+          else
+            echo "❌ $violation_count dependency violations found"
+            echo ""
+            echo "Dependency Rules (Foundation → Core → Network → High-level):"
+            echo "  • common.sh (Foundation): No dependencies"
+            echo "  • session.sh, template.sh, skill-detector.sh (Core): No dependencies"
+            echo "  • agents.sh, memory.sh (Core): No dependencies"
+            echo "  • providers.sh (Network): Can depend on common.sh only"
+            echo "  • prompt.sh (High-level): Can depend on agents.sh, memory.sh, template.sh"
+            echo ""
+            exit 1
+          fi
+
+      - name: Generate Architecture Report
+        if: always()
+        run: |
+          echo "# Euxis Architecture Compliance Report" > architecture-report.md
+          echo "" >> architecture-report.md
+          echo "Generated: $(date -u)" >> architecture-report.md
+          echo "Commit: ${{ github.sha }}" >> architecture-report.md
+          echo "" >> architecture-report.md
+
+          echo "## Layer Compliance" >> architecture-report.md
+          echo "Validates that Core layer files maintain architectural boundaries and avoid importing higher-level concerns:" >> architecture-report.md
+          echo "" >> architecture-report.md
+          echo "### Layer Definitions" >> architecture-report.md
+          echo "- **Core Layer**: \`session.sh\`, \`template.sh\`, core binaries - fundamental functionality" >> architecture-report.md
+          echo "- **UI Layer**: Interactive components (whiptail, dialog, ncurses, interactive menus)" >> architecture-report.md
+          echo "- **Network Layer**: HTTP requests, API calls, provider communication" >> architecture-report.md
+          echo "- **Filesystem Layer**: Advanced file operations (mount, partition, disk operations)" >> architecture-report.md
+          echo "" >> architecture-report.md
+          echo "### Validation Method" >> architecture-report.md
+          echo "- Pattern matching for forbidden imports in core files" >> architecture-report.md
+          echo "- Source statement analysis for library dependencies" >> architecture-report.md
+          echo "" >> architecture-report.md
+
+          echo "## Library Dependency Graph" >> architecture-report.md
+          echo "Ensures library modules follow the defined dependency hierarchy:" >> architecture-report.md
+          echo "" >> architecture-report.md
+          echo "\`\`\`" >> architecture-report.md
+          echo "euxis.sh" >> architecture-report.md
+          echo "  ├── lib/common.sh            (Foundation - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/session.sh           (Core - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/template.sh          (Core - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/skill-detector.sh    (Core - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/agents.sh            (Core - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/memory.sh            (Core - no dependencies)" >> architecture-report.md
+          echo "  ├── lib/providers.sh         (Network - depends on common.sh)" >> architecture-report.md
+          echo "  └── lib/prompt.sh            (High-level - depends on agents.sh, memory.sh, template.sh)" >> architecture-report.md
+          echo "\`\`\`" >> architecture-report.md
+          echo "" >> architecture-report.md
+
+          echo "## Benefits" >> architecture-report.md
+          echo "Architectural guardrails ensure code maintainability and prevent violations that could lead to:" >> architecture-report.md
+          echo "- Circular dependencies between layers" >> architecture-report.md
+          echo "- Tight coupling between core and UI/Network concerns" >> architecture-report.md
+          echo "- Violation of separation of concerns principles" >> architecture-report.md
+          echo "- Reduced testability and modularity" >> architecture-report.md
+          echo "- Core functionality becoming dependent on external services" >> architecture-report.md
+
+      - name: Upload Architecture Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-compliance-report
+          path: architecture-report.md
+          retention-days: 1

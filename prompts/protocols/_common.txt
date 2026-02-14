@@ -1,6 +1,6 @@
 ---
 partial_id: common-instructions
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 ---
 
@@ -89,6 +89,22 @@ Then store it:
 euxis-cortex remember "CONTRAINDICATION: <approach to avoid>. Use <alternative> instead." "<your_agent_id>" --type procedural
 ```
 
+### Verify Command Rules (Shared)
+The `verify_cmd` in dispatch manifests runs in a shell to confirm agent work. It MUST follow these constraints:
+
+1. **Use `python3`, not `python`.** macOS does not ship `python`.
+2. **Available tools:** `python3`, `pytest`, `mypy`, `bandit`, `pip-audit`, `ruff`, `gh`, plus standard Unix tools (`bash`, `test`, `grep`, `find`, `diff`, `sed`, `awk`).
+3. **NEVER assume project-specific dependencies are importable.** Use `grep` patterns to verify code changes instead of importing third-party libraries.
+4. **NEVER assume project-specific tools are installed.** Do NOT use `npm`, `cargo`, `eslint`, `tox`, `nox`, or tools requiring per-project setup.
+5. **Preferred verification patterns:**
+   - Code change: `grep -q 'expected_pattern' path/to/file`
+   - No forbidden pattern: `! grep -q 'unsafe_pattern' path/to/file`
+   - File exists: `test -f path/to/file`
+   - Syntax check: `python3 -m py_compile path/to/file.py`
+   - Unit tests: `pytest path/to/tests/ -x -q`
+   - Security scan: `bandit -r path/to/module/ -q`
+6. **Chain checks with `&&`** for multi-step verification.
+
 ### Dispatch Manifest Schema (Standard)
 Any agent that coordinates parallel work MUST use the standard Euxis dispatch manifest format:
 ```json
@@ -112,15 +128,15 @@ Any agent that coordinates parallel work MUST use the standard Euxis dispatch ma
 - Dispatches with no mutual dependencies MUST be grouped for parallel execution.
 - `mode` MUST be one of:
   - `hierarchical` (default) — All agents report to orchestrator. Use for standard coordination.
-  - `mesh` — Agents with dispatch authority (`architect`, `qa-coordinator`, `incident-commander`, `release-manager`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
+  - `mesh` — Agents with dispatch authority (`architect`, `qa`, `responder`, `gatekeeper`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
   - `federated` — Agents operate autonomously across project boundaries. Use for cross-project tasks.
 
 ### Cost-Tiered Model Routing
 When dispatching or delegating tasks, agents MUST consider model cost tiers:
 - **S-Tier (Strategic)**: Complex reasoning, architecture, quality gates → claude.
-- **A-Tier (Research)**: Deep analysis, massive context → gemini. Enterprise/AWS → amazon-q.
-- **B-Tier (Coding)**: Agentic tool use → goose. Local code models → opencode. Math/logic → qwen.
-- **C-Tier (Utility)**: Summaries, formatting, lookups → ollama. High throughput → crush, kilo.
+- **A-Tier (Research)**: Deep analysis, massive context → gemini. Enterprise/AWS → kiro.
+- **B-Tier (Coding)**: Agentic tool use → goose. Math/logic → qwen.
+- **C-Tier (Utility)**: Summaries, formatting, lookups → ollama. High throughput → crush.
 - **Standard**: All other tasks → claude (default).
 - P0 tasks ALWAYS use S-Tier. NEVER use S-Tier for utility tasks.
 - Explicit provider argument ALWAYS overrides tier routing.

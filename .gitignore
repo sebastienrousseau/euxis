@@ -1,16 +1,224 @@
-projects/
-cortex_db/
-audits/
-v4.5_FINAL_AUDIT.md
-.venv-voice/
-.piper-voices/
-.DS_Store
-*.log
-tmp/
+# ============================================================================
+# EUXIS .gitignore - Cross-Platform (macOS, Linux, WSL)
+# ============================================================================
 
-# Security-sensitive manifests (never commit)
+# ============================================================================
+# PYTHON
+# ============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+.venv-*/
+venv/
+ENV/
+env/
+.env/
+
+# Testing & Coverage
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+
+# Linters
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ============================================================================
+# NODE.JS (if applicable)
+# ============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# ============================================================================
+# IDE & EDITORS
+# ============================================================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains (PyCharm, IntelliJ, WebStorm)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Vim/Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+Session.vim
+.vim/
+
+# Emacs
+*~
+\#*\#
+.#*
+*.elc
+auto-save-list
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# OS-SPECIFIC
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================================================
+# EUXIS RUNTIME DATA
+# ============================================================================
+# Runtime project data (agent outputs, memory, audits)
+data/projects/
+data/cortex/db/
+data/lifecycle/
+data/perf/
+data/bus/pipes/
+projects/
+
+# Vector database (ChromaDB runtime)
+cortex_db/
+
+# Metrics runtime data (code is tracked, data is not)
+metrics/events.jsonl
+metrics/sessions.jsonl
+metrics/reports/
+
+# Observability runtime
+observability/
+
+# Runtime locks
+locks/
+
+# Audit artifacts (session-specific)
+docs/audits/
+
+# Voice/TTS (large binary models)
+.piper-voices/
+.tts-cache/
+
+# Runtime baseline snapshots (regenerated)
+baseline_*.json
+current/
+
+# Agent work outputs (regenerated)
+*_architecture.md
+*_analysis.md
+*_review.md
+*_framework.md
+*_sources.md
+capability_audit.json
+quality-gates.json
+
+# ============================================================================
+# BUILD & PACKAGING
+# ============================================================================
+*.tar.gz
+*.zip
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.exe
+
+# ============================================================================
+# SECURITY-SENSITIVE (NEVER COMMIT)
+# ============================================================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+credentials.json
+config.ini
+secrets.yaml
+secrets.yml
+*.secret
 internal_manifest.json
 edge-hunter-fixes.json
 
-# Override global gitignore that excludes /bin/ (Rust/Go convention)
+# ============================================================================
+# LOGS & TEMP
+# ============================================================================
+*.log
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# ============================================================================
+# EXCEPTIONS (Explicit includes)
+# ============================================================================
+# Override global gitignore for bin/ (contains Euxis scripts, not build output)
 !bin/
+
+# Keep example env file
+!.env.example
+tests/*_report.md

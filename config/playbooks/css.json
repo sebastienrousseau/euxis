@@ -1,0 +1,401 @@
+{
+  "schema_version": "1.0",
+  "id": "css",
+  "name": "CSS Excellence",
+  "description": "Ten-gate CSS enforcement: BEM or utility-first methodology, Stylelint zero warnings, custom properties for theming, responsive with relative units, prefers-reduced-motion on all animations, PurgeCSS for dead selectors, zero !important, zero ID selectors, low bundle size, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce CSS architecture methodology for: ${goal}. Mandate BEM (Block__Element--Modifier) or strict utility-first (Tailwind convention) throughout: pick ONE methodology and enforce consistently. Ban: deep nesting >3 levels (specificity explosion), ID selectors for styling (#id), !important without justification (override third-party only), element selectors without class (div, span for styling), star selector * for layout, inline styles in HTML (style attribute). Enforce: component-scoped files (one .css per component/block), global styles isolated in base/ or tokens/ directory, CSS custom properties (--var) for all design tokens (colors, spacing, typography, shadows), logical properties (margin-inline, padding-block) over physical (margin-left, padding-top). Flag: files >300 lines, selectors with specificity >0,2,0, duplicate property declarations across files. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "BEM or utility-first enforced consistently",
+            "zero nesting >3 levels",
+            "zero ID selectors for styling",
+            "zero !important without justification",
+            "component-scoped CSS files",
+            "custom properties for all design tokens",
+            "logical properties over physical",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce modern CSS idioms across all stylesheets for: ${goal}. Flag: @import (render-blocking, use bundler or @use), vendor prefixes without autoprefixer (-webkit-, -moz-), float for layout (use flexbox/grid), fixed pixel widths for layout (use relative/fluid), magic numbers without comment, color values without custom property (hardcoded #hex or rgb()), z-index without scale system (random z-index: 9999), margin: 0 auto for centering (use flexbox/grid), calc() where container query units suffice. Enforce: CSS Grid for 2D layout, Flexbox for 1D layout, container queries (@container) for component-responsive design, :is()/:where()/:has() for selector simplification, clamp() for fluid typography (font-size: clamp(1rem, 2.5vw, 2rem)), aspect-ratio for media, gap over margin for spacing between items, color-mix() for derived colors, @layer for cascade management, nesting (native CSS nesting) where supported.",
+          "verifies": [
+            "zero @import (use bundler or @use)",
+            "zero vendor prefixes without autoprefixer",
+            "Grid for 2D, Flexbox for 1D layout",
+            "clamp() for fluid typography",
+            "container queries for component-responsive",
+            ":is()/:where()/:has() for selectors",
+            "gap over margin between items",
+            "@layer for cascade management"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current CSS best practices for: ${goal}. Research: CSS nesting specification status and browser support, container queries adoption patterns, @layer cascade layers best practices, :has() selector patterns and performance implications, CSS color spaces (oklch, display-p3) and gamut mapping, View Transitions API for page transitions, CSS scroll-driven animations, Anchor Positioning API, CSS @scope for component scoping, subgrid adoption, current Stylelint plugin ecosystem, PostCSS vs Lightning CSS comparison, modern CSS reset approaches (modern-normalize, CSS Remedy). Cross-validate against MDN, web.dev, Can I Use, and CSS Working Group specs. Flag deprecated or poorly-supported features.",
+          "verifies": [
+            "CSS nesting status and support documented",
+            "container queries patterns researched",
+            "@layer best practices documented",
+            ":has() performance implications evaluated",
+            "modern color spaces researched (oklch)",
+            "deprecated features flagged with alternatives",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit CSS file organization for: ${goal}. Verify directory structure follows methodology: base/ (reset, typography, tokens), components/ (per-component styles), layouts/ (grid systems, page layouts), utilities/ (helper classes), themes/ (dark mode, brand variants). Verify a single entry point (main.css or index.css) imports in correct order (@layer base, components, utilities). Remove orphaned CSS files not imported or referenced. Enforce consistent file naming (kebab-case.css). Remove duplicate selectors across files (csscomb or stylelint-no-duplicate-selectors). Clean up source maps, minified files, and generated CSS from repo. Verify .stylelintrc exists and is configured. Verify PostCSS config or bundler pipeline documented.",
+          "verifies": [
+            "directory structure matches methodology (base/components/layouts)",
+            "single entry point with correct import order",
+            "no orphaned CSS files",
+            "consistent file naming (kebab-case.css)",
+            "no duplicate selectors across files",
+            "no generated/minified CSS in repo",
+            ".stylelintrc configured"
+          ]
+        }
+      ],
+      "checkpoint": "Methodology enforced, modern layout, custom properties, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Enforce BEM/utility-first, eliminate deep nesting, and organize files."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Analyze CSS bundle size and rendering performance for: ${goal}. Identify and remove unused selectors using PurgeCSS, UnCSS, or equivalent. Minify final output (Lightning CSS, cssnano, or clean-css). Measure: total CSS bundle size (target <50KB compressed for typical sites), number of selectors, maximum specificity. Flag: duplicate declarations, overlapping media queries that can be merged, unused custom properties, animations without will-change (for GPU compositing), layout-triggering properties in animations (top/left/width/height: use transform/opacity instead), @font-face without font-display: swap, excessive box-shadow or filter chains. Enforce: critical CSS inlined in <head> (above-fold styles), non-critical CSS loaded async (rel=preload), contain: layout/paint for isolated components, content-visibility: auto for off-screen content. Verify no render-blocking CSS in document head beyond critical path.",
+          "verifies": [
+            "unused selectors removed (PurgeCSS)",
+            "CSS minified in production",
+            "bundle size <50KB compressed",
+            "no layout-triggering properties in animations",
+            "critical CSS inlined for above-fold",
+            "font-display: swap on all @font-face",
+            "contain/content-visibility for performance",
+            "no duplicate declarations"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit CSS tooling and external dependency health for: ${goal}. Verify PostCSS or Lightning CSS pipeline configured: autoprefixer (target browsers defined in browserslist), nesting support (if not using native), custom media queries. Verify browserslist config exists and is current (>.5%, last 2 versions, not dead). Flag: CSS frameworks loaded in full when only subset used (load only needed components), excessive PostCSS plugins (>10), vendored CSS libraries in repo (use package manager). Verify: normalize/reset is minimal and modern (not reset.css from 2011), icon fonts replaced with SVG (better performance, accessibility), Google Fonts loaded with display=swap and preconnect. Check all CSS tools actively maintained. Verify no dev-only styles leaked to production (debug outlines, TODO markers).",
+          "verifies": [
+            "autoprefixer with browserslist configured",
+            "browserslist current and reasonable",
+            "CSS frameworks loaded partially (not full)",
+            "normalize/reset is modern and minimal",
+            "SVG icons over icon fonts",
+            "Google Fonts with display=swap and preconnect",
+            "no dev-only styles in production"
+          ]
+        }
+      ],
+      "checkpoint": "Dead CSS purged, bundle lean, critical CSS inlined, tooling optimized",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unused selectors, bloated bundle, or render-blocking CSS detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-browser CSS portability for: ${goal}. Audit responsiveness: verify layout integrity at breakpoints: mobile (375px), tablet (768px), desktop (1280px), wide (1920px). Ensure all sizing uses relative units (rem/em) for typography, percentages/fr/vw for layout, px only for borders and fine details. Test on: Chrome, Firefox, Safari, Edge (latest 2 versions). Flag: CSS features below 90% Can I Use support without @supports fallback, Safari-specific flexbox bugs without workarounds, Firefox-specific grid gaps. Verify: prefers-color-scheme (dark mode) handled, prefers-contrast (high contrast) respected, forced-colors-mode supported (Windows High Contrast), print stylesheet provides clean output (@media print). Verify no browser-specific hacks (-webkit-appearance without standard fallback). Test with CSS disabled: content remains accessible.",
+          "verifies": [
+            "layout correct at 375px, 768px, 1280px, 1920px",
+            "relative units (rem/em) for typography",
+            "renders correctly on Chrome, Firefox, Safari, Edge",
+            "@supports fallback for features <90% support",
+            "prefers-color-scheme handled (dark mode)",
+            "prefers-contrast and forced-colors respected",
+            "print stylesheet clean",
+            "content accessible without CSS"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-browser parity verified, responsive at all breakpoints, dark mode and print handled",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Browser-specific rendering, fixed units, or missing breakpoints detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and accessibility audit of CSS for: ${goal}. Verify prefers-reduced-motion: every animation, transition, and scroll-behavior MUST have @media (prefers-reduced-motion: reduce) that removes or reduces motion. Verify WCAG 2.2 AAA contrast: text contrast ratio >= 7:1 against background (check all color combinations including custom property values). Verify: focus indicators visible (outline or box-shadow, min 3px, not outline: none without replacement), touch targets >= 44x44px (min-height/min-width on interactive elements), text resizable to 200% without overflow or overlap (no fixed heights on text containers), no content hidden via display: none that should be screen-reader-accessible (use visually-hidden pattern). Scan for: CSS injection vectors (user-controlled custom properties, expression() in legacy IE), url() pointing to external domains without CSP, @import from untrusted sources. Flag: text-overflow: hidden without accessible alternative, pointer-events: none hiding interactive elements.",
+          "verifies": [
+            "prefers-reduced-motion on ALL animations/transitions",
+            "WCAG 2.2 AAA contrast >= 7:1",
+            "focus indicators visible (min 3px)",
+            "touch targets >= 44x44px",
+            "text resizable to 200% without overflow",
+            "visually-hidden pattern (not display: none for SR content)",
+            "no CSS injection vectors",
+            "no url() to untrusted external domains"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit CSS supply chain and third-party resources for: ${goal}. Verify: all external stylesheets use SRI (integrity attribute), CDN resources verified and pinned, no external @import from untrusted domains. Verify: CSS custom properties do not leak sensitive data (no content: attr(data-secret)), no CSS-based tracking pixels (background-image to tracking endpoints), no CSS keylogger patterns (input[value^=] with background requests). Verify: browserslist matches security requirements (no support for EOL browsers with known vulnerabilities). Audit third-party CSS: vendor styles scoped to prevent cascade leakage, no !important overrides from third-party. Verify PostCSS plugins from trusted sources (npm audit). Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "SRI on all external stylesheets",
+            "no external @import from untrusted domains",
+            "no CSS-based tracking or keylogger patterns",
+            "custom properties do not leak sensitive data",
+            "browserslist excludes EOL browsers",
+            "third-party CSS scoped (no cascade leakage)",
+            "PostCSS plugins audited (npm audit)",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Reduced-motion on all animations, AAA contrast, zero injection vectors, supply chain clean",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Missing reduced-motion, contrast violations, or CSS injection detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive CSS testing for: ${goal}. Visual regression testing: capture screenshots at all breakpoints (375px, 768px, 1280px, 1920px) for every page/component, compare against baselines (BackstopJS, Playwright screenshots, or Percy). Test all states: hover, focus, active, disabled, error, loading, empty, overflow (long text, many items). Test theme variants: light mode, dark mode, high contrast, forced-colors. Test reduced-motion: verify animations disabled/reduced. Test typography: 200% zoom, minimum font size enforced, RTL layout (if applicable). Test CSS custom property cascade: verify fallback values work when variables undefined. Run Lighthouse: Accessibility = 100. Run axe-core: zero violations. Verify no visual regressions when CSS is updated (diff against baseline). Test print preview: margins, colors, backgrounds.",
+          "verifies": [
+            "visual regression at all breakpoints (375-1920px)",
+            "all interactive states tested (hover/focus/active/disabled)",
+            "dark mode and high contrast tested",
+            "reduced-motion tested (animations disabled)",
+            "200% zoom tested (no overflow)",
+            "custom property fallbacks verified",
+            "Lighthouse Accessibility = 100",
+            "axe-core zero violations"
+          ]
+        }
+      ],
+      "checkpoint": "Visual regression baselined, all states tested, themes verified, accessibility 100",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Visual regressions, untested states, or accessibility violations detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full CSS CI pipeline for: ${goal}. Stylelint with strict config: disallow @import (no-invalid-at-import-syntax), enforce property ordering (alphabetical or grouped via stylelint-order), ban ID selectors (selector-max-id: 0), ban !important (declaration-no-important), limit nesting depth (max-nesting-depth: 3), enforce BEM naming (stylelint-selector-bem-pattern if BEM). Prettier for formatting (or stylelint --fix). PurgeCSS in build pipeline: fail if dead CSS >5% of total. Bundle size check with threshold. Visual regression in CI (BackstopJS or Playwright). Lighthouse CI with accessibility assertions. Pre-commit hooks: stylelint --fix, prettier. Autoprefixer with browserslist. CSS minification in build. SLO: lint <10s, visual regression <60s. No '|| true' on any step.",
+          "verifies": [
+            "Stylelint with strict rules (no @import, no !important, no ID)",
+            "property ordering enforced (stylelint-order)",
+            "BEM naming validated (if BEM methodology)",
+            "PurgeCSS in build (dead CSS <5%)",
+            "bundle size threshold enforced",
+            "visual regression in CI",
+            "Lighthouse CI accessibility assertion",
+            "pre-commit hooks (stylelint + prettier)"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces Stylelint, PurgeCSS, visual regression, accessibility, bundle size",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Stylelint not enforced, dead CSS, or missing visual regression."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all CSS documentation for: ${goal}. Verify design tokens documented: every custom property (--color-*, --space-*, --font-*) listed with value, purpose, and usage example. Document naming convention: BEM block/element/modifier rules, or utility class naming patterns. Document breakpoint system: all breakpoints listed with values and usage. Document theme system: how to add colors, how dark mode works, how to override tokens. Component style guide: every component documented with HTML markup + CSS class examples, all variants shown. README MUST include: methodology used (BEM/utility-first), setup instructions, build pipeline, browser support matrix, contributing guide for CSS. Verify style guide builds without errors (Storybook CSS docs, or static style guide).",
+          "verifies": [
+            "all custom properties documented (name/value/purpose)",
+            "naming convention documented (BEM rules or utility patterns)",
+            "breakpoint system documented with values",
+            "theme system documented (dark mode, overrides)",
+            "component style guide with markup examples",
+            "README with methodology and browser support",
+            "style guide builds without errors"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all CSS documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit style guide descriptions, README, component docs, CSS comments, and token descriptions. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "Design tokens documented, style guide complete, methodology documented, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Undocumented tokens, missing style guide, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit CSS design system ergonomics and visual UX for: ${goal}. Verify custom property theming: all colors use CSS custom properties (--color-primary, --color-surface), all spacing uses scale (--space-1 through --space-8), all typography uses tokens (--font-body, --font-heading, --font-mono), theme switching works by changing property values on :root or [data-theme]. Verify animation UX: transitions on interactive state changes (hover, focus, expand), animation duration 150-300ms for micro-interactions, easing curves appropriate (ease-out for enter, ease-in for exit), loading skeletons for async content. Verify responsive design: mobile-first media queries (min-width), fluid typography with clamp(), no horizontal scrolling at any viewport, images scale without distortion (object-fit). Verify consistency: spacing scale applied uniformly, color palette constrained to tokens, border-radius consistent, shadow system (--shadow-sm/md/lg).",
+          "verifies": [
+            "custom properties for all colors/spacing/typography",
+            "theme switching via property values on :root",
+            "transitions on all state changes (150-300ms)",
+            "prefers-reduced-motion respected for animations",
+            "mobile-first media queries (min-width)",
+            "fluid typography with clamp()",
+            "spacing scale applied uniformly"
+          ]
+        }
+      ],
+      "checkpoint": "Design tokens complete, theming ergonomic, animations accessible, responsive mobile-first",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Inconsistent tokens, missing transitions, or hard-coded values detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish CSS baselines for: ${goal}. Measure: total CSS size (raw and compressed), number of selectors, maximum specificity, number of custom properties, number of media queries. Test rendering performance: 60fps scrolling with Chrome DevTools Performance panel, no layout thrashing (forced reflows), paint cost within budget. Test with extreme content: very long text, 100+ list items, deeply nested components, single-character content, missing images. Verify: no overflow at any viewport (horizontal scroll), no z-index collisions, no text truncation without accessible disclosure. Run Lighthouse Performance: target >= 95. Test CSS loading: verify no FOUC (flash of unstyled content). Measure First Contentful Paint impact of CSS. Target: 60fps scrolling, Lighthouse >= 95, no FOUC, low memory, low CPU.",
+          "verifies": [
+            "CSS size baselined (raw and compressed)",
+            "60fps scrolling verified (no layout thrashing)",
+            "extreme content tested (long text, 100+ items)",
+            "no horizontal overflow at any viewport",
+            "no z-index collisions",
+            "Lighthouse Performance >= 95",
+            "no FOUC (flash of unstyled content)"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: visual regressions (screenshot diff), bundle size regressions (threshold), Stylelint regressions (new warnings), accessibility regressions (axe-core diff), Lighthouse score regressions. Classify every change by risk: token modifications (affect entire theme), breakpoint changes, z-index changes, animation additions, custom property renames, selector specificity increases. Scan for deprecated CSS features flagged >6 months ago. Verify dead selectors: styles not applied to any element in any page. Check dev-only styles not shipped (debug borders, placeholder backgrounds). Verify CI blocks regression merges.",
+          "verifies": [
+            "visual regression detection active",
+            "bundle size regression blocked",
+            "Stylelint regression blocked",
+            "accessibility regression blocked (axe-core)",
+            "change categories classified by risk",
+            "no dead selectors in production",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: Stylelint zero warnings, PurgeCSS clean, visual baselines accepted, Lighthouse scores at target (Performance >= 95, Accessibility = 100), all breakpoints verified, dark mode verified, reduced-motion verified, documentation current. Determine correct semantic version bump: MAJOR for breaking token/class renames, MINOR for new components/tokens, PATCH for fixes/adjustments. Generate changelog following Keep a Changelog format. Verify migration guide for breaking changes (renamed tokens, removed classes). Verify browserslist still current. Draft release notes with highlights. Verify rollback plan exists (previous version restorable). Coordinate accessibility sign-off.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "changelog generated (Keep a Changelog)",
+            "migration guide for token/class renames",
+            "browserslist verified current",
+            "release notes drafted",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Visual baseline stable, performance on target, regressions blocked, release-ready",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review visual baselines, performance, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), BEM/utility-first enforced consistently, custom properties for all tokens, modern layout (Grid/Flexbox), best practices researched with citations, Stylelint zero warnings, dead CSS purged, cross-browser parity (Chrome/Firefox/Safari/Edge), responsive at all breakpoints, prefers-reduced-motion on all animations, WCAG 2.2 AAA contrast, visual regression baselined, Lighthouse Accessibility = 100, all tokens documented, style guide complete, brand voice audit passed, CI enforces all gates, performance on target, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "methodology enforced (BEM/utility-first)",
+            "custom properties for all design tokens",
+            "cross-browser parity confirmed",
+            "prefers-reduced-motion on all animations",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Verify WCAG 2.2 AAA compliance: contrast ratios verified for all color combinations including custom property values in all themes. Verify ADA/Section 508 compliance for government projects. Verify no CSS tracking mechanisms (background-image beacons, font fingerprinting). Verify no user data exposed via CSS selectors (attribute selectors matching sensitive data). Verify third-party CSS licenses compatible with project license. Verify cookie consent styles do not prevent dismissal. Verify right-to-left (RTL) support if international audience. Verify .gitignore excludes generated CSS, source maps, and node_modules. Flag any compliance violation with regulatory reference (WCAG, ADA, GDPR) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "WCAG 2.2 AAA contrast for all themes",
+            "ADA/Section 508 compliance (if applicable)",
+            "no CSS tracking mechanisms",
+            "no user data exposed via selectors",
+            "third-party CSS licenses compatible",
+            "RTL support (if international)",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge responsiveness claims: does testing at 4 breakpoints mean the layout works at ALL viewport widths, or are there in-between sizes (500px, 900px, 1100px) where layout breaks? Challenge reduced-motion claims: does @media (prefers-reduced-motion) cover all motion, or are there scroll-driven animations, CSS transitions triggered by class toggling, or SVG animations that bypass the media query? Challenge PurgeCSS claims: does removing unused CSS mean all dynamic states are preserved, or are there JavaScript-toggled classes, hover states, and error states that PurgeCSS incorrectly strips? Challenge dark mode claims: does dark mode work, or are there third-party embeds, images without dark variants, or shadows that disappear against dark backgrounds? Perform pre-mortem: assume the CSS caused a visual regression in production 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "responsiveness challenged (in-between viewports)",
+            "reduced-motion challenged (scroll-driven, JS-triggered)",
+            "PurgeCSS challenged (dynamic states preserved)",
+            "dark mode challenged (embeds, images, shadows)",
+            "pre-mortem completed (top 5 failure modes)",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

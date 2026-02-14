@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# (c) 2026 Euxis Fleet. All rights reserved.
+set -euo pipefail
 
-BUS_DIR="$HOME/.euxis/bus/pipes"
+BUS_DIR="$HOME/.euxis/data/bus/pipes"
 
 usage() {
   cat <<'EOF'
@@ -62,6 +63,12 @@ cmd_publish() {
 
   validate_topic "$topic" || return 1
 
+  # Validate sender name (same allowlist as topic)
+  if [[ ! "$sender" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "Error: Invalid sender name '$sender'. Must match [a-zA-Z0-9_-]+" >&2
+    return 1
+  fi
+
   if [[ ! "$priority" =~ ^P[0-3]$ ]]; then
     echo "Error: Priority must be P0, P1, P2, or P3" >&2
     return 1
@@ -77,10 +84,25 @@ cmd_publish() {
   local filename
   filename="$(date +%s%N)-$RANDOM.msg"
 
-  # Build JSON envelope
+  # Build JSON envelope (using jq for safe escaping — prevents shell injection)
   local envelope
-  envelope=$(printf '{"sender":"%s","topic":"%s","priority":"%s","payload":"%s","timestamp":"%s","correlation_id":"%s"}' \
-    "$sender" "$topic" "$priority" "$message" "$ts" "$correlation_id")
+  if command -v jq &>/dev/null; then
+    envelope=$(jq -n \
+      --arg sender "$sender" \
+      --arg topic "$topic" \
+      --arg priority "$priority" \
+      --arg payload "$message" \
+      --arg timestamp "$ts" \
+      --arg correlation_id "$correlation_id" \
+      '{sender:$sender,topic:$topic,priority:$priority,payload:$payload,timestamp:$timestamp,correlation_id:$correlation_id}')
+  else
+    # Fallback: sanitize inputs by stripping shell metacharacters
+    local safe_sender safe_message
+    safe_sender=$(printf '%s' "$sender" | tr -d '\\"`$(){}[]|;&<>!')
+    safe_message=$(printf '%s' "$message" | tr -d '\\"`$(){}[]|;&<>!')
+    envelope=$(printf '{"sender":"%s","topic":"%s","priority":"%s","payload":"%s","timestamp":"%s","correlation_id":"%s"}' \
+      "$safe_sender" "$topic" "$priority" "$safe_message" "$ts" "$correlation_id")
+  fi
 
   printf '%s\n' "$envelope" > "$topic_dir/$filename"
   echo "Published to $topic: $filename"
@@ -225,6 +247,38 @@ cmd_status() {
   fi
 }
 
+cmd_cleanup() {
+  local retention_hours="${1:-24}"
+
+  if [[ ! -d "$BUS_DIR" ]]; then
+    echo "No bus directory to clean."
+    return 0
+  fi
+
+  local total_removed=0
+  for d in "$BUS_DIR"/*/; do
+    [[ -d "$d" ]] || continue
+    local tname
+    tname=$(basename "$d")
+    local count=0
+    while IFS= read -r f; do
+      [[ -f "$f" ]] || continue
+      rm -f "$f"
+      count=$((count + 1))
+    done < <(find "$d" -name '*.msg' -mmin +"$((retention_hours * 60))" 2>/dev/null)
+    if [[ $count -gt 0 ]]; then
+      echo "Cleaned $count message(s) from $tname (older than ${retention_hours}h)"
+      total_removed=$((total_removed + count))
+    fi
+  done
+
+  if [[ $total_removed -eq 0 ]]; then
+    echo "No stale messages found (retention: ${retention_hours}h)."
+  else
+    echo "Total: removed $total_removed stale message(s)."
+  fi
+}
+
 # --- Main ---
 
 mkdir -p "$BUS_DIR"
@@ -243,6 +297,8 @@ case "$1" in
     cmd_list_topics ;;
   drain)
     shift; cmd_drain "$@" ;;
+  cleanup)
+    shift; cmd_cleanup "$@" ;;
   status)
     cmd_status ;;
   -h|--help|help)

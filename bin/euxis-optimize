@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS OPTIMIZE v4.1: System-Wide Tune-Up
 # 1. Benchmarks Accuracy (Certify)
 # 2. Cleans Memory (Librarian GC)
@@ -6,6 +7,23 @@
 # 4. Quality Assurance (Architect Self-Reflection)
 
 set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-optimize — System-wide tune-up
+
+Usage:
+  euxis-optimize
+
+Runs accuracy baseline, memory GC, prompt compression,
+and architect self-reflection.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 # Ensure ~/bin is in PATH for euxis commands
 export PATH="$PATH:$HOME/bin"
@@ -37,7 +55,7 @@ echo "" | tee -a "$LOG_FILE"
 # --- STEP 3: PROMPT COMPRESSION (Token Optimization) ---
 echo "⚡ [3/4] Optimizing Token Performance..." | tee -a "$LOG_FILE"
 euxis librarian "AUDIT TASK:
-1. Read ~/.euxis/prompts/architect.txt and ~/.euxis/prompts/bug-fixer.txt.
+1. Read ~/.euxis/prompts/architect.txt and ~/.euxis/prompts/debugger.txt.
 2. IDENTIFY token bloat: unnecessary polite words, redundant instructions, repeated phrases.
 3. SUGGEST a compressed version of each that saves tokens but keeps accuracy.
 4. COUNT: How many tokens could be saved per prompt?

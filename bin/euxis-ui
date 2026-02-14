@@ -1,9 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS CONSOLE: Mission Control TUI
 # Version: 2.1
 # Author: Euxis System
 
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-ui — Console mission control TUI
+
+Usage:
+  euxis-ui
+
+Interactive terminal UI for managing the Euxis agent fleet.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 # --- CONFIGURATION & COLORS ---
 EUXIS_HOME="$HOME/.euxis"
@@ -112,7 +129,7 @@ view_audit_logs() {
     echo -e "  ${BOLD}SELECT AGENT LOGS TO VIEW:${RESET}\n"
 
     # List projects that have logs
-    project_logs="$EUXIS_HOME/projects/$(basename "$PROJECT_ROOT")"
+    project_logs="$EUXIS_HOME/data/projects/$(basename "$PROJECT_ROOT")"
     if [[ ! -d "$project_logs" ]]; then
         echo -e "  ${RED}No logs found for this project yet.${RESET}"
         pause

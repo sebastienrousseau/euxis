@@ -1,0 +1,400 @@
+{
+  "schema_version": "1.0",
+  "id": "html",
+  "name": "HTML Excellence",
+  "description": "Ten-gate HTML enforcement: semantic architecture, performance, portability, accessibility & safety, testing, CI, documentation, UX design, release readiness, truth. WCAG 2.2 AAA, zero div soup, zero inline handlers, valid W3C markup, SEO-complete, low payload, fast LCP, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Enforce semantic HTML5 architecture for: ${goal}. Every page MUST use landmark elements correctly: <header> for site/section headers, <nav> for navigation (with aria-label when multiple), <main> (exactly one per page), <article> for self-contained content, <section> with heading, <aside> for tangential content, <footer> for site/section footers. Eliminate div soup: every <div> MUST justify why a semantic element does not suffice. Enforce: <figure>/<figcaption> for media, <time datetime> for dates, <address> for contact info, <details>/<summary> for disclosure, <dialog> for modals (not div+aria). Heading hierarchy MUST be sequential (h1 > h2 > h3, no skipping). One <h1> per page. Enforce component-based structure: partials/includes for reusable fragments, templates for layouts. Flag files >500 lines. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "landmark elements used correctly (header/nav/main/article/footer)",
+            "zero unjustified <div> (no div soup)",
+            "<dialog> for modals (not div+aria)",
+            "heading hierarchy sequential (no skipping)",
+            "one <h1> per page",
+            "component-based structure with partials/templates",
+            "no files >500 lines",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce modern HTML idioms across the entire codebase for: ${goal}. Flag: inline event handlers (onclick, onsubmit), inline styles (style attribute), presentational elements (<b> instead of <strong>, <i> instead of <em>, <center>, <font>), deprecated attributes (align, bgcolor, border on table), missing lang attribute on <html>, missing charset meta, table-based layouts, <br> for spacing (use CSS), empty href=\"#\" links, target=\"_blank\" without rel=\"noopener noreferrer\". Enforce: <button type=\"button\"> (not <a> for actions), <input> with explicit <label for>, loading=\"lazy\" on below-fold images, decoding=\"async\" on images, <picture> with <source> for responsive images, fetchpriority=\"high\" on LCP images, type attribute omitted on <script> and <style> (defaults to module/CSS), data-* attributes over custom attributes.",
+          "verifies": [
+            "zero inline event handlers",
+            "zero inline styles",
+            "zero presentational/deprecated elements",
+            "lang attribute on <html>",
+            "<button> for actions (not <a>)",
+            "explicit <label for> on every <input>",
+            "loading=\"lazy\" on below-fold images",
+            "modern HTML5 attributes used throughout"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current HTML best practices for: ${goal}. Research: latest HTML Living Standard changes (new elements, deprecated features), WCAG 2.2 updates and AAA requirements, Core Web Vitals optimization patterns (LCP, CLS, INP), current state of <dialog>, <popover>, Declarative Shadow DOM, CSS container queries integration, View Transitions API, Speculation Rules API for prerendering, structured data (JSON-LD) best practices, meta tag standards (Open Graph, Twitter Card, Dublin Core). Cross-validate findings against WHATWG spec, MDN, web.dev, and W3C WAI. Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "HTML Living Standard changes researched",
+            "WCAG 2.2 AAA requirements documented",
+            "Core Web Vitals patterns identified",
+            "new platform features evaluated (dialog, popover)",
+            "structured data best practices verified",
+            "deprecated patterns flagged",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit HTML file organization for: ${goal}. Verify every HTML file has a descriptive comment or front-matter explaining its purpose. Verify template/partial directories mirror page structure. Remove orphaned HTML files not linked or included anywhere. Enforce consistent file naming (kebab-case.html). Verify shared components (header, footer, nav) are extracted as partials, not copy-pasted. Clean up generated files, build artifacts, and .DS_Store from repo. Verify favicon set complete (favicon.ico, apple-touch-icon, SVG icon). Verify sitemap.xml and robots.txt present. Verify 404.html custom error page exists.",
+          "verifies": [
+            "every HTML file has purpose comment",
+            "template directories organized logically",
+            "no orphaned HTML files",
+            "consistent file naming (kebab-case.html)",
+            "shared components extracted as partials",
+            "favicon set complete",
+            "sitemap.xml, robots.txt, and 404.html present"
+          ]
+        }
+      ],
+      "checkpoint": "Semantic HTML5, zero div soup, modern idioms enforced, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Replace div soup with semantic elements and fix heading hierarchy."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Optimize HTML payload and rendering performance for: ${goal}. Minify inline scripts and styles in production builds. Enforce critical rendering path: preload LCP image (fetchpriority=\"high\"), preconnect to third-party origins, prefetch next-page navigation, dns-prefetch for external domains. Inline critical CSS in <head>, defer non-critical CSS. Scripts: type=\"module\" with defer by default, async only for independent analytics. Verify: no render-blocking resources in <head>, no document.write, no synchronous XHR. Optimize images: WebP/AVIF with <picture> fallback, width/height attributes set (prevent CLS), srcset for responsive sizes. Enforce resource hints: <link rel=\"preload\"> for fonts, <link rel=\"modulepreload\"> for JS modules. Target: LCP <2.5s, CLS <0.1, INP <200ms, total HTML payload <50KB uncompressed.",
+          "verifies": [
+            "LCP image preloaded (fetchpriority=\"high\")",
+            "critical CSS inlined, non-critical deferred",
+            "no render-blocking resources in <head>",
+            "images optimized (WebP/AVIF, width/height, srcset)",
+            "resource hints configured (preload/preconnect/prefetch)",
+            "scripts defer/module by default",
+            "Core Web Vitals targets (LCP <2.5s, CLS <0.1, INP <200ms)",
+            "HTML payload <50KB uncompressed"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit HTML external resource health for: ${goal}. Identify and remove unused CSS/JS references. Verify no broken links (internal or external). Verify CDN resources use integrity attributes (SRI: integrity=\"sha384-...\"). Flag excessive third-party scripts (>5 external origins). Verify fonts: self-hosted or preconnected, font-display: swap set, subset to used characters. Check all referenced resources actively maintained. Flag resources loaded from HTTP (must be HTTPS). Verify no duplicate resource loading (same CSS/JS loaded twice). Verify gzip/brotli compression configured for serving.",
+          "verifies": [
+            "no unused CSS/JS references",
+            "no broken links (internal or external)",
+            "SRI integrity on CDN resources",
+            "third-party scripts minimized (<5 origins)",
+            "fonts optimized (self-hosted or preconnected, swap)",
+            "all resources HTTPS",
+            "no duplicate resource loading"
+          ]
+        }
+      ],
+      "checkpoint": "Payload optimized, Core Web Vitals on target, resources lean and verified",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Render-blocking resources, payload bloat, or broken links detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform and cross-browser portability for: ${goal}. Test rendering on: Chrome, Firefox, Safari, Edge (latest 2 versions). Test responsive breakpoints: mobile (375px), tablet (768px), desktop (1280px), wide (1920px). Verify no browser-specific CSS without fallbacks (-webkit-, -moz-). Verify no JavaScript APIs used without feature detection or polyfill. Test with reduced-motion preference: prefers-reduced-motion respected. Test dark mode: prefers-color-scheme handled. Verify print stylesheet: @media print produces clean output. Verify <meta name=\"viewport\"> is correct (width=device-width, initial-scale=1). Test with images disabled: alt text provides context. Flag any user-agent sniffing. Verify all form elements functional with keyboard-only navigation.",
+          "verifies": [
+            "renders correctly on Chrome, Firefox, Safari, Edge",
+            "responsive at 375px, 768px, 1280px, 1920px",
+            "no vendor-prefixed CSS without fallbacks",
+            "prefers-reduced-motion respected",
+            "prefers-color-scheme handled",
+            "print stylesheet produces clean output",
+            "viewport meta correct"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-browser parity verified, responsive, dark mode, print, reduced-motion",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Browser-specific rendering or missing responsive breakpoints detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and accessibility audit of HTML for: ${goal}. WCAG 2.2 AAA compliance: verify ARIA labels on all interactive elements, ARIA roles on landmarks, contrast ratios >= 7:1 (AAA), focus indicators visible (min 3px), skip-to-content link, aria-live regions for dynamic content, aria-describedby for form errors, aria-expanded for toggles, aria-current for navigation. Scan for: XSS vectors (innerHTML in templates, unescaped user content, javascript: URLs), clickjacking (missing X-Frame-Options or CSP frame-ancestors), open redirect (unvalidated href from user input), form action to HTTP, autocomplete on sensitive fields. Verify: Content-Security-Policy meta tag or header, X-Content-Type-Options, Referrer-Policy, Permissions-Policy headers recommended. Flag severity and provide remediation.",
+          "verifies": [
+            "WCAG 2.2 AAA contrast >= 7:1",
+            "ARIA labels on all interactive elements",
+            "ARIA roles on landmarks",
+            "skip-to-content link present",
+            "focus indicators visible (min 3px)",
+            "no XSS vectors (innerHTML, javascript: URLs)",
+            "CSP meta tag or header configured",
+            "security headers recommended (X-Frame-Options, Referrer-Policy)"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit HTML supply chain and third-party security for: ${goal}. Verify every external script/stylesheet uses Subresource Integrity (SRI). Check all CDN origins for known compromises. Flag any inline scripts that could be replaced with external files (CSP nonce/hash compatibility). Verify cookie attributes on forms: Secure, HttpOnly, SameSite=Strict recommended. Verify no third-party tracking pixels without consent mechanism. Verify no sensitive data in HTML comments or data attributes. Audit forms: CSRF tokens present, action URLs use HTTPS. Verify Content-Security-Policy is strict: no unsafe-inline, no unsafe-eval (use nonce or hash). Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "SRI on all external scripts/stylesheets",
+            "CDN origins verified (no known compromises)",
+            "no sensitive data in HTML comments",
+            "CSRF tokens on forms",
+            "form actions use HTTPS",
+            "CSP strict (no unsafe-inline/unsafe-eval)",
+            "no tracking without consent",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "WCAG 2.2 AAA compliant, zero XSS vectors, supply chain secured",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Accessibility violations, XSS vectors, or insecure third-party resources detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive HTML testing for: ${goal}. Validate all pages with W3C Nu HTML Checker (vnu.jar): zero errors, zero warnings. Run axe-core or pa11y for automated accessibility testing: zero violations at AAA level. Run Lighthouse CI: Performance >= 95, Accessibility = 100, Best Practices = 100, SEO = 100. Visual regression testing: capture screenshots at all breakpoints (375px, 768px, 1280px, 1920px), compare against baselines. Test all interactive elements: forms submit correctly, links resolve, buttons trigger actions, modals open/close with keyboard. Test screen reader compatibility: VoiceOver (macOS), NVDA (Windows). Verify structured data validates (Schema.org validator). Test with JavaScript disabled: content still accessible (progressive enhancement).",
+          "verifies": [
+            "W3C Nu HTML Checker: zero errors and warnings",
+            "axe-core/pa11y: zero AAA violations",
+            "Lighthouse: Performance >= 95, A11y/BP/SEO = 100",
+            "visual regression at all breakpoints",
+            "forms/links/buttons/modals tested",
+            "screen reader tested (VoiceOver/NVDA)",
+            "structured data validates",
+            "progressive enhancement (works without JS)"
+          ]
+        }
+      ],
+      "checkpoint": "W3C valid, WCAG AAA, Lighthouse 100, visual regression baselined, screen reader tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Validation errors, accessibility violations, or Lighthouse score gaps detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full HTML CI pipeline for: ${goal}. W3C Nu HTML Checker (vnu.jar --errors-only) on every HTML file: fail build on malformed tags. htmlhint or html-validate with strict config. axe-core/pa11y-ci for accessibility: fail on any violation. Lighthouse CI with performance budgets (LCP <2.5s, CLS <0.1, INP <200ms) and score assertions (Performance >= 95, Accessibility = 100). Link checker (lychee or broken-link-checker): fail on dead links. Structured data validator (schema-dts or Google Rich Results Test). Pre-commit hooks: htmlhint, prettier --parser html. HTML minification in build pipeline (html-minifier-terser). SLO enforcement: validation <10s, full audit <60s. No '|| true' on any step.",
+          "verifies": [
+            "W3C validation in CI (fail on errors)",
+            "htmlhint/html-validate with strict config",
+            "axe-core/pa11y-ci accessibility gate",
+            "Lighthouse CI with budget assertions",
+            "link checker in pipeline (fail on dead links)",
+            "structured data validation in CI",
+            "pre-commit hooks configured",
+            "HTML minification in build"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces validation, accessibility, performance, and link integrity",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Missing validation, accessibility gate, or broken link detection."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all HTML documentation and SEO metadata for: ${goal}. Verify SEO meta tags on every page: <title> unique and descriptive (50-60 chars), <meta name=\"description\"> unique (150-160 chars), Open Graph tags (og:title, og:description, og:image, og:url, og:type), Twitter Card tags (twitter:card, twitter:title, twitter:description, twitter:image), canonical URL (<link rel=\"canonical\">). Verify heading hierarchy is logical for screen readers. Structured data: JSON-LD for Organization, WebPage, BreadcrumbList, Article (as applicable). README MUST include: project description, local development setup, build commands, deployment instructions, browser support matrix. Document component library: every reusable partial/template documented with usage examples. Style guide for HTML conventions used in the project.",
+          "verifies": [
+            "<title> unique and descriptive (50-60 chars) per page",
+            "Open Graph tags complete (og:title/description/image/url)",
+            "Twitter Card tags complete",
+            "canonical URL on every page",
+            "JSON-LD structured data (Organization, WebPage, Breadcrumb)",
+            "README with dev setup, build, deploy, browser support",
+            "component library documented with examples"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all HTML documentation, meta descriptions, and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit meta descriptions, alt text, button labels, form labels, error messages, and 404 page copy. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "SEO metadata complete, structured data valid, component docs, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing SEO tags, incomplete structured data, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit HTML UX ergonomics and interaction design for: ${goal}. Verify form UX: autocomplete attributes on all inputs (autocomplete=\"email\", \"name\", etc.), inputmode for mobile keyboards (numeric, email, tel, url), validation with constraint API (required, pattern, minlength, type) and clear error messages, submit button labeled with action verb ('Create account' not 'Submit'). Verify navigation: breadcrumbs with aria-label, skip-to-content visible on focus, back-to-top for long pages, 404 page with search and navigation. Verify feedback: loading states communicated (aria-busy, role=\"status\"), success/error states announced (aria-live=\"polite\"), progress indicators for multi-step flows. Verify touch targets >= 44x44px. Verify focus order matches visual order (no positive tabindex). Flag any generic 'Click here' or 'Read more' link text.",
+          "verifies": [
+            "autocomplete attributes on form inputs",
+            "inputmode for mobile keyboards",
+            "constraint validation with clear error messages",
+            "submit buttons labeled with action verbs",
+            "breadcrumbs and skip-to-content present",
+            "loading/success/error states announced (aria-live)",
+            "touch targets >= 44x44px"
+          ]
+        }
+      ],
+      "checkpoint": "Forms ergonomic, navigation accessible, feedback announced, touch-friendly",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Poor form UX, missing feedback states, or navigation issues detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Run Lighthouse on every page: capture Performance, Accessibility, Best Practices, SEO scores as baselines. Measure Core Web Vitals under load: LCP, CLS, INP with WebPageTest or CrUX data. Test with throttled connections: 3G (1.6 Mbps), slow 4G (9 Mbps). Test with large content: 100 images, 50 form fields, long articles (>5000 words). Verify HTML minification savings. Test Service Worker caching strategy. Verify gzip/brotli compression ratios. Measure Time to First Byte (TTFB <800ms). Target: Lighthouse Performance >= 95 on throttled 4G, CLS <0.1 under dynamic content loading.",
+          "verifies": [
+            "Lighthouse baselines captured for every page",
+            "Core Web Vitals measured (LCP/CLS/INP)",
+            "performance tested on 3G and slow 4G",
+            "large content stress tested (100 images, long articles)",
+            "HTML minification savings verified",
+            "TTFB <800ms",
+            "Lighthouse >= 95 on throttled 4G"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: Lighthouse score regressions, accessibility regressions (axe-core diff), visual regressions (screenshot comparison), broken link regressions, W3C validation regressions. Classify every change by risk: landmark structure changes, heading hierarchy shifts, ARIA attribute modifications, form structure changes, third-party script additions, meta tag changes. Scan for deprecated HTML elements/attributes flagged >6 months ago. Verify dead pages not linked from anywhere. Check dev-only content not leaked to production. Verify CI blocks regression merges.",
+          "verifies": [
+            "Lighthouse regression detection active",
+            "accessibility regression blocked (axe-core diff)",
+            "visual regression detection active",
+            "change categories classified by risk",
+            "no stale deprecated markup (>6 months)",
+            "no dead/orphaned pages",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: W3C validation passes all pages, axe-core zero AAA violations, Lighthouse scores at target, all links verified, SEO metadata complete, structured data valid, visual regression baselines accepted, security headers configured. Determine correct semantic version bump (MAJOR for layout restructures or URL changes, MINOR for new pages/components, PATCH for content/style fixes). Generate changelog following Keep a Changelog format. Verify redirect rules for moved/removed pages (301 redirects). Verify cache-busting for updated assets. Draft release notes with highlights. Verify rollback plan exists (previous deployment restorable). Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "changelog generated (Keep a Changelog)",
+            "301 redirects for moved/removed pages",
+            "cache-busting for updated assets",
+            "release notes drafted",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Lighthouse baselined, regressions blocked, release-ready with redirects and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review Lighthouse baselines, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), semantic HTML5 enforced (zero div soup), modern idioms throughout, best practices researched with citations, W3C validation zero errors, WCAG 2.2 AAA (contrast >= 7:1, ARIA complete), Lighthouse scores at target (Performance >= 95, Accessibility/BP/SEO = 100), cross-browser parity (Chrome/Firefox/Safari/Edge), responsive at all breakpoints, Core Web Vitals on target, SEO metadata and structured data complete, all links verified, security headers configured, brand voice audit passed, CI enforces all gates, visual regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "semantic HTML confirmed (zero div soup)",
+            "WCAG 2.2 AAA confirmed",
+            "cross-browser parity confirmed",
+            "Lighthouse scores at target",
+            "CI fully enforced",
+            "SEO and structured data verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in HTML comments, data attributes, meta tags, and hidden form fields. Verify cookie consent banner with proper opt-in mechanism. Audit all third-party scripts for data collection compliance. Verify privacy policy and terms of service pages linked. Check GDPR compliance: no tracking before consent, data minimization in forms, no excessive hidden fields. Verify ADA/Section 508 compliance (federal requirement). Verify copyright notice in footer. Check for unauthorized analytics or tracking pixels. Verify .gitignore excludes sensitive config files. Flag any compliance violation with regulatory reference (GDPR, CCPA, ADA, Section 508) and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in HTML comments or hidden fields",
+            "cookie consent with proper opt-in",
+            "privacy policy and terms linked",
+            "GDPR compliance (no tracking before consent)",
+            "ADA/Section 508 compliance verified",
+            "copyright notice in footer",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge accessibility claims: does axe-core AAA pass mean truly accessible, or are there cognitive accessibility gaps (reading level, information density, animation triggers)? Challenge SEO claims: does metadata completeness mean discoverability, or are there crawlability issues (robots.txt blocking, noindex leaks, canonical conflicts)? Challenge performance claims: does Lighthouse 95+ on CI mean real-user performance, or is lab data masking field issues (third-party script loading, CLS from ads/dynamic content)? Perform pre-mortem: assume the site caused an accessibility lawsuit 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "accessibility challenged (cognitive gaps beyond axe-core)",
+            "SEO challenged (crawlability vs metadata completeness)",
+            "performance challenged (lab vs field data)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'standards' completed for: this repository","timestamp":"2026-02-08T10:45:23Z","correlation_id":"1770547523-58093-21937"}

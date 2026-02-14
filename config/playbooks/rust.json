@@ -1,0 +1,393 @@
+{
+  "schema_version": "1.0",
+  "id": "rust",
+  "name": "Rust Excellence",
+  "description": "Ten-gate Rust enforcement: architecture, zero-cost performance, portability, safety, testing, CI, documentation, API design, release readiness, truth. Zero unsafe without justification, zero clones without measurement, zero warnings, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit Rust crate structure for: ${goal}. Enforce strict separation of library and binary targets. Verify workspace layout: shared dependencies via workspace Cargo.toml, consistent edition across members, resolver = '2'. Verify module tree follows domain boundaries, not implementation convenience. Flag god modules (>500 lines) and circular dependencies. Enforce re-export hygiene: public API surface MUST be minimal, intentional, and documented. Verify dependency graph depth <=5. Entry points for binaries MUST be minimal (parse args, call lib). Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "lib and binary targets cleanly separated",
+            "workspace layout follows best practices",
+            "dependency graph depth <=5",
+            "no god modules (>500 lines)",
+            "no circular dependencies",
+            "public API surface minimal and intentional",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Rust idioms across the entire codebase for: ${goal}. Flag: unnecessary allocations (String where &str suffices), .clone() without profiling justification, .unwrap() outside tests, manual iterator loops instead of combinators, stringly-typed APIs instead of newtypes, non-exhaustive enums missing #[non_exhaustive], error types using String instead of typed variants, synchronous I/O in async contexts. Verify edition 2021+ patterns: dep: syntax for optional dependencies, resolver = '2'. Enforce naming: snake_case for functions/variables, CamelCase for types, SCREAMING_SNAKE for constants. Prefer let over let mut, prefer & over &mut.",
+          "verifies": [
+            "no unnecessary allocations",
+            "no unjustified .clone()",
+            "no .unwrap() outside tests",
+            "iterator combinators preferred over manual loops",
+            "newtypes used instead of stringly-typed APIs",
+            "edition 2021+ patterns enforced",
+            "naming conventions consistent"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Rust best practices for: ${goal}. Research: latest Rust edition features and migration paths, current clippy lint recommendations, community-endorsed error handling patterns (thiserror vs anyhow vs custom), async runtime best practices (tokio vs async-std), zero-cost patterns for common operations, current MSRV community standards, latest cargo plugin ecosystem (cargo-deny, cargo-semver-checks, cargo-mutants). Cross-validate findings against Rust API Guidelines, Rust Performance Book, and Rustonomicon. Flag deprecated patterns and propose modern replacements.",
+          "verifies": [
+            "latest Rust edition features researched",
+            "error handling patterns evaluated with citations",
+            "async runtime best practices documented",
+            "zero-cost patterns recommended",
+            "MSRV community standards verified",
+            "deprecated patterns identified",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit Rust crate file organization for: ${goal}. Verify every source module has clear single responsibility documented in a module-level doc comment. Verify mod.rs vs file-named modules consistency (pick one style, enforce everywhere). Remove orphaned files not referenced by any mod declaration. Verify test organization: unit tests in #[cfg(test)] mod tests within source files, integration tests in tests/ directory, test utilities in tests/common/mod.rs or a shared test crate. Verify examples/ contains runnable examples declared in Cargo.toml. Clean up empty modules and unused re-exports.",
+          "verifies": [
+            "every module has single responsibility",
+            "consistent module file style (mod.rs vs file-named)",
+            "no orphaned source files",
+            "unit tests colocated, integration tests in tests/",
+            "test utilities consolidated",
+            "examples runnable and declared in Cargo.toml"
+          ]
+        }
+      ],
+      "checkpoint": "Crate structure sound, idioms enforced, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Fix crate structure, idioms, and file organization before proceeding."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Profile Rust code for zero-cost abstraction violations for: ${goal}. Replace .clone() with borrowing where ownership transfer is unnecessary. Replace Box<dyn Trait> with generics/impl Trait where monomorphization is preferable. Replace Arc<Mutex<T>> with per-thread state or channels where contention exists. Identify unnecessary heap allocations: Vec where ArrayVec/SmallVec suffices, String where Cow<str> works, HashMap where a sorted Vec or perfect hash applies. Benchmark async runtime configuration (worker threads, blocking pool). Profile compile times: flag heavy proc macros, excessive generics. Output criterion benchmarks as evidence. Target: low memory, low CPU, zero waste.",
+          "verifies": [
+            "no unnecessary .clone() remaining",
+            "Box<dyn Trait> justified or replaced with generics",
+            "heap allocations minimized",
+            "async runtime configured optimally",
+            "compile time within budget",
+            "benchmarks attached as evidence",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit dependency health for: ${goal}. Minimize dependency count: flag transitive deps >50, identify unused deps via cargo-udeps, replace heavy deps with lighter alternatives (chrono to time, reqwest to ureq for sync). Verify feature flag hygiene: features MUST be additive-only, all features documented, feature powerset compiles (cargo hack check --feature-powerset --no-dev-deps). Check MSRV: rust-version declared, tested in CI. Verify no_std compatibility if applicable. Audit Cargo.toml metadata completeness. Verify Cargo.lock committed for binaries, absent for libraries.",
+          "verifies": [
+            "no unused dependencies",
+            "heavy deps replaced where possible",
+            "feature flags additive-only",
+            "feature powerset compiles",
+            "MSRV declared and tested",
+            "Cargo.toml metadata complete",
+            "Cargo.lock policy correct"
+          ]
+        }
+      ],
+      "checkpoint": "Zero-cost abstractions verified, allocations justified, dependencies lean",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Unjustified allocations, clones, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform portability for: ${goal}. Ensure identical behavior on x86_64-unknown-linux-gnu, x86_64-apple-darwin, and x86_64-pc-windows-msvc. Test cross-compilation to aarch64 targets (aarch64-unknown-linux-gnu, aarch64-apple-darwin). Verify no platform-specific behavior leaks: path separators, line endings, endianness, timezone handling. Test #[cfg(target_os)] and #[cfg(target_arch)] gates with coverage. Verify WASM target compiles if applicable (wasm32-unknown-unknown). Flag any hardcoded paths. Verify no platform-specific tooling required beyond rustup.",
+          "verifies": [
+            "tests pass on Linux, macOS, Windows",
+            "cross-compilation to aarch64 succeeds",
+            "no platform-specific behavior leaks",
+            "cfg gates tested with coverage",
+            "WASM target compiles if applicable",
+            "no hardcoded paths",
+            "portable tooling only (rustup)"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform parity verified on Linux, macOS, Windows, and aarch64",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Platform-specific leaks or cross-compilation failures detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Audit every unsafe block in the codebase for: ${goal}. For EACH unsafe usage: require a SAFETY comment documenting the invariant, verify the invariant is maintained by surrounding code, propose safe alternatives (unsafe transmute to TryFrom, raw pointer arithmetic to slice indexing, unsafe impl Send/Sync to thread safety proof). Scan for: buffer overflows via unchecked indexing, use-after-free patterns, data races in unsafe concurrent code, unsound lifetime extensions, FFI boundary violations. Run cargo audit for known CVEs. Flag any unsafe in public API surface as CRITICAL. Run Miri for undefined behavior detection.",
+          "verifies": [
+            "every unsafe block has SAFETY comment",
+            "every unsafe invariant verified",
+            "safe alternatives used where feasible",
+            "no buffer overflows or use-after-free",
+            "no unsound lifetime extensions",
+            "cargo audit clean",
+            "no unsafe in public API",
+            "Miri passes"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit supply chain security and define security policy for: ${goal}. Run cargo audit and cargo deny for known vulnerabilities. Check for unmaintained dependencies (>12 months no release). Verify all dependencies have compatible licenses (deny copyleft in permissive projects). Flag dependencies with excessive permissions (build scripts, proc macros with filesystem access). Check for typosquatting risks on crate names. Audit build.rs scripts for network access, filesystem writes, or code generation risks. Classify threat level for each finding using S0-S3 severity. Provide security clearance or block with requirements.",
+          "verifies": [
+            "no known CVEs in dependency tree",
+            "no unmaintained dependencies",
+            "license compatibility verified",
+            "no suspicious build scripts",
+            "no typosquatting risks",
+            "build.rs audited",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "All unsafe justified, supply chain clean, no known vulnerabilities",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Unjustified unsafe code or supply chain vulnerabilities detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive test coverage for: ${goal}. Generate property-based tests using proptest or quickcheck for all core logic: serialization roundtrips, parser invariants, mathematical properties. Verify panic safety: no panic on arbitrary input for public functions (proptest with arbitrary inputs). Generate fuzz targets for parsing, deserialization, and untrusted input. Enforce 100% line coverage on library code, 90%+ branch coverage. Verify doc tests compile and pass (cargo test --doc). Add regression tests for every bug fix. Enforce: no test interdependency (tests pass with --test-threads=1 in any order), #[should_panic] tests document expected message. Run mutation testing (cargo-mutants) to verify test effectiveness.",
+          "verifies": [
+            "property-based tests for core logic",
+            "panic safety verified on public API",
+            "fuzz targets for untrusted input",
+            "100% line coverage on lib",
+            "90%+ branch coverage",
+            "all doc tests pass",
+            "regression tests for bug fixes",
+            "mutation testing verifies quality"
+          ]
+        }
+      ],
+      "checkpoint": "100% coverage, property tests, fuzz targets, mutation tested",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Coverage gaps or missing test categories detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce strict CI pipeline for Rust for: ${goal}. Configure: cargo clippy with -D warnings (deny all warnings), cargo fmt -- --check (fail on unformatted code), cargo test with --all-features and --no-default-features, MSRV verification (install and test against declared rust-version), cargo doc --no-deps -D warnings (deny doc warnings), cargo deny check (licenses, advisories, bans). Set RUSTFLAGS='-D warnings' globally. Add cargo-semver-checks before releases. Enforce #![deny(missing_docs)] on library crates. Add Miri for unsafe code validation. CI matrix: macOS + Linux at minimum. Cache target/ directory. Nightly job for beta/nightly compiler testing. No '|| true' on any step.",
+          "verifies": [
+            "clippy denies all warnings",
+            "cargo fmt enforced",
+            "all-features and no-default-features tested",
+            "MSRV tested in CI",
+            "doc warnings denied",
+            "cargo deny configured",
+            "#![deny(missing_docs)] set",
+            "Miri runs on unsafe code"
+          ]
+        }
+      ],
+      "checkpoint": "CI pipeline enforces all Rust standards, zero tolerance",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Pipeline gaps or unenforced standards detected."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Rust documentation for: ${goal}. Every public item MUST have a doc comment with: one-line summary, explanation of behavior, at least one example (that compiles via cargo test --doc), panic conditions (# Panics), error conditions (# Errors), safety requirements (# Safety for unsafe). README MUST include: what the crate does (one sentence), installation (cargo add), quickstart example, feature flags table, MSRV, license. Verify docs.rs rendering: #[doc(cfg(...))] on feature-gated items, module-level docs present. Build docs without warnings (cargo doc --no-deps -D warnings).",
+          "verifies": [
+            "every public item documented",
+            "examples compile in all doc comments",
+            "Panics/Errors/Safety sections present",
+            "README complete with quickstart",
+            "docs.rs renders correctly",
+            "module-level docs present",
+            "doc build zero warnings"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Rust documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit doc comments, README, crate-level docs, and error messages. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All public APIs documented, examples verified, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing docs, broken examples, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Rust API ergonomics and user experience for: ${goal}. Verify: builder pattern for complex constructors, From/Into implementations for type conversions, Display for user-facing types, Debug for all types, Default where sensible, #[non_exhaustive] on public enums and structs with likely future fields. Verify error types implement std::error::Error with source() chaining. If CLI: verify error messages are actionable, progress output uses stderr, color respects NO_COLOR and TERM=dumb, exit codes follow convention. If library: verify error types carry enough context for consumers. Run cargo-semver-checks: verify no accidental breaking changes. Flag any generic 'Error occurred' without context.",
+          "verifies": [
+            "builder pattern for complex types",
+            "From/Into/Display/Debug implemented",
+            "#[non_exhaustive] used appropriately",
+            "error types chain with source()",
+            "error messages are actionable",
+            "NO_COLOR respected",
+            "semver compliance verified"
+          ]
+        }
+      ],
+      "checkpoint": "API ergonomic, semver clean, errors actionable, UX polished",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Ergonomic issues, semver hazards, or poor error messages detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Create criterion benchmarks for all hot paths. Set performance budgets: define acceptable p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload. Profile memory under sustained load: verify no unbounded growth. Verify compile time: flag if debug build >30s or release build >120s for the crate alone. Check binary size: strip symbols, enable LTO for release, verify no debug info leaks. Target: low memory, low CPU under sustained load.",
+          "verifies": [
+            "criterion benchmarks for hot paths",
+            "performance budgets defined (p50/p95/p99)",
+            "no unbounded memory growth under load",
+            "large input stress tested (10x, 100x)",
+            "compile time within budget",
+            "binary size optimized (LTO, stripped)",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (criterion --save-baseline), API breaking changes (cargo-semver-checks), coverage drops (fail if coverage decreases), new clippy warnings, new compiler warnings on beta/nightly (rustup run beta cargo check). Classify every change by risk: ownership transfers, lifetime changes, unsafe modifications, drop order changes, Send/Sync boundary shifts. Run mutation testing (cargo-mutants) to verify test effectiveness. Verify git hooks or CI gates block merging regressions.",
+          "verifies": [
+            "performance regression detection active",
+            "API break detection active (cargo-semver-checks)",
+            "coverage regression blocked",
+            "beta/nightly compiler tested",
+            "change categories classified by risk",
+            "mutation testing evaluates test quality",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: all tests pass with zero failures, coverage at 100%, clippy clean, cargo audit clean, documentation current. Determine correct semantic version bump (MAJOR for breaking, MINOR for features, PATCH for fixes). Verify version consistent in Cargo.toml across workspace members. Generate changelog from commit history following Keep a Changelog format. Verify upgrade/migration instructions for breaking changes. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent across Cargo.toml files",
+            "changelog generated (Keep a Changelog)",
+            "release notes drafted",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested, regressions blocked, release-ready with semver and changelog",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), Rust idioms enforced, best practices researched with citations, all .clone() justified by benchmarks, all unsafe blocks have SAFETY comments with verified invariants, cargo audit clean, cross-platform parity on Linux/macOS/Windows, 100% line coverage achieved, property tests cover core logic, CI enforces clippy -D warnings and cargo fmt, API documented with compiling examples, brand voice audit passed, semver compliance verified, stress tests passed, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "architecture scores at target",
+            "unsafe audit complete with evidence",
+            "cross-platform parity confirmed",
+            "100% coverage confirmed",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in log output, error messages, and debug traces. Audit all dependency licenses via cargo-deny: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers are present and correct across all source files. Verify no secrets or credentials in source (API keys, tokens, private keys). Verify .gitignore excludes sensitive files. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "all dependency licenses cleared (cargo-deny)",
+            "copyright headers present on all source files",
+            "no secrets or credentials in source",
+            "sensitive files excluded from repo",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge unsafe justifications: are the SAFETY invariants truly upheld under all calling contexts? Challenge performance claims: are benchmarks representative of real workloads? Perform pre-mortem: assume the crate caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. Evaluate reversibility. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "unsafe justifications challenged under all contexts",
+            "performance claims challenged against real workloads",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

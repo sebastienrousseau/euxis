@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "audio-pipeline",
+  "name": "Audio Pipeline Optimization",
+  "description": "Realtime audio pipeline audit: latency budgeting, buffer management, cross-platform verification.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Pipeline Audit",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "realtime-audio-engineer",
+          "task_template": "Audit the realtime audio pipeline: latency budgets, buffer management, sample rate handling, and platform abstraction for: ${goal}"
+        }
+      ],
+      "checkpoint": "Audio pipeline audit complete with latency profile",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Optimization",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "perf-optimizer",
+          "task_template": "Optimize hot paths in audio processing pipeline: ${goal}"
+        },
+        {
+          "agent": "automation-engineer",
+          "task_template": "Verify cross-platform audio device support (Linux/macOS/Windows) for: ${goal}"
+        }
+      ],
+      "checkpoint": "Latency targets met on all platforms",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Verification",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "qa-coordinator",
+          "task_template": "End-to-end audio pipeline testing with real hardware: ${goal}"
+        }
+      ],
+      "checkpoint": "Audio pipeline verified with measured latency profiles",
+      "abort_on_failure": false
+    }
+  ]
+}

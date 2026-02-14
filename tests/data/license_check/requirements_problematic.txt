@@ -1,0 +1,4 @@
+# Requirements with potential license issues
+requests>=2.25.0
+# GPLv3 library (example - this might not be real)
+some-gpl-package>=1.0.0

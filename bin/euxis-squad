@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# (c) 2026 Euxis Fleet. All rights reserved.
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/squads.json"
@@ -162,13 +163,19 @@ cmd_members() {
   printf "%-22s %-10s %-8s\n" "AGENT" "ROLE" "TIER"
   printf "%-22s %-10s %-8s\n" "---" "---" "---"
 
+  local registry_db="$EUXIS_DIR/registry.db"
+
   while IFS= read -r member; do
     local role="member"
     if [[ "$member" == "$lead" ]]; then
       role="lead"
     fi
     local tier="—"
-    if [[ -f "$REGISTRY_FILE" ]]; then
+    # SQLite-first, JSON fallback for tier lookup
+    if [[ -f "$registry_db" ]]; then
+      tier=$(sqlite3 -init /dev/null "$registry_db" "SELECT tier FROM agents WHERE id='${member//\'/\'\'}'" 2>/dev/null) || true
+      [[ -z "$tier" ]] && tier="—"
+    elif [[ -f "$REGISTRY_FILE" ]]; then
       tier=$(jq -r --arg id "$member" '.agents[] | select(.id == $id) | .tier // "—"' "$REGISTRY_FILE")
     fi
     printf "%-22s %-10s %-8s\n" "$member" "$role" "$tier"
@@ -179,16 +186,25 @@ cmd_validate() {
   require_jq
   require_squads_file
 
-  if [[ ! -f "$REGISTRY_FILE" ]]; then
-    echo "Error: registry.json not found at $REGISTRY_FILE" >&2
+  local registry_db="$EUXIS_DIR/registry.db"
+  local registry_agents=""
+
+  # Get agent list (SQLite-first, JSON fallback)
+  if [[ -f "$registry_db" ]]; then
+    registry_agents=$(sqlite3 -init /dev/null "$registry_db" "SELECT id FROM agents ORDER BY id" 2>/dev/null)
+  fi
+  if [[ -z "$registry_agents" ]] && [[ -f "$REGISTRY_FILE" ]]; then
+    registry_agents=$(jq -r '.agents[].id' "$REGISTRY_FILE")
+  fi
+
+  if [[ -z "$registry_agents" ]]; then
+    echo "Error: No registry found (neither registry.db nor registry.json)" >&2
     exit 1
   fi
 
   local errors=0
-  local registry_agents
-  registry_agents=$(jq -r '.agents[].id' "$REGISTRY_FILE")
 
-  echo "Validating squad members against registry.json..."
+  echo "Validating squad members against registry..."
   echo ""
 
   while IFS= read -r squad_id; do
@@ -197,8 +213,8 @@ cmd_validate() {
 
     while IFS= read -r member; do
       if ! echo "$registry_agents" | grep -qx "$member"; then
-        echo "  ERROR: '$member' in squad '$squad_name' not found in registry.json"
-        ((errors++))
+        echo "  ERROR: '$member' in squad '$squad_name' not found in registry"
+        ((errors++)) || true
       fi
     done < <(jq -r --arg id "$squad_id" '.squads[] | select(.id == $id) | .members[]' "$SQUADS_FILE")
   done < <(jq -r '.squads[].id' "$SQUADS_FILE")

@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 4 (Testing & Coverage) completed","timestamp":"2026-02-08T14:03:42Z","correlation_id":"1770559422-12065-15966"}

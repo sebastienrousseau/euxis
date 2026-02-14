@@ -1,0 +1,44 @@
+{
+  "project": "docs-as-code-validation",
+  "mode": "hierarchical",
+  "priority": "P1",
+  "description": "Comprehensive automation infrastructure for treating documentation as executable code",
+  "dispatches": [
+    {
+      "agent": "automaton",
+      "priority": "P1",
+      "task": "Create CI/CD pipeline configuration for automated documentation testing that validates all code snippets in README.md and docs/ on every commit. Include Docker containers for consistent testing environments across platforms.",
+      "verify_cmd": "test -f .github/workflows/docs-test.yml && grep -q 'markdown-doctest\\|cram\\|documentation.*test' .github/workflows/docs-test.yml"
+    },
+    {
+      "agent": "tester",
+      "priority": "P1",
+      "task": "Develop comprehensive test suite using markdown-doctest or equivalent tool to extract and execute all code blocks from documentation files. Create test fixtures for commands that require specific inputs or environments.",
+      "verify_cmd": "test -f tests/test_docs_code.py && python3 -m py_compile tests/test_docs_code.py"
+    },
+    {
+      "agent": "maintainer",
+      "priority": "P2",
+      "task": "Create automated documentation linting that validates code snippet syntax, checks for broken command references, and ensures all CLI commands mentioned in docs actually exist in the codebase.",
+      "verify_cmd": "test -f bin/euxis-docs-lint && chmod +x bin/euxis-docs-lint"
+    },
+    {
+      "agent": "gatekeeper",
+      "priority": "P2",
+      "task": "Establish pre-commit hooks that prevent documentation commits if any code snippets fail execution. Create release gates that ensure documentation examples work correctly before version releases.",
+      "verify_cmd": "test -f .pre-commit-config.yaml && grep -q 'docs.*test\\|markdown.*lint' .pre-commit-config.yaml"
+    },
+    {
+      "agent": "optimizer",
+      "priority": "P2",
+      "task": "Optimize documentation testing performance by implementing smart caching, parallel execution of independent code snippets, and incremental testing that only validates changed documentation sections.",
+      "verify_cmd": "test -f config/docs-test-optimization.yml && grep -q 'cache\\|parallel\\|incremental' config/docs-test-optimization.yml"
+    },
+    {
+      "agent": "watchdog",
+      "priority": "P3",
+      "task": "Create monitoring and alerting for documentation drift - detect when CLI commands change but documentation examples are not updated. Implement automated suggestions for fixing broken examples.",
+      "verify_cmd": "test -f bin/euxis-docs-drift-monitor && python3 -c 'import json; json.load(open(\"config/docs-monitoring.json\"))'"
+    }
+  ]
+}

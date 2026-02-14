@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "rust-release",
+  "name": "Rust Crate Release Pipeline",
+  "description": "MSRV verification, feature matrix testing, semver checks, and docs.rs quality for crate publishing.",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Pre-Release Audit",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "rust-crate-steward",
+          "task_template": "Perform full crate publishing audit: MSRV, feature flags, no_std, semver checks, docs.rs quality for: ${goal}"
+        }
+      ],
+      "checkpoint": "Crate audit complete with all checks passing",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 2,
+      "name": "Quality & Security",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "unit-tester",
+          "task_template": "Run full test suite including doc tests and feature powerset for: ${goal}"
+        },
+        {
+          "agent": "edge-hunter",
+          "task_template": "Security audit of public API surface and unsafe code blocks for: ${goal}"
+        }
+      ],
+      "checkpoint": "Tests passing and security cleared",
+      "abort_on_failure": true
+    },
+    {
+      "phase": 3,
+      "name": "Release",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "release-manager",
+          "task_template": "Prepare changelog, version bump, and publish crate for: ${goal}"
+        }
+      ],
+      "checkpoint": "Crate published to crates.io",
+      "abort_on_failure": false
+    }
+  ]
+}

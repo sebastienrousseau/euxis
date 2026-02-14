@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "id": "lua",
+  "name": "Lua Excellence",
+  "description": "Ten-gate Lua enforcement: architecture, performance, portability, safety, testing, CI, documentation, API design, release readiness, truth. Zero global pollution, strict local scoping, luacheck zero warnings, table.concat for strings, Lua 5.1-5.4 and LuaJIT parity, C-API stack balance verified, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit Lua architecture and enforce strict scoping for: ${goal}. Eliminate ALL global variable pollution: every variable and function MUST use local. Enforce strict module return patterns: each module file returns a single table of exported functions (local M = {} ... return M). Flag: accidental globals (assignment without local), module files that set globals instead of returning tables, files >400 lines, functions >50 lines, modules with >10 exports (split into submodules). Enforce directory structure: src/ or lib/ for modules, spec/ or tests/ for tests, rockspecs/ for LuaRocks specs. Verify require paths match directory structure (no hardcoded absolute paths). Flag circular requires. Enforce single-entry-point pattern for applications (main.lua or init.lua). Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "zero global variable pollution (all locals)",
+            "strict module return pattern (local M = {} return M)",
+            "no accidental globals",
+            "no circular requires",
+            "modular directory structure (src/lib + spec/tests)",
+            "require paths match directory structure",
+            "no files >400 lines or functions >50 lines",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Lua idioms across the entire codebase for: ${goal}. Flag: string concatenation in loops (use table.concat), ipairs where # operator and numeric for suffice, pairs where ipairs is appropriate (sequential arrays), rawget/rawset without justification, debug library usage in production, os.execute for subprocess (use io.popen or platform-specific FFI), type() checks where protocol/duck-typing suffices, C-style for loops where ipairs/pairs fits. Enforce: metatables for OOP (__index, __newindex, __tostring, __eq, __len), colon syntax for method calls (obj:method() not obj.method(obj)), varargs with select('#', ...) for correct nil handling, pcall/xpcall for error boundaries (not bare error()), string.format over concatenation, table.move for bulk operations (Lua 5.3+), multiple return values over tables for small result sets.",
+          "verifies": [
+            "table.concat for string building in loops",
+            "ipairs/pairs used correctly (array vs hash)",
+            "no debug library in production",
+            "metatables for OOP patterns",
+            "colon syntax for method calls",
+            "pcall/xpcall for error boundaries",
+            "string.format over concatenation",
+            "varargs handled correctly (select('#', ...))"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Lua best practices for: ${goal}. Research: Lua 5.4 changes (integers, generalized for, to-be-closed variables, warning system), LuaJIT 2.1 specifics (FFI, trace compiler restrictions, NYI list), compatibility shims between Lua 5.1/5.2/5.3/5.4 and LuaJIT, current LuaRocks ecosystem health and alternatives, embedding patterns (Neovim lua API, OpenResty ngx_lua, LOVE2D, Redis scripting), luacheck vs selene comparison, modern testing frameworks (Busted vs LuaUnit vs luassert), C-API best practices (stack management, userdata vs lightuserdata, coroutine safety). Cross-validate findings against Lua reference manual, Programming in Lua, LuaJIT wiki, and community resources. Flag deprecated patterns per version.",
+          "verifies": [
+            "Lua 5.4 features researched (integers, to-be-closed)",
+            "LuaJIT specifics documented (FFI, NYI list)",
+            "version compatibility shims identified",
+            "embedding patterns evaluated (Neovim/OpenResty/LOVE)",
+            "testing framework comparison with citations",
+            "C-API best practices documented",
+            "deprecated patterns flagged per version",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit Lua file organization for: ${goal}. Verify every module file has a header comment explaining purpose, dependencies, and Lua version compatibility. Verify test files mirror source structure: spec/<module>_spec.lua for every src/<module>.lua (Busted convention) or tests/test_<module>.lua (LuaUnit convention). Remove orphaned files not required anywhere. Enforce consistent file naming (snake_case.lua). Verify rockspec files are current and accurate: dependencies listed, modules mapped, Lua version constraints declared. Clean up .luarocks/, luacov.stats.out, and generated files from repo. Verify .luacheckrc exists and is configured. Verify init.lua files serve as module entry points (not grab-bags).",
+          "verifies": [
+            "every module has header comment with version compat",
+            "test files mirror source structure",
+            "no orphaned files",
+            "consistent file naming (snake_case.lua)",
+            "rockspec files current and accurate",
+            "no generated files in repo",
+            ".luacheckrc configured"
+          ]
+        }
+      ],
+      "checkpoint": "Zero globals, strict module returns, modern idioms, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Eliminate global pollution, enforce module return patterns, and fix structure."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Profile Lua performance and optimize hot paths for: ${goal}. Profile string concatenation loops: refactor ALL to table.concat (insert into table, concat once). Localize frequently accessed globals in hot paths (local insert = table.insert, local format = string.format). Profile with LuaJIT -jv (trace output) or luaprofiler. Apply: pre-allocate tables with known sizes (table.create in LuaJIT, {} with hints), avoid table creation in tight loops (reuse tables), use numeric for over ipairs in hot paths (faster in some VMs), cache string.find/match patterns outside loops, use FFI for C-struct access in LuaJIT (avoid userdata overhead). Flag: unnecessary closures in loops, repeated string patterns compiled per iteration, unbounded table growth without cleanup. Verify memory: collectgarbage('count') baselines, no leaked coroutines or upvalue references. Target: low memory, low CPU, LuaJIT-trace-friendly hot paths.",
+          "verifies": [
+            "table.concat for all string building in loops",
+            "globals localized in hot paths",
+            "tables pre-allocated where size known",
+            "no table creation in tight loops",
+            "string patterns cached outside loops",
+            "no leaked coroutines or upvalue references",
+            "hot paths profiled with evidence",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit Lua dependency health for: ${goal}. Verify all dependencies declared in rockspec: dependencies field complete with version constraints. Flag excessive dependencies (>15 for application, >5 for library). Check all deps actively maintained (release or commit within 12 months). Verify deps available for target Lua versions (5.1/5.3/5.4/LuaJIT). Flag deps with C extensions without prebuilt rocks for macOS/Linux. Replace heavy deps with stdlib equivalents where possible. Verify no dev dependencies leaked to runtime (test_dependencies separate). Check for abandoned or archived LuaRocks packages. Verify .luarocks/ and lua_modules/ excluded from repo.",
+          "verifies": [
+            "all dependencies declared in rockspec",
+            "version constraints on all deps",
+            "total dependencies reasonable (<15 app, <5 lib)",
+            "all deps actively maintained",
+            "deps available for target Lua versions",
+            "C extension deps have prebuilt rocks",
+            "dev dependencies separated",
+            "no .luarocks/ in repo"
+          ]
+        }
+      ],
+      "checkpoint": "String ops optimized, globals localized, tables pre-allocated, dependencies lean",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. String concatenation in loops, unlocalized globals, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform and cross-version portability for: ${goal}. Test on Lua version matrix: 5.1, 5.2, 5.3, 5.4, and LuaJIT 2.1 (as applicable per project). Test on macOS and Linux at minimum. Flag version-specific features without guards: goto (5.2+), bitwise operators (5.3+), integer division // (5.3+), to-be-closed <close> (5.4+), table.unpack vs unpack (5.2+ renamed), table.pack (5.2+), utf8 library (5.3+), string.gmatch position capture (5.4+). Verify LuaJIT compatibility: no features on NYI list in hot paths, FFI code guarded with pcall(require, 'ffi'), bit operations use bit or bit32 library with fallback. Verify no platform-specific path separators (use package.config:sub(1,1)). Verify no hardcoded absolute paths. Flag os.execute/io.popen commands that differ between platforms.",
+          "verifies": [
+            "tests pass on Lua 5.1, 5.2, 5.3, 5.4 (as applicable)",
+            "tests pass on LuaJIT 2.1",
+            "tests pass on macOS and Linux",
+            "version-specific features guarded",
+            "LuaJIT NYI list avoided in hot paths",
+            "portable path handling (package.config)",
+            "no hardcoded absolute paths"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-version parity verified across Lua 5.1-5.4 and LuaJIT on macOS and Linux",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Version-specific features without guards or platform leaks detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security audit of all Lua code for: ${goal}. Scan for: loadstring/load with user input (code injection), os.execute/io.popen with unsanitized input (command injection), dofile/loadfile on user-controlled paths (arbitrary code execution), string.format with %s on user input used in SQL/shell (injection), debug library usage (debug.getinfo, debug.sethook expose internals), rawset(_G, ...) allowing global namespace poisoning, deserialization of untrusted data (loadstring on data), unvalidated file paths in io.open (path traversal), hardcoded secrets, insecure random (math.random without math.randomseed from secure source). If C-API extensions: verify stack balance on all paths (lua_gettop checks), verify userdata lifecycle (no use-after-free, proper __gc), verify type checking on all stack access (luaL_checktype/luaL_checkudata). Flag severity and provide remediation.",
+          "verifies": [
+            "no loadstring/load with user input",
+            "no os.execute/io.popen with unsanitized input",
+            "no debug library in production",
+            "no global namespace poisoning (rawset(_G))",
+            "no hardcoded secrets",
+            "C-API stack balance verified on all paths",
+            "C-API userdata lifecycle correct (no use-after-free)",
+            "C-API type checking on all stack access"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit Lua supply chain security for: ${goal}. Verify all LuaRocks dependencies: check for known vulnerabilities, verify maintained (activity within 12 months), check license compatibility. Flag deps that execute code during install (build.type = 'command' with arbitrary scripts). Verify rockspec does not download from untrusted sources. If C extensions: verify source provenance, check for unsafe C patterns (buffer overflows, format strings, use-after-free). Verify no secrets in rockspec or source. Verify .gitignore excludes credentials, .env, private keys. Audit embedded Lua (Neovim/OpenResty/Redis): verify sandboxing is appropriate for the embedding context, verify no privilege escalation from Lua to host. Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "no known vulnerabilities in deps",
+            "all deps actively maintained",
+            "license compatibility verified",
+            "no arbitrary code execution in rockspec install",
+            "C extension source provenance verified",
+            "no secrets in rockspec or source",
+            "embedded Lua sandboxing verified",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "No code injection, C-API stack-safe, supply chain clean, embedding secured",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Code injection vectors, C-API stack imbalance, or dependency risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive Lua testing for: ${goal}. Implement tests using Busted (describe/it/assert) or LuaUnit. Test on BOTH standard Lua (5.1-5.4 as applicable) AND LuaJIT to catch behavioral differences: number representation (float vs integer in 5.3+), string length semantics, table length with holes, coroutine behavior, bit operations. Achieve function-level coverage using LuaCov (luacov report). Test error paths: verify pcall/xpcall error handling, verify error messages are descriptive, verify error objects propagate correctly. Test metatables: __index chains, __newindex guards, __gc finalizers. Test edge cases: nil in tables, empty strings, large tables (10K+ entries), deeply nested tables, coroutine yields across C boundaries. Verify mock discipline: external I/O mocked (file, network, os), tests do not modify global state. Verify tests do not rely on method swizzling unless strictly isolated.",
+          "verifies": [
+            "Busted or LuaUnit tests for all modules",
+            "tests pass on standard Lua AND LuaJIT",
+            "LuaCov coverage report generated",
+            "error paths tested (pcall/xpcall)",
+            "metatable behavior tested (__index/__gc)",
+            "edge cases tested (nil, holes, large tables)",
+            "external I/O mocked in tests",
+            "no global state mutation in tests"
+          ]
+        }
+      ],
+      "checkpoint": "Busted/LuaUnit tests comprehensive, Lua and LuaJIT parity, coverage reported, mocks clean",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Missing tests, Lua/LuaJIT behavioral gaps, or global state mutation detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full Lua CI pipeline for: ${goal}. Luacheck on ALL .lua files: zero warnings, configure expected globals in .luacheckrc (e.g., vim, ngx, love, redis per embedding context), flag undefined variables, flag unused variables, flag global assignments. Formatter: enforce LuaFormatter or StyLua with consistent config. Test suite: Busted or LuaUnit with TAP or JUnit output. CI matrix: Lua 5.1 + 5.3 + 5.4 + LuaJIT 2.1 at minimum (hererocks or luaver for version management). LuaCov for coverage with threshold. Pre-commit hooks: luacheck, stylua --check. macOS + Linux in CI matrix. If C extensions: compile and test on both platforms. SLO enforcement: luacheck <5s, tests <60s. No '|| true' on any step. Nightly job for LuaRocks dependency updates.",
+          "verifies": [
+            "luacheck zero warnings with configured globals",
+            ".luacheckrc defines expected globals per context",
+            "formatter enforced (StyLua or LuaFormatter)",
+            "CI matrix: Lua 5.1 + 5.3 + 5.4 + LuaJIT 2.1",
+            "LuaCov coverage with threshold",
+            "pre-commit hooks configured (luacheck + formatter)",
+            "CI matrix macOS + Linux",
+            "nightly dependency update job"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces luacheck, formatter, cross-version matrix, coverage threshold",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Luacheck not enforced, missing version matrix, or incomplete coverage."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Lua documentation for: ${goal}. Every exported function MUST have documentation: LDoc annotations (@param, @treturn, @raise, @usage with runnable example) or equivalent header comments. If C-API extensions: document stack balance explicitly (inputs consumed, outputs pushed), document userdata lifecycle (__gc behavior, prevent use-after-free), document thread safety (coroutine-safe or not). Module-level documentation: purpose, Lua version compatibility, embedding context requirements, dependencies. README MUST include: project description, installation (LuaRocks or manual), quickstart with code example, API reference or link to generated docs, supported Lua versions table, license. Generate docs with LDoc (ldoc .) or similar. Verify all @usage examples execute without errors.",
+          "verifies": [
+            "every exported function has LDoc annotations",
+            "@param/@treturn/@raise documented",
+            "@usage examples execute without errors",
+            "C-API stack balance documented (inputs/outputs)",
+            "C-API userdata lifecycle explained",
+            "README with install, quickstart, version matrix",
+            "LDoc generates without warnings"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Lua documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit LDoc comments, README, guides, error messages, and rockspec descriptions. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All exports documented with LDoc, C-API lifecycle explained, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing LDoc annotations, undocumented C-API, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Lua API ergonomics and user experience for: ${goal}. Verify module API design: require returns a table with clear function names, no side effects on require, minimal API surface (only expose what consumers need). Verify error handling: errors return nil, err pattern for expected failures (file not found, network timeout), error() only for programmer mistakes (wrong argument types), error messages include context (what failed, what was expected, what was received). Verify configuration: option tables with sensible defaults ({timeout = 30, retries = 3}), unknown keys flagged (not silently ignored). If CLI: verify argument parsing with help text, exit codes (0=success, 1=error), stderr for errors, stdout for output. Verify metatable API: __tostring for readable output, __index for clean namespacing, __call where intuitive (callable tables). Flag any error message that says 'error' without context.",
+          "verifies": [
+            "require returns table with no side effects",
+            "nil, err pattern for expected failures",
+            "error() only for programmer mistakes",
+            "error messages include context (what/expected/received)",
+            "option tables with defaults and unknown key detection",
+            "__tostring for readable output",
+            "minimal API surface (only needed exports)"
+          ]
+        }
+      ],
+      "checkpoint": "API ergonomic, nil/err pattern consistent, errors contextual, metatables clean",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Inconsistent error patterns, missing context, or side effects on require detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark hot paths on both standard Lua and LuaJIT (results differ significantly). Set performance budgets: p50/p95/p99 latencies. Test with large inputs: 10x and 100x typical workload (large tables, long strings, many coroutines). Profile memory with collectgarbage('count'): baseline, peak, after full GC cycle. Verify no unbounded table growth or leaked coroutines under sustained load. If LuaJIT: verify hot paths compile to traces (-jv output, no NYI aborts). If C extensions: profile with Valgrind/AddressSanitizer for memory leaks and invalid access. Verify GC pressure: no excessive allocation/collection cycles in hot paths. Target: low memory, low CPU, trace-friendly on LuaJIT.",
+          "verifies": [
+            "benchmarks on standard Lua AND LuaJIT",
+            "performance budgets defined (p50/p95/p99)",
+            "large input stress tested (10x, 100x)",
+            "memory profiled (collectgarbage baseline/peak)",
+            "no unbounded table growth under load",
+            "LuaJIT traces compile without NYI aborts",
+            "C extensions Valgrind/ASAN clean"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: performance regressions (benchmark comparison), coverage drops, new luacheck warnings, test failures on any Lua version in matrix. Classify every change by risk: metatable modifications, global access patterns, C-API stack changes, error handling modifications, coroutine boundary shifts, FFI binding changes. Scan for deprecated Lua patterns older than 6 months. Verify dead code: unreachable functions, unused locals (luacheck catches some), modules not required anywhere. Check dev-only deps not leaked to runtime rockspec. Verify CI blocks regression merges.",
+          "verifies": [
+            "performance regression detection active",
+            "coverage regression blocked",
+            "all Lua versions in matrix tested",
+            "change categories classified by risk",
+            "no stale deprecated patterns (>6 months)",
+            "no dead code (unreachable functions/modules)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: luacheck zero warnings, formatter clean, all tests pass on Lua 5.1-5.4 and LuaJIT, documentation current, no hardcoded secrets. Determine correct semantic version bump (MAJOR for breaking API changes, MINOR for new functions/features, PATCH for fixes). Verify version consistent in rockspec filename and source. Generate changelog following Keep a Changelog format. Verify rockspec uploads to LuaRocks successfully (luarocks upload --skip-pack for dry-run). Verify backward compatibility: deprecated functions still work with warnings, removed functions have migration docs. Draft release notes with highlights. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in rockspec",
+            "changelog generated (Keep a Changelog)",
+            "rockspec upload verified (dry-run)",
+            "migration instructions for breaking changes",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "Stress tested on Lua and LuaJIT, regressions blocked, release-ready with rockspec",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review stress tests, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), zero global pollution, strict module return patterns, table.concat for all string loops, globals localized in hot paths, best practices researched with citations, luacheck zero warnings, cross-version parity (Lua 5.1-5.4 + LuaJIT), macOS + Linux tests pass, no code injection vectors, C-API stack balance verified (if applicable), all exports documented with LDoc and runnable examples, brand voice audit passed, CI enforces all gates across version matrix, stress tests passed on both Lua and LuaJIT, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "zero global pollution confirmed",
+            "table.concat optimization confirmed",
+            "cross-version parity confirmed (Lua + LuaJIT)",
+            "C-API safety confirmed (if applicable)",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, and debug output. Verify no secrets or credentials in source or rockspec. Audit all dependency licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright/license headers present on all source files. Check for unauthorized data flows (network calls, telemetry). Verify .gitignore excludes .env, credentials, luacov.stats.out, .luarocks/. If embedded (Neovim/OpenResty/Redis): verify Lua code respects host sandboxing and does not escalate privileges. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "no secrets in source or rockspec",
+            "all dependency licenses cleared",
+            "copyright headers present on all source files",
+            "no unauthorized data flows",
+            "embedded sandboxing respected (if applicable)",
+            "compliance findings with regulatory references",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge global pollution claims: does luacheck catch all globals, or are there dynamic assignments via rawset(_G), module() function (deprecated), or metatable __newindex on _G that bypass static analysis? Challenge performance claims: does table.concat optimization apply under LuaJIT where the JIT may optimize concatenation differently, or are benchmarks misleading? Challenge cross-version claims: do tests cover behavioral differences in table length with holes, number precision (float vs integer in 5.3+), and coroutine.wrap error propagation differences? Perform pre-mortem: assume the module caused a production incident 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "global pollution challenged (dynamic rawset/_G, module())",
+            "performance challenged (LuaJIT concat optimization)",
+            "cross-version challenged (table holes, number precision)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

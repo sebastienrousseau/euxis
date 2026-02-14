@@ -1,12 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. Deep-Dive Audit Runner.
 # Runs benchmarks, logical integrity, security probes, and consolidates a report.
 
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-audit-run — Deep-dive audit runner
+
+Usage:
+  euxis-audit-run
+
+Runs benchmarks, logical integrity checks, security probes,
+and consolidates a readiness report.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
-REPORT_DIR="$EUXIS_HOME/audits/$(date +%Y%m%d_%H%M)"
+REPORT_DIR="$EUXIS_HOME/docs/audits/$(date +%Y%m%d_%H%M)"
 mkdir -p "$REPORT_DIR"
 
 GATE_PASS=0
@@ -16,10 +33,10 @@ gate_result() {
     local name="$1" exit_code="$2"
     if [[ $exit_code -eq 0 ]]; then
         echo "  PASS: $name"
-        ((GATE_PASS++))
+        ((GATE_PASS++)) || true
     else
         echo "  FAIL: $name"
-        ((GATE_FAIL++))
+        ((GATE_FAIL++)) || true
     fi
 }
 
@@ -37,7 +54,7 @@ if [[ -x "$BIN_DIR/euxis-bench" ]]; then
 else
     echo "  SKIP: euxis-bench not found."
     echo "Skipped — euxis-bench not available." > "$REPORT_DIR/benchmarks.txt"
-    ((GATE_FAIL++))
+    ((GATE_FAIL++)) || true
 fi
 
 # ── GATE 2: Logical Integrity (Architect auditing Fleet) ──
@@ -52,7 +69,7 @@ if command -v euxis &>/dev/null; then
 else
     echo "  SKIP: euxis CLI not available."
     echo "Skipped — euxis CLI not available." > "$REPORT_DIR/logic_audit.md"
-    ((GATE_FAIL++))
+    ((GATE_FAIL++)) || true
 fi
 
 # ── GATE 3: Security Red-Teaming (Injection Probing) ──
@@ -73,10 +90,10 @@ echo "--------------------------------------------------"
     RESULT=$(euxis "; echo $CANARY" "test" claude 2>&1 || true)
     if echo "$RESULT" | grep -qx "$CANARY"; then
         echo "  FAIL: Shell injection succeeded (canary found as command output)."
-        ((PROBE_FAIL++))
+        ((PROBE_FAIL++)) || true
     else
         echo "  PASS: Agent argument is not injectable."
-        ((PROBE_PASS++))
+        ((PROBE_PASS++)) || true
     fi
 
     # Probe 2: Path traversal in agent name
@@ -84,17 +101,17 @@ echo "--------------------------------------------------"
     RESULT=$(euxis "../../etc/passwd" "test" claude 2>&1 || true)
     if echo "$RESULT" | grep -q "root:"; then
         echo "  FAIL: Path traversal succeeded."
-        ((PROBE_FAIL++))
+        ((PROBE_FAIL++)) || true
     else
         echo "  PASS: Path traversal blocked."
-        ((PROBE_PASS++))
+        ((PROBE_PASS++)) || true
     fi
 
     # Probe 3: Null byte injection
     echo "## Probe 3: Null byte injection"
     RESULT=$(euxis architect $'test\x00injected' claude 2>&1 || true)
     echo "  PASS: Null byte handled without crash."
-    ((PROBE_PASS++))
+    ((PROBE_PASS++)) || true
 
     echo ""
     echo "## Summary: $PROBE_PASS passed, $PROBE_FAIL failed"
@@ -110,7 +127,7 @@ if command -v euxis &>/dev/null; then
     LOGIC=$(cat "$REPORT_DIR/logic_audit.md" 2>/dev/null || echo "N/A")
     SECURITY=$(cat "$REPORT_DIR/security_probe.txt" 2>/dev/null || echo "N/A")
 
-    euxis tech-writer \
+    euxis writer \
         "Consolidate the following audit results into a structured 'v6.0 Readiness Report' in Markdown. Include a verdict: PASS if no failures, CONDITIONAL if warnings only, FAIL if critical issues. Sections: Performance, Logic, Security, Verdict.
 
 --- PERFORMANCE ---
@@ -121,7 +138,7 @@ $LOGIC
 
 --- SECURITY ---
 $SECURITY
-" claude > "$EUXIS_HOME/v6.0_FINAL_AUDIT.md" 2>/dev/null
+" claude > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md" 2>/dev/null
     gate_result "Report consolidation" $?
 else
     {
@@ -131,7 +148,7 @@ else
         echo "Gates passed: $GATE_PASS / $((GATE_PASS + GATE_FAIL))"
         echo ""
         echo "See individual reports in: $REPORT_DIR/"
-    } > "$EUXIS_HOME/v6.0_FINAL_AUDIT.md"
+    } > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md"
     gate_result "Report consolidation (offline)" 0
 fi
 
@@ -143,7 +160,7 @@ if [[ $GATE_FAIL -eq 0 ]]; then
 else
     echo "  AUDIT INCOMPLETE: $GATE_PASS passed, $GATE_FAIL failed/skipped."
 fi
-echo "  Report: ~/.euxis/v6.0_FINAL_AUDIT.md"
+echo "  Report: ~/.euxis/docs/audits/v6.0-readiness-report.md"
 echo "  Details: $REPORT_DIR/"
 echo "=================================================="
 

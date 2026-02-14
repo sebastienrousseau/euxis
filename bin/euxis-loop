@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS LOOP: Autonomous Try-Catch-Retry with Reflexion & Checkpoints
 # Usage: euxis-loop <agent> <task> <verify_cmd> [max_retries]
 #        euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ... <cmdN>
@@ -20,8 +21,28 @@
 
 set -euo pipefail
 
+usage() {
+    cat <<'EOF'
+euxis-loop — Autonomous try-catch-retry with reflexion
+
+Usage:
+  euxis-loop <agent> <task> <verify_cmd> [max_retries]
+  euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> ... <cmdN>
+
+Implements the Reflexion pattern with optional checkpoint mode
+and human-in-the-loop confirmation.
+
+Options:
+  --checkpoints  Multi-checkpoint verification mode
+  --confirm      Pause for user confirmation before each retry
+  -h, --help     Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
 EUXIS_HOME="${HOME}/.euxis"
-PROJECTS_DIR="${EUXIS_HOME}/projects"
+PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 
 MODE="single"
 CONFIRM_MODE=false
@@ -44,7 +65,7 @@ if [[ "$MODE" == "checkpoints" ]]; then
 
     if [[ -z "$AGENT" || -z "$TASK" || ${#CHECKPOINT_CMDS[@]} -eq 0 ]]; then
         echo "Usage: euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ..."
-        echo "  Example: euxis-loop --checkpoints bug-fixer \"Fix parser\" 3 \\"
+        echo "  Example: euxis-loop --checkpoints debugger \"Fix parser\" 3 \\"
         echo "    \"python -c 'import parser'\" \\"
         echo "    \"pytest tests/test_parser.py\" \\"
         echo "    \"mypy parser.py\""
@@ -61,7 +82,7 @@ else
         echo "       euxis-loop --checkpoints <agent> <task> <max_retries> <cmd1> <cmd2> ..."
         echo "       euxis-loop --confirm <agent> <task> <verify_cmd> [max_retries]"
         echo ""
-        echo "  Example: euxis-loop bug-fixer \"Fix parser.py\" \"pytest tests/test_parser.py\" 3"
+        echo "  Example: euxis-loop debugger \"Fix parser.py\" \"pytest tests/test_parser.py\" 3"
         exit 1
     fi
 
@@ -174,7 +195,7 @@ run_checkpoints() {
         else
             echo "  ✔ Checkpoint $i passed"
         fi
-        ((i++))
+        ((i++)) || true
     done
 
     return 0
@@ -243,7 +264,7 @@ $ORIGINAL_TASK
 4. The failure occurred at checkpoint $FAILED_CHECKPOINT_NUM — focus your fix on what that checkpoint validates.
 5. This is retry attempt $((ATTEMPT + 1)) of $MAX_RETRIES."
 
-        ((ATTEMPT++))
+        ((ATTEMPT++)) || true
     fi
 done
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Euxis Dispatch Integration Test Suite
 # Tests stage-based execution, dependency resolution, file locking, and backward compatibility

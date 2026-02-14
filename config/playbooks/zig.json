@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "id": "zig",
+  "name": "Zig Excellence",
+  "description": "Ten-gate Zig enforcement: explicit allocator passing (no globals), init/deinit pairs, zig fmt, comptime maximized, try/catch explicit, unreachable banned unless proven, ReleaseSafe/Fast/Small verified, builtin tests, zero undefined behavior, low memory, low CPU.",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "Architecture & Idioms",
+      "gate": "architecture",
+      "principle": "Is the structure sound, modular, and idiomatic?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "architect",
+          "task_template": "Audit Zig architecture and allocator discipline for: ${goal}. Enforce explicit allocator passing: no global allocators (no std.heap.page_allocator at module scope), every function that allocates MUST accept an std.mem.Allocator parameter. Verify every init() has a corresponding deinit(): resource acquisition pairs documented and enforced. Enforce modular structure: src/ for source, src/main.zig as entry point, logical modules as separate files/directories. Verify build.zig is clean: targets well-named, dependencies declared with addModule/dependency, no hardcoded paths. Flag: god files (>500 lines), god functions (>50 lines), circular imports, pub on internal implementation details. Enforce: pub only on intentional API surface, module-level doc comments, error sets defined per module (not reusing anyerror), comptime for type-level programming. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "verifies": [
+            "explicit allocator passing (no global allocators)",
+            "every init() has corresponding deinit()",
+            "modular src/ structure with clean build.zig",
+            "pub only on intentional API surface",
+            "error sets defined per module (not anyerror)",
+            "no god files (>500 lines) or functions (>50 lines)",
+            "no circular imports",
+            "Tech Debt 10/10 and Modularity 100/100"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Enforce Zig idioms across the entire codebase for: ${goal}. Verify error handling: try and catch used explicitly, never silently discarding errors (_ = try ...). Ban unreachable unless mathematically proven impossible (document proof in adjacent comment). Flag: @panic in library code (return errors), catch unreachable without justification, bare @import(\"std\") without scoping (use const std = @import(\"std\")), optional unwrap .? without null check, manual memory management where arena/FixedBufferAllocator suffices, C-style for loops where Zig range iteration works. Enforce: defer/errdefer for cleanup (defer allocator.free(), errdefer allocator.destroy()), sentinel-terminated slices for C interop ([:0]const u8), tagged unions over separate enum+data, comptime parameters for generic functions, error unions over optional for fallible operations, std.log over std.debug.print for production logging, packed structs only when interfacing with hardware/network protocols.",
+          "verifies": [
+            "try/catch used explicitly (no silent error discard)",
+            "unreachable banned unless proven (with comment)",
+            "no @panic in library code (return errors)",
+            "defer/errdefer for all cleanup",
+            "tagged unions over enum+data",
+            "error unions over optional for fallible ops",
+            "std.log over std.debug.print",
+            "comptime parameters for generic functions"
+          ]
+        },
+        {
+          "agent": "researcher",
+          "task_template": "Conduct deep research on current Zig best practices for: ${goal}. Research: latest Zig release features and breaking changes (0.13+), build system patterns (build.zig best practices, addModule, dependency management), allocator design patterns (arena, FixedBufferAllocator, GeneralPurposeAllocator, testing.allocator), comptime metaprogramming patterns (type functions, comptimeStringMap, comptime interface checking), C interop patterns (@cImport, translate-c, linking), error handling strategies (error sets, error return traces, error unions), testing patterns (builtin test blocks, testing.allocator for leak detection, test filters), package management (zon files, build.zig.zon dependencies). Cross-validate against Zig language reference, Zig standard library source, ziglang.org documentation, and community resources (ziglearn, zig.news). Flag patterns deprecated by recent releases.",
+          "verifies": [
+            "latest Zig release features researched",
+            "build.zig best practices documented",
+            "allocator patterns compared (arena/GPA/fixed)",
+            "comptime metaprogramming patterns documented",
+            "C interop patterns verified",
+            "deprecated patterns flagged per release",
+            "findings cross-validated (2+ sources)"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Audit Zig file organization for: ${goal}. Verify every source file has a top-level doc comment (//!) explaining purpose. Verify test organization: builtin test blocks co-located with source for internal logic, tests/ directory for public API integration tests. Remove orphaned files not imported anywhere. Enforce Zig naming conventions: snake_case for functions/variables, PascalCase for types, SCREAMING_SNAKE_CASE for comptime constants. Verify build.zig.zon is accurate: dependencies declared with correct URLs and hashes. Clean up zig-cache/ and zig-out/ from repo. Verify .gitignore covers zig-cache/, zig-out/, and build artifacts. Verify file structure mirrors module hierarchy (directory names match @import paths).",
+          "verifies": [
+            "every file has //! doc comment",
+            "builtin tests co-located with source",
+            "integration tests in tests/ directory",
+            "no orphaned files",
+            "Zig naming conventions (snake_case/PascalCase/SCREAMING)",
+            "build.zig.zon accurate with hashes",
+            "no zig-cache/ or zig-out/ in repo"
+          ]
+        }
+      ],
+      "checkpoint": "Explicit allocators, init/deinit pairs, error handling strict, best practices researched, files organized",
+      "abort_on_failure": true,
+      "failure_message": "Architecture gate failed. Enforce explicit allocators, add deinit pairs, and fix error handling."
+    },
+    {
+      "phase": 1,
+      "name": "Performance & Resources",
+      "gate": "performance",
+      "principle": "Is every operation fast, lean, and resource-efficient?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Analyze Zig performance and comptime usage for: ${goal}. Ensure heavy computations resolved at compile time where possible: lookup tables via comptime, string processing via comptime, type dispatch via comptime, configuration parsing via comptime. Profile runtime with std.time.Timer or external profiler (perf, Instruments). Apply: arena allocators for batch operations (allocate many, free once), FixedBufferAllocator for known-size allocations, SIMD via @Vector for data-parallel operations, @prefetch for cache warming in sequential access. Flag: allocations in hot loops (use pre-allocation or arena), unnecessary copies (use slices/pointers), runtime type dispatch where comptime dispatch suffices, std.ArrayList growing without setCapacity hint, excessive error return trace depth in hot paths. Benchmark with zig build -Doptimize=ReleaseFast. Verify binary size with ReleaseSafe vs ReleaseSmall. Target: low memory, low CPU, maximum comptime evaluation.",
+          "verifies": [
+            "comptime for lookup tables and type dispatch",
+            "arena allocators for batch operations",
+            "no allocations in hot loops",
+            "@Vector SIMD for data-parallel operations",
+            "pre-allocation with capacity hints",
+            "runtime profiled with evidence (perf/Instruments)",
+            "binary size compared (ReleaseSafe vs ReleaseSmall)",
+            "low memory and CPU verified"
+          ]
+        },
+        {
+          "agent": "custodian",
+          "task_template": "Audit Zig dependency health for: ${goal}. Review build.zig.zon: all dependencies pinned with hash, URLs point to tagged releases (not branches). Flag excessive dependencies (>10 for a library). Check all deps actively maintained (commit within 12 months). Verify no C dependencies without justification (prefer pure Zig alternatives). Flag deps that require linking libc (reduces portability). Verify: build.zig fetches no resources at build time without hash verification, no vendored source without version tracking. Replace external deps with std library where possible (std.json, std.http, std.crypto). Check for abandoned packages. Verify zig-cache/ not committed. Verify build works offline with cached dependencies.",
+          "verifies": [
+            "all dependencies pinned with hash in build.zig.zon",
+            "deps point to tagged releases (not branches)",
+            "total dependencies reasonable (<10 for library)",
+            "all deps actively maintained",
+            "C deps justified (pure Zig preferred)",
+            "libc linking flagged (portability risk)",
+            "std library used where possible",
+            "build works offline with cached deps"
+          ]
+        }
+      ],
+      "checkpoint": "Comptime maximized, allocators optimal, dependencies lean, binary size profiled",
+      "abort_on_failure": true,
+      "failure_message": "Performance gate failed. Runtime computation where comptime suffices, allocation waste, or dependency bloat detected."
+    },
+    {
+      "phase": 2,
+      "name": "Portability & Platform Parity",
+      "gate": "portability",
+      "principle": "Does it build and pass identically on every platform?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify cross-platform Zig portability for: ${goal}. Test target matrix: x86_64-linux, aarch64-linux, x86_64-macos, aarch64-macos, x86_64-windows at minimum (zig build -Dtarget=...). Verify: builds without libc linkage (or libc linkage documented and justified), no platform-specific std.os calls without @import(\"builtin\").target checks, no hardcoded paths (use std.fs.path for portable path manipulation). Test all three optimize modes: ReleaseSafe (safety checks enabled), ReleaseFast (maximum speed), ReleaseSmall (minimum size). Verify Debug mode builds and tests pass. Flag: @cImport without cross-platform verification, platform-specific assembly without target guards, packed struct layout assumptions without @sizeOf verification. Verify std.testing.allocator works on all targets (no platform-specific test behavior).",
+          "verifies": [
+            "builds for x86_64 and aarch64 on linux/macos/windows",
+            "builds without libc (or libc justified)",
+            "no platform-specific calls without target checks",
+            "no hardcoded paths (std.fs.path used)",
+            "ReleaseSafe, ReleaseFast, ReleaseSmall all build",
+            "Debug mode tests pass",
+            "no @cImport without cross-platform verification"
+          ]
+        }
+      ],
+      "checkpoint": "Cross-platform builds verified on linux/macos/windows, all optimize modes pass",
+      "abort_on_failure": true,
+      "failure_message": "Portability gate failed. Target-specific code, libc dependency, or optimize mode failures detected."
+    },
+    {
+      "phase": 3,
+      "name": "Safety & Security",
+      "gate": "safety",
+      "principle": "Is the code safe and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Security and safety audit of Zig codebase for: ${goal}. Verify error handling completeness: every error union handled (no _ = try without justification), every optional checked before unwrap. Audit all unreachable: each MUST have adjacent comment proving impossibility (mathematical proof, type system guarantee, or exhaustive match). Audit unsafe operations: @ptrCast usage justified and documented, @intToPtr flagged (hardware/FFI only), @ptrToInt flagged, @alignCast verified, @as narrowing conversions checked, @bitCast type-size-verified. Scan for: buffer overflows in slice operations, use-after-free (accessing freed allocator memory), double-free, integer overflow in safety-unchecked modes, format string injection in std.fmt, hardcoded secrets. Verify: ReleaseSafe mode passes all tests (runtime safety checks active), std.testing.allocator catches all leaks in tests. Run with -fsanitize=undefined if C interop present.",
+          "verifies": [
+            "every error union handled (no silent discard)",
+            "unreachable proven and documented",
+            "@ptrCast/@intToPtr justified and documented",
+            "no buffer overflows in slice operations",
+            "no use-after-free or double-free",
+            "no hardcoded secrets",
+            "ReleaseSafe passes all tests (safety checks active)",
+            "std.testing.allocator catches all leaks"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit Zig supply chain security for: ${goal}. Verify: all dependencies in build.zig.zon pinned with cryptographic hash, dependency URLs point to verified sources (official repos, not forks without justification). Check for known vulnerabilities in dependencies (manual review, Zig community advisories). Verify: no build.zig that downloads and executes arbitrary code without hash verification, no @cImport pulling headers from unverified paths. Audit C dependencies (if any): check for known CVEs, verify source provenance. Verify .gitignore excludes credentials, .env, zig-cache/, zig-out/. Verify no secrets in build.zig or build.zig.zon. Flag: linking against system libraries without version constraints, dlopen/LoadLibrary without path validation. Classify threat level using S0-S3 severity.",
+          "verifies": [
+            "all deps pinned with cryptographic hash",
+            "dependency URLs from verified sources",
+            "no unverified downloads in build.zig",
+            "C dependencies CVE-checked (if any)",
+            "@cImport paths verified",
+            "no secrets in build files",
+            "sensitive files excluded from repo",
+            "threat classification complete (S0-S3)"
+          ]
+        }
+      ],
+      "checkpoint": "Error handling complete, unsafe ops justified, allocator-leak-free, supply chain verified",
+      "abort_on_failure": true,
+      "failure_message": "Safety gate failed. Unjustified unreachable, unsafe casts, leaks, or supply chain risks detected."
+    },
+    {
+      "phase": 4,
+      "name": "Testing & Coverage",
+      "gate": "testing",
+      "principle": "Is every code path tested with evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Enforce comprehensive Zig testing for: ${goal}. Leverage builtin test blocks: co-located test {} blocks for internal logic in every source file, integration tests in tests/ for public API. Use std.testing.allocator for ALL tests (detects memory leaks automatically). Test error paths: verify every error set member returned and handled, test error propagation through try chains, test errdefer execution. Test comptime: use comptime { ... } blocks with @compileError for compile-time assertion tests. Test edge cases: null optionals, empty slices, zero-length allocations, integer boundary values (std.math.maxInt, std.math.minInt), sentinel-terminated strings. Test all optimize modes: zig build test -Doptimize=Debug AND -Doptimize=ReleaseSafe (behavior differs with safety checks). Verify: no test interdependency, test names descriptive, fuzz testing with std.testing.fuzz (if available) or custom fuzzing on parsers. Benchmark with std.testing.Timer.",
+          "verifies": [
+            "builtin test blocks in every source file",
+            "std.testing.allocator in ALL tests (leak detection)",
+            "every error set member tested",
+            "errdefer execution verified",
+            "comptime assertions with @compileError",
+            "edge cases tested (null, empty, boundary values)",
+            "tests pass in Debug AND ReleaseSafe modes",
+            "fuzz testing on parsers/input functions"
+          ]
+        }
+      ],
+      "checkpoint": "Builtin tests comprehensive, allocator-leak-free, error paths covered, comptime verified",
+      "abort_on_failure": true,
+      "failure_message": "Testing gate failed. Missing test blocks, allocator leaks, or untested error paths detected."
+    },
+    {
+      "phase": 5,
+      "name": "CI & Automation",
+      "gate": "ci-automation",
+      "principle": "Does CI enforce every standard automatically?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "automaton",
+          "task_template": "Enforce full Zig CI pipeline for: ${goal}. Enforce zig fmt: fail CI if code is not formatted (zig fmt --check src/ tests/). Build in ALL optimize modes: zig build -Doptimize=Debug, -Doptimize=ReleaseSafe, -Doptimize=ReleaseFast, -Doptimize=ReleaseSmall. Test in Debug AND ReleaseSafe: zig build test -Doptimize=Debug, zig build test -Doptimize=ReleaseSafe. Cross-compile check: build for x86_64-linux, aarch64-linux, x86_64-macos, aarch64-macos, x86_64-windows. Binary size tracking per optimize mode. Pre-commit hooks: zig fmt. Cache zig-cache/ across CI runs. SLO: build <60s, tests <30s per optimize mode. No '|| true' on any step. Nightly job for Zig master toolchain testing (catch breaking changes early). Verify build.zig.zon dependency fetch is reproducible.",
+          "verifies": [
+            "zig fmt --check enforced (fail on diff)",
+            "builds in Debug, ReleaseSafe, ReleaseFast, ReleaseSmall",
+            "tests pass in Debug AND ReleaseSafe",
+            "cross-compile for linux/macos/windows verified",
+            "binary size tracked per optimize mode",
+            "pre-commit hooks configured (zig fmt)",
+            "zig-cache cached across CI runs",
+            "nightly Zig master testing configured"
+          ]
+        }
+      ],
+      "checkpoint": "CI enforces zig fmt, all optimize modes, cross-compilation, Zig master nightly",
+      "abort_on_failure": true,
+      "failure_message": "CI gate failed. Formatting not enforced, optimize modes not tested, or cross-compile failures."
+    },
+    {
+      "phase": 6,
+      "name": "Documentation",
+      "gate": "documentation",
+      "principle": "Is every public API documented with runnable examples?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit and perfect all Zig documentation for: ${goal}. Every pub function, type, and constant MUST have /// doc comments: one-line summary, parameter descriptions, return value description, error conditions documented. Every file MUST have //! top-level doc comment explaining module purpose. Document allocator requirements: which functions allocate, which allocator parameter to pass, ownership semantics (caller owns returned memory). Document comptime parameters: what types/values are accepted, compile-time constraints. Document init/deinit lifecycle: what resources are acquired, cleanup order. README MUST include: project description, prerequisites (Zig version), build instructions (zig build), usage example, API overview, supported targets, license. Verify: zig build docs generates without errors (autodoc), all pub symbols appear in generated docs.",
+          "verifies": [
+            "every pub symbol has /// doc comment",
+            "allocator requirements documented per function",
+            "ownership semantics documented (caller owns)",
+            "init/deinit lifecycle documented",
+            "comptime parameter constraints documented",
+            "README with Zig version, build, and usage",
+            "zig build docs generates without errors"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit all Zig documentation and user-facing content for brand voice compliance for: ${goal}. Enforce the Euxis Standard: authoritative, concise, imperative mood. Cut all hedging ('you might', 'it seems', 'this should'), filler ('basically', 'simply', 'just'), passive voice, and corporate jargon ('leverage', 'utilize', 'robust', 'facilitate'). Verify: short declarative sentences (8-15 words), benefit before mechanism, active voice always, one idea per sentence. Audit /// doc comments, //! module docs, README, error messages, and build.zig comments. Output word count reduction and principle violations found.",
+          "verifies": [
+            "imperative mood enforced throughout",
+            "no hedging or filler words",
+            "active voice only",
+            "sentences 8-15 words",
+            "benefit before mechanism",
+            "no corporate jargon",
+            "brand voice audit complete with metrics"
+          ]
+        }
+      ],
+      "checkpoint": "All pub APIs documented, allocator/lifecycle documented, autodoc clean, brand voice enforced",
+      "abort_on_failure": true,
+      "failure_message": "Documentation gate failed. Missing doc comments, undocumented allocators, or voice violations detected."
+    },
+    {
+      "phase": 7,
+      "name": "API Design & UX",
+      "gate": "api-design",
+      "principle": "Is the API ergonomic, discoverable, and user-friendly?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "designer",
+          "task_template": "Audit Zig API ergonomics for: ${goal}. Verify allocator API pattern: every function that allocates accepts Allocator as parameter, init/deinit pairs symmetric, returned memory ownership clear. Verify error handling UX: error sets are specific (not anyerror), error names descriptive (error.FileNotFound not error.Err), error return traces enabled in debug for diagnostics. Verify type-driven design: tagged unions for state machines, packed structs only for wire protocols, extern structs only for C interop, comptime generics with clear constraints. If CLI: verify std.process.ArgIterator or clap for argument parsing, --help comprehensive, exit codes (0=success, 1=error), stderr for errors, stdout for data. If library: verify minimal pub surface, no pub on implementation details, consistent naming (verb_noun for functions, PascalCase for types). Flag any error.Unexpected without context.",
+          "verifies": [
+            "allocator passed explicitly to all allocating functions",
+            "init/deinit pairs symmetric and documented",
+            "error sets specific (not anyerror)",
+            "error names descriptive",
+            "tagged unions for state machines",
+            "minimal pub API surface",
+            "consistent naming (verb_noun, PascalCase)"
+          ]
+        }
+      ],
+      "checkpoint": "API allocator-explicit, errors specific, types expressive, naming consistent",
+      "abort_on_failure": true,
+      "failure_message": "API design gate failed. Implicit allocators, anyerror usage, or naming inconsistencies detected."
+    },
+    {
+      "phase": 8,
+      "name": "Hardening & Release",
+      "gate": "hardening",
+      "principle": "Is it release-ready with baselines, changelogs, and semver?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Stress test and establish performance baselines for: ${goal}. Benchmark with std.testing.Timer or custom timing. Compare all optimize modes: Debug (baseline), ReleaseSafe (safety + speed), ReleaseFast (maximum speed), ReleaseSmall (minimum size). Record: binary sizes per mode, execution time per mode, memory usage per mode. Test with large inputs: 10x and 100x typical workload. Verify: no memory leaks under sustained load (std.testing.allocator or GeneralPurposeAllocator with safety), no unbounded memory growth, comptime evaluation completes within reasonable compile time. Test under memory pressure: FixedBufferAllocator with constrained size, verify graceful OutOfMemory handling. Verify binary reproducibility: same source produces identical binary (bit-for-bit). Target: low memory, low CPU, smallest ReleaseSmall binary possible.",
+          "verifies": [
+            "benchmarks across all optimize modes",
+            "binary sizes recorded (Debug/Safe/Fast/Small)",
+            "no memory leaks under sustained load",
+            "large input stress tested (10x, 100x)",
+            "graceful OutOfMemory handling verified",
+            "comptime evaluation completes in reasonable time",
+            "binary reproducibility verified",
+            "low memory and CPU under sustained load"
+          ]
+        },
+        {
+          "agent": "watchdog",
+          "task_template": "Perform exhaustive regression analysis for: ${goal}. Verify CI catches: binary size regressions (per optimize mode), performance regressions (benchmark comparison), test regressions in any optimize mode, zig fmt regressions, cross-compile regressions. Classify every change by risk: pub API changes (breaking for consumers), error set changes, allocator pattern changes, comptime logic changes, C interop changes, build.zig dependency changes. Scan for deprecated Zig patterns flagged >6 months ago (std library renames, removed functions). Verify dead code: unreachable functions, unused imports, unused pub declarations. Verify CI blocks regression merges. Verify Zig master nightly catches upcoming breaking changes.",
+          "verifies": [
+            "binary size regression detection active",
+            "performance regression tracked",
+            "test regressions blocked across optimize modes",
+            "change categories classified by risk",
+            "no deprecated patterns (>6 months)",
+            "no dead code (unused pub, unreachable functions)",
+            "CI blocks regression merges"
+          ]
+        },
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify release readiness for: ${goal}. Execute pre-release checklist: zig fmt clean, all optimize modes build, tests pass in Debug and ReleaseSafe, cross-compilation succeeds, std.testing.allocator reports zero leaks, documentation current, no hardcoded secrets. Determine correct semantic version bump: MAJOR for pub API breaks (removed pub functions, changed error sets, allocator changes), MINOR for new pub features, PATCH for fixes. Verify version consistent in build.zig.zon. Generate changelog following Keep a Changelog format. Verify minimum Zig version documented and tested. Draft release notes with binary sizes per optimize mode, supported targets, and breaking changes. Verify rollback plan exists. Coordinate security clearance with sentinel.",
+          "verifies": [
+            "pre-release checklist complete",
+            "semantic version bump correct",
+            "version consistent in build.zig.zon",
+            "changelog generated (Keep a Changelog)",
+            "minimum Zig version documented and tested",
+            "release notes with binary sizes and targets",
+            "rollback plan documented"
+          ]
+        }
+      ],
+      "checkpoint": "All modes tested, binary sizes tracked, regressions blocked, release-ready with semver",
+      "abort_on_failure": false,
+      "failure_message": "Hardening findings detected. Review optimize mode results, regressions, and release readiness."
+    },
+    {
+      "phase": 9,
+      "name": "Final Truth Gate",
+      "gate": "truth",
+      "principle": "Is every claim backed by evidence?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "reviewer",
+          "task_template": "Final gate for: ${goal}. Validate evidence from all prior phases. Verify: architecture scores at target (Tech Debt 10/10, Modularity 100/100), explicit allocator passing everywhere, every init/deinit paired, error handling complete (no silent discard, unreachable proven), comptime maximized, best practices researched with citations, zig fmt clean, all four optimize modes build, tests pass in Debug and ReleaseSafe, cross-platform verified (linux/macos/windows, amd64/arm64), std.testing.allocator zero leaks, error sets specific, all pub symbols documented with allocator/lifecycle semantics, brand voice audit passed, CI enforces all gates, benchmarks baselined across modes, regressions blocked, release readiness confirmed. Cross-check agent findings for contradictions. Issue PASS or FAIL.",
+          "verifies": [
+            "all gate claims backed by evidence",
+            "no contradictions between agents",
+            "explicit allocators and init/deinit confirmed",
+            "error handling complete (unreachable proven)",
+            "cross-platform parity confirmed",
+            "std.testing.allocator zero leaks",
+            "CI fully enforced",
+            "documentation and brand voice verified",
+            "release readiness confirmed"
+          ]
+        },
+        {
+          "agent": "auditor",
+          "task_template": "Compliance audit for: ${goal}. Scan for PII exposure in logs, error messages, and debug output. Verify no secrets in source, build.zig, or build.zig.zon. Audit all dependency licenses: reject copyleft (GPL, AGPL) in permissive projects without explicit approval. Verify copyright headers present on all .zig files (or LICENSE file covering all). Check for unauthorized data flows to external endpoints. Verify .gitignore excludes zig-cache/, zig-out/, .env, credentials. If C interop: verify C dependency licenses separately. If shipping binaries: verify SBOM generated, supported targets documented. Flag any compliance violation with regulatory reference and remediation. Issue PASS, FAIL, or WARN verdict.",
+          "verifies": [
+            "no PII in logs or error output",
+            "no secrets in source or build files",
+            "all dependency licenses cleared",
+            "copyright headers or LICENSE covering all files",
+            "no unauthorized data flows",
+            "C interop licenses verified separately",
+            "SBOM generated for binary releases",
+            "compliance verdict issued (PASS/FAIL/WARN)"
+          ]
+        },
+        {
+          "agent": "critic",
+          "task_template": "Adversarial review of all gate findings for: ${goal}. Challenge assumptions from every prior phase. For each gate's PASS claim: invert the assumption and test what happens if wrong. Challenge allocator claims: does explicit allocator passing mean no leaks, or are there error paths where errdefer is missing, arena allocators freed too early, or GeneralPurposeAllocator safety checks disabled in ReleaseFast? Challenge comptime claims: does comptime evaluation mean faster runtime, or are there cases where excessive comptime generates bloated binary code (monomorphization explosion, large lookup tables)? Challenge safety claims: does ReleaseSafe passing mean no UB, or are there undefined behaviors in C interop (@cImport code), packed struct access patterns, or @ptrCast chains that ReleaseSafe cannot catch? Perform pre-mortem: assume the library caused a production crash 6 months later, enumerate top 5 reasons. Assess blast radius. If all agents agree on PASS, verify it is not groupthink. Issue PROCEED, PROCEED WITH SAFEGUARDS, or RECONSIDER verdict.",
+          "verifies": [
+            "all assumptions tested (inversion analysis)",
+            "allocator claims challenged (missing errdefer, arena lifetime)",
+            "comptime challenged (monomorphization bloat, lookup table size)",
+            "safety challenged (C interop UB, packed struct, @ptrCast chains)",
+            "pre-mortem completed (top 5 failure modes)",
+            "blast radius assessed for remaining risks",
+            "groupthink checked (counter-scenarios tested)",
+            "critic verdict issued (PROCEED/SAFEGUARDS/RECONSIDER)"
+          ]
+        }
+      ],
+      "checkpoint": "Reviewer sign-off, compliance cleared, critic challenge passed",
+      "abort_on_failure": true,
+      "failure_message": "Final truth gate failed. Unverified claims, compliance issues, or critic objections detected."
+    }
+  ]
+}

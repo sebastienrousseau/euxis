@@ -1,11 +1,11 @@
 ---
 protocol_id: artifact-output-contract
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 priority: "RED"
 ---
 
-## ARTIFACT & OUTPUT CONTRACT PROTOCOL (v0.0.6)
+## ARTIFACT & OUTPUT CONTRACT PROTOCOL (v0.0.7)
 
 Every Euxis agent MUST produce deliverables that conform to a canonical artifact type. Unstructured output is forbidden in orchestrated workflows.
 
@@ -13,15 +13,15 @@ Every Euxis agent MUST produce deliverables that conform to a canonical artifact
 
 | Type | Description | Required Sections | Agents |
 |------|-------------|-------------------|--------|
-| `CODE_CHANGE` | Source code modification | Diff, Rationale, Test Evidence | `bug-fixer`, `legacy-maintainer`, `automation-engineer`, `perf-optimizer` |
-| `ANALYSIS_REPORT` | Investigation or audit output | Summary, Findings (severity-tagged), Evidence, Recommendations | `architect`, `edge-hunter`, `deep-researcher`, `data-steward`, `system-critic` |
-| `TEST_REPORT` | Test execution results | Scope, Pass/Fail Matrix, Coverage Delta, Blockers | `unit-tester`, `qa-coordinator` |
-| `PLAN` | Orchestration or project plan | Goal, Phases (DAG), Success Criteria, Delegation Commands | `orchestrator`, `product-manager` |
-| `DOCUMENTATION` | User-facing or internal docs | Title, Audience, Content, Version Reference | `tech-writer`, `devrel-advocate`, `librarian` |
-| `RELEASE_ARTIFACT` | Changelog, release notes, manifest | Version, Changelog, Release Notes, Rollback Plan | `release-manager` |
-| `REVIEW_VERDICT` | Quality gate assessment | Checklist, Findings, Verdict (PASS/CONDITIONAL_PASS/FAIL), Blockers | `reviewer`, `compliance-officer` |
-| `CHALLENGE_REPORT` | Adversarial review | Decision Type, Assumptions, Pre-Mortem, Blast Radius, Verdict | `system-critic` |
-| `CONTENT` | Marketing, social, brand content | Audience, Channel, Content, CTA | `growth-marketer`, `social-manager`, `brand-evangelist` |
+| `CODE_CHANGE` | Source code modification | Diff, Rationale, Test Evidence | `debugger`, `maintainer`, `automator`, `optimizer` |
+| `ANALYSIS_REPORT` | Investigation or audit output | Summary, Findings (severity-tagged), Evidence, Recommendations | `architect`, `pentester`, `researcher`, `telemetry`, `critic` |
+| `TEST_REPORT` | Test execution results | Scope, Pass/Fail Matrix, Coverage Delta, Blockers | `tester`, `qa` |
+| `PLAN` | Orchestration or project plan | Goal, Phases (DAG), Success Criteria, Delegation Commands | `orchestrator`, `planner` |
+| `DOCUMENTATION` | User-facing or internal docs | Title, Audience, Content, Version Reference | `writer`, `ambassador`, `librarian` |
+| `RELEASE_ARTIFACT` | Changelog, release notes, manifest | Version, Changelog, Release Notes, Rollback Plan | `gatekeeper` |
+| `REVIEW_VERDICT` | Quality gate assessment | Checklist, Findings, Verdict (PASS/CONDITIONAL_PASS/FAIL), Blockers | `reviewer`, `compliance` |
+| `CHALLENGE_REPORT` | Adversarial review | Decision Type, Assumptions, Pre-Mortem, Blast Radius, Verdict | `critic` |
+| `CONTENT` | Marketing, social, brand content | Audience, Channel, Content, CTA | `marketer`, `social`, `evangelist` |
 | `SUMMARY` | Spoken or written synthesis | Key Points, Context, Omissions | `butler` |
 
 ### 2. Required Sections Per Type
@@ -68,7 +68,7 @@ An artifact is DONE when ALL of the following are true:
 
 1. The `reviewer` agent MUST verify artifact completeness against this contract before issuing a PASS verdict.
 2. The `orchestrator` MUST reject any phase output that does not match a canonical artifact type.
-3. Agents MUST NOT invent custom artifact types. If a task does not fit an existing type, escalate to `product-manager` to define a new type.
+3. Agents MUST NOT invent custom artifact types. If a task does not fit an existing type, escalate to `planner` to define a new type.
 4. Artifacts with `FAILURE` status MUST include a Reflexion block (per Mandatory Protocol Section 4, Step A1/2).
 5. Multiple artifacts in a single response MUST be numbered and clearly delimited with `---` separators.
 

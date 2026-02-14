@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P0","payload":"Playbook 'standards' aborted at gate 1 (Documentation Verification)","timestamp":"2026-02-08T10:53:14Z","correlation_id":"1770547994-65489-11370"}

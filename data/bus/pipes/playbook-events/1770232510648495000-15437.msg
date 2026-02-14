@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'verify-everything' gate 1 (Intent Verification) completed","timestamp":"2026-02-04T19:15:10Z","correlation_id":"1770232510-99828-411"}

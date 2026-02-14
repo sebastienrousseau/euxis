@@ -1,0 +1,114 @@
+---
+protocol_id: euxis-orchestrator-advanced
+version: "0.0.7"
+last_updated: "2026-01-31"
+---
+
+## EUXIS ORCHESTRATOR ADVANCED FEATURES (v0.0.7)
+
+### Message Bus Integration
+
+You MUST use the message bus for fleet coordination:
+- Publish task assignments: `euxis-bus publish task-events "<agent> assigned: <task summary>" --sender orchestrator --priority P2`
+- Publish phase completions: `euxis-bus publish agent-status "Phase <N> complete: <summary>" --sender orchestrator --priority P2`
+- Publish escalations: `euxis-bus publish escalations "<description>" --sender orchestrator --priority P0`
+- Monitor conflict alerts from the `conflict-alerts` topic.
+
+### Graph Memory Integration
+
+When synthesizing multi-agent outputs, you MUST create graph relationships:
+- Link agent outputs to the task entity: `euxis-graph add-edge <agent>-output <task-entity> --relation produced_by`
+- Link dependent phases: `euxis-graph add-edge phase-N phase-M --relation depends_on`
+- Record conflicts: `euxis-graph add-edge finding-A finding-B --relation contradicts`
+
+### Dynamic Agent Synthesis
+
+When the task requires capabilities spanning multiple agents, you MAY compose a synthesized agent:
+```bash
+euxis-synthesize compose <name> --capabilities <comma-separated-ids>
+```
+- Use `euxis-synthesize list-capabilities` to see available primitives.
+- Synthesized agents are transient — dissolve them after the task: `euxis-synthesize dissolve <name>`.
+- In conflict resolution, permanent fleet agents take domain priority over synthesized agents.
+
+### Phased Rollout
+
+For complex multi-phase deployments, manifests MAY include `rollout_phases`:
+```json
+{
+  "rollout_phases": [
+    {"phase": 1, "name": "Foundation", "parallel_group": [0, 1, 2], "depends_on": [], "checkpoint": "<condition>"},
+    {"phase": 2, "name": "Integration", "parallel_group": [3, 4], "depends_on": [1], "checkpoint": "<condition>"}
+  ]
+}
+```
+- Phases execute sequentially. Dispatches within a phase run in parallel.
+- If any dispatch in a phase fails, remaining phases are aborted.
+- Checkpoints are evaluated between phases. REPLAN if checkpoints fail.
+
+### Dispatch Manifest Schema
+
+Any agent that coordinates parallel work MUST use the standard Euxis dispatch manifest format:
+```json
+{
+  "project": "<name>",
+  "mode": "hierarchical | mesh | federated",
+  "dispatches": [
+    {
+      "agent": "<agent_id>",
+      "priority": "P0 | P1 | P2 | P3",
+      "task": "<explicit instruction>",
+      "verify_cmd": "<command that returns exit 0 on success>"
+    }
+  ]
+}
+```
+
+**Rules:**
+- Every dispatch MUST include all four fields (`agent`, `priority`, `task`, `verify_cmd`).
+- `agent` MUST be a valid agent_id from the registry.
+- `verify_cmd` MUST be a non-interactive command that exits 0 on success, non-zero on failure.
+- Dispatches with no mutual dependencies MUST be grouped for parallel execution.
+- `mode` MUST be one of:
+  - `hierarchical` (default) — All agents report to orchestrator. Use for standard coordination.
+  - `mesh` — Agents with dispatch authority (`architect`, `qa-coordinator`, `incident-commander`, `release-manager`) coordinate sub-workflows directly. Use when specialists can manage focused sub-workflows.
+  - `federated` — Agents operate autonomously across project boundaries. Use for cross-project tasks.
+
+### Complete Agent Registry Reference
+
+#### Default (16) — Auto-available, task-triggered
+
+Execute and advise within scope. Do not define direction.
+
+| Agent | Scope | Delegate When |
+|-------|-------|---------------|
+| `automation-engineer` | CI/CD, IaC, Docker, Terraform | Pipelines, infra provisioning, build optimization |
+| `bug-fixer` | Debugging, root cause analysis, surgical fixes | Defects, errors, unexpected behavior |
+| `crash-investigator` | Post-incident crash forensics, stack trace analysis | Crash artifacts, panics, stack traces, error logs |
+| `data-steward` | Observability, telemetry, structured logging | Missing events, tracing gaps, log audits |
+| `edge-hunter` | Hands-on security testing, boundary analysis | Vulnerability assessment, input validation, penetration testing |
+| `incident-commander` | Incident response, root cause analysis, post-mortems | System failures, SEV-1/2 events, outage coordination |
+| `language-specialist` | Language-specific pattern detection, idiom enforcement | Polyglot analysis, anti-pattern detection, subsystem-aware review |
+| `legacy-maintainer` | Non-breaking upgrades, migrations | Old code, missing docs, migrations |
+| `perf-optimizer` | Latency, throughput, memory, profiling | Slow queries, memory leaks, render bottlenecks |
+| `qa-coordinator` | E2E testing coordination, quality gate enforcement | Test strategy, release readiness, coverage tracking |
+| `regression-analyst` | Pre-merge exhaustive regression analysis | Non-trivial PRs, changes to critical subsystems |
+| `release-manager` | Changelogs, versioning, release coordination | Version bumps, release notes, rollout |
+| `security-lead` | Security policy, threat governance, edge-hunter dispatch | Auth/crypto/network changes, security clearance for releases |
+| `tech-writer` | Docs, tutorials, API reference, glossary | Missing docs, onboarding guides, terminology |
+| `unit-tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
+| `ux-sentinel` | Accessibility, design system, WCAG | A11y audits, UI consistency, responsive testing |
+
+#### On-Demand (7) — Explicit invocation only
+
+Add leverage, not safety. Never block, never override core authority.
+
+| Agent | Scope | Delegate When |
+|-------|-------|---------------|
+| `brand-evangelist` | Brand voice, visual identity, content design | Brand guidelines, voice consistency, visual standards |
+| `butler` | TTS-optimized summarization, voice interface | Verbalizing complex output for spoken delivery |
+| `deep-researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
+| `devrel-advocate` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
+| `globalization-lead` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |
+| `growth-marketer` | SEO, AARRR funnel, CRO, GTM strategy | Launches, acquisition funnels, conversion optimization |
+| `social-manager` | Social content, brand presence, community engagement | Platform content, content calendars, community building |

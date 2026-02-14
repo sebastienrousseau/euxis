@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# (c) 2026 Euxis Fleet. All rights reserved.
+set -euo pipefail
 
 EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/squads.json"
@@ -81,7 +82,7 @@ cmd_info() {
   local step=1
   while IFS= read -r agent; do
     echo "  $step. $agent"
-    ((step++))
+    ((step++)) || true
   done < <(echo "$combo" | jq -r '.chain[]')
 }
 
@@ -152,7 +153,7 @@ Continue the chain. Build on the previous output."
     echo "$output"
     echo ""
     context="$output"
-    ((step++))
+    ((step++)) || true
   done < <(echo "$combo" | jq -r '.chain[]')
 
   echo "═══════════════════════════════════════════════════════"

@@ -1,0 +1,17 @@
+{
+  "id": "${PLAYBOOK_ID}",
+  "name": "${PLAYBOOK_NAME}",
+  "description": "${DESCRIPTION}",
+  "version": "1.0",
+  "restart_policy": "from_failed_gate",
+  "phases": [
+    {
+      "phase": 0,
+      "name": "${PHASE_0_NAME}",
+      "mode": "hierarchical",
+      "checkpoint": "${CHECKPOINT_0}",
+      "abort_on_failure": true,
+      "squad": "${SQUAD_ID}"
+    }
+  ]
+}

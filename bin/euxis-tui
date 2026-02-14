@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# EUXIS ETX: Modern Terminal Experience
+# (c) 2026 Euxis Fleet. All rights reserved.
+#
+# Launch the ETX terminal interface for the Euxis agent fleet.
+# Built on Python Textual for rich, accessible TUI rendering.
+
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-tui — Euxis Terminal Experience (ETX)
+
+Usage:
+  euxis-tui [OPTIONS]
+
+Launches the ETX terminal interface for the Euxis agent fleet.
+Built on Python Textual for rich, accessible TUI rendering.
+
+Options:
+  -h, --help    Show this help text
+
+Requirements:
+  - Python venv at ~/.euxis/.venv
+  - Textual library (auto-installed on first run)
+
+Examples:
+  euxis-tui           # Launch the TUI
+  euxis-tui --help    # Show this help
+EOF
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
+EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
+VENV_PYTHON="${EUXIS_HOME}/.venv/bin/python"
+
+# Verify Python venv exists
+if [[ ! -x "${VENV_PYTHON}" ]]; then
+    echo "[euxis] ERROR: Python venv not found at ${EUXIS_HOME}/.venv"
+    echo "[euxis] Run: ${EUXIS_HOME}/setup.sh to initialize"
+    exit 1
+fi
+
+# Verify Textual is installed
+if ! "${VENV_PYTHON}" -c "import textual" 2>/dev/null; then
+    echo "[euxis] Installing ETX dependencies..."
+    if command -v uv >/dev/null 2>&1; then
+        uv pip install textual textual-dev --python "${VENV_PYTHON}"
+    else
+        "${VENV_PYTHON}" -m pip install textual textual-dev
+    fi
+fi
+
+# Launch ETX
+cd "${EUXIS_HOME}"
+exec "${VENV_PYTHON}" -m tui "$@"

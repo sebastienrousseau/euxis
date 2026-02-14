@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'verify-everything' gate 4 (Release Quality Gates) completed","timestamp":"2026-02-01T22:30:49Z","correlation_id":"1769985049-582328-6867"}

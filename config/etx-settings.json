@@ -1,0 +1,11 @@
+{
+  "theme": "etx-liquid-glass",
+  "default_provider": "claude",
+  "show_agent_tags": true,
+  "reduced_motion": false,
+  "accessible_mode": false,
+  "locale": "en",
+  "grid_columns": 4,
+  "recent_agents": [],
+  "recent_commands": []
+}

@@ -1,7 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS VERIFY: Pre-Commit Quality Gate
 # Runs: Health -> Lint -> Unit Tests -> Certify -> Doc Check
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-verify — Pre-commit quality gate
+
+Usage:
+  euxis-verify
+
+Runs health, lint, unit tests, certification, and doc checks.
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="${HOME}/.euxis"
 EUXIS_BIN="${EUXIS_HOME}/bin"
@@ -42,7 +59,8 @@ fi
 
 # 4. Agent Certification (golden dataset + semantic eval)
 echo -n "   [4/5] Certifying Agents...        "
-if "${EUXIS_BIN}/euxis-certify" >/dev/null 2>&1; then
+"${EUXIS_BIN}/euxis-certify" >/dev/null 2>&1 && CERTIFY_RC=0 || CERTIFY_RC=$?
+if [[ $CERTIFY_RC -eq 0 ]]; then
     echo "PASS"
 else
     echo "FAIL"
@@ -53,13 +71,13 @@ fi
 # 5. Documentation Drift
 echo -n "   [5/5] Checking Documentation...   "
 NEWEST_PROMPT=$(find "${EUXIS_HOME}/prompts" -name "*.txt" -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n 1)
-DOC_FILE="${EUXIS_HOME}/USER_GUIDE.md"
+DOC_FILE="${EUXIS_HOME}/docs/user-guide.md"
 
 if [[ ! -f "$DOC_FILE" ]]; then
-    echo "MISSING (USER_GUIDE.md not found)"
+    echo "MISSING (docs/user-guide.md not found)"
 elif [[ -n "$NEWEST_PROMPT" ]] && [[ "$NEWEST_PROMPT" -nt "$DOC_FILE" ]]; then
     echo "DRIFT DETECTED (warning)"
-    echo "   Prompts are newer than USER_GUIDE.md."
+    echo "   Prompts are newer than docs/user-guide.md."
 else
     echo "PASS"
 fi

@@ -1,11 +1,11 @@
 ---
 protocol_id: escalation-severity
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 priority: "ORANGE"
 ---
 
-## ESCALATION & SEVERITY PROTOCOL (v0.0.6)
+## ESCALATION & SEVERITY PROTOCOL (v0.0.7)
 
 This protocol defines the unified severity taxonomy and escalation rules for the entire Euxis fleet. All agents MUST use this taxonomy — no agent-specific severity scales are permitted.
 
@@ -78,15 +78,15 @@ The orchestrator's priority framework (P0-P3) maps to severity as follows:
 
 | Finding Domain | Primary Escalation Target | Secondary |
 |---------------|--------------------------|-----------|
-| Security vulnerability | `security-lead` | `edge-hunter` + `compliance-officer` |
-| Architectural risk | `architect` | `system-critic` |
-| Data integrity | `data-steward` | `orchestrator` |
-| Test failure (blocking) | `qa-coordinator` | `unit-tester` |
-| Compliance violation | `compliance-officer` | `orchestrator` |
-| Performance degradation | `perf-optimizer` | `architect` |
-| User-facing breakage | `product-manager` | `ux-sentinel` |
-| Release blocker | `release-manager` | `orchestrator` |
-| Incident / outage | `incident-commander` | `orchestrator` |
+| Security vulnerability | `sentinel` | `pentester` + `compliance` |
+| Architectural risk | `architect` | `critic` |
+| Data integrity | `telemetry` | `orchestrator` |
+| Test failure (blocking) | `qa` | `tester` |
+| Compliance violation | `compliance` | `orchestrator` |
+| Performance degradation | `optimizer` | `architect` |
+| User-facing breakage | `planner` | `ux` |
+| Release blocker | `gatekeeper` | `orchestrator` |
+| Incident / outage | `responder` | `orchestrator` |
 
 ### 7. Escalation Rules
 

@@ -1,0 +1,132 @@
+1..42
+not ok 1 resolve_agent_path finds valid core agent
+# (in test file tests/bats/lib/agents.bats, line 89)
+#   `[[ "${output}" == "${EUXIS_HOME}/config/agents/architect.md" ]]' failed
+not ok 2 resolve_agent_path finds valid default agent
+# (in test file tests/bats/lib/agents.bats, line 95)
+#   `[[ "${output}" == "${EUXIS_HOME}/config/agents/tester.md" ]]' failed
+not ok 3 resolve_agent_path returns empty for invalid agent
+# (in test file tests/bats/lib/agents.bats, line 100)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 4 resolve_agent_path handles empty input
+# (in test file tests/bats/lib/agents.bats, line 106)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 5 resolve_agent_path handles missing registry
+# (in test file tests/bats/lib/agents.bats, line 113)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 6 resolve_agent_path handles malformed registry
+# (in test file tests/bats/lib/agents.bats, line 120)
+#   `[[ "${status}" -eq 1 ]]' failed
+ok 7 list_agents shows all available agents
+not ok 8 list_agents filters by type
+# (in test file tests/bats/lib/agents.bats, line 140)
+#   `[[ ! "${output}" =~ "tester" ]]' failed
+not ok 9 list_agents handles invalid type filter
+# (in test file tests/bats/lib/agents.bats, line 146)
+#   `[[ "${output}" == "" ]]' failed
+not ok 10 list_agents handles missing registry
+# (in test file tests/bats/lib/agents.bats, line 152)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 11 _lifecycle_init creates agent state directory
+# (in test file tests/bats/lib/agents.bats, line 164)
+#   `[[ -d "${EUXIS_HOME}/data/agents/newagent" ]]' failed
+not ok 12 agent_lifecycle_transition records state changes
+# (in test file tests/bats/lib/agents.bats, line 173)
+#   `[[ -f "${state_file}" ]]' failed
+not ok 13 agent_lifecycle_transition creates lifecycle log
+# (in test file tests/bats/lib/agents.bats, line 183)
+#   `[[ -f "${log_file}" ]]' failed
+not ok 14 agent_lifecycle_transition handles invalid states
+# (in test file tests/bats/lib/agents.bats, line 189)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 15 agent_get_state returns current state
+# (in test file tests/bats/lib/agents.bats, line 199)
+#   `[[ "${output}" == "active" ]]' failed
+not ok 16 agent_get_state returns unknown for missing state
+# (in test file tests/bats/lib/agents.bats, line 207)
+#   `[[ "${output}" == "unknown" ]]' failed
+not ok 17 list_active_agents shows agents with active state
+# (in test file tests/bats/lib/agents.bats, line 222)
+#   `[[ "${output}" =~ "architect" ]]' failed
+ok 18 count_active_agents returns correct count
+not ok 19 count_active_agents returns 0 when no active agents
+# (in test file tests/bats/lib/agents.bats, line 246)
+#   `[[ "${output}" == "0" ]]' failed
+not ok 20 cleanup_stale_agents removes old state files
+# (in test file tests/bats/lib/agents.bats, line 260)
+#   `[[ "${output}" =~ "Cleaned up" ]]' failed
+ok 21 cleanup_stale_agents preserves recent state files
+not ok 22 register_agent_plugin creates plugin entry
+# (in test file tests/bats/lib/agents.bats, line 285)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 23 register_agent_plugin validates plugin config
+# (in test file tests/bats/lib/agents.bats, line 298)
+#   `[[ "${output}" =~ "Invalid plugin configuration" ]]' failed
+not ok 24 register_agent_plugin prevents duplicate registration
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+#  in test file tests/bats/lib/agents.bats, line 305)
+#   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
+# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+not ok 25 unregister_agent_plugin removes plugin
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+#  in test file tests/bats/lib/agents.bats, line 316)
+#   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
+# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+not ok 26 unregister_agent_plugin handles non-existent plugin
+# (in test file tests/bats/lib/agents.bats, line 328)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 27 list_plugins shows registered plugins
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+#  in test file tests/bats/lib/agents.bats, line 336)
+#   `register_agent_plugin "plugin1" "${plugin1}"' failed with status 127
+# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+not ok 28 list_plugins handles no plugins
+# (in test file tests/bats/lib/agents.bats, line 348)
+#   `[[ "${output}" =~ "No plugins registered" ]]' failed
+not ok 29 agent_probe_liveness checks basic agent availability
+# (in test file tests/bats/lib/agents.bats, line 358)
+#   `[[ "${output}" =~ "Agent tester is alive" ]]' failed
+not ok 30 agent_probe_liveness fails for non-existent agent
+# (in test file tests/bats/lib/agents.bats, line 364)
+#   `[[ "${output}" =~ "Agent not found" ]]' failed
+not ok 31 agent_probe_readiness checks agent readiness
+# (in test file tests/bats/lib/agents.bats, line 373)
+#   `[[ "${output}" =~ "Agent tester is ready" ]]' failed
+not ok 32 agent_probe_readiness fails for inactive agent
+# (in test file tests/bats/lib/agents.bats, line 381)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 33 agent_health_report provides comprehensive status
+# (in test file tests/bats/lib/agents.bats, line 391)
+#   `[[ "${output}" =~ "Health Report for tester" ]]' failed
+ok 34 agents functions handle set -u mode
+ok 35 agents functions handle pipefail mode
+not ok 36 agents functions handle Unicode agent names
+# (in test file tests/bats/lib/agents.bats, line 428)
+#   `[[ "${output}" =~ "测试代理" ]]' failed
+ok 37 agents functions handle concurrent access
+not ok 38 agents functions handle file system errors
+# (in test file tests/bats/lib/agents.bats, line 447)
+#   `[[ "${status}" -eq 1 ]]' failed
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis/data/agents/architect: Permission denied
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis/data/agents/debugger: Permission denied
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis/data/agents/tester: Permission denied
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis/data/agents: Directory not empty
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis/data: Directory not empty
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2/euxis: Directory not empty
+# rm: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.8zSjB4kqx2: Directory not empty
+ok 39 agents functions handle large state files
+ok 40 agent operations are idempotent
+not ok 41 agent lifecycle maintains consistency
+# (in test file tests/bats/lib/agents.bats, line 479)
+#   `[[ "${state1}" == "active" ]]' failed
+# /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.GGEVu0rBHu/date: fork: Resource temporarily unavailable
+not ok 42 plugin management maintains registry integrity
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+#  in test file tests/bats/lib/agents.bats, line 490)
+#   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
+# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+
+The following warnings were encountered during tests:
+BW01: `run`'s command `unregister_agent_plugin nonexistent-plugin` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. `run -127`, to fix this message.
+      (from function `run' in file /opt/homebrew/Cellar/bats-core/1.13.0/lib/bats-core/test_functions.bash, line 420,
+       in test file tests/bats/lib/agents.bats, line 327)

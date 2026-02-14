@@ -39,7 +39,7 @@ import json
 # ============================================================================
 
 # Store in standard user location valid on Mac/Linux/WSL
-DB_PATH = os.path.expanduser("~/.euxis/cortex_db")
+DB_PATH = os.path.expanduser("~/.euxis/data/cortex/db")
 OS_INFO = platform.system()  # Darwin, Linux, or Windows (WSL reports Linux)
 
 # Detect WSL specifically
@@ -54,6 +54,29 @@ if OS_INFO == "Linux":
 
 PLATFORM_LABEL = "WSL" if IS_WSL else OS_INFO
 
+
+# ============================================================================
+# Auto-activate project venv (ensures chromadb is importable)
+# ============================================================================
+
+def _activate_venv():
+    """Add project venv site-packages to sys.path if not already active."""
+    if os.environ.get("VIRTUAL_ENV"):
+        return  # Already in a venv
+    euxis_home = os.path.expanduser("~/.euxis")
+    for venv_dir in (".venv", "venv", "env"):
+        site_pkgs = os.path.join(euxis_home, venv_dir, "lib")
+        if os.path.isdir(site_pkgs):
+            # Find the python3.x directory inside lib/
+            for entry in sorted(os.listdir(site_pkgs)):
+                if not entry.startswith("python"):
+                    continue
+                sp = os.path.join(site_pkgs, entry, "site-packages")
+                if os.path.isdir(sp) and sp not in sys.path:
+                    sys.path.insert(0, sp)
+                    return
+
+_activate_venv()
 
 # ============================================================================
 # Lazy Imports (avoid startup lag for --help / no-args)

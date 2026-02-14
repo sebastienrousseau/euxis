@@ -1,0 +1,44 @@
+1..29
+ok 1 log_info outputs to stderr with correct format
+ok 2 log_info handles empty message
+ok 3 log_info handles special characters and spaces
+ok 4 log_error outputs to stderr with ERROR prefix
+ok 5 log_warn outputs to stderr with WARN prefix
+ok 6 log_debug outputs only when EUXIS_DEBUG=1
+ok 7 log_debug handles EUXIS_DEBUG=0 explicitly
+ok 8 _perf_enabled returns true when performance not disabled
+ok 9 _perf_enabled returns false when EUXIS_PERF_DISABLE=1
+ok 10 _euxis_now_ns returns 0 when performance disabled
+ok 11 _euxis_now_ns returns numeric timestamp when enabled
+not ok 12 _euxis_now_ns handles date command without %N support
+# (in test file tests/bats/lib/common.bats, line 136)
+#   `[[ "${output}" == "1000000000" ]]' failed
+not ok 13 _euxis_now_ns handles no perl available
+# (in test file tests/bats/lib/common.bats, line 158)
+#   `[[ "${output}" == "1234567890000000000" ]]' failed
+not ok 14 _perf_start sets EUXIS_PERF_START_NS
+# (in test file tests/bats/lib/common.bats, line 169)
+#   `[[ -n "${EUXIS_PERF_START_NS}" ]]' failed
+not ok 15 _perf_elapsed_ms calculates elapsed time correctly
+# (in test file tests/bats/lib/common.bats, line 179)
+#   `[[ "${output}" == "500" ]]  # (1000000000 - 500000000) / 1000000' failed
+ok 16 _perf_elapsed_ms returns 0 when performance disabled
+not ok 17 performance_budget enforces time limits
+# (in test file tests/bats/lib/common.bats, line 193)
+#   `[[ "${status}" -eq 1 ]]' failed
+ok 18 performance_budget passes when under budget
+not ok 19 _perf_check_budget logs warnings when over budget
+# (in test file tests/bats/lib/common.bats, line 213)
+#   `[[ "${output}" =~ "PERFORMANCE WARNING" ]]' failed
+not ok 20 _perf_record logs performance metrics
+# (in test file tests/bats/lib/common.bats, line 222)
+#   `[[ "${output}" =~ "test operation completed in 750ms" ]]' failed
+ok 21 start_spinner creates background process
+ok 22 stop_spinner terminates background process
+ok 23 functions handle unbound variables with set -u
+ok 24 functions handle pipefail properly
+ok 25 log functions handle Unicode characters
+ok 26 performance functions handle extreme values
+ok 27 functions are idempotent
+ok 28 functions handle signal interruption gracefully
+ok 29 functions work with different EUXIS_HOME paths

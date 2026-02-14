@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'verify-everything' completed for: Verify PR #759 feat/v0.2.479 Ollama aliases","timestamp":"2026-02-04T19:24:43Z","correlation_id":"1770233083-49374-18265"}

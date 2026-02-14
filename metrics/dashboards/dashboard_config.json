@@ -1,0 +1,178 @@
+{
+  "dashboard_version": "1.0.0",
+  "dashboards": {
+    "agent_performance_overview": {
+      "title": "Agent Performance Overview",
+      "description": "High-level fleet performance metrics",
+      "refresh_interval": 300,
+      "panels": [
+        {
+          "id": "fleet_success_rate",
+          "title": "Fleet Success Rate",
+          "type": "single_stat",
+          "query": "fleet_metrics.fleet_success_rate",
+          "unit": "percent",
+          "thresholds": [
+            {"value": 0.95, "color": "green"},
+            {"value": 0.9, "color": "yellow"},
+            {"value": 0.0, "color": "red"}
+          ]
+        },
+        {
+          "id": "total_tasks_24h",
+          "title": "Total Tasks (24h)",
+          "type": "single_stat",
+          "query": "fleet_metrics.total_tasks",
+          "unit": "short"
+        },
+        {
+          "id": "fleet_avg_duration",
+          "title": "Average Task Duration",
+          "type": "single_stat",
+          "query": "fleet_metrics.fleet_avg_duration_ms",
+          "unit": "milliseconds"
+        },
+        {
+          "id": "active_agents",
+          "title": "Active Agents",
+          "type": "single_stat",
+          "query": "fleet_metrics.active_agents",
+          "unit": "short"
+        },
+        {
+          "id": "agent_success_rates",
+          "title": "Agent Success Rates",
+          "type": "bar_chart",
+          "query": "agent_performance.*.success_rate",
+          "unit": "percent",
+          "limit": 10
+        },
+        {
+          "id": "task_duration_distribution",
+          "title": "Task Duration Distribution",
+          "type": "histogram",
+          "query": "agent_performance.*.avg_duration_ms",
+          "unit": "milliseconds",
+          "buckets": 20
+        }
+      ]
+    },
+    "delegation_analysis": {
+      "title": "Delegation Patterns",
+      "description": "Inter-agent delegation and handoff analysis",
+      "refresh_interval": 600,
+      "panels": [
+        {
+          "id": "delegation_frequency_heatmap",
+          "title": "Delegation Frequency Heatmap",
+          "type": "heatmap",
+          "query": "delegation_patterns.*.delegation_frequency",
+          "unit": "short"
+        },
+        {
+          "id": "handoff_success_rates",
+          "title": "Handoff Success Rates",
+          "type": "bar_chart",
+          "query": "delegation_patterns.*.handoff_success_rate",
+          "unit": "percent",
+          "threshold": 0.95
+        },
+        {
+          "id": "delegation_duration_p95",
+          "title": "Delegation Duration (P95)",
+          "type": "line_chart",
+          "query": "delegation_patterns.*.p95_delegation_duration_ms",
+          "unit": "milliseconds",
+          "time_series": true
+        }
+      ]
+    },
+    "tool_usage_analysis": {
+      "title": "Tool Usage Patterns",
+      "description": "Tool execution performance and usage patterns",
+      "refresh_interval": 600,
+      "panels": [
+        {
+          "id": "tool_success_rates",
+          "title": "Tool Success Rates",
+          "type": "table",
+          "query": "tool_usage_patterns",
+          "columns": ["tool_name", "success_rate", "total_executions", "avg_duration_ms"],
+          "sort": "success_rate"
+        },
+        {
+          "id": "tool_duration_comparison",
+          "title": "Tool Duration Comparison",
+          "type": "box_plot",
+          "query": "tool_usage_patterns.*.median_duration_ms",
+          "unit": "milliseconds"
+        },
+        {
+          "id": "retry_frequency_analysis",
+          "title": "Tool Retry Frequency",
+          "type": "bar_chart",
+          "query": "tool_usage_patterns.*.retry_frequency",
+          "unit": "percent",
+          "alert_threshold": 0.1
+        }
+      ]
+    },
+    "performance_trends": {
+      "title": "Performance Trends",
+      "description": "Historical performance trend analysis",
+      "refresh_interval": 1800,
+      "panels": [
+        {
+          "id": "success_rate_trend",
+          "title": "Success Rate Trend (7d)",
+          "type": "line_chart",
+          "query": "historical_metrics.daily_success_rate",
+          "unit": "percent",
+          "time_range": "7d"
+        },
+        {
+          "id": "duration_trend",
+          "title": "Average Duration Trend (7d)",
+          "type": "line_chart",
+          "query": "historical_metrics.daily_avg_duration",
+          "unit": "milliseconds",
+          "time_range": "7d"
+        },
+        {
+          "id": "task_volume_trend",
+          "title": "Task Volume Trend (7d)",
+          "type": "area_chart",
+          "query": "historical_metrics.daily_task_count",
+          "unit": "short",
+          "time_range": "7d"
+        }
+      ]
+    }
+  },
+  "alerts": [
+    {
+      "name": "low_fleet_success_rate",
+      "condition": "fleet_metrics.fleet_success_rate < 0.9",
+      "severity": "critical",
+      "message": "Fleet success rate below 90%"
+    },
+    {
+      "name": "high_delegation_failure",
+      "condition": "delegation_patterns.*.handoff_success_rate < 0.95",
+      "severity": "warning",
+      "message": "High delegation failure rate detected"
+    },
+    {
+      "name": "tool_performance_degradation",
+      "condition": "tool_usage_patterns.*.success_rate < 0.95",
+      "severity": "warning",
+      "message": "Tool performance degradation detected"
+    },
+    {
+      "name": "high_task_duration",
+      "condition": "agent_performance.*.p95_duration_ms > 300000",
+      "severity": "warning",
+      "message": "High task duration detected (>5min P95)"
+    }
+  ]
+}

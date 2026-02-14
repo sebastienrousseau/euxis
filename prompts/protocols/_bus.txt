@@ -1,6 +1,6 @@
 ---
 partial_id: bus-protocol
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-30"
 ---
 
@@ -21,15 +21,15 @@ Every agent MUST publish status events to the bus at these lifecycle points:
 ### Topic Conventions
 | Topic | Purpose | Default Subscribers |
 |-------|---------|-------------------|
-| `agent-status` | Agent lifecycle events | orchestrator, data-steward |
+| `agent-status` | Agent lifecycle events | orchestrator, telemetry |
 | `task-events` | Task creation/assignment/completion | orchestrator |
 | `memory-updates` | Cortex memory changes | librarian, orchestrator |
 | `conflict-alerts` | Inter-agent conflict detection | orchestrator, reviewer |
-| `health-checks` | Periodic health status | data-steward |
+| `health-checks` | Periodic health status | telemetry |
 | `escalations` | Priority escalation requests | orchestrator |
 
 ### Rules
 - NEVER publish sensitive data (credentials, PII) to any topic.
 - P0 events MUST be published immediately, not batched.
-- Custom topics are allowed but MUST be registered in bus/topics.json.
+- Custom topics are allowed but MUST be registered in data/bus/topics.json.
 - Messages MUST NOT exceed 4096 bytes.

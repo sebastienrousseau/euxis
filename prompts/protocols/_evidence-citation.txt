@@ -1,11 +1,11 @@
 ---
 protocol_id: evidence-citation
-version: "0.0.6"
+version: "0.0.7"
 last_updated: "2026-01-31"
 priority: "YELLOW"
 ---
 
-## EVIDENCE & CITATION PROTOCOL (v0.0.6)
+## EVIDENCE & CITATION PROTOCOL (v0.0.7)
 
 Every claim, finding, and recommendation produced by an Euxis agent MUST be grounded in evidence. Unsupported assertions are protocol violations.
 
@@ -86,8 +86,8 @@ Evidence degrades over time:
 1. The `reviewer` agent MUST reject artifacts with E5 evidence in findings.
 2. The `reviewer` agent MUST flag findings with no citation as incomplete.
 3. During conflict resolution, evidence grade determines winner when priority is equal (per Conflict Resolution Protocol).
-4. The `system-critic` MUST verify evidence grades when challenging assumptions.
-5. The `deep-researcher` MUST cite all sources with explicit grades in research outputs.
+4. The `critic` MUST verify evidence grades when challenging assumptions.
+5. The `researcher` MUST cite all sources with explicit grades in research outputs.
 
 # (c) 2026 Euxis Fleet. All rights reserved.
 # Enterprise Unified eXecution Intelligence System

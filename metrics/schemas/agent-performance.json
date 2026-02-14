@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0.0",
+  "metrics_taxonomy": {
+    "performance_events": {
+      "Agent:TaskStarted": {
+        "description": "Agent begins task execution",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "session_id": {"type": "string", "required": true},
+          "task_type": {"type": "enum", "values": ["user_request", "delegation", "orchestrated", "synthesized"], "required": true},
+          "priority": {"type": "enum", "values": ["P0", "P1", "P2", "P3"], "required": true},
+          "task_complexity": {"type": "enum", "values": ["simple", "medium", "complex"], "required": false},
+          "parent_session": {"type": "string", "required": false},
+          "delegation_chain": {"type": "array", "items": "string", "required": false}
+        },
+        "log_level": "INFO",
+        "cardinality": "high"
+      },
+      "Agent:TaskCompleted": {
+        "description": "Agent successfully completes task",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "session_id": {"type": "string", "required": true},
+          "duration_ms": {"type": "integer", "required": true},
+          "status": {"type": "enum", "values": ["SUCCESS", "WARNING", "FAILURE"], "required": true},
+          "artifacts_created": {"type": "integer", "required": true},
+          "cortex_operations": {"type": "integer", "required": true},
+          "tool_calls_count": {"type": "integer", "required": true},
+          "handoff_required": {"type": "boolean", "required": true},
+          "delegation_count": {"type": "integer", "required": false}
+        },
+        "log_level": "INFO",
+        "cardinality": "high"
+      },
+      "Agent:TaskFailed": {
+        "description": "Agent fails to complete task",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "session_id": {"type": "string", "required": true},
+          "duration_ms": {"type": "integer", "required": true},
+          "failure_reason": {"type": "string", "required": true},
+          "error_category": {"type": "enum", "values": ["timeout", "scope_boundary", "resource_unavailable", "validation_error", "internal_error"], "required": true},
+          "partial_completion": {"type": "boolean", "required": true},
+          "reflexion_generated": {"type": "boolean", "required": true}
+        },
+        "log_level": "ERROR",
+        "cardinality": "medium"
+      },
+      "Agent:DelegationStarted": {
+        "description": "Agent delegates work to another agent",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "delegating_agent": {"type": "string", "required": true},
+          "target_agent": {"type": "string", "required": true},
+          "delegation_reason": {"type": "enum", "values": ["scope_boundary", "specialization", "workload_distribution"], "required": true},
+          "priority": {"type": "enum", "values": ["P0", "P1", "P2", "P3"], "required": true}
+        },
+        "log_level": "INFO",
+        "cardinality": "medium"
+      },
+      "Agent:DelegationCompleted": {
+        "description": "Delegated work returns to delegating agent",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "delegating_agent": {"type": "string", "required": true},
+          "target_agent": {"type": "string", "required": true},
+          "total_duration_ms": {"type": "integer", "required": true},
+          "handoff_successful": {"type": "boolean", "required": true},
+          "quality_score": {"type": "float", "min": 0.0, "max": 1.0, "required": false}
+        },
+        "log_level": "INFO",
+        "cardinality": "medium"
+      }
+    },
+    "resource_events": {
+      "Agent:MemoryOperation": {
+        "description": "Agent performs Cortex memory operation",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "operation": {"type": "enum", "values": ["remember", "recall", "relate"], "required": true},
+          "memory_type": {"type": "enum", "values": ["episodic", "semantic", "procedural"], "required": true},
+          "operation_duration_ms": {"type": "integer", "required": true}
+        },
+        "log_level": "DEBUG",
+        "cardinality": "high"
+      },
+      "Agent:ToolExecution": {
+        "description": "Agent executes tool call",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "tool_name": {"type": "string", "required": true},
+          "execution_duration_ms": {"type": "integer", "required": true},
+          "success": {"type": "boolean", "required": true},
+          "retries": {"type": "integer", "required": false}
+        },
+        "log_level": "DEBUG",
+        "cardinality": "very_high"
+      }
+    },
+    "quality_events": {
+      "Agent:ReflexionGenerated": {
+        "description": "Agent generates reflexion on failure",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agent_id": {"type": "string", "required": true},
+          "failure_category": {"type": "string", "required": true},
+          "contraindication_stored": {"type": "boolean", "required": true}
+        },
+        "log_level": "WARN",
+        "cardinality": "low"
+      },
+      "Agent:ConflictDetected": {
+        "description": "Conflict detected between agent outputs",
+        "properties": {
+          "correlation_id": {"type": "string", "required": true},
+          "timestamp": {"type": "iso8601", "required": true},
+          "agents": {"type": "array", "items": "string", "required": true},
+          "conflict_type": {"type": "enum", "values": ["finding", "recommendation", "artifact"], "required": true},
+          "resolution_method": {"type": "enum", "values": ["priority", "evidence", "negotiation", "escalation"], "required": true}
+        },
+        "log_level": "WARN",
+        "cardinality": "low"
+      }
+    }
+  },
+  "aggregation_rules": {
+    "completion_time_metrics": {
+      "group_by": ["agent_id", "task_type"],
+      "metrics": ["avg_duration_ms", "p50_duration_ms", "p95_duration_ms", "p99_duration_ms"],
+      "window": "1h"
+    },
+    "success_rate_metrics": {
+      "group_by": ["agent_id", "priority"],
+      "metrics": ["success_rate", "failure_rate", "total_tasks"],
+      "window": "24h"
+    },
+    "delegation_pattern_metrics": {
+      "group_by": ["delegating_agent", "target_agent"],
+      "metrics": ["delegation_frequency", "avg_delegation_duration", "handoff_success_rate"],
+      "window": "7d"
+    }
+  }
+}

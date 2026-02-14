@@ -1,0 +1,1 @@
+{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 2 (Portability & Platform Parity) completed","timestamp":"2026-02-08T23:52:27Z","correlation_id":"1770594747-63090-28213"}

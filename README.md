@@ -1,528 +1,504 @@
 # Euxis
 
-**Enterprise Unified eXecution Intelligence System**
-
-Version 0.0.6
+**41 AI specialists. Deploy in seconds.**
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
 [![Platform][platform-badge]][platform-url]
 [![Agents][agents-badge]][agents-url]
 
-## Overview
+---
 
-Euxis gives you 31 specialist AI agents that plan, execute, and verify engineering tasks — so you can focus on what matters. Every decision is tracked. Every outcome is verified. Every lesson is remembered.
+## What Euxis Does
 
-Build faster. Ship with confidence.
+Euxis coordinates 41 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
 
-## Table of Contents
+**Ship features faster.** Break complex goals into tasks. Delegate to specialists. Get working solutions.
 
-- [Overview](#overview)
-- [Get Started](#get-started)
-- [How It Works](#how-it-works)
-- [Your Specialist Team](#your-specialist-team)
-- [Usage](#usage)
-- [Persistent Memory](#persistent-memory)
-- [Parallel Execution](#parallel-execution)
-- [Built-In Quality Assurance](#built-in-quality-assurance)
-- [Automatic Task Routing](#automatic-task-routing)
-- [Security Model](#security-model)
-- [Squads](#squads)
-- [Playbooks](#playbooks)
-- [Combos](#combos)
-- [Codex](#codex)
-- [CLI Reference](#cli-reference)
-- [Directory Structure](#directory-structure)
-- [Advanced](#advanced)
-- [License](#license)
+```bash
+euxis architect "Design a caching layer for our API"
+```
+
+**Catch bugs before production.** Security agents audit code. Testing agents verify logic. Quality gates block broken builds.
+
+```bash
+euxis-squad deploy quality "Audit the authentication module"
+```
+
+**Learn from every interaction.** The Cortex stores decisions, fixes, and lessons. Agents improve over time.
+
+```bash
+euxis-cortex remember "Fixed race condition with mutex lock" "debugger" --type procedural
+```
 
 ---
 
-## Get Started
+## Quick Start
 
-### Prerequisites
+Get your first agent running in 2 minutes.
 
-You need Bash 4.0+ and Python 3.8+, plus at least one AI provider.
-
-Euxis works with 10 providers out of the box:
-
-| Provider | CLI | Best For |
-|:---------|:----|:---------|
-| [Claude][claude-url] | `claude` | Reasoning, architecture, strategy |
-| [Gemini][gemini-url] | `gemini` | Research with large context |
-| [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
-| [Codex CLI][codex-url] | `codex` | OpenAI models |
-| [OpenCode][opencode-url] | `opencode` | Local code generation |
-| [Qwen Code][qwen-url] | `qwen` | Open-source agentic coding (256K context) |
-| [Crush][crush-url] | `crush` | Multi-model TUI agent |
-| [Kilo Code][kilo-url] | `kilo` | Multi-model agentic CLI |
-| [Amazon Q][amazon-q-url] | `kiro-cli` | AWS-native developer agent |
-| [Goose][goose-url] | `goose` | Open-source MCP-native agent |
-
-### Install
+### 1. Install
 
 ```bash
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 ~/.euxis/setup.sh
 ```
 
-Add `~/bin` to your `PATH`:
+### 2. Add to PATH
 
 ```bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.profile && source ~/.profile
+# For Zsh (macOS default)
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+
+# For Bash
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
-### Verify
+### 3. Verify Installation
 
 ```bash
-euxis-health      # 8-point fleet integrity check
-euxis-certify     # Full 6-gate certification pipeline
+euxis-health
 ```
+
+**Expected output:**
+```
+✅ Agent Naming Convention
+✅ Script Hardening
+✅ Orphaned Executables
+✅ Protocol Headers
+✅ Documentation Drift
+✅ Certification Status
+✅ Provider Dependencies
+✅ Codex Integration
+
+Fleet Status: HEALTHY (8/8 checks passed)
+```
+
+### 4. Run Your First Agent
+
+```bash
+euxis architect "What makes a good REST API?"
+```
+
+**Expected output:**
+```
+[euxis] Agent: architect
+[euxis] Provider: claude
+[euxis] ⠋ architect (claude)...
+
+THOUGHT 1: I need to outline the key principles that make REST APIs well-designed...
+
+FINAL ANSWER:
+A well-designed REST API follows these principles:
+
+1. **Resource-Oriented Design**: URLs represent resources, not actions
+   - Good: GET /users/123
+   - Avoid: GET /getUser?id=123
+
+2. **Proper HTTP Methods**: Use verbs correctly
+   - GET for retrieval, POST for creation, PUT for updates, DELETE for removal
+
+3. **Consistent Response Format**: JSON with predictable structure
+   - Always include status, data, and error fields
+
+[... continues with detailed recommendations ...]
+```
+
+---
+
+## How to Use Euxis
+
+Three patterns cover most engineering tasks.
+
+### Pattern 1: Single Agent
+
+One agent, one task, one answer. Use for focused questions.
+
+```bash
+euxis <agent> "<task>" [provider]
+```
+
+**Examples:**
+
+```bash
+# Debug a problem
+euxis debugger "Why does login return null when password contains special characters?"
+
+# Research options
+euxis researcher "Compare PostgreSQL vs MySQL for a write-heavy workload"
+
+# Write documentation
+euxis writer "Create API documentation for the /users endpoint"
+
+# Override provider
+euxis architect "Design the API" gemini
+```
+
+### Pattern 2: Combo Chain
+
+Agents execute in sequence. Each builds on previous output.
+
+```bash
+euxis-combo run <combo-name> "<task>"
+```
+
+**Available Combos:**
+
+| Combo | Chain | Best For |
+|-------|-------|----------|
+| `steve-jobs` | planner → architect → evangelist → reviewer | Product design, feature specs |
+| `fort-knox` | pentester → auditor → inspector → reviewer | Security reviews |
+| `jony-ive` | designer → animator → interactor → reviewer | UI/UX design |
+
+**Example:**
+
+```bash
+euxis-combo run steve-jobs "Design a user onboarding flow"
+```
+
+**What happens:**
+1. **Planner** scopes requirements
+2. **Architect** designs the structure
+3. **Evangelist** refines the narrative
+4. **Reviewer** validates the output
+
+### Pattern 3: Squad Deploy
+
+Multiple specialists work simultaneously.
+
+```bash
+euxis-squad deploy <squad> "<task>"
+```
+
+**Available Squads:**
+
+| Squad | Members | Best For |
+|-------|---------|----------|
+| `quality` | reviewer, inspector, pentester, auditor + 4 more | Full audits |
+| `build` | debugger, maintainer, automaton, tester + 2 more | Implementation |
+| `vision` | orchestrator, architect, planner, researcher + 2 more | Strategy |
+
+**Example:**
+
+```bash
+euxis-squad deploy quality "Complete security audit of the payment module"
+```
+
+**What happens:**
+- All squad members run in parallel
+- Lead agent (reviewer) coordinates output
+- Results synthesized into comprehensive report
+
+---
+
+## Common Tasks
+
+<details>
+<summary><strong>Fix a Bug</strong></summary>
+
+**Quick diagnosis:**
+```bash
+euxis debugger "Trace why login fails for users with special characters in passwords"
+```
+
+**Deep investigation:**
+```bash
+euxis-combo run fort-knox "Investigate the session timeout issue"
+```
+
+**What you get:**
+- Root cause analysis
+- Fix recommendations
+- Test suggestions
+
+**Related:** [Debugging Workflow](docs/guides/workflows/debugging-workflow.md)
+
+</details>
+
+<details>
+<summary><strong>Build a Feature</strong></summary>
+
+**Design first:**
+```bash
+euxis architect "Design a notification system supporting email, SMS, and push"
+```
+
+**Then implement:**
+```bash
+euxis-combo run steve-jobs "Build user preferences for notification channels"
+```
+
+**What you get:**
+- Architecture diagram
+- Implementation plan
+- API contracts
+
+**Related:** [Feature Development Workflow](docs/guides/workflows/feature-development-workflow.md)
+
+</details>
+
+<details>
+<summary><strong>Security Audit</strong></summary>
+
+**Quick scan:**
+```bash
+euxis pentester "Check for SQL injection in the search endpoint"
+```
+
+**Full audit:**
+```bash
+euxis-squad deploy quality "Complete security audit of the payment module"
+```
+
+**What you get:**
+- Vulnerability report
+- Risk assessment
+- Remediation steps
+
+**Related:** [Security Audit Workflow](docs/guides/workflows/security-audit-workflow.md)
+
+</details>
+
+<details>
+<summary><strong>Prepare a Release</strong></summary>
+
+**Validate everything:**
+```bash
+euxis-playbook run verify-everything "Prepare v2.0 release" --dry-run
+```
+
+**Execute release:**
+```bash
+euxis-playbook run zero-to-one "Launch v2.0"
+```
+
+**What you get:**
+- Pre-release checklist
+- Quality gates passed
+- Release notes
+
+**Related:** [Fleet Guide: Playbooks](docs/guides/fleet-guide.md#playbooks)
+
+</details>
 
 ---
 
 ## How It Works
 
-Euxis follows a three-step cycle: **Plan — Decompose — Delegate**.
-
-Your goal enters the orchestrator, gets broken into tasks, and flows through the fleet. The Cortex remembers everything across sessions.
-
-| Layer | Component | Purpose |
-|:------|:----------|:--------|
-| Memory | **Cortex** | Tri-typed vector store with persistent semantic recall |
-| Control | **Dispatcher** | Parallel execution of agent mission manifests |
-| Interface | **Link** | Terminal, voice, and IDE integration |
-
-```mermaid
-flowchart LR
-  U[User Goal] --> O[Orchestrator]
-  O --> A[Architect]
-  A --> M[Manifest]
-  M --> D[Dispatcher]
-  D --> F[Fleet]
-  F --> C[Cortex]
-  C --> O
 ```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Your Task  │ ──▶ │ Orchestrator│ ──▶ │ Specialists │ ──▶ │   Output    │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+                          │                   │                   │
+                    Breaks down          Execute in         Quality gates
+                     the work            parallel           validate results
+```
+
+### Provider Selection
+
+Euxis routes each agent to the optimal AI provider:
+
+| Agent Type | Provider | Reason |
+|------------|----------|--------|
+| Strategic (orchestrator, architect) | `claude` | Best reasoning |
+| Research (researcher) | `gemini` | Large context (2M tokens) |
+| Coding (debugger, tester) | `goose` | Tool use |
+| Utility (butler, writer) | `ollama` | Fast, local |
+
+Provider appears in output:
+```
+[euxis] Provider: claude
+```
+
+Override anytime:
+```bash
+euxis architect "Design the API" gemini
+```
+
+### Memory System
+
+The Cortex stores three types of knowledge:
+
+| Type | What It Stores | Example |
+|------|----------------|---------|
+| `episodic` | Events | "Fixed bug #42 with null check" |
+| `semantic` | Facts | "Auth module uses JWT with RS256" |
+| `procedural` | Workflows | "Deploy: test → build → push" |
+
+**Store knowledge:**
+```bash
+euxis-cortex remember "API uses OAuth 2.0 with PKCE" "architect" --type semantic
+```
+
+**Recall knowledge:**
+```bash
+euxis-cortex recall "authentication patterns" --type procedural
+```
+
+### Quality Assurance
+
+Every output passes three verification layers:
+
+1. **Internal consistency** — Claims supported by evidence
+2. **Cross-reference** — Validated against stored knowledge
+3. **Reviewer checkpoint** — Multi-agent work validated before delivery
 
 ---
 
-## Your Specialist Team
+## Agent Fleet
 
-34 agents across three tiers: 7 core agents govern the fleet, 20 default agents execute domain work, and 7 on-demand agents provide leverage when invoked. See [CONSTITUTION.md](CONSTITUTION.md) for the authoritative governance document.
+41 specialists organized by authority.
 
-### Core (7) — Authority-bearing, always present
+### Core Agents (9)
 
-| Agent | Domain |
-|:------|:-------|
-| `orchestrator` | Task decomposition, delegation, and synthesis |
-| `architect` | Software architecture, patterns, and design decisions |
-| `product-manager` | Intent, scope, and prioritization |
-| `reviewer` | Truth & quality gate |
-| `librarian` | Memory optimization, knowledge continuity, documentation governance |
-| `compliance-officer` | Legal, privacy, and regulatory authority |
-| `system-critic` | Risk, pre-mortems, counter-bias |
+Define direction. May block progress when necessary.
 
-### Default (20) — Auto-available, task-triggered
+| Agent | Function |
+|-------|----------|
+| `orchestrator` | Breaks down goals, coordinates specialists, synthesizes results |
+| `architect` | Designs systems, defines patterns, reviews structure |
+| `planner` | Scopes work, prioritizes tasks, manages intent |
+| `reviewer` | Quality gate for all output |
+| `critic` | Challenges assumptions, surfaces risks |
+| `auditor` | Legal, privacy, and compliance authority |
+| `arbiter` | Resolves conflicts between agents |
+| `librarian` | Knowledge governance and documentation |
+| `historian` | Long-term memory and patterns |
 
-| Agent | Domain |
-|:------|:-------|
-| `automation-engineer` | CI/CD, IaC, Docker, Terraform |
-| `bug-fixer` | Debugging, root cause analysis, surgical fixes |
-| `crash-investigator` | Post-incident crash forensics, stack trace analysis, root cause evidence gathering |
-| `data-steward` | Observability, telemetry, structured logging |
-| `edge-hunter` | Security analysis, boundary testing, vulnerability assessment |
-| `incident-commander` | Incident response, root cause analysis, post-mortems |
-| `language-specialist` | Language-specific pattern detection, idiom enforcement, subsystem-aware analysis |
-| `legacy-maintainer` | Legacy code documentation, non-breaking upgrades |
-| `perf-optimizer` | Latency, throughput, and memory profiling |
-| `qa-coordinator` | End-to-end testing coordination, quality gates |
-| `regression-analyst` | Pre-merge exhaustive regression analysis of commits and pull requests |
-| `release-manager` | Changelogs, semantic versioning, release coordination |
-| `security-lead` | Security policy, threat governance, edge-hunter dispatch |
-| `tech-writer` | Documentation, tutorials, API reference |
-| `unit-tester` | Test coverage, reliability, regression prevention |
-| `ux-sentinel` | Accessibility (WCAG 2.1 AA), responsive testing |
-| `cli-ui-artisan` | Terminal UI design and keyboard navigation |
-| `web-ui-architect` | Web UI components and design systems |
-| `theming-and-motion-engineer` | Theming, color systems, and animation |
-| `interaction-and-input-specialist` | Keyboard navigation and input handling |
+### Default Agents (21)
 
-### On-Demand (7) — Explicit invocation only
+Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--auto-available-task-triggered)
 
-| Agent | Domain |
-|:------|:-------|
-| `brand-evangelist` | Brand voice, product storytelling, design system advocacy |
-| `butler` | TTS-optimized summarization for spoken output |
-| `deep-researcher` | Iterative multi-pass research with cross-validation |
-| `devrel-advocate` | Developer relations, tutorials, demos |
-| `globalization-lead` | i18n, l10n, RTL support, Unicode validation |
-| `growth-marketer` | SEO, funnel optimization, go-to-market strategy |
-| `social-manager` | Platform-native content and community engagement |
+`accountant` · `animator` · `automaton` · `debugger` · `designer` · `gatekeeper` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `watchdog` · `writer`
 
-See the [Fleet Guide](FLEET_GUIDE.md) for delegation patterns, provider tiering, and workflow examples.
+### On-Demand Agents (7)
+
+Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
+
+`ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
+
+### Specialist Agents (4)
+
+Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4--domain-specific-expertise)
+
+`cryptographer` · `ledger` · `conduit` · `custodian`
 
 ---
 
-## Usage
+## Terminal Interface (ETX)
 
-### Route a task
-
-Send work to any agent by name. Euxis assembles the prompt, routes to the right provider, and captures the output.
+Modern TUI built on Python Textual.
 
 ```bash
-euxis orchestrator "Refactor the login module to use JWT."
-euxis architect "Review the authentication module."
-euxis bug-fixer "Fix the null pointer in user.py."
+euxis-tui
 ```
 
-### Research first, build second
+**Features:**
+- Fleet dashboard with all 41 agents
+- Command palette (`Ctrl+K`)
+- Streaming agent execution
+- Squad monitoring
+- Playbook browser
+- Performance sparklines
+- Cortex memory browser
+- Dark/light/contrast themes
 
-```bash
-euxis deep-researcher "Compare the top 3 Python PDF parsing libraries. Include benchmarks."
-```
-
-### Deploy the fleet
-
-Generate a plan, then execute agents in parallel.
-
-```bash
-euxis architect "Audit this repo for security gaps. Output a MISSION MANIFEST." > plan.json
-euxis-dispatch plan.json
-```
-
-### Convene experts
-
-Run a structured 3-round adversarial debate.
-
-```bash
-euxis-council "Should we migrate from Postgres to MongoDB for logging?"
-```
-
-### Self-correcting loops
-
-Run an agent with verification checkpoints that retry on failure.
-
-```bash
-euxis-loop bug-fixer "Fix parser.py" "pytest tests/test_parser.py" 3
-```
+**Keyboard shortcuts:**
+| Key | Action |
+|-----|--------|
+| `Ctrl+K` | Command palette |
+| `Ctrl+T` | Toggle theme |
+| `/` | Search |
+| `?` | Help |
+| `Ctrl+Q` | Quit |
 
 ---
 
-## Persistent Memory
+## Learn More
 
-The Cortex gives every agent access to persistent semantic memory across sessions. Memories are classified into three types so agents recall the right knowledge at the right time.
+| Guide | What You'll Learn |
+|-------|-------------------|
+| [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
+| [Core Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
+| [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
+| [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
+| [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
+| [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
+| [API Reference](docs/reference/api-reference.md) | Build custom integrations |
 
-| Type | Purpose | Example |
-|:-----|:--------|:--------|
-| `episodic` | Specific events and outcomes | "Bug #42 fixed by null-check in auth.py" |
-| `semantic` | Persistent facts and relationships | "The auth module uses JWT with RS256" |
-| `procedural` | Reusable workflows and contraindications | "Never retry with expired tokens" |
+---
 
+## Requirements
+
+- **Bash 4.0+** and **Python 3.8+**
+- **At least one AI provider** (Claude recommended)
+
+<details>
+<summary><strong>Supported Providers</strong></summary>
+
+| Provider | CLI | Function |
+|:---------|:----|:---------|
+| [Claude][claude-url] | `claude` | Reasoning, architecture, strategy |
+| [Gemini][gemini-url] | `gemini` | Research with large context |
+| [Ollama][ollama-url] | `ollama` | Local inference, zero cost |
+| [Codex CLI][codex-url] | `codex` | OpenAI models |
+| [Qwen Code][qwen-url] | `qwen` | Open-source coding (256K context) |
+| [Crush][crush-url] | `crush` | Multi-model TUI |
+| [Kiro CLI][kiro-cli-url] | `kiro-cli` | AI coding assistant |
+| [Goose][goose-url] | `goose` | MCP-native agent |
+
+**Install the quickest option:**
 ```bash
-euxis-cortex remember "Project uses hexagonal architecture" "architect" --type semantic
-euxis-cortex recall "authentication" --type procedural
-euxis-cortex stats
+# Local, free, no API key needed
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama2
 ```
+
+</details>
 
 ---
 
-## Parallel Execution
+## Troubleshooting
 
-The fleet supports three coordination modes. Choose the one that fits your workflow. Dispatches display a live status table with per-agent progress.
+<details>
+<summary><strong>Command not found: euxis</strong></summary>
 
-| Mode | Behavior |
-|:-----|:----------|
-| `hierarchical` | All agents report to the orchestrator. Default. |
-| `mesh` | Agents with dispatch authority coordinate sub-workflows directly. |
-| `federated` | Agents operate autonomously across project boundaries. |
+**Problem:** Shell can't find Euxis commands.
 
+**Solution:**
+1. Verify PATH: `echo $PATH | grep "$HOME/bin"`
+2. Restart terminal
+3. Re-run: `source ~/.zshrc` (or `~/.bashrc`)
+
+</details>
+
+<details>
+<summary><strong>Health check failures</strong></summary>
+
+**Problem:** `euxis-health` reports issues.
+
+**Solution:**
 ```bash
-euxis-dispatch plan.json                      # hierarchical
-euxis-dispatch --mode mesh plan.json          # peer-to-peer
-euxis-dispatch --mode federated plan.json     # cross-project
+euxis-certify
 ```
 
-Dispatch-authority agents: `architect`, `qa-coordinator`, `incident-commander`, `release-manager`.
+This identifies and resolves common configuration problems.
 
----
+</details>
 
-## Built-In Quality Assurance
+<details>
+<summary><strong>No AI provider available</strong></summary>
 
-Every agent applies three verification layers before delivering output.
+**Problem:** Agents can't execute.
 
-1. **Internal Consistency.** Every claim is supported by a ReAct observation. No fabricated paths.
-2. **Cross-Reference.** Key findings are checked against Cortex memories. Contradictions are flagged.
-3. **Evaluator Checkpoint.** The `reviewer` validates synthesized outputs before delivery.
-
-On failure, agents generate structured reflections stored as procedural memory:
-
-```
-REFLEXION:          Root cause — not the symptom
-EVIDENCE:           Specific observation that revealed the failure
-STRATEGY:           Concrete alternative approach
-CONTRAINDICATION:   What to never repeat
-```
-
----
-
-## Automatic Task Routing
-
-When you omit the provider argument, Euxis routes each agent to the optimal tier automatically.
-
-| Tier | Agents | Provider | Rationale |
-|:-----|:-------|:---------|:----------|
-| S-Tier: Strategic | orchestrator, architect, product-manager, reviewer, system-critic, compliance-officer | `claude` | Strongest reasoning |
-| A-Tier: Research | deep-researcher | `gemini` | 2M token context window |
-| A-Tier: Enterprise | incident-commander | `amazon-q` | AWS-native developer agent |
-| B-Tier: Coding | bug-fixer, unit-tester, automation-engineer | `goose` | Agent-native tool use |
-| B-Tier: Local Code | legacy-maintainer | `opencode` | Fast local code models |
-| B-Tier: Math/Logic | perf-optimizer, data-steward | `qwen` | Algorithmic optimization |
-| C-Tier: Utility | butler, librarian, tech-writer | `ollama` | Zero latency, no cost |
-| Standard | All others | `claude` | General-purpose fallback |
-
-An explicit provider argument always overrides tiering. Tasks marked P0 always route to S-Tier.
-
+**Solution:**
 ```bash
-euxis architect "Review the auth module"          # auto routes to claude
-euxis bug-fixer "Fix user.py" gemini              # explicit override
-euxis perf-optimizer "Optimize queries" qwen      # explicit override
+# Install Ollama (free, local)
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull llama2
 ```
 
----
-
-## Security Model
-
-Euxis enforces a zero-trust security model at every layer.
-
-- **Input Validation.** Agent names validated against `[a-zA-Z0-9_-]`. Shell metacharacters rejected.
-- **Script Hardening.** Every bash script enforces `set -euo pipefail`.
-- **Audit Trails.** Every action logged to `~/.euxis/projects/<project>/<agent>/audit.md`.
-- **Human-in-the-Loop.** `euxis-sync-docs` validates AI output against forbidden patterns and requires explicit approval.
-- **Security Probes.** `euxis-audit-run` tests for shell injection, path traversal, and null byte injection.
-
----
-
-## Squads
-
-Five cross-functional teams, each with a lead and a clear purpose. Deploy an entire squad with one command.
-
-| Squad | Purpose | Lead | Members |
-|:------|:--------|:-----|:--------|
-| Vision | Strategy & Discovery | `orchestrator` | orchestrator, architect, product-manager, deep-researcher |
-| Build | Engineering & Execution | `bug-fixer` | bug-fixer, legacy-maintainer, automation-engineer, unit-tester |
-| Quality | Assurance & Security | `reviewer` | reviewer, qa-coordinator, edge-hunter, compliance-officer, perf-optimizer |
-| Growth | Branding & Documentation | `tech-writer` | tech-writer, brand-evangelist, social-manager, devrel-advocate, growth-marketer, globalization-lead |
-| Experience | UI Excellence & Interaction Design | `web-ui-architect` | web-ui-architect, cli-ui-artisan, theming-and-motion-engineer, interaction-and-input-specialist, ux-sentinel |
-
-```bash
-euxis-squad list                            # All squads
-euxis-squad info vision                     # Details
-euxis-squad deploy build "Fix auth module"  # Deploy
-euxis-squad validate                        # Cross-check against registry
-```
-
----
-
-## Playbooks
-
-Playbooks activate squads in sequence for repeatable workflows. Each phase generates a dispatch manifest with checkpoints that gate progression.
-
-| Playbook | Sequence | Use Case |
-|:---------|:---------|:---------|
-| Zero to One | Vision -> Build -> Quality -> Growth | Full product launch |
-| Legacy Overhaul | Build -> Quality -> Vision | Modernize legacy systems |
-| Red Alert | Quality -> Build -> Vision | Emergency incident response |
-
-```bash
-euxis-playbook list                                             # Available playbooks
-euxis-playbook info zero-to-one                                 # Phase breakdown
-euxis-playbook run zero-to-one "Launch auth service" --dry-run  # Preview manifests
-euxis-playbook run zero-to-one "Launch auth service"            # Execute all phases
-euxis-playbook status                                           # Session history
-```
-
----
-
-## Combos
-
-Combos are sequential agent chains. Each agent receives the previous agent's output as context. Fast, focused, no manifest overhead.
-
-| Combo | Chain | Use Case |
-|:------|:------|:---------|
-| Steve Jobs | product-manager -> architect -> brand-evangelist -> reviewer | Vision to polished review |
-| Fort Knox | edge-hunter -> compliance-officer -> qa-coordinator -> reviewer | Maximum security assurance |
-| Content Factory | tech-writer -> brand-evangelist -> social-manager -> reviewer | End-to-end content production |
-| Jony Ive | web-ui-architect -> theming-and-motion-engineer -> interaction-and-input-specialist -> ux-sentinel -> reviewer | Apple-level UI from design system to polished interaction |
-
-```bash
-euxis-combo list                                      # Available combos
-euxis-combo info steve-jobs                           # Chain detail
-euxis-combo run steve-jobs "Design a new onboarding"  # Execute chain
-```
-
----
-
-## Codex
-
-The Codex is a prompt template library. Battle-tested templates that force agents into structured, high-quality output patterns.
-
-| Template | Agent | Use Case |
-|:---------|:------|:---------|
-| System X-Ray | `architect` | Trace critical data paths, dependency maps, risk zones |
-| Surgical Strike | `bug-fixer` | Zero-side-effect fix with blast radius verification |
-| Executive Decision | `deep-researcher` | Weighted decision matrix with 2026 data and ADR |
-| Feature Factory | 5-agent chain | End-to-end feature delivery from research to review |
-
-```bash
-euxis-codex list                                                    # All templates
-euxis-codex info xray                                               # Details and variables
-euxis-codex show surgical-fix                                       # Raw template
-euxis-codex run xray CODEX_CODEBASE_PATH=./src CODEX_ENTRY_POINT=main.py  # Execute
-```
-
----
-
-## CLI Reference
-
-### Core
-
-| Command | Description |
-|:--------|:------------|
-| `euxis <agent> <task> [provider]` | Route a task to any agent |
-| `euxis-ui` | Interactive Mission Control TUI |
-
-### Quality
-
-| Command | Description |
-|:--------|:------------|
-| `euxis-health` | Fleet integrity check |
-| `euxis-lint` | Static analysis |
-| `euxis-certify` | 6-gate certification pipeline |
-| `euxis-test-infra` | Infrastructure unit tests |
-| `euxis-bench` | Performance benchmarking |
-| `euxis-audit-run` | Security audit with probes |
-| `euxis-git-guard` | Pre-commit safety checks |
-| `euxis-verify` | Output verification |
-| `euxis-polish` | Prompt polishing |
-
-### Orchestration
-
-| Command | Description |
-|:--------|:------------|
-| `euxis-dispatch [--mode MODE] <manifest>` | Parallel agent execution |
-| `euxis-loop <agent> <task> <verify> [retries]` | Autonomous retry loop |
-| `euxis-council "<topic>"` | Multi-agent adversarial debate |
-| `euxis-bus <cmd> [args]` | Async pub/sub message bus |
-| `euxis-graph <cmd> [args]` | GraphRAG knowledge graph |
-| `euxis-squad <cmd> [args]` | Squad management and deployment |
-| `euxis-playbook <cmd> [args]` | Phased squad execution via playbooks |
-| `euxis-combo <cmd> [args]` | Sequential agent chain execution |
-| `euxis-codex <cmd> [args]` | Prompt template library |
-| `euxis-hooks <cmd> [--repo PATH]` | Git hook management |
-| `euxis-synthesize <cmd> [args]` | Dynamic agent composition |
-
-### Memory
-
-| Command | Description |
-|:--------|:------------|
-| `euxis-cortex <cmd> [args] [--type TYPE]` | Tri-typed vector memory |
-
-### Maintenance
-
-| Command | Description |
-|:--------|:------------|
-| `euxis-kaizen` | Continuous self-improvement cycle |
-| `euxis-daemon [interval]` | Periodic kaizen with fail-safe |
-| `euxis-optimize` | System-wide tune-up |
-| `euxis-sync-docs` | Documentation sync with approval gate |
-| `euxis-deploy` | Docker Compose enterprise deployment |
-
-### Interface
-
-| Command | Description |
-|:--------|:------------|
-| `euxis-voice` | Offline voice interface (Whisper + Piper) |
-| `euxis-gym <agent> <test> [provider]` | Agent evaluation and A/B testing |
-
----
-
-## Directory Structure
-
-```
-~/.euxis/
-├── bin/                    Executable tools (symlinked to ~/bin/)
-│   ├── euxis.sh            Core CLI — routing, prompt assembly, output capture
-│   ├── euxis-ui            Mission Control TUI
-│   ├── euxis-cortex        Semantic memory (vector store)
-│   ├── euxis-dispatch      Parallel agent execution
-│   ├── euxis-loop          Autonomous retry loop
-│   ├── euxis-council       Multi-agent consensus
-│   ├── euxis-bus           Async message bus
-│   ├── euxis-graph         GraphRAG knowledge graph
-│   ├── euxis-synthesize    Dynamic agent composition
-│   ├── euxis-squad         Squad management and deployment
-│   ├── euxis-playbook      Phased squad execution
-│   ├── euxis-combo         Sequential agent chains
-│   ├── euxis-codex         Prompt template library
-│   ├── euxis-hooks         Git hook management
-│   └── ...                 30 tools total
-├── codex/                     Prompt template library
-│   ├── codex.json             Template manifest
-│   ├── architect/             Architecture templates
-│   ├── code/                  Code templates
-│   ├── research/              Research templates
-│   └── combo/                 Multi-agent chain templates
-├── branding/
-│   └── signature.txt          Canonical branding signature
-├── hooks/
-│   └── prepare-commit-msg     Auto-appends signature to commits
-├── .github/
-│   └── pull_request_template.md  Branded PR template
-├── squads.json             Squad and combo registry
-├── playbooks/              Phased squad activation definitions
-│   ├── zero-to-one.json    Vision → Build → Quality → Growth
-│   ├── legacy-overhaul.json Build → Quality → Vision
-│   └── red-alert.json      Quality → Build → Vision
-├── prompts/
-│   ├── core/               7 core agents (authority-bearing)
-│   ├── fleet/              20 agents (13 default + 7 on-demand)
-│   └── protocols/          Shared protocol and common instructions
-├── tests/
-│   └── golden/             Golden datasets for evaluation
-├── registry.json           Master agent registry
-├── USER_GUIDE.md           Complete CLI and agent reference
-├── FLEET_GUIDE.md          Delegation patterns and workflows
-└── cortex_db/              ChromaDB vector database (git-ignored)
-```
-
----
-
-## Advanced
-
-### Voice Mode
-
-Run completely offline with Piper TTS and Faster-Whisper.
-
-```bash
-euxis-voice
-```
-
-### Continuous Improvement
-
-```bash
-euxis-kaizen              # 4-gate improvement cycle
-euxis-daemon              # Periodic kaizen (default: 30 min)
-euxis-daemon 3600         # Custom interval in seconds
-```
-
-### Conflict Resolution
-
-When agents produce conflicting outputs, Euxis resolves them systematically:
-
-1. **Domain Priority.** Primary scope agent wins.
-2. **Evidence Weight.** Verified data over inference over heuristic.
-3. **Negotiation Round.** Agents produce conflict responses (max 1 round).
-4. **Human Escalation.** Both positions presented if unresolved.
+</details>
 
 ---
 
@@ -530,11 +506,16 @@ When agents produce conflicting outputs, Euxis resolves them systematically:
 
 Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
-Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-docs`.
+---
+
+Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
+Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+
+*Euxis v0.0.7 · Build something that matters.*
 
 <!-- Reference Links -->
 
-[version-badge]: https://img.shields.io/badge/version-0.0.6-blue?style=for-the-badge
+[version-badge]: https://img.shields.io/badge/version-0.0.7-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
 
 [license-badge]: https://img.shields.io/badge/license-proprietary-green?style=for-the-badge
@@ -543,16 +524,14 @@ Governed by the `librarian` agent. Documentation auto-synced via `euxis-sync-doc
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-31-blueviolet?style=for-the-badge
-[agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/FLEET_GUIDE.md
+[agents-badge]: https://img.shields.io/badge/agents-41-blueviolet?style=for-the-badge
+[agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/guides/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli
 [gemini-url]: https://github.com/google-gemini/gemini-cli
 [ollama-url]: https://ollama.com/
 [codex-url]: https://github.com/openai/codex
-[opencode-url]: https://github.com/opencode-ai/opencode
 [qwen-url]: https://github.com/QwenLM/qwen-code
 [crush-url]: https://github.com/charmbracelet/crush
-[kilo-url]: https://github.com/Kilo-Org/kilocode
-[amazon-q-url]: https://github.com/aws/amazon-q-developer-cli
+[kiro-cli-url]: https://kiro.dev
 [goose-url]: https://github.com/block/goose

@@ -1,8 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS KAIZEN: Continuous Self-Improvement Loop
 # "Better every day."
 
 set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-kaizen — Continuous improvement loop
+
+Usage:
+  euxis-kaizen
+
+Runs certification, AI-driven analysis, and applies improvements.
+Guarded against unbounded recursion (max depth: 3).
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
@@ -123,10 +141,10 @@ fi
 echo ""
 echo "[GATE 3] Documentation Sync..."
 echo "--------------------------------------------------"
-"$BIN_DIR/euxis.sh" tech-writer "Read ~/.euxis/prompts/ and verify the ROOT README.md in ~/.euxis/.
+"$BIN_DIR/euxis.sh" writer "Read ~/.euxis/prompts/ and verify the ROOT README.md in ~/.euxis/.
 VERIFY:
 1. Every agent is listed in the README.
-2. The version number in the README matches the Protocol (v6.0).
+2. The version number in the README matches the Protocol (v0.0.7).
 3. The 'Installation' instructions are accurate.
 4. All CLI tools are documented.
 

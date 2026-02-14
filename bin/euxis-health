@@ -1,8 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS HEALTH: Fleet Integrity & Configuration Health Check
 # Validates naming, hardening, orphans, headers, and certification readiness.
 
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-health — Fleet health check
+
+Usage:
+  euxis-health [options]
+
+Validates naming, hardening, orphans, headers, and certification readiness.
+
+Options:
+  --silent    Exit code only, no output
+  --json      JSON output (implies --silent)
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="${HOME}/.euxis"
 BIN_DIR="${EUXIS_HOME}/bin"
@@ -12,9 +31,13 @@ WARNINGS=0
 
 # Silent mode: exit code only, no output (used by fast boot)
 SILENT=false
-if [[ "${1:-}" == "--silent" ]]; then
-    SILENT=true
-fi
+JSON_OUTPUT=false
+for arg in "$@"; do
+    case "$arg" in
+        --silent) SILENT=true ;;
+        --json)   JSON_OUTPUT=true; SILENT=true ;;
+    esac
+done
 
 log() {
     [[ "$SILENT" == true ]] && return
@@ -29,7 +52,7 @@ log "=================================================="
 # CHECK 1: Naming Consistency (filename vs agent_id)
 # ────────────────────────────────────────────────────────
 log ""
-log "[1/8] Naming Consistency..."
+log "[1/10] Naming Consistency..."
 
 for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
@@ -38,7 +61,7 @@ for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
         agent_id=$(grep -m1 '^agent_id:' "$f" | sed 's/agent_id: *//')
         if [[ "$filename" != "$agent_id" ]]; then
             log "  MISMATCH: $f — filename='${filename}' vs agent_id='${agent_id}'"
-            ((FAILURES++))
+            ((FAILURES++)) || true
         fi
     done
 done
@@ -51,7 +74,7 @@ fi
 # CHECK 2: Script Hardening (set -uo pipefail)
 # ────────────────────────────────────────────────────────
 log ""
-log "[2/8] Script Hardening..."
+log "[2/10] Script Hardening..."
 
 HARDENING_FAILURES=0
 for script in "${BIN_DIR}"/*; do
@@ -60,8 +83,8 @@ for script in "${BIN_DIR}"/*; do
     head -1 "$script" | grep -qE '(bash|sh)' || continue
     if ! grep -qE 'set -[euo]+.*pipefail|set -uo pipefail|set -euo pipefail' "$script"; then
         log "  MISSING HARDENING: $(basename "$script") — no 'set -uo pipefail' or 'set -euo pipefail'"
-        ((HARDENING_FAILURES++))
-        ((WARNINGS++))
+        ((HARDENING_FAILURES++)) || true
+        ((WARNINGS++)) || true
     fi
 done
 
@@ -73,51 +96,57 @@ fi
 # CHECK 3: Orphan Detection (agents not in registry)
 # ────────────────────────────────────────────────────────
 log ""
-log "[3/8] Orphan Detection..."
+log "[3/10] Orphan Detection..."
 
-if [[ ! -f "$REGISTRY" ]]; then
-    log "  MISSING: registry.json not found at $REGISTRY"
-    ((FAILURES++))
+REGISTRY_DB="${EUXIS_HOME}/registry.db"
+
+# Try to get registered agent IDs (SQLite-first, JSON fallback)
+REGISTERED=""
+if [[ -f "$REGISTRY_DB" ]]; then
+    # Use Python for SQLite access (more portable than sqlite3 CLI)
+    REGISTERED=$(python3 -c "import sqlite3; conn = sqlite3.connect('$REGISTRY_DB'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id').fetchall()]))" 2>/dev/null | sort)
+fi
+if [[ -z "$REGISTERED" ]] && [[ -f "$REGISTRY" ]]; then
+    if command -v jq &>/dev/null; then
+        REGISTERED=$(jq -r '.agents[].id' "$REGISTRY" 2>/dev/null | sort)
+    fi
+fi
+
+if [[ -z "$REGISTERED" ]]; then
+    log "  MISSING: No registry found (neither registry.db nor registry.json)"
+    ((FAILURES++)) || true
 else
-    if ! command -v jq &>/dev/null; then
-        log "  SKIP: jq not installed, cannot parse registry.json"
-        ((WARNINGS++))
-    else
-        # Get registered agent IDs
-        REGISTERED=$(jq -r '.agents[].id' "$REGISTRY" | sort)
-
-        # Get actual agent files
-        ACTUAL=""
-        for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
-            for f in "${dir}"/*.txt; do
-                [[ -f "$f" ]] || continue
-                name=$(basename "$f" .txt)
-                ACTUAL="${ACTUAL}${name}"$'\n'
-            done
+    # Get actual agent files
+    ACTUAL=""
+    for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+        for f in "${dir}"/*.txt; do
+            [[ -f "$f" ]] || continue
+            name=$(basename "$f" .txt)
+            ACTUAL="${ACTUAL}${name}"$'\n'
         done
-        ACTUAL=$(echo "$ACTUAL" | sort | sed '/^$/d')
+    done
+    ACTUAL=$(echo "$ACTUAL" | sort | sed '/^$/d')
 
-        # Find orphans (in filesystem but not in registry)
-        ORPHANS=$(comm -23 <(echo "$ACTUAL") <(echo "$REGISTERED"))
-        if [[ -n "$ORPHANS" ]]; then
-            log "  ORPHAN AGENTS (not in registry.json):"
-            log "$ORPHANS" | sed 's/^/    /'
-            ORPHAN_COUNT=$(echo "$ORPHANS" | wc -l | tr -d ' ')
-            FAILURES=$((FAILURES + ORPHAN_COUNT))
-        fi
+    # Find orphans (in filesystem but not in registry)
+    ORPHANS=$(comm -23 <(echo "$ACTUAL") <(echo "$REGISTERED"))
+    if [[ -n "$ORPHANS" ]]; then
+        log "  ORPHAN AGENTS (not in registry):"
+        log "$ORPHANS" | sed 's/^/    /'
+        ORPHAN_COUNT=$(echo "$ORPHANS" | wc -l | tr -d ' ')
+        FAILURES=$((FAILURES + ORPHAN_COUNT))
+    fi
 
-        # Find ghosts (in registry but not in filesystem)
-        GHOSTS=$(comm -13 <(echo "$ACTUAL") <(echo "$REGISTERED"))
-        if [[ -n "$GHOSTS" ]]; then
-            log "  GHOST ENTRIES (in registry but no file):"
-            log "$GHOSTS" | sed 's/^/    /'
-            GHOST_COUNT=$(echo "$GHOSTS" | wc -l | tr -d ' ')
-            FAILURES=$((FAILURES + GHOST_COUNT))
-        fi
+    # Find ghosts (in registry but not in filesystem)
+    GHOSTS=$(comm -13 <(echo "$ACTUAL") <(echo "$REGISTERED"))
+    if [[ -n "$GHOSTS" ]]; then
+        log "  GHOST ENTRIES (in registry but no file):"
+        log "$GHOSTS" | sed 's/^/    /'
+        GHOST_COUNT=$(echo "$GHOSTS" | wc -l | tr -d ' ')
+        FAILURES=$((FAILURES + GHOST_COUNT))
+    fi
 
-        if [[ -z "$ORPHANS" && -z "$GHOSTS" ]]; then
-            log "  All agents are registered. No orphans or ghosts."
-        fi
+    if [[ -z "$ORPHANS" && -z "$GHOSTS" ]]; then
+        log "  All agents are registered. No orphans or ghosts."
     fi
 fi
 
@@ -125,7 +154,7 @@ fi
 # CHECK 4: Header Schema Validation
 # ────────────────────────────────────────────────────────
 log ""
-log "[4/8] Header Schema Validation..."
+log "[4/10] Header Schema Validation..."
 
 REQUIRED_FIELDS=("agent_id" "role" "version" "tags" "last_updated")
 HEADER_FAILURES=0
@@ -138,7 +167,7 @@ for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
         for field in "${REQUIRED_FIELDS[@]}"; do
             if ! echo "$header" | grep -q "^${field}:"; then
                 log "  MISSING FIELD: $(basename "$f") — '${field}'"
-                ((HEADER_FAILURES++))
+                ((HEADER_FAILURES++)) || true
             fi
         done
     done
@@ -154,32 +183,32 @@ fi
 # CHECK 5: Certification Readiness
 # ────────────────────────────────────────────────────────
 log ""
-log "[5/8] Documentation Drift..."
+log "[5/10] Documentation Drift..."
 
-USER_GUIDE="${EUXIS_HOME}/USER_GUIDE.md"
+USER_GUIDE="${EUXIS_HOME}/docs/user-guide.md"
 if [[ -f "$USER_GUIDE" ]]; then
     LAST_DOC_SYNC=$(stat -c %Y "$USER_GUIDE" 2>/dev/null || stat -f %m "$USER_GUIDE" 2>/dev/null || echo 0)
     NOW=$(date +%s)
     if (( NOW - LAST_DOC_SYNC > 86400 )); then
-        log "  STALE: USER_GUIDE.md hasn't been updated in 24+ hours. Run 'euxis-sync-docs'."
-        ((WARNINGS++))
+        log "  STALE: docs/user-guide.md hasn't been updated in 24+ hours. Run 'euxis-sync-docs'."
+        ((WARNINGS++)) || true
     else
-        log "  USER_GUIDE.md is current (updated within 24h)."
+        log "  docs/user-guide.md is current (updated within 24h)."
     fi
 else
-    log "  MISSING: USER_GUIDE.md not found. Run 'euxis-sync-docs' to generate."
-    ((WARNINGS++))
+    log "  MISSING: docs/user-guide.md not found. Run 'euxis-sync-docs' to generate."
+    ((WARNINGS++)) || true
 fi
 
 log ""
-log "[6/8] Certification Readiness..."
+log "[6/10] Certification Readiness..."
 
 CERTIFY_SCRIPT="${BIN_DIR}/euxis-certify"
 if [[ -x "$CERTIFY_SCRIPT" ]]; then
     log "  euxis-certify is present and executable."
 else
     log "  MISSING or NOT EXECUTABLE: euxis-certify"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 fi
 
 LINT_SCRIPT="${BIN_DIR}/euxis-lint"
@@ -187,7 +216,7 @@ if [[ -x "$LINT_SCRIPT" ]]; then
     log "  euxis-lint is present and executable."
 else
     log "  MISSING or NOT EXECUTABLE: euxis-lint"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 fi
 
 TEST_SCRIPT="${BIN_DIR}/euxis-test-infra"
@@ -195,14 +224,14 @@ if [[ -x "$TEST_SCRIPT" ]]; then
     log "  euxis-test-infra is present and executable."
 else
     log "  MISSING or NOT EXECUTABLE: euxis-test-infra"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 fi
 
 # ────────────────────────────────────────────────────────
 # CHECK 6: Provider Connectivity (CLI tools)
 # ────────────────────────────────────────────────────────
 log ""
-log "[7/8] Provider Connectivity..."
+log "[7/10] Provider Connectivity..."
 
 PROVIDER_WARNINGS=0
 PROVIDER_CLIS=(claude gemini codex ollama opencode qwen crush kilo kiro-cli goose)
@@ -211,7 +240,7 @@ for cli in "${PROVIDER_CLIS[@]}"; do
         log "  FOUND: $cli"
     else
         log "  NOT FOUND: $cli (optional — install to enable this provider)"
-        ((PROVIDER_WARNINGS++))
+        ((PROVIDER_WARNINGS++)) || true
     fi
 done
 
@@ -223,34 +252,34 @@ elif [[ $FOUND_PROVIDERS -ge 1 ]]; then
     log "  ${FOUND_PROVIDERS} of ${TOTAL_PROVIDERS} provider CLIs available."
 else
     log "  WARNING: No provider CLIs found. At least one is required."
-    ((WARNINGS++))
+    ((WARNINGS++)) || true
 fi
 
 # ────────────────────────────────────────────────────────
 # CHECK 8: Codex Integrity (manifest + template files)
 # ────────────────────────────────────────────────────────
 log ""
-log "[8/8] Codex Integrity..."
+log "[8/10] Codex Integrity..."
 
-CODEX_DIR="${EUXIS_HOME}/codex"
+CODEX_DIR="${EUXIS_HOME}/config/codex"
 CODEX_MANIFEST="${CODEX_DIR}/codex.json"
 
 if [[ ! -f "$CODEX_MANIFEST" ]]; then
     log "  MISSING: codex.json not found at $CODEX_MANIFEST"
-    ((FAILURES++))
+    ((FAILURES++)) || true
 else
     if ! command -v jq &>/dev/null; then
         log "  SKIP: jq not installed, cannot validate codex.json"
-        ((WARNINGS++))
+        ((WARNINGS++)) || true
     elif ! jq empty "$CODEX_MANIFEST" 2>/dev/null; then
         log "  INVALID JSON: codex.json is not valid JSON"
-        ((FAILURES++))
+        ((FAILURES++)) || true
     else
         CODEX_FAILURES=0
         while IFS=$'\t' read -r tid tfile; do
             if [[ ! -f "${CODEX_DIR}/${tfile}" ]]; then
                 log "  MISSING TEMPLATE: '$tid' references '${tfile}' but file not found"
-                ((CODEX_FAILURES++))
+                ((CODEX_FAILURES++)) || true
             fi
         done < <(jq -r '.templates[] | [.id, .file] | @tsv' "$CODEX_MANIFEST")
 
@@ -261,6 +290,72 @@ else
             FAILURES=$((FAILURES + CODEX_FAILURES))
         fi
     fi
+fi
+
+# ────────────────────────────────────────────────────────
+# CHECK 9: Bus Pipe Activity
+# ────────────────────────────────────────────────────────
+log ""
+log "[9/10] Bus Pipe Activity..."
+
+BUS_DIR="${EUXIS_HOME}/data/bus/pipes"
+if [[ -d "$BUS_DIR" ]]; then
+    PIPE_COUNT=0
+    MSG_COUNT=0
+    STALE_PIPES=0
+    NOW=$(date +%s)
+    for pipe in "${BUS_DIR}"/*/; do
+        [[ -d "$pipe" ]] || continue
+        PIPE_COUNT=$((PIPE_COUNT + 1))
+        pipe_msgs=$(find "$pipe" -name "*.msg" -type f 2>/dev/null | wc -l | tr -d ' ')
+        MSG_COUNT=$((MSG_COUNT + pipe_msgs))
+        # Check for stale pipes (no messages in 7 days)
+        if [[ "$(uname)" == "Darwin" ]]; then
+            LATEST=$(find "$pipe" -name "*.msg" -type f -exec stat -f '%m' {} \; 2>/dev/null | sort -rn | head -1)
+        else
+            LATEST=$(find "$pipe" -name "*.msg" -type f -exec stat -c '%Y' {} \; 2>/dev/null | sort -rn | head -1)
+        fi
+        if [[ -n "$LATEST" ]]; then
+            LATEST_INT=${LATEST%.*}
+            if (( NOW - LATEST_INT > 604800 )); then
+                STALE_PIPES=$((STALE_PIPES + 1))
+            fi
+        fi
+    done
+    log "  ${PIPE_COUNT} pipe(s), ${MSG_COUNT} message(s) total."
+    if [[ $STALE_PIPES -gt 0 ]]; then
+        log "  ${STALE_PIPES} pipe(s) stale (no activity in 7+ days)."
+        ((WARNINGS++)) || true
+    else
+        log "  All pipes active."
+    fi
+else
+    log "  Bus directory not found — no message pipes configured."
+    ((WARNINGS++)) || true
+fi
+
+# ────────────────────────────────────────────────────────
+# CHECK 10: Cortex Connectivity
+# ────────────────────────────────────────────────────────
+log ""
+log "[10/10] Cortex Connectivity..."
+
+CORTEX_SCRIPT="${BIN_DIR}/euxis-cortex"
+if [[ -x "$CORTEX_SCRIPT" ]]; then
+    if CORTEX_OUT=$("$CORTEX_SCRIPT" stats 2>&1); then
+        log "  Cortex is reachable."
+        # Extract memory count if available
+        MEM_COUNT=$(echo "$CORTEX_OUT" | grep -oP '\d+ memor' | head -1 | grep -oP '\d+' || true)
+        if [[ -n "$MEM_COUNT" ]]; then
+            log "  ${MEM_COUNT} memories stored."
+        fi
+    else
+        log "  Cortex unreachable or not initialized."
+        ((WARNINGS++)) || true
+    fi
+else
+    log "  euxis-cortex not found — cortex integration unavailable."
+    ((WARNINGS++)) || true
 fi
 
 # ────────────────────────────────────────────────────────
@@ -276,5 +371,32 @@ else
     log "  HEALTH CHECK FAILED: $FAILURES error(s), $WARNINGS warning(s)."
 fi
 log "=================================================="
+
+# JSON output mode
+if [[ "$JSON_OUTPUT" == true ]]; then
+    AGENT_COUNT=0
+    for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+        for f in "${dir}"/*.txt; do [[ -f "$f" ]] && AGENT_COUNT=$((AGENT_COUNT + 1)); done
+    done
+    PROVIDER_FOUND=0
+    for cli in "${PROVIDER_CLIS[@]}"; do
+        command -v "$cli" &>/dev/null && PROVIDER_FOUND=$((PROVIDER_FOUND + 1))
+    done
+    STATUS="healthy"
+    [[ $FAILURES -gt 0 ]] && STATUS="unhealthy"
+    [[ $WARNINGS -gt 0 && $FAILURES -eq 0 ]] && STATUS="degraded"
+    cat <<ENDJSON
+{
+  "status": "${STATUS}",
+  "failures": ${FAILURES},
+  "warnings": ${WARNINGS},
+  "agents": ${AGENT_COUNT},
+  "providers": ${PROVIDER_FOUND},
+  "bus_pipes": ${PIPE_COUNT:-0},
+  "bus_messages": ${MSG_COUNT:-0},
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+ENDJSON
+fi
 
 [[ $FAILURES -eq 0 ]]

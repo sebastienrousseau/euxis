@@ -1,13 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS DAEMON: Safe, Periodic Self-Improvement
 # Runs 'euxis-kaizen' every X minutes with safety stops.
 
-set -uo pipefail
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+euxis-daemon — Periodic self-improvement daemon
+
+Usage:
+  euxis-daemon [interval_seconds]
+
+Runs euxis-kaizen on a timer with smart change detection.
+Default interval: 1800 seconds (30 minutes).
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/bin"
 INTERVAL="${1:-1800}" # Default: 1800 seconds (30 minutes). Override via first arg.
-LOG_DIR="$EUXIS_HOME/projects/euxis-internal/daemon-logs"
+LOG_DIR="$EUXIS_HOME/data/projects/euxis-internal/daemon-logs"
 mkdir -p "$LOG_DIR"
 
 LAST_HASH=""

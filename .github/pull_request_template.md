@@ -14,7 +14,7 @@
 ## Quality Checklist
 
 - [ ] Code follows project conventions (`set -uo pipefail` in bash scripts)
-- [ ] Documentation updated (README.md, USER_GUIDE.md, FLEET_GUIDE.md)
+- [ ] Documentation updated (README.md, docs/user-guide.md, docs/fleet-guide.md)
 - [ ] No secrets or credentials committed
 - [ ] Branding signature present in all commits
 - [ ] JSON manifests valid (registry.json, squads.json, codex.json)
