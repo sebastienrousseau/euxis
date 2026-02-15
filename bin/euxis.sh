@@ -70,6 +70,17 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header_args "${1:-}"
+  if ui_is_subcommand "${1:-}"; then
+    export EUXIS_UI_SUPPRESS=1
+  fi
+fi
+
+
 # ============================================================================
 # Configuration & Library Loading
 # ============================================================================
