@@ -203,6 +203,14 @@ Run a minimal WebSocket client:
 python3 scripts/gateway_demo.py --url ws://127.0.0.1:18789 --session sess_demo
 ```
 
+## WebChat UI
+
+Start the gateway and open:
+
+```
+http://127.0.0.1:18789/webchat/
+```
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash

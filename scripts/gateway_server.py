@@ -14,8 +14,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
+from gateway_utils import (
+    load_session_from_disk,
+    persist_message,
+    persist_run_event,
+    timestamp,
+)
 DEFAULT_CONFIG = {
     "gateway": {
         "bind": "127.0.0.1",
@@ -130,6 +137,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             tick_task.cancel()
             return
 
+    webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
+    if webchat_dir.exists():
+        app.mount("/webchat", StaticFiles(directory=str(webchat_dir), html=True), name="webchat")
+
     return app
 
 
@@ -169,40 +180,12 @@ def ensure_session(session_id: str) -> None:
         STATE.session_version += 1
 
 
-def sessions_dir() -> Path:
-    home = os.environ.get("EUXIS_HOME", str(Path.home() / ".euxis"))
-    base = Path(home) / "data" / "gateway" / "sessions"
-    base.mkdir(parents=True, exist_ok=True)
-    return base
-
-
-def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
-    path = sessions_dir() / f"{session_id}.jsonl"
-    if not path.exists():
-        return []
-    entries: List[Dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        try:
-            entries.append(json.loads(line))
-        except Exception:
-            continue
-    return entries
-
-
-def persist_message(session_id: str, entry: Dict[str, Any]) -> None:
-    path = sessions_dir() / f"{session_id}.jsonl"
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(entry) + "\n")
-
-
 def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
     entry = {
         "message_id": f"msg_{int(time.time() * 1000)}",
         "role": role,
         "content": content,
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "timestamp": timestamp(),
     }
     STATE.sessions[session_id].append(entry)
     persist_message(session_id, entry)
@@ -358,7 +341,7 @@ async def send_ticks(ws: WebSocket, seq_state: Dict[str, int]) -> None:
                 "type": "event",
                 "event": "tick",
                 "seq": seq_state["value"],
-                "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "ts": timestamp(),
                 "data": {"uptime_ms": int((time.time() - STATE.started_at) * 1000), "stateVersion": STATE.session_version},
             }
             STATE.last_event_ts = payload["ts"]
@@ -373,7 +356,7 @@ async def send_presence(ws: WebSocket, seq_state: Dict[str, int]) -> None:
         "type": "event",
         "event": "presence",
         "seq": seq_state["value"],
-        "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "ts": timestamp(),
         "data": {"stateVersion": STATE.session_version, "sessions_active": STATE.sessions_active},
     }
     STATE.last_event_ts = payload["ts"]
@@ -394,7 +377,7 @@ async def send_agent_event(
         "type": "event",
         "event": "agent",
         "seq": seq_state["value"],
-        "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "ts": timestamp(),
         "data": {
             "run_id": run_id,
             "session_id": session_id,
@@ -404,6 +387,7 @@ async def send_agent_event(
         },
     }
     STATE.last_event_ts = payload["ts"]
+    persist_run_event(run_id, payload)
     await ws.send_text(json.dumps(payload))
 
 

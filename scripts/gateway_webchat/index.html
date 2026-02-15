@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Euxis Gateway WebChat</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    #log { border: 1px solid #ddd; padding: 1rem; height: 40vh; overflow: auto; }
+    #controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    input { flex: 1; padding: 0.5rem; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Euxis Gateway WebChat</h1>
+  <div id="log"></div>
+  <div id="controls">
+    <input id="session" placeholder="session_id" value="sess_webchat_demo" />
+    <input id="message" placeholder="Type a message" />
+    <button id="send">Send</button>
+  </div>
+  <script>
+    const log = document.getElementById('log');
+    const sessionInput = document.getElementById('session');
+    const messageInput = document.getElementById('message');
+    const sendBtn = document.getElementById('send');
+
+    const ws = new WebSocket(`ws://${location.host}/`);
+
+    ws.onmessage = (evt) => {
+      const line = document.createElement('div');
+      line.textContent = evt.data;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    };
+
+    sendBtn.onclick = () => {
+      const payload = {
+        type: 'request',
+        id: `req_${Date.now()}`,
+        method: 'chat.send',
+        params: {
+          session_id: sessionInput.value,
+          channel_id: 'webchat',
+          role: 'user',
+          content: messageInput.value,
+          meta: { agent: 'architect', approved: true }
+        }
+      };
+      ws.send(JSON.stringify(payload));
+      messageInput.value = '';
+    };
+  </script>
+</body>
+</html>
