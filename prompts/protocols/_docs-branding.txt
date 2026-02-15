@@ -20,8 +20,8 @@ The canonical branding signature is maintained at:
 ```
 ---
 
-> 🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-> 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 ```
 
 ALL external-facing artifacts MUST carry this signature. No exceptions.
@@ -31,7 +31,7 @@ ALL external-facing artifacts MUST carry this signature. No exceptions.
 | Artifact | Location | Enforcement |
 |----------|----------|-------------|
 | Pull request descriptions | Footer of PR body | `euxis-hooks pr` auto-appends |
-| Commit messages | Trailer line: `Engineered with Euxis` | `prepare-commit-msg` hook |
+| Commit messages | Trailer line: `Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co` | `prepare-commit-msg` hook |
 | Release notes | Footer section | `gatekeeper` mandate |
 | Changelog entries | Footer of each release entry | `gatekeeper` mandate |
 | README.md | Author attribution section | `euxis-certify` Gate 5 |
@@ -69,8 +69,8 @@ The `euxis-hooks pr` command:
 
 ---
 
-> 🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-> 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 ```
 
 ### 4. Documentation Governance
@@ -110,7 +110,7 @@ The `librarian` agent is responsible for documentation governance sweeps.
 
 <body>
 
-Engineered with Euxis
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 ```
 
 The `prepare-commit-msg` hook at `~/.euxis/bin/hooks/prepare-commit-msg` appends the `Engineered with Euxis` trailer automatically.

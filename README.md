@@ -509,8 +509,8 @@ Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
 
 ---
 
-Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 
 *Euxis v0.0.7 · Build something that matters.*
 

@@ -171,8 +171,8 @@ Every release artifact MUST carry the Euxis branding signature. This is mandator
 - **Pull request creation:** MUST ALWAYS use `euxis-hooks pr` instead of `gh pr create`. This command automatically appends the branded footer. NEVER use `gh pr create` directly — it will bypass branding. If for any reason `euxis-hooks pr` is unavailable, you MUST manually append the following footer to the PR body:
   ```
   ---
-  > 🎨 Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-  > 🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+> Designed by Sebastien Rousseau — https://sebastienrousseau.com
+> Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
   ```
 - **Pull request descriptions:** MUST include the branded footer from `~/.euxis/.github/pull_request_template.md`.
 - **Release notes:** MUST end with the signature block from `~/.euxis/config/branding/signature.txt`.

@@ -1503,5 +1503,5 @@ The design addresses enterprise requirements including authentication, rate limi
 
 ---
 
-*Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-🚀 Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System*
+*Designed by Sebastien Rousseau — https://sebastienrousseau.com*  
+*Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co*
