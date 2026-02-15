@@ -8,7 +8,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
@@ -29,6 +29,7 @@ class GatewayState:
     def __init__(self) -> None:
         self.started_at = time.time()
         self.sessions_active = 0
+        self.sessions: Dict[str, List[Dict[str, Any]]] = {}
 
 
 STATE = GatewayState()
@@ -106,22 +107,11 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             await ws.close(code=4401)
             return
         await ws.accept()
+        seq_state = {"value": 0}
         try:
             while True:
                 message = await ws.receive_text()
-                await ws.send_text(
-                    json.dumps(
-                        {
-                            "type": "response",
-                            "id": "unknown",
-                            "ok": False,
-                            "error": {
-                                "code": "NOT_IMPLEMENTED",
-                                "message": "Gateway skeleton: request handling not implemented",
-                            },
-                        }
-                    )
-                )
+                await handle_frame(ws, message, seq_state)
         except WebSocketDisconnect:
             return
 
@@ -155,6 +145,151 @@ def is_authorized(ws: WebSocket, config: Dict[str, Any]) -> bool:
         _user, pwd = decoded.split(":", 1)
         return pwd == password
     return True
+
+
+def ensure_session(session_id: str) -> None:
+    if session_id not in STATE.sessions:
+        STATE.sessions[session_id] = []
+        STATE.sessions_active = len(STATE.sessions)
+
+
+def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
+    entry = {
+        "message_id": f"msg_{int(time.time() * 1000)}",
+        "role": role,
+        "content": content,
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
+    STATE.sessions[session_id].append(entry)
+    return entry
+
+
+async def handle_frame(ws: WebSocket, raw: str, seq_state: Dict[str, int]) -> None:
+    try:
+        frame = json.loads(raw)
+    except Exception:
+        await ws.send_text(
+            json.dumps(
+                {
+                    "type": "response",
+                    "id": "unknown",
+                    "ok": False,
+                    "error": {"code": "INVALID_REQUEST", "message": "Invalid JSON"},
+                }
+            )
+        )
+        return
+
+    if frame.get("type") != "request":
+        await ws.send_text(
+            json.dumps(
+                {
+                    "type": "response",
+                    "id": frame.get("id", "unknown"),
+                    "ok": False,
+                    "error": {"code": "INVALID_REQUEST", "message": "Expected request frame"},
+                }
+            )
+        )
+        return
+
+    req_id = frame.get("id", "unknown")
+    method = frame.get("method", "")
+    params = frame.get("params", {}) if isinstance(frame.get("params"), dict) else {}
+
+    if method == "chat.history":
+        session_id = params.get("session_id", "")
+        if not session_id:
+            await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id")
+            return
+        ensure_session(session_id)
+        limit = int(params.get("limit", 200))
+        messages = STATE.sessions[session_id][-limit:]
+        await send_result(ws, req_id, {"messages": messages})
+        return
+
+    if method == "chat.send":
+        session_id = params.get("session_id", "")
+        role = params.get("role", "")
+        content = params.get("content", "")
+        if not session_id or not role:
+            await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id or role")
+            return
+        ensure_session(session_id)
+        entry = append_message(session_id, role, content)
+        run_id = f"run_{int(time.time() * 1000)}"
+        await send_result(
+            ws,
+            req_id,
+            {
+                "message_id": entry["message_id"],
+                "session_id": session_id,
+                "run_id": run_id,
+            },
+        )
+        seq_state["value"] += 1
+        await ws.send_text(
+            json.dumps(
+                {
+                    "type": "event",
+                    "event": "agent",
+                    "seq": seq_state["value"],
+                    "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                    "data": {
+                        "run_id": run_id,
+                        "session_id": session_id,
+                        "agent_id": params.get("meta", {}).get("agent", "gateway"),
+                        "status": "final",
+                        "content": "Gateway skeleton: agent dispatch not implemented",
+                    },
+                }
+            )
+        )
+        return
+
+    if method == "chat.inject":
+        session_id = params.get("session_id", "")
+        role = params.get("role", "")
+        content = params.get("content", "")
+        if not session_id or not role:
+            await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id or role")
+            return
+        ensure_session(session_id)
+        entry = append_message(session_id, role, content)
+        await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id})
+        return
+
+    if method == "chat.abort":
+        await send_result(ws, req_id, {"aborted": True})
+        return
+
+    await send_error(ws, req_id, "INVALID_REQUEST", "Unknown method")
+
+
+async def send_result(ws: WebSocket, req_id: str, result: Dict[str, Any]) -> None:
+    await ws.send_text(
+        json.dumps(
+            {
+                "type": "response",
+                "id": req_id,
+                "ok": True,
+                "result": result,
+            }
+        )
+    )
+
+
+async def send_error(ws: WebSocket, req_id: str, code: str, message: str) -> None:
+    await ws.send_text(
+        json.dumps(
+            {
+                "type": "response",
+                "id": req_id,
+                "ok": False,
+                "error": {"code": code, "message": message},
+            }
+        )
+    )
 
 
 def cmd_run(args: argparse.Namespace) -> int:
