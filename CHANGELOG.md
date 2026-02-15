@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Documentation audit with AI-ready `llms.txt` file
+- Gateway protocol documentation and quickstart
+- Gateway auth and config references
+- Gateway JSON Schemas for request/response/event frames
+- Gateway protocol validation harness
 
 ---
 

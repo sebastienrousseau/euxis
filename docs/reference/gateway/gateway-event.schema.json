@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://euxis.co/schemas/gateway-event.schema.json",
+  "title": "Euxis Gateway Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "event", "seq", "ts", "data"],
+  "properties": {
+    "type": {"const": "event"},
+    "event": {"type": "string", "enum": ["agent", "presence", "tick", "shutdown"]},
+    "seq": {"type": "integer", "minimum": 0},
+    "ts": {"type": "string"},
+    "data": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event": {"const": "agent"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["run_id", "session_id", "agent_id", "status", "content"],
+            "properties": {
+              "run_id": {"type": "string", "minLength": 1},
+              "session_id": {"type": "string", "minLength": 1},
+              "agent_id": {"type": "string", "minLength": 1},
+              "status": {"type": "string", "enum": ["stream", "final", "error", "aborted"]},
+              "content": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event": {"const": "presence"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stateVersion", "sessions_active"],
+            "properties": {
+              "stateVersion": {"type": "integer", "minimum": 0},
+              "sessions_active": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event": {"const": "tick"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["uptime_ms", "stateVersion"],
+            "properties": {
+              "uptime_ms": {"type": "integer", "minimum": 0},
+              "stateVersion": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event": {"const": "shutdown"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["reason", "message"],
+            "properties": {
+              "reason": {"type": "string", "minLength": 1},
+              "message": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  ]
+}
