@@ -308,9 +308,17 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
 
     # Test Architect output format with proper error handling
     resp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_semantic_resp.XXXXXX" 2>/dev/null) || { echo "  [FAIL] Failed to create temp file" >&2; return 1; }
-    echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s)..."
+    SEMANTIC_PROVIDER="${EUXIS_SEMANTIC_PROVIDER:-gemini}"
+    if ! command -v "${SEMANTIC_PROVIDER}" >/dev/null 2>&1; then
+        echo "  FAIL: Provider '${SEMANTIC_PROVIDER}' not found for semantic verification."
+        echo "        Install it or set EUXIS_SEMANTIC_PROVIDER to an available provider."
+        echo ""
+        echo "CERTIFICATION FAILED at Gate 4 (Semantic - Provider Missing)."
+        exit 1
+    fi
+    echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s) with ${SEMANTIC_PROVIDER}..."
 
-    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." claude > "${resp_file}" 2>/dev/null; then
+    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." "${SEMANTIC_PROVIDER}" > "${resp_file}" 2>/dev/null; then
         RESP=$(cat "${resp_file}" 2>/dev/null || echo "")
         EXIT_CODE=0
     else

@@ -401,7 +401,7 @@ _perf_record() {
             --argjson ms "${elapsed_ms}" \
             --arg status "${safe_status}" \
             '{ts:$ts,op:$op,agent:$agent,ms:$ms,status:$status}' \
-            >> "${EUXIS_PERF_LOG}"
+            >> "${EUXIS_PERF_LOG}" 2>/dev/null || true
     else
         printf '{"ts":"%s","op":"%s","agent":"%s","ms":%s,"status":"%s"}\n' \
             "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -409,7 +409,7 @@ _perf_record() {
             "${safe_agent}" \
             "${elapsed_ms}" \
             "${safe_status}" \
-            >> "${EUXIS_PERF_LOG}"
+            >> "${EUXIS_PERF_LOG}" 2>/dev/null || true
     fi
 }
 
