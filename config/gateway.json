@@ -12,6 +12,16 @@
       "password": {
         "value": ""
       }
+    },
+    "exec": {
+      "policy": "allowlist",
+      "ask": "on-miss",
+      "ask_fallback": "deny",
+      "allowlist": [
+        "architect",
+        "debugger",
+        "reviewer"
+      ]
     }
   }
 }

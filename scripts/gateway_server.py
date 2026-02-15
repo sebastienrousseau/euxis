@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
+import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
@@ -21,6 +23,12 @@ DEFAULT_CONFIG = {
         "health_enabled": True,
         "health_path": "/health",
         "auth": {"mode": "token", "token": {"value": ""}, "password": {"value": ""}},
+        "exec": {
+            "policy": "allowlist",
+            "ask": "on-miss",
+            "ask_fallback": "deny",
+            "allowlist": [],
+        },
     }
 }
 
@@ -30,6 +38,9 @@ class GatewayState:
         self.started_at = time.time()
         self.sessions_active = 0
         self.sessions: Dict[str, List[Dict[str, Any]]] = {}
+        self.session_version = 0
+        self.last_event_ts = ""
+        self.running: Dict[str, asyncio.Task] = {}
 
 
 STATE = GatewayState()
@@ -79,7 +90,7 @@ def resolve_config(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def os_environ() -> Dict[str, str]:
-    return dict(**{k: v for k, v in dict(**__import__("os").environ).items()})
+    return dict(**os.environ)
 
 
 def build_app(config: Dict[str, Any]) -> FastAPI:
@@ -97,6 +108,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             {
                 "status": "ok",
                 "sessions_active": STATE.sessions_active,
+                "last_event_ts": STATE.last_event_ts or None,
                 "uptime_ms": uptime_ms,
             }
         )
@@ -108,11 +120,14 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             return
         await ws.accept()
         seq_state = {"value": 0}
+        tick_task = asyncio.create_task(send_ticks(ws, seq_state))
+        await send_presence(ws, seq_state)
         try:
             while True:
                 message = await ws.receive_text()
-                await handle_frame(ws, message, seq_state)
+                await handle_frame(ws, message, seq_state, config)
         except WebSocketDisconnect:
+            tick_task.cancel()
             return
 
     return app
@@ -151,6 +166,35 @@ def ensure_session(session_id: str) -> None:
     if session_id not in STATE.sessions:
         STATE.sessions[session_id] = []
         STATE.sessions_active = len(STATE.sessions)
+        STATE.session_version += 1
+
+
+def sessions_dir() -> Path:
+    home = os.environ.get("EUXIS_HOME", str(Path.home() / ".euxis"))
+    base = Path(home) / "data" / "gateway" / "sessions"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
+    path = sessions_dir() / f"{session_id}.jsonl"
+    if not path.exists():
+        return []
+    entries: List[Dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            entries.append(json.loads(line))
+        except Exception:
+            continue
+    return entries
+
+
+def persist_message(session_id: str, entry: Dict[str, Any]) -> None:
+    path = sessions_dir() / f"{session_id}.jsonl"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry) + "\n")
 
 
 def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
@@ -161,10 +205,13 @@ def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     }
     STATE.sessions[session_id].append(entry)
+    persist_message(session_id, entry)
     return entry
 
 
-async def handle_frame(ws: WebSocket, raw: str, seq_state: Dict[str, int]) -> None:
+async def handle_frame(
+    ws: WebSocket, raw: str, seq_state: Dict[str, int], config: Dict[str, Any]
+) -> None:
     try:
         frame = json.loads(raw)
     except Exception:
@@ -203,6 +250,8 @@ async def handle_frame(ws: WebSocket, raw: str, seq_state: Dict[str, int]) -> No
             await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id")
             return
         ensure_session(session_id)
+        if not STATE.sessions[session_id]:
+            STATE.sessions[session_id] = load_session_from_disk(session_id)
         limit = int(params.get("limit", 200))
         messages = STATE.sessions[session_id][-limit:]
         await send_result(ws, req_id, {"messages": messages})
@@ -212,39 +261,21 @@ async def handle_frame(ws: WebSocket, raw: str, seq_state: Dict[str, int]) -> No
         session_id = params.get("session_id", "")
         role = params.get("role", "")
         content = params.get("content", "")
+        meta = params.get("meta", {}) if isinstance(params.get("meta"), dict) else {}
         if not session_id or not role:
             await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id or role")
             return
         ensure_session(session_id)
         entry = append_message(session_id, role, content)
         run_id = f"run_{int(time.time() * 1000)}"
-        await send_result(
-            ws,
-            req_id,
-            {
-                "message_id": entry["message_id"],
-                "session_id": session_id,
-                "run_id": run_id,
-            },
+        if not is_exec_allowed(meta, config):
+            await send_error(ws, req_id, "APPROVAL_REQUIRED", "Execution approval required")
+            return
+        await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id, "run_id": run_id})
+        task = asyncio.create_task(
+            dispatch_agent(ws, seq_state, session_id, run_id, meta, content)
         )
-        seq_state["value"] += 1
-        await ws.send_text(
-            json.dumps(
-                {
-                    "type": "event",
-                    "event": "agent",
-                    "seq": seq_state["value"],
-                    "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-                    "data": {
-                        "run_id": run_id,
-                        "session_id": session_id,
-                        "agent_id": params.get("meta", {}).get("agent", "gateway"),
-                        "status": "final",
-                        "content": "Gateway skeleton: agent dispatch not implemented",
-                    },
-                }
-            )
-        )
+        STATE.running[run_id] = task
         return
 
     if method == "chat.inject":
@@ -260,10 +291,147 @@ async def handle_frame(ws: WebSocket, raw: str, seq_state: Dict[str, int]) -> No
         return
 
     if method == "chat.abort":
+        run_id = params.get("run_id", "")
+        task = STATE.running.get(run_id)
+        if task:
+            task.cancel()
+            STATE.running.pop(run_id, None)
         await send_result(ws, req_id, {"aborted": True})
         return
 
     await send_error(ws, req_id, "INVALID_REQUEST", "Unknown method")
+
+
+async def dispatch_agent(
+    ws: WebSocket,
+    seq_state: Dict[str, int],
+    session_id: str,
+    run_id: str,
+    meta: Dict[str, Any],
+    content: str,
+) -> None:
+    agent_id = meta.get("agent", "architect")
+    provider = meta.get("provider")
+    cmd = [str(Path.home() / ".euxis" / "bin" / "euxis"), agent_id, content]
+    if provider:
+        cmd.append(provider)
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    except Exception as exc:
+        await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "error", str(exc))
+        return
+
+    async def stream_stdout() -> None:
+        assert proc.stdout
+        async for line in proc.stdout:
+            text = line.decode("utf-8", errors="ignore").rstrip()
+            if not text:
+                continue
+            await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "stream", text)
+
+    async def stream_stderr() -> None:
+        assert proc.stderr
+        async for line in proc.stderr:
+            text = line.decode("utf-8", errors="ignore").rstrip()
+            if not text:
+                continue
+            await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "stream", text)
+
+    await asyncio.gather(stream_stdout(), stream_stderr())
+    await proc.wait()
+    status = "final" if proc.returncode == 0 else "error"
+    await send_agent_event(ws, seq_state, run_id, session_id, agent_id, status, f"exit {proc.returncode}")
+    STATE.running.pop(run_id, None)
+
+
+async def send_ticks(ws: WebSocket, seq_state: Dict[str, int]) -> None:
+    try:
+        while True:
+            await asyncio.sleep(30)
+            seq_state["value"] += 1
+            payload = {
+                "type": "event",
+                "event": "tick",
+                "seq": seq_state["value"],
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "data": {"uptime_ms": int((time.time() - STATE.started_at) * 1000), "stateVersion": STATE.session_version},
+            }
+            STATE.last_event_ts = payload["ts"]
+            await ws.send_text(json.dumps(payload))
+    except asyncio.CancelledError:
+        return
+
+
+async def send_presence(ws: WebSocket, seq_state: Dict[str, int]) -> None:
+    seq_state["value"] += 1
+    payload = {
+        "type": "event",
+        "event": "presence",
+        "seq": seq_state["value"],
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "data": {"stateVersion": STATE.session_version, "sessions_active": STATE.sessions_active},
+    }
+    STATE.last_event_ts = payload["ts"]
+    await ws.send_text(json.dumps(payload))
+
+
+async def send_agent_event(
+    ws: WebSocket,
+    seq_state: Dict[str, int],
+    run_id: str,
+    session_id: str,
+    agent_id: str,
+    status: str,
+    content: str,
+) -> None:
+    seq_state["value"] += 1
+    payload = {
+        "type": "event",
+        "event": "agent",
+        "seq": seq_state["value"],
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "data": {
+            "run_id": run_id,
+            "session_id": session_id,
+            "agent_id": agent_id,
+            "status": status,
+            "content": content,
+        },
+    }
+    STATE.last_event_ts = payload["ts"]
+    await ws.send_text(json.dumps(payload))
+
+
+def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
+    exec_cfg = config["gateway"].get("exec", {})
+    policy = exec_cfg.get("policy", "allowlist")
+    ask = exec_cfg.get("ask", "on-miss")
+    ask_fallback = exec_cfg.get("ask_fallback", "deny")
+    allowlist = set(exec_cfg.get("allowlist", []))
+    approved = bool(meta.get("approved"))
+    agent_id = meta.get("agent", "")
+
+    if policy == "deny":
+        return False
+    if policy == "full":
+        return True
+
+    allowed = agent_id in allowlist
+    if allowed:
+        return True
+
+    if ask == "off":
+        return ask_fallback == "full"
+    if ask == "always" and not approved:
+        return False
+    if ask == "on-miss" and not approved:
+        return False
+    return approved or ask_fallback == "full"
 
 
 async def send_result(ws: WebSocket, req_id: str, result: Dict[str, Any]) -> None:

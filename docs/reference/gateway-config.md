@@ -17,6 +17,16 @@ Reference for the Gateway configuration file.
       "token": {
         "value": "replace-with-secure-random-value"
       }
+    },
+    "exec": {
+      "policy": "allowlist",
+      "ask": "on-miss",
+      "ask_fallback": "deny",
+      "allowlist": [
+        "architect",
+        "debugger",
+        "reviewer"
+      ]
     }
   }
 }
@@ -51,6 +61,13 @@ Reference for the Gateway configuration file.
 ### `gateway.auth.password`
 
 - `value` (string): password for basic auth (if enabled).
+
+### `gateway.exec`
+
+- `policy` (string): `deny`, `allowlist`, or `full`.
+- `ask` (string): `off`, `on-miss`, `always`.
+- `ask_fallback` (string): `deny`, `allowlist`, or `full`.
+- `allowlist` (array): list of agent IDs allowed to execute.
 
 ## Notes
 

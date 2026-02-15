@@ -195,6 +195,14 @@ Run a health check against a running gateway:
 python3 scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health
 ```
 
+## Demo Client
+
+Run a minimal WebSocket client:
+
+```bash
+python3 scripts/gateway_demo.py --url ws://127.0.0.1:18789 --session sess_demo
+```
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash
