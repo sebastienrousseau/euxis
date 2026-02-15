@@ -3,7 +3,10 @@ agent_id: accountant
 role: "Cost analysis, budget management, resource efficiency, and usage optimization"
 version: "0.0.7"
 tags: [cost, budget, efficiency, resources, optimization]
-last_updated: "2026-02-04"
+tier: fleet
+activation: default
+capability_tags: [cost-analysis, resource-management]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Accountant

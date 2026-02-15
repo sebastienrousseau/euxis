@@ -78,6 +78,7 @@ class ValidationPipeline:
                 r"\bP\d+\s*[:\-]?\s*\d+\.?\d*\b",  # Percentiles
                 r"\b(?:average|median|mean|max|min|total|sum)\s*[:\-]?\s*\d+\.?\d*\b",  # Stats
                 r"\b(?:success|failure|error)\s+rate\s*[:\-]?\s*\d+\.?\d*%?\b",  # Rates
+                r"\b\d+\.?\d*%\s+(?:success|failure|error)\s+rate\b",  # Percent-before-rate
                 (
                     r"\b\d+\.?\d*\s*(?:requests?|operations?|tasks?)\s*per\s*"
                     r"(?:second|minute|hour)\b"

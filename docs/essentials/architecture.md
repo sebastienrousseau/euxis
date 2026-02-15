@@ -4,7 +4,7 @@ Comprehensive architectural documentation for the Euxis multi-provider AI agent 
 
 **Version:** 0.0.7
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
-**Agent Count:** 41 (9 core + 32 fleet)
+**Agent Count:** 42 (9 core + 33 fleet)
 
 ---
 
@@ -404,27 +404,27 @@ flowchart TB
         direction TB
 
         subgraph STier["S-Tier: Strategic"]
-            s_agents["orchestrator<br/>architect<br/>product-manager<br/>reviewer"]
+            s_agents["orchestrator<br/>architect<br/>planner<br/>reviewer"]
             s_provider["claude"]
         end
 
         subgraph ATier["A-Tier: Research/Domain"]
-            a_research["researcher<br/>deep-researcher<br/>compliance-officer"]
-            a_domain["crypto-auditor<br/>payments-steward"]
+            a_research["researcher<br/>deep-researcher<br/>auditor"]
+            a_domain["cryptographer<br/>ledger"]
             a_provider1["gemini"]
             a_provider2["claude"]
         end
 
         subgraph BTier["B-Tier: Coding/Systems"]
-            b_coding["bug-fixer<br/>unit-tester<br/>automation-engineer"]
-            b_systems["realtime-engineer<br/>rust-steward"]
-            b_math["perf-optimizer<br/>data-steward"]
+            b_coding["debugger<br/>tester<br/>automaton"]
+            b_systems["conduit<br/>custodian"]
+            b_math["optimizer<br/>telemetrist"]
             b_provider1["goose"]
             b_provider2["qwen"]
         end
 
         subgraph CTier["C-Tier: Utility"]
-            c_agents["butler<br/>librarian<br/>tech-writer"]
+            c_agents["butler<br/>librarian<br/>writer"]
             c_provider["ollama"]
         end
     end
@@ -465,19 +465,19 @@ flowchart TB
 
     match_agent{"Match Agent<br/>to Tier"}
 
-    match_agent -->|"orchestrator, architect,<br/>product-manager, reviewer"| return_claude
+    match_agent -->|"orchestrator, architect,<br/>planner, reviewer"| return_claude
 
-    match_agent -->|"researcher, deep-researcher,<br/>compliance-officer"| return_gemini["return 'gemini'"]
+    match_agent -->|"researcher, deep-researcher,<br/>auditor"| return_gemini["return 'gemini'"]
 
-    match_agent -->|"incident-commander"| return_kiro["return 'kiro-cli'"]
+    match_agent -->|"responder"| return_kiro["return 'kiro-cli'"]
 
-    match_agent -->|"bug-fixer, unit-tester,<br/>automation-engineer,<br/>legacy-maintainer"| return_goose["return 'goose'"]
+    match_agent -->|"debugger, tester,<br/>automaton,<br/>maintainer"| return_goose["return 'goose'"]
 
     match_agent -->|"crypto-auditor,<br/>payments-steward"| return_claude
 
-    match_agent -->|"perf-optimizer,<br/>data-steward"| return_qwen["return 'qwen'"]
+    match_agent -->|"optimizer,<br/>telemetrist"| return_qwen["return 'qwen'"]
 
-    match_agent -->|"butler, librarian,<br/>tech-writer"| return_ollama["return 'ollama'"]
+    match_agent -->|"butler, librarian,<br/>writer"| return_ollama["return 'ollama'"]
 
     match_agent -->|"No Match"| return_default["return DEFAULT_PROVIDER<br/>('claude')"]
 

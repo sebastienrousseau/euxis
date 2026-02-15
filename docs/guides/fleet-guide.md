@@ -9,7 +9,7 @@ Version 0.0.7
 
 ## Fleet Overview
 
-41 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
+42 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
 
 ### Core (9): Authority-bearing, always present
 
@@ -55,7 +55,7 @@ These agents execute domain-specific work when you call them. They advise and de
 | `watchdog` | Performs exhaustive pre-merge analysis. Catches regressions, validates behavior changes, blocks risky merges. | "Review this PR thoroughly" or "Check for regressions" |
 | `writer` | Creates documentation that developers actually read. Writes tutorials, API references, and guides that answer real questions. | "Document the API" or "Write a getting started guide" |
 
-### On-Demand (7): Explicit invocation only
+### On-Demand (8): Explicit invocation only
 
 These agents handle specialized growth and communication tasks. They add capability: not safety gates. Call them when you need their specific expertise.
 
@@ -66,6 +66,7 @@ These agents handle specialized growth and communication tasks. They add capabil
 | `evangelist` | Crafts brand voice and visual identity. Tells compelling stories about your product. Makes technical work resonate. | "Write launch announcement copy" or "Define our brand voice" |
 | `localizer` | Adapts products for global markets. Handles i18n, l10n, RTL layouts, Unicode validation, and cultural adaptation. | "Localize for Japanese market" or "Add RTL support" |
 | `marketer` | Drives growth through SEO, funnel optimization, and go-to-market strategy. Turns features into user acquisition. | "Improve our SEO" or "Plan the product launch" |
+| `deep-researcher` | Produces CTO-grade strategic briefs. Synthesizes academic, industry, and standards evidence with citations. | "Produce a strategic brief on AI system modularity" |
 | `researcher` | Conducts deep research with cross-validation. Compares options, benchmarks alternatives, synthesizes findings. Uses Gemini's 2M context. | "Compare React vs Vue vs Svelte" or "Research PDF parsing libraries" |
 | `strategist` | Plans content calendars, manages social presence, builds community engagement. Amplifies your technical work. | "Plan Q1 content strategy" or "Grow our Twitter presence" |
 
@@ -359,13 +360,15 @@ Use a combo when you want a focused pipeline with a predictable flow. Combos are
 ```
 Task: "Design onboarding flow"
     ↓
-Agent 1 (planner): Defines scope and requirements → output
+Agent 1 (deep-researcher): Establishes evidence-backed context → output
     ↓
-Agent 2 (architect): Designs the structure → output
+Agent 2 (planner): Defines scope and requirements → output
     ↓
-Agent 3 (evangelist): Polishes the narrative → output
+Agent 3 (architect): Designs the structure → output
     ↓
-Agent 4 (reviewer): Validates and approves → final output
+Agent 4 (evangelist): Polishes the narrative → output
+    ↓
+Agent 5 (reviewer): Validates and approves → final output
 ```
 
 Each agent receives:
@@ -376,12 +379,14 @@ Each agent receives:
 
 | Combo | What It Does | The Chain | Best For |
 |-------|--------------|-----------|----------|
-| **Steve Jobs** | Vision to polished output. Plans, architects, communicates, reviews. | planner → architect → evangelist → reviewer | Product design, feature specs, strategic documents |
-| **Fort Knox** | Maximum security verification. Penetration testing, compliance audit, final inspection. | pentester → auditor → inspector → reviewer | Security-critical features, pre-launch security review |
-| **Content Factory** | End-to-end content creation. Writes, brands, strategizes, validates. | writer → evangelist → strategist → reviewer | Blog posts, documentation, marketing materials |
-| **Jony Ive** | Apple-level interface design. Designs, animates, handles interaction, reviews. | designer → animator → interactor → reviewer | UI components, design systems, user experiences |
-| **Crypto Fortress** | Deep cryptographic audit. Security policy, crypto review, penetration test, validation. | sentinel → cryptographer → pentester → reviewer | Encryption features, key management, secure protocols |
-| **SWIFT Payment** | Payments integration validation. Schema compliance, audit trail, testing, review. | ledger → auditor → tester → reviewer | Payment processing, ISO 20022, financial integrations |
+| **Envision** | Product narrative aligned with architecture and ready for launch review. | deep-researcher → planner → architect → evangelist → reviewer | Product strategy, launch briefs, roadmap narratives |
+| **Protect** | Security posture hardened with evidence-backed assurance. | sentinel → pentester → auditor → inspector → reviewer | Security-critical features, audit readiness |
+| **Craft** | End-to-end content creation with consistent voice. | writer → strategist → evangelist → reviewer | Blog posts, documentation, messaging |
+| **Refine** | Interface refined from system to motion and interaction. | designer → animator → interactor → reviewer | UI components, design systems, UX polish |
+| **Seal** | Deep cryptographic audit with policy-backed validation. | sentinel → cryptographer → pentester → reviewer | Encryption features, key management |
+| **Settle** | Payments integration validation with compliance and tests. | ledger → auditor → tester → reviewer | Payment processing, ISO 20022 |
+| **Inspect** | Exhaustive pre-merge analysis and regression hardening. | researcher → polyglot → watchdog → pentester → reviewer | High-risk PRs, critical merges |
+| **Discover** | Evidence-backed architecture roadmap and decisions. | deep-researcher → architect → reviewer | Platform decisions, modernization plans |
 
 ### Combo Commands
 

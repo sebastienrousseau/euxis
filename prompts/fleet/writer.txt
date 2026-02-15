@@ -3,7 +3,10 @@ agent_id: writer
 role: "Documentation, tutorials, API reference, and glossary maintenance"
 version: "0.0.7"
 tags: [documentation, writing, content]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [documentation]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Lead Technical Writer

@@ -14,15 +14,15 @@ The fleet's 31 generalist agents handle broad engineering tasks well, but four d
 ## Decision
 Add four specialist agents with dedicated prompts, intelligence tiering, and organizational infrastructure:
 
-- `crypto-cryptography-auditor` — A-Tier (claude) for deep reasoning on cryptographic correctness
-- `payments-domain-steward` — A-Tier (claude) for ISO 20022 domain expertise
-- `realtime-audio-engineer` — B-Tier (goose) for systems-level audio work
-- `rust-crate-steward` — B-Tier (goose) for Rust toolchain integration
+- `cryptographer` — A-Tier (claude) for deep reasoning on cryptographic correctness
+- `ledger` — A-Tier (claude) for ISO 20022 domain expertise
+- `conduit` — B-Tier (goose) for systems-level audio work
+- `custodian` — B-Tier (goose) for Rust toolchain integration
 
-Create a "Specialist" squad to organize these agents, domain-specific playbooks for phased workflows, and two new combos (Crypto Fortress, SWIFT Payment) for chained execution.
+Create a "Specialist" squad to organize these agents, domain-specific playbooks for phased workflows, and two new combos (Seal, Settle) for chained execution.
 
 ## Alternatives Considered
-1. **Extend existing agents** — Add crypto/payments/audio/rust knowledge to edge-hunter, perf-optimizer, etc. Rejected: violates single-responsibility, dilutes prompt quality.
+1. **Extend existing agents** — Add crypto/payments/audio/rust knowledge to pentester, optimizer, etc. Rejected: violates single-responsibility, dilutes prompt quality.
 2. **On-demand prompt injection** — Load domain knowledge via protocol files only when needed. Rejected: insufficient depth; domain agents need persistent mandate and calibrated output format.
 3. **External tool integration** — Delegate to cargo-semver-checks, valgrind, etc. directly. Rejected: tools supplement but don't replace domain reasoning about *why* and *when* to apply checks.
 

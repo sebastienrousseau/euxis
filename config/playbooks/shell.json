@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current shell scripting best practices for: ${goal}. Research: POSIX sh compatibility matrix vs bash-specific features, ShellCheck rule categories and severity levels, current bash 5.x features (associative arrays, nameref, loadable builtins), portable alternatives to common bashisms, cross-platform differences (macOS default shell is zsh, Linux is bash, BSD vs GNU coreutils), structured output patterns (JSON from shell via jq), modern argument parsing (getopts vs getopt vs manual), process management best practices (trap, wait, job control), container-friendly scripting (Alpine/busybox ash compatibility). Cross-validate findings against Bash manual, POSIX spec, ShellCheck wiki, and Google Shell Style Guide. Flag deprecated patterns.",
           "verifies": [
             "POSIX vs bash compatibility documented",

@@ -1,6 +1,6 @@
 # Euxis Documentation
 
-> Euxis: 41 AI agents that coordinate to handle engineering tasks. Deploy in seconds.
+> Euxis: 42 AI agents that coordinate to handle engineering tasks. Deploy in seconds.
 
 ## Quick Start
 - [Quick Start Guide](docs/essentials/quick-start.md): Get your first agent running in 5 minutes
@@ -99,7 +99,7 @@ Override: `euxis architect "task" gemini`
 
 ## Documentation
 - [User Guide](docs/guides/user-guide.md): Complete CLI reference
-- [Fleet Guide](docs/guides/fleet-guide.md): All 41 agents detailed
+- [Fleet Guide](docs/guides/fleet-guide.md): All 42 agents detailed
 - [UI Guide](docs/guides/ui-guide.md): Terminal interface
 - [Concepts](docs/essentials/core-concepts/): Core concepts explained
 - [Workflows](docs/guides/workflows/): Problem-to-solution tutorials

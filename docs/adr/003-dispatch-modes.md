@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-The orchestrator produces mission manifests that deploy multiple agents to accomplish complex tasks. Not all multi-agent tasks have the same coordination requirements. A code review needs sequential handoffs (architect → reviewer → bug-fixer), while a security audit benefits from parallel independent analysis that gets merged. Some tasks need peer-to-peer agent communication without a central coordinator.
+The orchestrator produces mission manifests that deploy multiple agents to accomplish complex tasks. Not all multi-agent tasks have the same coordination requirements. A code review needs sequential handoffs (architect → reviewer → debugger), while a security audit benefits from parallel independent analysis that gets merged. Some tasks need peer-to-peer agent communication without a central coordinator.
 
 A single dispatch strategy would either over-serialize parallel-safe work or under-coordinate dependent work.
 

@@ -75,7 +75,7 @@ class TestETXHeaderReactiveDefaults(unittest.TestCase):
     def test_default_agent_count(self):
         """Test default agent_count reactive value is 41."""
         descriptor = ETXHeader.__dict__["agent_count"]
-        assert descriptor._default == 41
+        assert descriptor._default == 42
 
     def test_default_version(self):
         """Test default version reactive value is '0.0.7'."""
@@ -209,7 +209,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         header, _, _, mock_status = self._create_header_with_mocks()
         header._update_display()
         text = mock_status.update.call_args[0][0]
-        assert "41" in text
+        assert "42" in text
         assert "agents" in text
 
     def test_update_display_status_contains_provider(self):

@@ -9,7 +9,7 @@
 #     euxis --help
 #
 # DESCRIPTION:
-#     Primary entry point for the Euxis Fleet system. Coordinates 41 specialist
+#     Primary entry point for the Euxis Fleet system. Coordinates 42 specialist
 #     AI agents across multiple providers for engineering tasks. Supports single
 #     agent execution, fleet dispatch, squad deployment, and playbook execution.
 #

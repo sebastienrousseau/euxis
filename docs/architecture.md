@@ -6,7 +6,7 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 
 **Version:** 0.0.7
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
-**Agent Count:** 41 (9 core + 32 fleet)
+**Agent Count:** 42 (9 core + 33 fleet)
 
 ## System Architecture
 
@@ -34,9 +34,9 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 │   │  librarian │ auditor │ arbiter │ historian              │  │
 │   └─────────────────────────────────────────────────────────┘  │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                   FLEET TIER (32)                       │  │
+│   │                   FLEET TIER (33)                       │  │
 │   │  Default (21): debugger, sentinel, writer, accountant   │  │
-│   │  On-Demand (7): researcher, marketer, ambassador        │  │
+│   │  On-Demand (8): deep-researcher, researcher, marketer    │  │
 │   │  Specialist (4): cryptographer, ledger, conduit         │  │
 │   └─────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
@@ -85,9 +85,9 @@ Fleet agents are specialists for specific domains and tasks.
 - optimizer, pentester, polyglot, repairer, responder
 - sentinel, tactician, telemetrist, tester, watchdog, writer
 
-**On-Demand (7 — Explicit invocation only):**
+**On-Demand (8 — Explicit invocation only):**
 - ambassador, butler, evangelist, localizer
-- marketer, researcher, strategist
+- marketer, deep-researcher, researcher, strategist
 
 **Specialist (4 — Domain-specific expertise):**
 - cryptographer, ledger, conduit, custodian

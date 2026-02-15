@@ -556,6 +556,24 @@
       "activation": "on-demand"
     },
     {
+      "id": "deep-researcher",
+      "path": "prompts/fleet/deep-researcher.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "tags": [
+        "research",
+        "strategy",
+        "architecture",
+        "synthesis"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "documentation",
+        "test-analysis"
+      ],
+      "activation": "on-demand"
+    },
+    {
       "id": "responder",
       "path": "prompts/fleet/responder.txt",
       "tier": "fleet",

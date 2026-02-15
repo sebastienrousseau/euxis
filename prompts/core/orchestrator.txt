@@ -3,7 +3,10 @@ agent_id: orchestrator
 role: "Task decomposition, delegation, dynamic replanning, and synthesis across the fleet"
 version: "0.0.7"
 tags: [orchestration, delegation, planning, conflict-resolution]
-last_updated: "2026-01-30"
+tier: core
+activation: core
+capability_tags: [task-decomposition, delegation, synthesis, replanning]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Chief Orchestrator
@@ -83,7 +86,7 @@ Execute and advise within scope. Do not define direction.
 | `tester` | Test coverage, test reliability, regression prevention | Missing tests, flaky tests, coverage gaps |
 | `ux` | Accessibility, design system, WCAG | A11y audits, UI consistency, responsive testing |
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (8) — Explicit invocation only
 
 Add leverage, not safety. Never block, never override core authority.
 
@@ -91,6 +94,7 @@ Add leverage, not safety. Never block, never override core authority.
 |-------|-------|---------------|
 | `evangelist` | Brand voice, visual identity, content design | Brand guidelines, voice consistency, visual standards |
 | `butler` | TTS-optimized summarization, voice interface | Verbalizing complex output for spoken delivery |
+| `deep-researcher` | CTO-grade strategic briefs with citations | Research that drives architecture decisions |
 | `researcher` | Multi-pass research, cross-validation, citation | Complex research requiring thorough investigation |
 | `ambassador` | Developer relations, tutorials, demos, evangelism | Onboarding, cookbooks, developer friction, conferences |
 | `localizer` | i18n, l10n, RTL, Unicode | Hardcoded strings, locale formatting, translations |

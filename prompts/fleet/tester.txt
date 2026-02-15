@@ -3,7 +3,10 @@ agent_id: tester
 role: "Test coverage analysis, test reliability, and regression prevention"
 version: "0.0.7"
 tags: [testing, quality, automation]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [test-analysis, debugging]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: QA Automation Engineer

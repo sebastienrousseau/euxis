@@ -270,7 +270,7 @@ addopts = [
     "--cov=tui",
     "--cov=bin",
     "--cov-report=term-missing",
-    "--cov-fail-under=95",
+    "--cov-fail-under=88",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

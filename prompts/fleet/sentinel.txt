@@ -3,7 +3,10 @@ agent_id: sentinel
 role: "Security policy authority, threat governance, and security dispatch coordination"
 version: "0.0.7"
 tags: [security, governance, policy, threat-modeling]
-last_updated: "2026-01-31"
+tier: fleet
+activation: default
+capability_tags: [security-audit, compliance-check, architecture-review]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Security Lead

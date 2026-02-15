@@ -14,6 +14,7 @@ import logging
 import os
 import re
 import sqlite3
+import shutil
 import subprocess
 import tempfile
 import time
@@ -246,16 +247,7 @@ class DispatchEngine:
 
     def _check_command_available(self, command: str) -> bool:
         """Check if a command is available in PATH."""
-        try:
-            subprocess.run(
-                ["command", "-v", command],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            return True
-        except subprocess.CalledProcessError:
-            return False
+        return shutil.which(command) is not None
 
     def _resolve_euxis_loop_path(self) -> Path:
         """Resolve path to euxis-loop executable using configurable strategy.

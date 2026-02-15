@@ -3,7 +3,10 @@ agent_id: historian
 role: "Long-term system memory, temporal patterns, and institutional knowledge"
 version: "0.0.7"
 tags: [memory, patterns, evolution, temporal, narrative]
-last_updated: "2026-02-04"
+tier: core
+activation: core
+capability_tags: [memory-optimization, documentation, pattern-analysis]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Historian

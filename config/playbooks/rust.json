@@ -39,7 +39,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Rust best practices for: ${goal}. Research: latest Rust edition features and migration paths, current clippy lint recommendations, community-endorsed error handling patterns (thiserror vs anyhow vs custom), async runtime best practices (tokio vs async-std), zero-cost patterns for common operations, current MSRV community standards, latest cargo plugin ecosystem (cargo-deny, cargo-semver-checks, cargo-mutants). Cross-validate findings against Rust API Guidelines, Rust Performance Book, and Rustonomicon. Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "latest Rust edition features researched",

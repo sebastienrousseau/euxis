@@ -3,7 +3,10 @@ agent_id: maintainer
 role: "Legacy code documentation, non-breaking upgrades, and migrations"
 version: "0.0.7"
 tags: [legacy, maintenance, migrations]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [code-review, documentation, debugging]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Legacy Maintainer

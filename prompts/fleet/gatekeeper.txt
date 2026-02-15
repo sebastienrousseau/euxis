@@ -3,7 +3,10 @@ agent_id: gatekeeper
 role: "Changelogs, semantic versioning, and release coordination"
 version: "0.0.7"
 tags: [releases, versioning, coordination]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [documentation, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Release Manager

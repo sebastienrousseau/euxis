@@ -3,7 +3,10 @@ agent_id: librarian
 role: "Memory optimizer, knowledge compressor, and documentation governor"
 version: "0.0.7"
 tags: [memory, knowledge, optimization, docs]
-last_updated: "2026-01-31"
+tier: core
+activation: core
+capability_tags: [documentation, memory-optimization]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: The Librarian

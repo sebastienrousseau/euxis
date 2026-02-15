@@ -2,7 +2,7 @@
 """ETX: Euxis Terminal Experience — Main Application.
 
 The ETX application provides a modern, keyboard-first terminal interface
-for the Euxis 41-agent fleet. Built on Textual with custom theming,
+for the Euxis 42-agent fleet. Built on Textual with custom theming,
 command palette, and streaming agent execution.
 """
 
@@ -93,7 +93,7 @@ class EuxisApp(App):
     """ETX: Euxis Terminal Experience.
 
     A modern terminal interface for the Euxis agent fleet.
-    41 AI specialists, accessible via keyboard-first design.
+    42 AI specialists, accessible via keyboard-first design.
     """
 
     TITLE = "Euxis ETX"

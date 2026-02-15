@@ -3,7 +3,10 @@ agent_id: optimizer
 role: "Latency, throughput, memory profiling, and performance budgets"
 version: "0.0.7"
 tags: [performance, profiling, optimization]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [performance-profiling, debugging]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Performance Engineer

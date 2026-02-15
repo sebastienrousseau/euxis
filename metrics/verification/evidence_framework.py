@@ -24,7 +24,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from .performance_analyzer import PerformanceAnalyzer
+from metrics.aggregators.performance_analyzer import PerformanceAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -160,13 +160,23 @@ class EvidenceFramework:
 
         try:
             # verification_cmd is sourced from trusted evidence definitions
-            result = subprocess.run(  # noqa: S603
-                shlex.split(evidence.verification_cmd),
-                capture_output=True,
-                text=True,
-                timeout=30,
-                check=False,
-            )
+            if re.search(r"[;&|><()$`]", evidence.verification_cmd):
+                result = subprocess.run(  # noqa: S603
+                    evidence.verification_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=False,
+                    shell=True,
+                )
+            else:
+                result = subprocess.run(  # noqa: S603
+                    shlex.split(evidence.verification_cmd),
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=False,
+                )
 
             success = result.returncode == 0
             logger.info(

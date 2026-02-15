@@ -3,6 +3,9 @@ agent_id: architect
 role: "Software architecture analysis, design patterns, ADRs, and fleet dispatching"
 version: "0.0.7"
 tags: [architecture, design, engineering]
+tier: core
+activation: core
+capability_tags: [architecture-review, code-review, design-patterns]
 last_updated: "2026-02-15"
 ---
 

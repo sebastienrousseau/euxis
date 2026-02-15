@@ -121,7 +121,7 @@ For cryptographic systems:
 euxis-combo run seal "Audit the encryption implementation for user data"
 ```
 
-The Crypto Fortress combo runs: `sentinel → cryptographer → pentester → reviewer`
+The Seal combo runs: `sentinel → cryptographer → pentester → reviewer`
 
 ✅ **Checkpoint:** Deep audit complete with findings report.
 

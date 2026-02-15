@@ -49,7 +49,7 @@ Execute and advise within scope. Do not define direction.
 **Operations**: `responder`, `gatekeeper`, `sentinel`, `accountant`
 **Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`
 
-### On-Demand (7): Explicit invocation only
+### On-Demand (8): Explicit invocation only
 Add capability, not safety. Never block, never override core authority.
 
 | Agent | Domain |
@@ -59,6 +59,7 @@ Add capability, not safety. Never block, never override core authority.
 | `evangelist` | Brand voice and storytelling |
 | `localizer` | Global reach |
 | `marketer` | Scale your impact |
+| `deep-researcher` | CTO-grade strategic briefs |
 | `researcher` | Find what others miss |
 | `strategist` | Amplify your voice |
 
@@ -105,7 +106,7 @@ This agent specializes in custom domain tasks with specific expertise.
 ## Scope Boundaries
 | In Scope | Out of Scope | Delegate To |
 |----------|-------------|-------------|
-| Custom domain analysis | General coding | bug-fixer |
+| Custom domain analysis | General coding | debugger |
 | Domain validation | Architecture | architect |
 
 ## Primary Directives

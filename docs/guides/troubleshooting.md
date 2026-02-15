@@ -119,7 +119,7 @@ euxis-certify
 --------------------------------------------------
   Running full validation...
   Running minimal validation...
-  Registry database valid (41 agents)
+  Registry database valid (42 agents)
   Euxis directory structure is valid
   All system dependencies available
   Full validation passed.
@@ -552,9 +552,9 @@ euxis architect "Your task" ollama
 |------------|------------------|----------|
 | orchestrator, architect | claude | gemini |
 | researcher, deep-researcher | gemini | claude |
-| bug-fixer, unit-tester | goose | claude |
+| debugger, tester | goose | claude |
 | butler, librarian | ollama | claude |
-| perf-optimizer | qwen | claude |
+| optimizer | qwen | claude |
 
 ---
 
@@ -587,8 +587,8 @@ jq -r '.agents[].id' ~/.euxis/registry.json | sort
    ```bash
    # Common agents
    euxis architect "Task"     # Not 'architekt'
-   euxis bug-fixer "Task"     # Not 'bugfixer'
-   euxis unit-tester "Task"   # Not 'unittester'
+   euxis debugger "Task"     # Not 'bugfixer'
+   euxis tester "Task"   # Not 'unittester'
    ```
 
 2. **Check if prompt file exists:**

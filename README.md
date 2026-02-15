@@ -1,6 +1,6 @@
 # Euxis
 
-**41 AI specialists. Deploy in seconds.**
+**42 AI specialists. Deploy in seconds.**
 Version 0.0.7
 
 [![Version][version-badge]][version-url]
@@ -12,7 +12,7 @@ Version 0.0.7
 
 ## What Euxis Does
 
-Euxis coordinates 41 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
+Euxis coordinates 42 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
 
 **Ship features faster.** Break complex goals into tasks. Delegate to specialists. Get working solutions.
 
@@ -348,7 +348,7 @@ Every output passes three verification layers:
 
 ## Agent Fleet
 
-41 specialists organized by authority.
+42 specialists organized by authority.
 
 ### Core Agents (9)
 
@@ -395,7 +395,7 @@ euxis-tui
 ```
 
 **Features:**
-- Fleet dashboard with all 41 agents
+- Fleet dashboard with all 42 agents
 - Command palette (`Ctrl+K`)
 - Streaming agent execution
 - Squad monitoring
@@ -422,7 +422,7 @@ euxis-tui
 | [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
 | [Core Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
 | [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
-| [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
+| [Fleet Guide](docs/guides/fleet-guide.md) | All 42 agents in detail |
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
 | [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |

@@ -274,11 +274,15 @@ class TestConcurrentAccess:
 
         registry_data = {
             "protocol_version": "0.0.7",
-            "agents": [
-                {"id": f"agent_{i}", "tier": "fleet",
-                 "tags": [], "activation": "default"}
-                for i in range(50)
-            ],
+            "agents": (
+                [
+                    {"id": "core_agent_0", "tier": "core", "tags": [], "activation": "core"},
+                ]
+                + [
+                    {"id": f"agent_{i}", "tier": "fleet", "tags": [], "activation": "default"}
+                    for i in range(50)
+                ]
+            ),
         }
 
         squads_data = {
@@ -298,7 +302,7 @@ class TestConcurrentAccess:
                 agents = registry.agents
                 core_agents = registry.core_agents
                 agent = registry.get_agent("agent_0")
-                assert len(agents) == 50
+                assert len(agents) == 51
                 assert len(core_agents) > 0
                 assert agent.id == "agent_0"
             except Exception as exc:  # noqa: BLE001

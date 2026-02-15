@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Go best practices for: ${goal}. Research: latest Go release features (generics patterns, range over func, log/slog structured logging, enhanced HTTP routing), current golangci-lint linter recommendations (exhaustive, nilnil, wrapcheck, errcheck, gocritic), Go module best practices (workspace mode, version retraction, GOPROXY/GONOSUMDB), testing patterns (testscript, golden files, integration test tags), concurrency patterns (errgroup, semaphore, fan-out/fan-in, context cancellation), current dependency injection approaches (wire, fx, manual), observability patterns (OpenTelemetry, slog handlers), build patterns (goreleaser, ko for containers). Cross-validate against Effective Go, Go blog, Go wiki (CodeReviewComments, CommonMistakes), and core team talks. Flag deprecated patterns.",
           "verifies": [
             "latest Go release features researched",

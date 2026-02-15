@@ -3,7 +3,10 @@ agent_id: localizer
 role: "Internationalization, localization, RTL support, and Unicode validation"
 version: "0.0.7"
 tags: [i18n, l10n, globalization]
-last_updated: "2026-01-30"
+tier: fleet
+activation: on-demand
+capability_tags: [compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Globalization & Localization Lead

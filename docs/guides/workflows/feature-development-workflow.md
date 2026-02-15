@@ -41,7 +41,7 @@ For complex features, get the full strategic view:
 euxis-combo run envision "Design user notification preferences with multi-channel support"
 ```
 
-The Steve Jobs combo runs: `planner → architect → evangelist → reviewer`
+The Envision combo runs: `deep-researcher → planner → architect → evangelist → reviewer`
 
 This gives you scope, structure, communication clarity, and quality validation.
 

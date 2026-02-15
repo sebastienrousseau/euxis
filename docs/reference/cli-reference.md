@@ -190,7 +190,7 @@ Cross-platform semantic memory system using vector and graph hybrid storage. Man
 
 **Examples:**
 ```bash
-euxis-cortex remember 'Deployed v0.0.7 to staging, all tests passed' 'release-manager' --type episodic
+euxis-cortex remember 'Deployed v0.0.7 to staging, all tests passed' 'gatekeeper' --type episodic
 euxis-cortex recall 'auth token' 5 --hybrid
 euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 ```
@@ -313,7 +313,7 @@ Squad-based agent group management for coordinated team operations.
 **Examples:**
 ```bash
 euxis-squad create security-team
-euxis-squad assign edge-hunter security-team
+euxis-squad assign pentester security-team
 ```
 
 **See Also:** [euxis-council](#euxis-council), [euxis-dispatch](#euxis-dispatch)

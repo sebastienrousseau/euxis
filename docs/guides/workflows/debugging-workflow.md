@@ -53,7 +53,7 @@ For issues involving multiple systems:
 euxis-combo run protect "Investigate why sessions expire immediately after login"
 ```
 
-The Fort Knox combo runs: `pentester → auditor → inspector → reviewer`
+The Protect combo runs: `sentinel → pentester → auditor → inspector → reviewer`
 
 This gives you security, compliance, testing, and quality perspectives.
 

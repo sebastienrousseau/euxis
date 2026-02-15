@@ -112,7 +112,7 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 41 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 42 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
 ### Core (9) — Authority-bearing, always present
 
@@ -158,7 +158,7 @@ Execute and advise within scope. Direction comes from core agents.
 | `watchdog` | Pre-merge exhaustive regression analysis |
 | `writer` | Documentation, tutorials, API reference, glossary |
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (8) — Explicit invocation only
 
 Add capability without blocking. Do not override core authority.
 
@@ -169,6 +169,7 @@ Add capability without blocking. Do not override core authority.
 | `evangelist` | Brand voice, visual identity, content design |
 | `localizer` | i18n, l10n, RTL support, Unicode validation |
 | `marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `deep-researcher` | CTO-grade strategic research briefs with citations |
 | `researcher` | Iterative research with cross-validation |
 | `strategist` | Platform-native content, calendars, community engagement |
 
@@ -193,7 +194,7 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 41 agents: 9 core + 21 default + 7 on-demand + 4 specialist |
+| **Fleet** | 42 agents: 9 core + 21 default + 8 on-demand + 4 specialist |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |

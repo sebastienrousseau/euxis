@@ -46,3 +46,8 @@ class ShortcutBar(Static):
         for key, label in self._shortcuts:
             parts.append(f"[bold] {key} [/][dim] {label}[/]")
         self.update("  ".join(parts))
+
+    @property
+    def renderable(self) -> str:
+        """Expose current renderable for tests."""
+        return getattr(self, "_renderable", "")

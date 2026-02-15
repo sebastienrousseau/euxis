@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
   "protocol_version": "0.0.7",
-  "last_updated": "2026-02-04",
+  "last_updated": "2026-02-15",
   "squads": [
     {
       "id": "vision",
       "name": "Vision Squad",
-      "purpose": "Strategy & Discovery",
+      "purpose": "Strategy, Research, and Architecture",
       "lead": "orchestrator",
-      "members": ["orchestrator", "architect", "planner", "researcher", "historian", "accountant"]
+      "members": ["orchestrator", "architect", "planner", "deep-researcher", "researcher", "historian", "accountant"]
     },
     {
       "id": "build",
@@ -22,7 +22,7 @@
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "inspector", "pentester", "auditor", "optimizer", "watchdog", "polyglot", "arbiter"]
+      "members": ["reviewer", "inspector", "sentinel", "pentester", "auditor", "optimizer", "watchdog", "polyglot", "arbiter"]
     },
     {
       "id": "growth",
@@ -49,51 +49,51 @@
   "combos": [
     {
       "id": "envision",
-      "name": "Steve Jobs",
+      "name": "Envision",
       "description": "Shape a product narrative from concept to launch. Aligns architecture with a clear story and delivers a review-ready brief.",
-      "chain": ["planner", "architect", "evangelist", "reviewer"]
+      "chain": ["deep-researcher", "planner", "architect", "evangelist", "reviewer"]
     },
     {
       "id": "protect",
-      "name": "Fort Knox",
+      "name": "Protect",
       "description": "Harden your system from threat model to audit trail. Surfaces risks, validates controls, and delivers an assurance summary.",
-      "chain": ["pentester", "auditor", "inspector", "reviewer"]
+      "chain": ["sentinel", "pentester", "auditor", "inspector", "reviewer"]
     },
     {
       "id": "craft",
-      "name": "Content Factory",
+      "name": "Craft",
       "description": "Take content from rough draft to publish-ready. Ensures clarity, consistency, and tone across every revision.",
-      "chain": ["writer", "evangelist", "strategist", "reviewer"]
+      "chain": ["writer", "strategist", "evangelist", "reviewer"]
     },
     {
       "id": "refine",
-      "name": "Jony Ive",
+      "name": "Refine",
       "description": "Evolve an interface from design system through motion and interaction detail. Ready for real users.",
       "chain": ["designer", "animator", "interactor", "reviewer"]
     },
     {
       "id": "seal",
-      "name": "Crypto Fortress",
+      "name": "Seal",
       "description": "Audit your cryptography end to end. Validates policies, checks primitives, and returns a clear verdict.",
       "chain": ["sentinel", "cryptographer", "pentester", "reviewer"]
     },
     {
       "id": "settle",
-      "name": "SWIFT Payment",
+      "name": "Settle",
       "description": "Verify a payments flow from transaction to settlement. Covers compliance, reconciliation, and test coverage.",
       "chain": ["ledger", "auditor", "tester", "reviewer"]
     },
     {
       "id": "inspect",
-      "name": "Deep Review",
+      "name": "Inspect",
       "description": "Run a deep pre-merge analysis. Catches language-level issues, regression risks, and research gaps.",
       "chain": ["researcher", "polyglot", "watchdog", "pentester", "reviewer"]
     },
     {
       "id": "discover",
-      "name": "Research Roadmap",
+      "name": "Discover",
       "description": "Turn external research into an actionable roadmap. Maps findings to architecture decisions and outlines next steps.",
-      "chain": ["researcher", "architect", "reviewer"]
+      "chain": ["deep-researcher", "architect", "reviewer"]
     }
   ]
 }

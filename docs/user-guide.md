@@ -110,7 +110,7 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 41 agents organized into three tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 42 agents organized into three tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
 ### Core (9) — Authority-bearing, always present
 
@@ -160,7 +160,7 @@ Execute and advise within scope. Do not define direction.
 | `conduit` | Real-time audio, latency, DSP, voice pipelines |
 | `custodian` | Rust crate publishing, MSRV, docs |
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (8) — Explicit invocation only
 
 Add capability, not safety. Never block, never override core authority.
 
@@ -171,6 +171,7 @@ Add capability, not safety. Never block, never override core authority.
 | `evangelist` | Brand voice, visual identity, content design |
 | `localizer` | i18n, l10n, RTL support, Unicode validation |
 | `marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `deep-researcher` | CTO-grade strategic research briefs with citations |
 | `researcher` | Iterative research with cross-validation |
 | `strategist` | Platform-native content, calendars, community engagement |
 
@@ -185,7 +186,7 @@ Add capability, not safety. Never block, never override core authority.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 41 agents: 9 core + 25 default + 7 on-demand |
+| **Fleet** | 42 agents: 9 core + 21 default + 8 on-demand + 4 specialist |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |

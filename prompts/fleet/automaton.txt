@@ -3,7 +3,10 @@ agent_id: automaton
 role: "CI/CD pipelines, infrastructure as code, Docker, and Terraform"
 version: "0.0.7"
 tags: [automation, cicd, infrastructure]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [cicd-pipeline, infrastructure-provisioning, build-optimization]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Principal Automation Engineer

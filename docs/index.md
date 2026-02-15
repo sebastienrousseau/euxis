@@ -1,6 +1,6 @@
 # Build Software at the Speed of Thought
 
-**Your personal team of 41 AI specialists. Every task planned. Every outcome verified. Every lesson remembered.**
+**Your personal team of 42 AI specialists. Every task planned. Every outcome verified. Every lesson remembered.**
 
 Euxis transforms how you build software — from idea to deployment in minutes, not hours. Stop context-switching between tools. Start shipping with confidence.
 
@@ -12,7 +12,7 @@ Euxis transforms how you build software — from idea to deployment in minutes, 
 
 **Plan faster.** The orchestrator breaks your goal into executable tasks. No more wondering where to start.
 
-**Execute smarter.** 41 specialist agents handle architecture, security, testing, and deployment. Each one an expert in their domain.
+**Execute smarter.** 42 specialist agents handle architecture, security, testing, and deployment. Each one an expert in their domain.
 
 **Ship with confidence.** Every change is verified. Every decision is tracked. Every lesson is preserved for next time.
 
@@ -20,8 +20,8 @@ Euxis transforms how you build software — from idea to deployment in minutes, 
 euxis orchestrator "Add user authentication to my app"
 # → Architect designs the schema
 # → Security-lead audits the implementation
-# → Unit-tester creates comprehensive tests
-# → Release-manager handles deployment
+# → Tester creates comprehensive tests
+# → Gatekeeper handles deployment
 # All in parallel. All verified. All remembered.
 ```
 
@@ -176,7 +176,7 @@ euxis-voice
 
 ## What You Get
 
-✓ **41 AI specialists** working as your personal team
+✓ **42 AI specialists** working as your personal team
 ✓ **Instant task decomposition** from goals to execution
 ✓ **Persistent memory** that learns from every interaction
 ✓ **Quality assurance** with automatic verification

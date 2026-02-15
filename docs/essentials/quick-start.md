@@ -8,7 +8,7 @@
 
 By the end of this guide, you'll have:
 
-- **41 AI agents** ready to handle engineering tasks
+- **42 AI agents** ready to handle engineering tasks
 - **Your first completed task** with verified output
 - **Working knowledge** of the three main usage patterns
 
@@ -132,7 +132,7 @@ Fleet Status: HEALTHY (8/8 checks passed)
 
 | Check | What It Verifies |
 |-------|------------------|
-| Agent Naming | All 41 agents follow naming conventions |
+| Agent Naming | All 42 agents follow naming conventions |
 | Script Hardening | Shell scripts have proper error handling |
 | Orphaned Executables | No broken symlinks in ~/bin |
 | Protocol Headers | Agent prompts include required headers |
@@ -167,7 +167,7 @@ euxis butler "Introduce yourself briefly"
 
 Hello! I'm your Euxis Butler, optimized for clear communication.
 I translate complex system outputs into natural, spoken English.
-The fleet has 41 agents ready to assist with engineering tasks.
+The fleet has 42 agents ready to assist with engineering tasks.
 ```
 
 **Understanding the output:**
@@ -318,7 +318,7 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 
 | Guide | What You'll Learn |
 |-------|-------------------|
-| [Fleet Guide](../guides/fleet-guide.md) | All 41 agents in detail |
+| [Fleet Guide](../guides/fleet-guide.md) | All 42 agents in detail |
 | [User Guide](../guides/user-guide.md) | Complete CLI reference |
 | [API Reference](../reference/api-reference.md) | Build custom integrations |
 

@@ -323,7 +323,7 @@ def main() -> None:
             create_query_views(conn)
             if not verify_migration(conn, registry_data):
                 _fail("Migration verification failed.")
-    except (OSError, sqlite3.Error, json.JSONDecodeError, ValueError) as exc:  # pragma: no cover
+    except (OSError, sqlite3.Error, json.JSONDecodeError, ValueError, Exception) as exc:  # pragma: no cover
         if DB_FILE.exists():
             DB_FILE.unlink()
         _fail(f"Migration failed: {exc}")
