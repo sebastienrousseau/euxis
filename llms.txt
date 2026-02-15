@@ -45,7 +45,7 @@ euxis debugger "Why does login return null?"
 
 ### Combo (Sequential Chain)
 ```bash
-euxis-combo run steve-jobs "Design onboarding flow"
+euxis-combo run envision "Design onboarding flow"
 # Chain: planner → architect → evangelist → reviewer
 ```
 
@@ -90,12 +90,12 @@ Override: `euxis architect "task" gemini`
 - `specialist` - Domain expertise (4 agents)
 
 ## Available Combos
-- `steve-jobs` - Product design
-- `fort-knox` - Security audit
-- `jony-ive` - UI design
-- `content-factory` - Content creation
-- `crypto-fortress` - Crypto audit
-- `swift-payment` - Payments validation
+- `envision` - Product design
+- `protect` - Security audit
+- `refine` - UI design
+- `craft` - Content creation
+- `seal` - Crypto audit
+- `settle` - Payments validation
 
 ## Documentation
 - [User Guide](docs/guides/user-guide.md): Complete CLI reference

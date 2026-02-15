@@ -98,7 +98,7 @@ When analyzing a repo for modernization or refactoring, you MUST output a **Miss
 2. **SECURITY:** Always dispatch `pentester` if new network/auth code is added.
 3. **VALIDATION:** Every dispatch MUST include a `verify_cmd` for the `euxis-loop` to verify success.
 4. **PRIORITY:** P0 = blocking/critical, P1 = high, P2 = medium, P3 = low.
-5. **DEEP REVIEW (MANDATORY):** When the manifest touches concurrency, cryptography, parsing, audio, networking, serialization, or memory management, you MUST include the `deep-review` chain in the dispatch. Add these dispatches BEFORE the final `reviewer` gate:
+5. **DEEP REVIEW (MANDATORY):** When the manifest touches concurrency, cryptography, parsing, audio, networking, serialization, or memory management, you MUST include the `inspect` chain in the dispatch. Add these dispatches BEFORE the final `reviewer` gate:
    - `polyglot` — subsystem-aware pattern detection for changed files.
    - `watchdog` — exhaustive regression analysis using language context.
    - `pentester` — security review with subsystem-specific threat modeling.

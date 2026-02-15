@@ -11,20 +11,19 @@ Tests cover:
 
 from __future__ import annotations
 
+# Import the migration script (filename uses dashes, so importlib is required)
+import importlib.util
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
-from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import patch
 
 import pytest
 
-# Import the migration script (filename uses dashes, so importlib is required)
-import importlib.util
-import sys
 _spec = importlib.util.spec_from_file_location(
     "migrate_registry_to_sqlite",
     Path(__file__).parent.parent.parent / "migrate-registry-to-sqlite.py",
@@ -86,7 +85,7 @@ class TestBackupFunctionality(unittest.TestCase):
         assert migrate_registry_to_sqlite.BACKUP_DIR.exists()
         assert backup_file.exists()
 
-    @patch('migrate_registry_to_sqlite.datetime')
+    @patch("migrate_registry_to_sqlite.datetime")
     def test_create_backup_timestamp_format(self, mock_datetime):
         """Test backup filename timestamp format."""
         mock_datetime.now.return_value.strftime.return_value = "20260101-120000"
@@ -103,9 +102,8 @@ class TestSchemaCreation(unittest.TestCase):
     """Test SQLite schema creation."""
 
     def setUp(self):
-        self.temp_db = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
-        self.temp_db.close()
-        self.db_path = Path(self.temp_db.name)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_db:
+            self.db_path = Path(temp_db.name)
 
     def tearDown(self):
         if self.db_path.exists():
@@ -118,15 +116,15 @@ class TestSchemaCreation(unittest.TestCase):
 
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-            tables = [row[0] for row in cursor.fetchall() if not row[0].startswith('sqlite_')]
+            tables = [row[0] for row in cursor.fetchall() if not row[0].startswith("sqlite_")]
 
             expected_tables = {
-                'registry_metadata',
-                'agents',
-                'tags',
-                'capability_tags',
-                'agent_tags',
-                'agent_capabilities'
+                "registry_metadata",
+                "agents",
+                "tags",
+                "capability_tags",
+                "agent_tags",
+                "agent_capabilities"
             }
             assert set(tables) == expected_tables
 
@@ -141,13 +139,13 @@ class TestSchemaCreation(unittest.TestCase):
             cursor.execute("PRAGMA table_info(agents)")
             agents_columns = {row[1]: row[2] for row in cursor.fetchall()}
             expected_agent_columns = {
-                'id': 'TEXT',
-                'path': 'TEXT',
-                'tier': 'TEXT',
-                'version': 'TEXT',
-                'activation': 'TEXT',
-                'created_at': 'TEXT',
-                'updated_at': 'TEXT'
+                "id": "TEXT",
+                "path": "TEXT",
+                "tier": "TEXT",
+                "version": "TEXT",
+                "activation": "TEXT",
+                "created_at": "TEXT",
+                "updated_at": "TEXT"
             }
             assert agents_columns == expected_agent_columns
 
@@ -163,18 +161,18 @@ class TestSchemaCreation(unittest.TestCase):
 
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='index'")
-            indexes = [row[0] for row in cursor.fetchall() if not row[0].startswith('sqlite_')]
+            indexes = [row[0] for row in cursor.fetchall() if not row[0].startswith("sqlite_")]
 
             expected_indexes = {
-                'idx_agents_tier',
-                'idx_agents_version',
-                'idx_agents_activation',
-                'idx_agent_tags_agent',
-                'idx_agent_tags_tag',
-                'idx_agent_capabilities_agent',
-                'idx_agent_capabilities_capability',
-                'idx_tags_name',
-                'idx_capability_tags_name'
+                "idx_agents_tier",
+                "idx_agents_version",
+                "idx_agents_activation",
+                "idx_agent_tags_agent",
+                "idx_agent_tags_tag",
+                "idx_agent_capabilities_agent",
+                "idx_agent_capabilities_capability",
+                "idx_tags_name",
+                "idx_capability_tags_name"
             }
             assert set(indexes) == expected_indexes
 
@@ -189,16 +187,15 @@ class TestSchemaCreation(unittest.TestCase):
             cursor = conn.cursor()
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = [row[0] for row in cursor.fetchall()]
-            assert 'agents' in tables
+            assert "agents" in tables
 
 
 class TestTagInsertion(unittest.TestCase):
     """Test tag insertion helper function."""
 
     def setUp(self):
-        self.temp_db = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
-        self.temp_db.close()
-        self.db_path = Path(self.temp_db.name)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_db:
+            self.db_path = Path(temp_db.name)
 
     def tearDown(self):
         if self.db_path.exists():
@@ -257,9 +254,8 @@ class TestDataMigration(unittest.TestCase):
     """Test data migration from JSON to SQLite."""
 
     def setUp(self):
-        self.temp_db = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
-        self.temp_db.close()
-        self.db_path = Path(self.temp_db.name)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_db:
+            self.db_path = Path(temp_db.name)
 
     def tearDown(self):
         if self.db_path.exists():
@@ -422,9 +418,8 @@ class TestQueryViews(unittest.TestCase):
     """Test query view creation and functionality."""
 
     def setUp(self):
-        self.temp_db = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
-        self.temp_db.close()
-        self.db_path = Path(self.temp_db.name)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_db:
+            self.db_path = Path(temp_db.name)
 
     def tearDown(self):
         if self.db_path.exists():
@@ -441,9 +436,9 @@ class TestQueryViews(unittest.TestCase):
             views = [row[0] for row in cursor.fetchall()]
 
             expected_views = {
-                'agent_tags_view',
-                'agent_capabilities_view',
-                'agents_complete'
+                "agent_tags_view",
+                "agent_capabilities_view",
+                "agents_complete"
             }
             assert set(views) == expected_views
 
@@ -472,7 +467,7 @@ class TestQueryViews(unittest.TestCase):
             result = cursor.fetchone()
 
             assert result[0] == "test-agent"
-            tags = result[1].split(',') if result[1] else []
+            tags = result[1].split(",") if result[1] else []
             assert set(tags) == {"tag1", "tag2"}
 
     def test_agent_capabilities_view_functionality(self):
@@ -495,11 +490,14 @@ class TestQueryViews(unittest.TestCase):
             migrate_registry_to_sqlite.create_query_views(conn)
 
             cursor = conn.cursor()
-            cursor.execute("SELECT id, capabilities FROM agent_capabilities_view WHERE id = ?", ("capable-agent",))
+            cursor.execute(
+                "SELECT id, capabilities FROM agent_capabilities_view WHERE id = ?",
+                ("capable-agent",),
+            )
             result = cursor.fetchone()
 
             assert result[0] == "capable-agent"
-            capabilities = result[1].split(',') if result[1] else []
+            capabilities = result[1].split(",") if result[1] else []
             assert set(capabilities) == {"cap1", "cap2"}
 
     def test_agents_complete_view_functionality(self):
@@ -541,9 +539,8 @@ class TestMigrationVerification(unittest.TestCase):
     """Test migration integrity verification."""
 
     def setUp(self):
-        self.temp_db = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
-        self.temp_db.close()
-        self.db_path = Path(self.temp_db.name)
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_db:
+            self.db_path = Path(temp_db.name)
 
     def tearDown(self):
         if self.db_path.exists():
@@ -643,10 +640,14 @@ class TestMainFunction(unittest.TestCase):
         migrate_registry_to_sqlite.BACKUP_DIR = self.original_backup_dir
         shutil.rmtree(self.temp_dir)
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py'])
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py"])
     def test_main_success(self):
         """Test successful main execution."""
-        registry_data = {"agents": [{"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}]}
+        registry_data = {
+            "agents": [
+                {"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}
+            ]
+        }
         migrate_registry_to_sqlite.REGISTRY_FILE.write_text(json.dumps(registry_data))
 
         # Should complete without error
@@ -662,7 +663,7 @@ class TestMainFunction(unittest.TestCase):
             count = cursor.fetchone()[0]
             assert count == 1
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py', '--backup'])
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py", "--backup"])
     def test_main_with_backup(self):
         """Test main execution with backup flag."""
         registry_data = {"agents": []}
@@ -675,10 +676,14 @@ class TestMainFunction(unittest.TestCase):
         backup_files = list(migrate_registry_to_sqlite.BACKUP_DIR.glob("registry-*.json"))
         assert len(backup_files) == 1
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py', '--dry-run'])
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py", "--dry-run"])
     def test_main_dry_run(self):
         """Test main execution in dry run mode."""
-        registry_data = {"agents": [{"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}]}
+        registry_data = {
+            "agents": [
+                {"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}
+            ]
+        }
         migrate_registry_to_sqlite.REGISTRY_FILE.write_text(json.dumps(registry_data))
 
         migrate_registry_to_sqlite.main()
@@ -686,14 +691,14 @@ class TestMainFunction(unittest.TestCase):
         # Database should not be created in dry run
         assert not migrate_registry_to_sqlite.DB_FILE.exists()
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py'])
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py"])
     def test_main_missing_registry(self):
         """Test main execution when registry file is missing."""
         with pytest.raises(SystemExit):
             migrate_registry_to_sqlite.main()
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py'])
-    @patch('builtins.input', return_value='n')
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py"])
+    @patch("builtins.input", return_value="n")
     def test_main_database_exists_cancel(self, mock_input):
         """Test main execution when database exists and user cancels."""
         registry_data = {"agents": []}
@@ -705,11 +710,15 @@ class TestMainFunction(unittest.TestCase):
         with pytest.raises(SystemExit):
             migrate_registry_to_sqlite.main()
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py'])
-    @patch('builtins.input', return_value='y')
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py"])
+    @patch("builtins.input", return_value="y")
     def test_main_database_exists_overwrite(self, mock_input):
         """Test main execution when database exists and user confirms overwrite."""
-        registry_data = {"agents": [{"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}]}
+        registry_data = {
+            "agents": [
+                {"id": "test", "path": "test.yaml", "tier": "core", "version": "1.0"}
+            ]
+        }
         migrate_registry_to_sqlite.REGISTRY_FILE.write_text(json.dumps(registry_data))
 
         # Create existing database
@@ -724,8 +733,8 @@ class TestMainFunction(unittest.TestCase):
             count = cursor.fetchone()[0]
             assert count == 1
 
-    @patch('sys.argv', ['migrate_registry_to_sqlite.py'])
-    @patch('migrate_registry_to_sqlite.create_schema')
+    @patch("sys.argv", ["migrate_registry_to_sqlite.py"])
+    @patch("migrate_registry_to_sqlite.create_schema")
     def test_main_migration_failure(self, mock_create_schema):
         """Test main execution when migration fails."""
         registry_data = {"agents": []}

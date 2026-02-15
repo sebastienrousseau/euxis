@@ -58,20 +58,21 @@ validate_combo_id() {
 }
 
 cmd_list() {
-  ui_progress_begin 2 "Loading combos"
   require_jq
-  ui_progress_step "Dependencies ready"
   require_squads_file
-  ui_progress_step "Combos loaded"
-  ui_progress_done "Combos ready"
 
-  printf "%-18s %-22s %-40s %s\n" "ID" "NAME" "DESCRIPTION" "CHAIN"
-  printf "%-18s %-22s %-40s %s\n" "---" "---" "---" "---"
-
-  jq -r '.combos[] | [.id, .name, .description, (.chain | join(" → "))] | @tsv' "$SQUADS_FILE" |
-    while IFS=$'\t' read -r id name desc chain; do
-      printf "%-18s %-22s %-40s %s\n" "$id" "$name" "$desc" "$chain"
+  jq -r '.combos[] | [.id, .description] | @tsv' "$SQUADS_FILE" |
+    while IFS=$'\t' read -r id desc; do
+      local cyan reset
+      cyan=$(ui_cyan)
+      reset=$(ui_reset)
+      printf "%s✓%s %s%s%s — %s\n" "$cyan" "$reset" "$cyan" "$id" "$reset" "$desc"
     done
+
+  local cyan reset
+  cyan=$(ui_cyan)
+  reset=$(ui_reset)
+  printf "\n%s✓ Combos ready%s\n" "$cyan" "$reset"
 }
 
 cmd_info() {

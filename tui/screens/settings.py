@@ -10,8 +10,9 @@ from textual.screen import Screen
 from textual.widgets import Button, Label, Select, Static, Switch
 
 from tui.core.runner import PROVIDERS
-from tui.i18n import _
+from tui.i18n import _, set_locale
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -113,7 +114,6 @@ class SettingsScreen(Screen[None]):
                     yield Button(_("Save"), variant="primary", id="save-btn")
                     yield Button(_("Cancel"), id="cancel-btn")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:
@@ -146,7 +146,6 @@ class SettingsScreen(Screen[None]):
         locale_select = self.query_one("#locale-select", Select)
         if locale_select.value is not Select.BLANK:
             config.locale = str(locale_select.value)
-            from tui.i18n import set_locale
             set_locale(config.locale)
 
         config.show_agent_tags = self.query_one("#tags-switch", Switch).value

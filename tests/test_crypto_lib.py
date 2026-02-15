@@ -1,23 +1,29 @@
-"""
-Tests for crypto_lib pure functional implementation
+"""Tests for crypto_lib pure functional implementation.
 
 Verifies that all crypto operations are pure functions without filesystem dependencies.
 """
 
+
 import pytest
-import os
+
 from crypto_lib import (
-    encrypt, decrypt, EncryptionResult, DecryptionResult,
-    generate_key, derive_key,
-    CryptoError, InvalidKeyError, DecryptionError
+    CryptoError,
+    DecryptionError,
+    DecryptionResult,
+    EncryptionResult,
+    InvalidKeyError,
+    decrypt,
+    derive_key,
+    encrypt,
+    generate_key,
 )
 
 
 class TestPureFunctionality:
-    """Test that crypto functions are pure (no side effects)"""
+    """Test that crypto functions are pure (no side effects)."""
 
     def test_encrypt_is_deterministic_with_same_inputs(self):
-        """Encrypt with same inputs should produce different results due to random IV"""
+        """Encrypt with same inputs should produce different results due to random IV."""
         key = generate_key()
         data = "test data"
 
@@ -29,7 +35,7 @@ class TestPureFunctionality:
         assert result1.iv != result2.iv
 
     def test_encrypt_decrypt_roundtrip(self):
-        """Basic encrypt/decrypt roundtrip"""
+        """Basic encrypt/decrypt roundtrip."""
         key = generate_key()
         original_data = "Hello, World! 🔒"
 
@@ -45,7 +51,7 @@ class TestPureFunctionality:
         assert decrypted.to_string() == original_data
 
     def test_encrypt_bytes_data(self):
-        """Test encryption with bytes input"""
+        """Test encryption with bytes input."""
         key = generate_key()
         original_data = b"Binary data \x00\x01\x02\xff"
 
@@ -55,13 +61,15 @@ class TestPureFunctionality:
         assert decrypted.plaintext == original_data
 
     def test_no_filesystem_access(self, tmp_path, monkeypatch):
-        """Verify no filesystem access during crypto operations"""
+        """Verify no filesystem access during crypto operations."""
         # Mock file operations to raise if accessed
         def mock_open(*args, **kwargs):
-            raise AssertionError("Filesystem access detected")
+            msg = "Filesystem access detected"
+            raise AssertionError(msg)
 
         def mock_exists(*args, **kwargs):
-            raise AssertionError("Filesystem access detected")
+            msg = "Filesystem access detected"
+            raise AssertionError(msg)
 
         monkeypatch.setattr("builtins.open", mock_open)
         monkeypatch.setattr("os.path.exists", mock_exists)
@@ -77,10 +85,10 @@ class TestPureFunctionality:
 
 
 class TestEncryptionResult:
-    """Test EncryptionResult immutability and serialization"""
+    """Test EncryptionResult immutability and serialization."""
 
     def test_encryption_result_immutable(self):
-        """EncryptionResult should be immutable"""
+        """EncryptionResult should be immutable."""
         result = EncryptionResult(
             ciphertext=b"test",
             iv=b"iv",
@@ -91,7 +99,7 @@ class TestEncryptionResult:
             result.ciphertext = b"modified"
 
     def test_to_base64_serialization(self):
-        """Test base64 serialization and parsing"""
+        """Test base64 serialization and parsing."""
         key = generate_key()
         data = "test data"
 
@@ -108,22 +116,22 @@ class TestEncryptionResult:
 
 
 class TestKeyManagement:
-    """Test key generation and derivation functions"""
+    """Test key generation and derivation functions."""
 
     def test_generate_key_default_size(self):
-        """Test default key generation"""
+        """Test default key generation."""
         key = generate_key()
         assert len(key) == 32
         assert isinstance(key, bytes)
 
     def test_generate_key_different_sizes(self):
-        """Test key generation with different sizes"""
+        """Test key generation with different sizes."""
         for size in [16, 24, 32]:
             key = generate_key(size)
             assert len(key) == size
 
     def test_generate_key_invalid_size(self):
-        """Test key generation with invalid size"""
+        """Test key generation with invalid size."""
         with pytest.raises(InvalidKeyError):
             generate_key(0)
 
@@ -131,27 +139,27 @@ class TestKeyManagement:
             generate_key(15)  # Unsupported size
 
     def test_derive_key_deterministic(self):
-        """Key derivation should be deterministic with same inputs"""
-        password = "test password"
+        """Key derivation should be deterministic with same inputs."""
+        key_material = "test-secret"
         salt = b"fixed salt 12345"
 
-        key1, _ = derive_key(password, salt)
-        key2, _ = derive_key(password, salt)
+        key1, _ = derive_key(key_material, salt)
+        key2, _ = derive_key(key_material, salt)
 
         assert key1 == key2
 
     def test_derive_key_different_salts(self):
-        """Different salts should produce different keys"""
-        password = "test password"
+        """Different salts should produce different keys."""
+        key_material = "test-secret"
 
-        key1, salt1 = derive_key(password)
-        key2, salt2 = derive_key(password)
+        key1, salt1 = derive_key(key_material)
+        key2, salt2 = derive_key(key_material)
 
         assert key1 != key2
         assert salt1 != salt2
 
     def test_derive_key_invalid_params(self):
-        """Test key derivation parameter validation"""
+        """Test key derivation parameter validation."""
         with pytest.raises(InvalidKeyError):
             derive_key("")  # Empty password
 
@@ -160,10 +168,10 @@ class TestKeyManagement:
 
 
 class TestErrorHandling:
-    """Test error handling and validation"""
+    """Test error handling and validation."""
 
     def test_encrypt_invalid_key_size(self):
-        """Test encryption with wrong key size"""
+        """Test encryption with wrong key size."""
         wrong_key = b"too short"
         data = "test"
 
@@ -171,7 +179,7 @@ class TestErrorHandling:
             encrypt(data, wrong_key)
 
     def test_decrypt_invalid_key_size(self):
-        """Test decryption with wrong key size"""
+        """Test decryption with wrong key size."""
         key = generate_key()
         wrong_key = b"wrong"
         data = "test"
@@ -182,7 +190,7 @@ class TestErrorHandling:
             decrypt(encrypted, wrong_key)
 
     def test_decrypt_wrong_key(self):
-        """Test decryption with wrong key (correct size)"""
+        """Test decryption with wrong key (correct size)."""
         key1 = generate_key()
         key2 = generate_key()
         data = "test"
@@ -193,7 +201,7 @@ class TestErrorHandling:
             decrypt(encrypted, key2)
 
     def test_decrypt_corrupted_data(self):
-        """Test decryption with corrupted ciphertext"""
+        """Test decryption with corrupted ciphertext."""
         key = generate_key()
         data = "test"
 
@@ -210,7 +218,7 @@ class TestErrorHandling:
             decrypt(corrupted, key)
 
     def test_unsupported_algorithm(self):
-        """Test unsupported algorithm error"""
+        """Test unsupported algorithm error."""
         key = generate_key()
         data = "test"
 
@@ -219,10 +227,10 @@ class TestErrorHandling:
 
 
 class TestCompatibility:
-    """Test compatibility and edge cases"""
+    """Test compatibility and edge cases."""
 
     def test_empty_data(self):
-        """Test encryption/decryption of empty data"""
+        """Test encryption/decryption of empty data."""
         key = generate_key()
         data = ""
 
@@ -232,7 +240,7 @@ class TestCompatibility:
         assert decrypted.to_string() == data
 
     def test_large_data(self):
-        """Test encryption/decryption of large data"""
+        """Test encryption/decryption of large data."""
         key = generate_key()
         data = "A" * 1000000  # 1MB of data
 
@@ -242,7 +250,7 @@ class TestCompatibility:
         assert decrypted.to_string() == data
 
     def test_unicode_data(self):
-        """Test encryption/decryption of unicode data"""
+        """Test encryption/decryption of unicode data."""
         key = generate_key()
         data = "Unicode: 🔒🔑🛡️ テスト 测试"
 

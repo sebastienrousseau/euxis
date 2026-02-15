@@ -1,5 +1,4 @@
-"""
-Evidence Verification Framework for Euxis Strategic Analysis
+"""Evidence Verification Framework for Euxis Strategic Analysis.
 
 This module provides comprehensive evidence verification capabilities for strategic
 analysis outputs, ensuring all quantitative claims are backed by verifiable sources.
@@ -29,25 +28,24 @@ Usage:
 """
 
 from .evidence_framework import (
-    EvidenceFramework,
-    Evidence,
-    EvidenceGrade,
     Claim,
+    Evidence,
+    EvidenceFramework,
+    EvidenceGrade,
     EvidenceVerificationError,
     VerifiedPerformanceAnalyzer,
-    create_performance_claim_with_evidence
+    create_performance_claim_with_evidence,
 )
-
 from .validation_pipeline import ValidationPipeline
 
 __version__ = "0.0.7"
 __all__ = [
-    "EvidenceFramework",
-    "ValidationPipeline",
-    "Evidence",
-    "EvidenceGrade",
     "Claim",
+    "Evidence",
+    "EvidenceFramework",
+    "EvidenceGrade",
     "EvidenceVerificationError",
+    "ValidationPipeline",
     "VerifiedPerformanceAnalyzer",
     "create_performance_claim_with_evidence"
 ]

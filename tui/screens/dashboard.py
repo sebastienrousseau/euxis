@@ -11,7 +11,9 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from tui.core.runner import PROVIDER_MODELS, get_project_path
+from tui.core.tips import TIPS
 from tui.i18n import _
+from tui.screens.welcome import WelcomeScreen
 from tui.widgets.fleet_grid import (
     AgentSelected,
     ComboSelected,
@@ -20,6 +22,7 @@ from tui.widgets.fleet_grid import (
     SystemCommandRequested,
 )
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -31,7 +34,7 @@ if TYPE_CHECKING:
 class TipBar(Static):
     """Rotating contextual tip bar."""
 
-    def __init__(self, tips: list[str], **kwargs) -> None:
+    def __init__(self, tips: list[str], **kwargs: object) -> None:
         super().__init__(**kwargs)
         self._tips = tips
         self._index = random.randint(0, max(0, len(tips) - 1))  # noqa: S311
@@ -71,13 +74,9 @@ class DashboardScreen(Screen[None]):
 
     def compose(self) -> ComposeResult:
         """Build the dashboard layout with header, tip bar, fleet grid, and footer."""
-        from tui.app import TIPS
-
         yield ETXHeader(id="header")
         yield TipBar(TIPS, classes="tip-bar")
         yield FleetGrid(self.euxis_app.fleet_registry, id="fleet-grid")
-
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:
@@ -100,9 +99,8 @@ class DashboardScreen(Screen[None]):
         )
 
         # Show welcome screen on first visit (after dashboard is fully composed)
-        if not self.euxis_app._welcome_shown:
-            self.euxis_app._welcome_shown = True
-            from tui.screens.welcome import WelcomeScreen
+        if not self.euxis_app.welcome_shown:
+            self.euxis_app.mark_welcome_shown()
             self.app.push_screen(WelcomeScreen())
 
     def on_agent_card_selected(self, event: AgentCard.Selected) -> None:

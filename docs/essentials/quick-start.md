@@ -291,7 +291,7 @@ euxis writer "Create getting started docs for our CLI tool"
 
 ```bash
 # Chain agents for refined output (planner → architect → evangelist → reviewer)
-euxis-combo run steve-jobs "Design a user notification system"
+euxis-combo run envision "Design a user notification system"
 
 # Deploy a full squad for comprehensive work
 euxis-squad deploy quality "Audit the authentication module"

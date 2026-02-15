@@ -260,7 +260,6 @@ class TestFleetMonitorExecuteOperation(unittest.TestCase):
 
         # Mock query_one to handle OutputPanel, Container, and ShortcutBar queries
         mock_container = Mock()
-        mock_task_input = Mock()
         mock_container.mount = Mock(return_value=None)
 
         def query_one_side_effect(selector, *args, **kwargs):
@@ -334,8 +333,9 @@ class TestFleetMonitorExecuteOperation(unittest.TestCase):
     @patch("tui.screens.fleet_monitor.run_squad")
     def test_error_handling(self, mock_run):
         async def error_stream(*a, **kw):
-            raise OSError("connection failed")
-            yield  # noqa: E501
+            msg = "connection failed"
+            raise OSError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self.screen._set_agent_status = Mock()
@@ -347,8 +347,9 @@ class TestFleetMonitorExecuteOperation(unittest.TestCase):
     @patch("tui.screens.fleet_monitor.run_squad")
     def test_runtime_error(self, mock_run):
         async def error_stream(*a, **kw):
-            raise RuntimeError("timeout")
-            yield  # noqa: E501
+            msg = "timeout"
+            raise RuntimeError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self.screen._set_agent_status = Mock()

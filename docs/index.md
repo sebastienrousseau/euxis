@@ -141,7 +141,7 @@ euxis researcher "Compare Python PDF parsing libraries"
 euxis-dispatch auth-refactor.json
 
 # Sequential specialist chain
-euxis-combo steve-jobs "Design user onboarding flow"
+euxis-combo envision "Design user onboarding flow"
 
 # Full squad deployment
 euxis-squad build "Implement payment system"

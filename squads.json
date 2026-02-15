@@ -48,51 +48,51 @@
   ],
   "combos": [
     {
-      "id": "steve-jobs",
+      "id": "envision",
       "name": "Steve Jobs",
-      "description": "Minimalist design to polished review",
+      "description": "Shape a product narrative from concept to launch. Aligns architecture with a clear story and delivers a review-ready brief.",
       "chain": ["planner", "architect", "evangelist", "reviewer"]
     },
     {
-      "id": "fort-knox",
+      "id": "protect",
       "name": "Fort Knox",
-      "description": "Maximum security assurance",
+      "description": "Harden your system from threat model to audit trail. Surfaces risks, validates controls, and delivers an assurance summary.",
       "chain": ["pentester", "auditor", "inspector", "reviewer"]
     },
     {
-      "id": "content-factory",
+      "id": "craft",
       "name": "Content Factory",
-      "description": "End-to-end content production",
+      "description": "Take content from rough draft to publish-ready. Ensures clarity, consistency, and tone across every revision.",
       "chain": ["writer", "evangelist", "strategist", "reviewer"]
     },
     {
-      "id": "jony-ive",
+      "id": "refine",
       "name": "Jony Ive",
-      "description": "Apple-level UI from design system to polished interaction",
+      "description": "Evolve an interface from design system through motion and interaction detail. Ready for real users.",
       "chain": ["designer", "animator", "interactor", "reviewer"]
     },
     {
-      "id": "crypto-fortress",
+      "id": "seal",
       "name": "Crypto Fortress",
-      "description": "Deep cryptographic audit with security policy review",
+      "description": "Audit your cryptography end to end. Validates policies, checks primitives, and returns a clear verdict.",
       "chain": ["sentinel", "cryptographer", "pentester", "reviewer"]
     },
     {
-      "id": "swift-payment",
+      "id": "settle",
       "name": "SWIFT Payment",
-      "description": "End-to-end payments integration validation",
+      "description": "Verify a payments flow from transaction to settlement. Covers compliance, reconciliation, and test coverage.",
       "chain": ["ledger", "auditor", "tester", "reviewer"]
     },
     {
-      "id": "deep-review",
+      "id": "inspect",
       "name": "Deep Review",
-      "description": "Exhaustive pre-merge regression, language analysis, and external research",
+      "description": "Run a deep pre-merge analysis. Catches language-level issues, regression risks, and research gaps.",
       "chain": ["researcher", "polyglot", "watchdog", "pentester", "reviewer"]
     },
     {
-      "id": "research-roadmap",
+      "id": "discover",
       "name": "Research Roadmap",
-      "description": "External research synthesis into architectural roadmap",
+      "description": "Turn external research into an actionable roadmap. Maps findings to architecture decisions and outlines next steps.",
       "chain": ["researcher", "architect", "reviewer"]
     }
   ]

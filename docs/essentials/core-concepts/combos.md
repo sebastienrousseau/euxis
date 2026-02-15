@@ -15,16 +15,16 @@ Combos are predefined sequential chains of agents optimized for specific pattern
 
 ```bash
 # Apple-style design workflow
-euxis-combo run steve-jobs "Design minimalist login interface"
+euxis-combo run envision "Design minimalist login interface"
 
 # Maximum security assurance
-euxis-combo run fort-knox "Audit OAuth2 implementation"
+euxis-combo run protect "Audit OAuth2 implementation"
 
 # End-to-end content production
-euxis-combo run content-factory "Create API tutorial with examples"
+euxis-combo run craft "Create API tutorial with examples"
 
 # View combo details
-euxis-combo info jony-ive
+euxis-combo info refine
 ```
 
 ## Available Combos

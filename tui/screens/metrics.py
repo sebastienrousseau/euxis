@@ -12,6 +12,7 @@ from textual.widgets import Static
 
 from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 from tui.widgets.sparkline import sparkline_text
 
 if TYPE_CHECKING:
@@ -89,7 +90,6 @@ class MetricsScreen(Screen[None]):
             yield Static(id="metrics-agents")
             yield Static(id="metrics-providers")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

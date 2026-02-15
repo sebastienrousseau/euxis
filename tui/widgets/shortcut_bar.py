@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from textual.widgets import Static
 
 # Default shortcuts shown on the dashboard and most screens
@@ -33,7 +35,7 @@ class ShortcutBar(Static):
     def __init__(
         self,
         shortcuts: list[tuple[str, str]] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__("", **kwargs)
         self._shortcuts = shortcuts or DEFAULT_SHORTCUTS

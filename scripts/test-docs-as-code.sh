@@ -116,7 +116,7 @@ echo "----------------------------------"
 
 # Test 3: Info/help commands that should work without setup
 run_test "euxis-squad info quality" "euxis-squad info quality"
-run_test "euxis-combo info steve-jobs" "euxis-combo info steve-jobs"
+run_test "euxis-combo info envision" "euxis-combo info envision"
 run_test "euxis-cortex stats" "euxis-cortex stats"
 
 echo ""

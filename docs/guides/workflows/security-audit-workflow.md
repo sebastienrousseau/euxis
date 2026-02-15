@@ -118,7 +118,7 @@ This deploys 8 agents in parallel:
 For cryptographic systems:
 
 ```bash
-euxis-combo run crypto-fortress "Audit the encryption implementation for user data"
+euxis-combo run seal "Audit the encryption implementation for user data"
 ```
 
 The Crypto Fortress combo runs: `sentinel → cryptographer → pentester → reviewer`
@@ -197,7 +197,7 @@ euxis telemetrist "Add security event logging for failed authentication attempts
 | Threat modeling | `euxis sentinel "<system>"` |
 | Quick vulnerability scan | `euxis pentester "<target>"` |
 | Full security audit | `euxis-squad deploy quality "<scope>"` |
-| Crypto audit | `euxis-combo run crypto-fortress "<system>"` |
+| Crypto audit | `euxis-combo run seal "<system>"` |
 | Compliance check | `euxis auditor "<requirement>"` |
 | Security testing | `euxis tester "Security tests for <fix>"` |
 

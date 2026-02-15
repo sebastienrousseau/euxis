@@ -87,8 +87,8 @@ class TestFleetRegistry:
         reg = FleetRegistry.load()
         assert len(reg.combos) == 8
         combo_ids = {c.id for c in reg.combos}
-        assert "steve-jobs" in combo_ids
-        assert "fort-knox" in combo_ids
+        assert "envision" in combo_ids
+        assert "protect" in combo_ids
 
     def test_squad_members(self):
         from tui.core.registry import FleetRegistry
@@ -102,7 +102,7 @@ class TestFleetRegistry:
         from tui.core.registry import FleetRegistry
 
         reg = FleetRegistry.load()
-        steve = next(c for c in reg.combos if c.id == "steve-jobs")
+        steve = next(c for c in reg.combos if c.id == "envision")
         assert steve.chain == ("planner", "architect", "evangelist", "reviewer")
 
     def test_agent_tier_label(self):

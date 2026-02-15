@@ -43,7 +43,7 @@ euxis debugger "Why does this function return null?"
 **Use when:** You need multiple perspectives applied in sequence.
 
 ```bash
-euxis-combo run steve-jobs "Design the onboarding flow"
+euxis-combo run envision "Design the onboarding flow"
 ```
 
 ### Characteristics
@@ -71,17 +71,17 @@ Final Output
 
 | Combo | Chain | Use Case |
 |-------|-------|----------|
-| **steve-jobs** | planner → architect → evangelist → reviewer | Product design |
-| **fort-knox** | pentester → auditor → inspector → reviewer | Security audit |
-| **content-factory** | writer → evangelist → strategist → reviewer | Content creation |
-| **jony-ive** | designer → animator → interactor → reviewer | UI design |
-| **crypto-fortress** | sentinel → cryptographer → pentester → reviewer | Crypto audit |
-| **swift-payment** | ledger → auditor → tester → reviewer | Payments |
+| **envision** | planner → architect → evangelist → reviewer | Product design |
+| **protect** | pentester → auditor → inspector → reviewer | Security audit |
+| **craft** | writer → evangelist → strategist → reviewer | Content creation |
+| **refine** | designer → animator → interactor → reviewer | UI design |
+| **seal** | sentinel → cryptographer → pentester → reviewer | Crypto audit |
+| **settle** | ledger → auditor → tester → reviewer | Payments |
 
 ### Example Scenarios
-- Feature design (steve-jobs)
-- Security review (fort-knox)
-- Writing and refining content (content-factory)
+- Feature design (envision)
+- Security review (protect)
+- Writing and refining content (craft)
 
 ---
 
@@ -215,7 +215,7 @@ euxis-playbook run zero-to-one "Launch feature"
 euxis-squad deploy quality "Phase 3: Verification"
 
 # Combo for focused analysis
-euxis-combo run fort-knox "Security review before release"
+euxis-combo run protect "Security review before release"
 ```
 
 ---
@@ -225,7 +225,7 @@ euxis-combo run fort-knox "Security review before release"
 | Situation | Pattern | Command |
 |-----------|---------|---------|
 | Quick question | Agent | `euxis debugger "..."` |
-| Design refinement | Combo | `euxis-combo run steve-jobs "..."` |
+| Design refinement | Combo | `euxis-combo run envision "..."` |
 | Security audit | Squad | `euxis-squad deploy quality "..."` |
 | Product launch | Playbook | `euxis-playbook run zero-to-one "..."` |
 | Not sure | Orchestrator | `euxis orchestrator "..."` |

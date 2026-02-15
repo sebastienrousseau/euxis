@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Evidence Verification Framework for Strategic Analysis Outputs
+"""Evidence Verification Framework for Strategic Analysis Outputs.
 
 This framework validates quantitative claims in strategic analysis reports by requiring
 source documentation and verifiable evidence for all assertions.
@@ -13,56 +12,72 @@ Key features:
 - Evidence decay detection
 """
 
-import json
-import re
 import hashlib
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
-from enum import Enum
+import json
 import logging
+import re
+import shlex
+import subprocess
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+from .performance_analyzer import PerformanceAnalyzer
 
 logger = logging.getLogger(__name__)
 
+MAX_ALLOWED_GRADE_INDEX = 2
+
 class EvidenceGrade(Enum):
-    """Evidence grade hierarchy as defined in Euxis Evidence Citation Protocol"""
-    VERIFIED = "E1"      # Confirmed by automated tool output, test result, or direct observation
-    MEASURED = "E2"      # Quantified by profiling, benchmarking, or metric collection
-    OBSERVED = "E3"      # Seen in source code, logs, or documentation but not independently verified
-    INFERRED = "E4"      # Logically deduced from multiple observations, not directly confirmed
-    SPECULATED = "E5"    # FORBIDDEN - Guesses, hunches, or assumptions without supporting observations
+    """Evidence grade hierarchy as defined in Euxis Evidence Citation Protocol."""
+
+    # Confirmed by automated tool output, test result, or direct observation
+    VERIFIED = "E1"
+    # Quantified by profiling, benchmarking, or metric collection
+    MEASURED = "E2"
+    # Seen in source code, logs, or documentation but not independently verified
+    OBSERVED = "E3"
+    # Logically deduced from multiple observations, not directly confirmed
+    INFERRED = "E4"
+    # FORBIDDEN - Guesses, hunches, or assumptions without supporting observations
+    SPECULATED = "E5"
 
 @dataclass
 class Evidence:
-    """Represents a piece of evidence supporting a claim"""
+    """Represents a piece of evidence supporting a claim."""
+
     source_file: str
-    source_line: Optional[int]
+    source_line: int | None
     evidence_type: str  # "measurement", "observation", "test_result", "log_entry", etc.
     grade: EvidenceGrade
     content: str
     timestamp: datetime
-    verification_cmd: Optional[str]  # Command that can re-verify this evidence
-    metadata: Dict[str, Any]
+    verification_cmd: str | None  # Command that can re-verify this evidence
+    metadata: dict[str, Any]
 
     def get_hash(self) -> str:
-        """Generate unique hash for this evidence"""
-        content_str = f"{self.source_file}:{self.source_line}:{self.content}:{self.timestamp.isoformat()}"
+        """Generate unique hash for this evidence."""
+        content_str = (
+            f"{self.source_file}:{self.source_line}:{self.content}:{self.timestamp.isoformat()}"
+        )
         return hashlib.sha256(content_str.encode()).hexdigest()[:12]
 
 @dataclass
 class Claim:
-    """Represents a quantitative claim in a strategic analysis"""
+    """Represents a quantitative claim in a strategic analysis."""
+
     statement: str
-    value: Union[float, int, str]
-    unit: Optional[str]
+    value: float | int | str
+    unit: str | None
     context: str
-    supporting_evidence: List[Evidence]
+    supporting_evidence: list[Evidence]
     confidence: float  # 0.0 - 1.0
     verified: bool = False
 
-    def get_highest_evidence_grade(self) -> Optional[EvidenceGrade]:
-        """Get the highest grade evidence supporting this claim"""
+    def get_highest_evidence_grade(self) -> EvidenceGrade | None:
+        """Get the highest grade evidence supporting this claim."""
         if not self.supporting_evidence:
             return None
         grades = [e.grade for e in self.supporting_evidence]
@@ -70,13 +85,13 @@ class Claim:
         return min(grades, key=lambda x: list(EvidenceGrade).index(x))
 
 class EvidenceVerificationError(Exception):
-    """Raised when evidence verification fails"""
-    pass
+    """Raised when evidence verification fails."""
+
 
 class EvidenceFramework:
-    """Main evidence verification framework"""
+    """Main evidence verification framework."""
 
-    def __init__(self, evidence_dir: str = "/home/seb/.euxis/metrics/evidence"):
+    def __init__(self, evidence_dir: str = "/home/seb/.euxis/metrics/evidence") -> None:
         self.evidence_dir = Path(evidence_dir)
         self.evidence_dir.mkdir(parents=True, exist_ok=True)
 
@@ -87,7 +102,7 @@ class EvidenceFramework:
         logging.basicConfig(
             filename=str(self.verification_log),
             level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s'
+            format="%(asctime)s - %(levelname)s - %(message)s"
         )
 
         # Evidence decay thresholds (in days)
@@ -99,82 +114,85 @@ class EvidenceFramework:
         }
 
     def store_evidence(self, evidence: Evidence) -> str:
-        """Store evidence in the database"""
+        """Store evidence in the database."""
         evidence_dict = asdict(evidence)
-        evidence_dict['grade'] = evidence.grade.value
-        evidence_dict['timestamp'] = evidence.timestamp.isoformat()
-        evidence_dict['hash'] = evidence.get_hash()
+        evidence_dict["grade"] = evidence.grade.value
+        evidence_dict["timestamp"] = evidence.timestamp.isoformat()
+        evidence_dict["hash"] = evidence.get_hash()
 
         # Append to JSONL database
-        with open(self.evidence_db, 'a') as f:
-            f.write(json.dumps(evidence_dict) + '\n')
+        with self.evidence_db.open("a") as f:
+            f.write(json.dumps(evidence_dict) + "\n")
 
-        logger.info(f"Stored evidence: {evidence.get_hash()}")
+        logger.info("Stored evidence: %s", evidence.get_hash())
         return evidence.get_hash()
 
-    def load_evidence(self, evidence_hash: str) -> Optional[Evidence]:
-        """Load evidence by hash from database"""
+    def load_evidence(self, evidence_hash: str) -> Evidence | None:
+        """Load evidence by hash from database."""
         if not self.evidence_db.exists():
             return None
 
-        with open(self.evidence_db, 'r') as f:
+        with self.evidence_db.open() as f:
             for line in f:
                 try:
                     data = json.loads(line.strip())
-                    if data.get('hash') == evidence_hash:
+                    if data.get("hash") == evidence_hash:
                         # Reconstruct Evidence object
-                        evidence = Evidence(
-                            source_file=data['source_file'],
-                            source_line=data.get('source_line'),
-                            evidence_type=data['evidence_type'],
-                            grade=EvidenceGrade(data['grade']),
-                            content=data['content'],
-                            timestamp=datetime.fromisoformat(data['timestamp']),
-                            verification_cmd=data.get('verification_cmd'),
-                            metadata=data.get('metadata', {})
+                        return Evidence(
+                            source_file=data["source_file"],
+                            source_line=data.get("source_line"),
+                            evidence_type=data["evidence_type"],
+                            grade=EvidenceGrade(data["grade"]),
+                            content=data["content"],
+                            timestamp=datetime.fromisoformat(data["timestamp"]),
+                            verification_cmd=data.get("verification_cmd"),
+                            metadata=data.get("metadata", {}),
                         )
-                        return evidence
                 except (json.JSONDecodeError, KeyError, ValueError):
                     continue
         return None
 
     def verify_evidence(self, evidence: Evidence) -> bool:
-        """Verify evidence using its verification command"""
+        """Verify evidence using its verification command."""
         if not evidence.verification_cmd:
-            logger.warning(f"No verification command for evidence {evidence.get_hash()}")
+            logger.warning("No verification command for evidence %s", evidence.get_hash())
             return False
 
         try:
-            import subprocess
-            result = subprocess.run(
-                evidence.verification_cmd,
-                shell=True,
+            # verification_cmd is sourced from trusted evidence definitions
+            result = subprocess.run(  # noqa: S603
+                shlex.split(evidence.verification_cmd),
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
+                check=False,
             )
 
             success = result.returncode == 0
-            logger.info(f"Evidence verification {evidence.get_hash()}: {'PASS' if success else 'FAIL'}")
+            logger.info(
+                "Evidence verification %s: %s",
+                evidence.get_hash(),
+                "PASS" if success else "FAIL",
+            )
+        except subprocess.TimeoutExpired:
+            logger.exception("Evidence verification timeout: %s", evidence.get_hash())
+            return False
+        except (OSError, subprocess.SubprocessError, ValueError):
+            logger.exception("Evidence verification error")
+            return False
+        else:
             return success
 
-        except subprocess.TimeoutExpired:
-            logger.error(f"Evidence verification timeout: {evidence.get_hash()}")
-            return False
-        except Exception as e:
-            logger.error(f"Evidence verification error: {e}")
-            return False
-
     def check_evidence_decay(self, evidence: Evidence) -> bool:
-        """Check if evidence has decayed beyond acceptable threshold"""
+        """Check if evidence has decayed beyond acceptable threshold."""
         threshold_days = self.decay_thresholds.get(evidence.grade, 7)
         decay_threshold = timedelta(days=threshold_days)
 
-        age = datetime.now(timezone.utc) - evidence.timestamp.replace(tzinfo=timezone.utc)
+        age = datetime.now(UTC) - evidence.timestamp.replace(tzinfo=UTC)
         return age > decay_threshold
 
-    def validate_claim(self, claim: Claim) -> Dict[str, Any]:
-        """Validate a claim against its supporting evidence"""
+    def validate_claim(self, claim: Claim) -> dict[str, Any]:
+        """Validate a claim against its supporting evidence."""
         validation_result = {
             "claim": claim.statement,
             "value": claim.value,
@@ -195,10 +213,16 @@ class EvidenceFramework:
             return validation_result
 
         # Check for forbidden E5 evidence
-        e5_evidence = [e for e in claim.supporting_evidence if e.grade == EvidenceGrade.SPECULATED]
+        e5_evidence = [
+            evidence
+            for evidence in claim.supporting_evidence
+            if evidence.grade == EvidenceGrade.SPECULATED
+        ]
         if e5_evidence:
             validation_result["valid"] = False
-            validation_result["issues"].append(f"Contains {len(e5_evidence)} forbidden E5 (SPECULATED) evidence")
+            validation_result["issues"].append(
+                f"Contains {len(e5_evidence)} forbidden E5 (SPECULATED) evidence"
+            )
 
         # Analyze evidence grades
         grade_counts = {}
@@ -217,7 +241,9 @@ class EvidenceFramework:
                     validation_result["evidence_summary"]["verified_evidence"] += 1
                 else:
                     validation_result["valid"] = False
-                    validation_result["issues"].append(f"Failed verification: {evidence.get_hash()}")
+                    validation_result["issues"].append(
+                        f"Failed verification: {evidence.get_hash()}"
+                    )
             else:
                 validation_result["evidence_summary"]["missing_verification"] += 1
 
@@ -225,17 +251,24 @@ class EvidenceFramework:
 
         # Require at least E3 evidence for strategic claims
         highest_grade = claim.get_highest_evidence_grade()
-        if not highest_grade or list(EvidenceGrade).index(highest_grade) > 2:  # Worse than E3
+        if (
+            not highest_grade
+            or list(EvidenceGrade).index(highest_grade) > MAX_ALLOWED_GRADE_INDEX
+        ):
             validation_result["valid"] = False
             validation_result["issues"].append("Strategic claims require at least E3 evidence")
 
         return validation_result
 
-    def validate_analysis_report(self, report: Dict[str, Any], claims: List[Claim]) -> Dict[str, Any]:
-        """Validate an entire strategic analysis report"""
+    def validate_analysis_report(
+        self,
+        report: dict[str, Any],
+        claims: list[Claim],
+    ) -> dict[str, Any]:
+        """Validate an entire strategic analysis report."""
         report_validation = {
             "report_id": report.get("report_id", "unknown"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "overall_valid": True,
             "claims_total": len(claims),
             "claims_valid": 0,
@@ -264,12 +297,14 @@ class EvidenceFramework:
         # Check evidence distribution
         all_evidence = [e for claim in claims for e in claim.supporting_evidence]
         if len(all_evidence) < len(claims):
-            report_validation["issues"].append("Insufficient evidence density (< 1 evidence per claim)")
+            report_validation["issues"].append(
+                "Insufficient evidence density (< 1 evidence per claim)"
+            )
 
         return report_validation
 
     def generate_citation_format(self, evidence: Evidence) -> str:
-        """Generate properly formatted citation for evidence"""
+        """Generate properly formatted citation for evidence."""
         grade = evidence.grade.value
         source_ref = evidence.source_file
         if evidence.source_line:
@@ -277,16 +312,16 @@ class EvidenceFramework:
 
         return f"[{grade}: {evidence.evidence_type} in {source_ref}]"
 
-    def extract_claims_from_text(self, text: str) -> List[str]:
-        """Extract quantitative claims from analysis text"""
+    def extract_claims_from_text(self, text: str) -> list[str]:
+        """Extract quantitative claims from analysis text."""
         # Patterns for quantitative claims
         patterns = [
-            r'\b\d+\.?\d*%\b',  # Percentages
-            r'\b\d+\.?\d*\s*(ms|seconds?|minutes?|hours?)\b',  # Time measurements
-            r'\brate\s+of\s+\d+\.?\d*\b',  # Rates
-            r'\b\d+\.?\d*x\s+(?:faster|slower|more|less)\b',  # Comparisons
-            r'\bP\d+\s+\d+\.?\d*\b',  # Percentiles
-            r'\b(?:average|median|mean)\s+\d+\.?\d*\b',  # Statistical measures
+            r"\b\d+\.?\d*%\b",  # Percentages
+            r"\b\d+\.?\d*\s*(ms|seconds?|minutes?|hours?)\b",  # Time measurements
+            r"\brate\s+of\s+\d+\.?\d*\b",  # Rates
+            r"\b\d+\.?\d*x\s+(?:faster|slower|more|less)\b",  # Comparisons
+            r"\bP\d+\s+\d+\.?\d*\b",  # Percentiles
+            r"\b(?:average|median|mean)\s+\d+\.?\d*\b",  # Statistical measures
         ]
 
         claims = []
@@ -303,18 +338,18 @@ class EvidenceFramework:
     def create_evidence_from_measurement(
         self,
         measurement_file: str,
-        measurement_value: Union[float, int],
+        measurement_value: float,
         measurement_unit: str,
         verification_cmd: str
     ) -> Evidence:
-        """Create E2 (MEASURED) evidence from a measurement"""
+        """Create E2 (MEASURED) evidence from a measurement."""
         return Evidence(
             source_file=measurement_file,
             source_line=None,
             evidence_type="measurement",
             grade=EvidenceGrade.MEASURED,
             content=f"{measurement_value} {measurement_unit}",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd=verification_cmd,
             metadata={"measurement_value": measurement_value, "unit": measurement_unit}
         )
@@ -325,14 +360,14 @@ class EvidenceFramework:
         source_line: int,
         observation: str
     ) -> Evidence:
-        """Create E3 (OBSERVED) evidence from code/log observation"""
+        """Create E3 (OBSERVED) evidence from code/log observation."""
         return Evidence(
             source_file=source_file,
             source_line=source_line,
             evidence_type="code_observation",
             grade=EvidenceGrade.OBSERVED,
             content=observation,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd=f"grep -n '{observation}' {source_file}",
             metadata={}
         )
@@ -344,14 +379,14 @@ def create_performance_claim_with_evidence(
     measurement_source: str,
     verification_cmd: str
 ) -> Claim:
-    """Helper function to create performance claims with proper evidence"""
+    """Create performance claims with proper evidence."""
     evidence = Evidence(
         source_file=measurement_source,
         source_line=None,
         evidence_type="performance_measurement",
         grade=EvidenceGrade.MEASURED,
         content=f"Measured: {measured_value} {unit}",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         verification_cmd=verification_cmd,
         metadata={"value": measured_value, "unit": unit}
     )
@@ -367,15 +402,14 @@ def create_performance_claim_with_evidence(
 
 # Integration with existing PerformanceAnalyzer
 class VerifiedPerformanceAnalyzer:
-    """Extended PerformanceAnalyzer with evidence verification"""
+    """Extended PerformanceAnalyzer with evidence verification."""
 
-    def __init__(self, metrics_dir: str = "/home/seb/.euxis/metrics"):
-        from .performance_analyzer import PerformanceAnalyzer
+    def __init__(self, metrics_dir: str = "/home/seb/.euxis/metrics") -> None:
         self.analyzer = PerformanceAnalyzer(metrics_dir)
         self.evidence_framework = EvidenceFramework()
 
-    def generate_verified_report(self, hours_back: int = 24) -> Dict[str, Any]:
-        """Generate performance report with evidence verification"""
+    def generate_verified_report(self, hours_back: int = 24) -> dict[str, Any]:
+        """Generate performance report with evidence verification."""
         # Get base report
         base_report = self.analyzer.generate_performance_report(hours_back)
 
@@ -389,11 +423,17 @@ class VerifiedPerformanceAnalyzer:
             # Success rate claim
             if "fleet_success_rate" in fleet:
                 success_rate = fleet["fleet_success_rate"] * 100  # Convert to percentage
+                verification_cmd = (
+                    'python3 -c "import json; '
+                    f"sessions=[json.loads(l) for l in open('{self.analyzer.sessions_file}')]; "
+                    "successes=sum(1 for s in sessions if s['status']=='SUCCESS'); "
+                    "print(f'Success rate: {successes/len(sessions)*100:.1f}%')\""
+                )
                 evidence = self.evidence_framework.create_evidence_from_measurement(
                     measurement_file=str(self.analyzer.sessions_file),
                     measurement_value=success_rate,
                     measurement_unit="percent",
-                    verification_cmd=f"python3 -c \"import json; sessions=[json.loads(l) for l in open('{self.analyzer.sessions_file}')]; successes=sum(1 for s in sessions if s['status']=='SUCCESS'); print(f'Success rate: {{successes/len(sessions)*100:.1f}}%')\""
+                    verification_cmd=verification_cmd,
                 )
 
                 claim = Claim(
@@ -440,4 +480,4 @@ if __name__ == "__main__":
 
     # Validate claim
     validation = framework.validate_claim(claim)
-    print("Validation result:", json.dumps(validation, indent=2))
+    logger.info("Validation result: %s", json.dumps(validation, indent=2))

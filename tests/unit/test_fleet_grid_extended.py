@@ -20,13 +20,13 @@ from tui.widgets.fleet_grid import FleetGrid
 
 
 def _make_agent(**overrides):
-    defaults = dict(
-        id="architect",
-        tier="core",
-        version="0.0.7",
-        tags=("design", "plan"),
-        activation="default",
-    )
+    defaults = {
+        "id": "architect",
+        "tier": "core",
+        "version": "0.0.7",
+        "tags": ("design", "plan"),
+        "activation": "default",
+    }
     defaults.update(overrides)
     return Agent(**defaults)
 
@@ -73,7 +73,8 @@ class TestFleetGridMatchesFilter(unittest.TestCase):
         assert self._call_matches("arch", _make_agent(id="architect")) is True
 
     def test_no_match(self):
-        assert self._call_matches("xyz_nonexistent", _make_agent(id="architect", tags=("design",), tier="core")) is False
+        agent = _make_agent(id="architect", tags=("design",), tier="core")
+        assert self._call_matches("xyz_nonexistent", agent) is False
 
 
 # ===========================================================================
@@ -109,10 +110,12 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
         mock_scroll = Mock()
         grid.query_one = Mock(return_value=mock_scroll)
 
-        with patch("tui.widgets.fleet_grid.Static") as mock_static:
-            with patch("tui.widgets.fleet_grid.Horizontal") as mock_horiz:
-                with patch("tui.widgets.fleet_grid.AgentCard"):
-                    grid._rebuild_grid()
+        with (
+            patch("tui.widgets.fleet_grid.Static"),
+            patch("tui.widgets.fleet_grid.Horizontal"),
+            patch("tui.widgets.fleet_grid.AgentCard"),
+        ):
+            grid._rebuild_grid()
 
         # Should have mounted section label + 1 row
         assert mock_scroll.mount.call_count >= 2
@@ -128,10 +131,12 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
         mock_scroll = Mock()
         grid.query_one = Mock(return_value=mock_scroll)
 
-        with patch("tui.widgets.fleet_grid.Static"):
-            with patch("tui.widgets.fleet_grid.Horizontal"):
-                with patch("tui.widgets.fleet_grid.AgentCard"):
-                    grid._rebuild_grid()
+        with (
+            patch("tui.widgets.fleet_grid.Static"),
+            patch("tui.widgets.fleet_grid.Horizontal"),
+            patch("tui.widgets.fleet_grid.AgentCard"),
+        ):
+            grid._rebuild_grid()
 
         # Multiple sections should be mounted
         assert mock_scroll.mount.call_count > 2
@@ -147,10 +152,12 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
         mock_row = Mock()
         grid.query_one = Mock(return_value=mock_scroll)
 
-        with patch("tui.widgets.fleet_grid.Static"):
-            with patch("tui.widgets.fleet_grid.Horizontal", return_value=mock_row):
-                with patch("tui.widgets.fleet_grid.AgentCard"):
-                    grid._rebuild_grid()
+        with (
+            patch("tui.widgets.fleet_grid.Static"),
+            patch("tui.widgets.fleet_grid.Horizontal", return_value=mock_row),
+            patch("tui.widgets.fleet_grid.AgentCard"),
+        ):
+            grid._rebuild_grid()
 
         # 1 section label + 1 section desc + 2 rows = 4 mount calls
         assert mock_scroll.mount.call_count == 4
@@ -164,10 +171,12 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
         mock_scroll = Mock()
         grid.query_one = Mock(return_value=mock_scroll)
 
-        with patch("tui.widgets.fleet_grid.Static"):
-            with patch("tui.widgets.fleet_grid.Horizontal") as mock_horiz:
-                with patch("tui.widgets.fleet_grid.AgentCard"):
-                    grid._rebuild_grid()
+        with (
+            patch("tui.widgets.fleet_grid.Static"),
+            patch("tui.widgets.fleet_grid.Horizontal"),
+            patch("tui.widgets.fleet_grid.AgentCard"),
+        ):
+            grid._rebuild_grid()
 
         # Only core section with 1 agent should appear
         # Section label + 1 section desc + 1 row = 3 mount calls

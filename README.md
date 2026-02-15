@@ -147,14 +147,14 @@ euxis-combo run <combo-name> "<task>"
 
 | Combo | Chain | Best For |
 |-------|-------|----------|
-| `steve-jobs` | planner → architect → evangelist → reviewer | Product design, feature specs |
-| `fort-knox` | pentester → auditor → inspector → reviewer | Security reviews |
-| `jony-ive` | designer → animator → interactor → reviewer | UI/UX design |
+| `envision` | planner → architect → evangelist → reviewer | Product design, feature specs |
+| `protect` | pentester → auditor → inspector → reviewer | Security reviews |
+| `refine` | designer → animator → interactor → reviewer | UI/UX design |
 
 **Example:**
 
 ```bash
-euxis-combo run steve-jobs "Design a user onboarding flow"
+euxis-combo run envision "Design a user onboarding flow"
 ```
 
 **What happens:**
@@ -204,7 +204,7 @@ euxis debugger "Trace why login fails for users with special characters in passw
 
 **Deep investigation:**
 ```bash
-euxis-combo run fort-knox "Investigate the session timeout issue"
+euxis-combo run protect "Investigate the session timeout issue"
 ```
 
 **What you get:**
@@ -226,7 +226,7 @@ euxis architect "Design a notification system supporting email, SMS, and push"
 
 **Then implement:**
 ```bash
-euxis-combo run steve-jobs "Build user preferences for notification channels"
+euxis-combo run envision "Build user preferences for notification channels"
 ```
 
 **What you get:**

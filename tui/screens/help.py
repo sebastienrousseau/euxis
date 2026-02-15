@@ -11,6 +11,7 @@ from textual.widgets import Markdown
 
 from tui.i18n import _
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -154,7 +155,6 @@ class HelpScreen(Screen[None]):
         with VerticalScroll():
             yield Markdown(HELP_CONTENT, id="help-content")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

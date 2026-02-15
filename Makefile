@@ -16,6 +16,7 @@ VENV_DIR := $(PROJECT_DIR)/.venv
 SRC_DIR := tui
 TEST_DIR := tests
 COVERAGE_DIR := $(TEST_DIR)/coverage
+RUFF_CACHE_DIR ?= /tmp/euxis-ruff-cache
 
 help: ## Show this help message
 	@echo "Euxis Development Commands (Zero-Tolerance Policy)"
@@ -103,12 +104,14 @@ format-check: ## Check code formatting (ZERO TOLERANCE)
 
 lint: ## Lint code with Ruff (ZERO WARNINGS)
 	@echo "=== Linting code (Ruff - ZERO WARNINGS) ==="
-	ruff check . --fix --show-fixes
+	@mkdir -p $(RUFF_CACHE_DIR)
+	RUFF_CACHE_DIR=$(RUFF_CACHE_DIR) ruff check . --fix --show-fixes
 	@echo "✅ Linting complete"
 
 lint-check: ## Check linting (ZERO TOLERANCE)
 	@echo "=== Checking linting violations ==="
-	ruff check .
+	@mkdir -p $(RUFF_CACHE_DIR)
+	RUFF_CACHE_DIR=$(RUFF_CACHE_DIR) ruff check .
 	@echo "✅ No linting violations found"
 
 type-check: ## Type check with mypy (STRICT MODE)

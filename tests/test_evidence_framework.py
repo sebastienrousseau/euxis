@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Integration tests for the Evidence Verification Framework
+"""Integration tests for the Evidence Verification Framework.
 
 Tests the complete evidence verification pipeline including:
 - Evidence storage and retrieval
@@ -10,64 +9,63 @@ Tests the complete evidence verification pipeline including:
 """
 
 import json
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-import sys
-import subprocess
 
 # Add metrics to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "metrics"))
 
-from verification import (
-    EvidenceFramework,
-    Evidence,
-    EvidenceGrade,
-    Claim,
-    ValidationPipeline,
-    create_performance_claim_with_evidence
-)
+from verification import Claim, Evidence, EvidenceFramework, EvidenceGrade, ValidationPipeline
+
+
+def _out(*values: object, sep: str = " ", end: str = "\n") -> None:
+    """Write output without using print()."""
+    sys.stdout.write(sep.join(map(str, values)) + end)
+
 
 class TestEvidenceFramework(unittest.TestCase):
-    """Test the core evidence framework functionality"""
+    """Test the core evidence framework functionality."""
 
     def setUp(self):
-        """Setup test environment with temporary directories"""
+        """Set up test environment with temporary directories."""
         self.temp_dir = tempfile.mkdtemp()
         self.framework = EvidenceFramework(evidence_dir=self.temp_dir)
 
     def tearDown(self):
-        """Cleanup temporary files"""
-        import shutil
+        """Cleanup temporary files."""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_evidence_creation_and_storage(self):
-        """Test creating and storing evidence"""
+        """Test creating and storing evidence."""
         evidence = Evidence(
             source_file="/test/metrics.json",
             source_line=42,
             evidence_type="performance_measurement",
             grade=EvidenceGrade.MEASURED,
             content="Response time: 150ms",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd="echo 'test verification'",
             metadata={"response_time": 150, "unit": "ms"}
         )
 
         # Store evidence
         evidence_hash = self.framework.store_evidence(evidence)
-        self.assertIsNotNone(evidence_hash)
-        self.assertEqual(len(evidence_hash), 12)  # Hash should be 12 characters
+        assert evidence_hash is not None
+        assert len(evidence_hash) == 12  # Hash should be 12 characters
 
         # Retrieve evidence
         retrieved = self.framework.load_evidence(evidence_hash)
-        self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.source_file, evidence.source_file)
-        self.assertEqual(retrieved.grade, evidence.grade)
+        assert retrieved is not None
+        assert retrieved.source_file == evidence.source_file
+        assert retrieved.grade == evidence.grade
 
     def test_evidence_verification(self):
-        """Test evidence verification using commands"""
+        """Test evidence verification using commands."""
         # Create evidence with a command that will succeed
         evidence = Evidence(
             source_file="/test/success.txt",
@@ -75,13 +73,13 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="test_result",
             grade=EvidenceGrade.VERIFIED,
             content="Test passed",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd="echo 'success' && exit 0",
             metadata={}
         )
 
         result = self.framework.verify_evidence(evidence)
-        self.assertTrue(result)
+        assert result is True
 
         # Create evidence with a command that will fail
         failing_evidence = Evidence(
@@ -90,16 +88,16 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="test_result",
             grade=EvidenceGrade.VERIFIED,
             content="Test failed",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd="echo 'failure' && exit 1",
             metadata={}
         )
 
         result = self.framework.verify_evidence(failing_evidence)
-        self.assertFalse(result)
+        assert result is False
 
     def test_evidence_decay_checking(self):
-        """Test evidence decay detection"""
+        """Test evidence decay detection."""
         # Create old evidence that should be decayed
         old_evidence = Evidence(
             source_file="/test/old.txt",
@@ -107,13 +105,13 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="measurement",
             grade=EvidenceGrade.VERIFIED,  # Should decay after 1 day
             content="Old measurement",
-            timestamp=datetime.now(timezone.utc) - timedelta(days=2),
+            timestamp=datetime.now(UTC) - timedelta(days=2),
             verification_cmd=None,
             metadata={}
         )
 
         is_decayed = self.framework.check_evidence_decay(old_evidence)
-        self.assertTrue(is_decayed)
+        assert is_decayed is True
 
         # Create fresh evidence that should not be decayed
         fresh_evidence = Evidence(
@@ -122,16 +120,16 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="measurement",
             grade=EvidenceGrade.VERIFIED,
             content="Fresh measurement",
-            timestamp=datetime.now(timezone.utc) - timedelta(hours=1),
+            timestamp=datetime.now(UTC) - timedelta(hours=1),
             verification_cmd=None,
             metadata={}
         )
 
         is_decayed = self.framework.check_evidence_decay(fresh_evidence)
-        self.assertFalse(is_decayed)
+        assert is_decayed is False
 
     def test_claim_validation(self):
-        """Test claim validation against evidence"""
+        """Test claim validation against evidence."""
         # Create valid evidence
         evidence = Evidence(
             source_file="/test/metrics.json",
@@ -139,7 +137,7 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="performance_measurement",
             grade=EvidenceGrade.MEASURED,
             content="Success rate: 95.5%",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd="echo 'verified' && exit 0",
             metadata={"success_rate": 95.5}
         )
@@ -155,11 +153,11 @@ class TestEvidenceFramework(unittest.TestCase):
         )
 
         validation = self.framework.validate_claim(claim)
-        self.assertTrue(validation["valid"])
-        self.assertEqual(validation["evidence_summary"]["total_evidence"], 1)
+        assert validation["valid"] is True
+        assert validation["evidence_summary"]["total_evidence"] == 1
 
     def test_claim_validation_forbidden_evidence(self):
-        """Test that claims with E5 evidence are rejected"""
+        """Test that claims with E5 evidence are rejected."""
         # Create forbidden E5 evidence
         forbidden_evidence = Evidence(
             source_file="/test/speculation.txt",
@@ -167,7 +165,7 @@ class TestEvidenceFramework(unittest.TestCase):
             evidence_type="speculation",
             grade=EvidenceGrade.SPECULATED,  # E5 - forbidden
             content="I think the success rate is around 95%",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             verification_cmd=None,
             metadata={}
         )
@@ -182,25 +180,25 @@ class TestEvidenceFramework(unittest.TestCase):
         )
 
         validation = self.framework.validate_claim(claim)
-        self.assertFalse(validation["valid"])
-        self.assertTrue(any("E5" in issue for issue in validation["issues"]))
+        assert validation["valid"] is False
+        assert any("E5" in issue for issue in validation["issues"])
 
 class TestValidationPipeline(unittest.TestCase):
-    """Test the validation pipeline functionality"""
+    """Test the validation pipeline functionality."""
 
     def setUp(self):
-        """Setup test environment"""
+        """Set up test environment."""
         self.temp_dir = tempfile.mkdtemp()
         self.framework = EvidenceFramework(evidence_dir=self.temp_dir)
         self.pipeline = ValidationPipeline(self.framework)
 
     def tearDown(self):
-        """Cleanup temporary files"""
+        """Cleanup temporary files."""
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_quantitative_claim_extraction(self):
-        """Test extraction of quantitative claims from text"""
+        """Test extraction of quantitative claims from text."""
         analysis_text = """
         Performance Analysis Report
 
@@ -211,16 +209,16 @@ class TestValidationPipeline(unittest.TestCase):
         """
 
         claims = self.pipeline.extract_quantitative_claims(analysis_text)
-        self.assertGreater(len(claims), 0)
+        assert len(claims) > 0
 
         # Check for specific claims
         claim_texts = [claim["matched_text"] for claim in claims]
-        self.assertTrue(any("95.5%" in text for text in claim_texts))
-        self.assertTrue(any("150ms" in text for text in claim_texts))
-        self.assertTrue(any("300ms" in text for text in claim_texts))
+        assert any("95.5%" in text for text in claim_texts)
+        assert any("150ms" in text for text in claim_texts)
+        assert any("300ms" in text for text in claim_texts)
 
     def test_citation_requirement_checking(self):
-        """Test checking for proper evidence citations"""
+        """Test checking for proper evidence citations."""
         # Text with proper citations
         cited_text = """
         The system success rate is 95.5% [E2: Measured via load test #847].
@@ -230,8 +228,8 @@ class TestValidationPipeline(unittest.TestCase):
         claims = self.pipeline.extract_quantitative_claims(cited_text)
         citation_check = self.pipeline.check_citation_requirements(cited_text, claims)
 
-        self.assertEqual(citation_check["cited_claims"], len(claims))
-        self.assertEqual(len(citation_check["uncited_claims"]), 0)
+        assert citation_check["cited_claims"] == len(claims)
+        assert len(citation_check["uncited_claims"]) == 0
 
         # Text without proper citations
         uncited_text = """
@@ -242,11 +240,11 @@ class TestValidationPipeline(unittest.TestCase):
         claims = self.pipeline.extract_quantitative_claims(uncited_text)
         citation_check = self.pipeline.check_citation_requirements(uncited_text, claims)
 
-        self.assertLess(citation_check["cited_claims"], len(claims))
-        self.assertGreater(len(citation_check["uncited_claims"]), 0)
+        assert citation_check["cited_claims"] < len(claims)
+        assert len(citation_check["uncited_claims"]) > 0
 
     def test_forbidden_terms_detection(self):
-        """Test detection of forbidden uncertainty terms"""
+        """Test detection of forbidden uncertainty terms."""
         text_with_forbidden_terms = """
         The system probably achieves around 95% success rate.
         Response time seems to be approximately 150ms.
@@ -254,21 +252,21 @@ class TestValidationPipeline(unittest.TestCase):
         """
 
         forbidden_check = self.pipeline.check_forbidden_terms(text_with_forbidden_terms)
-        self.assertGreater(forbidden_check["forbidden_terms_found"], 0)
+        assert forbidden_check["forbidden_terms_found"] > 0
 
         # Check specific forbidden terms are detected
         found_terms = [v["term"] for v in forbidden_check["violations"]]
-        self.assertIn("probably", found_terms)
-        self.assertIn("around", found_terms)
-        self.assertIn("seems", found_terms)
-        self.assertIn("approximately", found_terms)
+        assert "probably" in found_terms
+        assert "around" in found_terms
+        assert "seems" in found_terms
+        assert "approximately" in found_terms
 
     def test_file_validation_pipeline(self):
-        """Test complete file validation pipeline"""
+        """Test complete file validation pipeline."""
         # Create a test analysis file
         analysis_data = {
             "report_id": "test_001",
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "analysis": """
                 Performance Analysis Results
 
@@ -283,49 +281,49 @@ class TestValidationPipeline(unittest.TestCase):
 
         # Write test file
         test_file = Path(self.temp_dir) / "test_analysis.json"
-        with open(test_file, 'w') as f:
+        with test_file.open("w") as f:
             json.dump(analysis_data, f)
 
         # Process through pipeline
         result = self.pipeline.process_analysis_file(test_file)
 
-        self.assertIn("validation_steps", result)
-        self.assertIn("overall_score", result)
-        self.assertTrue(result["passed"])  # Should pass with proper citations
+        assert "validation_steps" in result
+        assert "overall_score" in result
+        assert result["passed"] is True  # Should pass with proper citations
 
         # Check that claims were extracted
         claims_found = result["validation_steps"]["claim_extraction"]["claims_found"]
-        self.assertGreater(claims_found, 0)
+        assert claims_found > 0
 
 class TestCLIInterface(unittest.TestCase):
-    """Test the CLI interface functionality"""
+    """Test the CLI interface functionality."""
 
     def setUp(self):
-        """Setup CLI testing environment"""
+        """Set up CLI testing environment."""
         self.cli_script = Path(__file__).parent.parent / "bin" / "euxis-evidence-verify"
 
     def test_cli_help(self):
-        """Test CLI help functionality"""
+        """Test CLI help functionality."""
         result = subprocess.run(
             [str(self.cli_script), "--help"],
             capture_output=True,
             text=True
         )
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("Evidence Verification", result.stdout)
+        assert result.returncode == 0
+        assert "Evidence Verification" in result.stdout
 
     def test_cli_validate_missing_file(self):
-        """Test CLI validation with missing file"""
+        """Test CLI validation with missing file."""
         result = subprocess.run(
             [str(self.cli_script), "validate", "/nonexistent/file.json"],
             capture_output=True,
             text=True
         )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("ERROR", result.stdout)
+        assert result.returncode != 0
+        assert "ERROR" in result.stdout
 
 def create_sample_analysis_files():
-    """Create sample analysis files for manual testing"""
+    """Create sample analysis files for manual testing."""
     samples_dir = Path("/tmp/euxis_evidence_samples")
     samples_dir.mkdir(exist_ok=True)
 
@@ -361,10 +359,10 @@ def create_sample_analysis_files():
         """
     }
 
-    with open(samples_dir / "good_analysis.json", 'w') as f:
+    with (samples_dir / "good_analysis.json").open("w") as f:
         json.dump(good_analysis, f, indent=2)
 
-    with open(samples_dir / "bad_analysis.json", 'w') as f:
+    with (samples_dir / "bad_analysis.json").open("w") as f:
         json.dump(bad_analysis, f, indent=2)
 
     return samples_dir
@@ -372,8 +370,8 @@ def create_sample_analysis_files():
 if __name__ == "__main__":
     # Create sample files for manual testing
     samples_dir = create_sample_analysis_files()
-    print(f"Created sample files in: {samples_dir}")
-    print("Test with: python3 -m pytest tests/test_evidence_framework.py -v")
+    _out(f"Created sample files in: {samples_dir}")
+    _out("Test with: python3 -m pytest tests/test_evidence_framework.py -v")
 
     # Run the tests
     unittest.main()

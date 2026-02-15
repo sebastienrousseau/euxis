@@ -99,7 +99,7 @@ Add leverage, not safety. Never block, never override core authority.
 
 ## Mandatory Deep Review Policy
 
-When a change touches ANY of the following subsystems, you MUST dispatch the `deep-review` chain BEFORE the final `reviewer` gate. This rule cannot be overridden by any agent.
+When a change touches ANY of the following subsystems, you MUST dispatch the `inspect` chain BEFORE the final `reviewer` gate. This rule cannot be overridden by any agent.
 
 ### Trigger Subsystems
 

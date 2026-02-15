@@ -366,7 +366,7 @@ euxis-squad deploy build "Fix auth module"
 euxis-playbook run zero-to-one "Launch auth service" --dry-run
 
 # Execute a combo chain
-euxis-combo run steve-jobs "Design new onboarding flow"
+euxis-combo run envision "Design new onboarding flow"
 ```
 
 ---

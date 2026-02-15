@@ -38,7 +38,7 @@ The architect will:
 For complex features, get the full strategic view:
 
 ```bash
-euxis-combo run steve-jobs "Design user notification preferences with multi-channel support"
+euxis-combo run envision "Design user notification preferences with multi-channel support"
 ```
 
 The Steve Jobs combo runs: `planner → architect → evangelist → reviewer`
@@ -170,7 +170,7 @@ The Zero to One playbook executes: `Vision → Build → Quality → Growth`
 | Task | Command |
 |------|---------|
 | Architecture design | `euxis architect "<feature>"` |
-| Full strategic design | `euxis-combo run steve-jobs "<feature>"` |
+| Full strategic design | `euxis-combo run envision "<feature>"` |
 | Implementation planning | `euxis planner "<breakdown>"` |
 | Code implementation | `euxis debugger "<implement>"` |
 | Infrastructure setup | `euxis automaton "<setup>"` |

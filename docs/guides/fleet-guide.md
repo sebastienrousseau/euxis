@@ -387,9 +387,9 @@ Each agent receives:
 
 ```bash
 euxis-combo list                                              # See available combos
-euxis-combo info fort-knox                                    # View the chain
-euxis-combo run steve-jobs "Design onboarding flow"           # Execute the combo
-euxis-combo run fort-knox "Audit payment module" --provider claude  # Override provider for all agents
+euxis-combo info protect                                    # View the chain
+euxis-combo run envision "Design onboarding flow"           # Execute the combo
+euxis-combo run protect "Audit payment module" --provider claude  # Override provider for all agents
 ```
 
 ### Squads vs. Playbooks vs. Combos

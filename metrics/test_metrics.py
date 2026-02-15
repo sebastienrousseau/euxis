@@ -1,22 +1,67 @@
 #!/usr/bin/env python3
-"""
-Test script for the agent performance metrics system
-Generates sample data and validates functionality
+"""Test script for the agent performance metrics system.
+
+Generates sample data and validates functionality.
 """
 
+import importlib
+import secrets
 import sys
 import time
-import random
+from collections.abc import Iterable
 from pathlib import Path
+from typing import TextIO
 
 # Add local modules to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from collectors.performance_collector import PerformanceMetricsCollector
-from aggregators.performance_analyzer import PerformanceAnalyzer
+performance_analyzer = importlib.import_module("aggregators.performance_analyzer")
+PerformanceAnalyzer = performance_analyzer.PerformanceAnalyzer
+performance_collector = importlib.import_module("collectors.performance_collector")
+PerformanceMetricsCollector = performance_collector.PerformanceMetricsCollector
 
-def generate_sample_data():
-    """Generate sample metrics data for testing"""
+def _out(*values: object, sep: str = " ", end: str = "\n", stream: TextIO = sys.stdout) -> None:
+    """Write output without using print()."""
+    stream.write(sep.join(map(str, values)) + end)
+
+
+def _choice[T](options: Iterable[T]) -> T:
+    """Choose a random item using a crypto-safe source."""
+    options_list = list(options)
+    if not options_list:
+        msg = "No options provided."
+        raise ValueError(msg)
+    return secrets.choice(options_list)
+
+
+def _randint(low: int, high: int) -> int:
+    """Return a random int in [low, high] using a crypto-safe source."""
+    if low > high:
+        msg = "low must be <= high."
+        raise ValueError(msg)
+    return low + secrets.randbelow(high - low + 1)
+
+
+def _weighted_choice[T](options: list[T], weights: list[int]) -> T:
+    """Choose a weighted option using a crypto-safe source."""
+    if len(options) != len(weights):
+        msg = "Options and weights must match."
+        raise ValueError(msg)
+    total = sum(weights)
+    if total <= 0:
+        msg = "Total weight must be positive."
+        raise ValueError(msg)
+    roll = secrets.randbelow(total)
+    acc = 0
+    for option, weight in zip(options, weights, strict=True):
+        acc += weight
+        if roll < acc:
+            return option
+    return options[-1]
+
+
+def generate_sample_data() -> None:
+    """Generate sample metrics data for testing."""
     collector = PerformanceMetricsCollector()
 
     # List of test agents
@@ -25,14 +70,14 @@ def generate_sample_data():
     priorities = ["P0", "P1", "P2", "P3"]
     tools = ["Read", "Write", "Edit", "Bash", "Grep"]
 
-    print("🧪 Generating sample metrics data...")
+    _out("🧪 Generating sample metrics data...")
 
     # Generate 50 sample sessions
     for i in range(50):
-        agent = random.choice(agents)
+        agent = _choice(agents)
         session_id = f"test-session-{i:03d}"
-        task_type = random.choice(task_types)
-        priority = random.choice(priorities)
+        task_type = _choice(task_types)
+        priority = _choice(priorities)
 
         # Start task
         correlation_id = collector.task_started(
@@ -43,10 +88,10 @@ def generate_sample_data():
         )
 
         # Simulate some tool executions
-        for _ in range(random.randint(1, 8)):
-            tool = random.choice(tools)
-            duration = random.randint(50, 2000)
-            success = random.choice([True, True, True, False])  # 75% success rate
+        for _ in range(_randint(1, 8)):
+            tool = _choice(tools)
+            duration = _randint(50, 2000)
+            success = _weighted_choice([True, False], [3, 1])  # 75% success rate
 
             collector.tool_execution(
                 agent_id=agent,
@@ -57,10 +102,10 @@ def generate_sample_data():
             )
 
         # Simulate some memory operations
-        if random.choice([True, False]):
-            operation = random.choice(["remember", "recall"])
-            memory_type = random.choice(["episodic", "semantic", "procedural"])
-            duration = random.randint(10, 200)
+        if _choice([True, False]):
+            operation = _choice(["remember", "recall"])
+            memory_type = _choice(["episodic", "semantic", "procedural"])
+            duration = _randint(10, 200)
 
             collector.memory_operation(
                 agent_id=agent,
@@ -71,7 +116,7 @@ def generate_sample_data():
             )
 
         # Complete task (with some failures)
-        status = random.choices(["SUCCESS", "WARNING", "FAILURE"], weights=[80, 15, 5])[0]
+        status = _weighted_choice(["SUCCESS", "WARNING", "FAILURE"], [80, 15, 5])
 
         if status == "FAILURE":
             collector.task_failed(
@@ -84,22 +129,22 @@ def generate_sample_data():
             collector.task_completed(
                 session_id=session_id,
                 status=status,
-                artifacts_created=random.randint(0, 5),
-                cortex_operations=random.randint(0, 3),
-                tool_calls_count=random.randint(1, 8),
-                handoff_required=random.choice([True, False])
+                artifacts_created=_randint(0, 5),
+                cortex_operations=_randint(0, 3),
+                tool_calls_count=_randint(1, 8),
+                handoff_required=_choice([True, False])
             )
 
         # Brief delay to simulate realistic timing
         time.sleep(0.01)
 
-    print(f"✅ Generated sample data for {len(agents)} agents with 50 sessions")
+    _out(f"✅ Generated sample data for {len(agents)} agents with 50 sessions")
 
-def test_delegation_tracking():
-    """Test delegation tracking"""
+def test_delegation_tracking() -> None:
+    """Test delegation tracking."""
     collector = PerformanceMetricsCollector()
 
-    print("\n🔄 Testing delegation tracking...")
+    _out("\n🔄 Testing delegation tracking...")
 
     # Simulate delegation chain: architect -> reviewer -> edge-hunter
     delegation_id = collector.delegation_started(
@@ -121,13 +166,13 @@ def test_delegation_tracking():
         quality_score=0.92
     )
 
-    print("✅ Delegation tracking tested")
+    _out("✅ Delegation tracking tested")
 
-def test_conflict_detection():
-    """Test conflict detection"""
+def test_conflict_detection() -> None:
+    """Test conflict detection."""
     collector = PerformanceMetricsCollector()
 
-    print("\n⚠️  Testing conflict detection...")
+    _out("\n⚠️  Testing conflict detection...")
 
     collector.conflict_detected(
         agents=["architect", "reviewer"],
@@ -135,76 +180,71 @@ def test_conflict_detection():
         resolution_method="evidence"
     )
 
-    print("✅ Conflict detection tested")
+    _out("✅ Conflict detection tested")
 
-def test_analysis():
-    """Test metrics analysis"""
+def test_analysis() -> None:
+    """Test metrics analysis."""
     analyzer = PerformanceAnalyzer()
 
-    print("\n📊 Testing metrics analysis...")
+    _out("\n📊 Testing metrics analysis...")
 
     # Test agent performance analysis
     agent_perf = analyzer.analyze_agent_performance(hours_back=1)
-    print(f"✅ Analyzed performance for {len(agent_perf)} agents")
+    _out(f"✅ Analyzed performance for {len(agent_perf)} agents")
 
     # Test delegation analysis
     delegation_patterns = analyzer.analyze_delegation_patterns(hours_back=1)
-    print(f"✅ Analyzed {len(delegation_patterns)} delegation patterns")
+    _out(f"✅ Analyzed {len(delegation_patterns)} delegation patterns")
 
     # Test tool usage analysis
     tool_usage = analyzer.analyze_tool_usage_patterns(hours_back=1)
-    print(f"✅ Analyzed usage for {len(tool_usage)} tools")
+    _out(f"✅ Analyzed usage for {len(tool_usage)} tools")
 
     # Generate report
     report = analyzer.generate_performance_report(hours_back=1)
-    print(f"✅ Generated comprehensive report")
+    _out("✅ Generated comprehensive report")
 
     # Show sample metrics
     fleet_metrics = report.get("fleet_metrics", {})
     if fleet_metrics:
-        print(f"\n📈 Sample Fleet Metrics:")
-        print(f"   Total Tasks: {fleet_metrics.get('total_tasks', 0)}")
-        print(f"   Success Rate: {fleet_metrics.get('fleet_success_rate', 0):.1%}")
-        print(f"   Active Agents: {fleet_metrics.get('active_agents', 0)}")
+        _out("\n📈 Sample Fleet Metrics:")
+        _out(f"   Total Tasks: {fleet_metrics.get('total_tasks', 0)}")
+        _out(f"   Success Rate: {fleet_metrics.get('fleet_success_rate', 0):.1%}")
+        _out(f"   Active Agents: {fleet_metrics.get('active_agents', 0)}")
 
-def test_rankings():
-    """Test agent rankings"""
+def test_rankings() -> None:
+    """Test agent rankings."""
     analyzer = PerformanceAnalyzer()
 
-    print("\n🏆 Testing agent rankings...")
+    _out("\n🏆 Testing agent rankings...")
 
     rankings = analyzer.get_agent_rankings(hours_back=1, metric="success_rate")
-    print(f"✅ Generated rankings for {len(rankings)} agents")
+    _out(f"✅ Generated rankings for {len(rankings)} agents")
 
     if rankings:
-        print(f"   Top performer: {rankings[0][0]} ({rankings[0][1]:.1%})")
+        _out(f"   Top performer: {rankings[0][0]} ({rankings[0][1]:.1%})")
 
-def main():
-    """Run all tests"""
-    print("🚀 Starting Agent Performance Metrics Test Suite")
-    print("=" * 60)
+def main() -> None:
+    """Run all tests."""
+    _out("🚀 Starting Agent Performance Metrics Test Suite")
+    _out("=" * 60)
 
-    try:
-        # Generate test data
-        generate_sample_data()
+    # Generate test data
+    generate_sample_data()
 
-        # Test specific features
-        test_delegation_tracking()
-        test_conflict_detection()
-        test_analysis()
-        test_rankings()
+    # Test specific features
+    test_delegation_tracking()
+    test_conflict_detection()
+    test_analysis()
+    test_rankings()
 
-        print("\n" + "=" * 60)
-        print("✅ All tests completed successfully!")
-        print("\nMetrics files created:")
-        print(f"   📄 Events: /home/seb/.euxis/metrics/events.jsonl")
-        print(f"   📄 Sessions: /home/seb/.euxis/metrics/sessions.jsonl")
-        print("\nTry running:")
-        print("   python3 /home/seb/.euxis/metrics/metrics_cli.py report")
-
-    except Exception as e:
-        print(f"\n❌ Test failed: {e}")
-        sys.exit(1)
+    _out("\n" + "=" * 60)
+    _out("✅ All tests completed successfully!")
+    _out("\nMetrics files created:")
+    _out("   📄 Events: /home/seb/.euxis/metrics/events.jsonl")
+    _out("   📄 Sessions: /home/seb/.euxis/metrics/sessions.jsonl")
+    _out("\nTry running:")
+    _out("   python3 /home/seb/.euxis/metrics/metrics_cli.py report")
 
 if __name__ == "__main__":
     main()

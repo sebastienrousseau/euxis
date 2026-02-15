@@ -11,7 +11,7 @@ import argparse
 import json
 import sqlite3
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 REGISTRY_FILE = Path.home() / ".euxis" / "registry.json"
@@ -20,22 +20,25 @@ BACKUP_DIR = Path.home() / ".euxis" / "backups"
 
 
 def _fail(msg: str) -> None:
-    print(f"❌ {msg}", file=sys.stderr)
+    """Exit with an error message."""
+    sys.stderr.write(f"❌ {msg}\n")
     raise SystemExit(1)
 
 
 def create_backup() -> Path:
+    """Write a timestamped backup of the registry JSON."""
     if not REGISTRY_FILE.exists():
         _fail(f"Registry file not found: {REGISTRY_FILE}")
 
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    stamp = datetime.now(tz=UTC).strftime("%Y%m%d-%H%M%S")
     backup_file = BACKUP_DIR / f"registry-{stamp}.json"
     backup_file.write_text(REGISTRY_FILE.read_text())
     return backup_file
 
 
 def create_schema(conn: sqlite3.Connection) -> None:
+    """Create required registry tables and indexes."""
     cursor = conn.cursor()
     cursor.execute("PRAGMA foreign_keys = ON")
 
@@ -105,8 +108,13 @@ def create_schema(conn: sqlite3.Connection) -> None:
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_agents_activation ON agents(activation)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_tags_agent ON agent_tags(agent_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_tags_tag ON agent_tags(tag_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_capabilities_agent ON agent_capabilities(agent_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_capabilities_capability ON agent_capabilities(capability_id)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_agent_capabilities_agent ON agent_capabilities(agent_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_agent_capabilities_capability "
+        "ON agent_capabilities(capability_id)"
+    )
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_capability_tags_name ON capability_tags(name)")
 
@@ -114,22 +122,39 @@ def create_schema(conn: sqlite3.Connection) -> None:
 
 
 def insert_tag(cursor: sqlite3.Cursor, name: str, table: str) -> int:
-    cursor.execute(f"SELECT id FROM {table} WHERE name = ?", (name,))
+    """Insert a tag into a known table and return its ID."""
+    if table == "tags":
+        select_sql = "SELECT id FROM tags WHERE name = ?"
+        insert_sql = "INSERT INTO tags (name) VALUES (?)"
+    elif table == "capability_tags":
+        select_sql = "SELECT id FROM capability_tags WHERE name = ?"
+        insert_sql = "INSERT INTO capability_tags (name) VALUES (?)"
+    else:
+        _fail(f"Unknown tag table: {table}")
+
+    cursor.execute(select_sql, (name,))
     row = cursor.fetchone()
     if row:
         return int(row[0])
-    cursor.execute(f"INSERT INTO {table} (name) VALUES (?)", (name,))
+    cursor.execute(insert_sql, (name,))
     return int(cursor.lastrowid)
 
 
 def migrate_data(conn: sqlite3.Connection, registry_data: dict, dry_run: bool = False) -> None:
+    """Load registry data into the SQLite database."""
     if dry_run:
         return
 
     cursor = conn.cursor()
 
     # Metadata
-    for key in ("schema_version", "protocol_version", "last_updated", "capabilities_registry", "constitution"):
+    for key in (
+        "schema_version",
+        "protocol_version",
+        "last_updated",
+        "capabilities_registry",
+        "constitution",
+    ):
         if key in registry_data:
             cursor.execute(
                 "INSERT OR REPLACE INTO registry_metadata (key, value) VALUES (?, ?)",
@@ -140,7 +165,15 @@ def migrate_data(conn: sqlite3.Connection, registry_data: dict, dry_run: bool = 
     for agent in agents:
         cursor.execute(
             """
-            INSERT OR REPLACE INTO agents (id, path, tier, version, activation, created_at, updated_at)
+            INSERT OR REPLACE INTO agents (
+                id,
+                path,
+                tier,
+                version,
+                activation,
+                created_at,
+                updated_at
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -172,6 +205,7 @@ def migrate_data(conn: sqlite3.Connection, registry_data: dict, dry_run: bool = 
 
 
 def create_query_views(conn: sqlite3.Connection) -> None:
+    """Create read-friendly views for tags and capabilities."""
     cursor = conn.cursor()
 
     cursor.execute(
@@ -218,6 +252,7 @@ def create_query_views(conn: sqlite3.Connection) -> None:
 
 
 def verify_migration(conn: sqlite3.Connection, registry_data: dict) -> bool:
+    """Confirm the database matches registry entries."""
     agents = registry_data.get("agents", []) or []
     expected_ids = {a.get("id") for a in agents}
 
@@ -233,14 +268,28 @@ def verify_migration(conn: sqlite3.Connection, registry_data: dict) -> bool:
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse CLI arguments."""
     parser = argparse.ArgumentParser(description="Migrate Euxis registry JSON to SQLite.")
-    parser.add_argument("--backup", action="store_true", help="Create backup of registry.json before migrating.")
-    parser.add_argument("--dry-run", action="store_true", help="Validate migration without writing a database.")
-    parser.add_argument("--force", action="store_true", help="Overwrite existing database without prompt.")
+    parser.add_argument(
+        "--backup",
+        action="store_true",
+        help="Create backup of registry.json before migrating.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate migration without writing a database.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing database without prompt.",
+    )
     return parser.parse_args(argv)
 
 
 def main() -> None:
+    """Run the migration workflow."""
     args = _parse_args(sys.argv[1:])
 
     if not REGISTRY_FILE.exists():
@@ -274,7 +323,7 @@ def main() -> None:
             create_query_views(conn)
             if not verify_migration(conn, registry_data):
                 _fail("Migration verification failed.")
-    except Exception as exc:  # pragma: no cover - safety net
+    except (OSError, sqlite3.Error, json.JSONDecodeError, ValueError) as exc:  # pragma: no cover
         if DB_FILE.exists():
             DB_FILE.unlink()
         _fail(f"Migration failed: {exc}")

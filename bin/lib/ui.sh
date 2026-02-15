@@ -34,6 +34,14 @@ _ui_reset() {
   fi
 }
 
+ui_cyan() {
+  _ui_color '36'
+}
+
+ui_reset() {
+  _ui_reset
+}
+
 _ui_spinner_char() {
   local chars=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
   local idx=$(( _EUXIS_UI_SPINNER_INDEX % 10 ))
@@ -70,6 +78,7 @@ ui_header() {
   cyan=$(_ui_color '36')
   reset=$(_ui_reset)
 
+  printf "\n"
   printf "%s┏━┛┃ ┃┃ ┃┛┏━┛%s\n" "$cyan" "$reset"
   printf "%s┏━┛┃ ┃ ┛ ┃━━┃%s\n" "$cyan" "$reset"
   printf "%s━━┛━━┛┛ ┛┛━━┛%s\n" "$cyan" "$reset"
@@ -123,7 +132,7 @@ ui_progress_begin() {
   spinner=$(_ui_spinner_char)
   local bar
   bar=$(_ui_progress_bar 0 "$total")
-  printf "\r%s %s  %s  %d/%d" "$spinner" "$label" "$bar" 0 "$total"
+  printf "\r\033[K%s %s  %s  %d/%d" "$spinner" "$label" "$bar" 0 "$total"
 }
 
 ui_progress_step() {
@@ -134,7 +143,7 @@ ui_progress_step() {
   spinner=$(_ui_spinner_char)
   local bar
   bar=$(_ui_progress_bar "$_EUXIS_UI_PROGRESS_CURRENT" "$_EUXIS_UI_PROGRESS_TOTAL")
-  printf "\r%s %s  %s  %d/%d" "$spinner" "$label" "$bar" "$_EUXIS_UI_PROGRESS_CURRENT" "$_EUXIS_UI_PROGRESS_TOTAL"
+  printf "\r\033[K%s %s  %s  %d/%d" "$spinner" "$label" "$bar" "$_EUXIS_UI_PROGRESS_CURRENT" "$_EUXIS_UI_PROGRESS_TOTAL"
 }
 
 ui_progress_done() {
@@ -142,7 +151,7 @@ ui_progress_done() {
   ui_enabled || return 0
   local bar
   bar=$(_ui_progress_bar "$_EUXIS_UI_PROGRESS_TOTAL" "$_EUXIS_UI_PROGRESS_TOTAL")
-  printf "\r✓ %s  %s  %d/%d\n" "$label" "$bar" "$_EUXIS_UI_PROGRESS_TOTAL" "$_EUXIS_UI_PROGRESS_TOTAL"
+  printf "\r\033[K✓ %s  %s  %d/%d\n" "$label" "$bar" "$_EUXIS_UI_PROGRESS_TOTAL" "$_EUXIS_UI_PROGRESS_TOTAL"
 }
 
 ui_task_ok() {

@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+
 from tui.core.registry import FleetRegistry
 
 
@@ -160,7 +162,7 @@ class TestFleetRegistryParseAgents(unittest.TestCase):
 
     def test_parse_agents_invalid_type(self):
         reg = FleetRegistry()
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             reg._parse_agents("not a dict")
 
     def test_parse_agents_empty(self):
@@ -211,7 +213,7 @@ class TestFleetRegistryParseSquads(unittest.TestCase):
 
     def test_parse_squads_invalid_type(self):
         reg = FleetRegistry()
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             reg._parse_squads([1, 2, 3])
 
     def test_parse_squads_no_combos(self):

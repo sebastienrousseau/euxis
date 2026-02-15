@@ -13,6 +13,7 @@ from textual.widgets import Static
 
 from tui.i18n import _
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -51,7 +52,6 @@ class AboutScreen(Screen[None]):
             with Center():
                 yield Static(EUXIS_LOGO, id="about-logo")
             yield Static(id="about-info")
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

@@ -14,6 +14,7 @@ from tui.core import EUXIS_HOME
 from tui.core.runner import get_project_name
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -41,7 +42,6 @@ class LogViewerScreen(Screen[None]):
             yield OptionList(id="log-list")
             yield OutputPanel(id="log-content")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

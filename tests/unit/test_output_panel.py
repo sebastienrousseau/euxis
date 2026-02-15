@@ -154,10 +154,7 @@ class TestOutputPanelHypothesis(unittest.TestCase):
     @given(line=st.text(max_size=500))
     def test_arbitrary_text_never_crashes(self, line):
         """write_line should never raise for any input string."""
-        try:
-            self.panel.write_line(line)
-        except Exception as exc:
-            self.fail(f"write_line raised {type(exc).__name__}: {exc}")
+        self.panel.write_line(line)
 
     @settings(max_examples=50)
     @given(
@@ -165,10 +162,7 @@ class TestOutputPanelHypothesis(unittest.TestCase):
         style=st.sampled_from(["cyan", "red", "green", "yellow", "dim", "bold"]),
     )
     def test_write_status_never_crashes(self, message, style):
-        try:
-            self.panel.write_status(message, style)
-        except Exception as exc:
-            self.fail(f"write_status raised {type(exc).__name__}: {exc}")
+        self.panel.write_status(message, style)
 
 
 if __name__ == "__main__":
