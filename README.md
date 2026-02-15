@@ -308,6 +308,12 @@ euxis-playbook run zero-to-one "Launch v2.0"
 
 ---
 
+## Why Euxis
+
+Raw model tools are powerful, but they’re single‑threaded. Euxis turns one prompt into a coordinated system: routing, verification, memory, and repeatable workflows. It’s how you scale beyond “ask and hope.”
+
+If you want Claude Code, Cursor, or Aider to stay sharp at scale, Euxis is the control plane.
+
 ## How It Works
 
 ```
@@ -399,17 +405,19 @@ Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--
 
 `accountant` · `animator` · `automaton` · `debugger` · `designer` · `gatekeeper` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `watchdog` · `writer`
 
-### On-Demand Agents (7)
+### On-Demand Agents (8)
 
 Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
 
-`ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
+`ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `deep-researcher` · `strategist`
 
 ### Specialist Agents (4)
 
 Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4--domain-specific-expertise)
 
 `cryptographer` · `ledger` · `conduit` · `custodian`
+
+**Count check:** 9 core + 21 default + 8 on‑demand + 4 specialist = **42**.
 
 ---
 
