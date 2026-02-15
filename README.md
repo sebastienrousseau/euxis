@@ -1,6 +1,7 @@
 # Euxis
 
 **41 AI specialists. Deploy in seconds.**
+Version 0.0.7
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]

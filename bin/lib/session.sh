@@ -7,7 +7,7 @@ set -euo pipefail
 
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-PROJECTS_DIR="${EUXIS_HOME}/data/projects"
+PROJECTS_DIR="${EUXIS_PROJECTS_DIR:-${EUXIS_HOME}/data/projects}"
 
 get_project_name() {
     if [[ -n "${EUXIS_PROJECT:-}" ]]; then
@@ -28,7 +28,17 @@ get_session_id() {
 ensure_project_dirs() {
     local project="$1"
     local agent="$2"
-    local agent_dir="${PROJECTS_DIR}/${project}/${agent}"
+    local base_dir="${PROJECTS_DIR}"
+
+    if [[ ! -d "${base_dir}" ]]; then
+        mkdir -p "${base_dir}" 2>/dev/null || true
+    fi
+    if [[ ! -w "${base_dir}" ]]; then
+        base_dir="${EUXIS_PROJECTS_DIR:-/tmp/euxis/projects}"
+        mkdir -p "${base_dir}" 2>/dev/null || true
+    fi
+
+    local agent_dir="${base_dir}/${project}/${agent}"
 
     mkdir -p "${agent_dir}/output"
 
