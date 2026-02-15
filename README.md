@@ -429,6 +429,10 @@ Modern TUI built on Python Textual.
 euxis-tui
 ```
 
+**TUI Demo:**
+
+[![Euxis TUI Demo](https://asciinema.org/a/04UwRbMM8mE8P90W.svg)](https://asciinema.org/a/04UwRbMM8mE8P90W)
+
 **Preview (text capture):**
 ```
 Euxis ETX • Fleet Dashboard
