@@ -314,6 +314,9 @@ Raw model tools are powerful, but they’re single‑threaded. Euxis turns one p
 
 If you want Claude Code, Cursor, or Aider to stay sharp at scale, Euxis is the control plane.
 
+Instead of four separate prompts, run one verified chain:
+`euxis-combo run protect "Audit auth and session security"`
+
 ## How It Works
 
 ```
@@ -407,7 +410,7 @@ Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--
 
 ### On-Demand Agents (8)
 
-Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
+Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-8-explicit-invocation-only)
 
 `ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `deep-researcher` · `strategist`
 
