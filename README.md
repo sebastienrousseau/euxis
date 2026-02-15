@@ -55,7 +55,31 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
-### 3. Verify Installation
+### 3. Configure a Provider
+
+Set one API key or run local with Ollama. This prevents first‑run auth errors.
+
+```bash
+# Claude
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Gemini
+export GOOGLE_API_KEY="AIza..."
+
+# OpenAI
+export OPENAI_API_KEY="sk-..."
+
+# Optional default
+export EUXIS_PROVIDER="claude"
+```
+
+Prefer local? No key needed:
+
+```bash
+ollama pull llama2
+```
+
+### 4. Verify Installation
 
 ```bash
 euxis-health
@@ -75,7 +99,7 @@ euxis-health
 Fleet Status: HEALTHY (8/8 checks passed)
 ```
 
-### 4. Run Your First Agent
+### 5. Run Your First Agent
 
 ```bash
 euxis architect "What makes a good REST API?"
@@ -318,7 +342,10 @@ euxis architect "Design the API" gemini
 
 ### Memory System
 
-The Cortex stores three types of knowledge:
+The Cortex is persistent, tri‑typed memory backed by a vector + graph hybrid.
+It stores to disk at `~/.euxis/data/cortex/db` and scales with your history.
+Use it to lock in wins, avoid repeat failures, and share team patterns.
+Learn more in [Memory](docs/essentials/core-concepts/memory.md).
 
 | Type | What It Stores | Example |
 |------|----------------|---------|
@@ -394,6 +421,17 @@ Modern TUI built on Python Textual.
 euxis-tui
 ```
 
+**Preview (text capture):**
+```
+Euxis ETX • Fleet Dashboard
+────────────────────────────────────────────
+✓ orchestrator   ✓ architect    ✓ reviewer
+✓ debugger       ✓ tester       ✓ pentester
+✓ inspector      ✓ auditor      ✓ sentinel
+────────────────────────────────────────────
+Focus: quality • Active: 8 • Cortex: 214 memories
+```
+
 **Features:**
 - Fleet dashboard with all 42 agents
 - Command palette (`Ctrl+K`)
@@ -415,6 +453,27 @@ euxis-tui
 
 ---
 
+## Validation
+
+Run the same benchmarks we use in CI.
+
+```bash
+euxis-bench
+```
+
+Benchmarks and baselines live in `docs/benchmarks/`.
+
+## Contributing
+
+Open a pull request, file an issue, or propose a new agent.  
+Start with `CONTRIBUTING.md`. Security issues belong in `SECURITY.md`.  
+Issues and feature requests live at [GitHub Issues](https://github.com/sebastienrousseau/euxis/issues).
+
+## Changelog and Migration
+
+Track changes in `CHANGELOG.md`.  
+Upgrade guidance lives in `docs/guides/migration-guide.md`.
+
 ## Learn More
 
 | Guide | What You'll Learn |
@@ -426,6 +485,8 @@ euxis-tui
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
 | [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |
+| [Changelog](CHANGELOG.md) | What changed in each release |
+| [Migration Guide](docs/guides/migration-guide.md) | Upgrade steps across versions |
 
 ---
 
@@ -505,7 +566,7 @@ ollama pull llama2
 
 ## License
 
-Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
+Apache-2.0 © 2026 Sebastien Rousseau.
 
 ---
 
@@ -519,13 +580,13 @@ Engineered with Euxis — Enterprise Unified Execution Intelligence System — h
 [version-badge]: https://img.shields.io/badge/version-0.0.7-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
 
-[license-badge]: https://img.shields.io/badge/license-proprietary-green?style=for-the-badge
+[license-badge]: https://img.shields.io/badge/license-Apache%202.0-green?style=for-the-badge
 [license-url]: https://github.com/sebastienrousseau/euxis/blob/main/LICENSE
 
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-41-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-42-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/guides/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli
