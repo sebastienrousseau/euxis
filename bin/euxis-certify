@@ -326,14 +326,36 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
     fi
     echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s) with ${SEMANTIC_PROVIDER}..."
 
-    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." "${SEMANTIC_PROVIDER}" > "${resp_file}" 2>/dev/null; then
-        RESP=$(cat "${resp_file}" 2>/dev/null || echo "")
+    start_ts=$(date +%s 2>/dev/null || echo "")
+    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." "${SEMANTIC_PROVIDER}" > "${resp_file}" 2>&1; then
+        RESP_LOG=$(cat "${resp_file}" 2>/dev/null || echo "")
+        OUTPUT_PATH=$(printf "%s\n" "$RESP_LOG" | grep -Eo "Output: .*" | tail -n1 | sed "s/.*Output: //")
+        if [[ -n "$OUTPUT_PATH" && -f "$OUTPUT_PATH" ]]; then
+            RESP=$(cat "${OUTPUT_PATH}" 2>/dev/null || echo "")
+        else
+            RESP="$RESP_LOG"
+        fi
         EXIT_CODE=0
     else
         RESP=""
         EXIT_CODE=$?
     fi
     rm -f "${resp_file}"
+
+    if [[ -z "$RESP" ]]; then
+        output_dir="$EUXIS_HOME/data/projects/.euxis/architect/output"
+        if [[ -d "$output_dir" ]]; then
+            if [[ -n "$start_ts" ]]; then
+                latest_output=$(find "$output_dir" -type f -name "*.md" -newermt "@$start_ts" 2>/dev/null | sort -r | head -n1)
+            fi
+            if [[ -z "${latest_output:-}" ]]; then
+                latest_output=$(ls -t "$output_dir"/*.md 2>/dev/null | head -n1)
+            fi
+            if [[ -n "${latest_output:-}" && -f "$latest_output" ]]; then
+                RESP=$(cat "$latest_output" 2>/dev/null || echo "")
+            fi
+        fi
+    fi
 
     if [[ $EXIT_CODE -eq 124 ]]; then
         echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
