@@ -135,7 +135,15 @@ EUXIS_LIFECYCLE_DIR="${EUXIS_HOME}/data/lifecycle"
 
 # Initialize lifecycle tracking directory
 _lifecycle_init() {
-    [[ -d "${EUXIS_LIFECYCLE_DIR}" ]] || mkdir -p "${EUXIS_LIFECYCLE_DIR}"
+    if [[ ! -d "${EUXIS_LIFECYCLE_DIR}" ]]; then
+        mkdir -p "${EUXIS_LIFECYCLE_DIR}" 2>/dev/null || true
+    fi
+    if ! touch "${EUXIS_LIFECYCLE_DIR}/.write-test" 2>/dev/null; then
+        EUXIS_LIFECYCLE_DIR="/tmp/euxis/lifecycle"
+        mkdir -p "${EUXIS_LIFECYCLE_DIR}" 2>/dev/null || true
+    else
+        rm -f "${EUXIS_LIFECYCLE_DIR}/.write-test" 2>/dev/null || true
+    fi
 }
 
 # Record agent state transition

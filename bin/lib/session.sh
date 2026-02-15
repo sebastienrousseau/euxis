@@ -40,7 +40,12 @@ ensure_project_dirs() {
 
     local agent_dir="${base_dir}/${project}/${agent}"
 
-    mkdir -p "${agent_dir}/output"
+    if ! mkdir -p "${agent_dir}/output" 2>/dev/null; then
+        base_dir="${EUXIS_PROJECTS_DIR:-/tmp/euxis/projects}"
+        mkdir -p "${base_dir}" 2>/dev/null || true
+        agent_dir="${base_dir}/${project}/${agent}"
+        mkdir -p "${agent_dir}/output"
+    fi
 
     # Initialize files if they don't exist
     [[ -f "${agent_dir}/audit.md" ]] || echo "# Audit Log: ${agent}" > "${agent_dir}/audit.md"

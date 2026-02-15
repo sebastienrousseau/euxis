@@ -198,6 +198,26 @@ run_claude() {
 run_gemini() {
     local full_prompt="$1"
     if command -v gemini &>/dev/null; then
+        local gemini_home gemini_config
+        gemini_home="${EUXIS_GEMINI_HOME:-/tmp/euxis-gemini-home}"
+        gemini_config="${gemini_home}/.gemini"
+
+        if [[ ! -d "${gemini_config}" ]]; then
+            umask 077
+            mkdir -p "${gemini_config}/tmp" "${gemini_config}/policies"
+            if [[ -d "${HOME}/.gemini" ]]; then
+                cp -a "${HOME}/.gemini/oauth_creds.json" "${gemini_config}/" 2>/dev/null || true
+                cp -a "${HOME}/.gemini/google_accounts.json" "${gemini_config}/" 2>/dev/null || true
+                cp -a "${HOME}/.gemini/settings.json" "${gemini_config}/" 2>/dev/null || true
+                cp -a "${HOME}/.gemini/state.json" "${gemini_config}/" 2>/dev/null || true
+                cp -a "${HOME}/.gemini/installation_id" "${gemini_config}/" 2>/dev/null || true
+                cp -a "${HOME}/.gemini/trustedFolders.json" "${gemini_config}/" 2>/dev/null || true
+                if [[ -d "${HOME}/.gemini/policies" ]]; then
+                    cp -a "${HOME}/.gemini/policies/." "${gemini_config}/policies/" 2>/dev/null || true
+                fi
+            fi
+        fi
+
         local guard
         guard="IMPORTANT: This is plain-text mode. Do not call tools or output ACTION/OBSERVATION steps. Respond only with the final answer in the required Output Format."
         local err_file old_umask
@@ -205,10 +225,14 @@ run_gemini() {
         umask 077
         err_file=$(mktemp "${TMPDIR:-/tmp}/euxis_gemini_err.XXXXXX" 2>/dev/null) || { umask "${old_umask}"; echo "[euxis] Error: failed to create temp file" >&2; return 1; }
         umask "${old_umask}"
-        local out
+        local out prompt
+        prompt=$(printf '%s\n\n%s' "${guard}" "${full_prompt}")
         # shellcheck disable=SC2086
-        out=$(printf '%s\n\n%s' "${guard}" "${full_prompt}" | NODE_OPTIONS="--no-deprecation" \
-            gemini ${PROVIDER_FLAGS} --output-format text -p "" 2> "${err_file}")
+        if command -v mise &>/dev/null; then
+            out=$(HOME="${gemini_home}" NODE_OPTIONS="--no-deprecation" mise exec -- gemini ${PROVIDER_FLAGS} --output-format text -p "${prompt}" 2> "${err_file}")
+        else
+            out=$(HOME="${gemini_home}" NODE_OPTIONS="--no-deprecation" gemini ${PROVIDER_FLAGS} --output-format text -p "${prompt}" 2> "${err_file}")
+        fi
         local rc=$?
         if [[ -s "${err_file}" ]]; then
             grep -vE '^(Error executing tool|Tool execution denied by policy|Tool ".*" not found in registry|Loaded cached credentials|Hook registry initialized|\\(node:.*\\) \\[DEP0040\\])' "${err_file}" >&2 || true
