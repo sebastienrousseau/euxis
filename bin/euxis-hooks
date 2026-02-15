@@ -30,7 +30,7 @@ Usage:
   euxis-hooks check-pr [PR_NUMBER]
 
 Commands:
-  install     Symlink Euxis hooks into .git/hooks/
+  install     Symlink Euxis hooks into .git/hooks/ (includes PR signature enforcement on push)
   uninstall   Remove Euxis hook symlinks from .git/hooks/
   status      Show which Euxis hooks are installed
   pr          Create a PR with branding signature auto-appended
