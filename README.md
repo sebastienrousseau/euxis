@@ -504,6 +504,7 @@ Upgrade guidance lives in `docs/guides/migration-guide.md`.
 | [Gateway Quickstart](docs/reference/gateway-quickstart.md) | Minimal WebSocket walkthrough |
 | [Gateway Auth](docs/reference/gateway-auth.md) | Token authentication guide |
 | [Gateway Config](docs/reference/gateway-config.md) | Configuration keys and defaults |
+| [Gateway CLI](docs/reference/gateway-cli.md) | `euxis-gateway` command reference |
 | [Changelog](CHANGELOG.md) | What changed in each release |
 | [Migration Guide](docs/guides/migration-guide.md) | Upgrade steps across versions |
 

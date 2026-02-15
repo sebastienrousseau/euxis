@@ -289,6 +289,12 @@ nav:
     - API Reference: reference/api-reference.md
     - CLI Reference: reference/cli-reference.md
     - Library Architecture: reference/lib-architecture.md
+    - Gateway Protocol: reference/gateway.md
+    - Gateway CLI: reference/gateway-cli.md
+    - Gateway Quickstart: reference/gateway-quickstart.md
+    - Gateway Auth: reference/gateway-auth.md
+    - Gateway Config: reference/gateway-config.md
+    - Gateway Adapters: reference/gateway-adapters.md
     - Architecture Decisions:
       - Intelligence Tiering: reference/architecture-decisions/001-intelligence-tiering.md
       - Tiered Memory: reference/architecture-decisions/002-tiered-memory-architecture.md

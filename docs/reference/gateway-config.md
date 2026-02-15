@@ -26,6 +26,13 @@ Reference for the Gateway configuration file.
 
 **File location (proposed):** `~/.euxis/config/gateway.json`
 
+## Config Loading Order (v0.1)
+
+1. `--config <path>` CLI override
+2. `EUXIS_GATEWAY_CONFIG` environment override
+3. Default: `~/.euxis/config/gateway.json`
+4. Built-in defaults if file is missing
+
 ### `gateway`
 
 - `bind` (string): interface to bind. Default: `127.0.0.1`

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gateway auth and config references
 - Gateway JSON Schemas for request/response/event frames
 - Gateway protocol validation harness
+- Gateway CLI reference and adapter design notes
 
 ---
 

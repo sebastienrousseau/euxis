@@ -360,6 +360,12 @@ euxis-audit-run
 # Sync documentation (with approval)
 euxis-sync-docs
 
+# Start the gateway (local)
+euxis-gateway run
+
+# Check gateway status
+euxis-gateway status
+
 # Deploy a squad
 euxis-squad deploy build "Fix auth module"
 

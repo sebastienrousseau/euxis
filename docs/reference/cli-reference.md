@@ -8,6 +8,7 @@ Complete reference for all Euxis command-line tools.
 ### Core System
 - [euxis](#euxis) - Main Euxis CLI entry point
 - [euxis-daemon](#euxis-daemon) - Background daemon management
+- [euxis-gateway](#euxis-gateway) - Gateway control plane
 - [euxis-health](#euxis-health) - System health monitoring
 - [euxis-verify](#euxis-verify) - Single verification runner
 - [euxis-verify-all](#euxis-verify-all) - Comprehensive verification
@@ -101,6 +102,36 @@ euxis-daemon status
 
 ---
 
+### euxis-gateway
+
+**Synopsis:** `euxis-gateway <command> [options]`
+
+**Description:**
+Runs and manages the Gateway control plane for channels, sessions, and WebSocket clients.
+
+**Commands:**
+- `run` - Start the Gateway
+- `status` - Show Gateway status
+- `config` - Print resolved Gateway configuration
+- `sessions` - List active sessions
+
+**Options:**
+- `--bind <addr>` - Bind address (default: `127.0.0.1`)
+- `--port <port>` - Bind port (default: `18789`)
+- `--config <path>` - Path to gateway config (default: `~/.euxis/config/gateway.json`)
+- `--auth-mode <token|password>` - Override auth mode
+
+**Examples:**
+```bash
+euxis-gateway run
+euxis-gateway run --bind 0.0.0.0 --port 18789
+euxis-gateway status
+euxis-gateway config
+```
+
+**See Also:** [Gateway Protocol](gateway.md), [Gateway Config](gateway-config.md)
+
+---
 ### euxis-health
 
 **Synopsis:** `euxis-health [check|monitor|report]`
@@ -718,6 +749,10 @@ euxis-deploy production --confirm
 
 **Description:**
 Documentation synchronization across repositories and environments.
+
+**Docs Tooling Note:**
+Gateway schemas can be validated with `scripts/gateway_protocol_test.py`.
+Optional dependencies live in `requirements-dev.txt` (`jsonschema`, `referencing`).
 
 **Examples:**
 ```bash
