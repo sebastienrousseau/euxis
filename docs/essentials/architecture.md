@@ -12,6 +12,18 @@ Comprehensive architectural documentation for the Euxis multi-provider AI agent 
 
 The Euxis framework is organized into five distinct layers, each with specific responsibilities. The CLI layer provides the user interface, shell libraries handle core logic, the optional Python TUI offers rich visualization, the data layer manages persistence, and the provider layer abstracts AI model interactions.
 
+## Gateway Control Plane (v0.1)
+
+Euxis introduces a minimal Gateway control plane to front agent execution with a WebSocket surface and health endpoint. The Gateway is a thin runtime that delegates execution to existing Euxis CLI entry points.
+
+**Responsibilities:**
+- Accept WebSocket connections and validate auth headers.
+- Provide a health endpoint for liveness checks.
+- Route inbound frames to `euxis-dispatch` or `euxis-squad` (future).
+
+**Entry Point:**
+- `euxis-gateway run` (see `docs/reference/gateway-cli.md`)
+
 ```mermaid
 flowchart TB
     subgraph CLI["CLI Layer"]

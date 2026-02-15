@@ -1,0 +1,17 @@
+{
+  "gateway": {
+    "bind": "127.0.0.1",
+    "port": 18789,
+    "health_enabled": true,
+    "health_path": "/health",
+    "auth": {
+      "mode": "token",
+      "token": {
+        "value": "replace-with-secure-random-value"
+      },
+      "password": {
+        "value": ""
+      }
+    }
+  }
+}

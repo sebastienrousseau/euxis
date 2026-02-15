@@ -27,6 +27,23 @@ Each adapter exposes a minimal interface:
 - Bot token via OAuth (recommended for workspace installs).
 - Support Socket Mode for environments without inbound HTTP.
 
+### Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+    participant Slack
+    participant Adapter
+    participant Gateway
+    participant Agent
+
+    Slack->>Adapter: event (message)
+    Adapter->>Gateway: chat.send (session_id)
+    Gateway->>Agent: dispatch
+    Agent-->>Gateway: response stream
+    Gateway-->>Adapter: agent event
+    Adapter-->>Slack: postMessage (thread_ts)
+```
+
 ### Inbound Mapping
 
 - `event.user` + `event.channel` -> `session_id`
@@ -49,6 +66,23 @@ Each adapter exposes a minimal interface:
 
 - Bot token via BotFather.
 - Webhook mode preferred; long polling fallback.
+
+### Flow (Mermaid)
+
+```mermaid
+sequenceDiagram
+    participant Telegram
+    participant Adapter
+    participant Gateway
+    participant Agent
+
+    Telegram->>Adapter: update (message)
+    Adapter->>Gateway: chat.send (session_id)
+    Gateway->>Agent: dispatch
+    Agent-->>Gateway: response stream
+    Gateway-->>Adapter: agent event
+    Adapter-->>Telegram: sendMessage (message_thread_id)
+```
 
 ### Inbound Mapping
 

@@ -187,6 +187,14 @@ Optional validator deps:
 pip install jsonschema referencing
 ```
 
+## Smoke Test
+
+Run a health check against a running gateway:
+
+```bash
+python3 scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health
+```
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash

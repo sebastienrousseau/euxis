@@ -43,6 +43,7 @@ Commands:
     bench                    Performance benchmarking
     kaizen                   Continuous self-improvement cycle
     daemon [interval]        Periodic kaizen with fail-safe
+    gateway <cmd> [args]     Gateway control plane
     optimize                 System-wide tune-up
     sync-docs                Documentation sync with approval gate
     deploy                   Docker Compose enterprise deployment
