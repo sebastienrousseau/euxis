@@ -235,6 +235,36 @@ FINAL ANSWER:
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
+- Gateway settings (optional): `~/.euxis/config/gateway.json`
+
+Minimal gateway config example:
+
+```json
+{
+  "gateway": {
+    "bind": "127.0.0.1",
+    "port": 18789,
+    "health_enabled": true,
+    "health_path": "/health",
+    "auth": {
+      "mode": "token",
+      "token": {
+        "value": "replace-with-secure-random-value"
+      }
+    }
+  }
+}
+```
+
+Token guidance:
+
+```bash
+openssl rand -hex 32
+```
+
+Store tokens in environment variables or a secrets manager. Avoid committing them to git.
+
+See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md`.
 
 ### 3. Knowledge Storage (data/)
 - Cortex: Semantic memory with vector search

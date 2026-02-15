@@ -500,6 +500,10 @@ Upgrade guidance lives in `docs/guides/migration-guide.md`.
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
 | [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |
+| [Gateway Protocol](docs/reference/gateway.md) | WebSocket control plane reference |
+| [Gateway Quickstart](docs/reference/gateway-quickstart.md) | Minimal WebSocket walkthrough |
+| [Gateway Auth](docs/reference/gateway-auth.md) | Token authentication guide |
+| [Gateway Config](docs/reference/gateway-config.md) | Configuration keys and defaults |
 | [Changelog](CHANGELOG.md) | What changed in each release |
 | [Migration Guide](docs/guides/migration-guide.md) | Upgrade steps across versions |
 
