@@ -6,9 +6,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
-  # shellcheck source=bin/lib/ui.sh
-  source "${EUXIS_HOME}/bin/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -40,8 +40,8 @@ BIN_DIR="$EUXIS_HOME/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
 
 # Source validation library for fail-fast gates
-# shellcheck source=bin/lib/validation.sh
-source "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null || {
+# shellcheck source=core/lib/validation.sh
+source "$EUXIS_HOME/core/lib/validation.sh" 2>/dev/null || {
     echo "FATAL: Cannot load validation library. Certification cannot proceed." >&2
     exit 1
 }
@@ -170,7 +170,7 @@ else
 fi
 
 # SEC-2: Model name validation exists in providers.sh
-if grep -q '_validate_model_name' "$EUXIS_HOME/bin/lib/providers.sh" 2>/dev/null; then
+if grep -q '_validate_model_name' "$EUXIS_HOME/core/lib/providers.sh" 2>/dev/null; then
     echo "  PASS: Provider model name validation present"
 else
     echo "  FAIL: providers.sh missing _validate_model_name() (env var injection risk)"
@@ -178,7 +178,7 @@ else
 fi
 
 # SEC-3: Task input sanitization in dispatch.sh
-if grep -q 'sanitize_task_input' "$EUXIS_HOME/bin/lib/dispatch.sh" 2>/dev/null; then
+if grep -q 'sanitize_task_input' "$EUXIS_HOME/core/lib/dispatch.sh" 2>/dev/null; then
     echo "  PASS: Task input sanitization in dispatch pipeline"
 else
     echo "  FAIL: dispatch.sh missing sanitize_task_input (goal hijacking risk)"
@@ -186,7 +186,7 @@ else
 fi
 
 # SEC-4: PII sanitization in logging
-if grep -q '_sanitize_pii' "$EUXIS_HOME/bin/lib/common.sh" 2>/dev/null; then
+if grep -q '_sanitize_pii' "$EUXIS_HOME/core/lib/common.sh" 2>/dev/null; then
     echo "  PASS: PII sanitization in logging functions"
 else
     echo "  FAIL: common.sh logging lacks PII sanitization"
@@ -202,7 +202,7 @@ else
 fi
 
 # SEC-6: Prompt injection detection in validation.sh
-if grep -q 'injection_patterns' "$EUXIS_HOME/bin/lib/validation.sh" 2>/dev/null; then
+if grep -q 'injection_patterns' "$EUXIS_HOME/core/lib/validation.sh" 2>/dev/null; then
     echo "  PASS: Prompt injection detection in task validation"
 else
     echo "  FAIL: validation.sh missing prompt injection detection"

@@ -71,9 +71,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
-  # shellcheck source=bin/lib/ui.sh
-  source "${EUXIS_HOME}/bin/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
   ui_auto_header_args "${1:-}"
   if ui_is_subcommand "${1:-}"; then
     export EUXIS_UI_SUPPRESS=1
@@ -88,16 +88,16 @@ fi
 EUXIS_HOME="${HOME}/.euxis"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 PROJECTS_DIR="${EUXIS_HOME}/data/projects"
-source "${EUXIS_HOME}/bin/lib/common.sh"
-source "${EUXIS_HOME}/bin/lib/providers.sh"
-source "${EUXIS_HOME}/bin/lib/agents.sh"
-source "${EUXIS_HOME}/bin/lib/memory.sh"
-source "${EUXIS_HOME}/bin/lib/session.sh"
-source "${EUXIS_HOME}/bin/lib/template.sh"
-source "${EUXIS_HOME}/bin/lib/skill-detector.sh"
-source "${EUXIS_HOME}/bin/lib/prompt.sh"
-source "${EUXIS_HOME}/bin/lib/cli.sh"
-source "${EUXIS_HOME}/bin/lib/dispatch.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/providers.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/session.sh"
+source "${EUXIS_HOME}/core/lib/template.sh"
+source "${EUXIS_HOME}/core/lib/skill-detector.sh"
+source "${EUXIS_HOME}/core/lib/prompt.sh"
+source "${EUXIS_HOME}/core/lib/cli.sh"
+source "${EUXIS_HOME}/core/lib/dispatch.sh"
 
 # Fast boot health check (moved to cli.sh)
 check_health_fast
@@ -125,7 +125,7 @@ EUXIS_BIN="${EUXIS_HOME}/bin"
 # Check for help flags before dispatch
 case "${1:-}" in
   -h | --help | help)
-    source "${EUXIS_HOME}/bin/lib/cli.sh"
+    source "${EUXIS_HOME}/core/lib/cli.sh"
     usage
     ;;
   --version)

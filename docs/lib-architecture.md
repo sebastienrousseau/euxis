@@ -1,8 +1,8 @@
-# Euxis Library Architecture (`bin/lib/`)
+# Euxis Library Architecture (`core/lib/`)
 
 ## Overview
 
-Euxis v0.0.8 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `bin/lib/`. The main script (`bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
+Euxis v0.0.8 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `core/lib/`. The main script (`bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
 
 ## Modules
 
@@ -20,7 +20,7 @@ Euxis v0.0.8 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused l
 ## Code Metrics
 
 The framework core consists of:
-- **8 library modules** in `bin/lib/` (~870 LOC)
+- **8 library modules** in `core/lib/` (~870 LOC)
 - **1 main entry point** `bin/euxis.sh` (~400 LOC)
 - **20+ CLI tools** in `bin/` (dispatch, loop, council, bench, lint, etc.)
 - **6 test files** in `tests/` (E2E, concurrency, integration)
@@ -65,7 +65,7 @@ euxis.sh
 Internal dependencies are resolved via `EUXIS_HOME`:
 
 ```bash
-source "${EUXIS_HOME}/bin/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
 ```
 
 ## How euxis.sh Sources Libraries
@@ -73,8 +73,8 @@ source "${EUXIS_HOME}/bin/lib/common.sh"
 ```bash
 EUXIS_HOME="${HOME}/.euxis"
 
-source "${EUXIS_HOME}/bin/lib/common.sh"
-source "${EUXIS_HOME}/bin/lib/providers.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/providers.sh"
 # ... etc
 ```
 
@@ -84,7 +84,7 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
 
 ### Adding a New Library Module
 
-1. Create `bin/lib/<name>.sh` with the guard pattern:
+1. Create `core/lib/<name>.sh` with the guard pattern:
    ```bash
    #!/usr/bin/env bash
    [[ -n "${_EUXIS_LIB_<NAME>:-}" ]] && return; _EUXIS_LIB_<NAME>=1
@@ -93,12 +93,12 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
 
 2. Source any dependencies at the top:
    ```bash
-   source "${EUXIS_HOME}/bin/lib/common.sh"
+   source "${EUXIS_HOME}/core/lib/common.sh"
    ```
 
 3. Add a `source` line in `bin/euxis.sh` (after existing sources).
 
-4. Set permissions: `chmod 755 bin/lib/<name>.sh`
+4. Set permissions: `chmod 755 core/lib/<name>.sh`
 
 5. Run `bash -n bin/euxis.sh` to verify syntax.
 

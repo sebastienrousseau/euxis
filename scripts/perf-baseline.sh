@@ -96,11 +96,11 @@ record_metric "tui_startup" "$tui_ms" 800 1500 3000
 echo "  Testing shell library loading..."
 start_time=$(perf_timer_start)
 bash -c "
-source '$EUXIS_HOME/bin/lib/common.sh'
-source '$EUXIS_HOME/bin/lib/providers.sh'
-source '$EUXIS_HOME/bin/lib/agents.sh'
-source '$EUXIS_HOME/bin/lib/memory.sh'
-source '$EUXIS_HOME/bin/lib/session.sh'
+source '$EUXIS_HOME/core/lib/common.sh'
+source '$EUXIS_HOME/core/lib/providers.sh'
+source '$EUXIS_HOME/core/lib/agents.sh'
+source '$EUXIS_HOME/core/lib/memory.sh'
+source '$EUXIS_HOME/core/lib/session.sh'
 " 2>/dev/null || true
 elapsed=$(perf_timer_elapsed_ms "$start_time")
 record_metric "shell_lib_loading" "$elapsed" 100 500 1000

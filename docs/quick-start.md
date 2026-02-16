@@ -228,7 +228,7 @@ FINAL ANSWER:
 
 ### 1. Agent Execution (bin/)
 - 38 executable tools for agent deployment
-- Shell libraries in bin/lib/ for shared functionality
+- Shell libraries in core/lib/ for shared functionality
 - Entry point: `euxis` command
 
 ### 2. Configuration (config/)

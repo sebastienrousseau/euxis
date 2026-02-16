@@ -9,7 +9,7 @@
 set -euo pipefail
 
 # Source validation library for security checks
-source "${EUXIS_HOME}/bin/lib/validation.sh"
+source "${EUXIS_HOME}/core/lib/validation.sh"
 
 # ============================================================================
 # Usage Information

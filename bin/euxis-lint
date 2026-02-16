@@ -6,9 +6,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
-  # shellcheck source=bin/lib/ui.sh
-  source "${EUXIS_HOME}/bin/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -357,7 +357,7 @@ echo "[8/8] Checking Module Dependencies..."
 DEP_FAILURES=0
 
 # Verify no circular sourcing in lib files
-LIB_DIR="$EUXIS_HOME/bin/lib"
+LIB_DIR="$EUXIS_HOME/core/lib"
 if [[ -d "$LIB_DIR" ]]; then
     for lib_file in "$LIB_DIR"/*.sh; do
         [[ -f "$lib_file" ]] || continue

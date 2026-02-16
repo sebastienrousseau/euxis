@@ -341,7 +341,7 @@ chmod +x ~/.euxis/bin/*
 # Fix directory permissions
 chmod 755 ~/.euxis
 chmod 755 ~/.euxis/bin
-chmod 755 ~/.euxis/bin/lib
+chmod 755 ~/.euxis/core/lib
 
 # Verify
 ls -la ~/.euxis/bin/euxis
@@ -630,7 +630,7 @@ tail -20 ~/.euxis/data/lifecycle/transitions.jsonl
 1. **Clean stale agents (30 minute timeout):**
    ```bash
    # Manual cleanup via the agents library
-   source ~/.euxis/bin/lib/agents.sh
+   source ~/.euxis/core/lib/agents.sh
    cleanup_stale_agents 1800  # 30 minutes
    ```
 
@@ -783,7 +783,7 @@ wc -l ~/.euxis/data/projects/*/*/memory.md
 
 1. **Run manual pruning:**
    ```bash
-   source ~/.euxis/bin/lib/memory.sh
+   source ~/.euxis/core/lib/memory.sh
 
    # Prune specific memory file
    prune_memory ~/.euxis/data/projects/myproject/architect/memory.md
@@ -827,7 +827,7 @@ Semantic drift occurs when new memories contradict existing knowledge. This is a
 
 2. **Manually resolve:**
    ```bash
-   source ~/.euxis/bin/lib/memory.sh
+   source ~/.euxis/core/lib/memory.sh
 
    # Supersede old knowledge with new
    resolve_memory_contradiction \

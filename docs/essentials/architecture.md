@@ -37,7 +37,7 @@ flowchart TB
         loop[euxis-loop]
     end
 
-    subgraph ShellLib["Shell Libraries (bin/lib/)"]
+    subgraph ShellLib["Shell Libraries (core/lib/)"]
         direction LR
         cli_sh[cli.sh<br/>Argument Parsing]
         dispatch_sh[dispatch.sh<br/>Command Routing]
