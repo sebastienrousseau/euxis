@@ -25,8 +25,8 @@ The framework core consists of:
 - **20+ CLI tools** in `bin/` (dispatch, loop, council, bench, lint, etc.)
 - **6 test files** in `tests/` (E2E, concurrency, integration)
 - **11 validation patterns** in `config/patterns/`
-- **35 agent prompts** in `prompts/core/` and `prompts/fleet/`
-- **11 protocol files** in `prompts/protocols/`
+- **35 agent prompts** in `agents/prompts/core/` and `agents/prompts/fleet/`
+- **11 protocol files** in `agents/prompts/protocols/`
 - **6 templates** in `config/templates/`
 - **6 ADRs** in `docs/adr/`
 

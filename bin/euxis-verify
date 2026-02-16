@@ -78,7 +78,7 @@ fi
 
 # 5. Documentation Drift
 echo -n "   [5/5] Checking Documentation...   "
-NEWEST_PROMPT=$(find "${EUXIS_HOME}/prompts" -name "*.txt" -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n 1)
+NEWEST_PROMPT=$(find "${EUXIS_HOME}/agents/prompts" -name "*.txt" -print0 2>/dev/null | xargs -0 ls -t 2>/dev/null | head -n 1)
 DOC_FILE="${EUXIS_HOME}/docs/user-guide.md"
 
 if [[ ! -f "$DOC_FILE" ]]; then

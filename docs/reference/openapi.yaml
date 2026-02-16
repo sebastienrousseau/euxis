@@ -707,7 +707,7 @@ components:
         path:
           type: string
           description: Path to agent prompt file
-          example: prompts/fleet/debugger.txt
+          example: agents/prompts/fleet/debugger.txt
         tier:
           type: string
           enum: [core, fleet]

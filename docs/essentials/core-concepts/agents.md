@@ -147,7 +147,7 @@ unregister_agent_plugin "my-specialist"
 
 ### Fleet Agent
 
-For permanent fleet addition, place prompt in `~/.euxis/prompts/fleet/<agent-id>.txt` and update the registry.
+For permanent fleet addition, place prompt in `~/.euxis/agents/prompts/fleet/<agent-id>.txt` and update the registry.
 
 ## Authority Model
 

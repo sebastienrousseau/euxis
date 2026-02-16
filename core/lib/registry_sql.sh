@@ -7,7 +7,7 @@ set -euo pipefail
 
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-REGISTRY_DB="${EUXIS_HOME}/registry.db"
+REGISTRY_DB="${EUXIS_HOME}/agents/registry.db"
 
 # Connection pool directory for named pipes
 REGISTRY_POOL_DIR="${EUXIS_HOME}/data/registry_pool"
@@ -370,7 +370,7 @@ registry_health_sql() {
     # Check data consistency
     local agent_count file_count
     agent_count=$(registry_query "SELECT COUNT(*) FROM agents")
-    file_count=$(find "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet" -name "*.txt" 2>/dev/null | grep -v "/_" | wc -l | tr -d ' ')
+    file_count=$(find "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet" -name "*.txt" 2>/dev/null | grep -v "/_" | wc -l | tr -d ' ')
 
     if [[ "${agent_count}" -ne "${file_count}" ]]; then
         echo "⚠️  Agent count mismatch: DB=${agent_count}, Files=${file_count}"
@@ -439,7 +439,7 @@ _registry_auto_rebuild() {
     }
 
     # Check if JSON is newer than database
-    if [[ "${EUXIS_HOME}/registry.json" -nt "${REGISTRY_DB}" ]]; then
+    if [[ "${EUXIS_HOME}/agents/registry.json" -nt "${REGISTRY_DB}" ]]; then
         log_warn "Registry JSON is newer than database, auto-rebuilding..."
         registry_rebuild
         return $?
@@ -454,8 +454,8 @@ registry_get_version() {
     if [[ -f "${REGISTRY_DB}" ]]; then
         sqlite3 -init /dev/null "${REGISTRY_DB}" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null && return
     fi
-    if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
-        jq -r '.protocol_version // .version' "${EUXIS_HOME}/registry.json" 2>/dev/null && return
+    if [[ -f "${EUXIS_HOME}/agents/registry.json" ]] && command -v jq &>/dev/null; then
+        jq -r '.protocol_version // .version' "${EUXIS_HOME}/agents/registry.json" 2>/dev/null && return
     fi
     echo "0.0.8"
 }
@@ -465,8 +465,8 @@ registry_agent_exists() {
     if [[ -f "${REGISTRY_DB}" ]]; then
         [[ -n "$(registry_query "SELECT 1 FROM agents WHERE id = ?" "${agent}" 2>/dev/null)" ]] && return 0
     fi
-    if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
-        jq -e --arg id "${agent}" '.agents[] | select(.id == $id)' "${EUXIS_HOME}/registry.json" &>/dev/null && return 0
+    if [[ -f "${EUXIS_HOME}/agents/registry.json" ]] && command -v jq &>/dev/null; then
+        jq -e --arg id "${agent}" '.agents[] | select(.id == $id)' "${EUXIS_HOME}/agents/registry.json" &>/dev/null && return 0
     fi
     return 1
 }
@@ -475,8 +475,8 @@ registry_list_agent_ids() {
     if [[ -f "${REGISTRY_DB}" ]]; then
         sqlite3 -init /dev/null "${REGISTRY_DB}" "SELECT id FROM agents ORDER BY id" 2>/dev/null && return
     fi
-    if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
-        jq -r '.agents[].id' "${EUXIS_HOME}/registry.json" 2>/dev/null && return
+    if [[ -f "${EUXIS_HOME}/agents/registry.json" ]] && command -v jq &>/dev/null; then
+        jq -r '.agents[].id' "${EUXIS_HOME}/agents/registry.json" 2>/dev/null && return
     fi
 }
 

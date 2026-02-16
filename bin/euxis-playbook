@@ -11,7 +11,7 @@ fi
 
 
 EUXIS_DIR="$HOME/.euxis"
-SQUADS_FILE="$EUXIS_DIR/squads.json"
+SQUADS_FILE="$EUXIS_DIR/agents/squads.json"
 PLAYBOOKS_DIR="$EUXIS_DIR/config/playbooks"
 SESSION_DIR="/tmp/euxis_playbook_sessions"
 
@@ -50,7 +50,7 @@ require_jq() {
 
 require_squads_file() {
   if [[ ! -f "$SQUADS_FILE" ]]; then
-    echo "Error: squads.json not found at $SQUADS_FILE" >&2
+    echo "Error: agents/squads.json not found at $SQUADS_FILE" >&2
     exit 1
   fi
 }
@@ -436,7 +436,7 @@ cmd_run() {
       squad=$(jq --arg id "$squad_id" '.squads[] | select(.id == $id)' "$SQUADS_FILE")
 
       if [[ -z "$squad" ]]; then
-        echo "Error: Squad '$squad_id' not found in squads.json" >&2
+        echo "Error: Squad '$squad_id' not found in agents/squads.json" >&2
         log_session "ERROR squad '$squad_id' not found"
         exit 1
       fi

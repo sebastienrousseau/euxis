@@ -11,8 +11,8 @@ fi
 
 
 EUXIS_DIR="$HOME/.euxis"
-SQUADS_FILE="$EUXIS_DIR/squads.json"
-REGISTRY_FILE="$EUXIS_DIR/registry.json"
+SQUADS_FILE="$EUXIS_DIR/agents/squads.json"
+REGISTRY_FILE="$EUXIS_DIR/agents/registry.json"
 
 usage() {
   cat <<'EOF'
@@ -30,7 +30,7 @@ Commands:
   info        Squad details (lead, members, purpose)
   deploy      Generate dispatch manifest and invoke euxis-dispatch
   members     List members with registry info
-  validate    Cross-check all squad members against registry.json
+  validate    Cross-check all squad members against agents/registry.json
 
 Options:
   --mode      Dispatch mode: hierarchical|mesh|federated (default: hierarchical)
@@ -48,7 +48,7 @@ require_jq() {
 
 require_squads_file() {
   if [[ ! -f "$SQUADS_FILE" ]]; then
-    echo "Error: squads.json not found at $SQUADS_FILE" >&2
+    echo "Error: agents/squads.json not found at $SQUADS_FILE" >&2
     exit 1
   fi
 }
@@ -171,7 +171,7 @@ cmd_members() {
   printf "%-22s %-10s %-8s\n" "AGENT" "ROLE" "TIER"
   printf "%-22s %-10s %-8s\n" "---" "---" "---"
 
-  local registry_db="$EUXIS_DIR/registry.db"
+  local registry_db="$EUXIS_DIR/agents/registry.db"
 
   while IFS= read -r member; do
     local role="member"
@@ -194,7 +194,7 @@ cmd_validate() {
   require_jq
   require_squads_file
 
-  local registry_db="$EUXIS_DIR/registry.db"
+  local registry_db="$EUXIS_DIR/agents/registry.db"
   local registry_agents=""
 
   # Get agent list (SQLite-first, JSON fallback)
@@ -206,7 +206,7 @@ cmd_validate() {
   fi
 
   if [[ -z "$registry_agents" ]]; then
-    echo "Error: No registry found (neither registry.db nor registry.json)" >&2
+    echo "Error: No registry found (neither agents/registry.db nor agents/registry.json)" >&2
     exit 1
   fi
 

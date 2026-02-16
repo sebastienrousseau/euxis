@@ -74,7 +74,7 @@ fi
 """)
         mock_loop.chmod(0o755)
 
-        # Create mock registry.json with test agents
+        # Create mock agents/registry.json with test agents
         registry = {
             "agents": [
                 {"id": "fast_agent.py", "path": "mock", "tier": "test", "version": "1.0"},
@@ -83,7 +83,7 @@ fi
                 {"id": "lock_agent.py", "path": "mock", "tier": "test", "version": "1.0"},
             ]
         }
-        registry_path = Path(self.temp_dir) / "registry.json"
+        registry_path = Path(self.temp_dir) / "agents/registry.json"
         with registry_path.open("w") as f:
             json.dump(registry, f)
 
@@ -459,7 +459,7 @@ exit 0
 
         # Create mock registry with echo agent
         registry = {"agents": [{"id": "echo", "path": "mock", "tier": "test", "version": "1.0"}]}
-        registry_path = Path(self.temp_dir) / "registry.json"
+        registry_path = Path(self.temp_dir) / "agents/registry.json"
         with registry_path.open("w") as f:
             json.dump(registry, f)
 

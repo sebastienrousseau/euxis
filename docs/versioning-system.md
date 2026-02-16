@@ -7,7 +7,7 @@ This document describes how version management works across the Euxis system, en
 The **single source of truth** for the Euxis system version is:
 
 ```
-registry.json → "protocol_version" field
+agents/registry.json → "protocol_version" field
 ```
 
 **Current version: 0.0.8**
@@ -17,14 +17,14 @@ All other version references MUST derive from this source.
 ## System Components
 
 ### 1. Registry.json (Primary Source)
-- **File**: `registry.json`
+- **File**: `agents/registry.json`
 - **Field**: `protocol_version`
 - **Purpose**: Authoritative version source used by all workflows and documentation
 
 ### 2. VERSION File (Backup Source)
 - **File**: `VERSION`
 - **Purpose**: Simple version reference for scripts and tools that can't parse JSON
-- **Sync**: Must match `registry.json` at all times
+- **Sync**: Must match `agents/registry.json` at all times
 
 ### 3. CI/CD Workflows (Dynamic Usage)
 All GitHub workflows now extract version dynamically:
@@ -36,8 +36,8 @@ All GitHub workflows now extract version dynamically:
       echo "Using override version: ${{ github.event.inputs.version }}"
       echo "EUXIS_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
     else
-      echo "Extracting version from registry.json..."
-      EUXIS_VERSION=$(python3 -c "import json; print(json.load(open('registry.json'))['protocol_version'])")
+      echo "Extracting version from agents/registry.json..."
+      EUXIS_VERSION=$(python3 -c "import json; print(json.load(open('agents/registry.json'))['protocol_version'])")
       echo "Found version: $EUXIS_VERSION"
       echo "EUXIS_VERSION=$EUXIS_VERSION" >> $GITHUB_ENV
     fi
@@ -69,8 +69,8 @@ scripts/check-version-consistency.sh
 scripts/sync-versions.sh
 ```
 
-**Purpose**: Updates all version references to match `registry.json`
-**Usage**: Run after updating `protocol_version` in `registry.json`
+**Purpose**: Updates all version references to match `agents/registry.json`
+**Usage**: Run after updating `protocol_version` in `agents/registry.json`
 **Updates**:
 - `VERSION` file
 - All agent prompt YAML frontmatter
@@ -82,8 +82,8 @@ When releasing a new version:
 
 1. **Update the authoritative source**:
    ```bash
-   # Edit registry.json
-   vim registry.json
+   # Edit agents/registry.json
+   vim agents/registry.json
    # Update "protocol_version": "X.Y.Z"
    ```
 
@@ -112,7 +112,7 @@ All workflows support manual version override:
 workflow_dispatch:
   inputs:
     version:
-      description: 'Override version (leave empty to use registry.json)'
+      description: 'Override version (leave empty to use agents/registry.json)'
       required: false
       default: ''
 ```
@@ -143,7 +143,7 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 - CI/CD integration for version validation
 
 ### ✅ Audit Trail
-- Clear version history in `registry.json`
+- Clear version history in `agents/registry.json`
 - Automated detection of version drift
 - Compliance with versioning protocol
 
@@ -161,7 +161,7 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
    ```
 
 ### Workflow Using Wrong Version
-1. Verify `registry.json` has correct `protocol_version`
+1. Verify `agents/registry.json` has correct `protocol_version`
 2. Ensure workflow has version extraction step
 3. Check that `$EUXIS_VERSION` is used instead of hardcoded values
 
@@ -183,7 +183,7 @@ default: 'v0.0.8'
 ```yaml
 # GOOD: Dynamic version from registry
 echo "Euxis v$EUXIS_VERSION Platform Report" > report.md
-EUXIS_VERSION=$(python3 -c "import json; print(json.load(open('registry.json'))['protocol_version'])")
+EUXIS_VERSION=$(python3 -c "import json; print(json.load(open('agents/registry.json'))['protocol_version'])")
 ```
 
 This system ensures version consistency across the entire Euxis codebase while providing flexibility for testing and development workflows.

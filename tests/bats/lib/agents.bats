@@ -20,12 +20,12 @@ setup() {
     export PATH="${EUXIS_TEST_TMPDIR}:${PATH}"
 
     # Create mock prompts directories (actual agent path structure)
-    mkdir -p "${EUXIS_HOME}/prompts/core"
-    mkdir -p "${EUXIS_HOME}/prompts/fleet"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/core"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/fleet"
 
     # Create mock agent prompt files
     for agent in architect orchestrator; do
-        cat > "${EUXIS_HOME}/prompts/core/${agent}.txt" << EOF
+        cat > "${EUXIS_HOME}/agents/prompts/core/${agent}.txt" << EOF
 ---
 agent_id: ${agent}
 role: "Mock ${agent} agent"
@@ -42,7 +42,7 @@ EOF
     done
 
     for agent in tester debugger reviewer; do
-        cat > "${EUXIS_HOME}/prompts/fleet/${agent}.txt" << EOF
+        cat > "${EUXIS_HOME}/agents/prompts/fleet/${agent}.txt" << EOF
 ---
 agent_id: ${agent}
 role: "Mock ${agent} agent"
@@ -59,13 +59,13 @@ EOF
     done
 
     # Create partial file (should be excluded)
-    echo "partial" > "${EUXIS_HOME}/prompts/core/_protocol.txt"
+    echo "partial" > "${EUXIS_HOME}/agents/prompts/core/_protocol.txt"
 
     # Create lifecycle directories
     mkdir -p "${EUXIS_HOME}/data/lifecycle"
 
-    # Create mock registry.json (needed for SQL-fallback path validation)
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
+    # Create mock agents/registry.json (needed for SQL-fallback path validation)
+    cat > "${EUXIS_HOME}/agents/registry.json" << 'EOF'
 {
   "agents": [
     {"id": "architect", "tier": "core"},
@@ -115,13 +115,13 @@ teardown() {
 @test "resolve_agent_path finds valid core agent" {
     run resolve_agent_path "architect"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "${EUXIS_HOME}/prompts/core/architect.txt" ]]
+    [[ "${output}" == "${EUXIS_HOME}/agents/prompts/core/architect.txt" ]]
 }
 
 @test "resolve_agent_path finds valid fleet agent" {
     run resolve_agent_path "tester"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "${EUXIS_HOME}/prompts/fleet/tester.txt" ]]
+    [[ "${output}" == "${EUXIS_HOME}/agents/prompts/fleet/tester.txt" ]]
 }
 
 @test "resolve_agent_path returns error for invalid agent" {
@@ -154,8 +154,8 @@ teardown() {
 }
 
 @test "list_agents handles empty prompts directory" {
-    rm -f "${EUXIS_HOME}/prompts/core"/*.txt
-    rm -f "${EUXIS_HOME}/prompts/fleet"/*.txt
+    rm -f "${EUXIS_HOME}/agents/prompts/core"/*.txt
+    rm -f "${EUXIS_HOME}/agents/prompts/fleet"/*.txt
     run list_agents
     # Should not crash, output may be empty
     [[ "${status}" -eq 0 ]]
@@ -253,7 +253,7 @@ teardown() {
     # Create manifest file (the actual API takes a file path)
     manifest_file="${EUXIS_TEST_TMPDIR}/plugin-manifest.json"
     # prompt_file must be within EUXIS_HOME (path traversal guard)
-    prompt_file="${EUXIS_HOME}/prompts/plugin-prompt.txt"
+    prompt_file="${EUXIS_HOME}/agents/prompts/plugin-prompt.txt"
     echo "Plugin prompt content" > "${prompt_file}"
 
     cat > "${manifest_file}" << EOF
@@ -270,7 +270,7 @@ EOF
     # Plugin metadata should be saved
     [[ -f "${EUXIS_HOME}/config/plugins/test-plugin.json" ]]
     # Prompt should be symlinked into fleet
-    [[ -L "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]
+    [[ -L "${EUXIS_HOME}/agents/prompts/fleet/test-plugin.txt" ]]
 }
 
 @test "register_agent_plugin rejects missing manifest" {
@@ -293,12 +293,12 @@ EOF
     # Set up plugin first
     mkdir -p "${EUXIS_HOME}/config/plugins"
     echo '{"agent_id":"test-plugin"}' > "${EUXIS_HOME}/config/plugins/test-plugin.json"
-    echo "prompt" > "${EUXIS_HOME}/prompts/fleet/test-plugin.txt"
+    echo "prompt" > "${EUXIS_HOME}/agents/prompts/fleet/test-plugin.txt"
 
     run unregister_agent_plugin "test-plugin"
     [[ "${status}" -eq 0 ]]
     [[ ! -f "${EUXIS_HOME}/config/plugins/test-plugin.json" ]]
-    [[ ! -f "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]
+    [[ ! -f "${EUXIS_HOME}/agents/prompts/fleet/test-plugin.txt" ]]
 }
 
 @test "list_plugins shows registered plugins" {

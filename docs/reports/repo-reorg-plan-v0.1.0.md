@@ -16,7 +16,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 - `docs/`: documentation, reference, ADRs, guides, reports.
 - `metrics/`: metrics collection, aggregation, verification, dashboard schemas.
 - `packages/`: sub-packages (`crypto-lib`, `crypto-server`).
-- `prompts/`: agent prompts and protocols.
+- `agents/prompts/`: agent prompts and protocols.
 - `scripts/`: gateway server + adapters + tooling scripts.
 - `tests/`: test suites for infra, TUI, CLI, gateway, etc.
 - `tui/`: Textual-based ETX TUI app.
@@ -59,7 +59,7 @@ tests/       # Cross-module integration tests only
 
 ### `agents/`
 - **Purpose**: Agent definitions, prompts, squads, combos.
-- **Contains**: `prompts/`, `squads.json`, `registry.json`.
+- **Contains**: `agents/prompts/`, `agents/squads.json`, `agents/registry.json`.
 - **Depends on**: `core/`, `config/`.
 
 ### `gateway/`
@@ -104,7 +104,7 @@ tests/       # Cross-module integration tests only
 - `bin/*` → `cli/bin/*`
 - `bin/lib/*` → `core/lib/*`
 - `prompts/*` → `agents/prompts/*`
-- `registry.json`, `registry.db`, `squads.json` → `agents/`
+- `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
 - `scripts/gateway_*` → `gateway/`
 - `adapters/*` → `adapters/`
 - `gateway/webchat/*` → `gateway/webchat/*`

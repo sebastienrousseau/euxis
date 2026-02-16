@@ -84,7 +84,7 @@ AGENTS=(
 
 for agent in "${AGENTS[@]}"; do
     FOUND=false
-    for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
+    for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
         if [[ -f "$dir/${agent}.txt" ]]; then
             FOUND=true
             break
@@ -102,7 +102,7 @@ fi
 
 # CHECK 2: Protocol File Exists
 echo "[2/8] Checking Protocol..."
-PROTOCOL_FILE="$EUXIS_HOME/prompts/protocols/_protocol.txt"
+PROTOCOL_FILE="$EUXIS_HOME/agents/prompts/protocols/_protocol.txt"
 if [[ ! -f "$PROTOCOL_FILE" ]]; then
     echo "  MISSING: _protocol.txt"
     ((FAILURES++)) || true
@@ -121,8 +121,8 @@ fi
 
 # CHECK 3: Version Synchronization
 echo "[3/8] Checking Versions..."
-VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
-VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/prompts/core/" "$EUXIS_HOME/prompts/fleet/" "$EUXIS_HOME/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
+VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/agents/prompts/core/" "$EUXIS_HOME/agents/prompts/fleet/" "$EUXIS_HOME/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
+VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/agents/prompts/core/" "$EUXIS_HOME/agents/prompts/fleet/" "$EUXIS_HOME/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
 
 if [[ "$VERSION_COUNT" -ne 1 ]]; then
     echo "  VERSION MISMATCH: Found multiple versions: $VERSIONS"
@@ -150,7 +150,7 @@ HEADER_FAILURES=0
 
 # Pre-build agent file list for fast lookup (avoid repeated filesystem checks)
 declare -A KNOWN_AGENTS
-for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
+for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
     for f in "$dir"/*.txt; do
         [[ -f "$f" ]] || continue
         name=$(basename "$f" .txt)
@@ -158,7 +158,7 @@ for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
     done
 done
 
-for dir in "$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet"; do
+for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
     for prompt_file in "$dir"/*.txt; do
         [[ -f "$prompt_file" ]] || continue
         local_name=$(basename "$prompt_file" .txt)
@@ -333,7 +333,7 @@ if [[ -d "$PATTERNS_DIR" ]]; then
     done
 
     # Cross-reference: protocol references patterns that exist
-    PROTOCOL_FILE="$EUXIS_HOME/prompts/protocols/_protocol.txt"
+    PROTOCOL_FILE="$EUXIS_HOME/agents/prompts/protocols/_protocol.txt"
     if [[ -f "$PROTOCOL_FILE" ]]; then
         for ref_pattern in $(grep -oE '[A-Z]+-[0-9]{3}' "$PROTOCOL_FILE" | sort -u); do
             if [[ ! -f "$PATTERNS_DIR/${ref_pattern}.md" ]]; then

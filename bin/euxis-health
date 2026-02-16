@@ -33,7 +33,7 @@ EOF
 
 EUXIS_HOME="${HOME}/.euxis"
 BIN_DIR="${EUXIS_HOME}/bin"
-REGISTRY="${EUXIS_HOME}/registry.json"
+REGISTRY="${EUXIS_HOME}/agents/registry.json"
 FAILURES=0
 WARNINGS=0
 
@@ -62,7 +62,7 @@ log "=================================================="
 log ""
 log "[1/10] Naming Consistency..."
 
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "$f" ]] || continue
         filename=$(basename "$f" .txt)
@@ -106,7 +106,7 @@ fi
 log ""
 log "[3/10] Orphan Detection..."
 
-REGISTRY_DB="${EUXIS_HOME}/registry.db"
+REGISTRY_DB="${EUXIS_HOME}/agents/registry.db"
 
 # Try to get registered agent IDs (SQLite-first, JSON fallback)
 REGISTERED=""
@@ -121,12 +121,12 @@ if [[ -z "$REGISTERED" ]] && [[ -f "$REGISTRY" ]]; then
 fi
 
 if [[ -z "$REGISTERED" ]]; then
-    log "  MISSING: No registry found (neither registry.db nor registry.json)"
+    log "  MISSING: No registry found (neither agents/registry.db nor agents/registry.json)"
     ((FAILURES++)) || true
 else
     # Get actual agent files
     ACTUAL=""
-    for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+    for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
         for f in "${dir}"/*.txt; do
             [[ -f "$f" ]] || continue
             name=$(basename "$f" .txt)
@@ -167,7 +167,7 @@ log "[4/10] Header Schema Validation..."
 REQUIRED_FIELDS=("agent_id" "role" "version" "tags" "last_updated")
 HEADER_FAILURES=0
 
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "$f" ]] || continue
         # Extract frontmatter (between first --- and second ---)
@@ -383,7 +383,7 @@ log "=================================================="
 # JSON output mode
 if [[ "$JSON_OUTPUT" == true ]]; then
     AGENT_COUNT=0
-    for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+    for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
         for f in "${dir}"/*.txt; do [[ -f "$f" ]] && AGENT_COUNT=$((AGENT_COUNT + 1)); done
     done
     PROVIDER_FOUND=0

@@ -110,7 +110,7 @@ PREFIX="${SLASH_PREFIXES[$COMMAND]}"
 PROVIDER=$(resolve_tiered_provider "${AGENT}")
 
 # Build minimal prompt (skip full protocol loading for speed)
-PROTOCOL_FILE="${EUXIS_HOME}/prompts/protocols/_protocol.txt"
+PROTOCOL_FILE="${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt"
 AGENT_FILE=$(resolve_agent_path "${AGENT}")
 
 if [[ ! -f "${AGENT_FILE}" ]]; then

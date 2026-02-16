@@ -58,7 +58,7 @@ flowchart TB
 
     subgraph Data["Data Layer"]
         direction LR
-        registry[(registry.db<br/>SQLite Agent Registry)]
+        registry[(agents/registry.db<br/>SQLite Agent Registry)]
         memory_files[(memory.md<br/>Per-Agent Memory)]
         lifecycle[(lifecycle/<br/>Agent State)]
         projects[(projects/<br/>Session Data)]
@@ -94,7 +94,7 @@ flowchart TB
 | **CLI** | `euxis`, `euxis-dispatch`, `euxis-squad`, `euxis-combo`, `euxis-playbook` | User-facing commands for agent invocation and orchestration |
 | **Shell Libraries** | `cli.sh`, `dispatch.sh`, `agents.sh`, `providers.sh`, `memory.sh` | Core framework logic implemented in pure Bash |
 | **Python TUI** | `euxis-cortex`, `euxis-synthesize`, `euxis-ui` | Optional rich interfaces requiring Python venv |
-| **Data Layer** | `registry.db`, `memory.md`, `lifecycle/`, `projects/` | Persistent storage for agents, memory, and sessions |
+| **Data Layer** | `agents/registry.db`, `memory.md`, `lifecycle/`, `projects/` | Persistent storage for agents, memory, and sessions |
 | **Provider Layer** | Claude, Gemini, Goose, Ollama, Qwen, OpenAI | External AI model backends |
 
 ---
@@ -685,7 +685,7 @@ flowchart TB
     end
 
     subgraph Prompt["Prompt Assembly"]
-        template["Load agent prompt<br/>prompts/core/architect.txt"]
+        template["Load agent prompt<br/>agents/prompts/core/architect.txt"]
         protocols["Inject protocols<br/>constitution.md, etc."]
         memory_inject["Inject tiered memory"]
         task_inject["Inject sanitized task"]
@@ -751,13 +751,13 @@ flowchart TB
 │   ├── projects/                # Project-specific data
 │   └── registry_pool/           # Connection pool locks
 ├── docs/                         # Documentation
-├── prompts/                      # Agent prompts
+├── agents/prompts/                      # Agent prompts
 │   ├── core/                    # Core tier (9 agents)
 │   ├── fleet/                   # Fleet tier (32 agents)
 │   └── protocols/               # Shared protocol fragments
-├── registry.db                   # SQLite agent registry
-├── registry.json                 # JSON registry (fallback)
-└── squads.json                   # Squad/combo definitions
+├── agents/registry.db                   # SQLite agent registry
+├── agents/registry.json                 # JSON registry (fallback)
+└── agents/squads.json                   # Squad/combo definitions
 ```
 
 ---

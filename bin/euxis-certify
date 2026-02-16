@@ -131,8 +131,8 @@ else
 fi
 
 # Validate current version consistency (SQLite-first, JSON fallback)
-CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "")
-[[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]] && CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
+CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/agents/registry.json" 2>/dev/null || echo "")
+[[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]] && CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/agents/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
 if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
     validation_error "Cannot determine current version from registry"
     ((CERT_ERRORS++)) || true
@@ -277,11 +277,11 @@ SEMANTIC_ERRORS=0
 
 # Check if architect agent exists (SQLite-first, JSON fallback)
 _architect_found=false
-if [[ -f "$EUXIS_HOME/registry.db" ]]; then
-    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
+if [[ -f "$EUXIS_HOME/agents/registry.db" ]]; then
+    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/agents/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
 fi
-if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/registry.json" ]]; then
-    jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/registry.json" &>/dev/null && _architect_found=true
+if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/agents/registry.json" ]]; then
+    jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/agents/registry.json" &>/dev/null && _architect_found=true
 fi
 if [[ "$_architect_found" != "true" ]]; then
     validation_error "Architect agent not found in registry - semantic tests cannot run"
@@ -670,7 +670,7 @@ if [[ $DOC_FAILURES -eq 0 ]]; then
     echo "  PASS: All documentation is current (updated within 7 days)."
 fi
 
-# 6d. README references correct version (registry.json is source of truth)
+# 6d. README references correct version (agents/registry.json is source of truth)
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
     if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md references version $CURRENT_VERSION."
@@ -709,7 +709,7 @@ for doc in docs/user-guide.md docs/fleet-guide.md; do
 done
 
 # 6g. Prompts must match current version (core/fleet/protocols)
-PROMPT_DIRS=("$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet" "$EUXIS_HOME/prompts/protocols")
+PROMPT_DIRS=("$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet" "$EUXIS_HOME/agents/prompts/protocols")
 for dir in "${PROMPT_DIRS[@]}"; do
     if [[ -d "$dir" ]]; then
         while IFS= read -r -d '' prompt; do
@@ -778,7 +778,7 @@ check_phrase_versions 'Version ([0-9]+\.[0-9]+\.[0-9]+)' "Version"
 
 # 6i. JSON protocol/version fields must match current version
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
-    for manifest in registry.json squads.json config/capabilities.json config/codex/codex.json; do
+    for manifest in agents/registry.json agents/squads.json config/capabilities.json config/codex/codex.json; do
         path="$EUXIS_HOME/$manifest"
         if [[ -f "$path" ]]; then
             version_value=$(jq -r '.protocol_version // .version // empty' "$path" 2>/dev/null || echo "")
@@ -791,7 +791,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
 fi
 
 # 6j. Registry, squads, and codex manifests are valid JSON
-MANIFESTS=("registry.json" "squads.json" "config/capabilities.json" "config/codex/codex.json")
+MANIFESTS=("agents/registry.json" "agents/squads.json" "config/capabilities.json" "config/codex/codex.json")
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
     echo "  Validating JSON manifest files..."
     for manifest in "${MANIFESTS[@]}"; do
@@ -810,7 +810,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
 
                 # Additional schema validation for critical files
                 case "$manifest" in
-                    "registry.json")
+                    "agents/registry.json")
                         if ! jq -e 'has("schema_version") and has("protocol_version") and has("agents")' "$MANIFEST_PATH" &>/dev/null; then
                             echo "  FAIL: $manifest missing required schema fields."
                             ((DOC_FAILURES++)) || true

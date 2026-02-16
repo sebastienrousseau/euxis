@@ -16,7 +16,7 @@ Maintain the 50-agent architecture with the following constraints:
 
 3. **Agent consolidation criteria.** An agent MUST be consolidated or removed if:
    - It has not been dispatched in 90 days (track via lifecycle transitions.jsonl)
-   - Its scope overlaps >70% with another agent (measure via tag intersection in registry.json)
+   - Its scope overlaps >70% with another agent (measure via tag intersection in agents/registry.json)
    - It cannot pass the gym evaluation with >80% quality score
 
 4. **Maximum fleet size: 50 agents.** Beyond this, coordination complexity exceeds the benefit of specialization. New agents above this threshold must replace an existing agent.

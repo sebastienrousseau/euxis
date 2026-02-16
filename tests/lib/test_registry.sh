@@ -2,8 +2,8 @@
 # Tests for registry integrity (SQLite + JSON)
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-registry="${EUXIS_HOME}/registry.json"
-registry_db="${EUXIS_HOME}/registry.db"
+registry="${EUXIS_HOME}/agents/registry.json"
+registry_db="${EUXIS_HOME}/agents/registry.db"
 
 # ============================================================================
 # JSON Tests (original)

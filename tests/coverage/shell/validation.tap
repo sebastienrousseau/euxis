@@ -70,7 +70,7 @@ not ok 27 validate_euxis_structure fails on missing bin directory
 #   `[[ "${output}" =~ "Missing required directory: bin" ]]' failed
 not ok 28 validate_euxis_structure fails on missing registry
 # (in test file tests/bats/lib/validation.bats, line 300)
-#   `[[ "${output}" =~ "Missing registry.json" ]]' failed
+#   `[[ "${output}" =~ "Missing agents/registry.json" ]]' failed
 not ok 29 validate_minimal runs basic checks only
 # (in test file tests/bats/lib/validation.bats, line 313)
 #   `[[ "${status}" -eq 0 ]]' failed

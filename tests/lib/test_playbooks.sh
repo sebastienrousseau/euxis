@@ -48,14 +48,14 @@ for tpl in dispatch-manifest.json agent-prompt.txt pattern.md adr.md playbook.js
 done
 
 # ===== SQUADS.JSON =====
-squads_file="${EUXIS_HOME}/squads.json"
-assert_file_exists "squads.json" "${squads_file}"
+squads_file="${EUXIS_HOME}/agents/squads.json"
+assert_file_exists "agents/squads.json" "${squads_file}"
 
 # Valid JSON
 if jq empty "${squads_file}" 2>/dev/null; then
-    assert_eq "squads.json is valid JSON" "0" "0"
+    assert_eq "agents/squads.json is valid JSON" "0" "0"
 else
-    assert_eq "squads.json is valid JSON" "valid" "invalid"
+    assert_eq "agents/squads.json is valid JSON" "valid" "invalid"
 fi
 
 # Has 6 squads

@@ -8,20 +8,20 @@ setup() {
     export EUXIS_TEST_TMPDIR
 
     export EUXIS_HOME="${EUXIS_TEST_TMPDIR}/euxis"
-    export REGISTRY_DB="${EUXIS_HOME}/registry.db"
+    export REGISTRY_DB="${EUXIS_HOME}/agents/registry.db"
     export REGISTRY_POOL_DIR="${EUXIS_HOME}/data/registry_pool"
     mkdir -p "${EUXIS_HOME}/data/registry_pool"
-    mkdir -p "${EUXIS_HOME}/prompts/core"
-    mkdir -p "${EUXIS_HOME}/prompts/fleet"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/core"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/fleet"
 
     # Create mock agent files
     for agent in architect tester debugger; do
-        echo "# ${agent}" > "${EUXIS_HOME}/prompts/core/${agent}.txt"
+        echo "# ${agent}" > "${EUXIS_HOME}/agents/prompts/core/${agent}.txt"
     done
 
     # Create mock SQLite database
     if command -v sqlite3 &>/dev/null; then
-        sqlite3 "${EUXIS_HOME}/registry.db" << 'EOF'
+        sqlite3 "${EUXIS_HOME}/agents/registry.db" << 'EOF'
 CREATE TABLE IF NOT EXISTS agents (
     id TEXT PRIMARY KEY,
     path TEXT,
@@ -48,9 +48,9 @@ CREATE TABLE IF NOT EXISTS registry_metadata (
     key TEXT PRIMARY KEY,
     value TEXT
 );
-INSERT INTO agents VALUES ('architect', 'prompts/core/architect.txt', 'core', 'default');
-INSERT INTO agents VALUES ('tester', 'prompts/core/tester.txt', 'default', 'default');
-INSERT INTO agents VALUES ('debugger', 'prompts/core/debugger.txt', 'default', 'default');
+INSERT INTO agents VALUES ('architect', 'agents/prompts/core/architect.txt', 'core', 'default');
+INSERT INTO agents VALUES ('tester', 'agents/prompts/core/tester.txt', 'default', 'default');
+INSERT INTO agents VALUES ('debugger', 'agents/prompts/core/debugger.txt', 'default', 'default');
 INSERT INTO tags VALUES (1, 'development');
 INSERT INTO tags VALUES (2, 'quality');
 INSERT INTO agent_tags VALUES ('architect', 1);
@@ -64,7 +64,7 @@ EOF
     fi
 
     # Create fallback JSON
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/registry.json" << 'EOF'
 {
   "protocol_version": "0.0.8",
   "agents": [
@@ -159,7 +159,7 @@ teardown() {
 }
 
 @test "registry_query fails on missing database" {
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
     run registry_query "SELECT 1"
     [[ "${status}" -eq 1 ]]
     [[ "${output}" =~ "not found" ]]
@@ -183,7 +183,7 @@ teardown() {
 
     run resolve_agent_path_sql "architect"
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" =~ "prompts/core/architect.txt" ]]
+    [[ "${output}" =~ "agents/prompts/core/architect.txt" ]]
 }
 
 @test "resolve_agent_path_sql fails for unknown agent" {
@@ -280,7 +280,7 @@ teardown() {
 }
 
 @test "registry_health_sql fails for missing database" {
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
     run registry_health_sql
     [[ "${status}" -eq 1 ]]
     [[ "${output}" =~ "not found" ]]
@@ -291,7 +291,7 @@ teardown() {
 # ============================================================================
 
 @test "list_agents_hybrid falls back to filesystem" {
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
 
     # Need to source agents.sh for fallback
     source "${BATS_TEST_DIRNAME}/../../../bin/lib/agents.sh" 2>/dev/null || true
@@ -312,7 +312,7 @@ teardown() {
 }
 
 @test "registry_get_version falls back to JSON" {
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
     run registry_get_version
     [[ "${status}" -eq 0 ]]
     [[ "${output}" == "0.0.8" ]]
@@ -381,7 +381,7 @@ teardown() {
 }
 
 @test "REGISTRY_DB path is correct" {
-    [[ "${REGISTRY_DB}" == "${EUXIS_HOME}/registry.db" ]]
+    [[ "${REGISTRY_DB}" == "${EUXIS_HOME}/agents/registry.db" ]]
 }
 
 @test "REGISTRY_POOL_SIZE default is 3" {

@@ -14,11 +14,11 @@ echo "=== Euxis Version Consistency Check ==="
 
 # Extract the authoritative version (SQLite-first, JSON fallback)
 REGISTRY_VERSION=""
-if [ -f "registry.db" ]; then
-    REGISTRY_VERSION=$(sqlite3 -init /dev/null "registry.db" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null || echo "")
+if [ -f "agents/registry.db" ]; then
+    REGISTRY_VERSION=$(sqlite3 -init /dev/null "agents/registry.db" "SELECT value FROM registry_metadata WHERE key='protocol_version'" 2>/dev/null || echo "")
 fi
-if [ -z "$REGISTRY_VERSION" ] && [ -f "registry.json" ]; then
-    REGISTRY_VERSION=$(python3 -c "import json; print(json.load(open('registry.json'))['protocol_version'])" 2>/dev/null || echo "")
+if [ -z "$REGISTRY_VERSION" ] && [ -f "agents/registry.json" ]; then
+    REGISTRY_VERSION=$(python3 -c "import json; print(json.load(open('agents/registry.json'))['protocol_version'])" 2>/dev/null || echo "")
 fi
 
 if [ -z "$REGISTRY_VERSION" ]; then
@@ -37,7 +37,7 @@ if [ -f "VERSION" ]; then
         echo "❌ VIOLATION: VERSION file ($VERSION_FILE_CONTENT) != registry ($REGISTRY_VERSION)"
         violation_count=$((violation_count + 1))
     else
-        echo "✅ VERSION file matches registry.json"
+        echo "✅ VERSION file matches agents/registry.json"
     fi
 fi
 
@@ -81,7 +81,7 @@ done
 echo ""
 echo "Checking agent prompt versions..."
 
-prompt_files=(prompts/core/*.txt prompts/fleet/*.txt)
+prompt_files=(agents/prompts/core/*.txt agents/prompts/fleet/*.txt)
 for prompt_file in "${prompt_files[@]}"; do
     if [ -f "$prompt_file" ]; then
         # Extract version from YAML frontmatter

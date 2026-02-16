@@ -6,10 +6,10 @@ source "${EUXIS_HOME}/bin/lib/agents.sh"
 source "${EUXIS_HOME}/bin/lib/providers.sh"
 
 # Agent prompt files exist
-assert_file_exists "crypto-cryptography-auditor prompt" "${EUXIS_HOME}/prompts/fleet/crypto-cryptography-auditor.txt"
-assert_file_exists "payments-domain-steward prompt" "${EUXIS_HOME}/prompts/fleet/payments-domain-steward.txt"
-assert_file_exists "realtime-audio-engineer prompt" "${EUXIS_HOME}/prompts/fleet/realtime-audio-engineer.txt"
-assert_file_exists "rust-crate-steward prompt" "${EUXIS_HOME}/prompts/fleet/rust-crate-steward.txt"
+assert_file_exists "crypto-cryptography-auditor prompt" "${EUXIS_HOME}/agents/prompts/fleet/crypto-cryptography-auditor.txt"
+assert_file_exists "payments-domain-steward prompt" "${EUXIS_HOME}/agents/prompts/fleet/payments-domain-steward.txt"
+assert_file_exists "realtime-audio-engineer prompt" "${EUXIS_HOME}/agents/prompts/fleet/realtime-audio-engineer.txt"
+assert_file_exists "rust-crate-steward prompt" "${EUXIS_HOME}/agents/prompts/fleet/rust-crate-steward.txt"
 
 # Agent paths resolve correctly
 crypto_path=$(resolve_agent_path "crypto-cryptography-auditor")

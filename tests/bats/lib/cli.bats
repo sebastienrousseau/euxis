@@ -11,14 +11,14 @@ setup() {
     export EUXIS_HOME="${HOME}/.euxis"
     export PROJECTS_DIR="${EUXIS_TEST_TMPDIR}/projects"
     mkdir -p "${PROJECTS_DIR}"
-    mkdir -p "${EUXIS_TEST_TMPDIR}/prompts/core"
-    mkdir -p "${EUXIS_TEST_TMPDIR}/prompts/fleet"
+    mkdir -p "${EUXIS_TEST_TMPDIR}/agents/prompts/core"
+    mkdir -p "${EUXIS_TEST_TMPDIR}/agents/prompts/fleet"
     mkdir -p "${EUXIS_TEST_TMPDIR}/lifecycle"
     mkdir -p "${EUXIS_TEST_TMPDIR}/perf"
 
     # Create mock agent files in test dir
     for agent in architect tester debugger; do
-        cat > "${EUXIS_TEST_TMPDIR}/prompts/core/${agent}.txt" << EOF
+        cat > "${EUXIS_TEST_TMPDIR}/agents/prompts/core/${agent}.txt" << EOF
 ---
 agent_id: ${agent}
 role: "Mock ${agent}"

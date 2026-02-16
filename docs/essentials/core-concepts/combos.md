@@ -116,7 +116,7 @@ Process flow:
 
 ### Define Custom Combo
 
-Add to `squads.json` combos section:
+Add to `agents/squads.json` combos section:
 
 ```json
 {

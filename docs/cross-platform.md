@@ -43,7 +43,7 @@ Comprehensive automation system ensuring Euxis v0.0.8 build/package/runtime pari
 - Basic functionality test with timeout protection
 
 ### Gate 4: Agent Registry ✅
-- JSON validity check for `registry.json`
+- JSON validity check for `agents/registry.json`
 - Agent count verification (6+ agents expected)
 - Schema validation
 

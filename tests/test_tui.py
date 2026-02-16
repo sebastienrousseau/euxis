@@ -463,14 +463,14 @@ class TestIntegration:
         assert len(playbooks) >= 16  # 16 language playbooks created earlier
 
     def test_registry_json_valid(self):
-        registry_path = Path.home() / ".euxis" / "registry.json"
+        registry_path = Path.home() / ".euxis" / "agents/registry.json"
         assert registry_path.exists()
         data = json.loads(registry_path.read_text())
         assert "agents" in data
         assert len(data["agents"]) == 42
 
     def test_squads_json_valid(self):
-        squads_path = Path.home() / ".euxis" / "squads.json"
+        squads_path = Path.home() / ".euxis" / "agents/squads.json"
         assert squads_path.exists()
         data = json.loads(squads_path.read_text())
         assert "squads" in data

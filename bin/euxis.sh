@@ -86,7 +86,7 @@ fi
 # ============================================================================
 
 EUXIS_HOME="${HOME}/.euxis"
-PROMPTS_DIR="${EUXIS_HOME}/prompts"
+PROMPTS_DIR="${EUXIS_HOME}/agents/prompts"
 PROJECTS_DIR="${EUXIS_HOME}/data/projects"
 source "${EUXIS_HOME}/core/lib/common.sh"
 source "${EUXIS_HOME}/core/lib/providers.sh"

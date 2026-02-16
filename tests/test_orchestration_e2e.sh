@@ -112,13 +112,13 @@ cat > "${PLUGIN_DIR}/manifest.json" <<JSON
 JSON
 
 register_agent_plugin "${PLUGIN_DIR}/manifest.json" 2>/dev/null
-if [[ -f "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]; then
+if [[ -f "${EUXIS_HOME}/agents/prompts/fleet/test-plugin.txt" ]]; then
     pass "Plugin registration creates prompt file"
 else
     fail "Plugin registration failed"
 fi
 unregister_agent_plugin "test-plugin" 2>/dev/null
-if [[ ! -f "${EUXIS_HOME}/prompts/fleet/test-plugin.txt" ]]; then
+if [[ ! -f "${EUXIS_HOME}/agents/prompts/fleet/test-plugin.txt" ]]; then
     pass "Plugin unregistration removes prompt file"
 else
     fail "Plugin unregistration failed"
@@ -350,7 +350,7 @@ echo ""
 echo "[8/10] Property-Based Prompt Validation..."
 
 # T8.1: Every agent prompt produces non-empty output via prepare_prompt
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "${f}" ]] || continue
         name=$(basename "${f}" .txt)
@@ -368,7 +368,7 @@ pass "All 35 agent prompts produce valid output (>100 chars each)"
 # T8.2: Every agent prompt contains ReAct instructions (inherited from protocol)
 # Use [[ *pattern* ]] instead of pipe+grep for large strings
 react_fail=0
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "${f}" ]] || continue
         name=$(basename "${f}" .txt)
@@ -384,7 +384,7 @@ done
 
 # T8.3: Every agent prompt contains evidence-based verification
 evidence_fail=0
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "${f}" ]] || continue
         name=$(basename "${f}" .txt)
@@ -400,7 +400,7 @@ done
 
 # T8.4: Every agent prompt contains false positive elimination
 fp_fail=0
-for dir in "${EUXIS_HOME}/prompts/core" "${EUXIS_HOME}/prompts/fleet"; do
+for dir in "${EUXIS_HOME}/agents/prompts/core" "${EUXIS_HOME}/agents/prompts/fleet"; do
     for f in "${dir}"/*.txt; do
         [[ -f "${f}" ]] || continue
         name=$(basename "${f}" .txt)

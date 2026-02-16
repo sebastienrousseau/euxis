@@ -217,7 +217,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: bin/, config/, data/, docs/, prompts/, tests/, tui/
+OBSERVATION 1: Found: bin/, config/, data/, docs/, agents/prompts/, tests/, tui/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -271,7 +271,7 @@ See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md
 - Project-specific agent outputs
 - Performance metrics
 
-### 4. Agent Intelligence (prompts/)
+### 4. Agent Intelligence (agents/prompts/)
 - 41 agent personality definitions
 - 9 core agents + 32 specialists
 - ReAct reasoning protocols

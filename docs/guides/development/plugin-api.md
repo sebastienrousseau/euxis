@@ -244,7 +244,7 @@ You MUST [primary responsibility]. [Additional context about the agent's role].
 **Behavior:**
 1. Validates manifest has required fields (`agent_id`, `prompt_file`)
 2. Checks that `prompt_file` exists and is readable
-3. Creates symbolic link: `~/.euxis/prompts/fleet/${agent_id}.txt` → `prompt_file`
+3. Creates symbolic link: `~/.euxis/agents/prompts/fleet/${agent_id}.txt` → `prompt_file`
 4. Copies manifest to `~/.euxis/config/plugins/${agent_id}.json`
 5. Logs successful registration
 
@@ -270,7 +270,7 @@ register_agent_plugin "/path/to/my-plugin-manifest.json"
 - `agent_id` - ID of the plugin to remove
 
 **Behavior:**
-1. Removes symlink from `~/.euxis/prompts/fleet/`
+1. Removes symlink from `~/.euxis/agents/prompts/fleet/`
 2. Removes manifest from `~/.euxis/config/plugins/`
 3. Logs successful unregistration
 
