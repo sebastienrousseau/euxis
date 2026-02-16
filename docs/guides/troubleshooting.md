@@ -1018,6 +1018,10 @@ Agent takes >5 seconds just to start.
 export EUXIS_DEBUG=1
 euxis architect "Test"
 
+## Metrics Location
+
+Performance metrics are stored at `~/.euxis/metrics/events.jsonl`.
+
 # Check performance metrics
 tail -20 ~/.euxis/metrics/events.jsonl
 ```

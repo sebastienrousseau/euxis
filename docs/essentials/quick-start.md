@@ -232,6 +232,7 @@ FINAL ANSWER:
 - Entry point: `euxis` command
 
 ### 2. Configuration (config/ + security/)
+- Gateway policy defaults: `security/gateway.json`
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
@@ -267,6 +268,7 @@ Store tokens in environment variables or a secrets manager. Avoid committing the
 See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md`.
 
 ### 3. Knowledge Storage (memory/ + metrics/ + data/)
+- Metrics live in `metrics/` (runtime data in `~/.euxis/metrics/`)
 - Cortex: Semantic memory with vector search
 - Project-specific agent outputs
 - Performance metrics (metrics/)

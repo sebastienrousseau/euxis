@@ -232,11 +232,13 @@ FINAL ANSWER:
 - Entry point: `euxis` command
 
 ### 2. Configuration (config/ + security/)
+- Gateway policy defaults: `security/gateway.json`
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
 
 ### 3. Knowledge Storage (memory/ + metrics/ + data/)
+- Metrics live in `metrics/` (runtime data in `~/.euxis/metrics/`)
 - Cortex: Semantic memory with vector search
 - Project-specific agent outputs
 - Performance metrics (metrics/)

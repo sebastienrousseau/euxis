@@ -746,7 +746,10 @@ flowchart TB
 │   ├── patterns/                # Validation patterns
 │   ├── playbooks/               # Playbook definitions
 │   └── templates/               # Prompt templates
-├── data/                         # Runtime data
+├── data/                         # Runtime data (bus, lifecycle, projects)
+├── memory/                       # Cortex storage
+├── metrics/                      # Fleet metrics
+├── security/                     # Approval policies
 │   ├── lifecycle/               # Agent state files
 │   ├── projects/                # Project-specific data
 │   └── registry_pool/           # Connection pool locks
