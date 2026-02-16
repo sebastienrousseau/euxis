@@ -62,11 +62,14 @@
       "enabled": true,
       "stt": {
         "mode": "manual",
-        "webhook_url": ""
+        "webhook_url": "",
+        "command": "",
+        "auto_inject": true
       },
       "tts": {
         "mode": "manual",
-        "webhook_url": ""
+        "webhook_url": "",
+        "command": ""
       }
     }
   }

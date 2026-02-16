@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import json
 import os
+import shlex
 import sys
 import time
 from urllib import error as urlerror
@@ -430,6 +431,33 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             await post_json(tts_cfg["webhook_url"], {"session_id": session_id, "text": text})
         return JSONResponse({"status": "ok"})
 
+    @app.post("/voice/stt")
+    async def voice_stt(payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        session_id = payload.get("session_id", "")
+        audio_path = payload.get("audio_path", "")
+        if not session_id:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        stt_cfg = config["gateway"].get("voice", {}).get("stt", {})
+        if stt_cfg.get("mode") != "command" or not stt_cfg.get("command"):
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        if not audio_path:
+            blob = resolve_voice_blob(session_id, payload.get("format", "raw"))
+            audio_path = str(blob) if blob else ""
+        if not audio_path:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        transcript = await run_voice_command(
+            stt_cfg.get("command", ""),
+            {"audio_path": audio_path},
+        )
+        if transcript:
+            persist_voice_text(
+                session_id,
+                {"ts": timestamp(), "event": "stt", "content": transcript, "meta": payload.get("meta", {})},
+            )
+        return JSONResponse({"status": "ok", "content": transcript})
+
     @app.post("/sessions/{session_id}/broadcast")
     async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
         message = payload.get("message", "")
@@ -686,6 +714,24 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                                     "audio_path": str(audio_path) if audio_path else None,
                                 },
                             )
+                        if stt_cfg.get("mode") == "command" and stt_cfg.get("command"):
+                            audio_path = resolve_voice_blob(session_id, payload.get("format", "raw"))
+                            transcript = await run_voice_command(
+                                stt_cfg.get("command", ""),
+                                {"audio_path": str(audio_path) if audio_path else ""},
+                            )
+                            if transcript:
+                                persist_voice_text(
+                                    session_id,
+                                    {"ts": timestamp(), "event": "stt", "content": transcript, "meta": meta},
+                                )
+                                auto_inject = bool(stt_cfg.get("auto_inject", True))
+                                if auto_inject:
+                                    meta.setdefault("agent", "orchestrator")
+                                    meta.setdefault("channel_id", "voice")
+                                    meta.setdefault("scope", "dm")
+                                    meta.setdefault("approved", True)
+                                    asyncio.create_task(process_inbound(session_id, transcript, meta, config))
                     await ws.send_text(json.dumps({"type": "ack", "event": "end"}))
                     continue
                 await ws.send_text(json.dumps({"type": "error", "error": "unknown_event"}))
@@ -1116,12 +1162,40 @@ async def push_voice_tts(session_id: str, content: str) -> None:
     if meta.get("channel_id") != "voice":
         return
     payload = {"event": "tts", "session_id": session_id, "content": content}
+    tts_cfg = STATE.config.get("gateway", {}).get("voice", {}).get("tts", {})
+    if tts_cfg.get("mode") == "command" and tts_cfg.get("command"):
+        audio_path = await run_voice_command(
+            tts_cfg.get("command", ""),
+            {"text": content, "session_id": session_id},
+        )
+        if audio_path:
+            payload["audio_path"] = audio_path
     connections = STATE.voice_connections.get(session_id, [])
     for ws in list(connections):
         try:
             await ws.send_text(json.dumps(payload))
         except Exception:
             continue
+
+
+async def run_voice_command(command: str, vars_map: Dict[str, str]) -> str:
+    if not command:
+        return ""
+    rendered = command.format(**vars_map)
+    args = shlex.split(rendered)
+    if not args:
+        return ""
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+    except Exception:
+        return ""
+    stdout, _stderr = await proc.communicate()
+    if proc.returncode != 0:
+        return ""
+    output = stdout.decode("utf-8", errors="ignore").strip()
+    return output
 
 
 def split_message(content: str, max_len: int) -> List[str]:

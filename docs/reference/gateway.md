@@ -326,6 +326,28 @@ Server may send:
 { "event": "tts", "session_id": "sess_voice", "content": "Assistant reply" }
 ```
 
+## STT/TTS Command Hooks
+
+When `gateway.voice.stt.mode=command`, the Gateway runs the command with:
+
+- `{audio_path}` pointing to the stored audio chunk.
+
+When `gateway.voice.tts.mode=command`, the Gateway runs the command with:
+
+- `{text}` and `{session_id}`.
+
+If the command prints a path to stdout, it is returned as `audio_path` in the `tts` event.
+
+## STT Endpoint
+
+```
+POST /voice/stt
+{
+  "session_id": "sess_voice",
+  "audio_path": "/path/to/audio.raw"
+}
+```
+
 ## Webhook APIs
 
 Webhook updates are persisted to `~/.euxis/data/gateway/webhooks.json`.

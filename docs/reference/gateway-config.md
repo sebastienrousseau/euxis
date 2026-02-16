@@ -72,11 +72,14 @@ Reference for the Gateway configuration file.
       "enabled": true,
       "stt": {
         "mode": "manual",
-        "webhook_url": ""
+        "webhook_url": "",
+        "command": "",
+        "auto_inject": true
       },
       "tts": {
         "mode": "manual",
-        "webhook_url": ""
+        "webhook_url": "",
+        "command": ""
       }
     }
   }
@@ -162,10 +165,13 @@ Reference for the Gateway configuration file.
 ### `gateway.voice`
 
 - `enabled` (bool): enable voice endpoints.
-- `stt.mode` (string): `manual` or `webhook`.
+- `stt.mode` (string): `manual`, `webhook`, or `command`.
 - `stt.webhook_url` (string): POST audio metadata for transcription.
-- `tts.mode` (string): `manual` or `webhook`.
+- `stt.command` (string): command to run for transcription (supports `{audio_path}`).
+- `stt.auto_inject` (bool): inject transcript into agent pipeline.
+- `tts.mode` (string): `manual`, `webhook`, or `command`.
 - `tts.webhook_url` (string): POST text for synthesis.
+- `tts.command` (string): command to run for synthesis (supports `{text}` and `{session_id}`).
 
 ## Notes
 
