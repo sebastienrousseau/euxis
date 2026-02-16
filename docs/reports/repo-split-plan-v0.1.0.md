@@ -359,3 +359,33 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pytest -q
 ```
+
+
+## Local Multi-Repo Workflow
+
+Recommended patterns for developers:
+
+- **git worktree**: keep `euxis-core`, `euxis-cli`, `euxis-gateway` checked out side-by-side.
+- **Path deps**: point `euxis-cli` to `../euxis-core` during development.
+- **Feature flags**: coordinate breaking changes with toggles.
+
+Example worktree setup:
+
+```bash
+git clone git@github.com:org/euxis-core.git ~/dev/euxis-core
+git -C ~/dev/euxis-core worktree add ../euxis-cli
+```
+
+
+## Repo README Drafts (short)
+
+- **euxis-core** — shared registry, schemas, and shell libs for Euxis.
+- **euxis-cli** — command entrypoints and automation tooling.
+- **euxis-gateway** — WebSocket control plane with HTTP health endpoints.
+- **euxis-adapters** — channel adapters and adapter SDK.
+- **euxis-tui** — Textual UI application for fleet management.
+- **euxis-security** — approval and allowlist policy defaults.
+- **euxis-metrics** — observability tooling and fleet metrics schemas.
+- **euxis-docs** — documentation and ADRs.
+- **euxis-crypto-lib** — Python crypto utilities.
+- **euxis-crypto-packages** — TypeScript crypto packages.
