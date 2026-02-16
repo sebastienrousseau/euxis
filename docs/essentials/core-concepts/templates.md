@@ -201,4 +201,4 @@ euxis-lint
 3. **Validate after creation**: Run lint/certify checks
 4. **Document customizations**: Note deviations from template
 
-**See Also**: [Agents](agents.md), [Playbooks](playbooks.md), [Patterns](../user-guide.md#patterns)
+**See Also**: [Agents](agents.md), [Playbooks](playbooks.md), [Patterns](../guides/user-guide.md#patterns)

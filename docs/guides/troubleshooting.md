@@ -38,7 +38,7 @@ euxis-health
   All agents have complete headers (agent_id, role, version, tags, last_updated).
 
 [5/10] Documentation Drift...
-  docs/user-guide.md is current (updated within 24h).
+  docs/guides/user-guide.md is current (updated within 24h).
 
 [6/10] Certification Readiness...
   euxis-certify is present and executable.
@@ -183,8 +183,8 @@ euxis-certify
   jq available for JSON validation
   PASS: euxis-sync-docs is present and executable.
   PASS: README.md exists.
-  PASS: docs/user-guide.md exists.
-  PASS: docs/fleet-guide.md exists.
+  PASS: docs/guides/user-guide.md exists.
+  PASS: docs/guides/fleet-guide.md exists.
   PASS: All documentation is current (updated within 7 days).
   PASS: README.md references version 0.0.8.
   Validating JSON manifest files...

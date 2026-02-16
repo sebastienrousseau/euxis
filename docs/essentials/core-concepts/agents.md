@@ -171,4 +171,4 @@ euxis orchestrator "Complex goal requiring multiple specialists"
 euxis-health  # Check all agent integrity
 ```
 
-See [Fleet Guide](../fleet-guide.md) for complete agent reference and [User Guide](../user-guide.md) for all CLI commands.
+See [Fleet Guide](../guides/fleet-guide.md) for complete agent reference and [User Guide](../guides/user-guide.md) for all CLI commands.

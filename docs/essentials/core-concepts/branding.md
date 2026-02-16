@@ -88,4 +88,4 @@ euxis-certify
 3. **Keep URLs current**: Ensure links are accessible
 4. **Sign cryptographically**: Enable GPG/SSH signing
 
-**See Also**: [Certification Gates](../user-guide.md#certification), [Commit Hooks](../reference/cli-reference.md#euxis-hooks)
+**See Also**: [Certification Gates](../guides/user-guide.md#certification), [Commit Hooks](../reference/cli-reference.md#euxis-hooks)

@@ -71,7 +71,7 @@ Your specialists handle research, design, implementation, security, testing, and
 
 Each agent remembers every interaction. Your team gets smarter with every project.
 
-[See the complete team →](fleet-guide.md)
+[See the complete team →](guides/fleet-guide.md)
 
 ---
 
@@ -186,7 +186,7 @@ euxis-voice
 
 Stop managing tools. Start building the future.
 
-[Get Started →](#installation) • [Read the Docs →](user-guide.md) • [See the Fleet →](fleet-guide.md)
+[Get Started →](#installation) • [Read the Docs →](guides/user-guide.md) • [See the Fleet →](guides/fleet-guide.md)
 
 ---
 
