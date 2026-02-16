@@ -141,8 +141,8 @@ class DispatchEngine:
 
     def __init__(self, euxis_home: Path | None = None) -> None:
         self.euxis_home = euxis_home or EUXIS_HOME
-        self.registry_path = self.euxis_home / "registry.json"
-        self.registry_db = self.euxis_home / "registry.db"
+        self.registry_path = self.euxis_home / "agents/registry.json"
+        self.registry_db = self.euxis_home / "agents/registry.db"
         self.log_dir: Path | None = None
         self._valid_agents: set[str] | None = None
 
@@ -160,7 +160,7 @@ class DispatchEngine:
                 cursor = conn.execute("SELECT id FROM agents")
                 self._valid_agents = {row[0] for row in cursor}
                 conn.close()
-                logger.info("Loaded %s agents from registry.db", len(self._valid_agents))
+                logger.info("Loaded %s agents from agents/registry.db", len(self._valid_agents))
                 return self._valid_agents
             except sqlite3.Error as exc:
                 logger.warning("SQLite registry query failed, falling back to JSON: %s", exc)
@@ -179,7 +179,7 @@ class DispatchEngine:
                 agent["id"] for agent in registry_data.get("agents", [])
                 if isinstance(agent, dict) and "id" in agent
             }
-            logger.info("Loaded %s agents from registry.json", len(self._valid_agents))
+            logger.info("Loaded %s agents from agents/registry.json", len(self._valid_agents))
 
         except (OSError, json.JSONDecodeError):
             logger.exception("Failed to load agent registry")

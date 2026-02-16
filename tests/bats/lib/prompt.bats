@@ -9,35 +9,35 @@ setup() {
 
     export EUXIS_HOME="${EUXIS_TEST_TMPDIR}/euxis"
     export PROMPTS_DIR="${EUXIS_HOME}/prompts"
-    mkdir -p "${EUXIS_HOME}/prompts/core"
-    mkdir -p "${EUXIS_HOME}/prompts/fleet"
-    mkdir -p "${EUXIS_HOME}/prompts/protocols"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/core"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/fleet"
+    mkdir -p "${EUXIS_HOME}/agents/prompts/protocols"
     mkdir -p "${EUXIS_HOME}/data/projects/test/architect"
     mkdir -p "${EUXIS_HOME}/data/lifecycle"
 
     # Create mock protocol files
-    cat > "${EUXIS_HOME}/prompts/protocols/_common.txt" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/prompts/protocols/_common.txt" << 'EOF'
 # Common Protocol
 All agents must follow these guidelines.
 EOF
 
-    cat > "${EUXIS_HOME}/prompts/protocols/_protocol.txt" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt" << 'EOF'
 # Base Protocol
 Standard operating procedures.
 EOF
 
-    cat > "${EUXIS_HOME}/prompts/protocols/_security-boundaries.txt" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/prompts/protocols/_security-boundaries.txt" << 'EOF'
 # Security Protocol
 Handle secrets and credentials carefully.
 EOF
 
-    cat > "${EUXIS_HOME}/prompts/protocols/_versioning.txt" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/prompts/protocols/_versioning.txt" << 'EOF'
 # Versioning Protocol
 Follow semver for releases.
 EOF
 
     # Create mock agent files
-    cat > "${EUXIS_HOME}/prompts/core/architect.txt" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/prompts/core/architect.txt" << 'EOF'
 ---
 agent_id: architect
 role: "System Architect"
@@ -55,7 +55,7 @@ Structured analysis with recommendations.
 EOF
 
     # Create mock registry
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
+    cat > "${EUXIS_HOME}/agents/registry.json" << 'EOF'
 {
   "agents": [
     {"id": "architect", "tier": "core"},
@@ -203,7 +203,7 @@ teardown() {
 
 @test "resolve_protocols respects token budget" {
     # Create a large protocol file
-    local large_file="${EUXIS_HOME}/prompts/protocols/_security-boundaries.txt"
+    local large_file="${EUXIS_HOME}/agents/prompts/protocols/_security-boundaries.txt"
     for i in $(seq 1 5000); do
         echo "Line ${i} of security content" >> "${large_file}"
     done
@@ -216,7 +216,7 @@ teardown() {
 }
 
 @test "resolve_protocols handles missing protocol files" {
-    rm -f "${EUXIS_HOME}/prompts/protocols/_security-boundaries.txt"
+    rm -f "${EUXIS_HOME}/agents/prompts/protocols/_security-boundaries.txt"
     run resolve_protocols "security task"
     [[ "${status}" -eq 0 ]]
     [[ "${output}" =~ "Common Protocol" ]]
@@ -238,7 +238,7 @@ teardown() {
 }
 
 @test "_get_fleet_roster falls back to JSON when SQLite unavailable" {
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
     run _get_fleet_roster
     [[ "${status}" -eq 0 ]]
     [[ "${output}" =~ "architect" ]]
@@ -344,7 +344,7 @@ teardown() {
 }
 
 @test "resolve_protocols handles missing protocols directory" {
-    rm -rf "${EUXIS_HOME}/prompts/protocols"
+    rm -rf "${EUXIS_HOME}/agents/prompts/protocols"
     run resolve_protocols "task"
     [[ "${status}" -eq 0 ]]
 }

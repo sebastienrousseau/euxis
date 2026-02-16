@@ -38,7 +38,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
                 {"id": "debugger", "tier": "fleet", "tags": ["fix"], "activation": "on-demand"},
             ],
         }
-        (self.home / "registry.json").write_text(json.dumps(data))
+        (self.home / "agents/registry.json").write_text(json.dumps(data))
 
         reg = FleetRegistry.load(euxis_home=self.home)
         assert len(reg.agents) == 2
@@ -67,7 +67,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
                 },
             ],
         }
-        (self.home / "squads.json").write_text(json.dumps(squads_data))
+        (self.home / "agents/squads.json").write_text(json.dumps(squads_data))
 
         reg = FleetRegistry.load(euxis_home=self.home)
         assert len(reg.squads) == 1
@@ -77,10 +77,10 @@ class TestFleetRegistryLoad(unittest.TestCase):
         assert reg.combos[0].chain == ("debugger", "tester")
 
     def test_load_both_files(self):
-        (self.home / "registry.json").write_text(json.dumps({
+        (self.home / "agents/registry.json").write_text(json.dumps({
             "agents": [{"id": "a1", "tier": "core"}],
         }))
-        (self.home / "squads.json").write_text(json.dumps({
+        (self.home / "agents/squads.json").write_text(json.dumps({
             "squads": [{"id": "s1", "name": "S1", "members": ["a1"]}],
             "combos": [],
         }))

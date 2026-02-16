@@ -188,8 +188,8 @@ euxis-certify
   PASS: All documentation is current (updated within 7 days).
   PASS: README.md references version 0.0.8.
   Validating JSON manifest files...
-  PASS: registry.json is valid JSON.
-  PASS: squads.json is valid JSON.
+  PASS: agents/registry.json is valid JSON.
+  PASS: agents/squads.json is valid JSON.
   PASS: config/capabilities.json is valid JSON.
   PASS: config/codex/codex.json is valid JSON.
 
@@ -575,10 +575,10 @@ euxis architect "Your task" ollama
 euxis --help 2>&1 | grep -A 100 "Available Agents"
 
 # Check registry (SQLite)
-python3 -c "import sqlite3; conn = sqlite3.connect('$HOME/.euxis/registry.db'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id')]))"
+python3 -c "import sqlite3; conn = sqlite3.connect('$HOME/.euxis/agents/registry.db'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id')]))"
 
 # Check registry (JSON fallback)
-jq -r '.agents[].id' ~/.euxis/registry.json | sort
+jq -r '.agents[].id' ~/.euxis/agents/registry.json | sort
 ```
 
 **Solutions:**
@@ -593,8 +593,8 @@ jq -r '.agents[].id' ~/.euxis/registry.json | sort
 
 2. **Check if prompt file exists:**
    ```bash
-   ls ~/.euxis/prompts/core/*.txt
-   ls ~/.euxis/prompts/fleet/*.txt
+   ls ~/.euxis/agents/prompts/core/*.txt
+   ls ~/.euxis/agents/prompts/fleet/*.txt
    ```
 
 3. **Re-sync registry:**
@@ -687,10 +687,10 @@ echo "Hello" | claude --print --model claude-sonnet-4-20250514
 2. **Check prompt file integrity:**
    ```bash
    # Validate prompt has required sections
-   head -50 ~/.euxis/prompts/core/architect.txt
+   head -50 ~/.euxis/agents/prompts/core/architect.txt
 
    # Check frontmatter
-   grep -E "^(agent_id|role|version):" ~/.euxis/prompts/core/architect.txt
+   grep -E "^(agent_id|role|version):" ~/.euxis/agents/prompts/core/architect.txt
    ```
 
 3. **Check model availability:**
@@ -1027,7 +1027,7 @@ tail -20 ~/.euxis/data/perf/metrics.jsonl
 1. **Use SQLite registry (faster):**
    ```bash
    # Check if using SQLite
-   ls ~/.euxis/registry.db
+   ls ~/.euxis/agents/registry.db
 
    # If not, migrate
    python3 ~/.euxis/scripts/migrate-registry-to-sqlite.py
@@ -1132,7 +1132,7 @@ System slows down during fleet dispatch.
 | `Provider command timed out` | API too slow / network issue | Increase `EUXIS_API_TIMEOUT` |
 | `Path traversal rejected` | Security: Invalid file path | Use valid paths within `~/.euxis` |
 | `Invalid model name` | Malformed model identifier | Check `EUXIS_*_MODEL` env vars |
-| `Registry not found` | Missing registry.db/json | Run `~/.euxis/setup.sh` |
+| `Registry not found` | Missing agents/registry.db/json | Run `~/.euxis/setup.sh` |
 | `FATAL: Cannot load validation library` | Missing lib/validation.sh | Re-clone repository |
 | `Task input rejected: prompt injection` | Security: Dangerous input | Remove injection patterns from task |
 | `chromadb not installed` | Missing Cortex dependencies | Run `pip install chromadb` |

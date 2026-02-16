@@ -204,7 +204,7 @@ validate_euxis_structure() {
         "$euxis_home"
         "$euxis_home/bin"
         "$euxis_home/core/lib"
-        "$euxis_home/prompts"
+        "$euxis_home/agents/prompts"
         "$euxis_home/data"
     )
 
@@ -216,25 +216,25 @@ validate_euxis_structure() {
     done
 
     # Check registry exists (SQLite or JSON)
-    if [[ -f "$euxis_home/registry.db" ]]; then
+    if [[ -f "$euxis_home/agents/registry.db" ]]; then
         # Validate SQLite database
         local agent_count
         # Use Python for SQLite access (more portable than sqlite3 CLI)
-        agent_count=$(python3 -c "import sqlite3; conn = sqlite3.connect('$euxis_home/registry.db'); print(conn.execute('SELECT COUNT(*) FROM agents').fetchone()[0])" 2>/dev/null)
+        agent_count=$(python3 -c "import sqlite3; conn = sqlite3.connect('$euxis_home/agents/registry.db'); print(conn.execute('SELECT COUNT(*) FROM agents').fetchone()[0])" 2>/dev/null)
         if [[ -n "$agent_count" && "$agent_count" -gt 0 ]]; then
             validation_pass "Registry database valid ($agent_count agents)"
         else
-            validation_error "Registry database empty or corrupt: $euxis_home/registry.db"
+            validation_error "Registry database empty or corrupt: $euxis_home/agents/registry.db"
             return 1
         fi
-    elif [[ -f "$euxis_home/registry.json" ]]; then
+    elif [[ -f "$euxis_home/agents/registry.json" ]]; then
         # Fall back to JSON validation
-        if ! jq empty "$euxis_home/registry.json" &>/dev/null; then
-            validation_error "Registry file is not valid JSON: $euxis_home/registry.json"
+        if ! jq empty "$euxis_home/agents/registry.json" &>/dev/null; then
+            validation_error "Registry file is not valid JSON: $euxis_home/agents/registry.json"
             return 1
         fi
     else
-        validation_error "Registry not found (neither registry.db nor registry.json)"
+        validation_error "Registry not found (neither agents/registry.db nor agents/registry.json)"
         return 1
     fi
 

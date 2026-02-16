@@ -46,8 +46,8 @@ echo "  Press [Ctrl+C] to stop safely."
 echo "---------------------------------------------------"
 
 compute_hash() {
-    find "$EUXIS_HOME/prompts" "$EUXIS_HOME/bin" -type f -exec md5 -q {} + 2>/dev/null | sort | md5 -q 2>/dev/null \
-        || find "$EUXIS_HOME/prompts" "$EUXIS_HOME/bin" -type f -exec md5sum {} + 2>/dev/null | sort | md5sum 2>/dev/null
+    find "$EUXIS_HOME/agents/prompts" "$EUXIS_HOME/bin" -type f -exec md5 -q {} + 2>/dev/null | sort | md5 -q 2>/dev/null \
+        || find "$EUXIS_HOME/agents/prompts" "$EUXIS_HOME/bin" -type f -exec md5sum {} + 2>/dev/null | sort | md5sum 2>/dev/null
 }
 
 while true; do

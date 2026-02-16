@@ -11,8 +11,8 @@ from pathlib import Path
 
 EUXIS_ROOT = Path.home() / ".euxis"
 CAPABILITIES_FILE = EUXIS_ROOT / "capabilities.json"
-REGISTRY_FILE = EUXIS_ROOT / "registry.json"
-REGISTRY_DB = EUXIS_ROOT / "registry.db"
+REGISTRY_FILE = EUXIS_ROOT / "agents/registry.json"
+REGISTRY_DB = EUXIS_ROOT / "agents/registry.db"
 SYNTHESIZED_DIR = EUXIS_ROOT / "prompts" / "synthesized"
 COMMON_PROTOCOL = EUXIS_ROOT / "prompts" / "protocols" / "_common.txt"
 
@@ -61,7 +61,7 @@ def load_registry():
             pass  # Fall through to JSON
 
     if not REGISTRY_FILE.exists():
-        print(f"ERROR: Registry not found (neither registry.db nor registry.json)", file=sys.stderr)
+        print(f"ERROR: Registry not found (neither agents/registry.db nor agents/registry.json)", file=sys.stderr)
         sys.exit(1)
     with open(REGISTRY_FILE) as f:
         return json.load(f)
@@ -95,7 +95,7 @@ def save_registry(registry):
             conn.commit()
             conn.close()
         except sqlite3.Error as e:
-            print(f"WARNING: Failed to sync to registry.db: {e}", file=sys.stderr)
+            print(f"WARNING: Failed to sync to agents/registry.db: {e}", file=sys.stderr)
 
 
 def cmd_list_capabilities(args):
@@ -195,7 +195,7 @@ Follow the standard Euxis output format with EUXIS_HANDOFF block.
         print("=== DRY RUN — Generated prompt ===\n")
         print(prompt)
         print(f"Would write to: {prompt_path}")
-        print("Would register agent in registry.json")
+        print("Would register agent in agents/registry.json")
         return
 
     with open(prompt_path, "w") as f:
@@ -208,13 +208,13 @@ Follow the standard Euxis output format with EUXIS_HANDOFF block.
     registry["agents"] = [a for a in registry["agents"] if a["id"] != name]
     registry["agents"].append({
         "id": name,
-        "path": f"prompts/synthesized/{name}.txt",
+        "path": f"agents/prompts/synthesized/{name}.txt",
         "tier": "synthesized",
         "version": "6.0",
         "tags": ["synthesized"] + cap_ids
     })
     save_registry(registry)
-    print(f"Agent '{name}' registered in registry.json (tier: synthesized)")
+    print(f"Agent '{name}' registered in agents/registry.json (tier: synthesized)")
 
 
 def cmd_dissolve(args):

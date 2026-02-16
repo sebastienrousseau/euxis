@@ -7,7 +7,7 @@ set -euo pipefail
 
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-PROMPTS_DIR="${EUXIS_HOME}/prompts"
+PROMPTS_DIR="${EUXIS_HOME}/agents/prompts"
 
 # Source SQL registry functions if available
 if [[ -f "${EUXIS_HOME}/core/lib/registry_sql.sh" ]]; then

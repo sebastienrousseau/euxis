@@ -151,7 +151,7 @@ debugging ←→ performance-profiling ←→ test-analysis
 │   └── projects/          # Project-specific sessions
 ├── docs/                   # Documentation
 │   └── adr/               # Architecture Decision Records
-└── prompts/               # Agent prompts
+└── agents/prompts/               # Agent prompts
     ├── core/              # Core tier agents
     ├── fleet/             # Fleet tier agents
     └── protocols/         # Shared protocol fragments
@@ -210,8 +210,8 @@ Enables agents to share context and avoid redundant work:
 
 ### Adding New Agents
 
-1. Create prompt file: `prompts/fleet/<agent-name>.txt`
-2. Register in `registry.json`
+1. Create prompt file: `agents/prompts/fleet/<agent-name>.txt`
+2. Register in `agents/registry.json`
 3. Define capability tags
 
 ### Adding New Providers
@@ -222,7 +222,7 @@ Enables agents to share context and avoid redundant work:
 ### Adding New Capabilities
 
 1. Define in `capabilities.json`
-2. Map to relevant agents in `registry.json`
+2. Map to relevant agents in `agents/registry.json`
 
 ---
 

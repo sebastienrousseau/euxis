@@ -7,7 +7,7 @@
   "agents": [
     {
       "id": "accountant",
-      "path": "prompts/fleet/accountant.txt",
+      "path": "agents/prompts/fleet/accountant.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -25,7 +25,7 @@
     },
     {
       "id": "ambassador",
-      "path": "prompts/fleet/ambassador.txt",
+      "path": "agents/prompts/fleet/ambassador.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -40,7 +40,7 @@
     },
     {
       "id": "animator",
-      "path": "prompts/fleet/animator.txt",
+      "path": "agents/prompts/fleet/animator.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -58,7 +58,7 @@
     },
     {
       "id": "arbiter",
-      "path": "prompts/core/arbiter.txt",
+      "path": "agents/prompts/core/arbiter.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -75,7 +75,7 @@
     },
     {
       "id": "architect",
-      "path": "prompts/core/architect.txt",
+      "path": "agents/prompts/core/architect.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -92,7 +92,7 @@
     },
     {
       "id": "auditor",
-      "path": "prompts/core/auditor.txt",
+      "path": "agents/prompts/core/auditor.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -108,7 +108,7 @@
     },
     {
       "id": "automaton",
-      "path": "prompts/fleet/automaton.txt",
+      "path": "agents/prompts/fleet/automaton.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -125,7 +125,7 @@
     },
     {
       "id": "bridge",
-      "path": "prompts/fleet/bridge.txt",
+      "path": "agents/prompts/fleet/bridge.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "activation": "default",
@@ -143,7 +143,7 @@
     },
     {
       "id": "butler",
-      "path": "prompts/fleet/butler.txt",
+      "path": "agents/prompts/fleet/butler.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -159,7 +159,7 @@
     },
     {
       "id": "conduit",
-      "path": "prompts/fleet/conduit.txt",
+      "path": "agents/prompts/fleet/conduit.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -177,7 +177,7 @@
     },
     {
       "id": "critic",
-      "path": "prompts/core/critic.txt",
+      "path": "agents/prompts/core/critic.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -195,7 +195,7 @@
     },
     {
       "id": "cryptographer",
-      "path": "prompts/fleet/cryptographer.txt",
+      "path": "agents/prompts/fleet/cryptographer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -213,7 +213,7 @@
     },
     {
       "id": "custodian",
-      "path": "prompts/fleet/custodian.txt",
+      "path": "agents/prompts/fleet/custodian.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -231,7 +231,7 @@
     },
     {
       "id": "debugger",
-      "path": "prompts/fleet/debugger.txt",
+      "path": "agents/prompts/fleet/debugger.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -248,7 +248,7 @@
     },
     {
       "id": "deep-researcher",
-      "path": "prompts/fleet/deep-researcher.txt",
+      "path": "agents/prompts/fleet/deep-researcher.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -266,7 +266,7 @@
     },
     {
       "id": "designer",
-      "path": "prompts/fleet/designer.txt",
+      "path": "agents/prompts/fleet/designer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -288,7 +288,7 @@
     },
     {
       "id": "distill",
-      "path": "prompts/fleet/distill.txt",
+      "path": "agents/prompts/fleet/distill.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "activation": "on-demand",
@@ -306,7 +306,7 @@
     },
     {
       "id": "evangelist",
-      "path": "prompts/fleet/evangelist.txt",
+      "path": "agents/prompts/fleet/evangelist.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -323,7 +323,7 @@
     },
     {
       "id": "gatekeeper",
-      "path": "prompts/fleet/gatekeeper.txt",
+      "path": "agents/prompts/fleet/gatekeeper.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -339,7 +339,7 @@
     },
     {
       "id": "govern",
-      "path": "prompts/fleet/govern.txt",
+      "path": "agents/prompts/fleet/govern.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "activation": "on-demand",
@@ -357,7 +357,7 @@
     },
     {
       "id": "guard",
-      "path": "prompts/core/guard.txt",
+      "path": "agents/prompts/core/guard.txt",
       "tier": "core",
       "version": "0.0.8",
       "activation": "core",
@@ -376,7 +376,7 @@
     },
     {
       "id": "heal",
-      "path": "prompts/fleet/heal.txt",
+      "path": "agents/prompts/fleet/heal.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "activation": "default",
@@ -395,7 +395,7 @@
     },
     {
       "id": "historian",
-      "path": "prompts/core/historian.txt",
+      "path": "agents/prompts/core/historian.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -414,7 +414,7 @@
     },
     {
       "id": "inspector",
-      "path": "prompts/fleet/inspector.txt",
+      "path": "agents/prompts/fleet/inspector.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -431,7 +431,7 @@
     },
     {
       "id": "interactor",
-      "path": "prompts/fleet/interactor.txt",
+      "path": "agents/prompts/fleet/interactor.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -449,7 +449,7 @@
     },
     {
       "id": "investigator",
-      "path": "prompts/fleet/investigator.txt",
+      "path": "agents/prompts/fleet/investigator.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -466,7 +466,7 @@
     },
     {
       "id": "ledger",
-      "path": "prompts/fleet/ledger.txt",
+      "path": "agents/prompts/fleet/ledger.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -484,7 +484,7 @@
     },
     {
       "id": "librarian",
-      "path": "prompts/core/librarian.txt",
+      "path": "agents/prompts/core/librarian.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -501,7 +501,7 @@
     },
     {
       "id": "localizer",
-      "path": "prompts/fleet/localizer.txt",
+      "path": "agents/prompts/fleet/localizer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -516,7 +516,7 @@
     },
     {
       "id": "maintainer",
-      "path": "prompts/fleet/maintainer.txt",
+      "path": "agents/prompts/fleet/maintainer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -533,7 +533,7 @@
     },
     {
       "id": "marketer",
-      "path": "prompts/fleet/marketer.txt",
+      "path": "agents/prompts/fleet/marketer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -548,7 +548,7 @@
     },
     {
       "id": "optimizer",
-      "path": "prompts/fleet/optimizer.txt",
+      "path": "agents/prompts/fleet/optimizer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -564,7 +564,7 @@
     },
     {
       "id": "orchestrator",
-      "path": "prompts/core/orchestrator.txt",
+      "path": "agents/prompts/core/orchestrator.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -582,7 +582,7 @@
     },
     {
       "id": "pair",
-      "path": "prompts/core/pair.txt",
+      "path": "agents/prompts/core/pair.txt",
       "tier": "core",
       "version": "0.0.8",
       "activation": "core",
@@ -601,7 +601,7 @@
     },
     {
       "id": "pentester",
-      "path": "prompts/fleet/pentester.txt",
+      "path": "agents/prompts/fleet/pentester.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -617,7 +617,7 @@
     },
     {
       "id": "planner",
-      "path": "prompts/core/planner.txt",
+      "path": "agents/prompts/core/planner.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -633,7 +633,7 @@
     },
     {
       "id": "polyglot",
-      "path": "prompts/fleet/polyglot.txt",
+      "path": "agents/prompts/fleet/polyglot.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -651,7 +651,7 @@
     },
     {
       "id": "repairer",
-      "path": "prompts/fleet/repairer.txt",
+      "path": "agents/prompts/fleet/repairer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -670,7 +670,7 @@
     },
     {
       "id": "researcher",
-      "path": "prompts/fleet/researcher.txt",
+      "path": "agents/prompts/fleet/researcher.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -686,7 +686,7 @@
     },
     {
       "id": "responder",
-      "path": "prompts/fleet/responder.txt",
+      "path": "agents/prompts/fleet/responder.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -703,7 +703,7 @@
     },
     {
       "id": "reviewer",
-      "path": "prompts/core/reviewer.txt",
+      "path": "agents/prompts/core/reviewer.txt",
       "tier": "core",
       "version": "0.0.8",
       "tags": [
@@ -720,7 +720,7 @@
     },
     {
       "id": "route",
-      "path": "prompts/core/route.txt",
+      "path": "agents/prompts/core/route.txt",
       "tier": "core",
       "version": "0.0.8",
       "activation": "core",
@@ -739,7 +739,7 @@
     },
     {
       "id": "sentinel",
-      "path": "prompts/fleet/sentinel.txt",
+      "path": "agents/prompts/fleet/sentinel.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -757,7 +757,7 @@
     },
     {
       "id": "strategist",
-      "path": "prompts/fleet/strategist.txt",
+      "path": "agents/prompts/fleet/strategist.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -773,7 +773,7 @@
     },
     {
       "id": "tactician",
-      "path": "prompts/fleet/tactician.txt",
+      "path": "agents/prompts/fleet/tactician.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -792,7 +792,7 @@
     },
     {
       "id": "telemetrist",
-      "path": "prompts/fleet/telemetrist.txt",
+      "path": "agents/prompts/fleet/telemetrist.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -808,7 +808,7 @@
     },
     {
       "id": "tester",
-      "path": "prompts/fleet/tester.txt",
+      "path": "agents/prompts/fleet/tester.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -824,7 +824,7 @@
     },
     {
       "id": "trace",
-      "path": "prompts/fleet/trace.txt",
+      "path": "agents/prompts/fleet/trace.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "activation": "default",
@@ -843,7 +843,7 @@
     },
     {
       "id": "watchdog",
-      "path": "prompts/fleet/watchdog.txt",
+      "path": "agents/prompts/fleet/watchdog.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [
@@ -861,7 +861,7 @@
     },
     {
       "id": "writer",
-      "path": "prompts/fleet/writer.txt",
+      "path": "agents/prompts/fleet/writer.txt",
       "tier": "fleet",
       "version": "0.0.8",
       "tags": [

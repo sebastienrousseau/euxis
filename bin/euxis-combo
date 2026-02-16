@@ -11,7 +11,7 @@ fi
 
 
 EUXIS_DIR="$HOME/.euxis"
-SQUADS_FILE="$EUXIS_DIR/squads.json"
+SQUADS_FILE="$EUXIS_DIR/agents/squads.json"
 
 usage() {
   cat <<'EOF'
@@ -42,7 +42,7 @@ require_jq() {
 
 require_squads_file() {
   if [[ ! -f "$SQUADS_FILE" ]]; then
-    echo "Error: squads.json not found at $SQUADS_FILE" >&2
+    echo "Error: agents/squads.json not found at $SQUADS_FILE" >&2
     exit 1
   fi
 }

@@ -209,7 +209,7 @@ test_configuration_integrity() {
     echo -e "${BLUE}🔧 Testing Configuration Integrity${NC}"
     echo "-----------------------------------"
 
-    run_documentation_test "Registry JSON Valid" "python3 -m json.tool ~/.euxis/registry.json > /dev/null" "" 0
+    run_documentation_test "Registry JSON Valid" "python3 -m json.tool ~/.euxis/agents/registry.json > /dev/null" "" 0
     run_documentation_test "Agent Prompts Directory" "test -d ~/.euxis/prompts" "" 0
     run_documentation_test "Config Directory" "test -d ~/.euxis/config" "" 0
 }

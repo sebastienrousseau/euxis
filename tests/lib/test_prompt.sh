@@ -11,8 +11,8 @@ assert_contains "always loads _protocol.txt content" "EUXIS MANDATORY PROTOCOL" 
 # Test resolve_protocols: security keywords trigger security protocol
 result=$(resolve_protocols "review authentication and credentials")
 # Should contain security-boundaries content if the file exists
-if [[ -f "${EUXIS_HOME}/prompts/protocols/_security-boundaries.txt" ]]; then
-    sec_content=$(head -5 "${EUXIS_HOME}/prompts/protocols/_security-boundaries.txt")
+if [[ -f "${EUXIS_HOME}/agents/prompts/protocols/_security-boundaries.txt" ]]; then
+    sec_content=$(head -5 "${EUXIS_HOME}/agents/prompts/protocols/_security-boundaries.txt")
     if [[ -n "${sec_content}" ]]; then
         assert_contains "security keywords load security protocol" "security" "${result}"
     fi
@@ -20,7 +20,7 @@ fi
 
 # Test resolve_protocols: graph keywords trigger graph protocol
 result=$(resolve_protocols "analyze the knowledge graph entities")
-if [[ -f "${EUXIS_HOME}/prompts/protocols/_graph-memory.txt" ]]; then
+if [[ -f "${EUXIS_HOME}/agents/prompts/protocols/_graph-memory.txt" ]]; then
     assert_contains "graph keywords load graph protocol" "graph" "graph"
 fi
 

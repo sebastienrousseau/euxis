@@ -7,7 +7,7 @@ set -euo pipefail
 
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-PROMPTS_DIR="${EUXIS_HOME}/prompts"
+PROMPTS_DIR="${EUXIS_HOME}/agents/prompts"
 
 source "${EUXIS_HOME}/core/lib/agents.sh"
 source "${EUXIS_HOME}/core/lib/memory.sh"
@@ -143,8 +143,8 @@ _get_fleet_roster() {
     # Return cached result if available
     if [[ -n "${_EUXIS_REGISTRY_CACHE}" ]]; then
         # Check mtime for cache invalidation
-        local registry_file="${EUXIS_HOME}/registry.db"
-        [[ -f "${registry_file}" ]] || registry_file="${EUXIS_HOME}/registry.json"
+        local registry_file="${EUXIS_HOME}/agents/registry.db"
+        [[ -f "${registry_file}" ]] || registry_file="${EUXIS_HOME}/agents/registry.json"
         if [[ -f "${registry_file}" ]]; then
             local current_mtime
             current_mtime=$(stat -c '%Y' "${registry_file}" 2>/dev/null || stat -f '%m' "${registry_file}" 2>/dev/null)
@@ -156,7 +156,7 @@ _get_fleet_roster() {
     fi
 
     # Try SQLite first
-    local db_file="${EUXIS_HOME}/registry.db"
+    local db_file="${EUXIS_HOME}/agents/registry.db"
     if [[ -f "${db_file}" ]]; then
         local ids
         ids=$(sqlite3 -init /dev/null "${db_file}" "SELECT id FROM agents ORDER BY id" 2>/dev/null)
@@ -170,7 +170,7 @@ _get_fleet_roster() {
     fi
 
     # Fall back to JSON
-    local registry_file="${EUXIS_HOME}/registry.json"
+    local registry_file="${EUXIS_HOME}/agents/registry.json"
     if [[ -f "${registry_file}" ]] && command -v jq &>/dev/null; then
         _EUXIS_REGISTRY_CACHE=$(jq -r '[.agents[].id] | join(", ")' "${registry_file}" 2>/dev/null)
         _EUXIS_REGISTRY_MTIME=$(stat -c '%Y' "${registry_file}" 2>/dev/null || stat -f '%m' "${registry_file}" 2>/dev/null)

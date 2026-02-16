@@ -42,7 +42,7 @@ class TestBackupFunctionality(unittest.TestCase):
         # Mock the global paths
         self.original_registry_file = migrate_registry_to_sqlite.REGISTRY_FILE
         self.original_backup_dir = migrate_registry_to_sqlite.BACKUP_DIR
-        migrate_registry_to_sqlite.REGISTRY_FILE = self.temp_path / "registry.json"
+        migrate_registry_to_sqlite.REGISTRY_FILE = self.temp_path / "agents/registry.json"
         migrate_registry_to_sqlite.BACKUP_DIR = self.temp_path / "backups"
 
     def tearDown(self):
@@ -630,8 +630,8 @@ class TestMainFunction(unittest.TestCase):
         self.original_registry_file = migrate_registry_to_sqlite.REGISTRY_FILE
         self.original_db_file = migrate_registry_to_sqlite.DB_FILE
         self.original_backup_dir = migrate_registry_to_sqlite.BACKUP_DIR
-        migrate_registry_to_sqlite.REGISTRY_FILE = self.temp_path / "registry.json"
-        migrate_registry_to_sqlite.DB_FILE = self.temp_path / "registry.db"
+        migrate_registry_to_sqlite.REGISTRY_FILE = self.temp_path / "agents/registry.json"
+        migrate_registry_to_sqlite.DB_FILE = self.temp_path / "agents/registry.db"
         migrate_registry_to_sqlite.BACKUP_DIR = self.temp_path / "backups"
 
     def tearDown(self):

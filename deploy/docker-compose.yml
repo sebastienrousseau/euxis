@@ -8,7 +8,7 @@ services:
       dockerfile: deploy/Dockerfile
     container_name: euxis-fleet
     volumes:
-      - ..:/root/.euxis  # Maps local prompts/logs for persistence
+      - ..:/root/.euxis  # Maps local agents/prompts/logs for persistence
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}

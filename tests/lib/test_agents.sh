@@ -5,11 +5,11 @@ source "${EUXIS_HOME}/bin/lib/agents.sh"
 
 # Test resolve_agent_path: known core agent
 result=$(resolve_agent_path "architect")
-assert_eq "resolve architect path" "${EUXIS_HOME}/prompts/core/architect.txt" "${result}"
+assert_eq "resolve architect path" "${EUXIS_HOME}/agents/prompts/core/architect.txt" "${result}"
 
 # Test resolve_agent_path: known fleet agent
 result=$(resolve_agent_path "bug-fixer")
-assert_eq "resolve bug-fixer path" "${EUXIS_HOME}/prompts/fleet/bug-fixer.txt" "${result}"
+assert_eq "resolve bug-fixer path" "${EUXIS_HOME}/agents/prompts/fleet/bug-fixer.txt" "${result}"
 
 # Test resolve_agent_path: unknown agent returns empty
 result=$(resolve_agent_path "nonexistent-agent-xyz" 2>/dev/null || true)

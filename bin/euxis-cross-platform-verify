@@ -231,24 +231,24 @@ verify_agent_registry() {
     log_info "Verifying agent registry..."
 
     # SQLite-first, JSON fallback
-    if [[ -f "$EUXIS_ROOT/registry.db" ]]; then
+    if [[ -f "$EUXIS_ROOT/agents/registry.db" ]]; then
         local agent_count
-        agent_count=$(sqlite3 -init /dev/null "$EUXIS_ROOT/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null) || agent_count=""
+        agent_count=$(sqlite3 -init /dev/null "$EUXIS_ROOT/agents/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null) || agent_count=""
         if [[ -n "$agent_count" && "$agent_count" -gt 0 ]]; then
             log_success "Agent registry: SQLite database with $agent_count agents"
             return 0
         fi
     fi
 
-    if [[ ! -f "$EUXIS_ROOT/registry.json" ]]; then
-        log_error "Agent registry not found (neither registry.db nor registry.json)"
+    if [[ ! -f "$EUXIS_ROOT/agents/registry.json" ]]; then
+        log_error "Agent registry not found (neither agents/registry.db nor agents/registry.json)"
         return 1
     fi
 
     # Test JSON validity
-    if python3 -c "import json; json.load(open('$EUXIS_ROOT/registry.json'))" 2>/dev/null; then
+    if python3 -c "import json; json.load(open('$EUXIS_ROOT/agents/registry.json'))" 2>/dev/null; then
         local agent_count
-        agent_count="$(python3 -c "import json; data=json.load(open('$EUXIS_ROOT/registry.json')); print(len(data.get('agents',[])))")"
+        agent_count="$(python3 -c "import json; data=json.load(open('$EUXIS_ROOT/agents/registry.json')); print(len(data.get('agents',[])))")"
         log_success "Agent registry: Valid JSON with $agent_count agents"
     else
         log_error "Agent registry: Invalid JSON"

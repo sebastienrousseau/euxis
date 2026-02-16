@@ -213,8 +213,8 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         """Test DispatchEngine with default EUXIS_HOME."""
         engine = DispatchEngine()
         assert engine.euxis_home == Path.home() / ".euxis"
-        assert engine.registry_path == engine.euxis_home / "registry.json"
-        assert engine.registry_db == engine.euxis_home / "registry.db"
+        assert engine.registry_path == engine.euxis_home / "agents/registry.json"
+        assert engine.registry_db == engine.euxis_home / "agents/registry.db"
         assert engine.log_dir is None
         assert engine._valid_agents is None
 
@@ -223,12 +223,12 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         custom_home = self.temp_path / "custom_euxis"
         engine = DispatchEngine(euxis_home=custom_home)
         assert engine.euxis_home == custom_home
-        assert engine.registry_path == custom_home / "registry.json"
-        assert engine.registry_db == custom_home / "registry.db"
+        assert engine.registry_path == custom_home / "agents/registry.json"
+        assert engine.registry_db == custom_home / "agents/registry.db"
 
     def _create_test_db(self, agents):
         """Create a test SQLite registry database."""
-        db_path = self.temp_path / "registry.db"
+        db_path = self.temp_path / "agents/registry.db"
         conn = sqlite3.connect(str(db_path))
         conn.execute("""
             CREATE TABLE agents (
@@ -248,7 +248,7 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         for agent in agents:
             conn.execute(
                 "INSERT INTO agents (id, path, tier, version) VALUES (?, ?, ?, ?)",
-                (agent["id"], agent.get("path", f"prompts/fleet/{agent['id']}.txt"),
+                (agent["id"], agent.get("path", f"agents/prompts/fleet/{agent['id']}.txt"),
                  agent.get("tier", "fleet"), agent.get("version", "0.0.8"))
             )
         conn.commit()
@@ -277,7 +277,7 @@ class TestDispatchEngineInitialization(unittest.TestCase):
             {"id": "sql-agent2"}
         ])
         # Create JSON with different agents
-        registry_file = self.temp_path / "registry.json"
+        registry_file = self.temp_path / "agents/registry.json"
         registry_file.write_text(json.dumps({
             "agents": [{"id": "json-agent1"}, {"id": "json-agent2"}, {"id": "json-agent3"}]
         }))
@@ -298,7 +298,7 @@ class TestDispatchEngineInitialization(unittest.TestCase):
                 {"id": "agent2", "tier": "fleet"}
             ]
         }
-        registry_file = self.temp_path / "registry.json"
+        registry_file = self.temp_path / "agents/registry.json"
         registry_file.write_text(json.dumps(registry_data))
 
         engine = DispatchEngine(euxis_home=self.temp_path)
@@ -316,7 +316,7 @@ class TestDispatchEngineInitialization(unittest.TestCase):
 
     def test_load_agent_registry_invalid_json(self):
         """Test loading registry with invalid JSON (no SQLite)."""
-        registry_file = self.temp_path / "registry.json"
+        registry_file = self.temp_path / "agents/registry.json"
         registry_file.write_text('{"invalid": json}')
 
         engine = DispatchEngine(euxis_home=self.temp_path)
@@ -381,7 +381,7 @@ class TestDispatchEngineValidation(unittest.TestCase):
         """Test validation with unknown agents."""
         # Create registry with known agents
         registry_data = {"agents": [{"id": "known-agent"}]}
-        registry_file = self.temp_path / "registry.json"
+        registry_file = self.temp_path / "agents/registry.json"
         registry_file.write_text(json.dumps(registry_data))
 
         manifest = Manifest(

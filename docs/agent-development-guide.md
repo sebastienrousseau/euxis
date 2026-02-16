@@ -63,7 +63,7 @@ For agents that should be part of the permanent fleet:
 
 ### Step 1: Create Prompt File
 
-Place the file in `~/.euxis/prompts/fleet/<agent-id>.txt`.
+Place the file in `~/.euxis/agents/prompts/fleet/<agent-id>.txt`.
 
 **Required YAML frontmatter:**
 ```yaml
@@ -84,7 +84,7 @@ last_updated: "<YYYY-MM-DD>"
 
 ### Step 2: Add to Registry
 
-Add the agent entry to `~/.euxis/registry.json`:
+Add the agent entry to `~/.euxis/agents/registry.json`:
 
 ```json
 {
@@ -129,7 +129,7 @@ AGENTS=("architect" ... "my-agent")
 
 ```bash
 # Syntax check
-bash -n ~/.euxis/prompts/fleet/my-agent.txt
+bash -n ~/.euxis/agents/prompts/fleet/my-agent.txt
 
 # Lint validation (checks frontmatter, sections, registry)
 euxis-lint

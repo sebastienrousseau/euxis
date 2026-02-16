@@ -161,8 +161,8 @@ echo "🔍 Testing File and Config Validation"
 echo "--------------------------------------"
 
 # Test 8: Configuration and registry validation
-run_test "Registry file exists" "test -f ~/.euxis/registry.json"
-run_test "Registry JSON is valid" "python3 -m json.tool ~/.euxis/registry.json > /dev/null"
+run_test "Registry file exists" "test -f ~/.euxis/agents/registry.json"
+run_test "Registry JSON is valid" "python3 -m json.tool ~/.euxis/agents/registry.json > /dev/null"
 run_test "Agent prompts directory exists" "test -d ~/.euxis/prompts"
 
 echo ""

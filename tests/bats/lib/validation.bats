@@ -17,8 +17,8 @@ setup() {
     # Mock external commands
     export PATH="${EUXIS_TEST_TMPDIR}:${PATH}"
 
-    # Create valid registry.json
-    cat > "${EUXIS_HOME}/registry.json" << 'EOF'
+    # Create valid agents/registry.json
+    cat > "${EUXIS_HOME}/agents/registry.json" << 'EOF'
 {
   "agents": [
     {"id": "architect", "tier": "core"},
@@ -286,8 +286,8 @@ teardown() {
 }
 
 @test "validate_euxis_structure fails on missing registry" {
-    rm -f "${EUXIS_HOME}/registry.json"
-    rm -f "${EUXIS_HOME}/registry.db"
+    rm -f "${EUXIS_HOME}/agents/registry.json"
+    rm -f "${EUXIS_HOME}/agents/registry.db"
 
     run validate_euxis_structure
     [[ "${status}" -eq 1 ]]
@@ -295,7 +295,7 @@ teardown() {
 }
 
 @test "validate_euxis_structure fails on invalid JSON registry" {
-    echo "invalid json" > "${EUXIS_HOME}/registry.json"
+    echo "invalid json" > "${EUXIS_HOME}/agents/registry.json"
 
     run validate_euxis_structure
     [[ "${status}" -eq 1 ]]

@@ -20,7 +20,7 @@ ls ~/.euxis/config/templates/
 
 # Create a new agent from template
 cp ~/.euxis/config/templates/agent-prompt.txt \
-   ~/.euxis/prompts/fleet/my-new-agent.txt
+   ~/.euxis/agents/prompts/fleet/my-new-agent.txt
 ```
 
 ## Available Templates
@@ -157,12 +157,12 @@ PROPOSED | ACCEPTED | DEPRECATED | SUPERSEDED
 ```bash
 # Copy template
 cp ~/.euxis/config/templates/agent-prompt.txt \
-   ~/.euxis/prompts/fleet/my-agent.txt
+   ~/.euxis/agents/prompts/fleet/my-agent.txt
 
 # Edit with your agent details
-$EDITOR ~/.euxis/prompts/fleet/my-agent.txt
+$EDITOR ~/.euxis/agents/prompts/fleet/my-agent.txt
 
-# Register in registry.json
+# Register in agents/registry.json
 # (add entry with agent ID matching filename)
 ```
 

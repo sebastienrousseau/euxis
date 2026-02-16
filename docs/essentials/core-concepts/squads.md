@@ -92,7 +92,7 @@ Squads execute via dispatch manifests in three modes:
 
 ### Custom Squad Definition
 
-Add to `squads.json`:
+Add to `agents/squads.json`:
 
 ```json
 {
