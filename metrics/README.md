@@ -4,6 +4,16 @@
 
 The Euxis Agent Performance Metrics System provides comprehensive observability for agent operations, tracking task completion times, success rates, delegation patterns, and tool usage across the fleet.
 
+## Module Notes
+
+- **Repo path:** `metrics/`
+- **Runtime data path:** `~/.euxis/metrics/`
+- **Primary entrypoint:** `metrics/metrics_cli.py`
+
+## Dependencies
+
+- `core/` — shared utilities
+
 ## Architecture
 
 ```
