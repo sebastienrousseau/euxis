@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.0.9] - 2026-02-16
+
+### Changed
+- **Dependency Security**: Updated `cryptography` to address Dependabot-reported vulnerabilities
+
+### Fixed
+- **Release Hygiene**: Documented issue closure status and release summary artifacts
+
+### Security
+- **Dependency Patching**: Resolved 3 high and 2 moderate vulnerability alerts in the default branch
+
+---
+
 ## [0.0.8] - 2026-02-16
 
 ### Added
