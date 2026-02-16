@@ -217,7 +217,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: cli/bin/, config/, security/, memory/, metrics/, docs/, agents/, tests/, tui/, gateway/, adapters/, gateway/, adapters/, gateway/, adapters/
+OBSERVATION 1: Found: cli/bin/, config/, security/, memory/, metrics/, data/, docs/, agents/, tests/, tui/, gateway/, adapters/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
