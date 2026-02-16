@@ -16,13 +16,13 @@ Complete function reference for all 8 library modules in `core/lib/`.
 | `_perf_start` | `local t; t=$(_perf_start)` | Start a latency timer |
 | `_perf_elapsed_ms` | `_perf_elapsed_ms "$t"` | Returns elapsed milliseconds since timer start |
 | `_perf_check_budget` | `_perf_check_budget "$ms" "$budget" "op"` | Returns 0 if within budget, 1 if exceeded; logs warning on exceed |
-| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/data/perf/metrics.jsonl` |
+| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/metrics/events.jsonl` |
 | `start_spinner` | `start_spinner "Thinking..."` | Start background spinner for LLM wait |
 | `stop_spinner` | `stop_spinner` | Stop and clear spinner |
 
 **Environment Variables:**
 - `EUXIS_DEBUG` — Set to `1` to enable debug logging
-- `EUXIS_PERF_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/data/perf/metrics.jsonl`)
+- `EUXIS_METRICS_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/metrics/events.jsonl`)
 
 ---
 

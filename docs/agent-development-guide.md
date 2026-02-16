@@ -222,7 +222,7 @@ EUXIS_DEBUG=1 euxis my-agent "test task"
 cat ~/.euxis/data/lifecycle/my-agent.state
 
 # View performance metrics
-tail -5 ~/.euxis/data/perf/metrics.jsonl | jq .
+tail -5 ~/.euxis/metrics/events.jsonl | jq .
 
 # View recent memory
 tail -20 ~/.euxis/data/projects/*/my-agent/memory.md

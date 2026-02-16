@@ -217,7 +217,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: cli/bin/, config/, data/, docs/, agents/prompts/, tests/, tui/
+OBSERVATION 1: Found: cli/bin/, config/, security/, memory/, metrics/, docs/, agents/, tests/, tui/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -236,10 +236,10 @@ FINAL ANSWER:
 - Playbook definitions for workflows
 - Provider routing rules
 
-### 3. Knowledge Storage (data/)
+### 3. Knowledge Storage (memory/ + metrics/)
 - Cortex: Semantic memory with vector search
 - Project-specific agent outputs
-- Performance metrics
+- Performance metrics (metrics/)
 
 ### 4. Agent Intelligence (agents/prompts/)
 - 41 agent personality definitions
