@@ -41,7 +41,7 @@ async def main() -> int:
                         "channel_id": "webchat",
                         "role": "user",
                         "content": "Gateway demo run",
-                        "meta": {"agent": "architect", "approved": True},
+                        "meta": {"agent": "architect", "approved": True, "elevated": "full"},
                     },
                 }
             )

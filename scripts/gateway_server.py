@@ -542,14 +542,22 @@ def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
     policy = exec_cfg.get("policy", "allowlist")
     ask = exec_cfg.get("ask", "on-miss")
     ask_fallback = exec_cfg.get("ask_fallback", "deny")
+    elevated_mode = exec_cfg.get("elevated", "ask")
     allowlist = set(exec_cfg.get("allowlist", []))
     approved = bool(meta.get("approved"))
+    elevated = meta.get("elevated") == "full"
     agent_id = meta.get("agent", "")
 
     if policy == "deny":
         return False
     if policy == "full":
         return True
+
+    if elevated:
+        if elevated_mode == "full":
+            return True
+        if elevated_mode == "off":
+            return False
 
     allowed = agent_id in allowlist
     if allowed:

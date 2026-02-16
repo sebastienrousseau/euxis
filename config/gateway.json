@@ -18,6 +18,7 @@
       "policy": "allowlist",
       "ask": "on-miss",
       "ask_fallback": "deny",
+      "elevated": "ask",
       "allowlist": [
         "architect",
         "debugger",

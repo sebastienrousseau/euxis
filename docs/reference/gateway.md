@@ -271,6 +271,10 @@ Reject:
 http://127.0.0.1:18789/approvals/<run_id>/reject
 ```
 
+## Elevated Mode
+
+Set `meta.elevated` to `full` in `chat.send` to request elevated execution. This is governed by `gateway.exec.elevated`.
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash

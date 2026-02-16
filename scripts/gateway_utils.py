@@ -13,6 +13,12 @@ def timestamp() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
 
+def make_session_id(channel_id: str, chat_id: str, thread_id: str | None = None) -> str:
+    if thread_id:
+        return f"{channel_id}:{chat_id}:{thread_id}"
+    return f"{channel_id}:{chat_id}"
+
+
 def gateway_data_dir() -> Path:
     home = os.environ.get("EUXIS_HOME", str(Path.home() / ".euxis"))
     base = Path(home) / "data" / "gateway"

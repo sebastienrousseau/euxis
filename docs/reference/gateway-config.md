@@ -23,6 +23,7 @@ Reference for the Gateway configuration file.
       "policy": "allowlist",
       "ask": "on-miss",
       "ask_fallback": "deny",
+      "elevated": "ask",
       "allowlist": [
         "architect",
         "debugger",
@@ -83,6 +84,7 @@ Reference for the Gateway configuration file.
 - `policy` (string): `deny`, `allowlist`, or `full`.
 - `ask` (string): `off`, `on-miss`, `always`.
 - `ask_fallback` (string): `deny`, `allowlist`, or `full`.
+- `elevated` (string): `off`, `ask`, or `full`.
 - `allowlist` (array): list of agent IDs allowed to execute.
 
 ### `gateway.channels`
