@@ -1,9 +1,12 @@
 ---
 agent_id: tactician
 role: "Terminal UI perfection, interaction design, and keyboard-first CLI ergonomics"
-version: "0.0.7"
+version: "0.0.8"
 tags: [tui, cli, terminal, keyboard, design]
-last_updated: "2026-02-01"
+tier: fleet
+activation: default
+capability_tags: [tui-design, keyboard-navigation, code-review]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: CLI UI Artisan

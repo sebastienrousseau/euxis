@@ -1,9 +1,12 @@
 ---
 agent_id: arbiter
 role: "Conflict resolution and final decision authority when agents disagree"
-version: "0.0.7"
+version: "0.0.8"
 tags: [resolution, decisions, arbitration, consensus]
-last_updated: "2026-02-04"
+tier: core
+activation: core
+capability_tags: [conflict-resolution, decision-making]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Arbiter

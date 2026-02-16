@@ -1,5 +1,4 @@
-"""
-Core cryptographic operations - Pure functional implementation
+"""Core cryptographic operations - Pure functional implementation.
 
 All functions in this module are pure functions:
 - No filesystem access
@@ -8,66 +7,69 @@ All functions in this module are pure functions:
 - Return structured result objects
 """
 
-import os
 import base64
-from typing import Union, Optional
+import os
 from dataclasses import dataclass
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.backends import default_backend
 
-from .exceptions import CryptoError, InvalidKeyError, DecryptionError, EncryptionError, ParsingError
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+from .exceptions import CryptoError, DecryptionError, EncryptionError, InvalidKeyError
+
+AES_256_KEY_SIZE = 32
+GCM_AUTH_TAG_SIZE = 16
+ENCRYPTED_PARTS = 4
 
 
 @dataclass(frozen=True)
 class EncryptionResult:
-    """Immutable result object containing all encryption artifacts"""
+    """Immutable result object containing all encryption artifacts."""
+
     ciphertext: bytes
     iv: bytes
-    salt: Optional[bytes] = None
+    salt: bytes | None = None
     algorithm: str = "AES-256-GCM"
 
     def to_base64(self) -> str:
-        """Encode all components to base64 for safe transport"""
+        """Encode all components to base64 for safe transport."""
         data = {
-            'ciphertext': base64.b64encode(self.ciphertext).decode('utf-8'),
-            'iv': base64.b64encode(self.iv).decode('utf-8'),
-            'algorithm': self.algorithm
+            "ciphertext": base64.b64encode(self.ciphertext).decode("utf-8"),
+            "iv": base64.b64encode(self.iv).decode("utf-8"),
+            "algorithm": self.algorithm
         }
         if self.salt:
-            data['salt'] = base64.b64encode(self.salt).decode('utf-8')
+            data["salt"] = base64.b64encode(self.salt).decode("utf-8")
 
         # Simple concatenated format: algorithm:iv:salt:ciphertext (salt optional)
         if self.salt:
             return f"{self.algorithm}:{data['iv']}:{data['salt']}:{data['ciphertext']}"
-        else:
-            return f"{self.algorithm}:{data['iv']}::{data['ciphertext']}"
+        return f"{self.algorithm}:{data['iv']}::{data['ciphertext']}"
 
 
 @dataclass(frozen=True)
 class DecryptionResult:
-    """Immutable result object containing decryption output"""
+    """Immutable result object containing decryption output."""
+
     plaintext: bytes
     algorithm: str
     iv: bytes
-    salt: Optional[bytes] = None
+    salt: bytes | None = None
 
-    def to_string(self, encoding: str = 'utf-8') -> str:
-        """Convert plaintext to string with specified encoding"""
+    def to_string(self, encoding: str = "utf-8") -> str:
+        """Convert plaintext to string with specified encoding."""
         try:
             return self.plaintext.decode(encoding)
-        except UnicodeDecodeError as e:
-            raise CryptoError(f"Failed to decode plaintext with {encoding}: {e}")
+        except UnicodeDecodeError as exc:
+            msg = f"Failed to decode plaintext with {encoding}: {exc}"
+            raise CryptoError(msg) from exc
 
 
 def encrypt(
-    data: Union[str, bytes],
+    data: str | bytes,
     key: bytes,
     algorithm: str = "AES-256-GCM"
 ) -> EncryptionResult:
-    """
-    Pure function to encrypt data with given key.
+    """Pure function to encrypt data with given key.
 
     Args:
         data: Data to encrypt (string or bytes)
@@ -80,23 +82,23 @@ def encrypt(
     Raises:
         CryptoError: On encryption failure
         InvalidKeyError: If key is invalid
+
     """
     if algorithm != "AES-256-GCM":
-        raise EncryptionError(f"Unsupported algorithm: {algorithm}", algorithm=algorithm)
+        msg = f"Unsupported algorithm: {algorithm}"
+        raise EncryptionError(msg, algorithm=algorithm)
 
-    if len(key) != 32:
+    if len(key) != AES_256_KEY_SIZE:
+        msg = f"AES-256 requires 32-byte key, got {len(key)} bytes"
         raise InvalidKeyError(
-            f"AES-256 requires 32-byte key, got {len(key)} bytes",
+            msg,
             key_type="AES-256",
             expected_size=32,
-            actual_size=len(key)
+            actual_size=len(key),
         )
 
     # Convert string to bytes if needed
-    if isinstance(data, str):
-        plaintext = data.encode('utf-8')
-    else:
-        plaintext = data
+    plaintext = data.encode("utf-8") if isinstance(data, str) else data
 
     try:
         # Generate random IV (12 bytes for GCM)
@@ -125,16 +127,16 @@ def encrypt(
             algorithm=algorithm
         )
 
-    except Exception as e:
-        raise EncryptionError(f"Encryption failed: {e}", algorithm=algorithm)
+    except Exception as exc:
+        msg = f"Encryption failed: {exc}"
+        raise EncryptionError(msg, algorithm=algorithm) from exc
 
 
 def decrypt(
-    encrypted_data: Union[EncryptionResult, str],
+    encrypted_data: EncryptionResult | str,
     key: bytes
 ) -> DecryptionResult:
-    """
-    Pure function to decrypt data with given key.
+    """Pure function to decrypt data with given key.
 
     Args:
         encrypted_data: EncryptionResult object or base64 encoded string
@@ -147,6 +149,7 @@ def decrypt(
         CryptoError: On decryption failure
         InvalidKeyError: If key is invalid
         DecryptionError: If decryption fails (wrong key, corrupted data, etc.)
+
     """
     # Parse encrypted data
     if isinstance(encrypted_data, str):
@@ -154,21 +157,25 @@ def decrypt(
     elif isinstance(encrypted_data, EncryptionResult):
         result = encrypted_data
     else:
-        raise CryptoError("encrypted_data must be EncryptionResult or base64 string")
+        msg = "encrypted_data must be EncryptionResult or base64 string"
+        raise CryptoError(msg)
 
     if result.algorithm != "AES-256-GCM":
-        raise CryptoError(f"Unsupported algorithm: {result.algorithm}")
+        msg = f"Unsupported algorithm: {result.algorithm}"
+        raise CryptoError(msg)
 
-    if len(key) != 32:
-        raise InvalidKeyError(f"AES-256 requires 32-byte key, got {len(key)} bytes")
+    if len(key) != AES_256_KEY_SIZE:
+        msg = f"AES-256 requires 32-byte key, got {len(key)} bytes"
+        raise InvalidKeyError(msg)
+
+    # Split ciphertext and auth tag (last 16 bytes)
+    if len(result.ciphertext) < GCM_AUTH_TAG_SIZE:
+        msg = "Ciphertext too short to contain auth tag"
+        raise DecryptionError(msg)
 
     try:
-        # Split ciphertext and auth tag (last 16 bytes)
-        if len(result.ciphertext) < 16:
-            raise DecryptionError("Ciphertext too short to contain auth tag")
-
-        ciphertext = result.ciphertext[:-16]
-        auth_tag = result.ciphertext[-16:]
+        ciphertext = result.ciphertext[:-GCM_AUTH_TAG_SIZE]
+        auth_tag = result.ciphertext[-GCM_AUTH_TAG_SIZE:]
 
         # Create cipher
         cipher = Cipher(
@@ -188,17 +195,19 @@ def decrypt(
             salt=result.salt
         )
 
-    except Exception as e:
-        raise DecryptionError(f"Decryption failed: {e}")
+    except Exception as exc:
+        msg = f"Decryption failed: {exc}"
+        raise DecryptionError(msg) from exc
 
 
 def _parse_encrypted_string(encoded: str) -> EncryptionResult:
-    """Parse base64 encoded encryption result string"""
-    try:
-        parts = encoded.split(':')
-        if len(parts) != 4:
-            raise CryptoError("Invalid encrypted string format")
+    """Parse base64 encoded encryption result string."""
+    parts = encoded.split(":")
+    if len(parts) != ENCRYPTED_PARTS:
+        msg = "Invalid encrypted string format"
+        raise CryptoError(msg)
 
+    try:
         algorithm, iv_b64, salt_b64, ciphertext_b64 = parts
 
         iv = base64.b64decode(iv_b64)
@@ -215,5 +224,6 @@ def _parse_encrypted_string(encoded: str) -> EncryptionResult:
             algorithm=algorithm
         )
 
-    except Exception as e:
-        raise CryptoError(f"Failed to parse encrypted string: {e}")
+    except Exception as exc:
+        msg = f"Failed to parse encrypted string: {exc}"
+        raise CryptoError(msg) from exc

@@ -2,7 +2,7 @@
 """ETX: Euxis Terminal Experience — Main Application.
 
 The ETX application provides a modern, keyboard-first terminal interface
-for the Euxis 41-agent fleet. Built on Textual with custom theming,
+for the Euxis 42-agent fleet. Built on Textual with custom theming,
 command palette, and streaming agent execution.
 """
 
@@ -18,11 +18,13 @@ from textual.widgets import Button, Label, Static
 
 from tui.commands import AgentCommandProvider, SquadCommandProvider, SystemCommandProvider
 from tui.core.config import ETXConfig
-from tui.i18n import _
-from tui.themes import ETX_THEMES, THEME_CYCLE
 from tui.core.registry import FleetRegistry
 from tui.core.runner import get_git_branch, get_project_name
+from tui.i18n import _
 from tui.screens.dashboard import DashboardScreen
+from tui.themes import ETX_THEMES, THEME_CYCLE
+
+TASK_PREVIEW_LIMIT = 80
 
 
 class ConfirmDeployScreen(ModalScreen[bool]):
@@ -60,7 +62,11 @@ class ConfirmDeployScreen(ModalScreen[bool]):
 
     def compose(self):  # noqa: ANN201
         """Build the confirmation dialog."""
-        task_preview = self._task[:80] + "..." if len(self._task) > 80 else self._task
+        task_preview = (
+            self._task[:TASK_PREVIEW_LIMIT] + "..."
+            if len(self._task) > TASK_PREVIEW_LIMIT
+            else self._task
+        )
         with Vertical():
             yield Label(f"Deploy {self._operation}?", classes="title")
             yield Static(f"  {self._operation.capitalize()}: {self._name}")
@@ -72,43 +78,22 @@ class ConfirmDeployScreen(ModalScreen[bool]):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press."""
-        self.dismiss(event.button.id == "confirm")
+        self.dismiss(result=event.button.id == "confirm")
 
     def key_escape(self) -> None:
         """Cancel on Escape."""
-        self.dismiss(False)
+        self.dismiss(result=False)
 
     def key_enter(self) -> None:
         """Confirm on Enter."""
-        self.dismiss(True)
-
-
-TIPS = [
-    "Press Ctrl+K to open the command palette",
-    "Type @ to search agents by name",
-    "Type # to search squads and combos",
-    "Use Ctrl+T to cycle between themes",
-    "Press / on the dashboard to focus search",
-    "Use Ctrl+M to open the fleet monitor",
-    "Press F1 for the full keyboard reference",
-    "Use Ctrl+P to browse playbooks",
-    "Press F5 to refresh the fleet registry",
-    "Use Ctrl+O to view agent output logs",
-    "Deploy a squad for multi-agent operations",
-    "Press Escape to go back from any screen",
-    "Use Ctrl+S to open settings",
-    "Squads and combos are shown below agents — scroll down on the dashboard",
-    "Press F2 to return to the welcome screen anytime",
-    "Press ? to see all keyboard shortcuts",
-    "Playbooks define multi-gate quality pipelines — Ctrl+P to browse",
-]
+        self.dismiss(result=True)
 
 
 class EuxisApp(App):
     """ETX: Euxis Terminal Experience.
 
     A modern terminal interface for the Euxis agent fleet.
-    41 AI specialists, accessible via keyboard-first design.
+    42 AI specialists, accessible via keyboard-first design.
     """
 
     TITLE = "Euxis ETX"
@@ -160,6 +145,15 @@ class EuxisApp(App):
         # Push the dashboard as the default screen
         self._welcome_shown = False
         self.push_screen(DashboardScreen())
+
+    @property
+    def welcome_shown(self) -> bool:
+        """Return whether the welcome screen has been shown."""
+        return self._welcome_shown
+
+    def mark_welcome_shown(self) -> None:
+        """Mark the welcome screen as shown."""
+        self._welcome_shown = True
 
     def action_toggle_theme(self) -> None:
         """Cycle through all ETX themes."""

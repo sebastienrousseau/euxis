@@ -5,7 +5,7 @@ openapi: 3.1.0
 
 info:
   title: Euxis API
-  version: 0.0.7
+  version: 0.0.8
   description: |
     REST API for the Euxis Enterprise Unified eXecution Intelligence System.
 
@@ -80,7 +80,7 @@ paths:
                 $ref: '#/components/schemas/HealthStatus'
               example:
                 status: healthy
-                version: "0.0.7"
+                version: "0.0.8"
                 uptime_seconds: 3600
                 providers:
                   claude: available
@@ -153,7 +153,7 @@ paths:
                     tier: fleet
                     state: active
                     tags: [debugging, fixes, engineering]
-                total: 42
+                total: 50
 
   /agents/{agentId}:
     get:
@@ -715,7 +715,7 @@ components:
         version:
           type: string
           description: Agent version
-          example: "0.0.7"
+          example: "0.0.8"
         tags:
           type: array
           items:
@@ -1348,7 +1348,7 @@ components:
         version:
           type: string
           description: Euxis version
-          example: "0.0.7"
+          example: "0.0.8"
         uptime_seconds:
           type: integer
           description: System uptime in seconds

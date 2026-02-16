@@ -3,7 +3,7 @@
 
 ## Overview
 
-Euxis v0.0.7 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `bin/lib/`. The main script (`bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
+Euxis v0.0.8 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `bin/lib/`. The main script (`bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
 
 ## Modules
 
@@ -113,4 +113,4 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

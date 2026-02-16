@@ -28,18 +28,18 @@ import argparse
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-# Add the metrics directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / "metrics"))
+# Add the repository root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from verification.evidence_framework import (
+    from metrics.verification.evidence_framework import (
         EvidenceFramework,
         Evidence,
         EvidenceGrade,
         Claim,
         VerifiedPerformanceAnalyzer
     )
-    from verification.validation_pipeline import ValidationPipeline
+    from metrics.verification.validation_pipeline import ValidationPipeline
 except ImportError as e:
     print(f"Error importing evidence framework: {e}", file=sys.stderr)
     print("Make sure you're running from the Euxis root directory", file=sys.stderr)

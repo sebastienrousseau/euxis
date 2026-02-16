@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 usage() {
     cat <<'EOF'
 euxis-test-infra — Infrastructure test suite
@@ -149,10 +157,11 @@ fi
 
 # TEST 7: Project directory creation (uses mock provider to avoid API calls)
 TEMP_PROJECT="euxis_test_$$"
-EUXIS_PROJECT="$TEMP_PROJECT" EUXIS_MOCK_PROVIDER=true "$EUXIS_SCRIPT" architect "test" claude >/dev/null 2>&1 || true
-if [[ -d "$EUXIS_HOME/data/projects/$TEMP_PROJECT/architect/output" ]]; then
+PROJECTS_DIR="${EUXIS_PROJECTS_DIR:-/tmp/euxis/projects}"
+EUXIS_PROJECTS_DIR="$PROJECTS_DIR" EUXIS_PROJECT="$TEMP_PROJECT" EUXIS_MOCK_PROVIDER=true "$EUXIS_SCRIPT" architect "test" claude >/dev/null 2>&1 || true
+if [[ -d "$PROJECTS_DIR/$TEMP_PROJECT/architect/output" ]]; then
     report "PASS" "Creates project directory structure"
-    rm -rf "$EUXIS_HOME/data/projects/$TEMP_PROJECT"
+    rm -rf "$PROJECTS_DIR/$TEMP_PROJECT"
 else
     report "FAIL" "Creates project directory structure"
 fi

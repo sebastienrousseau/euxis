@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
-# EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.7)
+# EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.8)
 # Reads an Architect Mission Manifest and fires agent loops.
 #
 # Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
@@ -22,6 +22,14 @@
 # }
 
 set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
 
 usage() {
     cat <<'EOF'
@@ -382,6 +390,16 @@ LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
 DISPATCH_AGENTS="architect inspector responder gatekeeper"
 
+# Default verify command when none is provided in the manifest
+normalize_verify() {
+    local verify_cmd="$1"
+    if [[ -z "$verify_cmd" || "$verify_cmd" == "null" ]]; then
+        echo "true"
+        return
+    fi
+    echo "$verify_cmd"
+}
+
 # ============================================================================
 # Dispatch a single agent task
 # ============================================================================
@@ -392,6 +410,7 @@ dispatch_agent() {
     AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
     TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
     VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
+    VERIFY=$(normalize_verify "$VERIFY")
     PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
     echo "  [$PRIORITY] -> $AGENT ($MODE)"
@@ -428,6 +447,7 @@ dispatch_agent_with_cleanup() {
     AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
     TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
     VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
+    VERIFY=$(normalize_verify "$VERIFY")
     PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
     LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
@@ -739,13 +759,14 @@ else
     for i in $(seq 0 $((DISPATCH_COUNT - 1))); do
         AGENT=$(jq -r ".dispatches[$i].agent" "$MANIFEST_FILE")
         TASK=$(jq -r ".dispatches[$i].task" "$MANIFEST_FILE")
-        VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
+        RAW_VERIFY=$(jq -r ".dispatches[$i].verify_cmd // empty" "$MANIFEST_FILE")
+        VERIFY=$(normalize_verify "$RAW_VERIFY")
         PRIORITY=$(jq -r ".dispatches[$i].priority" "$MANIFEST_FILE")
 
         echo "---------------------------------------------------"
         echo "  [$PRIORITY] -> $AGENT ($MODE)"
         echo "  Task: $TASK"
-        [[ -n "$VERIFY" ]] && echo "  Verify: $VERIFY"
+        [[ -n "$RAW_VERIFY" ]] && echo "  Verify: $RAW_VERIFY"
 
         LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
 

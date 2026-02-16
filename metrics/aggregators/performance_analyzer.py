@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""
-Agent Performance Metrics Analyzer
-Aggregates and analyzes collected performance metrics
+"""Agent Performance Metrics Analyzer.
+
+Aggregates and analyzes collected performance metrics.
 """
 
 import json
-import statistics
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
-from collections import defaultdict, Counter
 import math
+import statistics
+from collections import Counter, defaultdict
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from typing import Any
+
 
 class PerformanceAnalyzer:
-    """Analyzes agent performance metrics and generates insights"""
+    """Analyzes agent performance metrics and generates insights."""
 
-    def __init__(self, metrics_dir: str = "/home/seb/.euxis/metrics"):
+    def __init__(self, metrics_dir: str = "/home/seb/.euxis/metrics") -> None:
         self.metrics_dir = Path(metrics_dir)
         self.events_file = self.metrics_dir / "events.jsonl"
         self.sessions_file = self.metrics_dir / "sessions.jsonl"
@@ -23,19 +24,21 @@ class PerformanceAnalyzer:
 
         self.reports_dir.mkdir(exist_ok=True)
 
-    def _load_events(self, hours_back: int = 24) -> List[Dict[str, Any]]:
-        """Load events from the last N hours"""
+    def _load_events(self, hours_back: int = 24) -> list[dict[str, Any]]:
+        """Load events from the last N hours."""
         if not self.events_file.exists():
             return []
 
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours_back)
         events = []
 
-        with open(self.events_file) as f:
+        with self.events_file.open() as f:
             for line in f:
                 try:
                     event = json.loads(line.strip())
-                    event_time = datetime.fromisoformat(event["timestamp"].replace("Z", "+00:00"))
+                    event_time = datetime.fromisoformat(
+                        event["timestamp"].replace("Z", "+00:00")
+                    )
                     if event_time >= cutoff_time:
                         events.append(event)
                 except (json.JSONDecodeError, KeyError, ValueError):
@@ -43,19 +46,21 @@ class PerformanceAnalyzer:
 
         return events
 
-    def _load_sessions(self, hours_back: int = 24) -> List[Dict[str, Any]]:
-        """Load completed sessions from the last N hours"""
+    def _load_sessions(self, hours_back: int = 24) -> list[dict[str, Any]]:
+        """Load completed sessions from the last N hours."""
         if not self.sessions_file.exists():
             return []
 
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours_back)
         sessions = []
 
-        with open(self.sessions_file) as f:
+        with self.sessions_file.open() as f:
             for line in f:
                 try:
                     session = json.loads(line.strip())
-                    session_time = datetime.fromisoformat(session["completed_at"].replace("Z", "+00:00"))
+                    session_time = datetime.fromisoformat(
+                        session["completed_at"].replace("Z", "+00:00")
+                    )
                     if session_time >= cutoff_time:
                         sessions.append(session)
                 except (json.JSONDecodeError, KeyError, ValueError):
@@ -63,14 +68,14 @@ class PerformanceAnalyzer:
 
         return sessions
 
-    def calculate_percentile(self, values: List[float], percentile: int) -> float:
-        """Calculate percentile value from a list"""
+    def calculate_percentile(self, values: list[float], percentile: int) -> float:
+        """Calculate percentile value from a list."""
         if not values:
             return 0.0
         sorted_values = sorted(values)
         index = (percentile / 100) * (len(sorted_values) - 1)
-        lower = int(math.floor(index))
-        upper = int(math.ceil(index))
+        lower = math.floor(index)
+        upper = math.ceil(index)
 
         if lower == upper:
             return sorted_values[lower]
@@ -78,8 +83,8 @@ class PerformanceAnalyzer:
         weight = index - lower
         return sorted_values[lower] * (1 - weight) + sorted_values[upper] * weight
 
-    def analyze_agent_performance(self, hours_back: int = 24) -> Dict[str, Dict[str, Any]]:
-        """Analyze performance metrics by agent"""
+    def analyze_agent_performance(self, hours_back: int = 24) -> dict[str, dict[str, Any]]:
+        """Analyze performance metrics by agent."""
         sessions = self._load_sessions(hours_back)
         if not sessions:
             return {}
@@ -135,8 +140,8 @@ class PerformanceAnalyzer:
 
         return result
 
-    def analyze_delegation_patterns(self, hours_back: int = 24) -> Dict[str, Any]:
-        """Analyze delegation patterns between agents"""
+    def analyze_delegation_patterns(self, hours_back: int = 24) -> dict[str, Any]:
+        """Analyze delegation patterns between agents."""
         events = self._load_events(hours_back)
 
         delegation_starts = defaultdict(list)
@@ -195,15 +200,21 @@ class PerformanceAnalyzer:
             result[pair_key] = {
                 "delegation_frequency": data["count"],
                 "handoff_success_rate": data["success_count"] / data["total_count"],
-                "avg_delegation_duration_ms": statistics.mean(durations) if durations else 0,
-                "median_delegation_duration_ms": statistics.median(durations) if durations else 0,
-                "p95_delegation_duration_ms": self.calculate_percentile(durations, 95) if durations else 0
+                "avg_delegation_duration_ms": (
+                    statistics.mean(durations) if durations else 0
+                ),
+                "median_delegation_duration_ms": (
+                    statistics.median(durations) if durations else 0
+                ),
+                "p95_delegation_duration_ms": (
+                    self.calculate_percentile(durations, 95) if durations else 0
+                ),
             }
 
         return result
 
-    def analyze_tool_usage_patterns(self, hours_back: int = 24) -> Dict[str, Any]:
-        """Analyze tool usage patterns across agents"""
+    def analyze_tool_usage_patterns(self, hours_back: int = 24) -> dict[str, Any]:
+        """Analyze tool usage patterns across agents."""
         events = self._load_events(hours_back)
 
         tool_metrics = defaultdict(lambda: {
@@ -246,16 +257,22 @@ class PerformanceAnalyzer:
                 "median_duration_ms": statistics.median(durations),
                 "p95_duration_ms": self.calculate_percentile(durations, 95),
                 "agents_using": dict(metrics["agents"]),
-                "avg_retries": statistics.mean(metrics["retry_counts"]) if metrics["retry_counts"] else 0,
-                "retry_frequency": len(metrics["retry_counts"]) / metrics["total_executions"]
+                "avg_retries": (
+                    statistics.mean(metrics["retry_counts"])
+                    if metrics["retry_counts"]
+                    else 0
+                ),
+                "retry_frequency": (
+                    len(metrics["retry_counts"]) / metrics["total_executions"]
+                ),
             }
 
         return result
 
-    def generate_performance_report(self, hours_back: int = 24) -> Dict[str, Any]:
-        """Generate comprehensive performance report"""
+    def generate_performance_report(self, hours_back: int = 24) -> dict[str, Any]:
+        """Generate comprehensive performance report."""
         report = {
-            "report_timestamp": datetime.now(timezone.utc).isoformat(),
+            "report_timestamp": datetime.now(UTC).isoformat(),
             "analysis_period_hours": hours_back,
             "agent_performance": self.analyze_agent_performance(hours_back),
             "delegation_patterns": self.analyze_delegation_patterns(hours_back),
@@ -282,28 +299,46 @@ class PerformanceAnalyzer:
                 "fleet_success_rate": total_successful / total_tasks if total_tasks > 0 else 0,
                 "fleet_avg_duration_ms": statistics.mean(all_durations) if all_durations else 0,
                 "active_agents": len(agent_perf),
-                "most_active_agent": max(agent_perf.keys(), key=lambda x: agent_perf[x]["total_tasks"]) if agent_perf else None,
-                "fastest_agent": min(agent_perf.keys(), key=lambda x: agent_perf[x]["avg_duration_ms"]) if agent_perf else None
+                "most_active_agent": (
+                    max(
+                        agent_perf.keys(),
+                        key=lambda agent: agent_perf[agent]["total_tasks"],
+                    )
+                    if agent_perf
+                    else None
+                ),
+                "fastest_agent": (
+                    min(
+                        agent_perf.keys(),
+                        key=lambda agent: agent_perf[agent]["avg_duration_ms"],
+                    )
+                    if agent_perf
+                    else None
+                ),
             }
 
             report["fleet_metrics"] = fleet_metrics
 
         return report
 
-    def save_report(self, report: Dict[str, Any], filename: Optional[str] = None) -> str:
-        """Save performance report to file"""
+    def save_report(self, report: dict[str, Any], filename: str | None = None) -> str:
+        """Save performance report to file."""
         if not filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
             filename = f"performance_report_{timestamp}.json"
 
         report_path = self.reports_dir / filename
-        with open(report_path, "w") as f:
+        with report_path.open("w") as f:
             json.dump(report, f, indent=2)
 
         return str(report_path)
 
-    def get_agent_rankings(self, hours_back: int = 24, metric: str = "success_rate") -> List[Tuple[str, float]]:
-        """Get agent rankings by specified metric"""
+    def get_agent_rankings(
+        self,
+        hours_back: int = 24,
+        metric: str = "success_rate",
+    ) -> list[tuple[str, float]]:
+        """Get agent rankings by specified metric."""
         agent_perf = self.analyze_agent_performance(hours_back)
 
         if not agent_perf:
@@ -317,15 +352,18 @@ class PerformanceAnalyzer:
         return sorted(rankings, key=lambda x: x[1], reverse=True)
 
 # Example usage functions for CLI integration
-def generate_daily_report():
-    """Generate and save daily performance report"""
+def generate_daily_report() -> str:
+    """Generate and save daily performance report."""
     analyzer = PerformanceAnalyzer()
     report = analyzer.generate_performance_report(24)
-    report_path = analyzer.save_report(report)
-    return report_path
+    return analyzer.save_report(report)
 
-def get_top_performers(metric: str = "success_rate", limit: int = 5):
-    """Get top performing agents by metric"""
+
+def get_top_performers(
+    metric: str = "success_rate",
+    limit: int = 5,
+) -> list[tuple[str, float]]:
+    """Get top performing agents by metric."""
     analyzer = PerformanceAnalyzer()
     rankings = analyzer.get_agent_rankings(24, metric)
     return rankings[:limit]

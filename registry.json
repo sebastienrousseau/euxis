@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "protocol_version": "0.0.7",
-  "last_updated": "2026-02-13",
+  "protocol_version": "0.0.8",
+  "last_updated": "2026-02-16",
   "capabilities_registry": "capabilities.json",
   "constitution": "CONSTITUTION.md",
   "agents": [
@@ -9,7 +9,7 @@
       "id": "accountant",
       "path": "prompts/fleet/accountant.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "cost",
         "budget",
@@ -27,7 +27,7 @@
       "id": "ambassador",
       "path": "prompts/fleet/ambassador.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "devrel",
         "community",
@@ -42,7 +42,7 @@
       "id": "animator",
       "path": "prompts/fleet/animator.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "theming",
         "color",
@@ -60,7 +60,7 @@
       "id": "arbiter",
       "path": "prompts/core/arbiter.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "resolution",
         "decisions",
@@ -77,7 +77,7 @@
       "id": "architect",
       "path": "prompts/core/architect.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "architecture",
         "design",
@@ -94,7 +94,7 @@
       "id": "auditor",
       "path": "prompts/core/auditor.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "compliance",
         "security",
@@ -110,7 +110,7 @@
       "id": "automaton",
       "path": "prompts/fleet/automaton.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "automation",
         "cicd",
@@ -124,10 +124,28 @@
       "activation": "default"
     },
     {
+      "id": "bridge",
+      "path": "prompts/fleet/bridge.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "channels",
+        "translation",
+        "media"
+      ],
+      "capability_tags": [
+        "channel-translation",
+        "media-bridging"
+      ]
+    },
+    {
       "id": "butler",
       "path": "prompts/fleet/butler.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "voice",
         "tts",
@@ -143,7 +161,7 @@
       "id": "conduit",
       "path": "prompts/fleet/conduit.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "audio",
         "realtime",
@@ -161,7 +179,7 @@
       "id": "critic",
       "path": "prompts/core/critic.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "critic",
         "risk",
@@ -179,7 +197,7 @@
       "id": "cryptographer",
       "path": "prompts/fleet/cryptographer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "cryptography",
         "security",
@@ -197,7 +215,7 @@
       "id": "custodian",
       "path": "prompts/fleet/custodian.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "rust",
         "crates",
@@ -215,7 +233,7 @@
       "id": "debugger",
       "path": "prompts/fleet/debugger.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "debugging",
         "fixes",
@@ -229,10 +247,28 @@
       "activation": "default"
     },
     {
+      "id": "deep-researcher",
+      "path": "prompts/fleet/deep-researcher.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "tags": [
+        "research",
+        "strategy",
+        "architecture",
+        "synthesis"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "documentation",
+        "test-analysis"
+      ],
+      "activation": "on-demand"
+    },
+    {
       "id": "designer",
       "path": "prompts/fleet/designer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "web",
         "ui",
@@ -251,10 +287,28 @@
       "activation": "default"
     },
     {
+      "id": "distill",
+      "path": "prompts/fleet/distill.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "summarization",
+        "context",
+        "memory"
+      ],
+      "capability_tags": [
+        "context-compression",
+        "summarization"
+      ]
+    },
+    {
       "id": "evangelist",
       "path": "prompts/fleet/evangelist.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "brand",
         "voice",
@@ -271,7 +325,7 @@
       "id": "gatekeeper",
       "path": "prompts/fleet/gatekeeper.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "releases",
         "versioning",
@@ -284,10 +338,66 @@
       "activation": "default"
     },
     {
+      "id": "govern",
+      "path": "prompts/fleet/govern.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "governance",
+        "policy",
+        "escalation"
+      ],
+      "capability_tags": [
+        "policy-governance",
+        "escalation"
+      ]
+    },
+    {
+      "id": "guard",
+      "path": "prompts/core/guard.txt",
+      "tier": "core",
+      "version": "0.0.8",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "security",
+        "approvals",
+        "audit"
+      ],
+      "capability_tags": [
+        "execution-approval",
+        "security-policy",
+        "audit"
+      ]
+    },
+    {
+      "id": "heal",
+      "path": "prompts/fleet/heal.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "recovery",
+        "health",
+        "resilience"
+      ],
+      "capability_tags": [
+        "recovery",
+        "health-monitoring",
+        "resilience"
+      ]
+    },
+    {
       "id": "historian",
       "path": "prompts/core/historian.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "memory",
         "patterns",
@@ -306,7 +416,7 @@
       "id": "inspector",
       "path": "prompts/fleet/inspector.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "testing",
         "qa",
@@ -323,7 +433,7 @@
       "id": "interactor",
       "path": "prompts/fleet/interactor.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "keyboard",
         "focus",
@@ -341,7 +451,7 @@
       "id": "investigator",
       "path": "prompts/fleet/investigator.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "crash",
         "forensics",
@@ -358,7 +468,7 @@
       "id": "ledger",
       "path": "prompts/fleet/ledger.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "payments",
         "iso20022",
@@ -376,7 +486,7 @@
       "id": "librarian",
       "path": "prompts/core/librarian.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "memory",
         "knowledge",
@@ -393,7 +503,7 @@
       "id": "localizer",
       "path": "prompts/fleet/localizer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "i18n",
         "l10n",
@@ -408,7 +518,7 @@
       "id": "maintainer",
       "path": "prompts/fleet/maintainer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "legacy",
         "maintenance",
@@ -425,7 +535,7 @@
       "id": "marketer",
       "path": "prompts/fleet/marketer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "marketing",
         "growth",
@@ -440,7 +550,7 @@
       "id": "optimizer",
       "path": "prompts/fleet/optimizer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "performance",
         "profiling",
@@ -456,7 +566,7 @@
       "id": "orchestrator",
       "path": "prompts/core/orchestrator.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "orchestration",
         "delegation",
@@ -471,10 +581,29 @@
       "activation": "core"
     },
     {
+      "id": "pair",
+      "path": "prompts/core/pair.txt",
+      "tier": "core",
+      "version": "0.0.8",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "pairing",
+        "onboarding",
+        "gateway"
+      ],
+      "capability_tags": [
+        "onboarding",
+        "channel-auth",
+        "device-pairing"
+      ]
+    },
+    {
       "id": "pentester",
       "path": "prompts/fleet/pentester.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "security",
         "testing",
@@ -490,7 +619,7 @@
       "id": "planner",
       "path": "prompts/core/planner.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "product",
         "requirements",
@@ -506,7 +635,7 @@
       "id": "polyglot",
       "path": "prompts/fleet/polyglot.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "languages",
         "patterns",
@@ -524,7 +653,7 @@
       "id": "repairer",
       "path": "prompts/fleet/repairer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "repair",
         "healing",
@@ -543,7 +672,7 @@
       "id": "researcher",
       "path": "prompts/fleet/researcher.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "research",
         "analysis",
@@ -559,7 +688,7 @@
       "id": "responder",
       "path": "prompts/fleet/responder.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "incident",
         "response",
@@ -576,7 +705,7 @@
       "id": "reviewer",
       "path": "prompts/core/reviewer.txt",
       "tier": "core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "quality",
         "review",
@@ -590,10 +719,29 @@
       "activation": "core"
     },
     {
+      "id": "route",
+      "path": "prompts/core/route.txt",
+      "tier": "core",
+      "version": "0.0.8",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "routing",
+        "sessions",
+        "gateway"
+      ],
+      "capability_tags": [
+        "routing",
+        "session-routing",
+        "dispatch"
+      ]
+    },
+    {
       "id": "sentinel",
       "path": "prompts/fleet/sentinel.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "security",
         "governance",
@@ -611,7 +759,7 @@
       "id": "strategist",
       "path": "prompts/fleet/strategist.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "social",
         "content",
@@ -627,7 +775,7 @@
       "id": "tactician",
       "path": "prompts/fleet/tactician.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "tui",
         "cli",
@@ -646,7 +794,7 @@
       "id": "telemetrist",
       "path": "prompts/fleet/telemetrist.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "observability",
         "telemetry",
@@ -662,7 +810,7 @@
       "id": "tester",
       "path": "prompts/fleet/tester.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "testing",
         "quality",
@@ -675,10 +823,29 @@
       "activation": "default"
     },
     {
+      "id": "trace",
+      "path": "prompts/fleet/trace.txt",
+      "tier": "fleet",
+      "version": "0.0.8",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ],
+      "capability_tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ]
+    },
+    {
       "id": "watchdog",
       "path": "prompts/fleet/watchdog.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "regression",
         "analysis",
@@ -696,7 +863,7 @@
       "id": "writer",
       "path": "prompts/fleet/writer.txt",
       "tier": "fleet",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "tags": [
         "documentation",
         "writing",

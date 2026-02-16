@@ -109,9 +109,11 @@ class TestLogViewerScreenLoadLogList(unittest.TestCase):
 
     def test_no_project_dir(self):
         screen = self._make_screen()
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen._load_log_list()
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen._load_log_list()
 
         call_args = self.mock_option_list.add_option.call_args[0][0]
         assert "No logs" in call_args.prompt
@@ -124,9 +126,11 @@ class TestLogViewerScreenLoadLogList(unittest.TestCase):
         (project_dir / "somefile.txt").write_text("not a dir")
 
         screen = self._make_screen()
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen._load_log_list()
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen._load_log_list()
 
         # No options should be added (only the "No logs" disabled option)
         # Actually: if there are no valid dirs, no options at all
@@ -139,9 +143,11 @@ class TestLogViewerScreenLoadLogList(unittest.TestCase):
         # No output/ subdirectory
 
         screen = self._make_screen()
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen._load_log_list()
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen._load_log_list()
 
         self.mock_option_list.add_option.assert_not_called()
 
@@ -152,9 +158,11 @@ class TestLogViewerScreenLoadLogList(unittest.TestCase):
         (output_dir / "data.json").write_text("{}")
 
         screen = self._make_screen()
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen._load_log_list()
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen._load_log_list()
 
         self.mock_option_list.add_option.assert_not_called()
 
@@ -170,9 +178,11 @@ class TestLogViewerScreenLoadLogList(unittest.TestCase):
         (project_dir / "architect" / "output" / "run-002.md").write_text("# More")
 
         screen = self._make_screen()
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen._load_log_list()
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen._load_log_list()
 
         assert self.mock_option_list.add_option.call_count == 2
 
@@ -213,9 +223,11 @@ class TestLogViewerScreenOptionSelected(unittest.TestCase):
         event = Mock()
         event.option.id = "architect"
 
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen.on_option_list_option_selected(event)
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen.on_option_list_option_selected(event)
 
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("No outputs" in c for c in status_calls)
@@ -229,9 +241,11 @@ class TestLogViewerScreenOptionSelected(unittest.TestCase):
         event = Mock()
         event.option.id = "architect"
 
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen.on_option_list_option_selected(event)
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen.on_option_list_option_selected(event)
 
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("No output files" in c for c in status_calls)
@@ -248,9 +262,11 @@ class TestLogViewerScreenOptionSelected(unittest.TestCase):
         event = Mock()
         event.option.id = "architect"
 
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen.on_option_list_option_selected(event)
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen.on_option_list_option_selected(event)
 
         # Should display latest file (2024-12-31.md sorts last)
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
@@ -271,9 +287,11 @@ class TestLogViewerScreenOptionSelected(unittest.TestCase):
         event = Mock()
         event.option.id = "debugger"
 
-        with patch("tui.screens.logs.EUXIS_HOME", self.euxis_home):
-            with patch("tui.screens.logs.get_project_name", return_value="myproject"):
-                screen.on_option_list_option_selected(event)
+        with (
+            patch("tui.screens.logs.EUXIS_HOME", self.euxis_home),
+            patch("tui.screens.logs.get_project_name", return_value="myproject"),
+        ):
+            screen.on_option_list_option_selected(event)
 
         write_calls = [c[0][0] for c in self.mock_output.write_line.call_args_list]
         assert "line1" in write_calls

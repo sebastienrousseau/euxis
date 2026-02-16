@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
-  "protocol_version": "0.0.7",
-  "last_updated": "2026-02-04",
+  "protocol_version": "0.0.8",
+  "last_updated": "2026-02-15",
   "squads": [
     {
       "id": "vision",
       "name": "Vision Squad",
-      "purpose": "Strategy & Discovery",
+      "purpose": "Strategy, Research, and Architecture",
       "lead": "orchestrator",
-      "members": ["orchestrator", "architect", "planner", "researcher", "historian", "accountant"]
+      "members": ["orchestrator", "architect", "planner", "deep-researcher", "researcher", "historian", "accountant"]
     },
     {
       "id": "build",
@@ -22,7 +22,7 @@
       "name": "Quality Squad",
       "purpose": "Assurance & Security",
       "lead": "reviewer",
-      "members": ["reviewer", "inspector", "pentester", "auditor", "optimizer", "watchdog", "polyglot", "arbiter"]
+      "members": ["reviewer", "inspector", "sentinel", "pentester", "auditor", "optimizer", "watchdog", "polyglot", "arbiter"]
     },
     {
       "id": "growth",
@@ -48,52 +48,52 @@
   ],
   "combos": [
     {
-      "id": "steve-jobs",
-      "name": "Steve Jobs",
-      "description": "Minimalist design to polished review",
-      "chain": ["planner", "architect", "evangelist", "reviewer"]
+      "id": "envision",
+      "name": "Envision",
+      "description": "Shape a product narrative from concept to launch. Aligns architecture with a clear story and delivers a review-ready brief.",
+      "chain": ["deep-researcher", "planner", "architect", "evangelist", "reviewer"]
     },
     {
-      "id": "fort-knox",
-      "name": "Fort Knox",
-      "description": "Maximum security assurance",
-      "chain": ["pentester", "auditor", "inspector", "reviewer"]
+      "id": "protect",
+      "name": "Protect",
+      "description": "Harden your system from threat model to audit trail. Surfaces risks, validates controls, and delivers an assurance summary.",
+      "chain": ["sentinel", "pentester", "auditor", "inspector", "reviewer"]
     },
     {
-      "id": "content-factory",
-      "name": "Content Factory",
-      "description": "End-to-end content production",
-      "chain": ["writer", "evangelist", "strategist", "reviewer"]
+      "id": "craft",
+      "name": "Craft",
+      "description": "Take content from rough draft to publish-ready. Ensures clarity, consistency, and tone across every revision.",
+      "chain": ["writer", "strategist", "evangelist", "reviewer"]
     },
     {
-      "id": "jony-ive",
-      "name": "Jony Ive",
-      "description": "Apple-level UI from design system to polished interaction",
+      "id": "refine",
+      "name": "Refine",
+      "description": "Evolve an interface from design system through motion and interaction detail. Ready for real users.",
       "chain": ["designer", "animator", "interactor", "reviewer"]
     },
     {
-      "id": "crypto-fortress",
-      "name": "Crypto Fortress",
-      "description": "Deep cryptographic audit with security policy review",
+      "id": "seal",
+      "name": "Seal",
+      "description": "Audit your cryptography end to end. Validates policies, checks primitives, and returns a clear verdict.",
       "chain": ["sentinel", "cryptographer", "pentester", "reviewer"]
     },
     {
-      "id": "swift-payment",
-      "name": "SWIFT Payment",
-      "description": "End-to-end payments integration validation",
+      "id": "settle",
+      "name": "Settle",
+      "description": "Verify a payments flow from transaction to settlement. Covers compliance, reconciliation, and test coverage.",
       "chain": ["ledger", "auditor", "tester", "reviewer"]
     },
     {
-      "id": "deep-review",
-      "name": "Deep Review",
-      "description": "Exhaustive pre-merge regression, language analysis, and external research",
+      "id": "inspect",
+      "name": "Inspect",
+      "description": "Run a deep pre-merge analysis. Catches language-level issues, regression risks, and research gaps.",
       "chain": ["researcher", "polyglot", "watchdog", "pentester", "reviewer"]
     },
     {
-      "id": "research-roadmap",
-      "name": "Research Roadmap",
-      "description": "External research synthesis into architectural roadmap",
-      "chain": ["researcher", "architect", "reviewer"]
+      "id": "discover",
+      "name": "Discover",
+      "description": "Turn external research into an actionable roadmap. Maps findings to architecture decisions and outlines next steps.",
+      "chain": ["deep-researcher", "architect", "reviewer"]
     }
   ]
 }

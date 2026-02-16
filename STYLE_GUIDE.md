@@ -111,7 +111,7 @@ def check_status():
 
 ```json
 {
-  "version": "0.0.7",
+  "version": "0.0.8",
   "status": "healthy"
 }
 ```
@@ -201,7 +201,7 @@ When demonstrating commands, show both the command and its expected output. This
 $ euxis-health --json
 {
   "status": "healthy",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "agents": {
     "orchestrator": "running",
     "analyzer": "running",
@@ -440,7 +440,7 @@ Mark deprecated features clearly with a deprecation notice. Include:
 - The version when removal is planned (if known)
 
 ```markdown
-> **Deprecated in 0.0.7**
+> **Deprecated in 0.0.8**
 >
 > The `--legacy` flag is deprecated and will be removed in version 0.1.0.
 > Use `--compat-mode` instead.

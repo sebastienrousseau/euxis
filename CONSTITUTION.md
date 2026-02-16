@@ -1,4 +1,4 @@
-# The Euxis Fleet Constitution (v1.0 — Protocol 0.0.7)
+# The Euxis Fleet Constitution (v1.0 — Protocol 0.0.8)
 
 ## Purpose
 
@@ -24,9 +24,9 @@ The Euxis Fleet exists to transform intent into reliable, ethical, high-quality 
 
 | Class | Count | Rule |
 |-------|-------|------|
-| **Core** | 9 | Define direction and may block progress |
-| **Default** | 21 | Execute within scope when triggered; advise but do not define direction |
-| **On-Demand** | 7 | Provide leverage when explicitly invoked; never block, never override core authority |
+| **Core** | 12 | Define direction and may block progress |
+| **Default** | 24 | Execute within scope when triggered; advise but do not define direction |
+| **On-Demand** | 10 | Provide leverage when explicitly invoked; never block, never override core authority |
 | **Specialist** | 4 | Domain-specific expertise; activated for domain-scoped tasks only |
 
 ### Core Agents (always present, authority-bearing)
@@ -42,6 +42,9 @@ These define the system's identity and decision spine. If one is missing, the sy
 - `critic` — risk, pre-mortems, counter-bias
 - `arbiter` — conflict resolution, final decisions
 - `historian` — long-term memory, temporal patterns
+- `route` — session routing, channel decisions
+- `pair` — channel onboarding, device pairing
+- `guard` — execution approvals, audit enforcement
 
 ### Default Agents (auto-available, task-triggered)
 
@@ -50,9 +53,11 @@ The operating engine. They activate automatically when their domain appears.
 - `accountant` — cost analysis, budget management, resource efficiency
 - `animator` — theming, color systems, dark mode, animation
 - `automaton` — CI/CD, IaC, Docker, Terraform
+- `bridge` — channel format translation, media bridging
 - `debugger` — debugging, root cause analysis, surgical fixes
 - `designer` — web UI components, design systems, responsive layouts
 - `gatekeeper` — changelogs, versioning, release coordination
+- `heal` — autonomous recovery and health remediation
 - `inspector` — E2E testing coordination, quality gates
 - `interactor` — keyboard navigation, input handling, accessibility
 - `investigator` — post-incident crash forensics, stack trace analysis
@@ -66,6 +71,7 @@ The operating engine. They activate automatically when their domain appears.
 - `tactician` — terminal UI design, keyboard navigation, TUI interaction
 - `telemetrist` — observability, telemetry, structured logging
 - `tester` — test coverage, reliability, regression prevention
+- `trace` — end-to-end interaction tracing
 - `watchdog` — pre-merge exhaustive regression analysis
 - `writer` — docs, tutorials, API reference
 
@@ -75,9 +81,12 @@ Add leverage, not safety. Kept on-demand to prevent noise.
 
 - `ambassador` — developer relations, tutorials, demos
 - `butler` — TTS-optimized summarization, voice interface
+- `distill` — context compression, long-session summaries
 - `evangelist` — brand voice, visual identity
+- `govern` — capability governance, escalation policy
 - `localizer` — i18n, l10n, RTL, Unicode
 - `marketer` — SEO, AARRR funnel, CRO, GTM strategy
+- `deep-researcher` — CTO-grade strategic briefs with citations
 - `researcher` — multi-pass research, cross-validation
 - `strategist` — social content, community engagement
 
@@ -111,4 +120,4 @@ New permanent agents are added only if they introduce a **new axis of responsibi
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

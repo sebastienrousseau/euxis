@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Dockerfile best practices for: ${goal}. Research: BuildKit features (cache mounts, secret mounts, SSH mounts, heredoc syntax), distroless vs Alpine vs scratch trade-offs, multi-platform builds (docker buildx, --platform), current OCI image spec and label standards, Dockerfile frontend syntax (# syntax=docker/dockerfile:1), Docker Scout and Snyk container scanning, Chainguard images as hardened alternatives, slim toolkit for image analysis, SBOM generation (syft, trivy). Cross-validate findings against Docker official docs, BuildKit docs, and OCI spec. Flag deprecated patterns (MAINTAINER, legacy builder features).",
           "verifies": [
             "BuildKit features researched (cache/secret/SSH mounts)",

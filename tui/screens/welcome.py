@@ -10,6 +10,7 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from tui.i18n import _
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -77,7 +78,6 @@ class WelcomeScreen(Screen[None]):
             yield Static(SPLASH_LOGO, id="welcome-logo")
             yield Static(id="welcome-stats")
             yield Static(id="welcome-prompt")
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

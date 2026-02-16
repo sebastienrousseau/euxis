@@ -457,7 +457,7 @@ registry_get_version() {
     if [[ -f "${EUXIS_HOME}/registry.json" ]] && command -v jq &>/dev/null; then
         jq -r '.protocol_version // .version' "${EUXIS_HOME}/registry.json" 2>/dev/null && return
     fi
-    echo "0.0.7"
+    echo "0.0.8"
 }
 
 registry_agent_exists() {

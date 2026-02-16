@@ -6,14 +6,13 @@ classify_license, parse_requirements_file, check_licenses.
 
 from __future__ import annotations
 
-import json
+# Import the module under test
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-# Import the module under test
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "bin"))
 from check_licenses import (
     COPYLEFT_LICENSES,
@@ -165,7 +164,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 
     def test_parse_valid_requirements(self):
         """Test parsing valid requirements file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("requests==2.28.0\n")
             f.write("flask==2.0.1\n")
             f.flush()
@@ -177,7 +176,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 
     def test_parse_with_comments(self):
         """Test parsing requirements with comments."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("# This is a comment\n")
             f.write("requests==2.28.0\n")
             f.write("# Another comment\n")
@@ -189,7 +188,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 
     def test_parse_with_empty_lines(self):
         """Test parsing requirements with empty lines."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("requests==2.28.0\n")
             f.write("\n")
             f.write("flask==2.0.1\n")
@@ -205,7 +204,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 
     def test_parse_no_version_specifier(self):
         """Test lines without == are skipped."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("requests>=2.28.0\n")
             f.write("flask==2.0.1\n")
             f.flush()
@@ -216,7 +215,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 
     def test_parse_whitespace_handling(self):
         """Test whitespace is handled correctly."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
             f.write("  requests == 2.28.0  \n")
             f.flush()
 
@@ -230,7 +229,7 @@ class TestParseRequirementsFile(unittest.TestCase):
 class TestGetPackageLicense(unittest.TestCase):
     """Tests for get_package_license function."""
 
-    @patch('check_licenses.requests.get')
+    @patch("check_licenses.requests.get")
     def test_successful_request(self, mock_get):
         """Test successful PyPI API request."""
         mock_response = Mock()
@@ -254,7 +253,7 @@ class TestGetPackageLicense(unittest.TestCase):
         assert result["version"] == "2.28.0"
         assert result["license"] == "MIT"
 
-    @patch('check_licenses.requests.get')
+    @patch("check_licenses.requests.get")
     def test_failed_request(self, mock_get):
         """Test failed PyPI API request."""
         mock_response = Mock()
@@ -264,7 +263,7 @@ class TestGetPackageLicense(unittest.TestCase):
         result = get_package_license("nonexistent-package", "1.0.0")
         assert result is None
 
-    @patch('check_licenses.requests.get')
+    @patch("check_licenses.requests.get")
     def test_request_timeout(self, mock_get):
         """Test PyPI API request timeout."""
         mock_get.side_effect = Exception("Timeout")
@@ -272,7 +271,7 @@ class TestGetPackageLicense(unittest.TestCase):
         result = get_package_license("requests", "2.28.0")
         assert result is None
 
-    @patch('check_licenses.requests.get')
+    @patch("check_licenses.requests.get")
     def test_extracts_classifiers(self, mock_get):
         """Test extraction of license classifiers."""
         mock_response = Mock()
@@ -302,8 +301,8 @@ class TestGetPackageLicense(unittest.TestCase):
 class TestCheckLicensesIntegration(unittest.TestCase):
     """Integration tests for check_licenses workflow."""
 
-    @patch('check_licenses.get_package_license')
-    @patch('check_licenses.parse_requirements_file')
+    @patch("check_licenses.get_package_license")
+    @patch("check_licenses.parse_requirements_file")
     def test_check_licenses_workflow(self, mock_parse, mock_get_license):
         """Test full check_licenses workflow."""
         from check_licenses import check_licenses
@@ -314,18 +313,30 @@ class TestCheckLicensesIntegration(unittest.TestCase):
         ]
 
         mock_get_license.side_effect = [
-            {"license": "MIT", "license_expression": "", "classifiers": [], "name": "requests", "version": "2.28.0"},
-            {"license": "BSD", "license_expression": "", "classifiers": [], "name": "flask", "version": "2.0.1"}
+            {
+                "license": "MIT",
+                "license_expression": "",
+                "classifiers": [],
+                "name": "requests",
+                "version": "2.28.0",
+            },
+            {
+                "license": "BSD",
+                "license_expression": "",
+                "classifiers": [],
+                "name": "flask",
+                "version": "2.0.1",
+            },
         ]
 
-        with patch('check_licenses.time.sleep'):  # Skip rate limiting
+        with patch("check_licenses.time.sleep"):  # Skip rate limiting
             results = check_licenses()
 
         assert "permissive" in results
         assert "copyleft" in results
         assert "errors" in results
 
-    @patch('check_licenses.parse_requirements_file')
+    @patch("check_licenses.parse_requirements_file")
     def test_check_licenses_empty_requirements(self, mock_parse):
         """Test check_licenses with empty requirements."""
         from check_licenses import check_licenses

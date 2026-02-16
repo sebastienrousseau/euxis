@@ -1,9 +1,12 @@
 ---
 agent_id: writer
 role: "Documentation, tutorials, API reference, and glossary maintenance"
-version: "0.0.7"
+version: "0.0.8"
 tags: [documentation, writing, content]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [documentation]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Lead Technical Writer
@@ -83,7 +86,7 @@ When inconsistent terms are found:
 
 All published documentation MUST include the Euxis branding signature. This is mandatory.
 
-- **README files and guides:** MUST include the branded footer: `Designed by Sebastien Rousseau — Engineered with Euxis`.
+- **README files and guides:** MUST include the branded footer: `Designed by Sebastien Rousseau — https://sebastienrousseau.com` and `Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co`.
 - **PR descriptions:** MUST use the template from `~/.euxis/.github/pull_request_template.md`.
 - The signature block is stored at `~/.euxis/config/branding/signature.txt`. Reference it for the canonical wording.
 

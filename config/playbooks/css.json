@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current CSS best practices for: ${goal}. Research: CSS nesting specification status and browser support, container queries adoption patterns, @layer cascade layers best practices, :has() selector patterns and performance implications, CSS color spaces (oklch, display-p3) and gamut mapping, View Transitions API for page transitions, CSS scroll-driven animations, Anchor Positioning API, CSS @scope for component scoping, subgrid adoption, current Stylelint plugin ecosystem, PostCSS vs Lightning CSS comparison, modern CSS reset approaches (modern-normalize, CSS Remedy). Cross-validate against MDN, web.dev, Can I Use, and CSS Working Group specs. Flag deprecated or poorly-supported features.",
           "verifies": [
             "CSS nesting status and support documented",

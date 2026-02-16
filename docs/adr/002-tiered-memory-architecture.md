@@ -13,7 +13,7 @@ Implement a three-tier memory retrieval system:
 
 - **Tier 1: Hot Memory** — The 20 most recent entries from the agent's memory file. Always included. Provides continuity with the immediate prior session.
 - **Tier 2: Relevant Memory** — Keyword-matched entries from the full memory file. Extracts keywords (5+ chars) from the current task, builds a grep alternation pattern, and returns the top 10 unique matches. Surfaces older but task-relevant memories.
-- **Tier 3: Cross-Agent Memory** — Keyword-matched entries from sibling agents' memory files within the same project. Read-only. Enables an architect to see what the bug-fixer discovered, or a reviewer to access the unit-tester's findings, without explicit delegation.
+- **Tier 3: Cross-Agent Memory** — Keyword-matched entries from sibling agents' memory files within the same project. Read-only. Enables an architect to see what the debugger discovered, or a reviewer to access the tester's findings, without explicit delegation.
 
 All three tiers are assembled by `build_tiered_memory()` and injected into the prompt under clearly labeled sections so the agent can distinguish recency from relevance from cross-agent context.
 
@@ -22,7 +22,7 @@ Additionally, the Cortex subsystem (`euxis-cortex`) provides typed vector memory
 ## Alternatives Considered
 1. **Full memory inclusion** — Include the entire memory file in every prompt. Rejected because memory files grow unbounded and would exceed context limits within a few sessions.
 2. **Embedding-only retrieval** — Use vector similarity exclusively (like a RAG system). Rejected as the sole mechanism because it requires an embedding model at boot time, adding latency. Keyword matching is instant and sufficient for most cases. The Cortex provides embedding-based recall as an opt-in deeper layer.
-3. **No cross-agent memory** — Each agent only sees its own history. Rejected because multi-agent workflows (dispatch, squads) produce knowledge that's valuable across agents. The architect's structural analysis helps the reviewer; the bug-fixer's findings help the unit-tester.
+3. **No cross-agent memory** — Each agent only sees its own history. Rejected because multi-agent workflows (dispatch, squads) produce knowledge that's valuable across agents. The architect's structural analysis helps the reviewer; the debugger's findings help the tester.
 
 ## Consequences
 - **Token efficiency:** Only relevant memories are included, keeping prompt size manageable regardless of memory file size.

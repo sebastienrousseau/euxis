@@ -8,7 +8,7 @@ export * from './health/crypto-health.js';
 export { healthMonitor as default } from './health/crypto-health.js';
 
 // Version and server metadata
-export const CRYPTO_SERVER_VERSION = '0.0.7';
+export const CRYPTO_SERVER_VERSION = '0.0.8';
 export const SERVER_NAME = 'euxis-crypto-server';
 
 // Dynamic import for health monitor (supports lazy loading)

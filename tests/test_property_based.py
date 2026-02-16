@@ -8,19 +8,17 @@ and edge cases using hypothesis-generated inputs.
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
-import pytest
-from hypothesis import given, strategies as st, assume, settings, example
+from hypothesis import assume, example, given, settings
+from hypothesis import strategies as st
 
 # Ensure the tui package is importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from tui.core.registry import FleetRegistry, Agent, Squad, Combo
 from tui.core.config import ETXConfig
-from tui.core.runner import AgentRun
+from tui.core.registry import Agent, Squad
 
 
 class TestAgentSerialization:
@@ -28,11 +26,11 @@ class TestAgentSerialization:
 
     @given(
         agent_id=st.text(min_size=1, max_size=50, alphabet=st.characters(
-            whitelist_categories=('Ll', 'Lu', 'Nd'), whitelist_characters='-_'
+            whitelist_categories=("Ll", "Lu", "Nd"), whitelist_characters="-_"
         )),
-        tier=st.sampled_from(['core', 'fleet', 'default', 'on-demand', 'specialist']),
+        tier=st.sampled_from(["core", "fleet", "default", "on-demand", "specialist"]),
         tags=st.lists(st.text(min_size=1, max_size=20), min_size=0, max_size=10),
-        activation=st.sampled_from(['default', 'on-demand', 'specialist'])
+        activation=st.sampled_from(["default", "on-demand", "specialist"])
     )
     @settings(max_examples=100, deadline=1000)
     def test_agent_serialization_roundtrip(self, agent_id, tier, tags, activation):
@@ -42,18 +40,18 @@ class TestAgentSerialization:
         agent = Agent(
             id=agent_id.strip(),
             tier=tier,
-            version='0.0.7',
+            version="0.0.8",
             tags=tuple(tags),
             activation=activation,
         )
 
         # Serialize to dict and back
         serialized = {
-            'id': agent.id,
-            'tier': agent.tier,
-            'version': agent.version,
-            'tags': agent.tags,
-            'activation': agent.activation,
+            "id": agent.id,
+            "tier": agent.tier,
+            "version": agent.version,
+            "tags": agent.tags,
+            "activation": agent.activation,
         }
         reconstructed = Agent(**serialized)
 
@@ -65,7 +63,7 @@ class TestAgentSerialization:
 
     @given(
         squad_id=st.text(min_size=1, max_size=30, alphabet=st.characters(
-            whitelist_categories=('Ll', 'Lu', 'Nd'), whitelist_characters='-_'
+            whitelist_categories=("Ll", "Lu", "Nd"), whitelist_characters="-_"
         )),
         name=st.text(min_size=1, max_size=50),
         purpose=st.text(min_size=1, max_size=200),
@@ -91,11 +89,11 @@ class TestAgentSerialization:
 
         # Test serialization
         serialized = {
-            'id': squad.id,
-            'name': squad.name,
-            'purpose': squad.purpose,
-            'lead': squad.lead,
-            'members': squad.members,
+            "id": squad.id,
+            "name": squad.name,
+            "purpose": squad.purpose,
+            "lead": squad.lead,
+            "members": squad.members,
         }
         reconstructed = Squad(**serialized)
 
@@ -107,12 +105,12 @@ class TestAgentSerialization:
 
     @given(
         config_data=st.fixed_dictionaries({
-            'theme': st.sampled_from(['etx-dark', 'etx-light', 'etx-contrast']),
-            'default_provider': st.sampled_from(['claude', 'gemini', 'ollama']),
-            'show_agent_tags': st.booleans(),
-            'reduced_motion': st.booleans(),
-            'accessible_mode': st.booleans(),
-            'grid_columns': st.integers(min_value=1, max_value=8),
+            "theme": st.sampled_from(["etx-dark", "etx-light", "etx-contrast"]),
+            "default_provider": st.sampled_from(["claude", "gemini", "ollama"]),
+            "show_agent_tags": st.booleans(),
+            "reduced_motion": st.booleans(),
+            "accessible_mode": st.booleans(),
+            "grid_columns": st.integers(min_value=1, max_value=8),
         })
     )
     def test_config_serialization_roundtrip(self, config_data):
@@ -151,7 +149,7 @@ class TestConfigBoundaries:
         if non_empty:
             assert config.recent_agents[0] == non_empty[-1]
 
-    @example(agents=['agent1', 'agent1', 'agent2', 'agent1'])  # Test deduplication
+    @example(agents=["agent1", "agent1", "agent2", "agent1"])  # Test deduplication
     @given(st.lists(st.text(min_size=1, max_size=20), min_size=1, max_size=15))
     def test_recent_agents_deduplication(self, agents):
         """Test that duplicate agents are properly deduplicated."""
@@ -179,7 +177,7 @@ class TestValidationInvariants:
             assert not result
 
         # Invariant: strings with path traversal patterns are invalid
-        if '..' in agent_name or '/' in agent_name:
+        if ".." in agent_name or "/" in agent_name:
             assert not result
 
         # Invariant: valid IDs start with a letter
@@ -199,7 +197,6 @@ class TestMathematicalProperties:
     )
     def test_sparkline_monotonicity(self, values):
         """Test that sparkline generation preserves relative ordering."""
-        from tui.widgets.sparkline import sparkline_text
 
         # Mock the sparkline function behavior
         def mock_sparkline_text(data, width=20):

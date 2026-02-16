@@ -82,7 +82,7 @@ def save_registry(registry):
                     "INSERT OR REPLACE INTO agents (id, path, tier, version, activation) "
                     "VALUES (?, ?, ?, ?, ?)",
                     (agent["id"], agent.get("path", ""), agent.get("tier", "fleet"),
-                     agent.get("version", "0.0.7"), agent.get("activation"))
+                     agent.get("version", "0.0.8"), agent.get("activation"))
                 )
                 # Sync tags
                 for tag in agent.get("tags", []):

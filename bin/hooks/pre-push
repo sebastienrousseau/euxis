@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Enforce Euxis branding signature in PR descriptions before push.
+set -euo pipefail
+
+if [[ "${EUXIS_PR_SIGNATURE_ENFORCE:-1}" != "1" ]]; then
+  exit 0
+fi
+
+if [[ "${CI:-}" == "true" ]]; then
+  exit 0
+fi
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Euxis: gh CLI is required to validate PR branding. Install it or set EUXIS_PR_SIGNATURE_ENFORCE=0 to bypass." >&2
+  exit 1
+fi
+
+branch="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
+if [[ -z "$branch" ]]; then
+  exit 0
+fi
+
+pr_body="$(gh pr view --json body -q '.body' 2>/dev/null || true)"
+if [[ -z "$pr_body" ]]; then
+  # No PR yet for this branch.
+  exit 0
+fi
+
+if echo "$pr_body" | grep -qF "Sebastien Rousseau" && echo "$pr_body" | grep -qF "euxis.co"; then
+  exit 0
+fi
+
+cat >&2 <<'EOF'
+Euxis: PR description is missing the branding signature.
+
+Fix:
+  euxis-hooks check-pr
+  gh pr edit --body-file <updated_body>
+
+To bypass once:
+  EUXIS_PR_SIGNATURE_ENFORCE=0 git push
+EOF
+exit 1

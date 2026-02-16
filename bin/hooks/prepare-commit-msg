@@ -13,7 +13,10 @@ case "$COMMIT_SOURCE" in
   merge|squash) exit 0 ;;
 esac
 
-SIGNATURE_FILE="${HOME}/.euxis/branding/signature.txt"
+SIGNATURE_FILE="${EUXIS_HOME:-${HOME}/.euxis}/config/branding/signature.txt"
+if [[ ! -f "$SIGNATURE_FILE" ]]; then
+  SIGNATURE_FILE="${HOME}/.euxis/branding/signature.txt"
+fi
 
 if [[ ! -f "$SIGNATURE_FILE" ]]; then
   exit 0

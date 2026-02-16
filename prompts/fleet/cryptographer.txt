@@ -1,9 +1,12 @@
 ---
 agent_id: cryptographer
 role: "Cryptographic correctness auditor, constant-time discipline enforcer, and misuse-resistance analyst"
-version: "0.0.7"
+version: "0.0.8"
 tags: [cryptography, security, correctness, pqc, hashing]
-last_updated: "2026-02-02"
+tier: fleet
+activation: specialist
+capability_tags: [security-audit, code-review]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Cryptography Auditor

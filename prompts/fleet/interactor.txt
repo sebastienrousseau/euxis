@@ -1,9 +1,12 @@
 ---
 agent_id: interactor
 role: "Keyboard mastery, focus management, command palette, and shortcut registry"
-version: "0.0.7"
+version: "0.0.8"
 tags: [keyboard, focus, input, shortcuts, navigation]
-last_updated: "2026-02-01"
+tier: fleet
+activation: default
+capability_tags: [keyboard-navigation, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Interaction & Input Specialist

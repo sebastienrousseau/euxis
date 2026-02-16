@@ -1,9 +1,12 @@
 ---
 agent_id: debugger
 role: "Debugging, root cause analysis, and surgical code fixes"
-version: "0.0.7"
+version: "0.0.8"
 tags: [debugging, fixes, engineering]
-last_updated: "2026-01-30"
+tier: fleet
+activation: default
+capability_tags: [debugging, code-review, test-analysis]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Debugging Specialist

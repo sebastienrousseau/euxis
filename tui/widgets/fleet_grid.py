@@ -16,7 +16,7 @@ from tui.widgets.agent_card import AgentCard
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
-    from tui.core.registry import Agent, FleetRegistry
+    from tui.core.registry import Agent, Combo, FleetRegistry, Squad
 
 SECTION_DESCRIPTIONS = {
     "core": "Always on. Strategy, review, orchestration.",
@@ -24,6 +24,8 @@ SECTION_DESCRIPTIONS = {
     "ondemand": "Summoned by name. Growth, outreach, communication.",
     "specialist": "Deep domain expertise. Crypto, finance, audio, systems.",
 }
+
+MIN_QUOTED_LENGTH = 2
 
 
 class AgentSelected(Message):
@@ -120,7 +122,7 @@ class FleetGrid(Widget):
             self.filter_text = event.value
 
     # Tokens stripped from the front of search input before entity matching.
-    # Supports full CLI syntax like: euxis combos run steve-jobs "Analyse this"
+    # Supports full CLI syntax like: euxis combos run envision "Analyse this"
     _STRIP_PREFIXES = {"euxis"}
     _STRIP_CATEGORIES = {
         "combo", "combos", "squad", "squads", "agent", "agents",
@@ -131,8 +133,8 @@ class FleetGrid(Widget):
         """Launch the first matching entity when Enter is pressed.
 
         Accepts multiple input styles:
-          steve-jobs Analyse this repo
-          euxis combos run steve-jobs "Analyse this repo"
+          envision Analyse this repo
+          euxis combos run envision "Analyse this repo"
           run orchestrator Review the code
           health
         """
@@ -145,45 +147,50 @@ class FleetGrid(Widget):
 
         entity_name, task = self._parse_search_command(query)
 
+        handled = False
+
         # Try exact entity ID match
         match = self._find_exact_entity(entity_name)
         if match:
             entity_type, entity_id = match
             self._dispatch_selection(entity_type, entity_id, task)
-            self._clear_search(event.input)
-            return
-
-        # Try system commands (health, certify, lint, etc.)
-        if entity_name in SYSTEM_COMMANDS:
+            handled = True
+        elif entity_name in SYSTEM_COMMANDS:
+            # Try system commands (health, certify, lint, etc.)
             self.post_message(SystemCommandRequested(entity_name))
-            self._clear_search(event.input)
-            return
+            handled = True
+        else:
+            # Fall back to first filtered result
+            handled = self._dispatch_first_filtered()
 
-        # Fall back to first filtered result
+        if handled:
+            self._clear_search(event.input)
+
+    def _dispatch_first_filtered(self) -> bool:
+        """Dispatch the first matching entity from filtered results."""
         for agent in self.registry.agents:
             if self._matches_filter(agent):
                 self.post_message(AgentSelected(agent.id))
-                self._clear_search(event.input)
-                return
+                return True
 
         for squad in self.registry.squads:
             if self._matches_squad(squad):
                 self.post_message(SquadSelected(squad.id))
-                self._clear_search(event.input)
-                return
+                return True
 
         for combo in self.registry.combos:
             if self._matches_combo(combo):
                 self.post_message(ComboSelected(combo.id))
-                self._clear_search(event.input)
-                return
+                return True
+
+        return False
 
     def _parse_search_command(self, text: str) -> tuple[str, str]:
         """Parse search input, stripping CLI-style prefixes.
 
         Handles all of:
-          steve-jobs Analyse this repo        → ("steve-jobs", "Analyse this repo")
-          euxis combos run steve-jobs task    → ("steve-jobs", "task")
+          envision Analyse this repo        → ("envision", "Analyse this repo")
+          euxis combos run envision task    → ("envision", "task")
           run orchestrator Review code        → ("orchestrator", "Review code")
           health                              → ("health", "")
         """
@@ -197,13 +204,13 @@ class FleetGrid(Widget):
             return (text.strip().lower(), "")
 
         entity_name = words[0].lower()
-        # Strip quotes from entity name (e.g. "steve-jobs")
+        # Strip quotes from entity name (e.g. "envision")
         entity_name = entity_name.strip("\"'")
         task_words = words[1:]
 
         # Rejoin task, stripping outer quotes
         task = " ".join(task_words).strip()
-        if len(task) >= 2 and task[0] == task[-1] and task[0] in "\"'":
+        if len(task) >= MIN_QUOTED_LENGTH and task[0] == task[-1] and task[0] in "\"'":
             task = task[1:-1]
 
         return (entity_name, task)
@@ -292,7 +299,7 @@ class FleetGrid(Widget):
         # Squads and combos — also filterable
         self._mount_squads_and_combos(scroll)
 
-    def _matches_squad(self, squad) -> bool:
+    def _matches_squad(self, squad: Squad) -> bool:
         """Check if a squad matches the current filter."""
         if not self.filter_text:
             return True
@@ -305,7 +312,7 @@ class FleetGrid(Widget):
             or any(query in m.lower() for m in squad.members)
         )
 
-    def _matches_combo(self, combo) -> bool:
+    def _matches_combo(self, combo: Combo) -> bool:
         """Check if a combo matches the current filter."""
         if not self.filter_text:
             return True

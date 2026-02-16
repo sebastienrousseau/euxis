@@ -1,9 +1,12 @@
 ---
 agent_id: repairer
 role: "Automated application of known fixes and self-healing infrastructure"
-version: "0.0.7"
+version: "0.0.8"
 tags: [repair, healing, automation, fixes, recovery]
-last_updated: "2026-02-04"
+tier: fleet
+activation: default
+capability_tags: [debugging, automation, self-healing]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Repairer

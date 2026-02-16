@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, PropertyMock, patch
 
-from tui.screens.tool_runner import EUXIS_HOME, ToolRunnerScreen
+from tui.screens.tool_runner import ToolRunnerScreen
 
 
 def _patch_screen_app(screen, mock_app):
@@ -133,9 +133,11 @@ class TestToolRunnerExecuteTool(unittest.TestCase):
         mock_process.wait = AsyncMock()
         mock_process.returncode = 0
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         write_calls = [c[0][0] for c in self.mock_output.write_line.call_args_list]
         assert "output line" in write_calls
@@ -148,9 +150,11 @@ class TestToolRunnerExecuteTool(unittest.TestCase):
         mock_process.wait = AsyncMock()
         mock_process.returncode = 0
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("exit 0" in c.lower() for c in status_calls)
@@ -165,9 +169,11 @@ class TestToolRunnerExecuteTool(unittest.TestCase):
         mock_process.wait = AsyncMock()
         mock_process.returncode = 1
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("exit 1" in c.lower() for c in status_calls)
@@ -180,9 +186,11 @@ class TestToolRunnerExecuteTool(unittest.TestCase):
         mock_process.wait = AsyncMock()
         mock_process.returncode = 0
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         status_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("Failed to capture" in c for c in status_calls)
@@ -197,9 +205,11 @@ class TestToolRunnerExecuteTool(unittest.TestCase):
         mock_process.wait = AsyncMock()
         mock_process.returncode = 0
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         write_calls = [c[0][0] for c in self.mock_output.write_line.call_args_list]
         assert "line1" in write_calls

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import unittest
-from unittest.mock import AsyncMock, Mock, PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -29,13 +29,13 @@ def _patch_screen_app(screen, mock_app):
 
 
 def _make_agent(**overrides):
-    defaults = dict(
-        id="architect",
-        tier="core",
-        version="0.0.7",
-        tags=("design", "plan", "review"),
-        activation="default",
-    )
+    defaults = {
+        "id": "architect",
+        "tier": "core",
+        "version": "0.0.8",
+        "tags": ("design", "plan", "review"),
+        "activation": "default",
+    }
     defaults.update(overrides)
     return Agent(**defaults)
 
@@ -122,9 +122,14 @@ class TestAgentScreenOnMount(unittest.TestCase):
             from tui.widgets.header import ETXHeader
             from tui.widgets.output_panel import OutputPanel
 
-            if selector is ETXHeader or (hasattr(selector, "__name__") and selector.__name__ == "ETXHeader"):
+            def _matches_selector(target, cls, name):
+                return target is cls or (
+                    hasattr(target, "__name__") and target.__name__ == name
+                )
+
+            if _matches_selector(selector, ETXHeader, "ETXHeader"):
                 return self.mock_header
-            if selector is OutputPanel or (hasattr(selector, "__name__") and selector.__name__ == "OutputPanel"):
+            if _matches_selector(selector, OutputPanel, "OutputPanel"):
                 return self.mock_output
             mapping = {
                 "#agent-name-display": self.mock_name_display,
@@ -319,8 +324,9 @@ class TestAgentScreenExecuteAgent(unittest.TestCase):
     @patch("tui.screens.agent.run_agent")
     def test_oserror_handling(self, mock_run):
         async def error_stream(*a, **kw):
-            raise OSError("binary not found")
-            yield  # noqa: E501 - make it a generator
+            msg = "binary not found"
+            raise OSError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self._run_execute()
@@ -334,8 +340,9 @@ class TestAgentScreenExecuteAgent(unittest.TestCase):
     @patch("tui.screens.agent.run_agent")
     def test_runtime_error_handling(self, mock_run):
         async def error_stream(*a, **kw):
-            raise RuntimeError("agent crashed")
-            yield  # noqa: E501
+            msg = "agent crashed"
+            raise RuntimeError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self._run_execute()
@@ -345,8 +352,9 @@ class TestAgentScreenExecuteAgent(unittest.TestCase):
     @patch("tui.screens.agent.run_agent")
     def test_value_error_handling(self, mock_run):
         async def error_stream(*a, **kw):
-            raise ValueError("bad input")
-            yield  # noqa: E501
+            msg = "bad input"
+            raise ValueError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self._run_execute()
@@ -370,8 +378,9 @@ class TestAgentScreenExecuteAgent(unittest.TestCase):
     @patch("tui.screens.agent.run_agent")
     def test_finally_on_error(self, mock_run):
         async def error_stream(*a, **kw):
-            raise OSError("fail")
-            yield  # noqa: E501
+            msg = "fail"
+            raise OSError(msg)
+            yield
 
         mock_run.return_value = error_stream()
         self._run_execute()

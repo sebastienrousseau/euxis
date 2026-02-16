@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Lua best practices for: ${goal}. Research: Lua 5.4 changes (integers, generalized for, to-be-closed variables, warning system), LuaJIT 2.1 specifics (FFI, trace compiler restrictions, NYI list), compatibility shims between Lua 5.1/5.2/5.3/5.4 and LuaJIT, current LuaRocks ecosystem health and alternatives, embedding patterns (Neovim lua API, OpenResty ngx_lua, LOVE2D, Redis scripting), luacheck vs selene comparison, modern testing frameworks (Busted vs LuaUnit vs luassert), C-API best practices (stack management, userdata vs lightuserdata, coroutine safety). Cross-validate findings against Lua reference manual, Programming in Lua, LuaJIT wiki, and community resources. Flag deprecated patterns per version.",
           "verifies": [
             "Lua 5.4 features researched (integers, to-be-closed)",

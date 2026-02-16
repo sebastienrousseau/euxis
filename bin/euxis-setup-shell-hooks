@@ -4,6 +4,14 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 # Configuration
 SCRIPT_NAME="euxis-setup-shell-hooks"
 EUXIS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

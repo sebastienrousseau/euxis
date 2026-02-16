@@ -15,7 +15,7 @@ cat > ~/my-agent.txt <<'EOF'
 ---
 agent_id: my-agent
 role: Custom domain specialist
-version: "0.0.7"
+version: "0.0.8"
 tags: [custom, domain]
 last_updated: "2026-02-02"
 ---
@@ -71,7 +71,7 @@ Place the file in `~/.euxis/prompts/fleet/<agent-id>.txt`.
 ---
 agent_id: <must match filename>
 role: <one-line description>
-version: "0.0.7"
+version: "0.0.8"
 tags: [<category tags>]
 last_updated: "<YYYY-MM-DD>"
 ---
@@ -238,8 +238,8 @@ See the ADR documents for rationale behind key design decisions:
 - `docs/adr/001-intelligence-tiering.md` — Why agents map to specific providers
 - `docs/adr/002-tiered-memory-architecture.md` — Why MemGPT-inspired memory
 - `docs/adr/003-dispatch-modes.md` — Why hierarchical/mesh/federated execution
-- `docs/adr/006-agent-fleet-size.md` — Why 41 agents and when to consolidate
+- `docs/adr/006-agent-fleet-size.md` — Why 50 agents and when to consolidate
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

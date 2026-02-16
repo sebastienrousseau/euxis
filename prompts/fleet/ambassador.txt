@@ -1,9 +1,12 @@
 ---
 agent_id: ambassador
 role: "Developer relations, tutorials, demos, and conference evangelism"
-version: "0.0.7"
+version: "0.0.8"
 tags: [devrel, community, content]
-last_updated: "2026-01-30"
+tier: fleet
+activation: on-demand
+capability_tags: [documentation]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Developer Relations Advocate

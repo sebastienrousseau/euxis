@@ -119,7 +119,7 @@ euxis-certify
 --------------------------------------------------
   Running full validation...
   Running minimal validation...
-  Registry database valid (41 agents)
+  Registry database valid (50 agents)
   Euxis directory structure is valid
   All system dependencies available
   Full validation passed.
@@ -134,7 +134,7 @@ euxis-certify
   User guide exists
   Fleet guide exists
   Temporary file write access verified
-  Current version detected: 0.0.7
+  Current version detected: 0.0.8
   All certification prerequisites met
 
 [GATE 0b] Security & Quality Enforcement...
@@ -186,7 +186,7 @@ euxis-certify
   PASS: docs/user-guide.md exists.
   PASS: docs/fleet-guide.md exists.
   PASS: All documentation is current (updated within 7 days).
-  PASS: README.md references version 0.0.7.
+  PASS: README.md references version 0.0.8.
   Validating JSON manifest files...
   PASS: registry.json is valid JSON.
   PASS: squads.json is valid JSON.
@@ -552,9 +552,9 @@ euxis architect "Your task" ollama
 |------------|------------------|----------|
 | orchestrator, architect | claude | gemini |
 | researcher, deep-researcher | gemini | claude |
-| bug-fixer, unit-tester | goose | claude |
+| debugger, tester | goose | claude |
 | butler, librarian | ollama | claude |
-| perf-optimizer | qwen | claude |
+| optimizer | qwen | claude |
 
 ---
 
@@ -587,8 +587,8 @@ jq -r '.agents[].id' ~/.euxis/registry.json | sort
    ```bash
    # Common agents
    euxis architect "Task"     # Not 'architekt'
-   euxis bug-fixer "Task"     # Not 'bugfixer'
-   euxis unit-tester "Task"   # Not 'unittester'
+   euxis debugger "Task"     # Not 'bugfixer'
+   euxis tester "Task"   # Not 'unittester'
    ```
 
 2. **Check if prompt file exists:**

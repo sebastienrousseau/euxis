@@ -1,18 +1,17 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
 """Tests for CryptoService dependency injection architecture."""
 
+
 import pytest
-from unittest.mock import Mock
 
 from tui.core.services import (
-    AlgorithmRegistry,
     AlgorithmInfo,
+    AlgorithmRegistry,
     CryptoService,
     InMemoryKeyManager,
     ServiceContainer,
-    SimpleXORAlgorithm,
     SHA256Algorithm,
-    CryptographicAlgorithm,
+    SimpleXORAlgorithm,
     create_default_crypto_service,
     setup_service_container,
 )
@@ -45,7 +44,10 @@ class TestAlgorithmRegistry:
         invalid_algorithm = "not an algorithm"
         metadata = AlgorithmInfo("test", 32, "Test", "symmetric")
 
-        with pytest.raises(TypeError, match="Algorithm must implement CryptographicAlgorithm protocol"):
+        with pytest.raises(
+            TypeError,
+            match="Algorithm must implement CryptographicAlgorithm protocol",
+        ):
             registry.register(invalid_algorithm, metadata)
 
     def test_list_algorithms(self):
@@ -372,7 +374,7 @@ class TestServiceContainer:
         """Test that getting unregistered service raises error."""
         container = ServiceContainer()
 
-        with pytest.raises(ValueError, match="Service .* not registered"):
+        with pytest.raises(ValueError, match=r"Service .* not registered"):
             container.get(int)
 
     def test_setup_service_container(self):
@@ -425,13 +427,24 @@ class TestIntegration:
                 try:
                     info = crypto_service.get_algorithm_info(algorithm)
                     if info.algorithm_type == "symmetric":
-                        test_key_id = crypto_service.generate_and_store_key(f"test_{algorithm}", algorithm)
-                        test_encrypted = crypto_service.encrypt(b"test", test_key_id, algorithm)
-                        test_decrypted = crypto_service.decrypt(test_encrypted, test_key_id, algorithm)
+                        test_key_id = crypto_service.generate_and_store_key(
+                            f"test_{algorithm}",
+                            algorithm,
+                        )
+                        test_encrypted = crypto_service.encrypt(
+                            b"test",
+                            test_key_id,
+                            algorithm,
+                        )
+                        test_decrypted = crypto_service.decrypt(
+                            test_encrypted,
+                            test_key_id,
+                            algorithm,
+                        )
                         assert test_decrypted == b"test"
-                except Exception:
+                except (KeyError, RuntimeError, ValueError):
                     # Some algorithms might not support all operations
-                    pass
+                    continue
 
     def test_dependency_injection_isolation(self):
         """Test that dependency injection provides proper isolation."""

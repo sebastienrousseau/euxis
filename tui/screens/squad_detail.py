@@ -10,6 +10,7 @@ from textual.screen import Screen
 from textual.widgets import Static
 
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -87,7 +88,6 @@ class SquadDetailScreen(Screen[None]):
             )
             yield Container(id="combos-list")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://euxis.co/schemas/gateway-request.schema.json",
+  "title": "Euxis Gateway Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "id", "method", "params"],
+  "properties": {
+    "type": {"const": "request"},
+    "id": {"type": "string", "minLength": 1},
+    "method": {
+      "type": "string",
+      "enum": ["gateway.connect", "chat.history", "chat.send", "chat.abort", "chat.inject"]
+    },
+    "params": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"method": {"const": "gateway.connect"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["protocol"],
+            "properties": {
+              "protocol": {"type": "string", "minLength": 1},
+              "client_id": {"type": "string"},
+              "resume_seq": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "chat.history"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["session_id"],
+            "properties": {
+              "session_id": {"type": "string", "minLength": 1},
+              "limit": {"type": "integer", "minimum": 1, "maximum": 1000}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "chat.send"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["session_id", "channel_id", "role", "content"],
+            "properties": {
+              "session_id": {"type": "string", "minLength": 1},
+              "channel_id": {"type": "string", "minLength": 1},
+              "role": {"type": "string", "enum": ["user", "assistant", "system"]},
+              "content": {"type": "string"},
+              "meta": {"type": "object"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "chat.abort"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["run_id", "session_id"],
+            "properties": {
+              "run_id": {"type": "string", "minLength": 1},
+              "session_id": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"method": {"const": "chat.inject"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["session_id", "role", "content"],
+            "properties": {
+              "session_id": {"type": "string", "minLength": 1},
+              "role": {"type": "string", "enum": ["assistant", "system"]},
+              "content": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

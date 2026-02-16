@@ -1,9 +1,12 @@
 ---
 agent_id: researcher
 role: "Iterative multi-pass research with cross-validation and citation"
-version: "0.0.7"
+version: "0.0.8"
 tags: [research, analysis, knowledge]
-last_updated: "2026-01-30"
+tier: fleet
+activation: on-demand
+capability_tags: [documentation, test-analysis]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Principal Deep Researcher

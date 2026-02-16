@@ -10,7 +10,15 @@
 
 set -euo pipefail
 
-VERSION="${VERSION:-v0.0.7}"
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
+VERSION="${VERSION:-v0.0.8}"
 LOCAL_ONLY=false
 _self="$0"
 while [ -L "$_self" ]; do
@@ -46,7 +54,7 @@ DESCRIPTION:
 
 EXAMPLES:
     euxis-cross-platform-verify --local-only
-    euxis-cross-platform-verify --version v0.0.7
+    euxis-cross-platform-verify --version v0.0.8
 
 VERIFICATION GATES:
     1. Build Parity      - Scripts execute on all platforms

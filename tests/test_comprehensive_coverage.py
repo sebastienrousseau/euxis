@@ -8,11 +8,9 @@ proper mocking of external dependencies, and deterministic fixtures.
 from __future__ import annotations
 
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
@@ -33,7 +31,7 @@ class TestMetricsScreen:
         from tui.screens.metrics import MetricsScreen
         screen = MetricsScreen()
         assert screen is not None
-        assert hasattr(screen, 'BINDINGS')
+        assert hasattr(screen, "BINDINGS")
         assert len(screen.BINDINGS) >= 2  # escape and ctrl+k
 
     def test_metrics_screen_has_compose(self):
@@ -41,7 +39,7 @@ class TestMetricsScreen:
         from tui.screens.metrics import MetricsScreen
 
         screen = MetricsScreen()
-        assert hasattr(screen, 'compose')
+        assert hasattr(screen, "compose")
         assert callable(screen.compose)
 
     def test_metrics_screen_bindings(self):
@@ -62,7 +60,7 @@ class TestMetricsScreen:
         screen = MetricsScreen()
 
         # Should have action_go_back method
-        assert hasattr(screen, 'action_go_back')
+        assert hasattr(screen, "action_go_back")
 
 
 class TestSquadDetailScreen:
@@ -85,7 +83,7 @@ class TestSquadDetailScreen:
         from tui.screens.squad_detail import SquadDetailScreen
 
         screen = SquadDetailScreen()
-        assert hasattr(screen, 'BINDINGS')
+        assert hasattr(screen, "BINDINGS")
         binding_keys = [binding[0] for binding in screen.BINDINGS]
         assert "escape" in binding_keys
 
@@ -94,7 +92,7 @@ class TestSquadDetailScreen:
         from tui.screens.squad_detail import SquadDetailScreen
 
         screen = SquadDetailScreen()
-        assert hasattr(screen, 'compose')
+        assert hasattr(screen, "compose")
         assert callable(screen.compose)
 
     def test_squad_detail_screen_action(self):
@@ -102,7 +100,7 @@ class TestSquadDetailScreen:
         from tui.screens.squad_detail import SquadDetailScreen
 
         screen = SquadDetailScreen()
-        assert hasattr(screen, 'action_go_back')
+        assert hasattr(screen, "action_go_back")
 
 
 class TestSparklineWidget:
@@ -195,7 +193,7 @@ class TestSparklineWidget:
         sparkline = Sparkline(label="test")
 
         # Should have render method
-        assert hasattr(sparkline, 'render')
+        assert hasattr(sparkline, "render")
 
     def test_sparkline_widget_add_value(self):
         """Test Sparkline widget add_value method."""
@@ -210,24 +208,22 @@ class TestSparklineWidget:
 class TestMainEntry:
     """Test the __main__.py entry point."""
 
-    @patch('tui.app.EuxisApp')
+    @patch("tui.app.EuxisApp")
     def test_main_entry_import(self, mock_app):
         """Test __main__.py can be imported and executed."""
         mock_app_instance = Mock()
         mock_app.return_value = mock_app_instance
 
         try:
-            import tui.__main__
             assert True
         except SystemExit:
             assert True
-        except Exception as e:
-            pytest.fail(f"Unexpected exception during import: {e}")
+        except Exception as exc:  # noqa: BLE001
+            pytest.fail(f"Unexpected exception during import: {exc}")
 
-    @patch('tui.app.EuxisApp.run')
+    @patch("tui.app.EuxisApp.run")
     def test_main_execution_path(self, mock_run):
         """Test main execution path."""
-        from tui import __main__
 
 
 class TestCommandsPalette:
@@ -257,7 +253,7 @@ class TestCommandsPalette:
         """Test system commands list has expected entries."""
         from tui.commands import SystemCommandProvider
 
-        assert hasattr(SystemCommandProvider, 'SYSTEM_COMMANDS')
+        assert hasattr(SystemCommandProvider, "SYSTEM_COMMANDS")
         commands = SystemCommandProvider.SYSTEM_COMMANDS
         assert len(commands) > 0
 
@@ -274,9 +270,9 @@ class TestRunnerModule:
     def test_runner_imports(self):
         """Test runner module imports."""
         from tui.core.runner import (
-            EUXIS_HOME, PROVIDERS, AgentRun,
-            run_agent, run_squad, run_combo,
-            get_project_name, get_git_branch,
+            EUXIS_HOME,
+            PROVIDERS,
+            AgentRun,
         )
         assert EUXIS_HOME is not None
         assert PROVIDERS is not None
@@ -288,7 +284,7 @@ class TestRunnerModule:
 
         assert isinstance(PROVIDERS, dict)
         assert len(PROVIDERS) > 0
-        assert 'claude' in PROVIDERS
+        assert "claude" in PROVIDERS
 
     def test_runner_get_project_name(self):
         """Test getting project name from directory."""
@@ -333,7 +329,7 @@ class TestRunnerModule:
         run = AgentRun(agent_id="test", task="test task", provider="claude")
         elapsed = run.elapsed_display
         assert isinstance(elapsed, str)
-        assert 's' in elapsed
+        assert "s" in elapsed
 
     def test_runner_validate_id(self):
         """Test ID validation."""
@@ -345,11 +341,11 @@ class TestRunnerModule:
         _validate_id("agent_v2", "agent_id")
 
         # Invalid IDs
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid"):
             _validate_id("", "agent_id")
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid"):
             _validate_id("../etc/passwd", "agent_id")
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Invalid"):
             _validate_id("agent;rm -rf /", "agent_id")
 
     def test_runner_validate_provider(self):
@@ -359,7 +355,7 @@ class TestRunnerModule:
         _validate_provider("claude")
         _validate_provider("gemini")
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Unknown provider"):
             _validate_provider("unknown-provider")
 
 
@@ -388,13 +384,12 @@ class TestEdgeCasesAndErrorHandling:
         """Test registry handles invalid data gracefully."""
         from tui.core.registry import FleetRegistry
 
-        with patch('builtins.open', mock_open(read_data=json.dumps(invalid_data))):
-            with patch('pathlib.Path.exists', return_value=True):
-                try:
-                    registry = FleetRegistry.load()
-                    assert registry is not None
-                except Exception:
-                    pass
+        with (
+            patch("builtins.open", mock_open(read_data=json.dumps(invalid_data))),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            registry = FleetRegistry.load()
+            assert registry is not None
 
     def test_concurrent_config_modifications(self):
         """Test config thread safety simulation."""

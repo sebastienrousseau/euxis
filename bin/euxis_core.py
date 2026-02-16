@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # (c) 2026 Euxis Fleet. All rights reserved.
-"""
-Euxis Core Dispatch Engine
+"""Euxis Core Dispatch Engine.
 
 Python core extracted from euxis-dispatch shell script.
 Provides DispatchEngine class for fleet deployment coordination.
@@ -9,12 +8,13 @@ Provides DispatchEngine class for fleet deployment coordination.
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import os
 import re
-import shlex
 import sqlite3
+import shutil
 import subprocess
 import tempfile
 import time
@@ -33,27 +33,28 @@ logger = logging.getLogger(__name__)
 
 EUXIS_HOME = Path(os.environ.get("EUXIS_HOME", Path.home() / ".euxis"))
 DEFAULT_DISPATCH_MODES = {"hierarchical", "mesh", "federated"}
-SHELL_METACHARACTERS = re.compile(r'[;&|`$(){}[\]<>*?~!#]')
+SHELL_METACHARACTERS = re.compile(r"[;&|`$(){}[\]<>*?~!#]")
 
 
 class DispatchError(Exception):
     """Base exception for dispatch operations."""
-    pass
+
 
 
 class ValidationError(DispatchError):
     """Raised when manifest or configuration validation fails."""
-    pass
+
 
 
 class AgentError(DispatchError):
     """Raised when agent operations fail."""
-    pass
+
 
 
 @dataclass
 class DispatchResult:
     """Result of a single agent dispatch."""
+
     agent: str
     index: int
     success: bool
@@ -66,6 +67,7 @@ class DispatchResult:
 @dataclass
 class ManifestDispatch:
     """Single dispatch entry from manifest."""
+
     agent: str
     task: str
     priority: str
@@ -78,6 +80,7 @@ class ManifestDispatch:
 @dataclass
 class Manifest:
     """Parsed dispatch manifest."""
+
     project: str
     mode: str
     dispatches: list[ManifestDispatch]
@@ -89,25 +92,31 @@ class Manifest:
         try:
             with manifest_path.open() as f:
                 data = json.load(f)
-        except (OSError, json.JSONDecodeError) as e:
-            raise ValidationError(f"Failed to load manifest {manifest_path}: {e}")
+        except (OSError, json.JSONDecodeError) as exc:
+            msg = f"Failed to load manifest {manifest_path}: {exc}"
+            raise ValidationError(msg) from exc
 
         # Validate required fields
         if "dispatches" not in data:
-            raise ValidationError("Manifest missing 'dispatches' field")
+            msg = "Manifest missing 'dispatches' field"
+            raise ValidationError(msg)
 
         dispatches = []
         for i, dispatch_data in enumerate(data["dispatches"]):
             if not isinstance(dispatch_data, dict):
-                raise ValidationError(f"Dispatch #{i} is not a valid object")
+                msg = f"Dispatch #{i} is not a valid object"
+                raise ValidationError(msg)
 
             # Required fields
             if "agent" not in dispatch_data:
-                raise ValidationError(f"Dispatch #{i} missing 'agent' field")
+                msg = f"Dispatch #{i} missing 'agent' field"
+                raise ValidationError(msg)
             if "task" not in dispatch_data:
-                raise ValidationError(f"Dispatch #{i} missing 'task' field")
+                msg = f"Dispatch #{i} missing 'task' field"
+                raise ValidationError(msg)
             if "priority" not in dispatch_data:
-                raise ValidationError(f"Dispatch #{i} missing 'priority' field")
+                msg = f"Dispatch #{i} missing 'priority' field"
+                raise ValidationError(msg)
 
             dispatches.append(ManifestDispatch(
                 agent=dispatch_data["agent"],
@@ -130,14 +139,14 @@ class Manifest:
 class DispatchEngine:
     """Core dispatch engine for fleet coordination."""
 
-    def __init__(self, euxis_home: Path | None = None):
+    def __init__(self, euxis_home: Path | None = None) -> None:
         self.euxis_home = euxis_home or EUXIS_HOME
         self.registry_path = self.euxis_home / "registry.json"
         self.registry_db = self.euxis_home / "registry.db"
         self.log_dir: Path | None = None
         self._valid_agents: set[str] | None = None
 
-        logger.info(f"Initialized DispatchEngine with EUXIS_HOME: {self.euxis_home}")
+        logger.info("Initialized DispatchEngine with EUXIS_HOME: %s", self.euxis_home)
 
     def _load_agent_registry(self) -> set[str]:
         """Load valid agent IDs from registry (SQLite-first, JSON fallback)."""
@@ -151,14 +160,14 @@ class DispatchEngine:
                 cursor = conn.execute("SELECT id FROM agents")
                 self._valid_agents = {row[0] for row in cursor}
                 conn.close()
-                logger.info(f"Loaded {len(self._valid_agents)} agents from registry.db")
+                logger.info("Loaded %s agents from registry.db", len(self._valid_agents))
                 return self._valid_agents
-            except sqlite3.Error as e:
-                logger.warning(f"SQLite registry query failed, falling back to JSON: {e}")
+            except sqlite3.Error as exc:
+                logger.warning("SQLite registry query failed, falling back to JSON: %s", exc)
 
         # Fall back to JSON
         if not self.registry_path.exists():
-            logger.warning(f"Registry not found at {self.registry_path}")
+            logger.warning("Registry not found at %s", self.registry_path)
             self._valid_agents = set()
             return self._valid_agents
 
@@ -170,24 +179,25 @@ class DispatchEngine:
                 agent["id"] for agent in registry_data.get("agents", [])
                 if isinstance(agent, dict) and "id" in agent
             }
-            logger.info(f"Loaded {len(self._valid_agents)} agents from registry.json")
+            logger.info("Loaded %s agents from registry.json", len(self._valid_agents))
 
-        except (OSError, json.JSONDecodeError) as e:
-            logger.error(f"Failed to load agent registry: {e}")
+        except (OSError, json.JSONDecodeError):
+            logger.exception("Failed to load agent registry")
             self._valid_agents = set()
 
         return self._valid_agents
 
     def validate_manifest(self, manifest: Manifest) -> None:
         """Validate manifest against registry and system constraints."""
-        logger.info(f"Validating manifest: {manifest.project} ({manifest.mode})")
+        logger.info("Validating manifest: %s (%s)", manifest.project, manifest.mode)
 
         # Validate dispatch mode
         if manifest.mode not in DEFAULT_DISPATCH_MODES:
-            raise ValidationError(
+            msg = (
                 f"Invalid dispatch mode '{manifest.mode}'. "
                 f"Must be one of: {', '.join(sorted(DEFAULT_DISPATCH_MODES))}"
             )
+            raise ValidationError(msg)
 
         # Load valid agents
         valid_agents = self._load_agent_registry()
@@ -205,20 +215,22 @@ class DispatchEngine:
                 unsafe_agents.append(dispatch.agent)
 
         if invalid_agents:
-            raise ValidationError(
+            msg = (
                 f"Manifest references unknown agents: {', '.join(invalid_agents)}. "
                 f"Valid agents: {', '.join(sorted(valid_agents))}"
             )
+            raise ValidationError(msg)
 
         if unsafe_agents:
-            raise ValidationError(
+            msg = (
                 f"Agent names contain shell metacharacters: {', '.join(unsafe_agents)}. "
-                f"Agent names must be alphanumeric with hyphens/underscores only."
+                "Agent names must be alphanumeric with hyphens/underscores only."
             )
+            raise ValidationError(msg)
 
         # Validate verify commands
         missing_cmds = []
-        for i, dispatch in enumerate(manifest.dispatches):
+        for _index, dispatch in enumerate(manifest.dispatches):
             if dispatch.verify_cmd:
                 # Extract first binary from command
                 cmd_parts = dispatch.verify_cmd.strip().lstrip("! ").split()
@@ -228,24 +240,14 @@ class DispatchEngine:
                         missing_cmds.append(f"[{dispatch.agent}] {binary}")
 
         if missing_cmds:
-            raise ValidationError(
-                f"Manifest verify commands reference missing tools: {', '.join(missing_cmds)}"
-            )
+            msg = f"Manifest verify commands reference missing tools: {', '.join(missing_cmds)}"
+            raise ValidationError(msg)
 
-        logger.info(f"Manifest validation passed: {len(manifest.dispatches)} dispatches")
+        logger.info("Manifest validation passed: %s dispatches", len(manifest.dispatches))
 
     def _check_command_available(self, command: str) -> bool:
         """Check if a command is available in PATH."""
-        try:
-            subprocess.run(
-                ["command", "-v", command],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            return True
-        except subprocess.CalledProcessError:
-            return False
+        return shutil.which(command) is not None
 
     def _resolve_euxis_loop_path(self) -> Path:
         """Resolve path to euxis-loop executable using configurable strategy.
@@ -260,6 +262,7 @@ class DispatchEngine:
 
         Returns:
             Path to euxis-loop executable
+
         """
         # Check environment variable override first
         env_path = os.environ.get("EUXIS_LOOP_PATH")
@@ -267,7 +270,7 @@ class DispatchEngine:
             loop_path = Path(env_path)
             if loop_path.is_file():
                 return loop_path
-            logger.warning(f"EUXIS_LOOP_PATH points to non-existent file: {env_path}")
+            logger.warning("EUXIS_LOOP_PATH points to non-existent file: %s", env_path)
 
         # Check user bin directory
         user_bin_loop = Path.home() / "bin" / "euxis-loop"
@@ -280,13 +283,14 @@ class DispatchEngine:
             return local_loop
 
         # Not found - raise error with helpful context
-        raise AgentError(
-            f"euxis-loop executable not found. Searched:\n"
+        msg = (
+            "euxis-loop executable not found. Searched:\n"
             f"  - EUXIS_LOOP_PATH: {env_path or '(not set)'}\n"
             f"  - User bin: {user_bin_loop}\n"
             f"  - EUXIS_HOME: {local_loop}\n"
-            f"Run 'make install' to set up symlinks."
+            "Run 'make install' to set up symlinks."
         )
+        raise AgentError(msg)
 
     def check_branch_protection(self) -> None:
         """Check if current branch is protected."""
@@ -301,17 +305,18 @@ class DispatchEngine:
 
             protected_branches = {"main", "master", "develop", "production", "staging"}
             if branch in protected_branches:
-                raise ValidationError(
+                msg = (
                     f"Dispatch cannot run on protected branch '{branch}'. "
                     "Switch to a feature branch first: git checkout -b feat/<version>"
                 )
+                raise ValidationError(msg)
 
             # Check for compliant feature branch naming
             compliant_prefixes = ("feat/", "fix/", "refactor/", "chore/")
             if not branch.startswith(compliant_prefixes):
-                logger.warning(f"Non-standard branch name '{branch}'. Proceeding...")
+                logger.warning("Non-standard branch name '%s'. Proceeding...", branch)
 
-            logger.info(f"Branch check passed: {branch}")
+            logger.info("Branch check passed: %s", branch)
 
         except subprocess.CalledProcessError:
             logger.warning("Could not determine current git branch")
@@ -319,7 +324,7 @@ class DispatchEngine:
     def setup_log_directory(self) -> Path:
         """Create temporary directory for dispatch logs."""
         self.log_dir = Path(tempfile.mkdtemp(prefix="euxis_dispatch_"))
-        logger.info(f"Created log directory: {self.log_dir}")
+        logger.info("Created log directory: %s", self.log_dir)
         return self.log_dir
 
     def dispatch_single_agent(
@@ -376,18 +381,16 @@ ATOMIC FILE OPERATIONS REQUIRED:
             "3"  # max attempts
         ]
 
-        logger.info(f"[{dispatch.priority}] -> {dispatch.agent} ({mode})")
+        logger.info("[%s] -> %s (%s)", dispatch.priority, dispatch.agent, mode)
 
         # Start process
         with log_file.open("w") as f:
-            process = subprocess.Popen(
+            return subprocess.Popen(
                 cmd,
                 stdout=f,
                 stderr=subprocess.STDOUT,
-                cwd=os.getcwd()
+                cwd=Path.cwd(),
             )
-
-        return process
 
     def execute_dispatches(
         self,
@@ -397,10 +400,10 @@ ATOMIC FILE OPERATIONS REQUIRED:
         """Execute all dispatches in the manifest."""
         dispatch_mode = mode or manifest.mode
 
-        logger.info(f"EUXIS FLEET DEPLOYMENT")
-        logger.info(f"  Project:    {manifest.project}")
-        logger.info(f"  Mode:       {dispatch_mode}")
-        logger.info(f"  Dispatches: {len(manifest.dispatches)}")
+        logger.info("EUXIS FLEET DEPLOYMENT")
+        logger.info("  Project:    %s", manifest.project)
+        logger.info("  Mode:       %s", dispatch_mode)
+        logger.info("  Dispatches: %s", len(manifest.dispatches))
 
         if len(manifest.dispatches) == 0:
             logger.info("No dispatches found in manifest")
@@ -412,10 +415,9 @@ ATOMIC FILE OPERATIONS REQUIRED:
 
         if has_phases:
             return self._execute_phased_rollout(manifest, dispatch_mode)
-        elif has_stages:
+        if has_stages:
             return self._execute_by_stages(manifest, dispatch_mode)
-        else:
-            return self._execute_flat_dispatch(manifest, dispatch_mode)
+        return self._execute_flat_dispatch(manifest, dispatch_mode)
 
     def _execute_flat_dispatch(
         self,
@@ -434,8 +436,8 @@ ATOMIC FILE OPERATIONS REQUIRED:
             processes.append((process, dispatch, i))
             time.sleep(2)  # Stagger startup
 
-        logger.info(f"All {len(manifest.dispatches)} agents deployed ({mode} mode)")
-        logger.info(f"Logs: {self.log_dir}")
+        logger.info("All %s agents deployed (%s mode)", len(manifest.dispatches), mode)
+        logger.info("Logs: %s", self.log_dir)
 
         # Wait for completion and collect results
         results = []
@@ -448,9 +450,9 @@ ATOMIC FILE OPERATIONS REQUIRED:
             success = return_code == 0
 
             if success:
-                logger.info(f"[PASS] {dispatch.agent}")
+                logger.info("[PASS] %s", dispatch.agent)
             else:
-                logger.error(f"[FAIL] {dispatch.agent} (see {log_file})")
+                logger.error("[FAIL] %s (see %s)", dispatch.agent, log_file)
 
             results.append(DispatchResult(
                 agent=dispatch.agent,
@@ -473,15 +475,15 @@ ATOMIC FILE OPERATIONS REQUIRED:
 
         # Determine max stage
         max_stage = max((d.stage for d in manifest.dispatches), default=1)
-        logger.info(f"  Stages: 1-{max_stage}")
+        logger.info("  Stages: 1-%s", max_stage)
 
         completed_agents: set[str] = set()
         all_results: list[DispatchResult] = []
 
         for current_stage in range(1, max_stage + 1):
-            logger.info(f"---------------------------------------------------")
-            logger.info(f"  STAGE {current_stage}")
-            logger.info(f"---------------------------------------------------")
+            logger.info("---------------------------------------------------")
+            logger.info("  STAGE %s", current_stage)
+            logger.info("---------------------------------------------------")
 
             # Get agents for this stage
             stage_dispatches = []
@@ -493,10 +495,14 @@ ATOMIC FILE OPERATIONS REQUIRED:
                         stage_dispatches.append((dispatch, i))
                     else:
                         missing_deps = set(dispatch.depends_on) - completed_agents
-                        logger.info(f"  [SKIP] Agent {dispatch.agent} waiting for: {', '.join(missing_deps)}")
+                        logger.info(
+                            "  [SKIP] Agent %s waiting for: %s",
+                            dispatch.agent,
+                            ", ".join(missing_deps),
+                        )
 
             if not stage_dispatches:
-                logger.info(f"  No agents ready for Stage {current_stage}")
+                logger.info("  No agents ready for Stage %s", current_stage)
                 continue
 
             # Execute stage agents in parallel
@@ -517,10 +523,10 @@ ATOMIC FILE OPERATIONS REQUIRED:
                 success = return_code == 0
 
                 if success:
-                    logger.info(f"  [PASS] {dispatch.agent}")
+                    logger.info("  [PASS] %s", dispatch.agent)
                     completed_agents.add(dispatch.agent)
                 else:
-                    logger.error(f"  [FAIL] {dispatch.agent} (see {log_file})")
+                    logger.error("  [FAIL] %s (see %s)", dispatch.agent, log_file)
                     stage_failed += 1
 
                 all_results.append(DispatchResult(
@@ -533,11 +539,19 @@ ATOMIC FILE OPERATIONS REQUIRED:
                 ))
 
             if stage_failed > 0:
-                logger.error(f"  [STAGE {current_stage} FAILED] {stage_failed} agent(s) failed")
-                logger.error(f"  ABORTING remaining stages due to failures")
+                logger.error(
+                    "  [STAGE %s FAILED] %s agent(s) failed",
+                    current_stage,
+                    stage_failed,
+                )
+                logger.error("  ABORTING remaining stages due to failures")
                 break
 
-            logger.info(f"  [STAGE {current_stage} COMPLETE] {len(stage_dispatches)} agent(s) succeeded")
+            logger.info(
+                "  [STAGE %s COMPLETE] %s agent(s) succeeded",
+                current_stage,
+                len(stage_dispatches),
+            )
 
         return all_results
 
@@ -557,9 +571,9 @@ ATOMIC FILE OPERATIONS REQUIRED:
             phase_num = phase.get("phase", phase_idx + 1)
             checkpoint = phase.get("checkpoint", "")
 
-            logger.info(f"---------------------------------------------------")
-            logger.info(f"  PHASE {phase_num}: {phase_name}")
-            logger.info(f"---------------------------------------------------")
+            logger.info("---------------------------------------------------")
+            logger.info("  PHASE %s: %s", phase_num, phase_name)
+            logger.info("---------------------------------------------------")
 
             # Get dispatch indices for this phase
             dispatch_indices = phase.get("parallel_group", [])
@@ -567,7 +581,7 @@ ATOMIC FILE OPERATIONS REQUIRED:
 
             for dispatch_idx in dispatch_indices:
                 if dispatch_idx >= len(manifest.dispatches):
-                    logger.error(f"Invalid dispatch index {dispatch_idx}")
+                    logger.error("Invalid dispatch index %s", dispatch_idx)
                     continue
 
                 dispatch = manifest.dispatches[dispatch_idx]
@@ -577,7 +591,7 @@ ATOMIC FILE OPERATIONS REQUIRED:
                 phase_processes.append((process, dispatch, dispatch_idx))
                 time.sleep(2)  # Stagger startup
 
-            logger.info(f"  Waiting for Phase {phase_num} to complete...")
+            logger.info("  Waiting for Phase %s to complete...", phase_num)
 
             # Wait for phase completion
             phase_failed = 0
@@ -590,9 +604,14 @@ ATOMIC FILE OPERATIONS REQUIRED:
                 success = return_code == 0
 
                 if success:
-                    logger.info(f"  [PASS] {dispatch.agent} (dispatch #{index})")
+                    logger.info("  [PASS] %s (dispatch #%s)", dispatch.agent, index)
                 else:
-                    logger.error(f"  [FAIL] {dispatch.agent} (dispatch #{index} — see {log_file})")
+                    logger.error(
+                        "  [FAIL] %s (dispatch #%s — see %s)",
+                        dispatch.agent,
+                        index,
+                        log_file,
+                    )
                     phase_failed += 1
 
                 all_results.append(DispatchResult(
@@ -605,25 +624,27 @@ ATOMIC FILE OPERATIONS REQUIRED:
                 ))
 
             if phase_failed > 0:
-                logger.error(f"  [PHASE {phase_num} FAILED] {phase_failed} dispatch(es) failed.")
+                logger.error(
+                    "  [PHASE %s FAILED] %s dispatch(es) failed.",
+                    phase_num,
+                    phase_failed,
+                )
                 if checkpoint:
-                    logger.error(f"  Checkpoint: {checkpoint}")
+                    logger.error("  Checkpoint: %s", checkpoint)
                 logger.error("  ABORTING remaining phases.")
                 total_failed += phase_failed
                 break
 
             # Evaluate checkpoint
             if checkpoint:
-                logger.info(f"  [CHECKPOINT] Phase {phase_num} — {checkpoint}")
-                logger.info(f"  [CHECKPOINT] Phase {phase_num} → CONTINUE")
+                logger.info("  [CHECKPOINT] Phase %s — %s", phase_num, checkpoint)
+                logger.info("  [CHECKPOINT] Phase %s → CONTINUE", phase_num)
 
         return all_results
 
 
 def main():
     """CLI entry point for testing."""
-    import argparse
-
     parser = argparse.ArgumentParser(description="Euxis Core Dispatch Engine")
     parser.add_argument("manifest", help="Path to manifest JSON file")
     parser.add_argument("--mode", choices=list(DEFAULT_DISPATCH_MODES),
@@ -653,19 +674,22 @@ def main():
         failed_dispatches = sum(1 for r in results if not r.success)
 
         if failed_dispatches == 0:
-            logger.info(f"ALL {total_dispatches} MISSIONS COMPLETE ({manifest.mode} mode).")
+            logger.info(
+                "ALL %s MISSIONS COMPLETE (%s mode).",
+                total_dispatches,
+                manifest.mode,
+            )
             return 0
-        else:
-            logger.error(f"{failed_dispatches} of {total_dispatches} missions failed.")
-            return 1
-
-    except (ValidationError, AgentError) as e:
-        logger.error(f"Error: {e}")
+        logger.error("%s of %s missions failed.", failed_dispatches, total_dispatches)
         return 1
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+
+    except (ValidationError, AgentError):
+        logger.exception("Error")
+        return 1
+    except Exception:
+        logger.exception("Unexpected error")
         return 1
 
 
 if __name__ == "__main__":
-    exit(main())
+    raise SystemExit(main())

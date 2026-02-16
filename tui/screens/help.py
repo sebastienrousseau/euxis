@@ -11,6 +11,7 @@ from textual.widgets import Markdown
 
 from tui.i18n import _
 from tui.widgets.header import ETXHeader
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -19,7 +20,7 @@ HELP_CONTENT = """\
 # Welcome to ETX
 
 **ETX** (Euxis Terminal Experience) is a keyboard-first terminal interface
-for the Euxis 41-agent fleet. Deploy AI specialists, monitor operations,
+for the Euxis 42-agent fleet. Deploy AI specialists, monitor operations,
 and manage your fleet — all from the terminal.
 
 ---
@@ -68,7 +69,7 @@ and manage your fleet — all from the terminal.
 | Screen | Access | Description |
 |--------|--------|-------------|
 | Welcome | `F2` | Splash screen with fleet stats |
-| Dashboard | Default | Fleet grid with all 41 agents, squads, and combos |
+| Dashboard | Default | Fleet grid with all 42 agents, squads, and combos |
 | Agent Execution | Click agent / command palette | Deploy and stream agent output |
 | Fleet Monitor | `Ctrl+M` / command palette | Monitor squad/dispatch operations |
 | Settings | `Ctrl+S` / command palette | Theme, provider, accessibility |
@@ -113,16 +114,16 @@ and manage your fleet — all from the terminal.
 
 - **CORE** (9 agents): Define direction and block progress when needed
 - **DEFAULT** (21 agents): Execute domain work automatically
-- **ON-DEMAND** (7 agents): Growth and communication tasks
+- **ON-DEMAND** (8 agents): Growth and communication tasks
 - **SPECIALIST** (4 agents): Deep domain expertise
 
 ## Squads
 
 | Squad | Purpose | Members |
 |-------|---------|---------|
-| Vision | Strategy & Discovery | orchestrator, architect, planner, researcher |
+| Vision | Strategy & Discovery | orchestrator, architect, planner, deep-researcher |
 | Build | Engineering & Execution | debugger, maintainer, automaton, tester |
-| Quality | Assurance & Security | reviewer, inspector, pentester, auditor |
+| Quality | Assurance & Security | reviewer, inspector, sentinel, pentester |
 | Growth | Branding & Documentation | writer, evangelist, strategist, ambassador |
 | Experience | UI Excellence | designer, tactician, animator, interactor |
 | Specialist | Domain Expertise | cryptographer, ledger, conduit, custodian |
@@ -131,12 +132,14 @@ and manage your fleet — all from the terminal.
 
 | Combo | Chain |
 |-------|-------|
-| Steve Jobs | planner → architect → evangelist → reviewer |
-| Fort Knox | pentester → auditor → inspector → reviewer |
-| Content Factory | writer → evangelist → strategist → reviewer |
-| Jony Ive | designer → animator → interactor → reviewer |
-| Crypto Fortress | sentinel → cryptographer → pentester → reviewer |
-| Deep Review | polyglot → watchdog → pentester → reviewer |
+| Envision | deep-researcher → planner → architect → evangelist → reviewer |
+| Protect | sentinel → pentester → auditor → inspector → reviewer |
+| Craft | writer → strategist → evangelist → reviewer |
+| Refine | designer → animator → interactor → reviewer |
+| Seal | sentinel → cryptographer → pentester → reviewer |
+| Settle | ledger → auditor → tester → reviewer |
+| Inspect | researcher → polyglot → watchdog → pentester → reviewer |
+| Discover | deep-researcher → architect → reviewer |
 """
 
 
@@ -154,7 +157,6 @@ class HelpScreen(Screen[None]):
         with VerticalScroll():
             yield Markdown(HELP_CONTENT, id="help-content")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

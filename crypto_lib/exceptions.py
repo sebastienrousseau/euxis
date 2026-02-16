@@ -1,21 +1,17 @@
-"""
-Crypto Library Exception Types - Structured Error Handling
+"""Crypto Library Exception Types - Structured Error Handling.
 
 This module defines specific error types for different crypto operation categories
 following the Result<T, E> pattern for safe error handling.
 """
 
-from typing import Any, Dict, Optional, Union, TypeVar, Generic
 from dataclasses import dataclass
 from enum import Enum
-
-
-T = TypeVar('T')  # Success type
-E = TypeVar('E')  # Error type
+from typing import Any
 
 
 class CryptoErrorCategory(Enum):
-    """Categories of crypto errors for systematic handling"""
+    """Categories of crypto errors for systematic handling."""
+
     KEY_MANAGEMENT = "key_management"
     ENCRYPTION = "encryption"
     DECRYPTION = "decryption"
@@ -27,14 +23,15 @@ class CryptoErrorCategory(Enum):
 
 @dataclass(frozen=True)
 class ErrorContext:
-    """Immutable context information for crypto errors"""
+    """Immutable context information for crypto errors."""
+
     operation: str
     category: CryptoErrorCategory
-    details: Dict[str, Any]
+    details: dict[str, Any]
     recoverable: bool = False
 
-    def with_detail(self, key: str, value: Any) -> 'ErrorContext':
-        """Return new context with additional detail"""
+    def with_detail(self, key: str, value: Any) -> "ErrorContext":
+        """Return new context with additional detail."""
         new_details = self.details.copy()
         new_details[key] = value
         return ErrorContext(
@@ -46,60 +43,60 @@ class ErrorContext:
 
 
 @dataclass(frozen=True)
-class Result(Generic[T, E]):
-    """Result<T, E> type for safe error handling without exceptions"""
-    _value: Optional[T] = None
-    _error: Optional[E] = None
+class Result[T, E]:
+    """Result<T, E> type for safe error handling without exceptions."""
+
+    _value: T | None = None
+    _error: E | None = None
     _is_success: bool = False
 
     @classmethod
-    def success(cls, value: T) -> 'Result[T, E]':
-        """Create successful result"""
+    def success(cls, value: T) -> "Result[T, E]":
+        """Create successful result."""
         return cls(_value=value, _is_success=True)
 
     @classmethod
-    def error(cls, error: E) -> 'Result[T, E]':
-        """Create error result"""
+    def error(cls, error: E) -> "Result[T, E]":
+        """Create error result."""
         return cls(_error=error, _is_success=False)
 
     @property
     def is_success(self) -> bool:
-        """Check if result is successful"""
+        """Check if result is successful."""
         return self._is_success
 
     @property
     def is_error(self) -> bool:
-        """Check if result is error"""
+        """Check if result is error."""
         return not self._is_success
 
     def unwrap(self) -> T:
-        """Get success value or raise exception"""
+        """Get success value or raise exception."""
         if not self._is_success:
-            raise ValueError(f"Called unwrap() on error result: {self._error}")
+            msg = f"Called unwrap() on error result: {self._error}"
+            raise ValueError(msg)
         return self._value
 
     def unwrap_or(self, default: T) -> T:
-        """Get success value or return default"""
+        """Get success value or return default."""
         return self._value if self._is_success else default
 
     def unwrap_error(self) -> E:
-        """Get error value or raise exception"""
+        """Get error value or raise exception."""
         if self._is_success:
-            raise ValueError(f"Called unwrap_error() on success result: {self._value}")
+            msg = f"Called unwrap_error() on success result: {self._value}"
+            raise ValueError(msg)
         return self._error
 
 
-# Type aliases for common crypto result patterns
-CryptoResult = Result[T, 'CryptoError']
-EncryptionResult = Result['EncryptionOutput', 'EncryptionError']
-DecryptionResult = Result['DecryptionOutput', 'DecryptionError']
-HashResult = Result[str, 'HashingError']
+# Type alias for common crypto result pattern
+type CryptoResult[T] = Result[T, "CryptoError"]
 
 
 class CryptoError(Exception):
-    """Base exception for all crypto operations with structured context"""
+    """Base exception for all crypto operations with structured context."""
 
-    def __init__(self, message: str, context: Optional[ErrorContext] = None):
+    def __init__(self, message: str, context: ErrorContext | None = None) -> None:
         super().__init__(message)
         self.message = message
         self.context = context or ErrorContext(
@@ -117,9 +114,15 @@ class CryptoError(Exception):
 
 
 class InvalidKeyError(CryptoError):
-    """Key-related errors with specific context preservation"""
+    """Key-related errors with specific context preservation."""
 
-    def __init__(self, message: str, key_type: Optional[str] = None, expected_size: Optional[int] = None, actual_size: Optional[int] = None):
+    def __init__(
+        self,
+        message: str,
+        key_type: str | None = None,
+        expected_size: int | None = None,
+        actual_size: int | None = None,
+    ) -> None:
         details = {}
         if key_type:
             details["key_type"] = key_type
@@ -138,9 +141,14 @@ class InvalidKeyError(CryptoError):
 
 
 class EncryptionError(CryptoError):
-    """Encryption-specific errors with operation context"""
+    """Encryption-specific errors with operation context."""
 
-    def __init__(self, message: str, algorithm: Optional[str] = None, data_size: Optional[int] = None):
+    def __init__(
+        self,
+        message: str,
+        algorithm: str | None = None,
+        data_size: int | None = None,
+    ) -> None:
         details = {}
         if algorithm:
             details["algorithm"] = algorithm
@@ -157,9 +165,14 @@ class EncryptionError(CryptoError):
 
 
 class DecryptionError(CryptoError):
-    """Decryption-specific errors with failure context"""
+    """Decryption-specific errors with failure context."""
 
-    def __init__(self, message: str, algorithm: Optional[str] = None, corruption_detected: bool = False):
+    def __init__(
+        self,
+        message: str,
+        algorithm: str | None = None,
+        corruption_detected: bool = False,
+    ) -> None:
         details = {}
         if algorithm:
             details["algorithm"] = algorithm
@@ -175,9 +188,14 @@ class DecryptionError(CryptoError):
 
 
 class HashingError(CryptoError):
-    """Hashing operation errors with algorithm context"""
+    """Hashing operation errors with algorithm context."""
 
-    def __init__(self, message: str, algorithm: Optional[str] = None, input_size: Optional[int] = None):
+    def __init__(
+        self,
+        message: str,
+        algorithm: str | None = None,
+        input_size: int | None = None,
+    ) -> None:
         details = {}
         if algorithm:
             details["algorithm"] = algorithm
@@ -194,9 +212,15 @@ class HashingError(CryptoError):
 
 
 class ValidationError(CryptoError):
-    """Validation errors for crypto data integrity"""
+    """Validation errors for crypto data integrity."""
 
-    def __init__(self, message: str, validation_type: Optional[str] = None, expected: Optional[str] = None, actual: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        validation_type: str | None = None,
+        expected: str | None = None,
+        actual: str | None = None,
+    ) -> None:
         details = {}
         if validation_type:
             details["validation_type"] = validation_type
@@ -215,9 +239,14 @@ class ValidationError(CryptoError):
 
 
 class ParsingError(CryptoError):
-    """Errors parsing crypto data formats"""
+    """Errors parsing crypto data formats."""
 
-    def __init__(self, message: str, format_type: Optional[str] = None, position: Optional[int] = None):
+    def __init__(
+        self,
+        message: str,
+        format_type: str | None = None,
+        position: int | None = None,
+    ) -> None:
         details = {}
         if format_type:
             details["format_type"] = format_type
@@ -234,9 +263,14 @@ class ParsingError(CryptoError):
 
 
 class AlgorithmError(CryptoError):
-    """Algorithm-specific or unsupported algorithm errors"""
+    """Algorithm-specific or unsupported algorithm errors."""
 
-    def __init__(self, message: str, algorithm: Optional[str] = None, supported_algorithms: Optional[list] = None):
+    def __init__(
+        self,
+        message: str,
+        algorithm: str | None = None,
+        supported_algorithms: list | None = None,
+    ) -> None:
         details = {}
         if algorithm:
             details["algorithm"] = algorithm

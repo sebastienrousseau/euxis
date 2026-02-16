@@ -24,8 +24,8 @@ cat ~/.euxis/config/branding/signature.txt
 **Standard Signature:**
 ```
 ---
-🎨 Designed by Sebastien Rousseau: https://sebastienrousseau.com/
-🚀 Engineered with Euxis: Enterprise Unified eXecution Intelligence System: https://euxis.co/
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 ```
 
 ## Branding Components

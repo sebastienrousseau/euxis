@@ -15,13 +15,13 @@ Memory in Euxis is a typed knowledge system that enables agents to learn, rememb
 
 ```bash
 # Store successful workflow
-euxis-cortex remember "API testing with Postman requires auth token setup first" "qa-coordinator" --type procedural
+euxis-cortex remember "API testing with Postman requires auth token setup first" "inspector" --type procedural
 
 # Store project fact
 euxis-cortex remember "User service uses PostgreSQL 14 with connection pooling" "architect" --type semantic
 
 # Store task outcome
-euxis-cortex remember "Fixed OAuth2 timeout by increasing token expiry to 3600s" "bug-fixer" --type episodic
+euxis-cortex remember "Fixed OAuth2 timeout by increasing token expiry to 3600s" "debugger" --type episodic
 
 # Recall relevant knowledge
 euxis-cortex recall "OAuth2 debugging" --type procedural
@@ -37,9 +37,9 @@ euxis-cortex recall "authentication issues" 5
 
 ```bash
 # Examples of episodic memories
-euxis-cortex remember "Deployed v2.1.0 to production, all health checks passed" "release-manager" --type episodic
-euxis-cortex remember "Fixed null pointer in auth.py line 89 by adding guard clause" "bug-fixer" --type episodic
-euxis-cortex remember "Performance testing revealed 50ms latency improvement after database indexing" "perf-optimizer" --type episodic
+euxis-cortex remember "Deployed v2.1.0 to production, all health checks passed" "gatekeeper" --type episodic
+euxis-cortex remember "Fixed null pointer in auth.py line 89 by adding guard clause" "debugger" --type episodic
+euxis-cortex remember "Performance testing revealed 50ms latency improvement after database indexing" "optimizer" --type episodic
 ```
 
 ### Semantic Memory
@@ -50,8 +50,8 @@ euxis-cortex remember "Performance testing revealed 50ms latency improvement aft
 ```bash
 # Examples of semantic memories
 euxis-cortex remember "The auth module uses JWT tokens with RS256 signing" "architect" --type semantic
-euxis-cortex remember "Database migrations must be backward compatible" "legacy-maintainer" --type semantic
-euxis-cortex remember "API rate limit is 1000 requests per minute per user" "product-manager" --type semantic
+euxis-cortex remember "Database migrations must be backward compatible" "maintainer" --type semantic
+euxis-cortex remember "API rate limit is 1000 requests per minute per user" "planner" --type semantic
 ```
 
 ### Procedural Memory
@@ -61,9 +61,9 @@ euxis-cortex remember "API rate limit is 1000 requests per minute per user" "pro
 
 ```bash
 # Examples of procedural memories
-euxis-cortex remember "To debug auth failures: check token expiry → verify signing key → inspect claims" "bug-fixer" --type procedural
-euxis-cortex remember "CONTRAINDICATION: Do NOT retry auth with expired refresh tokens: always re-authenticate" "bug-fixer" --type procedural
-euxis-cortex remember "To deploy: run tests → build → tag → push → verify health" "automation-engineer" --type procedural
+euxis-cortex remember "To debug auth failures: check token expiry → verify signing key → inspect claims" "debugger" --type procedural
+euxis-cortex remember "CONTRAINDICATION: Do NOT retry auth with expired refresh tokens: always re-authenticate" "debugger" --type procedural
+euxis-cortex remember "To deploy: run tests → build → tag → push → verify health" "automaton" --type procedural
 ```
 
 ## Memory Operations
@@ -75,8 +75,8 @@ euxis-cortex remember "To deploy: run tests → build → tag → push → verif
 euxis-cortex remember "<fact or pattern>" "<agent-id>" --type <episodic|semantic|procedural>
 
 # Examples
-euxis-cortex remember "Redis cache timeout set to 300s for session data" "data-steward" --type semantic
-euxis-cortex remember "Load testing revealed memory leak in WebSocket connections" "qa-coordinator" --type episodic
+euxis-cortex remember "Redis cache timeout set to 300s for session data" "telemetrist" --type semantic
+euxis-cortex remember "Load testing revealed memory leak in WebSocket connections" "inspector" --type episodic
 ```
 
 ### Retrieving Memories
@@ -184,20 +184,20 @@ Remember optimization benchmarks:
 euxis-cortex remember "Code review checklist: security → performance → readability → tests" "reviewer" --type procedural
 
 # Operations patterns
-euxis-cortex remember "Deployment rollback: stop traffic → revert → verify health → restore traffic" "incident-commander" --type procedural
+euxis-cortex remember "Deployment rollback: stop traffic → revert → verify health → restore traffic" "responder" --type procedural
 
 # Quality patterns
-euxis-cortex remember "Performance testing: baseline → load test → stress test → soak test" "qa-coordinator" --type procedural
+euxis-cortex remember "Performance testing: baseline → load test → stress test → soak test" "inspector" --type procedural
 ```
 
 ### Domain-Specific Knowledge
 
 ```bash
 # Security domain
-euxis-cortex remember "Authentication flows must validate: signature → expiry → audience → scope" "edge-hunter" --type semantic
+euxis-cortex remember "Authentication flows must validate: signature → expiry → audience → scope" "pentester" --type semantic
 
 # Payment domain
-euxis-cortex remember "PCI compliance requires: data encryption → access logging → secure transmission" "compliance-officer" --type semantic
+euxis-cortex remember "PCI compliance requires: data encryption → access logging → secure transmission" "auditor" --type semantic
 ```
 
 ## Memory Best Practices

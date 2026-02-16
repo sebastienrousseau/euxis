@@ -73,7 +73,7 @@ combo_count=$(jq '.combos | length' "${squads_file}" 2>/dev/null)
 assert_eq "6 combos" "6" "${combo_count}"
 
 # Combo IDs
-for cid in steve-jobs fort-knox content-factory jony-ive crypto-fortress swift-payment; do
+for cid in envision protect craft refine seal settle; do
     has_combo=$(jq -r ".combos[] | select(.id == \"${cid}\") | .id" "${squads_file}" 2>/dev/null)
     assert_eq "combo ${cid} exists" "${cid}" "${has_combo}"
 done

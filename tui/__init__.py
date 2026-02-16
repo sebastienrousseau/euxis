@@ -2,4 +2,4 @@
 # ETX: Euxis Terminal Experience
 """Euxis Terminal Experience - Modern TUI for the Euxis Agent Fleet."""
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"

@@ -1,9 +1,12 @@
 ---
 agent_id: reviewer
 role: "Quality gate enforcement, output validation, and completeness checking"
-version: "0.0.7"
+version: "0.0.8"
 tags: [quality, review, validation]
-last_updated: "2026-01-30"
+tier: core
+activation: core
+capability_tags: [code-review, compliance-check, test-analysis]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Quality Reviewer

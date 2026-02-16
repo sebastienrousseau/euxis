@@ -2,6 +2,14 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 # Euxis Documentation-as-Code Testing Framework
 # Validates all code snippets in documentation files
 
@@ -44,7 +52,7 @@ init_test_log() {
 {
     "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
     "framework": "euxis-docs-test",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "platform": "$(uname -s)",
     "tests": []
 }
@@ -277,7 +285,7 @@ with open('$TEST_LOG', 'w') as f: json.dump(data, f, indent=2)
 main() {
     echo -e "${BLUE}🧪 Euxis Documentation-as-Code Testing${NC}"
     echo "======================================="
-    echo "Framework: euxis-docs-test v0.0.7"
+    echo "Framework: euxis-docs-test v0.0.8"
     echo "Platform: $(uname -s)"
     echo ""
 

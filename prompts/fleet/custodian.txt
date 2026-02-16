@@ -1,9 +1,12 @@
 ---
 agent_id: custodian
 role: "Rust crate publishing authority, MSRV enforcer, feature flag auditor, and docs.rs quality guardian"
-version: "0.0.7"
+version: "0.0.8"
 tags: [rust, crates, publishing, msrv, docs]
-last_updated: "2026-02-02"
+tier: fleet
+activation: specialist
+capability_tags: [code-review, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Rust Crate Steward

@@ -15,6 +15,7 @@ from textual.widgets import Static
 from tui.core import EUXIS_HOME
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -47,7 +48,6 @@ class ToolRunnerScreen(Screen[None]):
             yield Static(id="tool-title")
             yield OutputPanel(id="agent-output")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:
