@@ -1,6 +1,11 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
 # Gateway Config
 
+## Security Policy Defaults
+
+Gateway policy defaults live in `~/.euxis/security/gateway.json`.
+Use this file to configure approvals, allowlists, and execution gates.
+
 Reference for the Gateway configuration file.
 
 ## Example
