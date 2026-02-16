@@ -62,7 +62,13 @@ Reference for the Gateway configuration file.
         "url": "https://example.com/hooks/gateway",
         "events": ["agent.final", "agent.error"]
       }
-    ]
+    ],
+    "canvas": {
+      "enabled": true
+    },
+    "voice": {
+      "enabled": true
+    }
   }
 }
 ```
@@ -136,6 +142,14 @@ Reference for the Gateway configuration file.
 
 - List of webhook targets (objects with `url` and `events` array).
 - Runtime updates are persisted to `~/.euxis/data/gateway/webhooks.json`.
+
+### `gateway.canvas`
+
+- `enabled` (bool): enable canvas endpoints and UI rendering.
+
+### `gateway.voice`
+
+- `enabled` (bool): enable voice endpoints.
 
 ## Notes
 

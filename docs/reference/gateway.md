@@ -263,6 +263,8 @@ DELETE /automation/cron/{job_id}
 
 ## Canvas APIs
 
+Canvas endpoints are available when `gateway.canvas.enabled=true`.
+
 Store canvas state:
 
 ```
@@ -279,6 +281,8 @@ GET /canvas/{session_id}
 ```
 
 ## Voice APIs
+
+Voice endpoints are available when `gateway.voice.enabled=true`.
 
 Wake the voice pipeline:
 
@@ -300,6 +304,8 @@ file=@audio.wav
 ```
 
 ## Webhook APIs
+
+Webhook updates are persisted to `~/.euxis/data/gateway/webhooks.json`.
 
 List webhooks:
 

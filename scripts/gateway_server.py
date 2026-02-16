@@ -336,10 +336,14 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.get("/canvas/{session_id}")
     async def canvas_get(session_id: str) -> JSONResponse:
+        if not config["gateway"].get("canvas", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
         return JSONResponse({"session_id": session_id, "state": load_canvas_state(session_id)})
 
     @app.post("/canvas/{session_id}")
     async def canvas_set(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("canvas", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
         state = payload.get("state", {})
         if not isinstance(state, dict):
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -348,6 +352,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.post("/voice/wake")
     async def voice_wake(payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
         session_id = payload.get("session_id", "")
         content = payload.get("content", "")
         meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
@@ -362,6 +368,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.post("/voice/upload")
     async def voice_upload(session_id: str, file: UploadFile = File(...)) -> JSONResponse:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
         if not session_id:
             return JSONResponse({"status": "invalid"}, status_code=400)
         blob = await file.read()

@@ -52,6 +52,12 @@
       "dm_scope": "main",
       "account_id": "default"
     },
-    "webhooks": []
+    "webhooks": [],
+    "canvas": {
+      "enabled": true
+    },
+    "voice": {
+      "enabled": true
+    }
   }
 }
