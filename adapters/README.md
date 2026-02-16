@@ -16,7 +16,7 @@ Adapters translate platform-specific events into Gateway messages. Each adapter 
 - `gateway/` — session and message routing APIs
 
 ## Usage
-Adapters are loaded by the Gateway based on `config/gateway.json`.
+Adapters are loaded by the Gateway based on `security/gateway.json`.
 
 ## Development
 ```bash
