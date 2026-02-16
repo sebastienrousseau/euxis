@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.0.7
+Version 0.0.8
 
 ## CLI Tools
 
@@ -110,9 +110,9 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 41 agents organized into three tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 50 agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
 
-### Core (9) — Authority-bearing, always present
+### Core (12) — Authority-bearing, always present
 
 Only core agents can block progress. If one is missing, the system is incomplete.
 
@@ -127,8 +127,11 @@ Only core agents can block progress. If one is missing, the system is incomplete
 | `critic` | Risk, pre-mortems, counter-bias |
 | `arbiter` | Conflict resolution, final decisions when agents disagree |
 | `historian` | Long-term memory, temporal patterns, institutional knowledge |
+| `route` | Session routing and agent selection |
+| `pair` | Channel onboarding and authentication |
+| `guard` | Execution approval enforcement |
 
-### Default (25) — Auto-available, task-triggered
+### Default (24) — Auto-available, task-triggered
 
 Execute and advise within scope. Do not define direction.
 
@@ -137,9 +140,11 @@ Execute and advise within scope. Do not define direction.
 | `accountant` | Cost analysis, budget management, resource efficiency |
 | `animator` | Theming, color systems, dark mode, animation |
 | `automaton` | CI/CD pipelines, IaC, Docker, Terraform |
+| `bridge` | Channel message translation and format preservation |
 | `debugger` | Debugging, root cause analysis, surgical fixes |
 | `designer` | Web UI components, design systems, responsive layouts |
 | `gatekeeper` | Changelogs, semantic versioning, release coordination |
+| `heal` | Automated recovery and resilience |
 | `inspector` | E2E testing coordination, quality gate enforcement |
 | `interactor` | Keyboard navigation, input handling, accessibility |
 | `investigator` | Post-incident crash forensics, stack trace analysis |
@@ -153,14 +158,11 @@ Execute and advise within scope. Do not define direction.
 | `tactician` | Terminal UI design, keyboard navigation, TUI interaction |
 | `telemetrist` | Observability, telemetry, structured logging |
 | `tester` | Test coverage, reliability, regression prevention |
+| `trace` | End-to-end tracing and decision observability |
 | `watchdog` | Pre-merge exhaustive regression analysis |
 | `writer` | Documentation, tutorials, API reference, glossary |
-| `cryptographer` | Cryptographic correctness, PQC, hashing |
-| `ledger` | ISO 20022, payments compliance, financial schemas |
-| `conduit` | Real-time audio, latency, DSP, voice pipelines |
-| `custodian` | Rust crate publishing, MSRV, docs |
 
-### On-Demand (7) — Explicit invocation only
+### On-Demand (10) — Explicit invocation only
 
 Add capability, not safety. Never block, never override core authority.
 
@@ -168,11 +170,25 @@ Add capability, not safety. Never block, never override core authority.
 |-------|------|
 | `ambassador` | Developer relations, tutorials, demos, conferences |
 | `butler` | TTS-optimized summarization, spoken English output |
+| `distill` | Context compression without loss of critical decisions |
 | `evangelist` | Brand voice, visual identity, content design |
+| `govern` | Agent capability boundaries and escalation rules |
 | `localizer` | i18n, l10n, RTL support, Unicode validation |
 | `marketer` | SEO, AARRR funnel, CRO, GTM strategy |
+| `deep-researcher` | CTO-grade strategic research briefs with citations |
 | `researcher` | Iterative research with cross-validation |
 | `strategist` | Platform-native content, calendars, community engagement |
+
+### Specialist (4) — Domain-specific expertise
+
+Activated for domain-scoped tasks only.
+
+| Agent | Role |
+|-------|------|
+| `cryptographer` | Cryptographic correctness, PQC, hashing |
+| `ledger` | ISO 20022, payments compliance, financial schemas |
+| `conduit` | Real-time audio, latency, DSP, voice pipelines |
+| `custodian` | Rust crate publishing, MSRV, docs |
 
 
 **For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
@@ -185,7 +201,7 @@ Add capability, not safety. Never block, never override core authority.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 41 agents: 9 core + 25 default + 7 on-demand |
+| **Fleet** | 50 agents: 12 core + 24 default + 10 on-demand + 4 specialist |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
@@ -358,9 +374,9 @@ euxis-squad deploy build "Fix auth module"
 euxis-playbook run zero-to-one "Launch auth service" --dry-run
 
 # Execute a combo chain
-euxis-combo run steve-jobs "Design new onboarding flow"
+euxis-combo run envision "Design new onboarding flow"
 ```
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

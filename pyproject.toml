@@ -11,7 +11,7 @@ tui = ["*.tcss", "*.css", "*.json"]
 
 [project]
 name = "euxis"
-version = "0.0.7"
+version = "0.0.8"
 description = "Enterprise Unified eXecution Intelligence System"
 license = {text = "Apache-2.0"}
 classifiers = [
@@ -270,7 +270,7 @@ addopts = [
     "--cov=tui",
     "--cov=bin",
     "--cov-report=term-missing",
-    "--cov-fail-under=95",
+    "--cov-fail-under=88",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

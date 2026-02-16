@@ -13,6 +13,7 @@ from textual.widgets import Input, Static
 from tui.core.runner import AgentRun, run_agent
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
+from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
     from textual.app import ComposeResult
@@ -64,7 +65,6 @@ class AgentScreen(Screen[None]):
                 )
             yield OutputPanel(id="agent-output")
 
-        from tui.widgets.shortcut_bar import ShortcutBar
         yield ShortcutBar()
 
     def on_mount(self) -> None:

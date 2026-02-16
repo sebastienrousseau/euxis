@@ -73,7 +73,12 @@ class TestMetricsScreenLoadMetrics(unittest.TestCase):
 
     @patch("tui.screens.metrics.EUXIS_HOME")
     def test_no_perf_dir(self, mock_home):
-        mock_home.__truediv__ = lambda self, x: Path(self.tmpdir) / x if hasattr(self, 'tmpdir') else Path("/nonexistent") / x
+        def _mock_truediv(self, path):
+            if hasattr(self, "tmpdir"):
+                return Path(self.tmpdir) / path
+            return Path("/nonexistent") / path
+
+        mock_home.__truediv__ = _mock_truediv
         # Use a path that doesn't have data/perf
         with patch("tui.screens.metrics.EUXIS_HOME", self.euxis_home):
             screen, patcher, mock_summary, _, _ = self._make_screen()
@@ -354,11 +359,17 @@ class TestMetricsScreenHypothesis(unittest.TestCase):
     @settings(max_examples=30)
     @given(
         entries=st.lists(
-            st.fixed_dictionaries({
-                "agent": st.text(min_size=1, max_size=10, alphabet=st.characters(whitelist_categories=["Ll"])),
-                "provider": st.sampled_from(["claude", "gemini", "ollama"]),
-                "duration_ms": st.integers(min_value=0, max_value=100000),
-            }),
+            st.fixed_dictionaries(
+                {
+                    "agent": st.text(
+                        min_size=1,
+                        max_size=10,
+                        alphabet=st.characters(whitelist_categories=["Ll"]),
+                    ),
+                    "provider": st.sampled_from(["claude", "gemini", "ollama"]),
+                    "duration_ms": st.integers(min_value=0, max_value=100000),
+                }
+            ),
             min_size=1,
             max_size=20,
         )

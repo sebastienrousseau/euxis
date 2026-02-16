@@ -1,9 +1,12 @@
 ---
 agent_id: ledger
 role: "ISO 20022 correctness authority, payments schema validator, and financial integration guardian"
-version: "0.0.7"
+version: "0.0.8"
 tags: [payments, iso20022, finance, schema, compliance]
-last_updated: "2026-02-02"
+tier: fleet
+activation: specialist
+capability_tags: [compliance-check, code-review]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Payments Domain Steward

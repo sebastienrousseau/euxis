@@ -1,127 +1,158 @@
 #!/usr/bin/env python3
-"""
-Euxis Agent Performance Metrics CLI
-Command-line interface for metrics collection and analysis
+"""Euxis Agent Performance Metrics CLI.
+
+Command-line interface for metrics collection and analysis.
 """
 
 import argparse
+import csv
 import json
 import sys
-from datetime import datetime, timezone
+import time
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import TextIO
 
 # Add local modules to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from collectors.performance_collector import PerformanceMetricsCollector
 from aggregators.performance_analyzer import PerformanceAnalyzer
 
-def cmd_report(args):
-    """Generate performance report"""
+
+def _out(*values: object, sep: str = " ", end: str = "\n", stream: TextIO = sys.stdout) -> None:
+    """Write output without using print()."""
+    stream.write(sep.join(map(str, values)) + end)
+
+def _print_fleet_overview(report: dict[str, object]) -> None:
+    fleet_metrics = report.get("fleet_metrics", {})
+    if not fleet_metrics:
+        return
+
+    _out("\n🚀 FLEET OVERVIEW")
+    _out("─────────────────────")
+    _out(f"Total Tasks: {fleet_metrics.get('total_tasks', 0)}")
+    _out(f"Success Rate: {fleet_metrics.get('fleet_success_rate', 0):.1%}")
+    _out(f"Avg Duration: {fleet_metrics.get('fleet_avg_duration_ms', 0):.0f}ms")
+    _out(f"Active Agents: {fleet_metrics.get('active_agents', 0)}")
+
+    most_active = fleet_metrics.get("most_active_agent")
+    fastest = fleet_metrics.get("fastest_agent")
+    if most_active:
+        _out(f"Most Active: {most_active}")
+    if fastest:
+        _out(f"Fastest: {fastest}")
+
+
+def _print_top_performers(report: dict[str, object]) -> None:
+    agent_perf = report.get("agent_performance", {})
+    if not agent_perf:
+        return
+
+    _out("\n🤖 TOP PERFORMERS")
+    _out("─────────────────────")
+
+    sorted_agents = sorted(
+        agent_perf.items(),
+        key=lambda x: (x[1]["success_rate"], -x[1]["avg_duration_ms"]),
+        reverse=True,
+    )
+
+    for i, (agent_id, metrics) in enumerate(sorted_agents[:5]):
+        _out(
+            f"{i+1}. {agent_id:<20} "
+            f"Success: {metrics['success_rate']:.1%} "
+            f"Tasks: {metrics['total_tasks']:<4} "
+            f"Avg: {metrics['avg_duration_ms']:.0f}ms"
+        )
+
+
+def _print_delegation_patterns(report: dict[str, object]) -> None:
+    delegation = report.get("delegation_patterns", {})
+    if not delegation:
+        return
+
+    _out("\n🔄 TOP DELEGATION PATTERNS")
+    _out("─────────────────────────────")
+
+    sorted_delegations = sorted(
+        delegation.items(),
+        key=lambda x: x[1]["delegation_frequency"],
+        reverse=True,
+    )
+
+    for pair, metrics in sorted_delegations[:5]:
+        _out(
+            f"{pair:<25} "
+            f"Freq: {metrics['delegation_frequency']:<4} "
+            f"Success: {metrics['handoff_success_rate']:.1%} "
+            f"Avg: {metrics['avg_delegation_duration_ms']:.0f}ms"
+        )
+
+
+def _print_tool_usage(report: dict[str, object]) -> None:
+    tools = report.get("tool_usage_patterns", {})
+    if not tools:
+        return
+
+    _out("\n🛠️  TOOL PERFORMANCE")
+    _out("─────────────────────")
+
+    sorted_tools = sorted(
+        tools.items(),
+        key=lambda x: x[1]["total_executions"],
+        reverse=True,
+    )
+
+    for tool, metrics in sorted_tools[:5]:
+        _out(
+            f"{tool:<15} "
+            f"Exec: {metrics['total_executions']:<6} "
+            f"Success: {metrics['success_rate']:.1%} "
+            f"Avg: {metrics['avg_duration_ms']:.0f}ms"
+        )
+
+
+def cmd_report(args: argparse.Namespace) -> None:
+    """Generate performance report."""
     analyzer = PerformanceAnalyzer()
 
     if args.format == "summary":
         # Generate summary report
         report = analyzer.generate_performance_report(args.hours)
 
-        print(f"\n📊 AGENT PERFORMANCE REPORT")
-        print(f"═══════════════════════════════════════")
-        print(f"Analysis Period: {args.hours} hours")
-        print(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        _out("\n📊 AGENT PERFORMANCE REPORT")
+        _out("═══════════════════════════════════════")
+        _out(f"Analysis Period: {args.hours} hours")
+        _out(f"Generated: {datetime.now(tz=UTC).strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
-        fleet_metrics = report.get("fleet_metrics", {})
-        if fleet_metrics:
-            print(f"\n🚀 FLEET OVERVIEW")
-            print(f"─────────────────────")
-            print(f"Total Tasks: {fleet_metrics.get('total_tasks', 0)}")
-            print(f"Success Rate: {fleet_metrics.get('fleet_success_rate', 0):.1%}")
-            print(f"Avg Duration: {fleet_metrics.get('fleet_avg_duration_ms', 0):.0f}ms")
-            print(f"Active Agents: {fleet_metrics.get('active_agents', 0)}")
-
-            most_active = fleet_metrics.get('most_active_agent')
-            fastest = fleet_metrics.get('fastest_agent')
-            if most_active:
-                print(f"Most Active: {most_active}")
-            if fastest:
-                print(f"Fastest: {fastest}")
-
-        # Agent performance summary
-        agent_perf = report.get("agent_performance", {})
-        if agent_perf:
-            print(f"\n🤖 TOP PERFORMERS")
-            print(f"─────────────────────")
-
-            # Sort by success rate
-            sorted_agents = sorted(
-                agent_perf.items(),
-                key=lambda x: (x[1]["success_rate"], -x[1]["avg_duration_ms"]),
-                reverse=True
-            )
-
-            for i, (agent_id, metrics) in enumerate(sorted_agents[:5]):
-                print(f"{i+1}. {agent_id:<20} "
-                      f"Success: {metrics['success_rate']:.1%} "
-                      f"Tasks: {metrics['total_tasks']:<4} "
-                      f"Avg: {metrics['avg_duration_ms']:.0f}ms")
-
-        # Delegation patterns
-        delegation = report.get("delegation_patterns", {})
-        if delegation:
-            print(f"\n🔄 TOP DELEGATION PATTERNS")
-            print(f"─────────────────────────────")
-
-            sorted_delegations = sorted(
-                delegation.items(),
-                key=lambda x: x[1]["delegation_frequency"],
-                reverse=True
-            )
-
-            for pair, metrics in sorted_delegations[:5]:
-                print(f"{pair:<25} "
-                      f"Freq: {metrics['delegation_frequency']:<4} "
-                      f"Success: {metrics['handoff_success_rate']:.1%} "
-                      f"Avg: {metrics['avg_delegation_duration_ms']:.0f}ms")
-
-        # Tool usage
-        tools = report.get("tool_usage_patterns", {})
-        if tools:
-            print(f"\n🛠️  TOOL PERFORMANCE")
-            print(f"─────────────────────")
-
-            sorted_tools = sorted(
-                tools.items(),
-                key=lambda x: x[1]["total_executions"],
-                reverse=True
-            )
-
-            for tool, metrics in sorted_tools[:5]:
-                print(f"{tool:<15} "
-                      f"Exec: {metrics['total_executions']:<6} "
-                      f"Success: {metrics['success_rate']:.1%} "
-                      f"Avg: {metrics['avg_duration_ms']:.0f}ms")
+        _print_fleet_overview(report)
+        _print_top_performers(report)
+        _print_delegation_patterns(report)
+        _print_tool_usage(report)
 
     elif args.format == "json":
         # Generate full JSON report
         report = analyzer.generate_performance_report(args.hours)
-        print(json.dumps(report, indent=2))
+        _out(json.dumps(report, indent=2))
 
     elif args.format == "csv":
         # Generate CSV format for agents
         agent_perf = analyzer.analyze_agent_performance(args.hours)
-        print("agent_id,total_tasks,success_rate,avg_duration_ms,p95_duration_ms")
+        _out("agent_id,total_tasks,success_rate,avg_duration_ms,p95_duration_ms")
         for agent_id, metrics in agent_perf.items():
-            print(f"{agent_id},{metrics['total_tasks']},{metrics['success_rate']:.3f},"
-                  f"{metrics['avg_duration_ms']:.0f},{metrics['p95_duration_ms']:.0f}")
+            _out(
+                f"{agent_id},{metrics['total_tasks']},{metrics['success_rate']:.3f},"
+                f"{metrics['avg_duration_ms']:.0f},{metrics['p95_duration_ms']:.0f}"
+            )
 
-def cmd_rankings(args):
-    """Show agent rankings by metric"""
+def cmd_rankings(args: argparse.Namespace) -> None:
+    """Show agent rankings by metric."""
     analyzer = PerformanceAnalyzer()
     rankings = analyzer.get_agent_rankings(args.hours, args.metric)
 
-    print(f"\n🏆 AGENT RANKINGS: {args.metric.upper()}")
-    print(f"═══════════════════════════════════════")
-    print(f"Period: {args.hours} hours")
+    _out(f"\n🏆 AGENT RANKINGS: {args.metric.upper()}")
+    _out("═══════════════════════════════════════")
+    _out(f"Period: {args.hours} hours")
 
     for i, (agent_id, value) in enumerate(rankings[:args.limit]):
         if args.metric.endswith("_rate"):
@@ -131,33 +162,35 @@ def cmd_rankings(args):
         else:
             value_str = f"{value:.2f}"
 
-        print(f"{i+1:2}. {agent_id:<20} {value_str}")
+        _out(f"{i+1:2}. {agent_id:<20} {value_str}")
 
-def cmd_monitor(args):
-    """Monitor live metrics (simplified version)"""
+def cmd_monitor(args: argparse.Namespace) -> None:
+    """Monitor live metrics (simplified version)."""
     analyzer = PerformanceAnalyzer()
 
-    print(f"\n📡 LIVE METRICS MONITOR")
-    print(f"═══════════════════════════════════════")
-    print(f"Refresh every {args.refresh}s (Ctrl+C to stop)")
+    _out("\n📡 LIVE METRICS MONITOR")
+    _out("═══════════════════════════════════════")
+    _out(f"Refresh every {args.refresh}s (Ctrl+C to stop)")
 
-    import time
     try:
         while True:
             report = analyzer.generate_performance_report(1)  # Last hour
             fleet = report.get("fleet_metrics", {})
 
-            print(f"\r{datetime.now().strftime('%H:%M:%S')} | "
-                  f"Tasks: {fleet.get('total_tasks', 0)} | "
-                  f"Success: {fleet.get('fleet_success_rate', 0):.1%} | "
-                  f"Agents: {fleet.get('active_agents', 0)}", end="", flush=True)
+            _out(
+                f"\r{datetime.now(tz=UTC).strftime('%H:%M:%S %Z')} | "
+                f"Tasks: {fleet.get('total_tasks', 0)} | "
+                f"Success: {fleet.get('fleet_success_rate', 0):.1%} | "
+                f"Agents: {fleet.get('active_agents', 0)}",
+                end="",
+            )
 
             time.sleep(args.refresh)
     except KeyboardInterrupt:
-        print("\nMonitoring stopped.")
+        _out("\nMonitoring stopped.")
 
-def cmd_cleanup(args):
-    """Clean up old metrics data"""
+def cmd_cleanup(args: argparse.Namespace) -> None:
+    """Clean up old metrics data."""
     metrics_dir = Path("/home/seb/.euxis/metrics")
 
     events_file = metrics_dir / "events.jsonl"
@@ -170,36 +203,35 @@ def cmd_cleanup(args):
     for file_path in [events_file, sessions_file]:
         if file_path.exists() and file_path.stat().st_size > max_size:
             # Read last N lines to keep recent data
-            with open(file_path) as f:
+            with file_path.open() as f:
                 lines = f.readlines()
 
             # Keep last 10,000 lines
             keep_lines = lines[-10000:]
 
-            with open(file_path, 'w') as f:
+            with file_path.open("w") as f:
                 f.writelines(keep_lines)
 
             cleaned.append(str(file_path))
 
     if cleaned:
-        print(f"Cleaned up {len(cleaned)} files:")
+        _out(f"Cleaned up {len(cleaned)} files:")
         for file_path in cleaned:
-            print(f"  - {file_path}")
+            _out(f"  - {file_path}")
     else:
-        print("No cleanup needed.")
+        _out("No cleanup needed.")
 
-def cmd_export(args):
-    """Export metrics data"""
+def cmd_export(args: argparse.Namespace) -> None:
+    """Export metrics data."""
     analyzer = PerformanceAnalyzer()
     report = analyzer.generate_performance_report(args.hours)
 
     output_path = Path(args.output)
-    with open(output_path, 'w') as f:
+    with output_path.open("w") as f:
         if args.format == "json":
             json.dump(report, f, indent=2)
         elif args.format == "csv":
             # Export agent performance as CSV
-            import csv
             agent_perf = report.get("agent_performance", {})
 
             fieldnames = ["agent_id", "total_tasks", "success_rate", "avg_duration_ms",
@@ -213,10 +245,10 @@ def cmd_export(args):
                 row.update({k: v for k, v in metrics.items() if k in fieldnames})
                 writer.writerow(row)
 
-    print(f"Exported metrics to: {output_path}")
+    _out(f"Exported metrics to: {output_path}")
 
-def main():
-    """Main CLI entry point"""
+def main() -> None:
+    """Run the CLI entry point."""
     parser = argparse.ArgumentParser(
         description="Euxis Agent Performance Metrics CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter
@@ -226,33 +258,73 @@ def main():
 
     # Report command
     report_parser = subparsers.add_parser("report", help="Generate performance report")
-    report_parser.add_argument("--hours", type=int, default=24, help="Hours to analyze (default: 24)")
-    report_parser.add_argument("--format", choices=["summary", "json", "csv"], default="summary",
-                              help="Output format (default: summary)")
+    report_parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Hours to analyze (default: 24)",
+    )
+    report_parser.add_argument(
+        "--format",
+        choices=["summary", "json", "csv"],
+        default="summary",
+        help="Output format (default: summary)",
+    )
 
     # Rankings command
     rankings_parser = subparsers.add_parser("rankings", help="Show agent rankings")
-    rankings_parser.add_argument("--metric", default="success_rate",
-                                choices=["success_rate", "avg_duration_ms", "total_tasks"],
-                                help="Metric to rank by (default: success_rate)")
-    rankings_parser.add_argument("--hours", type=int, default=24, help="Hours to analyze (default: 24)")
-    rankings_parser.add_argument("--limit", type=int, default=10, help="Number of agents to show (default: 10)")
+    rankings_parser.add_argument(
+        "--metric",
+        default="success_rate",
+        choices=["success_rate", "avg_duration_ms", "total_tasks"],
+        help="Metric to rank by (default: success_rate)",
+    )
+    rankings_parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Hours to analyze (default: 24)",
+    )
+    rankings_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Number of agents to show (default: 10)",
+    )
 
     # Monitor command
     monitor_parser = subparsers.add_parser("monitor", help="Monitor live metrics")
-    monitor_parser.add_argument("--refresh", type=int, default=30, help="Refresh interval in seconds (default: 30)")
+    monitor_parser.add_argument(
+        "--refresh",
+        type=int,
+        default=30,
+        help="Refresh interval in seconds (default: 30)",
+    )
 
     # Cleanup command
     cleanup_parser = subparsers.add_parser("cleanup", help="Clean up old metrics data")
-    cleanup_parser.add_argument("--max-size-mb", type=int, default=100,
-                               help="Maximum file size in MB before cleanup (default: 100)")
+    cleanup_parser.add_argument(
+        "--max-size-mb",
+        type=int,
+        default=100,
+        help="Maximum file size in MB before cleanup (default: 100)",
+    )
 
     # Export command
     export_parser = subparsers.add_parser("export", help="Export metrics data")
     export_parser.add_argument("--output", required=True, help="Output file path")
-    export_parser.add_argument("--hours", type=int, default=24, help="Hours to export (default: 24)")
-    export_parser.add_argument("--format", choices=["json", "csv"], default="json",
-                              help="Export format (default: json)")
+    export_parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Hours to export (default: 24)",
+    )
+    export_parser.add_argument(
+        "--format",
+        choices=["json", "csv"],
+        default="json",
+        help="Export format (default: json)",
+    )
 
     args = parser.parse_args()
 

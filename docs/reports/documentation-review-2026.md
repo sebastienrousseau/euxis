@@ -320,7 +320,7 @@ This analysis is based on:
 2. **Create llms.txt**
    ```
    # Euxis Documentation
-   > 41 AI agents for engineering tasks
+   > 50 AI agents for engineering tasks
 
    ## Quick Start
    - /docs/essentials/quick-start.md: Get running in 5 minutes

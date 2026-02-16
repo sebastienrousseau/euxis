@@ -25,11 +25,11 @@ def _make_app():
     config = ETXConfig()
     registry = FleetRegistry()
     registry.agents = [
-        Agent(id="architect", tier="core", version="0.0.7",
+        Agent(id="architect", tier="core", version="0.0.8",
               tags=("design",), activation="default"),
-        Agent(id="debugger", tier="fleet", version="0.0.7",
+        Agent(id="debugger", tier="fleet", version="0.0.8",
               tags=("debug",), activation="default"),
-        Agent(id="tester", tier="fleet", version="0.0.7",
+        Agent(id="tester", tier="fleet", version="0.0.8",
               tags=("test",), activation="on-demand"),
     ]
     registry.squads = [

@@ -11,7 +11,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from tui import i18n
 from tui.i18n import _, set_locale
@@ -166,7 +166,6 @@ class TestTranslatorState(unittest.TestCase):
 
     def test_set_locale_changes_translator(self):
         """Test set_locale modifies _translator."""
-        original = i18n._translator
         set_locale("en")
         # Should still be NullTranslations but potentially new instance
         assert isinstance(i18n._translator, gettext.NullTranslations)
@@ -229,11 +228,12 @@ class TestIntegration(unittest.TestCase):
 
     def test_concurrent_safe(self):
         """Test i18n can handle rapid locale changes."""
-        for i in range(100):
+        for idx in range(100):
             set_locale("en")
             _("test")
             set_locale("fr")
             _("test")
+            assert idx >= 0
         # Should complete without error
         assert True
 

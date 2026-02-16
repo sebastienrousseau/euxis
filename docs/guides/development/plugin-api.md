@@ -38,7 +38,7 @@ cat > ~/my-plugins/code-optimizer.txt <<'EOF'
 ---
 agent_id: code-optimizer
 role: "Performance optimization specialist for code review and refactoring"
-version: "0.0.7"
+version: "0.0.8"
 tags: [performance, optimization, code-review]
 last_updated: "2026-02-03"
 ---
@@ -178,7 +178,7 @@ Your agent prompt file MUST include specific sections to work properly with Euxi
 ---
 agent_id: your-agent-name    # Must match manifest agent_id
 role: "One-line description"
-version: "0.0.7"            # Use current Euxis version
+version: "0.0.8"            # Use current Euxis version
 tags: [category1, category2]
 last_updated: "YYYY-MM-DD"
 ---
@@ -198,7 +198,7 @@ last_updated: "YYYY-MM-DD"
 ---
 agent_id: my-agent
 role: "Brief description of what this agent does"
-version: "0.0.7"
+version: "0.0.8"
 tags: [category]
 last_updated: "2026-02-03"
 ---
@@ -308,7 +308,7 @@ This example shows a specialized agent for database migrations:
 ---
 agent_id: db-migrator
 role: "Database migration specialist for schema changes and data transformations"
-version: "0.0.7"
+version: "0.0.8"
 tags: [database, migration, schema]
 last_updated: "2026-02-03"
 ---
@@ -395,7 +395,7 @@ This example shows an agent specialized for API testing:
 ---
 agent_id: api-tester
 role: "API testing specialist for endpoint validation and contract testing"
-version: "0.0.7"
+version: "0.0.8"
 tags: [testing, api, validation, contracts]
 last_updated: "2026-02-03"
 ---
@@ -589,7 +589,7 @@ cat > ~/my-plugins/file-organizer/prompt.txt <<'EOF'
 ---
 agent_id: file-organizer
 role: "File system organization and cleanup specialist"
-version: "0.0.7"
+version: "0.0.8"
 tags: [filesystem, organization, cleanup]
 last_updated: "2026-02-03"
 ---
@@ -666,7 +666,7 @@ cat > ~/my-plugins/log-analyzer/prompt.txt <<'EOF'
 ---
 agent_id: log-analyzer
 role: "Log file analysis and pattern detection specialist"
-version: "0.0.7"
+version: "0.0.8"
 tags: [logging, analysis, debugging, patterns]
 last_updated: "2026-02-03"
 ---
@@ -747,4 +747,4 @@ euxis log-analyzer "Analyze the application logs from the last hour for any erro
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

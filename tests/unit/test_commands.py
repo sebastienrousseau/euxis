@@ -35,11 +35,11 @@ def _make_registry() -> FleetRegistry:
     """Create a FleetRegistry with a small test dataset."""
     registry = FleetRegistry()
     registry.agents = [
-        Agent(id="architect", tier="core", version="0.0.7",
+        Agent(id="architect", tier="core", version="0.0.8",
               tags=("design", "architecture"), activation="default"),
-        Agent(id="debugger", tier="fleet", version="0.0.7",
+        Agent(id="debugger", tier="fleet", version="0.0.8",
               tags=("debug", "troubleshoot"), activation="default"),
-        Agent(id="tester", tier="fleet", version="0.0.7",
+        Agent(id="tester", tier="fleet", version="0.0.8",
               tags=("test", "quality"), activation="on-demand"),
     ]
     registry.squads = [
@@ -382,7 +382,7 @@ class TestCommandProviderEdgeCases(unittest.TestCase):
         """Agent with empty tags should still be searchable by ID."""
         registry = FleetRegistry()
         registry.agents = [
-            Agent(id="notags", tier="fleet", version="0.0.7",
+            Agent(id="notags", tier="fleet", version="0.0.8",
                   tags=(), activation="default"),
         ]
         mock_app = _make_mock_app(registry)

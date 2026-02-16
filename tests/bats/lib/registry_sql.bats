@@ -59,14 +59,14 @@ INSERT INTO capability_tags VALUES (1, 'code-review');
 INSERT INTO capability_tags VALUES (2, 'testing');
 INSERT INTO agent_capabilities VALUES ('architect', 1);
 INSERT INTO agent_capabilities VALUES ('tester', 2);
-INSERT INTO registry_metadata VALUES ('protocol_version', '0.0.7');
+INSERT INTO registry_metadata VALUES ('protocol_version', '0.0.8');
 EOF
     fi
 
     # Create fallback JSON
     cat > "${EUXIS_HOME}/registry.json" << 'EOF'
 {
-  "protocol_version": "0.0.7",
+  "protocol_version": "0.0.8",
   "agents": [
     {"id": "architect", "tier": "core"},
     {"id": "tester", "tier": "default"},
@@ -308,14 +308,14 @@ teardown() {
 @test "registry_get_version returns version" {
     run registry_get_version
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "0.0.7" ]]
+    [[ "${output}" == "0.0.8" ]]
 }
 
 @test "registry_get_version falls back to JSON" {
     rm -f "${EUXIS_HOME}/registry.db"
     run registry_get_version
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "0.0.7" ]]
+    [[ "${output}" == "0.0.8" ]]
 }
 
 @test "registry_agent_exists returns true for existing agent" {

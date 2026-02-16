@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Zig best practices for: ${goal}. Research: latest Zig release features and breaking changes (0.13+), build system patterns (build.zig best practices, addModule, dependency management), allocator design patterns (arena, FixedBufferAllocator, GeneralPurposeAllocator, testing.allocator), comptime metaprogramming patterns (type functions, comptimeStringMap, comptime interface checking), C interop patterns (@cImport, translate-c, linking), error handling strategies (error sets, error return traces, error unions), testing patterns (builtin test blocks, testing.allocator for leak detection, test filters), package management (zon files, build.zig.zon dependencies). Cross-validate against Zig language reference, Zig standard library source, ziglang.org documentation, and community resources (ziglearn, zig.news). Flag patterns deprecated by recent releases.",
           "verifies": [
             "latest Zig release features researched",

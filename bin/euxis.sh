@@ -9,7 +9,7 @@
 #     euxis --help
 #
 # DESCRIPTION:
-#     Primary entry point for the Euxis Fleet system. Coordinates 41 specialist
+#     Primary entry point for the Euxis Fleet system. Coordinates 42 specialist
 #     AI agents across multiple providers for engineering tasks. Supports single
 #     agent execution, fleet dispatch, squad deployment, and playbook execution.
 #
@@ -70,6 +70,17 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header_args "${1:-}"
+  if ui_is_subcommand "${1:-}"; then
+    export EUXIS_UI_SUPPRESS=1
+  fi
+fi
+
+
 # ============================================================================
 # Configuration & Library Loading
 # ============================================================================
@@ -118,7 +129,7 @@ case "${1:-}" in
     usage
     ;;
   --version)
-    echo "euxis 0.0.7"
+    echo "euxis 0.0.8"
     exit 0
     ;;
 esac

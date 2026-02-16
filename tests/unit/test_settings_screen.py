@@ -120,13 +120,15 @@ class TestSettingsScreenOnButtonPressed(unittest.TestCase):
             mock_back.assert_called_once()
 
     def test_unknown_button_does_nothing(self):
-        with patch.object(self.screen, "action_save_settings") as mock_save:
-            with patch.object(self.screen, "action_go_back") as mock_back:
-                event = Mock()
-                event.button.id = "other-btn"
-                self.screen.on_button_pressed(event)
-                mock_save.assert_not_called()
-                mock_back.assert_not_called()
+        with (
+            patch.object(self.screen, "action_save_settings") as mock_save,
+            patch.object(self.screen, "action_go_back") as mock_back,
+        ):
+            event = Mock()
+            event.button.id = "other-btn"
+            self.screen.on_button_pressed(event)
+            mock_save.assert_not_called()
+            mock_back.assert_not_called()
 
 
 class TestSettingsScreenSaveSettings(unittest.TestCase):
@@ -169,7 +171,6 @@ class TestSettingsScreenSaveSettings(unittest.TestCase):
 
     def test_saves_theme(self):
         # Import Select to get BLANK sentinel
-        from textual.widgets import Select
 
         self.mock_theme_select.value = "textual-light"
         self.screen.action_save_settings()

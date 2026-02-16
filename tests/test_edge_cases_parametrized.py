@@ -8,14 +8,11 @@ and concurrent access patterns with deterministic fixtures.
 from __future__ import annotations
 
 import json
-import os
 import sys
-import tempfile
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -58,15 +55,17 @@ class TestEmptyInputs:
         """Test FleetRegistry handles empty JSON data."""
         from tui.core.registry import FleetRegistry
 
-        with patch('builtins.open', mock_open(read_data=empty_data)):
-            with patch('pathlib.Path.exists', return_value=True):
-                try:
-                    registry = FleetRegistry.load()
-                    # Should handle gracefully
-                    assert registry is not None
-                except (json.JSONDecodeError, KeyError, AttributeError, TypeError):
-                    # Some empty data might cause parsing errors, which is acceptable
-                    pass
+        with (
+            patch("builtins.open", mock_open(read_data=empty_data)),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            try:
+                registry = FleetRegistry.load()
+                # Should handle gracefully
+                assert registry is not None
+            except (json.JSONDecodeError, KeyError, AttributeError, TypeError):
+                # Some empty data might cause parsing errors, which is acceptable
+                pass
 
     @pytest.mark.parametrize("empty_sparkline_data", [
         [],
@@ -119,7 +118,7 @@ class TestUnicodeAndSpecialCharacters:
         unicode_data.update({
             "tags": (),
             "activation": "default",
-            "version": "0.0.7"
+            "version": "0.0.8"
         })
 
         agent = Agent(**unicode_data)
@@ -252,8 +251,8 @@ class TestConcurrentAccess:
                     config.add_recent_agent(agent_name)
                     time.sleep(0.001)  # Small delay to encourage race conditions
                 results.append(thread_id)
-            except Exception as e:
-                errors.append((thread_id, e))
+            except Exception as exc:  # noqa: BLE001
+                errors.append((thread_id, exc))
 
         # Run concurrent modifications
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -274,12 +273,16 @@ class TestConcurrentAccess:
         from tui.core.registry import FleetRegistry
 
         registry_data = {
-            "protocol_version": "0.0.7",
-            "agents": [
-                {"id": f"agent_{i}", "tier": "fleet",
-                 "tags": [], "activation": "default"}
-                for i in range(50)
-            ],
+            "protocol_version": "0.0.8",
+            "agents": (
+                [
+                    {"id": "core_agent_0", "tier": "core", "tags": [], "activation": "core"},
+                ]
+                + [
+                    {"id": f"agent_{i}", "tier": "fleet", "tags": [], "activation": "default"}
+                    for i in range(50)
+                ]
+            ),
         }
 
         squads_data = {
@@ -299,9 +302,11 @@ class TestConcurrentAccess:
                 agents = registry.agents
                 core_agents = registry.core_agents
                 agent = registry.get_agent("agent_0")
-                assert len(agents) == 50
-            except Exception as e:
-                errors.append((thread_id, e))
+                assert len(agents) == 51
+                assert len(core_agents) > 0
+                assert agent.id == "agent_0"
+            except Exception as exc:  # noqa: BLE001
+                errors.append((thread_id, exc))
 
         # Run concurrent access
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -329,7 +334,7 @@ class TestNoneAndNullValues:
         # Add required fields
         none_field.setdefault("tags", ())
         none_field.setdefault("activation", "default")
-        none_field.setdefault("version", "0.0.7")
+        none_field.setdefault("version", "0.0.8")
 
         try:
             agent = Agent(**none_field)
@@ -346,13 +351,15 @@ class TestNoneAndNullValues:
         """Test registry with JSON null values."""
         from tui.core.registry import FleetRegistry
 
-        with patch('builtins.open', mock_open(read_data=null_json)):
-            with patch('pathlib.Path.exists', return_value=True):
-                try:
-                    registry = FleetRegistry.load()
-                    assert registry is not None
-                except (json.JSONDecodeError, KeyError, TypeError):
-                    pass
+        with (
+            patch("builtins.open", mock_open(read_data=null_json)),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            try:
+                registry = FleetRegistry.load()
+                assert registry is not None
+            except (json.JSONDecodeError, KeyError, TypeError):
+                pass
 
 
 class TestErrorConditions:
@@ -362,7 +369,7 @@ class TestErrorConditions:
         """Test handling when registry files don't exist."""
         from tui.core.registry import FleetRegistry
 
-        with patch('pathlib.Path.exists', return_value=False):
+        with patch("pathlib.Path.exists", return_value=False):
             try:
                 registry = FleetRegistry.load()
                 assert registry is not None
@@ -378,29 +385,33 @@ class TestErrorConditions:
             '{"unclosed": "value"',
             '{invalid_key: "value"}',
             '{"trailing": "comma",}',
-            'not json at all',
+            "not json at all",
         ]
 
         for corrupted_data in corrupted_json_data:
-            with patch('builtins.open', mock_open(read_data=corrupted_data)):
-                with patch('pathlib.Path.exists', return_value=True):
-                    try:
-                        registry = FleetRegistry.load()
-                        assert registry is not None
-                    except (json.JSONDecodeError, UnicodeDecodeError):
-                        pass
+            with (
+                patch("builtins.open", mock_open(read_data=corrupted_data)),
+                patch("pathlib.Path.exists", return_value=True),
+            ):
+                try:
+                    registry = FleetRegistry.load()
+                    assert registry is not None
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    pass
 
     def test_permission_errors(self):
         """Test handling of file permission errors."""
         from tui.core.registry import FleetRegistry
 
-        with patch('builtins.open', side_effect=PermissionError("Access denied")):
-            with patch('pathlib.Path.exists', return_value=True):
-                try:
-                    registry = FleetRegistry.load()
-                    assert registry is not None
-                except PermissionError:
-                    pass
+        with (
+            patch("builtins.open", side_effect=PermissionError("Access denied")),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            try:
+                registry = FleetRegistry.load()
+                assert registry is not None
+            except PermissionError:
+                pass
 
     @pytest.mark.parametrize("malformed_data", [
         {"agents": "not a list"},
@@ -413,13 +424,15 @@ class TestErrorConditions:
         """Test handling of malformed registry data."""
         from tui.core.registry import FleetRegistry
 
-        with patch('builtins.open', mock_open(read_data=json.dumps(malformed_data))):
-            with patch('pathlib.Path.exists', return_value=True):
-                try:
-                    registry = FleetRegistry.load()
-                    assert registry is not None
-                except (KeyError, TypeError, ValueError):
-                    pass
+        with (
+            patch("builtins.open", mock_open(read_data=json.dumps(malformed_data))),
+            patch("pathlib.Path.exists", return_value=True),
+        ):
+            try:
+                registry = FleetRegistry.load()
+                assert registry is not None
+            except (KeyError, TypeError, ValueError):
+                pass
 
 
 class TestPerformanceBoundaries:
@@ -431,7 +444,7 @@ class TestPerformanceBoundaries:
 
         # Create large dataset
         large_dataset = {
-            "protocol_version": "0.0.7",
+            "protocol_version": "0.0.8",
             "agents": [
                 {
                     "id": f"agent_{i}",

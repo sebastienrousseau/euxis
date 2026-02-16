@@ -1,9 +1,12 @@
 ---
 agent_id: planner
 role: "Requirements gathering, user stories, and MoSCoW prioritization"
-version: "0.0.7"
+version: "0.0.8"
 tags: [product, requirements, planning]
-last_updated: "2026-01-30"
+tier: core
+activation: core
+capability_tags: [documentation, architecture-review]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Technical Product Manager

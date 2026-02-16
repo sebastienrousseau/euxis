@@ -1,6 +1,6 @@
 {
   "name": "@euxis/crypto-server",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Euxis cryptographic service server with health monitoring",
   "type": "module",
   "main": "./dist/index.js",

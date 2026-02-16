@@ -29,8 +29,8 @@ class TestFleetRegistry:
         from tui.core.registry import FleetRegistry
 
         reg = FleetRegistry.load()
-        assert len(reg.agents) == 41
-        assert reg.version == "0.0.7"
+        assert len(reg.agents) == 42
+        assert reg.version == "0.0.8"
 
     def test_core_agents(self):
         from tui.core.registry import FleetRegistry
@@ -87,8 +87,8 @@ class TestFleetRegistry:
         reg = FleetRegistry.load()
         assert len(reg.combos) == 8
         combo_ids = {c.id for c in reg.combos}
-        assert "steve-jobs" in combo_ids
-        assert "fort-knox" in combo_ids
+        assert "envision" in combo_ids
+        assert "protect" in combo_ids
 
     def test_squad_members(self):
         from tui.core.registry import FleetRegistry
@@ -102,8 +102,8 @@ class TestFleetRegistry:
         from tui.core.registry import FleetRegistry
 
         reg = FleetRegistry.load()
-        steve = next(c for c in reg.combos if c.id == "steve-jobs")
-        assert steve.chain == ("planner", "architect", "evangelist", "reviewer")
+        steve = next(c for c in reg.combos if c.id == "envision")
+        assert steve.chain == ("deep-researcher", "planner", "architect", "evangelist", "reviewer")
 
     def test_agent_tier_label(self):
         from tui.core.registry import FleetRegistry
@@ -223,7 +223,7 @@ class TestEuxisApp:
         app = EuxisApp()
         async with app.run_test():
             assert app.fleet_registry is not None
-            assert len(app.fleet_registry.agents) == 41
+            assert len(app.fleet_registry.agents) == 42
 
     @pytest.mark.asyncio
     async def test_app_theme_toggle(self):
@@ -286,7 +286,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="core",
-            version="0.0.7",
+            version="0.0.8",
             tags=("test", "debug"),
             activation="default",
         )
@@ -301,7 +301,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="fleet",
-            version="0.0.7",
+            version="0.0.8",
             tags=("test",),
             activation="default",
         )
@@ -445,7 +445,7 @@ class TestIntegration:
         app = EuxisApp()
         async with app.run_test():
             app.action_refresh()
-            assert len(app.fleet_registry.agents) == 41
+            assert len(app.fleet_registry.agents) == 42
 
     def test_fleet_registry_immutable_agents(self):
         from tui.core.registry import FleetRegistry
@@ -467,7 +467,7 @@ class TestIntegration:
         assert registry_path.exists()
         data = json.loads(registry_path.read_text())
         assert "agents" in data
-        assert len(data["agents"]) == 41
+        assert len(data["agents"]) == 42
 
     def test_squads_json_valid(self):
         squads_path = Path.home() / ".euxis" / "squads.json"

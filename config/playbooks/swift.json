@@ -39,7 +39,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Swift best practices for: ${goal}. Research: latest Swift concurrency patterns (actors, structured concurrency, isolation regions), SPM plugin ecosystem, Swift-DocC CLI capabilities, cross-platform Linux support status and Foundation feature parity, current SwiftLint vs swift-format comparison, latest Swift API Design Guidelines updates, Swift Evolution proposals for upcoming features. Cross-validate findings against Swift.org documentation, WWDC sessions, and Swift Evolution proposals. Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "latest Swift concurrency patterns researched",

@@ -1,6 +1,6 @@
 {
   "name": "@euxis/crypto-lib",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Euxis cryptographic operations library with type safety",
   "type": "module",
   "main": "./dist/index.js",

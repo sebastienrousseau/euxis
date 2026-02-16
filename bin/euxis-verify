@@ -4,6 +4,14 @@
 # Runs: Health -> Lint -> Unit Tests -> Certify -> Doc Check
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 usage() {
     cat <<'EOF'
 euxis-verify — Pre-commit quality gate

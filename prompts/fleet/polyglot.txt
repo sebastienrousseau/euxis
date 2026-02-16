@@ -1,9 +1,12 @@
 ---
 agent_id: polyglot
 role: "Language-specific pattern detection, idiom enforcement, and subsystem-aware code analysis"
-version: "0.0.7"
+version: "0.0.8"
 tags: [languages, patterns, idioms, polyglot]
-last_updated: "2026-02-02"
+tier: fleet
+activation: default
+capability_tags: [code-review, debugging, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Language Specialist

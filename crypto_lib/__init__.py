@@ -1,23 +1,22 @@
-"""
-Euxis Crypto Library - Pure Functional Encryption Operations
+"""Euxis Crypto Library - Pure Functional Encryption Operations.
 
 This module provides pure functional cryptographic operations without filesystem dependencies.
 All operations return structured EncryptionResult objects for safe handling.
 """
 
-from .core import encrypt, decrypt, EncryptionResult, DecryptionResult
-from .key_management import generate_key, derive_key
-from .exceptions import CryptoError, InvalidKeyError, DecryptionError
+from .core import DecryptionResult, EncryptionResult, decrypt, encrypt
+from .exceptions import CryptoError, DecryptionError, InvalidKeyError
+from .key_management import derive_key, generate_key
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 __all__ = [
-    "encrypt",
-    "decrypt",
-    "EncryptionResult",
-    "DecryptionResult",
-    "generate_key",
-    "derive_key",
     "CryptoError",
+    "DecryptionError",
+    "DecryptionResult",
+    "EncryptionResult",
     "InvalidKeyError",
-    "DecryptionError"
+    "decrypt",
+    "derive_key",
+    "encrypt",
+    "generate_key"
 ]

@@ -39,7 +39,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current best practices for: ${goal}. Identify the repository's primary language and ecosystem. Research: latest recommended project layouts, current community standards for linting/formatting/testing, modern patterns replacing deprecated approaches, zero-cost architecture patterns that minimize memory and CPU. Cross-validate findings against at least 2 authoritative sources (official docs, core team recommendations). Flag any pattern in the codebase that contradicts current community consensus. Produce actionable recommendations with citations.",
           "verifies": [
             "best practices researched with citations",

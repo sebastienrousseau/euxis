@@ -49,7 +49,7 @@ set -euo pipefail
 
 # Script metadata
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly SCRIPT_VERSION="0.0.7"
+readonly SCRIPT_VERSION="0.0.8"
 
 # Configuration
 VERBOSE=false

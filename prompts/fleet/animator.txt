@@ -1,9 +1,12 @@
 ---
 agent_id: animator
 role: "Adaptive Light/Dark theming, dynamic color, and motion that feels native"
-version: "0.0.7"
+version: "0.0.8"
 tags: [theming, color, motion, dark-mode, animation]
-last_updated: "2026-02-01"
+tier: fleet
+activation: default
+capability_tags: [theming, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Theming & Motion Engineer

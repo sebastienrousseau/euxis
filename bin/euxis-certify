@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 usage() {
     cat <<'EOF'
 euxis-certify — Certification toll gate pipeline
@@ -123,8 +131,8 @@ else
 fi
 
 # Validate current version consistency (SQLite-first, JSON fallback)
-CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
-[[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
+CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "")
+[[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]] && CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
 if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
     validation_error "Cannot determine current version from registry"
     ((CERT_ERRORS++)) || true
@@ -309,6 +317,15 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
     # Test Architect output format with proper error handling
     resp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_semantic_resp.XXXXXX" 2>/dev/null) || { echo "  [FAIL] Failed to create temp file" >&2; return 1; }
     SEMANTIC_PROVIDER="${EUXIS_SEMANTIC_PROVIDER:-gemini}"
+    if [[ "$SEMANTIC_PROVIDER" == "gemini" ]] && command -v node >/dev/null 2>&1; then
+        node_major=$(node -v 2>/dev/null | sed 's/^v//' | cut -d. -f1 || echo "0")
+        if [[ "${node_major}" =~ ^[0-9]+$ ]] && (( node_major < 20 )); then
+            if command -v claude >/dev/null 2>&1; then
+                echo "  WARN: gemini requires Node >=20. Falling back to claude for semantic verification."
+                SEMANTIC_PROVIDER="claude"
+            fi
+        fi
+    fi
     if ! command -v "${SEMANTIC_PROVIDER}" >/dev/null 2>&1; then
         echo "  FAIL: Provider '${SEMANTIC_PROVIDER}' not found for semantic verification."
         echo "        Install it or set EUXIS_SEMANTIC_PROVIDER to an available provider."
@@ -318,14 +335,36 @@ if [[ -f "$GOLDEN_DATASET" ]]; then
     fi
     echo "  Testing architect agent (timeout: ${SEMANTIC_TIMEOUT}s) with ${SEMANTIC_PROVIDER}..."
 
-    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." "${SEMANTIC_PROVIDER}" > "${resp_file}" 2>/dev/null; then
-        RESP=$(cat "${resp_file}" 2>/dev/null || echo "")
+    start_ts=$(date +%s 2>/dev/null || echo "")
+    if run_with_timeout "${SEMANTIC_TIMEOUT}" "$BIN_DIR/euxis.sh" architect "Analyze this structure: a single Python file with no tests." "${SEMANTIC_PROVIDER}" > "${resp_file}" 2>&1; then
+        RESP_LOG=$(cat "${resp_file}" 2>/dev/null || echo "")
+        OUTPUT_PATH=$(printf "%s\n" "$RESP_LOG" | grep -Eo "Output: .*" | tail -n1 | sed "s/.*Output: //")
+        if [[ -n "$OUTPUT_PATH" && -f "$OUTPUT_PATH" ]]; then
+            RESP=$(cat "${OUTPUT_PATH}" 2>/dev/null || echo "")
+        else
+            RESP="$RESP_LOG"
+        fi
         EXIT_CODE=0
     else
         RESP=""
         EXIT_CODE=$?
     fi
     rm -f "${resp_file}"
+
+    if [[ -z "$RESP" ]]; then
+        output_dir="$EUXIS_HOME/data/projects/.euxis/architect/output"
+        if [[ -d "$output_dir" ]]; then
+            if [[ -n "$start_ts" ]]; then
+                latest_output=$(find "$output_dir" -type f -name "*.md" -newermt "@$start_ts" 2>/dev/null | sort -r | head -n1)
+            fi
+            if [[ -z "${latest_output:-}" ]]; then
+                latest_output=$(ls -t "$output_dir"/*.md 2>/dev/null | head -n1)
+            fi
+            if [[ -n "${latest_output:-}" && -f "$latest_output" ]]; then
+                RESP=$(cat "$latest_output" 2>/dev/null || echo "")
+            fi
+        fi
+    fi
 
     if [[ $EXIT_CODE -eq 124 ]]; then
         echo "  FAIL: Architect timed out after ${SEMANTIC_TIMEOUT}s."
@@ -446,11 +485,23 @@ if command -v git &>/dev/null; then
     fi
 fi
 
-# 5f. Recent commits carry branding signature (check last 5)
+# 5f. Recent commits carry branding signature (since last tag, else last 5)
 if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/null 2>&1; then
     UNSIGNED_COMMITS=0
     CHECKED=0
+    LAST_TAG=$(git -C "$EUXIS_HOME" describe --tags --abbrev=0 2>/dev/null || echo "")
+    if [[ -n "$LAST_TAG" ]]; then
+        COMMITS=$(git -C "$EUXIS_HOME" log --format="%H" "${LAST_TAG}..HEAD" 2>/dev/null || echo "")
+    else
+        COMMITS=$(git -C "$EUXIS_HOME" log --format="%H" -5 2>/dev/null || echo "")
+    fi
     while IFS= read -r hash; do
+        [[ -z "$hash" ]] && continue
+        AUTHOR_NAME=$(git -C "$EUXIS_HOME" log -1 --format="%an" "$hash")
+        AUTHOR_EMAIL=$(git -C "$EUXIS_HOME" log -1 --format="%ae" "$hash")
+        if echo "$AUTHOR_NAME" | grep -qi "dependabot" || echo "$AUTHOR_EMAIL" | grep -qi "dependabot"; then
+            continue
+        fi
         CHECKED=$((CHECKED + 1))
         MSG=$(git -C "$EUXIS_HOME" log -1 --format="%B" "$hash")
         if ! echo "$MSG" | grep -qi "Engineered with.*Euxis"; then
@@ -458,14 +509,14 @@ if command -v git &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev
             SHORT=$(git -C "$EUXIS_HOME" log -1 --format="%h %s" "$hash")
             echo "  UNSIGNED: $SHORT"
         fi
-    done < <(git -C "$EUXIS_HOME" log --format="%H" -5 2>/dev/null)
+    done <<< "$COMMITS"
 
-    if [[ $UNSIGNED_COMMITS -eq 0 && $CHECKED -gt 0 ]]; then
-        echo "  PASS: Last $CHECKED commits carry branding signature."
-    elif [[ $CHECKED -eq 0 ]]; then
-        echo "  SKIP: No git history available."
+    if [[ $CHECKED -eq 0 ]]; then
+        echo "  PASS: No new commits since last tag."
+    elif [[ $UNSIGNED_COMMITS -eq 0 ]]; then
+        echo "  PASS: $CHECKED commit(s) since last tag carry branding signature."
     else
-        echo "  FAIL: $UNSIGNED_COMMITS of $CHECKED recent commits missing signature."
+        echo "  FAIL: $UNSIGNED_COMMITS of $CHECKED commit(s) since last tag missing signature."
         ((BRANDING_FAILURES++)) || true
     fi
 fi
@@ -619,9 +670,7 @@ if [[ $DOC_FAILURES -eq 0 ]]; then
     echo "  PASS: All documentation is current (updated within 7 days)."
 fi
 
-# 6d. README references correct version (SQLite-first, JSON fallback)
-CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
-[[ -z "$CURRENT_VERSION" ]] && CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/registry.json" 2>/dev/null || echo "0.0.7")
+# 6d. README references correct version (registry.json is source of truth)
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
     if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md references version $CURRENT_VERSION."
@@ -631,7 +680,23 @@ if [[ -f "$EUXIS_HOME/README.md" ]]; then
     fi
 fi
 
-# 6e. USER_GUIDE and FLEET_GUIDE reference correct version
+# 6e. README badge/footer must match current version
+if [[ -f "$EUXIS_HOME/README.md" ]]; then
+    if grep -Eq "shields\\.io/badge/version-${CURRENT_VERSION}-" "$EUXIS_HOME/README.md"; then
+        echo "  PASS: README.md badge matches version $CURRENT_VERSION."
+    else
+        echo "  FAIL: README.md badge does not match version $CURRENT_VERSION."
+        ((DOC_FAILURES++)) || true
+    fi
+    if grep -Eq "Euxis v${CURRENT_VERSION}\\b" "$EUXIS_HOME/README.md"; then
+        echo "  PASS: README.md footer matches version $CURRENT_VERSION."
+    else
+        echo "  FAIL: README.md footer does not match version $CURRENT_VERSION."
+        ((DOC_FAILURES++)) || true
+    fi
+fi
+
+# 6f. USER_GUIDE and FLEET_GUIDE reference correct version
 for doc in docs/user-guide.md docs/fleet-guide.md; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
@@ -643,7 +708,89 @@ for doc in docs/user-guide.md docs/fleet-guide.md; do
     fi
 done
 
-# 6f. Registry, squads, and codex manifests are valid JSON
+# 6g. Prompts must match current version (core/fleet/protocols)
+PROMPT_DIRS=("$EUXIS_HOME/prompts/core" "$EUXIS_HOME/prompts/fleet" "$EUXIS_HOME/prompts/protocols")
+for dir in "${PROMPT_DIRS[@]}"; do
+    if [[ -d "$dir" ]]; then
+        while IFS= read -r -d '' prompt; do
+            prompt_version=$(grep -m 1 -Eo 'version:[[:space:]]*\"[0-9]+\.[0-9]+\.[0-9]+\"' "$prompt" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            if [[ -z "$prompt_version" ]]; then
+                echo "  FAIL: Missing version in $(basename "$prompt")."
+                ((DOC_FAILURES++)) || true
+            elif [[ "$prompt_version" != "$CURRENT_VERSION" ]]; then
+                echo "  FAIL: $(basename "$prompt") version $prompt_version != $CURRENT_VERSION."
+                ((DOC_FAILURES++)) || true
+            fi
+        done < <(find "$dir" -type f -name "*.txt" -print0)
+    fi
+done
+
+# 6h. Enforce release-version phrases (avoid dependency versions)
+ALLOWLIST_REGEX='(^|/)(CHANGELOG\\.md|docs/guides/migration-guide\\.md|docs/archive/|docs/reports/|docs/benchmarks/|docs/reference/benchmarks/)'
+
+check_phrase_versions() {
+    local pattern="$1"
+    local label="$2"
+    local mismatches=0
+    if command -v rg &>/dev/null; then
+        while IFS=: read -r file line match; do
+            if [[ "$file" =~ $ALLOWLIST_REGEX ]]; then
+                continue
+            fi
+            version=$(printf '%s' "$match" | rg -o '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            if [[ -n "$version" && "$version" != "$CURRENT_VERSION" ]]; then
+                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION)."
+                ((mismatches++)) || true
+            fi
+        done < <(rg -n -o "$pattern" "$EUXIS_HOME" \
+            --glob '!data/**' \
+            --glob '!node_modules/**' \
+            --glob '!dist/**' \
+            --glob '!build/**' \
+            --glob '!*.db' \
+            --glob '!*.sqlite' \
+            --glob '!.git/**')
+    else
+        while IFS=: read -r file line match; do
+            if [[ "$file" =~ $ALLOWLIST_REGEX ]]; then
+                continue
+            fi
+            version=$(printf '%s' "$match" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            if [[ -n "$version" && "$version" != "$CURRENT_VERSION" ]]; then
+                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION)."
+                ((mismatches++)) || true
+            fi
+        done < <(grep -R -n -E -o "$pattern" "$EUXIS_HOME" \
+            --binary-files=without-match \
+            --exclude-dir .git \
+            --exclude-dir data \
+            --exclude-dir node_modules \
+            --exclude-dir dist \
+            --exclude-dir build)
+    fi
+    if [[ $mismatches -gt 0 ]]; then
+        ((DOC_FAILURES+=mismatches)) || true
+    fi
+}
+
+check_phrase_versions 'Euxis v([0-9]+\.[0-9]+\.[0-9]+)' "Euxis"
+check_phrase_versions 'Version ([0-9]+\.[0-9]+\.[0-9]+)' "Version"
+
+# 6i. JSON protocol/version fields must match current version
+if [[ "$JQ_AVAILABLE" == "true" ]]; then
+    for manifest in registry.json squads.json config/capabilities.json config/codex/codex.json; do
+        path="$EUXIS_HOME/$manifest"
+        if [[ -f "$path" ]]; then
+            version_value=$(jq -r '.protocol_version // .version // empty' "$path" 2>/dev/null || echo "")
+            if [[ -n "$version_value" && "$version_value" != "$CURRENT_VERSION" ]]; then
+                echo "  FAIL: $manifest version $version_value != $CURRENT_VERSION."
+                ((DOC_FAILURES++)) || true
+            fi
+        fi
+    done
+fi
+
+# 6j. Registry, squads, and codex manifests are valid JSON
 MANIFESTS=("registry.json" "squads.json" "config/capabilities.json" "config/codex/codex.json")
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
     echo "  Validating JSON manifest files..."

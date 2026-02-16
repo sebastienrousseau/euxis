@@ -7,6 +7,12 @@ Technical specifications, API documentation, and detailed reference materials.
 - [API Reference](api-reference.md) - Complete API specification
 - [Library Architecture](lib-architecture.md) - Internal library design
 - [CLI Reference](cli-reference.md) - Command-line interface
+- [Gateway Protocol](gateway.md) - WebSocket frame and event schemas
+- [Gateway CLI](gateway-cli.md) - `euxis-gateway` command reference
+- [Gateway Quickstart](gateway-quickstart.md) - Minimal WebSocket walkthrough
+- [Gateway Auth](gateway-auth.md) - Token authentication guide
+- [Gateway Config](gateway-config.md) - Configuration keys and defaults
+- [Gateway Adapters](gateway-adapters.md) - Slack and Telegram adapter design
 
 ## Architecture
 - [Architecture Decisions](architecture-decisions/) - ADRs and design rationale

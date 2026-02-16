@@ -15,79 +15,85 @@ Combos are predefined sequential chains of agents optimized for specific pattern
 
 ```bash
 # Apple-style design workflow
-euxis-combo run steve-jobs "Design minimalist login interface"
+euxis-combo run envision "Design minimalist login interface"
 
 # Maximum security assurance
-euxis-combo run fort-knox "Audit OAuth2 implementation"
+euxis-combo run protect "Audit OAuth2 implementation"
 
 # End-to-end content production
-euxis-combo run content-factory "Create API tutorial with examples"
+euxis-combo run craft "Create API tutorial with examples"
 
 # View combo details
-euxis-combo info jony-ive
+euxis-combo info refine
 ```
 
 ## Available Combos
 
-### Steve Jobs
-**Chain**: `product-manager` → `architect` → `brand-evangelist` → `reviewer`
-**Outcome**: Minimalist design with polished review
-**Use for**: Product design, user experience, minimalist interfaces
+### Envision
+**Chain**: `deep-researcher` → `planner` → `architect` → `evangelist` → `reviewer`
+**Outcome**: Product narrative aligned with architecture and ready for launch review
+**Use for**: Product strategy, roadmap briefs, launch storytelling
 
 Process flow:
-1. **Product Manager**: Define clear user intent and requirements
-2. **Architect**: Structure elegant technical solution
-3. **Brand Evangelist**: Apply consistent brand voice and aesthetics
-4. **Reviewer**: Quality gate and final polish
+1. **Deep Researcher**: Establish evidence-backed market and technical context
+2. **Planner**: Define clear intent and acceptance criteria
+3. **Architect**: Shape system design and boundary decisions
+4. **Evangelist**: Refine narrative and launch messaging
+5. **Reviewer**: Final quality gate and polish
 
-### Fort Knox
-**Chain**: `edge-hunter` → `compliance-officer` → `qa-coordinator` → `reviewer`
-**Outcome**: Maximum security assurance
+### Protect
+**Chain**: `sentinel` → `pentester` → `auditor` → `inspector` → `reviewer`
+**Outcome**: Security posture hardened with evidence-backed assurance
 **Use for**: Security-critical systems, compliance validation, audit preparation
 
 Process flow:
-1. **Edge Hunter**: Identify vulnerabilities and attack vectors
-2. **Compliance Officer**: Validate regulatory requirements
-3. **QA Coordinator**: Comprehensive testing strategy
-4. **Reviewer**: Security and compliance validation
+1. **Sentinel**: Define policy boundaries and threat posture
+2. **Pentester**: Identify vulnerabilities and attack vectors
+3. **Auditor**: Validate regulatory and compliance requirements
+4. **Inspector**: Verify E2E flows and evidence quality
+5. **Reviewer**: Security and compliance validation
 
-### Content Factory
-**Chain**: `tech-writer` → `brand-evangelist` → `social-manager` → `reviewer`
-**Outcome**: End-to-end content production
+### Craft
+**Chain**: `writer` → `strategist` → `evangelist` → `reviewer`
+**Outcome**: End-to-end content production with consistent voice
 **Use for**: Documentation, tutorials, marketing content, developer resources
 
 Process flow:
-1. **Tech Writer**: Create accurate technical content
-2. **Brand Evangelist**: Apply brand voice and messaging
-3. **Social Manager**: Optimize for audience engagement
+1. **Writer**: Create accurate technical content
+2. **Strategist**: Align message, audience, and distribution
+3. **Evangelist**: Apply brand voice and narrative consistency
 4. **Reviewer**: Quality and accuracy validation
 
-### Jony Ive
-**Chain**: `web-ui-architect` → `theming-and-motion-engineer` → `interaction-and-input-specialist` → `ux-sentinel` → `reviewer`
-**Outcome**: Apple-level UI with polished interaction design
+### Refine
+**Chain**: `designer` → `animator` → `interactor` → `reviewer`
+**Outcome**: Interface refined from system to motion and interaction
 **Use for**: User interfaces, design systems, interaction patterns
 
 Process flow:
-1. **Web UI Architect**: Design component architecture
-2. **Theming Engineer**: Apply visual design and motion
-3. **Interaction Specialist**: Optimize input and navigation
-4. **UX Sentinel**: User experience validation
-5. **Reviewer**: Design and usability review
+1. **Designer**: Shape component architecture and layout
+2. **Animator**: Apply motion and visual rhythm
+3. **Interactor**: Optimize input and navigation
+4. **Reviewer**: Design and usability review
 
-### Crypto Fortress
-**Chain**: `security-lead` → `crypto-cryptography-auditor` → `edge-hunter` → `reviewer`
+### Seal
+**Chain**: `sentinel` → `cryptographer` → `pentester` → `reviewer`
 **Outcome**: Deep cryptographic audit with security policy
 **Use for**: Cryptographic systems, security protocols, key management
 
-### SWIFT Payment
-**Chain**: `payments-domain-steward` → `compliance-officer` → `unit-tester` → `reviewer`
+### Settle
+**Chain**: `ledger` → `auditor` → `tester` → `reviewer`
 **Outcome**: Payments integration with compliance validation
 **Use for**: Payment processing, financial systems, regulatory compliance
 
-### Deep Review
-**Chain**: `language-specialist` → `regression-analyst` → `edge-hunter` → `reviewer`
+### Inspect
+**Chain**: `researcher` → `polyglot` → `watchdog` → `pentester` → `reviewer`
 **Outcome**: Exhaustive pre-merge analysis
 **Use for**: Code review, merge requests, quality assurance
+
+### Discover
+**Chain**: `deep-researcher` → `architect` → `reviewer`
+**Outcome**: Evidence-backed architecture roadmap
+**Use for**: Platform decisions, modernization plans, research synthesis
 
 ## Sequential Execution
 
@@ -118,9 +124,9 @@ Add to `squads.json` combos section:
   "name": "Performance Optimizer",
   "description": "End-to-end performance optimization",
   "chain": [
-    "perf-optimizer",
-    "data-steward",
-    "automation-engineer",
+    "optimizer",
+    "telemetrist",
+    "automaton",
     "reviewer"
   ]
 }
@@ -138,9 +144,9 @@ Create standalone combo file:
     "name": "AI Safety Validator",
     "description": "Comprehensive AI safety and ethics review",
     "chain": [
-      "compliance-officer",
-      "edge-hunter",
-      "system-critic",
+      "auditor",
+      "pentester",
+      "critic",
       "reviewer"
     ]
   }
@@ -161,19 +167,19 @@ euxis-combo run ai-safety "Review ML model training pipeline" --provider gemini
 
 ### Quality Amplification
 Progressive refinement through specialist chain:
-`specialist` → `reviewer` → `system-critic` → `final-reviewer`
+`polyglot` → `watchdog` → `reviewer` → `arbiter`
 
 ### Domain Deep-Dive
 Domain expert followed by complementary specialists:
-`domain-expert` → `security-specialist` → `performance-expert` → `reviewer`
+`cryptographer` → `sentinel` → `pentester` → `reviewer`
 
 ### Creative to Technical
 Innovation to implementation flow:
-`product-manager` → `architect` → `bug-fixer` → `reviewer`
+`planner` → `architect` → `debugger` → `reviewer`
 
 ### Risk Management
 Multiple risk perspectives before approval:
-`edge-hunter` → `system-critic` → `compliance-officer` → `reviewer`
+`sentinel` → `pentester` → `auditor` → `reviewer`
 
 ## Combo Management
 

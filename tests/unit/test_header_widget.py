@@ -75,12 +75,12 @@ class TestETXHeaderReactiveDefaults(unittest.TestCase):
     def test_default_agent_count(self):
         """Test default agent_count reactive value is 41."""
         descriptor = ETXHeader.__dict__["agent_count"]
-        assert descriptor._default == 41
+        assert descriptor._default == 42
 
     def test_default_version(self):
-        """Test default version reactive value is '0.0.7'."""
+        """Test default version reactive value is '0.0.8'."""
         descriptor = ETXHeader.__dict__["version"]
-        assert descriptor._default == "0.0.7"
+        assert descriptor._default == "0.0.8"
 
 
 class TestETXHeaderCSS(unittest.TestCase):
@@ -169,7 +169,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         assert mock_logo.update.called
         text = mock_logo.update.call_args[0][0]
         assert "EUXIS" in text
-        assert "0.0.7" in text
+        assert "0.0.8" in text
 
     def test_update_display_context_contains_project(self):
         """Test _update_display includes project name in context."""
@@ -202,14 +202,14 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         header, mock_logo, _, _ = self._create_header_with_mocks()
         header._update_display()
         text = mock_logo.update.call_args[0][0]
-        assert "0.0.7" in text
+        assert "0.0.8" in text
 
     def test_update_display_status_contains_agent_count(self):
         """Test _update_display includes agent count in status."""
         header, _, _, mock_status = self._create_header_with_mocks()
         header._update_display()
         text = mock_status.update.call_args[0][0]
-        assert "41" in text
+        assert "42" in text
         assert "agents" in text
 
     def test_update_display_status_contains_provider(self):

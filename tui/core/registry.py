@@ -73,7 +73,7 @@ class FleetRegistry:
     agents: list[Agent] = field(default_factory=list)
     squads: list[Squad] = field(default_factory=list)
     combos: list[Combo] = field(default_factory=list)
-    version: str = "0.0.7"
+    version: str = "0.0.8"
 
     @classmethod
     def load(cls, euxis_home: Path | None = None) -> FleetRegistry:

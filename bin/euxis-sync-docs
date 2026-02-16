@@ -4,6 +4,14 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 usage() {
     cat <<'EOF'
 euxis-sync-docs — Secure Documentation Synchronization
@@ -47,7 +55,7 @@ echo "LIBRARIAN: Generating documentation and compliance patch..."
 # 1. Ask Librarian for a bash patch
 euxis librarian "Scan ~/.euxis. Output ONLY a valid bash script that:
 1. Inserts '# (c) 2026 Euxis Fleet.' at the top of scripts missing it.
-2. Updates version tags to v0.0.7 in all prompts.
+2. Updates version tags to v0.0.8 in all prompts.
 3. Updates docs/user-guide.md with any new agents found in prompts/fleet/.
 Do NOT include comments or conversational text outside of code." claude > "$PATCH_FILE" 2>/dev/null
 

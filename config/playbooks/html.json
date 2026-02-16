@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current HTML best practices for: ${goal}. Research: latest HTML Living Standard changes (new elements, deprecated features), WCAG 2.2 updates and AAA requirements, Core Web Vitals optimization patterns (LCP, CLS, INP), current state of <dialog>, <popover>, Declarative Shadow DOM, CSS container queries integration, View Transitions API, Speculation Rules API for prerendering, structured data (JSON-LD) best practices, meta tag standards (Open Graph, Twitter Card, Dublin Core). Cross-validate findings against WHATWG spec, MDN, web.dev, and W3C WAI. Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "HTML Living Standard changes researched",

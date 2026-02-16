@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 # (c) 2026 Euxis Fleet. All rights reserved.
 # EUXIS LINT: Static Analysis for Agent Fleet
-# Enforces Protocol v0.0.7 Compliance
+# Enforces Protocol v0.0.8 Compliance
 
 set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
 
 usage() {
     cat <<'EOF'
@@ -12,7 +20,7 @@ euxis-lint — Static analysis for agent fleet
 Usage:
   euxis-lint
 
-Enforces Protocol v0.0.7 compliance: registry integrity,
+Enforces Protocol v0.0.8 compliance: registry integrity,
 agent count, prompt headers, version alignment, and more.
 
 Options:

@@ -8,7 +8,7 @@
 
 By the end of this guide, you'll have:
 
-- **41 AI agents** ready to handle engineering tasks
+- **50 AI agents** ready to handle engineering tasks
 - **Your first completed task** with verified output
 - **Working knowledge** of the three main usage patterns
 
@@ -132,7 +132,7 @@ Fleet Status: HEALTHY (8/8 checks passed)
 
 | Check | What It Verifies |
 |-------|------------------|
-| Agent Naming | All 41 agents follow naming conventions |
+| Agent Naming | All 50 agents follow naming conventions |
 | Script Hardening | Shell scripts have proper error handling |
 | Orphaned Executables | No broken symlinks in ~/bin |
 | Protocol Headers | Agent prompts include required headers |
@@ -167,7 +167,7 @@ euxis butler "Introduce yourself briefly"
 
 Hello! I'm your Euxis Butler, optimized for clear communication.
 I translate complex system outputs into natural, spoken English.
-The fleet has 41 agents ready to assist with engineering tasks.
+The fleet has 50 agents ready to assist with engineering tasks.
 ```
 
 **Understanding the output:**
@@ -235,6 +235,36 @@ FINAL ANSWER:
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
+- Gateway settings (optional): `~/.euxis/config/gateway.json`
+
+Minimal gateway config example:
+
+```json
+{
+  "gateway": {
+    "bind": "127.0.0.1",
+    "port": 18789,
+    "health_enabled": true,
+    "health_path": "/health",
+    "auth": {
+      "mode": "token",
+      "token": {
+        "value": "replace-with-secure-random-value"
+      }
+    }
+  }
+}
+```
+
+Token guidance:
+
+```bash
+openssl rand -hex 32
+```
+
+Store tokens in environment variables or a secrets manager. Avoid committing them to git.
+
+See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md`.
 
 ### 3. Knowledge Storage (data/)
 - Cortex: Semantic memory with vector search
@@ -291,7 +321,7 @@ euxis writer "Create getting started docs for our CLI tool"
 
 ```bash
 # Chain agents for refined output (planner → architect → evangelist → reviewer)
-euxis-combo run steve-jobs "Design a user notification system"
+euxis-combo run envision "Design a user notification system"
 
 # Deploy a full squad for comprehensive work
 euxis-squad deploy quality "Audit the authentication module"
@@ -318,7 +348,7 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 
 | Guide | What You'll Learn |
 |-------|-------------------|
-| [Fleet Guide](../guides/fleet-guide.md) | All 41 agents in detail |
+| [Fleet Guide](../guides/fleet-guide.md) | All 50 agents in detail |
 | [User Guide](../guides/user-guide.md) | Complete CLI reference |
 | [API Reference](../reference/api-reference.md) | Build custom integrations |
 
@@ -401,4 +431,4 @@ euxis-health
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

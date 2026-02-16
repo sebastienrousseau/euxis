@@ -7,7 +7,7 @@ rendering, CSS styling, and edge cases.
 from __future__ import annotations
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from tui.widgets.shortcut_bar import DEFAULT_SHORTCUTS, ShortcutBar
 
@@ -265,6 +265,7 @@ class TestShortcutBarInheritance(unittest.TestCase):
         bar = ShortcutBar()
         # The parent Static is initialized with empty string
         # Content is set in on_mount
+        assert bar.renderable == ""
 
 
 if __name__ == "__main__":

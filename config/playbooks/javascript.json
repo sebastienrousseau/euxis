@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current JavaScript best practices for: ${goal}. Research: latest TC39 proposals at Stage 3+ (Temporal, Iterator helpers, Record & Tuple, Pattern Matching, Decorators), current ESLint flat config migration status, Vitest vs Jest comparison and optimal config, modern bundler landscape (Vite, esbuild, Rollup, tsup), current Node.js LTS features (test runner, permissions model, single executable apps), TypeScript vs JSDoc-based typing comparison, monorepo tooling (npm workspaces, pnpm, turborepo). Cross-validate findings against MDN, Node.js docs, and TC39 proposals. Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "TC39 Stage 3+ proposals researched",

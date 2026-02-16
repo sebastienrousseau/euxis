@@ -5,7 +5,6 @@ Tests cover: EuxisApp instantiation and .run() invocation.
 
 from __future__ import annotations
 
-import importlib
 import sys
 import unittest
 from unittest.mock import Mock, patch

@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current C best practices for: ${goal}. Research: C17 changes from C11 (deprecated features, clarifications), C23 preview features (typeof, constexpr, nullptr, auto, #embed, #warning), current static analyzer landscape (Clang Static Analyzer, Coverity, PVS-Studio, cppcheck), modern build system patterns (CMake, Meson, Bazel for C), current sanitizer capabilities (ASan, MSan, UBSan, TSan for C), safe string handling libraries (safe C library, BSD strlcpy/strlcat), embedded C patterns (MISRA C, CERT C), memory management patterns (arena allocators, pool allocators, RAII-like cleanup with __attribute__((cleanup))). Cross-validate against ISO C standard drafts, CERT C Coding Standard, SEI CERT rules, and cppreference C section. Flag deprecated patterns.",
           "verifies": [
             "C17 vs C11 differences documented",

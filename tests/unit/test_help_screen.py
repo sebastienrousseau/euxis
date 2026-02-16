@@ -120,7 +120,7 @@ class TestHelpContent(unittest.TestCase):
 
     def test_help_content_lists_combos(self):
         """Test HELP_CONTENT documents combo names."""
-        for combo in ["Steve Jobs", "Fort Knox", "Content Factory", "Jony Ive"]:
+        for combo in ["Envision", "Protect", "Craft", "Refine", "Seal", "Settle", "Inspect", "Discover"]:
             assert combo in HELP_CONTENT, f"Missing combo: {combo}"
 
     def test_help_content_has_markdown_tables(self):

@@ -23,7 +23,7 @@ cat > /tmp/review-manifest.json << 'EOF'
   "project": "code-review",
   "dispatches": [
     {"agent": "reviewer", "priority": "P0", "task": "Review authentication module"},
-    {"agent": "security-lead", "priority": "P1", "task": "Security audit"}
+    {"agent": "sentinel", "priority": "P1", "task": "Security audit"}
   ]
 }
 EOF
@@ -98,7 +98,7 @@ The `verify_cmd` field specifies how to verify task completion:
 
 ```json
 {
-  "agent": "tech-writer",
+  "agent": "writer",
   "task": "Create quick-start guide",
   "verify_cmd": "test -f docs/quick-start.md && wc -l docs/quick-start.md | awk '$1 > 50'"
 }
@@ -126,7 +126,7 @@ The `verify_cmd` field specifies how to verify task completion:
       "verify_cmd": "test -f /tmp/doc-audit-report.md"
     },
     {
-      "agent": "tech-writer",
+      "agent": "writer",
       "priority": "P1",
       "task": "Create missing quick-start guide",
       "verify_cmd": "test -f docs/quick-start.md"
@@ -149,17 +149,17 @@ The `verify_cmd` field specifies how to verify task completion:
   "description": "Comprehensive security audit",
   "dispatches": [
     {
-      "agent": "security-lead",
+      "agent": "sentinel",
       "priority": "P0",
       "task": "Identify potential vulnerabilities in authentication"
     },
     {
-      "agent": "edge-hunter",
+      "agent": "pentester",
       "priority": "P1",
       "task": "Test edge cases and attack vectors"
     },
     {
-      "agent": "compliance-officer",
+      "agent": "auditor",
       "priority": "P2",
       "task": "Verify compliance with security standards"
     }

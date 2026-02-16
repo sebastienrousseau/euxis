@@ -31,8 +31,8 @@ jobs:
                 `PR description is missing required branding signature.\n` +
                 `Missing: ${missing.join(', ')}\n\n` +
                 `Every PR must include the Euxis branding footer:\n` +
-                `> Designed by **Sebastien Rousseau**\n` +
-                `> Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System`
+                `> Designed by Sebastien Rousseau — https://sebastienrousseau.com\n` +
+                `> Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co`
               );
             } else {
               console.log('Branding signature verified in PR description.');

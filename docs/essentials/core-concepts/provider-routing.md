@@ -207,4 +207,4 @@ euxis reviewer "Review the PR"                 # → claude (reasoning)
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

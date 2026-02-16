@@ -25,6 +25,7 @@ def set_locale(lang_code: str) -> None:
 
     Args:
         lang_code: ISO 639-1 language code (e.g. "en", "fr", "de").
+
     """
     global _translator  # noqa: PLW0603
     if lang_code == "en":

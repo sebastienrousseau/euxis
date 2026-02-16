@@ -105,9 +105,11 @@ class TestCortexScreenLoadStatus(unittest.TestCase):
             loop.close()
 
     def test_binary_not_found(self):
-        with patch("tui.screens.cortex.EUXIS_HOME", Path("/fake/nonexistent")):
-            with patch.object(Path, "exists", return_value=False):
-                self._run()
+        with (
+            patch("tui.screens.cortex.EUXIS_HOME", Path("/fake/nonexistent")),
+            patch.object(Path, "exists", return_value=False),
+        ):
+            self._run()
 
         error_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("not found" in c.lower() for c in error_calls)
@@ -126,12 +128,12 @@ class TestCortexScreenLoadStatus(unittest.TestCase):
             """Return True for ~/bin/euxis-cortex, False otherwise."""
             return str(self_path).endswith("euxis-cortex") and "/home" in str(self_path)
 
-        with patch.object(Path, "exists", side_effect=lambda: True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                with patch.object(Path, "home", return_value=Path("/tmp/fakehome")):
-                    # Directly test with a path that "exists"
-                    with patch.object(Path, "exists", return_value=True):
-                        self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+            patch.object(Path, "home", return_value=Path("/tmp/fakehome")),
+        ):
+            self._run()
 
         assert self.mock_output.write_line.call_count >= 0  # may vary based on mock
 
@@ -145,9 +147,11 @@ class TestCortexScreenLoadStatus(unittest.TestCase):
         mock_process.stdout = mock_stdout
         mock_process.wait = AsyncMock()
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         write_calls = [c[0][0] for c in self.mock_output.write_line.call_args_list]
         assert "collections: 5" in write_calls
@@ -159,31 +163,31 @@ class TestCortexScreenLoadStatus(unittest.TestCase):
         mock_process.stdout = None
         mock_process.wait = AsyncMock()
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run()
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run()
 
         self.mock_output.write_line.assert_not_called()
 
     @patch("tui.screens.cortex.EUXIS_HOME", Path("/tmp/test-euxis"))
     def test_oserror_handling(self):
-        with patch.object(Path, "exists", return_value=True):
-            with patch(
-                "asyncio.create_subprocess_exec", side_effect=OSError("exec failed")
-            ):
-                self._run()
+        with patch.object(Path, "exists", return_value=True), patch(
+            "asyncio.create_subprocess_exec", side_effect=OSError("exec failed")
+        ):
+            self._run()
 
         error_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("exec failed" in c for c in error_calls)
 
     @patch("tui.screens.cortex.EUXIS_HOME", Path("/tmp/test-euxis"))
     def test_runtime_error_handling(self):
-        with patch.object(Path, "exists", return_value=True):
-            with patch(
-                "asyncio.create_subprocess_exec",
-                side_effect=RuntimeError("bad state"),
-            ):
-                self._run()
+        with patch.object(Path, "exists", return_value=True), patch(
+            "asyncio.create_subprocess_exec",
+            side_effect=RuntimeError("bad state"),
+        ):
+            self._run()
 
         error_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("bad state" in c for c in error_calls)
@@ -229,9 +233,11 @@ class TestCortexScreenInputSubmitted(unittest.TestCase):
         event.input.id = "cortex-input"
         event.value = "auth patterns"
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run(event)
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run(event)
 
         assert event.input.value == ""
         write_calls = [c[0][0] for c in self.mock_output.write_line.call_args_list]
@@ -247,9 +253,11 @@ class TestCortexScreenInputSubmitted(unittest.TestCase):
         event.input.id = "cortex-input"
         event.value = "test query"
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch("asyncio.create_subprocess_exec", return_value=mock_process):
-                self._run(event)
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("asyncio.create_subprocess_exec", return_value=mock_process),
+        ):
+            self._run(event)
 
         self.mock_output.write_line.assert_not_called()
 
@@ -259,12 +267,11 @@ class TestCortexScreenInputSubmitted(unittest.TestCase):
         event.input.id = "cortex-input"
         event.value = "test"
 
-        with patch.object(Path, "exists", return_value=True):
-            with patch(
-                "asyncio.create_subprocess_exec",
-                side_effect=OSError("recall failed"),
-            ):
-                self._run(event)
+        with patch.object(Path, "exists", return_value=True), patch(
+            "asyncio.create_subprocess_exec",
+            side_effect=OSError("recall failed"),
+        ):
+            self._run(event)
 
         error_calls = [c[0][0] for c in self.mock_output.write_status.call_args_list]
         assert any("recall failed" in c for c in error_calls)

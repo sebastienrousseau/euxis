@@ -1,7 +1,7 @@
 # Euxis
 
-**41 AI specialists. Deploy in seconds.**
-Version 0.0.7
+**50 AI specialists. Deploy in seconds.**
+Version 0.0.8
 
 [![Version][version-badge]][version-url]
 [![License][license-badge]][license-url]
@@ -12,7 +12,7 @@ Version 0.0.7
 
 ## What Euxis Does
 
-Euxis coordinates 41 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
+Euxis coordinates 50 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
 
 **Ship features faster.** Break complex goals into tasks. Delegate to specialists. Get working solutions.
 
@@ -55,7 +55,31 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
-### 3. Verify Installation
+### 3. Configure a Provider
+
+Set one API key or run local with Ollama. This prevents first‑run auth errors.
+
+```bash
+# Claude
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Gemini
+export GOOGLE_API_KEY="AIza..."
+
+# OpenAI
+export OPENAI_API_KEY="sk-..."
+
+# Optional default
+export EUXIS_PROVIDER="claude"
+```
+
+Prefer local? No key needed:
+
+```bash
+ollama pull llama2
+```
+
+### 4. Verify Installation
 
 ```bash
 euxis-health
@@ -75,7 +99,7 @@ euxis-health
 Fleet Status: HEALTHY (8/8 checks passed)
 ```
 
-### 4. Run Your First Agent
+### 5. Run Your First Agent
 
 ```bash
 euxis architect "What makes a good REST API?"
@@ -147,14 +171,14 @@ euxis-combo run <combo-name> "<task>"
 
 | Combo | Chain | Best For |
 |-------|-------|----------|
-| `steve-jobs` | planner → architect → evangelist → reviewer | Product design, feature specs |
-| `fort-knox` | pentester → auditor → inspector → reviewer | Security reviews |
-| `jony-ive` | designer → animator → interactor → reviewer | UI/UX design |
+| `envision` | planner → architect → evangelist → reviewer | Product design, feature specs |
+| `protect` | pentester → auditor → inspector → reviewer | Security reviews |
+| `refine` | designer → animator → interactor → reviewer | UI/UX design |
 
 **Example:**
 
 ```bash
-euxis-combo run steve-jobs "Design a user onboarding flow"
+euxis-combo run envision "Design a user onboarding flow"
 ```
 
 **What happens:**
@@ -204,7 +228,7 @@ euxis debugger "Trace why login fails for users with special characters in passw
 
 **Deep investigation:**
 ```bash
-euxis-combo run fort-knox "Investigate the session timeout issue"
+euxis-combo run protect "Investigate the session timeout issue"
 ```
 
 **What you get:**
@@ -226,7 +250,7 @@ euxis architect "Design a notification system supporting email, SMS, and push"
 
 **Then implement:**
 ```bash
-euxis-combo run steve-jobs "Build user preferences for notification channels"
+euxis-combo run envision "Build user preferences for notification channels"
 ```
 
 **What you get:**
@@ -284,6 +308,15 @@ euxis-playbook run zero-to-one "Launch v2.0"
 
 ---
 
+## Why Euxis
+
+Raw model tools are powerful, but they’re single‑threaded. Euxis turns one prompt into a coordinated system: routing, verification, memory, and repeatable workflows. It’s how you scale beyond “ask and hope.”
+
+If you want Claude Code, Cursor, or Aider to stay sharp at scale, Euxis is the control plane.
+
+Instead of four separate prompts, run one verified chain:
+`euxis-combo run protect "Audit auth and session security"`
+
 ## How It Works
 
 ```
@@ -318,7 +351,10 @@ euxis architect "Design the API" gemini
 
 ### Memory System
 
-The Cortex stores three types of knowledge:
+The Cortex is persistent, tri‑typed memory backed by a vector + graph hybrid.
+It stores to disk at `~/.euxis/data/cortex/db` and scales with your history.
+Use it to lock in wins, avoid repeat failures, and share team patterns.
+Learn more in [Memory](docs/essentials/core-concepts/memory.md).
 
 | Type | What It Stores | Example |
 |------|----------------|---------|
@@ -348,9 +384,9 @@ Every output passes three verification layers:
 
 ## Agent Fleet
 
-41 specialists organized by authority.
+50 specialists organized by authority.
 
-### Core Agents (9)
+### Core Agents (12)
 
 Define direction. May block progress when necessary.
 
@@ -365,24 +401,29 @@ Define direction. May block progress when necessary.
 | `arbiter` | Resolves conflicts between agents |
 | `librarian` | Knowledge governance and documentation |
 | `historian` | Long-term memory and patterns |
+| `route` | Session and agent routing decisions |
+| `pair` | Channel and device onboarding |
+| `guard` | Execution approval enforcement |
 
-### Default Agents (21)
+### Default Agents (24)
 
-Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--auto-available-task-triggered)
+Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-24-auto-available-task-triggered)
 
-`accountant` · `animator` · `automaton` · `debugger` · `designer` · `gatekeeper` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `watchdog` · `writer`
+`accountant` · `animator` · `automaton` · `bridge` · `debugger` · `designer` · `gatekeeper` · `heal` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `trace` · `watchdog` · `writer`
 
-### On-Demand Agents (7)
+### On-Demand Agents (10)
 
-Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-7--explicit-invocation-only)
+Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-10-explicit-invocation-only)
 
-`ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `strategist`
+`ambassador` · `butler` · `distill` · `evangelist` · `govern` · `localizer` · `marketer` · `researcher` · `deep-researcher` · `strategist`
 
 ### Specialist Agents (4)
 
-Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4--domain-specific-expertise)
+Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4-domain-specific-expertise)
 
 `cryptographer` · `ledger` · `conduit` · `custodian`
+
+**Count check:** 12 core + 24 default + 10 on‑demand + 4 specialist = **50**.
 
 ---
 
@@ -394,8 +435,23 @@ Modern TUI built on Python Textual.
 euxis-tui
 ```
 
+**TUI Demo:**
+
+[![Euxis TUI Demo](https://asciinema.org/a/04UwRbMM8mE8P90W.svg)](https://asciinema.org/a/04UwRbMM8mE8P90W)
+
+**Preview (text capture):**
+```
+Euxis ETX • Fleet Dashboard
+────────────────────────────────────────────
+✓ orchestrator   ✓ architect    ✓ reviewer
+✓ debugger       ✓ tester       ✓ pentester
+✓ inspector      ✓ auditor      ✓ sentinel
+────────────────────────────────────────────
+Focus: quality • Active: 8 • Cortex: 214 memories
+```
+
 **Features:**
-- Fleet dashboard with all 41 agents
+- Fleet dashboard with all 50 agents
 - Command palette (`Ctrl+K`)
 - Streaming agent execution
 - Squad monitoring
@@ -415,6 +471,27 @@ euxis-tui
 
 ---
 
+## Validation
+
+Run the same benchmarks we use in CI.
+
+```bash
+euxis-bench
+```
+
+Benchmarks and baselines live in `docs/benchmarks/`.
+
+## Contributing
+
+Open a pull request, file an issue, or propose a new agent.  
+Start with `CONTRIBUTING.md`. Security issues belong in `SECURITY.md`.  
+Issues and feature requests live at [GitHub Issues](https://github.com/sebastienrousseau/euxis/issues).
+
+## Changelog and Migration
+
+Track changes in `CHANGELOG.md`.  
+Upgrade guidance lives in `docs/guides/migration-guide.md`.
+
 ## Learn More
 
 | Guide | What You'll Learn |
@@ -422,10 +499,17 @@ euxis-tui
 | [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
 | [Core Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
 | [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
-| [Fleet Guide](docs/guides/fleet-guide.md) | All 41 agents in detail |
+| [Fleet Guide](docs/guides/fleet-guide.md) | All 50 agents in detail |
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
 | [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |
+| [Gateway Protocol](docs/reference/gateway.md) | WebSocket control plane reference |
+| [Gateway Quickstart](docs/reference/gateway-quickstart.md) | Minimal WebSocket walkthrough |
+| [Gateway Auth](docs/reference/gateway-auth.md) | Token authentication guide |
+| [Gateway Config](docs/reference/gateway-config.md) | Configuration keys and defaults |
+| [Gateway CLI](docs/reference/gateway-cli.md) | `euxis-gateway` command reference |
+| [Changelog](CHANGELOG.md) | What changed in each release |
+| [Migration Guide](docs/guides/migration-guide.md) | Upgrade steps across versions |
 
 ---
 
@@ -505,27 +589,27 @@ ollama pull llama2
 
 ## License
 
-Copyright (c) 2026 Sebastien Rousseau. All rights reserved.
+Apache-2.0 © 2026 Sebastien Rousseau.
 
 ---
 
-Designed by **[Sebastien Rousseau](https://sebastienrousseau.com/)**
-Engineered with **[Euxis](https://euxis.co/)** — Enterprise Unified eXecution Intelligence System
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*
 
 <!-- Reference Links -->
 
-[version-badge]: https://img.shields.io/badge/version-0.0.7-blue?style=for-the-badge
+[version-badge]: https://img.shields.io/badge/version-0.0.8-blue?style=for-the-badge
 [version-url]: https://github.com/sebastienrousseau/euxis/releases
 
-[license-badge]: https://img.shields.io/badge/license-proprietary-green?style=for-the-badge
+[license-badge]: https://img.shields.io/badge/license-Apache%202.0-green?style=for-the-badge
 [license-url]: https://github.com/sebastienrousseau/euxis/blob/main/LICENSE
 
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-41-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-50-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/guides/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

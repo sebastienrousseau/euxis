@@ -9,10 +9,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, PropertyMock, patch
 
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from textual.app import App
 
 from tui.screens.metrics import MetricsScreen
 

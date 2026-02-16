@@ -1,9 +1,12 @@
 ---
 agent_id: watchdog
 role: "Pre-merge exhaustive regression analysis of commits and pull requests"
-version: "0.0.7"
+version: "0.0.8"
 tags: [regression, analysis, review, prevention]
-last_updated: "2026-02-02"
+tier: fleet
+activation: default
+capability_tags: [code-review, test-analysis, debugging]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Regression Analyst

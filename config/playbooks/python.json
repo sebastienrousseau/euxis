@@ -39,7 +39,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current Python best practices for: ${goal}. Research: latest pyproject.toml standards (PEP 621, 660, 723), current Ruff rule recommendations, MyPy vs pyright comparison and optimal config, modern async patterns (asyncio vs trio), packaging best practices (src layout, uv vs poetry vs hatch), current typing features (3.10+ union syntax, TypeGuard, ParamSpec), latest test framework patterns (pytest plugins, Hypothesis strategies). Cross-validate findings against PEPs, Python Packaging Authority docs, and core dev recommendations. Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "latest PEP standards researched",

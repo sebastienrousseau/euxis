@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Validation Pipeline for Strategic Analysis Outputs
+"""Validation Pipeline for Strategic Analysis Outputs.
 
 This pipeline automatically processes strategic analysis reports and validates
 all quantitative claims against required evidence documentation.
@@ -13,36 +12,43 @@ Features:
 - Pipeline execution with failure handling
 """
 
-import json
-import sys
 import argparse
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
+import json
 import logging
-import subprocess
 import re
+import shlex
+import subprocess
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, TextIO
 
 from .evidence_framework import (
-    EvidenceFramework,
-    Claim,
     Evidence,
+    EvidenceFramework,
     EvidenceGrade,
-    EvidenceVerificationError
+    EvidenceVerificationError,
 )
 
 logger = logging.getLogger(__name__)
 
-class ValidationPipeline:
-    """Pipeline for validating strategic analysis outputs"""
+DEFAULT_PASS_THRESHOLD = 0.8
 
-    def __init__(self, evidence_framework: Optional[EvidenceFramework] = None):
+
+def _out(*values: object, sep: str = " ", end: str = "\n", stream: TextIO = sys.stdout) -> None:
+    """Write output without using print()."""
+    stream.write(sep.join(map(str, values)) + end)
+
+class ValidationPipeline:
+    """Pipeline for validating strategic analysis outputs."""
+
+    def __init__(self, evidence_framework: EvidenceFramework | None = None) -> None:
         self.framework = evidence_framework or EvidenceFramework()
         self.validation_rules = self._load_validation_rules()
 
-    def _load_validation_rules(self) -> Dict[str, Any]:
-        """Load validation rules configuration"""
-        default_rules = {
+    def _load_validation_rules(self) -> dict[str, Any]:
+        """Load validation rules configuration."""
+        return {
             "required_evidence_grades": ["E1", "E2", "E3"],  # E4 allowed, E5 forbidden
             "minimum_evidence_per_claim": 1,
             "maximum_evidence_age_days": {
@@ -52,8 +58,11 @@ class ValidationPipeline:
                 "E4": 30
             },
             "required_citation_patterns": [
-                r'\[E[1-4]: .+\]',  # Evidence citation format
-                r'(?:Observed|Measured|Verified|Inferred) (?:at|in|by) .+'  # Evidence description
+                r"\[E[1-4]: .+\]",  # Evidence citation format
+                (
+                    r"(?:Observed|Measured|Verified|Inferred) "
+                    r"(?:at|in|by) .+"
+                ),  # Evidence description
             ],
             "forbidden_terms": [
                 "approximately", "roughly", "around", "about",
@@ -62,20 +71,23 @@ class ValidationPipeline:
             ],
             "required_verification_commands": True,
             "quantitative_claim_patterns": [
-                r'\b\d+\.?\d*%\b',  # Percentages
-                r'\b\d+\.?\d*\s*(?:ms|milliseconds?|seconds?|minutes?|hours?)\b',  # Time
-                r'\b\d+\.?\d*\s*(?:MB|GB|KB|bytes?)\b',  # Size
-                r'\b\d+\.?\d*x\s+(?:faster|slower|more|less|better|worse)\b',  # Comparisons
-                r'\bP\d+\s*[:\-]?\s*\d+\.?\d*\b',  # Percentiles
-                r'\b(?:average|median|mean|max|min|total|sum)\s*[:\-]?\s*\d+\.?\d*\b',  # Stats
-                r'\b(?:success|failure|error)\s+rate\s*[:\-]?\s*\d+\.?\d*%?\b',  # Rates
-                r'\b\d+\.?\d*\s*(?:requests?|operations?|tasks?)\s*per\s*(?:second|minute|hour)\b'  # Throughput
+                r"\b\d+\.?\d*%\b",  # Percentages
+                r"\b\d+\.?\d*\s*(?:ms|milliseconds?|seconds?|minutes?|hours?)\b",  # Time
+                r"\b\d+\.?\d*\s*(?:MB|GB|KB|bytes?)\b",  # Size
+                r"\b\d+\.?\d*x\s+(?:faster|slower|more|less|better|worse)\b",  # Comparisons
+                r"\bP\d+\s*[:\-]?\s*\d+\.?\d*\b",  # Percentiles
+                r"\b(?:average|median|mean|max|min|total|sum)\s*[:\-]?\s*\d+\.?\d*\b",  # Stats
+                r"\b(?:success|failure|error)\s+rate\s*[:\-]?\s*\d+\.?\d*%?\b",  # Rates
+                r"\b\d+\.?\d*%\s+(?:success|failure|error)\s+rate\b",  # Percent-before-rate
+                (
+                    r"\b\d+\.?\d*\s*(?:requests?|operations?|tasks?)\s*per\s*"
+                    r"(?:second|minute|hour)\b"
+                ),  # Throughput
             ]
         }
-        return default_rules
 
-    def extract_quantitative_claims(self, text: str) -> List[Dict[str, Any]]:
-        """Extract quantitative claims from analysis text"""
+    def extract_quantitative_claims(self, text: str) -> list[dict[str, Any]]:
+        """Extract quantitative claims from analysis text."""
         claims = []
         patterns = self.validation_rules["quantitative_claim_patterns"]
 
@@ -91,11 +103,11 @@ class ValidationPipeline:
                 matched_text = match.group(0)
 
                 # Try to extract numerical value
-                num_match = re.search(r'\d+\.?\d*', matched_text)
+                num_match = re.search(r"\d+\.?\d*", matched_text)
                 value = float(num_match.group()) if num_match else 0
 
                 # Determine unit
-                unit_match = re.search(r'[a-zA-Z%]+', matched_text)
+                unit_match = re.search(r"[a-zA-Z%]+", matched_text)
                 unit = unit_match.group() if unit_match else ""
 
                 claim_data = {
@@ -110,8 +122,12 @@ class ValidationPipeline:
 
         return claims
 
-    def check_citation_requirements(self, text: str, claims: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Check if all claims have proper citations"""
+    def check_citation_requirements(
+        self,
+        _text: str,
+        claims: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Check if all claims have proper citations."""
         citation_check = {
             "total_claims": len(claims),
             "cited_claims": 0,
@@ -142,13 +158,13 @@ class ValidationPipeline:
 
         return citation_check
 
-    def check_forbidden_terms(self, text: str) -> Dict[str, Any]:
-        """Check for forbidden uncertainty terms"""
+    def check_forbidden_terms(self, text: str) -> dict[str, Any]:
+        """Check for forbidden uncertainty terms."""
         forbidden = self.validation_rules["forbidden_terms"]
         found_terms = []
 
         for term in forbidden:
-            pattern = r'\b' + re.escape(term) + r'\b'
+            pattern = r"\b" + re.escape(term) + r"\b"
             matches = list(re.finditer(pattern, text, re.IGNORECASE))
             if matches:
                 for match in matches:
@@ -167,8 +183,8 @@ class ValidationPipeline:
             "violations": found_terms
         }
 
-    def validate_evidence_commands(self, evidence_list: List[Evidence]) -> Dict[str, Any]:
-        """Validate that evidence has proper verification commands"""
+    def validate_evidence_commands(self, evidence_list: list[Evidence]) -> dict[str, Any]:
+        """Validate that evidence has proper verification commands."""
         validation = {
             "total_evidence": len(evidence_list),
             "with_commands": 0,
@@ -182,12 +198,13 @@ class ValidationPipeline:
 
                 # Test the verification command
                 try:
-                    result = subprocess.run(
-                        evidence.verification_cmd,
-                        shell=True,
+                    # verification_cmd is sourced from trusted evidence definitions
+                    result = subprocess.run(  # noqa: S603
+                        shlex.split(evidence.verification_cmd),
                         capture_output=True,
                         text=True,
-                        timeout=10
+                        timeout=10,
+                        check=False,
                     )
 
                     validation["command_test_results"].append({
@@ -205,12 +222,12 @@ class ValidationPipeline:
                         "success": False,
                         "error": "Command timeout"
                     })
-                except Exception as e:
+                except (OSError, subprocess.SubprocessError, ValueError) as exc:
                     validation["command_test_results"].append({
                         "evidence_hash": evidence.get_hash(),
                         "command": evidence.verification_cmd,
                         "success": False,
-                        "error": str(e)
+                        "error": str(exc)
                     })
             else:
                 validation["missing_commands"].append({
@@ -221,32 +238,34 @@ class ValidationPipeline:
 
         return validation
 
-    def process_analysis_file(self, file_path: Path) -> Dict[str, Any]:
-        """Process a strategic analysis file through the validation pipeline"""
+    def process_analysis_file(self, file_path: Path) -> dict[str, Any]:
+        """Process a strategic analysis file through the validation pipeline."""
         if not file_path.exists():
-            raise FileNotFoundError(f"Analysis file not found: {file_path}")
+            msg = f"Analysis file not found: {file_path}"
+            raise FileNotFoundError(msg)
 
         # Read the analysis text
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                if file_path.suffix.lower() == '.json':
+            with file_path.open(encoding="utf-8") as f:
+                if file_path.suffix.lower() == ".json":
                     data = json.load(f)
                     # Extract text from various possible fields
                     text = ""
-                    for field in ['content', 'analysis', 'report', 'summary', 'text']:
+                    for field in ["content", "analysis", "report", "summary", "text"]:
                         if field in data:
                             text += str(data[field]) + "\n"
                     if not text.strip():
                         text = json.dumps(data, indent=2)
                 else:
                     text = f.read()
-        except Exception as e:
-            raise EvidenceVerificationError(f"Failed to read analysis file: {e}")
+        except (OSError, json.JSONDecodeError) as exc:
+            msg = f"Failed to read analysis file: {exc}"
+            raise EvidenceVerificationError(msg) from exc
 
         # Run validation pipeline
         pipeline_result = {
             "file_path": str(file_path),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "file_size": file_path.stat().st_size,
             "validation_steps": {}
         }
@@ -275,12 +294,12 @@ class ValidationPipeline:
         # Calculate overall validation score
         score = self._calculate_validation_score(pipeline_result)
         pipeline_result["overall_score"] = score
-        pipeline_result["passed"] = score >= 0.8  # 80% threshold for passing
+        pipeline_result["passed"] = score >= DEFAULT_PASS_THRESHOLD
 
         return pipeline_result
 
-    def _extract_embedded_evidence(self, text: str) -> List[Evidence]:
-        """Extract evidence objects from embedded JSON in text"""
+    def _extract_embedded_evidence(self, text: str) -> list[Evidence]:
+        """Extract evidence objects from embedded JSON in text."""
         evidence_list = []
 
         # Look for JSON blocks that might contain evidence
@@ -299,7 +318,7 @@ class ValidationPipeline:
                                 evidence_type=ev_data.get("evidence_type", "unknown"),
                                 grade=EvidenceGrade(ev_data.get("grade", "E4")),
                                 content=ev_data.get("content", ""),
-                                timestamp=datetime.now(timezone.utc),
+                                timestamp=datetime.now(UTC),
                                 verification_cmd=ev_data.get("verification_cmd"),
                                 metadata=ev_data.get("metadata", {})
                             )
@@ -309,8 +328,8 @@ class ValidationPipeline:
 
         return evidence_list
 
-    def _calculate_validation_score(self, pipeline_result: Dict[str, Any]) -> float:
-        """Calculate overall validation score from pipeline results"""
+    def _calculate_validation_score(self, pipeline_result: dict[str, Any]) -> float:
+        """Calculate overall validation score from pipeline results."""
         score = 1.0
 
         # Citation compliance (40% of score)
@@ -332,7 +351,11 @@ class ValidationPipeline:
                 command_ratio = ev_data["with_commands"] / ev_data["total_evidence"]
                 success_ratio = 0
                 if ev_data["command_test_results"]:
-                    successful_tests = sum(1 for r in ev_data["command_test_results"] if r["success"])
+                    successful_tests = sum(
+                        1
+                        for r in ev_data["command_test_results"]
+                        if r["success"]
+                    )
                     success_ratio = successful_tests / len(ev_data["command_test_results"])
 
                 evidence_score = (command_ratio * 0.5) + (success_ratio * 0.5)
@@ -340,18 +363,35 @@ class ValidationPipeline:
 
         return max(0.0, min(1.0, score))
 
-    def generate_validation_report(self, pipeline_results: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Generate comprehensive validation report from multiple pipeline results"""
+    def generate_validation_report(
+        self,
+        pipeline_results: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Generate comprehensive validation report from multiple pipeline results."""
         report = {
-            "report_timestamp": datetime.now(timezone.utc).isoformat(),
+            "report_timestamp": datetime.now(UTC).isoformat(),
             "files_analyzed": len(pipeline_results),
             "summary": {
                 "files_passed": sum(1 for r in pipeline_results if r["passed"]),
                 "files_failed": sum(1 for r in pipeline_results if not r["passed"]),
-                "average_score": sum(r["overall_score"] for r in pipeline_results) / len(pipeline_results) if pipeline_results else 0,
-                "total_claims": sum(r["validation_steps"]["claim_extraction"]["claims_found"] for r in pipeline_results),
-                "total_citations": sum(r["validation_steps"]["citation_check"]["cited_claims"] for r in pipeline_results),
-                "forbidden_violations": sum(r["validation_steps"]["forbidden_terms"]["forbidden_terms_found"] for r in pipeline_results)
+                "average_score": (
+                    sum(r["overall_score"] for r in pipeline_results)
+                    / len(pipeline_results)
+                    if pipeline_results
+                    else 0
+                ),
+                "total_claims": sum(
+                    r["validation_steps"]["claim_extraction"]["claims_found"]
+                    for r in pipeline_results
+                ),
+                "total_citations": sum(
+                    r["validation_steps"]["citation_check"]["cited_claims"]
+                    for r in pipeline_results
+                ),
+                "forbidden_violations": sum(
+                    r["validation_steps"]["forbidden_terms"]["forbidden_terms_found"]
+                    for r in pipeline_results
+                ),
             },
             "file_results": pipeline_results,
             "recommendations": []
@@ -359,26 +399,37 @@ class ValidationPipeline:
 
         # Generate recommendations
         if report["summary"]["files_failed"] > 0:
-            report["recommendations"].append(
-                f"Fix {report['summary']['files_failed']} failed validation files before publication"
+            message = (
+                "Fix "
+                f"{report['summary']['files_failed']} "
+                "failed validation files before publication"
             )
+            report["recommendations"].append(message)
 
         if report["summary"]["total_citations"] < report["summary"]["total_claims"]:
-            missing_citations = report["summary"]["total_claims"] - report["summary"]["total_citations"]
+            missing_citations = (
+                report["summary"]["total_claims"]
+                - report["summary"]["total_citations"]
+            )
             report["recommendations"].append(
                 f"Add {missing_citations} missing evidence citations"
             )
 
         if report["summary"]["forbidden_violations"] > 0:
-            report["recommendations"].append(
-                f"Remove {report['summary']['forbidden_violations']} instances of forbidden uncertainty language"
+            message = (
+                "Remove "
+                f"{report['summary']['forbidden_violations']} "
+                "instances of forbidden uncertainty language"
             )
+            report["recommendations"].append(message)
 
         return report
 
-def main():
-    """CLI interface for the validation pipeline"""
-    parser = argparse.ArgumentParser(description="Evidence Verification Pipeline for Strategic Analysis")
+def main() -> None:
+    """CLI interface for the validation pipeline."""
+    parser = argparse.ArgumentParser(
+        description="Evidence Verification Pipeline for Strategic Analysis"
+    )
     parser.add_argument("files", nargs="+", help="Analysis files to validate")
     parser.add_argument("--output", "-o", help="Output validation report to file")
     parser.add_argument("--threshold", type=float, default=0.8, help="Validation score threshold")
@@ -388,7 +439,7 @@ def main():
 
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
+    logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
 
     pipeline = ValidationPipeline()
     results = []
@@ -400,15 +451,20 @@ def main():
             results.append(result)
 
             if args.verbose:
-                print(f"\nValidated: {file_path}")
-                print(f"Score: {result['overall_score']:.2f}")
-                print(f"Passed: {'YES' if result['passed'] else 'NO'}")
+                _out(f"\nValidated: {file_path}")
+                _out(f"Score: {result['overall_score']:.2f}")
+                _out(f"Passed: {'YES' if result['passed'] else 'NO'}")
 
-        except Exception as e:
-            logger.error(f"Failed to validate {file_path}: {e}")
+        except (
+            OSError,
+            ValueError,
+            EvidenceVerificationError,
+            subprocess.CalledProcessError,
+        ) as exc:
+            logger.exception("Failed to validate %s", file_path)
             results.append({
                 "file_path": str(path),
-                "error": str(e),
+                "error": str(exc),
                 "overall_score": 0.0,
                 "passed": False
             })
@@ -417,19 +473,19 @@ def main():
     report = pipeline.generate_validation_report(results)
 
     if args.output:
-        with open(args.output, 'w') as f:
+        with Path(args.output).open("w") as f:
             json.dump(report, f, indent=2)
-        print(f"Validation report saved to: {args.output}")
+        _out(f"Validation report saved to: {args.output}")
     else:
-        print(json.dumps(report, indent=2))
+        _out(json.dumps(report, indent=2))
 
     # Exit with non-zero if validations failed
     failed_count = report["summary"]["files_failed"]
     if failed_count > 0:
-        print(f"\nValidation FAILED: {failed_count} files did not meet requirements")
+        _out(f"\nValidation FAILED: {failed_count} files did not meet requirements")
         sys.exit(1)
     else:
-        print(f"\nValidation PASSED: All {len(results)} files met requirements")
+        _out(f"\nValidation PASSED: All {len(results)} files met requirements")
         sys.exit(0)
 
 if __name__ == "__main__":

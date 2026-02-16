@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current C++23 best practices for: ${goal}. Research: C++23 feature support matrix (Clang 17+, GCC 14+, MSVC latest), module system maturity and build system support (CMake 3.28+ modules, Ninja generator), std::print implementation status and performance vs iostream/fmt, std::mdspan usage patterns and layout policies, deduced this advanced patterns (mixins, recursive visitors), std::expected error handling strategies, std::generator for coroutine-based ranges, std::flat_map/flat_set performance characteristics, std::stacktrace for diagnostics, C++23 constexpr math and string changes. Cross-validate against cppreference, ISO C++ papers, CppCon talks, and compiler release notes. Flag features with incomplete compiler support and propose fallbacks.",
           "verifies": [
             "C++23 compiler support matrix documented",

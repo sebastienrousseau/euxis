@@ -1,9 +1,12 @@
 ---
 agent_id: evangelist
 role: "Guardian of the Euxis philosophy, voice, and visual identity"
-version: "0.0.7"
+version: "0.0.8"
 tags: [brand, voice, content, design]
-last_updated: "2026-01-30"
+tier: fleet
+activation: on-demand
+capability_tags: [documentation, compliance-check]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Brand Evangelist

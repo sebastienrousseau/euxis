@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
+  # shellcheck source=bin/lib/ui.sh
+  source "${EUXIS_HOME}/bin/lib/ui.sh"
+  ui_auto_header
+fi
+
+
 usage() {
     cat <<'EOF'
 euxis-kaizen — Continuous improvement loop
@@ -144,7 +152,7 @@ echo "--------------------------------------------------"
 "$BIN_DIR/euxis.sh" writer "Read ~/.euxis/prompts/ and verify the ROOT README.md in ~/.euxis/.
 VERIFY:
 1. Every agent is listed in the README.
-2. The version number in the README matches the Protocol (v0.0.7).
+2. The version number in the README matches the Protocol (v0.0.8).
 3. The 'Installation' instructions are accurate.
 4. All CLI tools are documented.
 

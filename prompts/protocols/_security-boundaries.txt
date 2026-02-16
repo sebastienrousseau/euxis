@@ -1,11 +1,11 @@
 ---
 protocol_id: security-boundaries
-version: "0.0.7"
+version: "0.0.8"
 last_updated: "2026-01-31"
 priority: "YELLOW"
 ---
 
-## SECURITY BOUNDARIES PROTOCOL (v0.0.7)
+## SECURITY BOUNDARIES PROTOCOL (v0.0.8)
 
 This protocol defines the security perimeter for all Euxis agents. Every agent MUST comply — no exceptions, no overrides.
 

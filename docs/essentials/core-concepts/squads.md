@@ -28,44 +28,44 @@ euxis-squad list
 ## Available Squads
 
 ### Vision Squad
-**Purpose**: Strategy & Discovery
+**Purpose**: Strategy, Research, and Architecture
 **Lead**: `orchestrator`
-**Members**: `orchestrator`, `architect`, `product-manager`, `deep-researcher`
+**Members**: `orchestrator`, `architect`, `planner`, `deep-researcher`, `researcher`, `historian`, `accountant`
 
 Use for: Requirements gathering, system design, strategic planning, research
 
 ### Build Squad
 **Purpose**: Engineering & Execution
-**Lead**: `bug-fixer`
-**Members**: `bug-fixer`, `legacy-maintainer`, `automation-engineer`, `unit-tester`, `crash-investigator`
+**Lead**: `debugger`
+**Members**: `debugger`, `maintainer`, `automaton`, `tester`, `investigator`, `repairer`
 
 Use for: Feature development, bug fixes, infrastructure, testing, maintenance
 
 ### Quality Squad
 **Purpose**: Assurance & Security
 **Lead**: `reviewer`
-**Members**: `reviewer`, `qa-coordinator`, `edge-hunter`, `compliance-officer`, `perf-optimizer`, `regression-analyst`, `language-specialist`
+**Members**: `reviewer`, `inspector`, `sentinel`, `pentester`, `auditor`, `optimizer`, `watchdog`, `polyglot`, `arbiter`
 
 Use for: Code review, security audits, performance optimization, compliance validation
 
 ### Growth Squad
 **Purpose**: Branding & Documentation
-**Lead**: `tech-writer`
-**Members**: `tech-writer`, `brand-evangelist`, `social-manager`, `devrel-advocate`, `growth-marketer`, `globalization-lead`
+**Lead**: `writer`
+**Members**: `writer`, `evangelist`, `strategist`, `ambassador`, `marketer`, `localizer`
 
 Use for: Documentation, marketing materials, community outreach, content creation
 
 ### Experience Squad
 **Purpose**: UI Excellence & Interaction Design
-**Lead**: `web-ui-architect`
-**Members**: `web-ui-architect`, `cli-ui-artisan`, `theming-and-motion-engineer`, `interaction-and-input-specialist`, `ux-sentinel`
+**Lead**: `designer`
+**Members**: `designer`, `tactician`, `animator`, `interactor`
 
 Use for: UI/UX design, interaction patterns, theming systems, user experience optimization
 
 ### Specialist Squad
 **Purpose**: Domain-Specific Expertise
-**Lead**: `crypto-cryptography-auditor`
-**Members**: `crypto-cryptography-auditor`, `payments-domain-steward`, `realtime-audio-engineer`, `rust-crate-steward`
+**Lead**: `cryptographer`
+**Members**: `cryptographer`, `ledger`, `conduit`, `custodian`
 
 Use for: Cryptography, payments, audio processing, Rust ecosystem tasks
 
@@ -99,12 +99,12 @@ Add to `squads.json`:
   "id": "security-fortress",
   "name": "Security Fortress Squad",
   "purpose": "Maximum Security Assurance",
-  "lead": "security-lead",
+  "lead": "sentinel",
   "members": [
-    "security-lead",
-    "edge-hunter",
-    "crypto-cryptography-auditor",
-    "compliance-officer",
+    "sentinel",
+    "pentester",
+    "cryptographer",
+    "auditor",
     "reviewer"
   ]
 }
@@ -120,19 +120,19 @@ cat > security-audit-manifest.json <<'EOF'
   "mode": "hierarchical",
   "dispatches": [
     {
-      "agent": "security-lead",
+      "agent": "sentinel",
       "priority": "P0",
       "task": "Lead comprehensive security audit of authentication system",
       "verify_cmd": "test -f /tmp/security-report.md"
     },
     {
-      "agent": "edge-hunter",
+      "agent": "pentester",
       "priority": "P0",
       "task": "Perform boundary testing and vulnerability assessment",
-      "verify_cmd": "grep -q 'SCAN COMPLETE' /tmp/edge-hunter-log.txt"
+      "verify_cmd": "grep -q 'SCAN COMPLETE' /tmp/pentester-log.txt"
     },
     {
-      "agent": "crypto-cryptography-auditor",
+      "agent": "cryptographer",
       "priority": "P1",
       "task": "Audit cryptographic implementation and key management",
       "verify_cmd": "test -f /tmp/crypto-audit.md"

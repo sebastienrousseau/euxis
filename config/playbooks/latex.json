@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current LaTeX best practices for: ${goal}. Research: modern LaTeX3 (expl3) programming layer and when to use it, current TikZ/PGFPlots best practices (externalization, standalone), biblatex vs bibtex feature comparison, accessibility in PDF (tagged PDF with tagpdf, accessibility package), modern font loading (fontspec for LuaLaTeX/XeLaTeX vs traditional), latexmk vs arara vs tectonic comparison, current CTAN package recommendations (cleveref vs hyperref, minted vs listings), CI/CD patterns for LaTeX (GitHub Actions, Overleaf Git bridge), reproducible builds (pinned TeX Live versions, Docker texlive images). Cross-validate findings against CTAN documentation, LaTeX Companion 3rd edition, TeX.SE canonical answers, and TUGboat articles. Flag deprecated packages and propose modern replacements.",
           "verifies": [
             "LaTeX3 (expl3) applicability evaluated",

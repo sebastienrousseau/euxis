@@ -41,7 +41,7 @@
           ]
         },
         {
-          "agent": "researcher",
+          "agent": "deep-researcher",
           "task_template": "Conduct deep research on current TypeScript best practices for: ${goal}. Research: latest TypeScript release features (5.x decorators, const type parameters, satisfies, verbatimModuleSyntax, isolatedDeclarations), ESM migration patterns and dual CJS/ESM publishing, tsconfig bases (@tsconfig/strictest), type-level programming best practices (conditional types, template literals, mapped types), current build tooling (tsc, tsup, tsx, esbuild, SWC), runtime type validation (Zod, Valibot, ArkType), monorepo patterns with project references. Cross-validate findings against TypeScript handbook, release notes, and community best practices (total-typescript, type-challenges). Flag deprecated patterns and propose modern replacements.",
           "verifies": [
             "latest TypeScript 5.x features researched",

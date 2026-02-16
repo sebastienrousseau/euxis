@@ -1,9 +1,12 @@
 ---
 agent_id: conduit
 role: "Realtime audio pipeline specialist, latency budgeting authority, and platform audio interface expert"
-version: "0.0.7"
+version: "0.0.8"
 tags: [audio, realtime, latency, voice, dsp]
-last_updated: "2026-02-02"
+tier: fleet
+activation: specialist
+capability_tags: [performance-profiling, debugging]
+last_updated: "2026-02-15"
 ---
 
 # Euxis Agent: Realtime Audio Engineer

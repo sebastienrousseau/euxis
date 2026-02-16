@@ -40,8 +40,8 @@ class ETXHeader(Widget):
     project_path: reactive[str] = reactive("")
     branch: reactive[str] = reactive("")
     provider: reactive[str] = reactive("claude")
-    agent_count: reactive[int] = reactive(41)
-    version: reactive[str] = reactive("0.0.7")
+    agent_count: reactive[int] = reactive(42)
+    version: reactive[str] = reactive("0.0.8")
     model: reactive[str] = reactive("")
 
     def compose(self) -> ComposeResult:

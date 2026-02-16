@@ -1,10 +1,10 @@
 ---
 protocol_id: euxis-mandatory-protocol
-version: "0.0.7"
+version: "0.0.8"
 last_updated: "2026-01-31"
 ---
 
-## EUXIS MANDATORY PROTOCOL (v0.0.7)
+## EUXIS MANDATORY PROTOCOL (v0.0.8)
 
 ### 0. SESSION INITIALIZATION
 On first activation, you MUST:

@@ -4,7 +4,7 @@
 Core topics and concepts you need to understand Euxis.
 
 ## Getting Started
-- [Welcome to Euxis](index.md) - Your personal team of 41 AI specialists
+- [Welcome to Euxis](index.md) - Your personal team of 50 AI specialists
 - [Quick Start](quick-start.md) - Get up and running in minutes
 
 ## Core Concepts

@@ -2,7 +2,7 @@
 
 **How to pick the right agent for your task.**
 
-With 41 agents, choosing the right one might seem overwhelming. This guide makes it simple.
+With 50 agents, choosing the right one might seem overwhelming. This guide makes it simple.
 
 ---
 
@@ -226,4 +226,4 @@ What are you trying to do?
 
 ---
 
-*Euxis v0.0.7 · Build something that matters.*
+*Euxis v0.0.8 · Build something that matters.*

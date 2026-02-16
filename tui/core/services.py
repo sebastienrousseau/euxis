@@ -7,7 +7,7 @@ import abc
 import hashlib
 import secrets
 from dataclasses import dataclass
-from typing import Any, ClassVar, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 # Import crypto_lib for production-grade AES implementation
 try:
@@ -18,8 +18,9 @@ try:
     if crypto_lib_path.exists():
         sys.path.insert(0, str(crypto_lib_path.parent))
 
-    from crypto_lib import encrypt as crypto_encrypt, decrypt as crypto_decrypt, generate_key
-    from crypto_lib.exceptions import CryptoError, InvalidKeyError, DecryptionError
+    from crypto_lib import decrypt as crypto_decrypt
+    from crypto_lib import encrypt as crypto_encrypt
+    from crypto_lib.exceptions import CryptoError, DecryptionError, InvalidKeyError
     CRYPTO_LIB_AVAILABLE = True
 except ImportError:
     CRYPTO_LIB_AVAILABLE = False
@@ -55,6 +56,7 @@ class CryptographicAlgorithm(Protocol):
 @dataclass(frozen=True)
 class AlgorithmInfo:
     """Metadata about a cryptographic algorithm."""
+
     name: str
     key_size: int
     description: str
@@ -71,7 +73,8 @@ class AlgorithmRegistry:
     def register(self, algorithm: CryptographicAlgorithm, metadata: AlgorithmInfo) -> None:
         """Register a cryptographic algorithm with metadata."""
         if not isinstance(algorithm, CryptographicAlgorithm):
-            raise TypeError(f"Algorithm must implement CryptographicAlgorithm protocol")
+            msg = "Algorithm must implement CryptographicAlgorithm protocol"
+            raise TypeError(msg)
 
         self._algorithms[metadata.name] = algorithm
         self._metadata[metadata.name] = metadata
@@ -80,14 +83,16 @@ class AlgorithmRegistry:
         """Retrieve algorithm by name."""
         if name not in self._algorithms:
             available = ", ".join(self._algorithms.keys())
-            raise ValueError(f"Algorithm '{name}' not found. Available: {available}")
+            msg = f"Algorithm '{name}' not found. Available: {available}"
+            raise ValueError(msg)
 
         return self._algorithms[name]
 
     def get_metadata(self, name: str) -> AlgorithmInfo:
         """Get metadata for algorithm by name."""
         if name not in self._metadata:
-            raise ValueError(f"Algorithm metadata for '{name}' not found")
+            msg = f"Algorithm metadata for '{name}' not found"
+            raise ValueError(msg)
 
         return self._metadata[name]
 
@@ -141,7 +146,8 @@ class InMemoryKeyManager(KeyManagementService):
     def generate_key(self, algorithm: str) -> bytes:
         """Generate a new key for the specified algorithm."""
         if not self._algorithm_registry:
-            raise RuntimeError("Algorithm registry not set")
+            msg = "Algorithm registry not set"
+            raise RuntimeError(msg)
 
         metadata = self._algorithm_registry.get_metadata(algorithm)
         return secrets.token_bytes(metadata.key_size)
@@ -153,13 +159,15 @@ class InMemoryKeyManager(KeyManagementService):
     def retrieve_key(self, key_id: str) -> bytes:
         """Retrieve stored key by identifier."""
         if key_id not in self._keys:
-            raise KeyError(f"Key '{key_id}' not found")
+            msg = f"Key '{key_id}' not found"
+            raise KeyError(msg)
         return self._keys[key_id]
 
     def delete_key(self, key_id: str) -> None:
         """Delete stored key."""
         if key_id not in self._keys:
-            raise KeyError(f"Key '{key_id}' not found")
+            msg = f"Key '{key_id}' not found"
+            raise KeyError(msg)
         del self._keys[key_id]
 
     def list_keys(self) -> list[str]:
@@ -173,16 +181,19 @@ class SimpleXORAlgorithm:
 
     @property
     def name(self) -> str:
+        """Return algorithm name."""
         return "simple-xor"
 
     @property
     def key_size(self) -> int:
+        """Return required key size in bytes."""
         return 32  # 256 bits
 
     def encrypt(self, data: bytes, key: bytes) -> bytes:
         """XOR encrypt data with key."""
         if len(key) != self.key_size:
-            raise ValueError(f"Key must be {self.key_size} bytes")
+            msg = f"Key must be {self.key_size} bytes"
+            raise ValueError(msg)
 
         result = bytearray(data)
         for i in range(len(result)):
@@ -203,19 +214,23 @@ class SHA256Algorithm:
 
     @property
     def name(self) -> str:
+        """Return algorithm name."""
         return "sha256"
 
     @property
     def key_size(self) -> int:
+        """Return required key size in bytes."""
         return 0  # Hash algorithms don't use keys
 
     def encrypt(self, data: bytes, key: bytes) -> bytes:
         """Not applicable for hash algorithms."""
-        raise NotImplementedError("Hash algorithms do not support encryption")
+        msg = "Hash algorithms do not support encryption"
+        raise NotImplementedError(msg)
 
     def decrypt(self, encrypted_data: bytes, key: bytes) -> bytes:
         """Not applicable for hash algorithms."""
-        raise NotImplementedError("Hash algorithms do not support decryption")
+        msg = "Hash algorithms do not support decryption"
+        raise NotImplementedError(msg)
 
     def hash(self, data: bytes) -> bytes:
         """SHA-256 hash of data."""
@@ -227,37 +242,44 @@ class AES256GCMAlgorithm:
 
     @property
     def name(self) -> str:
+        """Return algorithm name."""
         return "aes-256-gcm"
 
     @property
     def key_size(self) -> int:
+        """Return required key size in bytes."""
         return 32  # 256 bits
 
     def encrypt(self, data: bytes, key: bytes) -> bytes:
         """Encrypt data using AES-256-GCM from crypto_lib."""
         if not CRYPTO_LIB_AVAILABLE:
-            raise RuntimeError("crypto_lib not available for AES-256-GCM encryption")
+            msg = "crypto_lib not available for AES-256-GCM encryption"
+            raise RuntimeError(msg)
 
         try:
             result = crypto_encrypt(data, key, "AES-256-GCM")
             # Convert EncryptionResult to bytes for the protocol interface
             # Use the base64 format for serialization
-            return result.to_base64().encode('utf-8')
-        except (CryptoError, InvalidKeyError) as e:
-            raise RuntimeError(f"AES-256-GCM encryption failed: {e}")
+            return result.to_base64().encode("utf-8")
+        except (CryptoError, InvalidKeyError) as exc:
+            msg = f"AES-256-GCM encryption failed: {exc}"
+            raise RuntimeError(msg) from exc
 
     def decrypt(self, encrypted_data: bytes, key: bytes) -> bytes:
         """Decrypt data using AES-256-GCM from crypto_lib."""
         if not CRYPTO_LIB_AVAILABLE:
-            raise RuntimeError("crypto_lib not available for AES-256-GCM decryption")
+            msg = "crypto_lib not available for AES-256-GCM decryption"
+            raise RuntimeError(msg)
 
         try:
             # Convert bytes back to string for crypto_lib parsing
-            encrypted_str = encrypted_data.decode('utf-8')
+            encrypted_str = encrypted_data.decode("utf-8")
             result = crypto_decrypt(encrypted_str, key)
+        except (CryptoError, InvalidKeyError, DecryptionError, UnicodeDecodeError) as exc:
+            msg = f"AES-256-GCM decryption failed: {exc}"
+            raise RuntimeError(msg) from exc
+        else:
             return result.plaintext
-        except (CryptoError, InvalidKeyError, DecryptionError, UnicodeDecodeError) as e:
-            raise RuntimeError(f"AES-256-GCM decryption failed: {e}")
 
     def hash(self, data: bytes) -> bytes:
         """SHA-256 hash of data."""
@@ -280,7 +302,8 @@ class CryptoService:
         # Validate default algorithm exists
         if default_algorithm not in algorithm_registry.list_algorithms():
             available = ", ".join(algorithm_registry.list_algorithms())
-            raise ValueError(f"Default algorithm '{default_algorithm}' not available. Available: {available}")
+            msg = f"Default algorithm '{default_algorithm}' not available. Available: {available}"
+            raise ValueError(msg)
 
     @property
     def algorithm_registry(self) -> AlgorithmRegistry:
@@ -334,7 +357,8 @@ class CryptoService:
         """Switch the default algorithm."""
         if new_default not in self._algorithm_registry.list_algorithms():
             available = ", ".join(self._algorithm_registry.list_algorithms())
-            raise ValueError(f"Algorithm '{new_default}' not available. Available: {available}")
+            msg = f"Algorithm '{new_default}' not available. Available: {available}"
+            raise ValueError(msg)
 
         self._default_algorithm = new_default
 
@@ -372,11 +396,12 @@ class ServiceContainer:
         if service_type in self._services:
             return self._services[service_type]()
 
-        raise ValueError(f"Service {service_type} not registered")
+        msg = f"Service {service_type} not registered"
+        raise ValueError(msg)
 
 
 def create_default_crypto_service() -> CryptoService:
-    """Factory function to create a CryptoService with default implementations."""
+    """Create a CryptoService with default implementations."""
     # Create algorithm registry and register default algorithms
     registry = AlgorithmRegistry()
 
@@ -423,7 +448,7 @@ def create_default_crypto_service() -> CryptoService:
 
 
 def setup_service_container() -> ServiceContainer:
-    """Setup service container with crypto services."""
+    """Set up the service container with crypto services."""
     container = ServiceContainer()
 
     # Create and register algorithm registry as singleton
