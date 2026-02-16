@@ -15,7 +15,8 @@ Reference for the Gateway configuration file.
     "auth": {
       "mode": "token",
       "token": {
-        "value": "replace-with-secure-random-value"
+        "value": "replace-with-secure-random-value",
+        "allow_query_param": true
       }
     },
     "exec": {
@@ -71,6 +72,7 @@ Reference for the Gateway configuration file.
 ### `gateway.auth.token`
 
 - `value` (string): shared token for Authorization header.
+- `allow_query_param` (bool): allow `?token=` in WebSocket URL for webchat.
 
 ### `gateway.auth.password`
 

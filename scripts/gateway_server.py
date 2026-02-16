@@ -20,8 +20,10 @@ import uvicorn
 from gateway_adapter_registry import build_adapters
 from gateway_utils import (
     load_session_from_disk,
+    load_session_meta,
     persist_message,
     persist_run_event,
+    persist_session_meta,
     timestamp,
 )
 DEFAULT_CONFIG = {
@@ -51,6 +53,8 @@ class GatewayState:
         self.running: Dict[str, asyncio.Task] = {}
         self.pending_approvals: Dict[str, Dict[str, Any]] = {}
         self.adapters: Dict[str, Any] = {}
+        self.connections: Dict[str, WebSocket] = {}
+        self.conn_seq: Dict[str, int] = {}
 
 
 STATE = GatewayState()
@@ -133,10 +137,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     async def sessions() -> JSONResponse:
         sessions = []
         for session_id, messages in STATE.sessions.items():
+            meta = load_session_meta(session_id)
             sessions.append(
                 {
                     "session_id": session_id,
                     "message_count": len(messages),
+                    "meta": meta,
                 }
             )
         return JSONResponse({"sessions": sessions})
@@ -146,7 +152,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         ensure_session(session_id)
         if not STATE.sessions[session_id]:
             STATE.sessions[session_id] = load_session_from_disk(session_id)
-        return JSONResponse({"session_id": session_id, "messages": STATE.sessions[session_id]})
+        meta = load_session_meta(session_id)
+        return JSONResponse({"session_id": session_id, "meta": meta, "messages": STATE.sessions[session_id]})
 
     @app.post("/approvals/{run_id}/approve")
     async def approve(run_id: str) -> JSONResponse:
@@ -155,6 +162,23 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             return JSONResponse({"status": "not_found"}, status_code=404)
         pending["approved"] = True
         STATE.pending_approvals[run_id] = pending
+        # Dispatch immediately to all active connections.
+        for conn_id, ws in list(STATE.connections.items()):
+            seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
+            task = asyncio.create_task(
+                dispatch_agent(
+                    ws,
+                    seq_state,
+                    pending["session_id"],
+                    pending["run_id"],
+                    pending.get("meta", {}),
+                    pending.get("content", ""),
+                    config,
+                )
+            )
+            STATE.running[pending["run_id"]] = task
+            STATE.conn_seq[conn_id] = seq_state["value"]
+            break
         return JSONResponse({"status": "approved"})
 
     @app.post("/admin/exec")
@@ -171,6 +195,9 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             await ws.close(code=4401)
             return
         await ws.accept()
+        conn_id = f"conn_{int(time.time() * 1000)}"
+        STATE.connections[conn_id] = ws
+        STATE.conn_seq[conn_id] = 0
         seq_state = {"value": 0}
         tick_task = asyncio.create_task(send_ticks(ws, seq_state))
         await send_presence(ws, seq_state)
@@ -180,6 +207,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                 await handle_frame(ws, message, seq_state, config)
         except WebSocketDisconnect:
             tick_task.cancel()
+            STATE.connections.pop(conn_id, None)
+            STATE.conn_seq.pop(conn_id, None)
             return
 
     webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
@@ -196,7 +225,13 @@ def is_authorized(ws: WebSocket, config: Dict[str, Any]) -> bool:
         if not token:
             return True
         header = ws.headers.get("authorization") or ""
-        return header.strip() == f"Bearer {token}"
+        if header.strip() == f"Bearer {token}":
+            return True
+        allow_query = config["gateway"]["auth"].get("token", {}).get("allow_query_param", False)
+        if allow_query:
+            query_token = ws.query_params.get("token", "")
+            return query_token == token
+        return False
     if mode == "password":
         password = config["gateway"]["auth"].get("password", {}).get("value", "")
         if not password:
@@ -295,6 +330,17 @@ async def handle_frame(
             return
         ensure_session(session_id)
         entry = append_message(session_id, role, content)
+        session_meta = load_session_meta(session_id)
+        session_meta.update(
+            {
+                "session_id": session_id,
+                "channel_id": params.get("channel_id", "webchat"),
+                "scope": params.get("scope", "dm"),
+                "owner": meta.get("agent", "architect"),
+                "updated_at": timestamp(),
+            }
+        )
+        persist_session_meta(session_id, session_meta)
         run_id = f"run_{int(time.time() * 1000)}"
         if not is_exec_allowed(meta, config):
             pending = {

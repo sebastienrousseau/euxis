@@ -53,6 +53,25 @@ def persist_message(session_id: str, entry: Dict[str, Any]) -> None:
         handle.write(json.dumps(entry) + "\n")
 
 
+def session_meta_path(session_id: str) -> Path:
+    return sessions_dir() / f"{session_id}.meta.json"
+
+
+def load_session_meta(session_id: str) -> Dict[str, Any]:
+    path = session_meta_path(session_id)
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def persist_session_meta(session_id: str, meta: Dict[str, Any]) -> None:
+    path = session_meta_path(session_id)
+    path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+
 def persist_run_event(run_id: str, entry: Dict[str, Any]) -> None:
     path = runs_dir() / f"{run_id}.jsonl"
     with path.open("a", encoding="utf-8") as handle:

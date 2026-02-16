@@ -7,7 +7,8 @@
     "auth": {
       "mode": "token",
       "token": {
-        "value": "replace-with-secure-random-value"
+        "value": "replace-with-secure-random-value",
+        "allow_query_param": true
       },
       "password": {
         "value": ""
