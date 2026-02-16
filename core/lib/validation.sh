@@ -205,6 +205,7 @@ validate_euxis_structure() {
         "$euxis_home/cli/bin"
         "$euxis_home/core/lib"
         "$euxis_home/agents/prompts"
+        "$euxis_home/memory/cortex"
         "$euxis_home/data"
     )
 

@@ -132,7 +132,7 @@ $RECYCLE.BIN/
 # ============================================================================
 # Runtime project data (agent outputs, memory, audits)
 data/projects/
-data/cortex/db/
+memory/cortex/db/
 data/lifecycle/
 data/perf/
 data/bus/pipes/

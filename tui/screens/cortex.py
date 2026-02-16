@@ -69,9 +69,9 @@ class CortexScreen(Screen[None]):
         output.write_status("Cortex Semantic Memory", "cyan")
         output.write_separator()
 
-        cortex_bin = Path.home() / "bin" / "euxis-cortex"
+        cortex_bin = Path.home() / "cli" / "bin" / "euxis-cortex"
         if not cortex_bin.exists():
-            cortex_bin = EUXIS_HOME / "bin" / "euxis-cortex"
+            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"
 
         if not cortex_bin.exists():
             output.write_status("Cortex binary not found", "red")
@@ -118,9 +118,9 @@ class CortexScreen(Screen[None]):
         output.write_separator()
         output.write_status(f"Recalling: {query}", "cyan")
 
-        cortex_bin = Path.home() / "bin" / "euxis-cortex"
+        cortex_bin = Path.home() / "cli" / "bin" / "euxis-cortex"
         if not cortex_bin.exists():
-            cortex_bin = EUXIS_HOME / "bin" / "euxis-cortex"
+            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"
 
         env = os.environ.copy()
         env["EUXIS_HOME"] = str(EUXIS_HOME)
