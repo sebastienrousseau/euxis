@@ -64,7 +64,7 @@ tests/       # Cross-module integration tests only
 
 ### `gateway/`
 - **Purpose**: WebSocket control plane and HTTP endpoints.
-- **Contains**: `scripts/gateway_server.py`, `scripts/gateway_utils.py`, gateway schemas, `gateway_webchat/`.
+- **Contains**: `gateway/server.py`, `gateway/utils.py`, gateway schemas, `gateway/webchat/`.
 - **Depends on**: `core/`, `security/`, `config/`.
 
 ### `cli/`
@@ -79,7 +79,7 @@ tests/       # Cross-module integration tests only
 
 ### `adapters/`
 - **Purpose**: Channel adapter implementations.
-- **Contains**: `scripts/gateway_adapters/*`.
+- **Contains**: `adapters/*`.
 - **Depends on**: `gateway/`, `core/`.
 
 ### `memory/`
@@ -106,10 +106,10 @@ tests/       # Cross-module integration tests only
 - `prompts/*` → `agents/prompts/*`
 - `registry.json`, `registry.db`, `squads.json` → `agents/`
 - `scripts/gateway_*` → `gateway/`
-- `scripts/gateway_adapters/*` → `adapters/`
-- `scripts/gateway_webchat/*` → `gateway/webchat/*`
-- `scripts/gateway_utils.py` → `gateway/utils.py`
-- `scripts/gateway_server.py` → `gateway/server.py`
+- `adapters/*` → `adapters/`
+- `gateway/webchat/*` → `gateway/webchat/*`
+- `gateway/utils.py` → `gateway/utils.py`
+- `gateway/server.py` → `gateway/server.py`
 - `tui/*` → `tui/*` (unchanged but becomes top-level module)
 - `metrics/*` → `metrics/*` (unchanged but becomes top-level module)
 
@@ -117,8 +117,8 @@ tests/       # Cross-module integration tests only
 
 ## Phase 5 — Import Update List (Representative)
 
-- `scripts/gateway_server.py` → `gateway/server.py`
-  - Update `from scripts.gateway_utils import ...` → `from gateway.utils import ...`
+- `gateway/server.py` → `gateway/server.py`
+  - Update `from gateway_utils import ...` → `from gateway.utils import ...`
 - `bin/euxis-gateway` → `cli/bin/euxis-gateway`
   - Update paths to `gateway/server.py` and new adapter locations
 - `tui/*` imports pointing at `core/lib` → `core/lib`
@@ -178,7 +178,7 @@ After each move:
 2. `euxis-test-infra`
 3. `pytest`
 4. `python -m tui --help`
-5. `python scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health`
+5. `python gateway/smoke_test.py --url http://127.0.0.1:18789/health`
 
 ---
 

@@ -23,8 +23,12 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-from gateway_adapter_registry import build_adapters
-from gateway_utils import (
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from adapters.registry import build_adapters
+from gateway.utils import (
     load_session_from_disk,
     load_session_meta,
     load_run_events,
@@ -823,7 +827,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                     STATE.voice_connections.pop(session_id, None)
             return
 
-    webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
+    webchat_dir = Path(__file__).resolve().parent / "webchat"
     if webchat_dir.exists():
         app.mount("/webchat", StaticFiles(directory=str(webchat_dir), html=True), name="webchat")
 

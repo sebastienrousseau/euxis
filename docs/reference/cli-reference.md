@@ -751,9 +751,9 @@ euxis-deploy production --confirm
 Documentation synchronization across repositories and environments.
 
 **Docs Tooling Note:**
-Gateway schemas can be validated with `scripts/gateway_protocol_test.py`.
+Gateway schemas can be validated with `gateway/protocol_test.py`.
 Optional dependencies live in `requirements-dev.txt` (`jsonschema`, `referencing`).
-Gateway health can be checked with `scripts/gateway_smoke_test.py`.
+Gateway health can be checked with `gateway/smoke_test.py`.
 
 **Examples:**
 ```bash

@@ -2,7 +2,7 @@
 """Minimal smoke test for the gateway health endpoint.
 
 Usage:
-  python3 scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health
+  python3 gateway/smoke_test.py --url http://127.0.0.1:18789/health
 """
 
 from __future__ import annotations

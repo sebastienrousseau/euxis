@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from gateway_adapters.slack_adapter import SlackAdapter, SlackAdapterConfig
-from gateway_adapters.telegram_adapter import TelegramAdapter, TelegramAdapterConfig
-from gateway_adapter_sdk import MessageHandler
+from adapters.slack_adapter import SlackAdapter, SlackAdapterConfig
+from adapters.telegram_adapter import TelegramAdapter, TelegramAdapterConfig
+from adapters.sdk import MessageHandler
 
 def build_adapters(config: Dict[str, Any], on_message: Optional[MessageHandler] = None) -> Dict[str, Any]:
     channels = config.get("gateway", {}).get("channels", {})

@@ -12,8 +12,8 @@ from urllib import error as urlerror
 from urllib import parse as urlparse
 from urllib import request as urlrequest
 
-from gateway_adapter_sdk import MessageHandler
-from gateway_utils import persist_message, timestamp
+from adapters.sdk import MessageHandler
+from gateway.utils import persist_message, timestamp
 
 LOGGER = logging.getLogger(__name__)
 
