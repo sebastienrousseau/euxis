@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Tests for prompt.sh caching and optimization
 
-source "${EUXIS_HOME}/bin/lib/common.sh"
-source "${EUXIS_HOME}/bin/lib/prompt.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/prompt.sh"
 
 # Test: _proto_fingerprint returns deterministic key
 fp1=$(_proto_fingerprint "check security authentication")
@@ -72,7 +72,7 @@ else
 fi
 
 # Test: bash-native operations (no grep -qiE forks in resolve_protocols)
-if grep -q 'grep -qiE' "${EUXIS_HOME}/bin/lib/prompt.sh" 2>/dev/null; then
+if grep -q 'grep -qiE' "${EUXIS_HOME}/core/lib/prompt.sh" 2>/dev/null; then
     assert_eq "no grep forks in prompt.sh" "false" "true"
 else
     assert_eq "no grep forks in prompt.sh" "false" "false"
@@ -87,4 +87,4 @@ else
 fi
 
 # Test: log_debug exists in common.sh
-assert_contains "log_debug function exists" "log_debug" "$(grep 'log_debug' "${EUXIS_HOME}/bin/lib/common.sh")"
+assert_contains "log_debug function exists" "log_debug" "$(grep 'log_debug' "${EUXIS_HOME}/core/lib/common.sh")"

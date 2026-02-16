@@ -254,8 +254,8 @@ class DispatchEngine:
 
         Search order:
         1. EUXIS_LOOP_PATH environment variable (if set)
-        2. ~/bin/euxis-loop (user binary location)
-        3. ${EUXIS_HOME}/bin/euxis-loop (local installation)
+        2. ~/cli/bin/euxis-loop (user binary location)
+        3. ${EUXIS_HOME}/cli/bin/euxis-loop (local installation)
 
         Raises:
             AgentError: If euxis-loop executable cannot be found

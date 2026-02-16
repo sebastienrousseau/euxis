@@ -257,7 +257,7 @@ check_health_fast() {
         return 0
     fi
 
-    local health_script="${EUXIS_HOME}/bin/euxis-health"
+    local health_script="${EUXIS_HOME}/cli/bin/euxis-health"
     if [[ -x "${health_script}" ]]; then
         if ! "${health_script}" --silent; then
             echo "[euxis] WARNING: Fleet integrity check failed. Run 'euxis-health' for details." >&2

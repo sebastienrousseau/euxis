@@ -32,11 +32,11 @@ jobs:
           # Define core layer files (fundamental system components)
           # These provide basic functionality and should not import higher-level concerns
           core_files=(
-            "bin/lib/session.sh"
-            "bin/lib/template.sh"
-            "bin/euxis-audit-run"
-            "bin/euxis-bench"
-            "bin/euxis-codex"
+            "core/lib/session.sh"
+            "core/lib/template.sh"
+            "cli/bin/euxis-audit-run"
+            "cli/bin/euxis-bench"
+            "cli/bin/euxis-codex"
           )
 
           # Define forbidden UI layer patterns for core layer
@@ -174,14 +174,14 @@ jobs:
           # Map of allowed dependencies for each library
           # Key: library file, Value: space-separated list of allowed dependencies
           declare -A allowed_deps
-          allowed_deps["bin/lib/common.sh"]=""  # Foundation - no dependencies
-          allowed_deps["bin/lib/session.sh"]="" # Core - no dependencies
-          allowed_deps["bin/lib/template.sh"]="" # Core - no dependencies
-          allowed_deps["bin/lib/skill-detector.sh"]="" # Core - no dependencies
-          allowed_deps["bin/lib/agents.sh"]="" # Core - no dependencies
-          allowed_deps["bin/lib/memory.sh"]="" # Core - no dependencies
-          allowed_deps["bin/lib/providers.sh"]="common.sh" # Network layer - can use foundation
-          allowed_deps["bin/lib/prompt.sh"]="agents.sh memory.sh template.sh" # High-level coordination
+          allowed_deps["core/lib/common.sh"]=""  # Foundation - no dependencies
+          allowed_deps["core/lib/session.sh"]="" # Core - no dependencies
+          allowed_deps["core/lib/template.sh"]="" # Core - no dependencies
+          allowed_deps["core/lib/skill-detector.sh"]="" # Core - no dependencies
+          allowed_deps["core/lib/agents.sh"]="" # Core - no dependencies
+          allowed_deps["core/lib/memory.sh"]="" # Core - no dependencies
+          allowed_deps["core/lib/providers.sh"]="common.sh" # Network layer - can use foundation
+          allowed_deps["core/lib/prompt.sh"]="agents.sh memory.sh template.sh" # High-level coordination
 
           violation_count=0
 

@@ -2,8 +2,8 @@
 # Tests for specialist agents: crypto, payments, audio, rust
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-source "${EUXIS_HOME}/bin/lib/agents.sh"
-source "${EUXIS_HOME}/bin/lib/providers.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/providers.sh"
 
 # Agent prompt files exist
 assert_file_exists "crypto-cryptography-auditor prompt" "${EUXIS_HOME}/agents/prompts/fleet/crypto-cryptography-auditor.txt"

@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire Euxis brain and scripts
 COPY . $EUXIS_HOME
-COPY scripts/* /usr/local/bin/
+COPY cli/bin/* /usr/local/bin/
 
 # Ensure everything is executable
 RUN chmod +x /usr/local/bin/euxis*

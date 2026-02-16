@@ -35,7 +35,7 @@ COPY . /app/.euxis/
 
 # Set proper ownership and permissions
 RUN chown -R euxis:euxis /app \
-    && chmod -R 755 /app/.euxis/bin/ \
+    && chmod -R 755 /app/.euxis/cli/bin/ \
     && find /app/.euxis/bin -name "euxis*" -exec chmod +x {} \;
 
 # Switch to non-root user
@@ -43,10 +43,10 @@ USER euxis
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD timeout 5 bash -c '/app/.euxis/bin/euxis --help >/dev/null 2>&1 || exit 1'
+    CMD timeout 5 bash -c '/app/.euxis/cli/bin/euxis --help >/dev/null 2>&1 || exit 1'
 
 # Default command
-CMD ["/app/.euxis/bin/euxis-daemon"]
+CMD ["/app/.euxis/cli/bin/euxis-daemon"]
 
 # Stage 3: Multi-platform variants
 

@@ -30,7 +30,7 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-BIN_DIR="$EUXIS_HOME/bin"
+BIN_DIR="$EUXIS_HOME/cli/bin"
 
 echo "=================================================="
 echo "  EUXIS PERFORMANCE BENCHMARK"

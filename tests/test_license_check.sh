@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-LICENSE_CHECKER="${PROJECT_ROOT}/bin/euxis-license-check"
+LICENSE_CHECKER="${PROJECT_ROOT}/cli/bin/euxis-license-check"
 
 # Test data directory
 TEST_DATA_DIR="${SCRIPT_DIR}/data/license_check"

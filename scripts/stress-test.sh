@@ -5,7 +5,7 @@
 set -euo pipefail
 
 EUXIS_HOME="${HOME}/.euxis"
-BIN_DIR="${EUXIS_HOME}/bin"
+BIN_DIR="${EUXIS_HOME}/cli/bin"
 RESULTS_DIR="/tmp/euxis-stress-$(date +%s)"
 mkdir -p "$RESULTS_DIR"
 

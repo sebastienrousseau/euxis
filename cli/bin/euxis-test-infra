@@ -30,7 +30,7 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-EUXIS_SCRIPT="$EUXIS_HOME/bin/euxis.sh"
+EUXIS_SCRIPT="$EUXIS_HOME/cli/bin/euxis.sh"
 PASS=0
 FAIL=0
 

@@ -11,7 +11,7 @@ fi
 
 
 EUXIS_DIR="$HOME/.euxis"
-HOOKS_DIR="$EUXIS_DIR/bin/hooks"
+HOOKS_DIR="$EUXIS_DIR/cli/bin/hooks"
 
 SIGNATURE_FOOTER='---
 

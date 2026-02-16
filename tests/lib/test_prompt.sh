@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Tests for lib/prompt.sh
 
-source "${EUXIS_HOME}/bin/lib/common.sh"
-source "${EUXIS_HOME}/bin/lib/prompt.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/prompt.sh"
 
 # Test resolve_protocols: mandatory protocols always loaded
 result=$(resolve_protocols "simple task with no keywords")

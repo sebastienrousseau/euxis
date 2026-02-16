@@ -209,8 +209,8 @@ jobs:
 
       - name: Test core scripts executability
         run: |
-          chmod +x bin/euxis*
-          ls -la bin/ | head -5
+          chmod +x cli/bin/euxis*
+          ls -la cli/bin/ | head -5
           echo "Testing script permissions..."
 
       - name: Verify core Euxis functionality
@@ -218,7 +218,7 @@ jobs:
           export EUXIS_HOME="$PWD"
           export PATH="$PWD/bin:$PATH"
           echo "Testing basic euxis command..."
-          bash -c 'bin/euxis --help || echo "Help command completed with status: $?"'
+          bash -c 'cli/bin/euxis --help || echo "Help command completed with status: $?"'
 
       - name: Test agent discovery
         run: |

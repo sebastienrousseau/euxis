@@ -2,7 +2,7 @@
 # Tests for memory.sh performance optimizations
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-source "${EUXIS_HOME}/bin/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
 
 # ===== _extract_keywords (pure bash) =====
 
@@ -40,14 +40,14 @@ assert_contains "case insensitive" "authentication" "${kw5}"
 # ===== No subprocess forks in _extract_keywords =====
 # The old pattern was: echo | tr '[:upper:]' '[:lower:]' | grep -oE '[a-z]{5,}' | sort -u | head
 # Verify the old pattern is gone (ignore comments)
-if grep -v '^[[:space:]]*#' "${EUXIS_HOME}/bin/lib/memory.sh" | grep -q "grep -oE"; then
+if grep -v '^[[:space:]]*#' "${EUXIS_HOME}/core/lib/memory.sh" | grep -q "grep -oE"; then
     assert_eq "_extract_keywords has no forks" "no-forks" "has-forks"
 else
     assert_eq "_extract_keywords has no forks" "0" "0"
 fi
 
 # ===== No basename/dirname subprocess in cross-agent =====
-if grep -q '$(basename' "${EUXIS_HOME}/bin/lib/memory.sh" || grep -q '$(dirname' "${EUXIS_HOME}/bin/lib/memory.sh"; then
+if grep -q '$(basename' "${EUXIS_HOME}/core/lib/memory.sh" || grep -q '$(dirname' "${EUXIS_HOME}/core/lib/memory.sh"; then
     assert_eq "cross-agent uses pure bash paths" "pure-bash" "has-subprocess"
 else
     assert_eq "cross-agent uses pure bash paths" "0" "0"

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 EUXIS_HOME="${HOME}/.euxis"
-BIN_DIR="${EUXIS_HOME}/bin"
+BIN_DIR="${EUXIS_HOME}/cli/bin"
 RESULTS_DIR="/tmp/euxis-perf-$(date +%s)"
 mkdir -p "$RESULTS_DIR"
 
@@ -311,7 +311,7 @@ cat > "$RESULTS_DIR/quick_benchmark.sh" << 'EOF'
 echo "Quick Euxis Performance Check..."
 
 start=$(date +%s%N 2>/dev/null || perl -MTime::HiRes=time -e 'printf "%.0f", time()*1e9')
-$HOME/.euxis/bin/euxis-health --silent >/dev/null 2>&1
+$HOME/.euxis/cli/bin/euxis-health --silent >/dev/null 2>&1
 end=$(date +%s%N 2>/dev/null || perl -MTime::HiRes=time -e 'printf "%.0f", time()*1e9')
 health_ms=$(( (end - start) / 1000000 ))
 

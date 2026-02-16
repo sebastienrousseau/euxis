@@ -216,9 +216,9 @@ def cmd_relate(memory_query, entity, relation):
     memory_node = f"memory-{memory_id[:8]}"
 
     # Create memory node in graph
-    euxis_graph = os.path.expanduser("~/.euxis/bin/euxis-graph")
+    euxis_graph = os.path.expanduser("~/.euxis/cli/bin/euxis-graph")
     if not os.path.isfile(euxis_graph):
-        print("Error: euxis-graph not found. Graph integration requires bin/euxis-graph.")
+        print("Error: euxis-graph not found. Graph integration requires cli/bin/euxis-graph.")
         sys.exit(1)
 
     # Add memory as graph node
@@ -266,7 +266,7 @@ def cmd_hybrid_recall(query, n_results=3, memory_type=None):
 
     # Step 2: Graph neighborhood expansion
     graph_results = []
-    euxis_graph = os.path.expanduser("~/.euxis/bin/euxis-graph")
+    euxis_graph = os.path.expanduser("~/.euxis/cli/bin/euxis-graph")
     if os.path.isfile(euxis_graph):
         # Search graph for entities matching the query
         result = subprocess.run(

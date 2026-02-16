@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/skill-detector.sh
 
-source "${EUXIS_HOME}/bin/lib/skill-detector.sh"
+source "${EUXIS_HOME}/core/lib/skill-detector.sh"
 
 # Setup: create temporary project directories
 TEST_TMPDIR=$(mktemp -d)

@@ -1,4 +1,4 @@
-"""Comprehensive unit tests for bin/check_licenses.py.
+"""Comprehensive unit tests for cli/bin/check_licenses.py.
 
 Tests cover: COPYLEFT_LICENSES, LICENSE_ALIASES, get_package_license,
 classify_license, parse_requirements_file, check_licenses.

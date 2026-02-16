@@ -209,7 +209,7 @@ verify_core_scripts() {
     fi
 
     # Test main euxis script
-    if [[ -x "$EUXIS_ROOT/bin/euxis" ]]; then
+    if [[ -x "$EUXIS_ROOT/cli/bin/euxis" ]]; then
         log_success "Main euxis script: Executable"
     else
         log_error "Main euxis script: Not executable"
@@ -217,7 +217,7 @@ verify_core_scripts() {
     fi
 
     # Test basic script execution (with timeout)
-    if timeout 10 "$EUXIS_ROOT/bin/euxis" --help >/dev/null 2>&1; then
+    if timeout 10 "$EUXIS_ROOT/cli/bin/euxis" --help >/dev/null 2>&1; then
         log_success "Euxis help command: Working"
     else
         log_warning "Euxis help command: Timed out or failed (this may be normal)"

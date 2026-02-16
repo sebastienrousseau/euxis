@@ -222,9 +222,9 @@ run_integration_tests() {
     local integration_failures=0
 
     # Test main euxis script
-    if [[ -x "${EUXIS_ROOT}/bin/euxis" ]]; then
+    if [[ -x "${EUXIS_ROOT}/cli/bin/euxis" ]]; then
         log_info "Testing euxis main script..."
-        if ! "${EUXIS_ROOT}/bin/euxis" --version &>/dev/null; then
+        if ! "${EUXIS_ROOT}/cli/bin/euxis" --version &>/dev/null; then
             log_error "euxis script version check failed"
             ((integration_failures++))
         fi
@@ -239,7 +239,7 @@ run_integration_tests() {
     )
 
     for script in "${key_scripts[@]}"; do
-        local script_path="${EUXIS_ROOT}/bin/${script}"
+        local script_path="${EUXIS_ROOT}/cli/bin/${script}"
         if [[ ! -x "${script_path}" ]]; then
             log_error "Script not executable: ${script}"
             ((integration_failures++))
@@ -327,7 +327,7 @@ main() {
             ((total_tests++))
 
             local lib_name="$(basename "${test_file}" .bats)"
-            local lib_file="${EUXIS_ROOT}/bin/lib/${lib_name}.sh"
+            local lib_file="${EUXIS_ROOT}/core/lib/${lib_name}.sh"
 
             if [[ ! -f "${lib_file}" ]]; then
                 log_error "Library file not found: ${lib_file}"

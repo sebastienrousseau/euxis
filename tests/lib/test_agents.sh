@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/agents.sh
 
-source "${EUXIS_HOME}/bin/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
 
 # Test resolve_agent_path: known core agent
 result=$(resolve_agent_path "architect")

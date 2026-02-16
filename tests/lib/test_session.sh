@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/session.sh
 
-source "${EUXIS_HOME}/bin/lib/session.sh"
+source "${EUXIS_HOME}/core/lib/session.sh"
 
 # Test get_project_name: defaults to basename of PWD
 unset EUXIS_PROJECT 2>/dev/null || true

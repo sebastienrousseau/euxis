@@ -33,4 +33,4 @@ pytest tests/test_tui.py
 ```
 
 ## API / Exports
-ETX is launched via `bin/euxis-tui` and uses `tui/app.py` as the entrypoint.
+ETX is launched via `cli/bin/euxis-tui` and uses `tui/app.py` as the entrypoint.

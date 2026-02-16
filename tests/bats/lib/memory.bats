@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/memory.sh
+# Test suite for core/lib/memory.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -35,8 +35,8 @@ EOF
     unset _EUXIS_LIB_COMMON
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/bin/lib/common.sh"
-    source "${HOME}/.euxis/bin/lib/memory.sh"
+    source "${HOME}/.euxis/core/lib/common.sh"
+    source "${HOME}/.euxis/core/lib/memory.sh"
 }
 
 teardown() {

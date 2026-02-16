@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/template.sh
+# Test suite for core/lib/template.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -16,7 +16,7 @@ setup() {
     unset _EUXIS_LIB_TEMPLATE
 
     # Source the library from real installation
-    source "${HOME}/.euxis/bin/lib/template.sh"
+    source "${HOME}/.euxis/core/lib/template.sh"
 }
 
 teardown() {

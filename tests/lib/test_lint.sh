@@ -4,7 +4,7 @@
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # Lint passes cleanly
-lint_output=$(bash "${EUXIS_HOME}/bin/euxis-lint" 2>&1)
+lint_output=$(bash "${EUXIS_HOME}/cli/bin/euxis-lint" 2>&1)
 lint_exit=$?
 assert_eq "lint exits 0" "0" "${lint_exit}"
 assert_contains "lint passes" "LINT PASSED" "${lint_output}"
@@ -27,7 +27,7 @@ assert_contains "11 patterns" "11 patterns" "${lint_output}"
 assert_contains "54 detection rules" "54 total detection rules" "${lint_output}"
 
 # Lint script is executable
-if [[ -x "${EUXIS_HOME}/bin/euxis-lint" ]]; then
+if [[ -x "${EUXIS_HOME}/cli/bin/euxis-lint" ]]; then
     assert_eq "lint is executable" "0" "0"
 else
     assert_eq "lint is executable" "executable" "not-executable"

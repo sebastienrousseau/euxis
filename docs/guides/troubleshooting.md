@@ -234,7 +234,7 @@ bash: euxis: command not found
 echo $PATH | tr ':' '\n' | grep -E "(home|~).*bin"
 
 # Check if euxis symlink exists
-ls -la ~/bin/euxis
+ls -la ~/cli/bin/euxis
 ```
 
 **Solution:**
@@ -266,7 +266,7 @@ ls -la ~/bin/euxis
 3. **Verify installation:**
    ```bash
    which euxis
-   # Expected: /home/username/bin/euxis
+   # Expected: /home/username/cli/bin/euxis
    ```
 
 ### Missing Dependencies
@@ -306,7 +306,7 @@ sudo apt update && sudo apt install python3.12 python3.12-venv
 python3 -m venv ~/.euxis/.venv
 
 # Install dependencies
-~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
+~/.euxis/.venv/cli/bin/pip install -r ~/.euxis/requirements.txt
 ```
 
 **Optional but recommended tools:**
@@ -329,22 +329,22 @@ brew install coreutils  # macOS (provides gtimeout)
 **Symptoms:**
 
 ```
-Permission denied: ~/.euxis/bin/euxis
+Permission denied: ~/.euxis/cli/bin/euxis
 ```
 
 **Solution:**
 
 ```bash
 # Fix executable permissions on all scripts
-chmod +x ~/.euxis/bin/*
+chmod +x ~/.euxis/cli/bin/*
 
 # Fix directory permissions
 chmod 755 ~/.euxis
-chmod 755 ~/.euxis/bin
+chmod 755 ~/.euxis/cli/bin
 chmod 755 ~/.euxis/core/lib
 
 # Verify
-ls -la ~/.euxis/bin/euxis
+ls -la ~/.euxis/cli/bin/euxis
 # Should show: -rwxr-xr-x
 ```
 
@@ -898,17 +898,17 @@ ModuleNotFoundError: No module named 'textual'
 1. **Create/recreate venv:**
    ```bash
    python3 -m venv ~/.euxis/.venv
-   ~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
+   ~/.euxis/.venv/cli/bin/pip install -r ~/.euxis/requirements.txt
    ```
 
 2. **Install Textual manually:**
    ```bash
-   ~/.euxis/.venv/bin/pip install textual textual-dev
+   ~/.euxis/.venv/cli/bin/pip install textual textual-dev
    ```
 
 3. **Verify installation:**
    ```bash
-   ~/.euxis/.venv/bin/python -c "import textual; print(textual.__version__)"
+   ~/.euxis/.venv/cli/bin/python -c "import textual; print(textual.__version__)"
    ```
 
 ### Display Rendering Issues

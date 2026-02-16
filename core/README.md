@@ -21,7 +21,7 @@ source "$EUXIS_HOME/core/lib/common.sh"
 ## Development
 ```bash
 # Lint shell libraries
-bin/euxis-shell-lint
+cli/bin/euxis-shell-lint
 ```
 
 ## Testing

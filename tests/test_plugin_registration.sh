@@ -70,7 +70,7 @@ setup() {
     touch "${TEST_TEMP_DIR}/test_output.log"
 
     # Source the agents library with mocked logging
-    source "${PROJECT_ROOT}/bin/lib/agents.sh"
+    source "${PROJECT_ROOT}/core/lib/agents.sh"
 }
 
 # Cleanup test environment

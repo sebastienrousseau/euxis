@@ -35,7 +35,7 @@ Missing standardized function documentation with:
 
 ## Audit Details
 
-### Primary Scripts (bin/euxis-*)
+### Primary Scripts (cli/bin/euxis-*)
 
 | Script | Usage Header | Help Flag | Exit Codes | Priority |
 |--------|-------------|-----------|------------|----------|
@@ -45,7 +45,7 @@ Missing standardized function documentation with:
 | euxis-certify | Missing | Missing | Missing | P0 |
 | [Continue for all 25+ scripts] | | | | |
 
-### Library Files (bin/lib/*.sh)
+### Library Files (core/lib/*.sh)
 
 | Library | Function Count | Documented | Complete | Priority |
 |---------|---------------|-----------|----------|----------|

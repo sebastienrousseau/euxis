@@ -92,14 +92,14 @@ not ok 37 validation handles concurrent execution
 #   `wait $pid1 && wait $pid2' failed
 # Running minimal validation...
 # Running minimal validation...
-#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/bin/lib
-#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/bin/lib
+#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
+#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
 #   ✅ All system dependencies available
 #
 #   ✅ All system dependencies available
 # Validation errors (1):
-#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/bin/lib
+#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
 #
 # Validation errors (1):
-#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/bin/lib
+#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
 ok 38 validation handles signal interruption # skip Signal handling test requires complex setup

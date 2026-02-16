@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/providers.sh
 
-source "${EUXIS_HOME}/bin/lib/providers.sh"
+source "${EUXIS_HOME}/core/lib/providers.sh"
 
 # Test resolve_tiered_provider: S-Tier agents → claude
 assert_eq "architect → claude" "claude" "$(resolve_tiered_provider architect)"
