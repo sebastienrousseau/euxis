@@ -27,6 +27,20 @@ Reference for the Gateway configuration file.
         "debugger",
         "reviewer"
       ]
+    },
+    "channels": {
+      "slack": {
+        "enabled": false,
+        "mode": "socket",
+        "token": "",
+        "app_token": ""
+      },
+      "telegram": {
+        "enabled": false,
+        "mode": "webhook",
+        "token": "",
+        "webhook_url": ""
+      }
     }
   }
 }
@@ -68,6 +82,17 @@ Reference for the Gateway configuration file.
 - `ask` (string): `off`, `on-miss`, `always`.
 - `ask_fallback` (string): `deny`, `allowlist`, or `full`.
 - `allowlist` (array): list of agent IDs allowed to execute.
+
+### `gateway.channels`
+
+- `slack.enabled` (bool): enable Slack adapter.
+- `slack.mode` (string): `socket` or `http`.
+- `slack.token` (string): bot token.
+- `slack.app_token` (string): socket mode app token.
+- `telegram.enabled` (bool): enable Telegram adapter.
+- `telegram.mode` (string): `webhook` or `poll`.
+- `telegram.token` (string): bot token.
+- `telegram.webhook_url` (string): webhook endpoint.
 
 ## Notes
 

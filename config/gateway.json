@@ -22,6 +22,20 @@
         "debugger",
         "reviewer"
       ]
+    },
+    "channels": {
+      "slack": {
+        "enabled": false,
+        "mode": "socket",
+        "token": "",
+        "app_token": ""
+      },
+      "telegram": {
+        "enabled": false,
+        "mode": "webhook",
+        "token": "",
+        "webhook_url": ""
+      }
     }
   }
 }

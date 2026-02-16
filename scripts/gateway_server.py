@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
+from gateway_adapter_registry import build_adapters
 from gateway_utils import (
     load_session_from_disk,
     persist_message,
@@ -49,6 +50,7 @@ class GatewayState:
         self.last_event_ts = ""
         self.running: Dict[str, asyncio.Task] = {}
         self.pending_approvals: Dict[str, Dict[str, Any]] = {}
+        self.adapters: Dict[str, Any] = {}
 
 
 STATE = GatewayState()
@@ -94,6 +96,7 @@ def resolve_config(args: argparse.Namespace) -> Dict[str, Any]:
     if args.auth_mode:
         config["gateway"]["auth"]["mode"] = args.auth_mode
 
+    config["gateway"].setdefault("channels", {})
     return config
 
 
@@ -103,6 +106,7 @@ def os_environ() -> Dict[str, str]:
 
 def build_app(config: Dict[str, Any]) -> FastAPI:
     app = FastAPI()
+    STATE.adapters = build_adapters(config)
 
     health_path = config["gateway"]["health_path"]
     health_enabled = config["gateway"]["health_enabled"]
@@ -124,6 +128,25 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     @app.get("/approvals")
     async def approvals() -> JSONResponse:
         return JSONResponse({"pending": list(STATE.pending_approvals.values())})
+
+    @app.get("/sessions")
+    async def sessions() -> JSONResponse:
+        sessions = []
+        for session_id, messages in STATE.sessions.items():
+            sessions.append(
+                {
+                    "session_id": session_id,
+                    "message_count": len(messages),
+                }
+            )
+        return JSONResponse({"sessions": sessions})
+
+    @app.get("/sessions/{session_id}")
+    async def session_detail(session_id: str) -> JSONResponse:
+        ensure_session(session_id)
+        if not STATE.sessions[session_id]:
+            STATE.sessions[session_id] = load_session_from_disk(session_id)
+        return JSONResponse({"session_id": session_id, "messages": STATE.sessions[session_id]})
 
     @app.post("/approvals/{run_id}/approve")
     async def approve(run_id: str) -> JSONResponse:
@@ -513,8 +536,19 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_sessions(args: argparse.Namespace) -> int:
-    print("Sessions not implemented in skeleton")
-    return 0
+    config = resolve_config(args)
+    bind = config["gateway"]["bind"]
+    port = config["gateway"]["port"]
+    url = f"http://{bind}:{port}/sessions"
+    try:
+        import httpx
+
+        resp = httpx.get(url, timeout=2.0)
+        print(resp.text)
+        return 0 if resp.status_code == 200 else 1
+    except Exception:
+        print("Gateway not responding")
+        return 1
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -211,6 +211,20 @@ Start the gateway and open:
 http://127.0.0.1:18789/webchat/
 ```
 
+## Session APIs
+
+List sessions:
+
+```
+http://127.0.0.1:18789/sessions
+```
+
+Fetch a session:
+
+```
+http://127.0.0.1:18789/sessions/<session_id>
+```
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash
