@@ -9,6 +9,20 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
+def _prune_dir(path: Path, older_than: float) -> int:
+    removed = 0
+    if not path.exists():
+        return removed
+    for item in path.iterdir():
+        try:
+            if item.is_file() and item.stat().st_mtime < older_than:
+                item.unlink()
+                removed += 1
+        except Exception:
+            continue
+    return removed
+
+
 def timestamp() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
@@ -189,6 +203,13 @@ def resolve_voice_blob(session_id: str, suffix: str = "raw") -> Optional[Path]:
     if path.exists():
         return path
     return None
+
+
+def cleanup_voice(retention_hours: int) -> int:
+    if retention_hours <= 0:
+        return 0
+    cutoff = time.time() - (retention_hours * 3600)
+    return _prune_dir(voice_dir(), cutoff)
 
 
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:

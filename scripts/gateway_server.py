@@ -46,6 +46,7 @@ from gateway_utils import (
     persist_voice_text,
     append_voice_chunk,
     resolve_voice_blob,
+    cleanup_voice,
     runs_dir,
     make_session_id,
     timestamp,
@@ -222,9 +223,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                 print(f"Adapter {name} disconnect failed: {exc}", file=sys.stderr)
 
     @app.get(health_path)  # type: ignore[misc]
-    async def health() -> JSONResponse:
+    async def health(request: Request) -> JSONResponse:
         if not health_enabled:
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         uptime_ms = int((time.time() - STATE.started_at) * 1000)
         return JSONResponse(
             {
@@ -236,15 +240,24 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         )
 
     @app.get("/approvals")
-    async def approvals() -> JSONResponse:
+    async def approvals(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         return JSONResponse({"pending": list(STATE.pending_approvals.values())})
 
     @app.get("/automation/cron")
-    async def cron_list() -> JSONResponse:
+    async def cron_list(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         return JSONResponse({"jobs": STATE.cron_jobs})
 
     @app.post("/automation/cron")
-    async def cron_create(payload: Dict[str, Any]) -> JSONResponse:
+    async def cron_create(payload: Dict[str, Any], request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         job_id = payload.get("job_id") or f"cron_{int(time.time() * 1000)}"
         every = payload.get("every_seconds")
         session_id = payload.get("session_id", "")
@@ -265,7 +278,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok", "job": job})
 
     @app.delete("/automation/cron/{job_id}")
-    async def cron_delete(job_id: str) -> JSONResponse:
+    async def cron_delete(job_id: str, request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         before = len(STATE.cron_jobs)
         STATE.cron_jobs = [job for job in STATE.cron_jobs if job.get("job_id") != job_id]
         persist_cron_jobs(STATE.cron_jobs)
@@ -274,11 +290,17 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "deleted"})
 
     @app.get("/webhooks")
-    async def webhooks_list() -> JSONResponse:
+    async def webhooks_list(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         return JSONResponse({"webhooks": STATE.webhooks})
 
     @app.post("/webhooks")
-    async def webhooks_set(payload: Dict[str, Any]) -> JSONResponse:
+    async def webhooks_set(payload: Dict[str, Any], request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         hooks = payload.get("webhooks", [])
         if not isinstance(hooks, list):
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -311,15 +333,23 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.post(telegram_webhook_path)
-    async def telegram_webhook(payload: Dict[str, Any]) -> JSONResponse:
+    async def telegram_webhook(payload: Dict[str, Any], request: Request) -> JSONResponse:
         adapter = STATE.adapters.get("telegram")
         if not adapter:
             return JSONResponse({"status": "disabled"}, status_code=404)
+        secret = telegram_cfg.get("secret_token", "")
+        if secret:
+            header = request.headers.get("x-telegram-bot-api-secret-token", "")
+            if header != secret:
+                return JSONResponse({"status": "unauthorized"}, status_code=401)
         adapter.receive(payload)
         return JSONResponse({"status": "ok"})
 
     @app.get("/sessions")
-    async def sessions() -> JSONResponse:
+    async def sessions(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         sessions = []
         for session_id, messages in STATE.sessions.items():
             meta = load_session_meta(session_id)
@@ -333,7 +363,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"sessions": sessions})
 
     @app.get("/sessions/{session_id}")
-    async def session_detail(session_id: str) -> JSONResponse:
+    async def session_detail(session_id: str, request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         ensure_session(session_id)
         if not STATE.sessions[session_id]:
             STATE.sessions[session_id] = load_session_from_disk(session_id)
@@ -341,15 +374,21 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"session_id": session_id, "meta": meta, "messages": STATE.sessions[session_id]})
 
     @app.get("/canvas/{session_id}")
-    async def canvas_get(session_id: str) -> JSONResponse:
+    async def canvas_get(session_id: str, request: Request) -> JSONResponse:
         if not config["gateway"].get("canvas", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         return JSONResponse({"session_id": session_id, "state": load_canvas_state(session_id)})
 
     @app.post("/canvas/{session_id}")
-    async def canvas_set(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+    async def canvas_set(session_id: str, payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("canvas", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         state = payload.get("state", {})
         if not isinstance(state, dict):
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -357,9 +396,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.post("/canvas/{session_id}/validate")
-    async def canvas_validate(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+    async def canvas_validate(session_id: str, payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("canvas", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         state = payload.get("state", {})
         if not isinstance(state, dict):
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -367,9 +409,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok" if not errors else "invalid", "errors": errors})
 
     @app.post("/voice/wake")
-    async def voice_wake(payload: Dict[str, Any]) -> JSONResponse:
+    async def voice_wake(payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         session_id = payload.get("session_id", "")
         content = payload.get("content", "")
         meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
@@ -387,9 +432,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.post("/voice/talk")
-    async def voice_talk(payload: Dict[str, Any]) -> JSONResponse:
+    async def voice_talk(payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         session_id = payload.get("session_id", "")
         content = payload.get("content", "")
         meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
@@ -407,9 +455,13 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.post("/voice/upload")
-    async def voice_upload(session_id: str, file: UploadFile = File(...)) -> JSONResponse:
+    async def voice_upload(session_id: str, file: UploadFile = File(...), request: Request = None) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        if request is not None:
+            allowed, reason = is_http_authorized(request, config)
+            if not allowed:
+                return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         if not session_id:
             return JSONResponse({"status": "invalid"}, status_code=400)
         blob = await file.read()
@@ -418,9 +470,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok", "path": str(path)})
 
     @app.post("/voice/tts")
-    async def voice_tts(payload: Dict[str, Any]) -> JSONResponse:
+    async def voice_tts(payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         session_id = payload.get("session_id", "")
         text = payload.get("content", "")
         if not session_id or not text:
@@ -432,9 +487,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.post("/voice/stt")
-    async def voice_stt(payload: Dict[str, Any]) -> JSONResponse:
+    async def voice_stt(payload: Dict[str, Any], request: Request) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
             return JSONResponse({"status": "disabled"}, status_code=404)
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         session_id = payload.get("session_id", "")
         audio_path = payload.get("audio_path", "")
         if not session_id:
@@ -459,7 +517,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok", "content": transcript})
 
     @app.post("/sessions/{session_id}/broadcast")
-    async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+    async def session_broadcast(session_id: str, payload: Dict[str, Any], request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         message = payload.get("message", "")
         if not message:
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -472,7 +533,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok"})
 
     @app.get("/sessions/export")
-    async def sessions_export() -> JSONResponse:
+    async def sessions_export(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         data: Dict[str, Any] = {}
         for session_id in STATE.sessions.keys():
             if not STATE.sessions[session_id]:
@@ -481,7 +545,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"sessions": data})
 
     @app.post("/sessions/import")
-    async def sessions_import(payload: Dict[str, Any]) -> JSONResponse:
+    async def sessions_import(payload: Dict[str, Any], request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         sessions = payload.get("sessions", {})
         if not isinstance(sessions, dict):
             return JSONResponse({"status": "invalid"}, status_code=400)
@@ -498,16 +565,25 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "ok", "imported": count})
 
     @app.get("/runs")
-    async def runs() -> JSONResponse:
+    async def runs(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         runs = [p.stem for p in runs_dir().glob("*.jsonl")]
         return JSONResponse({"runs": runs})
 
     @app.get("/runs/{run_id}")
-    async def run_detail(run_id: str) -> JSONResponse:
+    async def run_detail(run_id: str, request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         return JSONResponse({"run_id": run_id, "events": load_run_events(run_id)})
 
     @app.post("/approvals/{run_id}/approve")
-    async def approve(run_id: str) -> JSONResponse:
+    async def approve(run_id: str, request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         pending = STATE.pending_approvals.pop(run_id, None)
         if not pending:
             return JSONResponse({"status": "not_found"}, status_code=404)
@@ -539,7 +615,10 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         return JSONResponse({"status": "approved"})
 
     @app.post("/approvals/{run_id}/reject")
-    async def reject(run_id: str) -> JSONResponse:
+    async def reject(run_id: str, request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
         pending = STATE.pending_approvals.pop(run_id, None)
         if not pending:
             return JSONResponse({"status": "not_found"}, status_code=404)
@@ -779,6 +858,40 @@ def is_authorized(ws: WebSocket, config: Dict[str, Any]) -> Tuple[bool, Optional
         except Exception:
             return False, "invalid_basic"
         # Expect "username:password" format; only password is checked in v0.1
+        if ":" not in decoded:
+            return False, "invalid_basic"
+        _user, pwd = decoded.split(":", 1)
+        return (pwd == password), None
+    return True, None
+
+
+def is_http_authorized(request: Request, config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    mode = config["gateway"]["auth"].get("mode", "token")
+    if mode == "token":
+        token = config["gateway"]["auth"].get("token", {}).get("value", "")
+        if not token:
+            return True, None
+        header = request.headers.get("authorization") or ""
+        if header.strip() == f"Bearer {token}":
+            return True, None
+        allow_query = config["gateway"]["auth"].get("token", {}).get("allow_query_param", False)
+        if allow_query:
+            query_token = request.query_params.get("token", "")
+            return (query_token == token), None
+        return False, "invalid_token"
+    if mode == "password":
+        password = config["gateway"]["auth"].get("password", {}).get("value", "")
+        if not password:
+            return True, None
+        header = request.headers.get("authorization") or ""
+        if not header.lower().startswith("basic "):
+            return False, "missing_basic"
+        try:
+            import base64
+            encoded = header.split(" ", 1)[1].strip()
+            decoded = base64.b64decode(encoded).decode("utf-8")
+        except Exception:
+            return False, "invalid_basic"
         if ":" not in decoded:
             return False, "invalid_basic"
         _user, pwd = decoded.split(":", 1)
@@ -1047,6 +1160,7 @@ async def send_ticks(ws: WebSocket, seq_state: Dict[str, int]) -> None:
 
 async def cron_loop(config: Dict[str, Any]) -> None:
     try:
+        last_cleanup = 0.0
         while True:
             now = time.time()
             changed = False
@@ -1067,6 +1181,10 @@ async def cron_loop(config: Dict[str, Any]) -> None:
                 asyncio.create_task(process_inbound(session_id, content, meta, config))
             if changed:
                 persist_cron_jobs(STATE.cron_jobs)
+            if now - last_cleanup > 3600:
+                retention = int(config["gateway"].get("voice", {}).get("retention_hours", 24))
+                cleanup_voice(retention)
+                last_cleanup = now
             await asyncio.sleep(1)
     except asyncio.CancelledError:
         return
@@ -1136,11 +1254,14 @@ async def notify_webhooks(payload: Dict[str, Any]) -> None:
                 method="POST",
             )
             try:
-                await asyncio.to_thread(urlrequest.urlopen, req, 5)
+                def _post() -> None:
+                    with urlrequest.urlopen(req, timeout=5) as resp:
+                        resp.read()
+                await asyncio.to_thread(_post)
                 break
-        except urlerror.URLError:
-            await asyncio.sleep(0.5 * (attempt + 1))
-            continue
+            except urlerror.URLError:
+                await asyncio.sleep(0.5 * (attempt + 1))
+                continue
 
 
 async def post_json(url: str, payload: Dict[str, Any]) -> None:
@@ -1152,7 +1273,10 @@ async def post_json(url: str, payload: Dict[str, Any]) -> None:
         method="POST",
     )
     try:
-        await asyncio.to_thread(urlrequest.urlopen, req, 10)
+        def _post() -> None:
+            with urlrequest.urlopen(req, timeout=10) as resp:
+                resp.read()
+        await asyncio.to_thread(_post)
     except urlerror.URLError:
         return
 
@@ -1185,6 +1309,11 @@ async def run_voice_command(command: str, vars_map: Dict[str, str]) -> str:
     args = shlex.split(rendered)
     if not args:
         return ""
+    allowlist = STATE.config.get("gateway", {}).get("voice", {}).get("command_allowlist", [])
+    if allowlist:
+        base = Path(args[0]).name
+        if base not in allowlist:
+            return ""
     try:
         proc = await asyncio.create_subprocess_exec(
             *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE

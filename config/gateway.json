@@ -41,6 +41,7 @@
         "token": "",
         "webhook_url": "",
         "webhook_path": "/channels/telegram/webhook",
+        "secret_token": "",
         "poll_timeout": 20,
         "poll_interval": 1.5,
         "max_length": 4000
@@ -70,7 +71,9 @@
         "mode": "manual",
         "webhook_url": "",
         "command": ""
-      }
+      },
+      "command_allowlist": [],
+      "retention_hours": 24
     }
   }
 }

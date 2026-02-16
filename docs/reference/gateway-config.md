@@ -46,6 +46,7 @@ Reference for the Gateway configuration file.
         "token": "",
         "webhook_url": "",
         "webhook_path": "/channels/telegram/webhook",
+        "secret_token": "",
         "poll_timeout": 20,
         "poll_interval": 1.5,
         "max_length": 4000
@@ -80,7 +81,9 @@ Reference for the Gateway configuration file.
         "mode": "manual",
         "webhook_url": "",
         "command": ""
-      }
+      },
+      "command_allowlist": [],
+      "retention_hours": 24
     }
   }
 }
@@ -139,6 +142,7 @@ Reference for the Gateway configuration file.
 - `telegram.token` (string): bot token.
 - `telegram.webhook_url` (string): webhook endpoint.
 - `telegram.webhook_path` (string): HTTP path for Telegram webhook.
+- `telegram.secret_token` (string): shared secret for webhook verification.
 - `telegram.poll_timeout` (int): long polling timeout (seconds).
 - `telegram.poll_interval` (float): polling backoff (seconds).
 - `telegram.max_length` (int): max characters per message chunk.
@@ -172,6 +176,8 @@ Reference for the Gateway configuration file.
 - `tts.mode` (string): `manual`, `webhook`, or `command`.
 - `tts.webhook_url` (string): POST text for synthesis.
 - `tts.command` (string): command to run for synthesis (supports `{text}` and `{session_id}`).
+- `command_allowlist` (array): allowed command executables for STT/TTS.
+- `retention_hours` (int): voice data retention in hours.
 
 ## Notes
 

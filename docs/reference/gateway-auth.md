@@ -19,6 +19,8 @@ Send the token as a WebSocket header:
 Authorization: Bearer <token>
 ```
 
+HTTP endpoints (health, sessions, approvals, automation, canvas, voice) use the same Authorization header.
+
 ### WebChat Usage
 
 If `allow_query_param` is enabled, you can pass the token via query param:
