@@ -766,3 +766,6 @@ flowchart TB
 ---
 
 *Euxis v0.0.8 - Build something that matters.*
+
+### Observability (metrics/)
+Euxis records fleet events and performance data in `~/.euxis/metrics/events.jsonl` for analysis and dashboards.
