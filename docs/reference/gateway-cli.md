@@ -22,7 +22,7 @@ euxis-gateway run
 Options:
 - `--bind <addr>`: bind address (default: `127.0.0.1`)
 - `--port <port>`: bind port (default: `18789`)
-- `--config <path>`: config path (default: `~/.euxis/config/gateway.json`)
+- `--config <path>`: config path (default: `~/.euxis/security/gateway.json`)
 - `--auth-mode <token|password>`: override auth mode
 
 ### status
@@ -53,7 +53,7 @@ euxis-gateway sessions
 
 1. `--config <path>` CLI override
 2. `EUXIS_GATEWAY_CONFIG` environment override
-3. Default: `~/.euxis/config/gateway.json`
+3. Default: `~/.euxis/security/gateway.json`
 4. Built-in defaults if file is missing
 
 ## Related

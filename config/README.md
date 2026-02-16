@@ -6,7 +6,6 @@ Configuration schemas, defaults, and templates for Euxis.
 Owns configuration files and schemas that define runtime behavior for gateway, agents, and tooling.
 
 ## Structure
-- `gateway.json` — Gateway defaults
 - `capabilities.json` — Capability registry
 - `codex/` — Codex config
 - `playbooks/` — Playbook definitions
@@ -15,11 +14,11 @@ Owns configuration files and schemas that define runtime behavior for gateway, a
 - `core/` — validation utilities
 
 ## Usage
-Configurations are loaded by runtime modules using `EUXIS_HOME/config`.
+Configurations are loaded by runtime modules using `EUXIS_HOME/config`. Gateway policy defaults live in `security/gateway.json`.
 
 ## Development
 ```bash
-jq '.' config/gateway.json
+jq '.' security/gateway.json
 ```
 
 ## Testing

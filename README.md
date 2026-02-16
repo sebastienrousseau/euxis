@@ -132,6 +132,7 @@ Euxis is organized into clear, self-contained modules.
 - `adapters/`: channel adapters (Slack, Telegram, WebChat)
 - `tui/`: ETX Textual UI
 - `memory/`: Cortex storage layout
+- `security/`: approvals, allowlists, audit policy
 - `metrics/`: metrics pipeline and dashboards
 - `config/`: schemas, playbooks, and defaults
 - `docs/`: documentation and ADRs

@@ -235,7 +235,7 @@ FINAL ANSWER:
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
-- Gateway settings (optional): `~/.euxis/config/gateway.json`
+- Gateway settings (optional): `~/.euxis/security/gateway.json`
 
 Minimal gateway config example:
 

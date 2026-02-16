@@ -18,6 +18,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 - `packages/`: sub-packages (`crypto-lib`, `crypto-server`).
 - `agents/prompts/`: agent prompts and protocols.
 - `scripts/`: gateway server + adapters + tooling scripts.
+- `security/`: approval policies, allowlists, audit policy defaults.
 - `tests/`: test suites for infra, TUI, CLI, gateway, etc.
 - `tui/`: Textual-based ETX TUI app.
 
@@ -107,6 +108,7 @@ tests/       # Cross-module integration tests only
 - `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
 - `scripts/gateway_*` → `gateway/`
 - `adapters/*` → `adapters/`
+- `config/gateway.json` → `security/gateway.json`
 - `data/cortex/*` → `memory/cortex/*`
 - `gateway/webchat/*` → `gateway/webchat/*`
 - `gateway/utils.py` → `gateway/utils.py`
