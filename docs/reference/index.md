@@ -19,6 +19,7 @@ Technical specifications, API documentation, and detailed reference materials.
 
 ## Performance & Analysis
 - [Benchmarks](benchmarks/) - Performance metrics and analysis
+- [Metrics](../metrics/) - Fleet observability and reports
 
 ## Need Context?
 Looking for conceptual understanding? Start with [Essentials](../essentials/).

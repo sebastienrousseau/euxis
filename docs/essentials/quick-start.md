@@ -217,7 +217,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: cli/bin/, config/, security/, memory/, metrics/, docs/, agents/, tests/, tui/
+OBSERVATION 1: Found: cli/bin/, config/, security/, memory/, metrics/, docs/, agents/, tests/, tui/, gateway/, adapters/, gateway/, adapters/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -226,12 +226,12 @@ FINAL ANSWER:
 
 ## Core Components
 
-### 1. Agent Execution (cli/bin/)
+### 1. Agent Execution (cli/)
 - 38 executable tools for agent deployment
 - Shell libraries in core/lib/ for shared functionality
 - Entry point: `euxis` command
 
-### 2. Configuration (config/)
+### 2. Configuration (config/ + security/)
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules
@@ -266,12 +266,12 @@ Store tokens in environment variables or a secrets manager. Avoid committing the
 
 See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md`.
 
-### 3. Knowledge Storage (memory/ + metrics/)
+### 3. Knowledge Storage (memory/ + metrics/ + data/)
 - Cortex: Semantic memory with vector search
 - Project-specific agent outputs
 - Performance metrics (metrics/)
 
-### 4. Agent Intelligence (agents/prompts/)
+### 4. Agent Intelligence (agents/)
 - 41 agent personality definitions
 - 9 core agents + 32 specialists
 - ReAct reasoning protocols
