@@ -59,7 +59,15 @@
       "enabled": true
     },
     "voice": {
-      "enabled": true
+      "enabled": true,
+      "stt": {
+        "mode": "manual",
+        "webhook_url": ""
+      },
+      "tts": {
+        "mode": "manual",
+        "webhook_url": ""
+      }
     }
   }
 }

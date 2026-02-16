@@ -314,7 +314,9 @@ Client sends:
 ```json
 { "event": "start", "session_id": "sess_voice", "meta": { "agent": "orchestrator" } }
 { "event": "chunk", "session_id": "sess_voice", "format": "raw", "data": "<base64>" }
+{ "event": "stt", "session_id": "sess_voice", "content": "Transcribed text" }
 { "event": "text", "session_id": "sess_voice", "content": "Transcribed text" }
+{ "event": "tts", "session_id": "sess_voice", "content": "Speak this reply" }
 { "event": "end", "session_id": "sess_voice" }
 ```
 

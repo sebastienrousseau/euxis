@@ -69,7 +69,15 @@ Reference for the Gateway configuration file.
       "enabled": true
     },
     "voice": {
-      "enabled": true
+      "enabled": true,
+      "stt": {
+        "mode": "manual",
+        "webhook_url": ""
+      },
+      "tts": {
+        "mode": "manual",
+        "webhook_url": ""
+      }
     }
   }
 }
@@ -154,6 +162,10 @@ Reference for the Gateway configuration file.
 ### `gateway.voice`
 
 - `enabled` (bool): enable voice endpoints.
+- `stt.mode` (string): `manual` or `webhook`.
+- `stt.webhook_url` (string): POST audio metadata for transcription.
+- `tts.mode` (string): `manual` or `webhook`.
+- `tts.webhook_url` (string): POST text for synthesis.
 
 ## Notes
 

@@ -561,6 +561,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         await ws.accept()
         session_id: Optional[str] = None
         meta: Dict[str, Any] = {}
+        seen_audio = False
         try:
             while True:
                 message = await ws.receive()
@@ -569,6 +570,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                         await ws.send_text(json.dumps({"type": "error", "error": "missing_session_id"}))
                         continue
                     append_voice_chunk(session_id, message["bytes"])
+                    seen_audio = True
                     await ws.send_text(json.dumps({"type": "ack", "event": "chunk"}))
                     continue
                 if "text" not in message:
@@ -602,7 +604,39 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                         await ws.send_text(json.dumps({"type": "error", "error": "invalid_base64"}))
                         continue
                     append_voice_chunk(session_id, chunk, payload.get("format", "raw"))
+                    seen_audio = True
                     await ws.send_text(json.dumps({"type": "ack", "event": "chunk"}))
+                    continue
+                if event == "stt":
+                    session_id = payload.get("session_id") or session_id
+                    transcript = payload.get("content", "")
+                    if not session_id or not transcript:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_content"}))
+                        continue
+                    meta = payload.get("meta", meta) if isinstance(payload.get("meta"), dict) else meta
+                    persist_voice_text(
+                        session_id,
+                        {"ts": timestamp(), "event": "stt", "content": transcript, "meta": meta},
+                    )
+                    await ws.send_text(json.dumps({"type": "ack", "event": "stt"}))
+                    continue
+                if event == "tts":
+                    session_id = payload.get("session_id") or session_id
+                    text = payload.get("content", "")
+                    if not session_id or not text:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_content"}))
+                        continue
+                    persist_voice_text(
+                        session_id,
+                        {"ts": timestamp(), "event": "tts", "content": text, "meta": meta},
+                    )
+                    tts_cfg = config["gateway"].get("voice", {}).get("tts", {})
+                    if tts_cfg.get("mode") == "webhook" and tts_cfg.get("webhook_url"):
+                        await post_json(
+                            tts_cfg["webhook_url"],
+                            {"session_id": session_id, "text": text, "meta": meta},
+                        )
+                    await ws.send_text(json.dumps({"type": "ack", "event": "tts"}))
                     continue
                 if event == "text":
                     session_id = payload.get("session_id") or session_id
@@ -623,6 +657,13 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                     await ws.send_text(json.dumps({"type": "ack", "event": "text"}))
                     continue
                 if event == "end":
+                    if seen_audio:
+                        stt_cfg = config["gateway"].get("voice", {}).get("stt", {})
+                        if stt_cfg.get("mode") == "webhook" and stt_cfg.get("webhook_url"):
+                            await post_json(
+                                stt_cfg["webhook_url"],
+                                {"session_id": session_id, "meta": meta},
+                            )
                     await ws.send_text(json.dumps({"type": "ack", "event": "end"}))
                     continue
                 await ws.send_text(json.dumps({"type": "error", "error": "unknown_event"}))
@@ -1025,6 +1066,20 @@ async def notify_webhooks(payload: Dict[str, Any]) -> None:
             except urlerror.URLError:
                 await asyncio.sleep(0.5 * (attempt + 1))
                 continue
+
+
+async def post_json(url: str, payload: Dict[str, Any]) -> None:
+    body = json.dumps(payload).encode("utf-8")
+    req = urlrequest.Request(
+        url,
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        await asyncio.to_thread(urlrequest.urlopen, req, 10)
+    except urlerror.URLError:
+        return
 
 
 def split_message(content: str, max_len: int) -> List[str]:
