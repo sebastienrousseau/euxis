@@ -173,6 +173,17 @@ def persist_voice_text(session_id: str, entry: Dict[str, Any]) -> None:
         handle.write(json.dumps(entry) + "\n")
 
 
+def voice_chunk_path(session_id: str, suffix: str = "raw") -> Path:
+    return voice_dir() / f"{session_id}.{suffix}"
+
+
+def append_voice_chunk(session_id: str, chunk: bytes, suffix: str = "raw") -> Path:
+    path = voice_chunk_path(session_id, suffix)
+    with path.open("ab") as handle:
+        handle.write(chunk)
+    return path
+
+
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
     path = sessions_dir() / f"{session_id}.jsonl"
     if not path.exists():

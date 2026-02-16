@@ -303,6 +303,21 @@ Content-Type: multipart/form-data
 file=@audio.wav
 ```
 
+Stream voice audio (WebSocket):
+
+```
+ws://127.0.0.1:18789/voice/stream
+```
+
+Client sends:
+
+```json
+{ "event": "start", "session_id": "sess_voice", "meta": { "agent": "orchestrator" } }
+{ "event": "chunk", "session_id": "sess_voice", "format": "raw", "data": "<base64>" }
+{ "event": "text", "session_id": "sess_voice", "content": "Transcribed text" }
+{ "event": "end", "session_id": "sess_voice" }
+```
+
 ## Webhook APIs
 
 Webhook updates are persisted to `~/.euxis/data/gateway/webhooks.json`.

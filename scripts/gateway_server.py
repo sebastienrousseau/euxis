@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import base64
 import hashlib
 import hmac
 import json
@@ -42,6 +43,7 @@ from gateway_utils import (
     persist_canvas_state,
     persist_voice_blob,
     persist_voice_text,
+    append_voice_chunk,
     runs_dir,
     make_session_id,
     timestamp,
@@ -547,6 +549,84 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             STATE.connections.pop(conn_id, None)
             STATE.conn_seq.pop(conn_id, None)
             STATE.conn_sessions.pop(conn_id, None)
+            return
+
+    @app.websocket("/voice/stream")
+    async def voice_stream(ws: WebSocket) -> None:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            await ws.accept()
+            await ws.send_text(json.dumps({"type": "error", "error": "voice_disabled"}))
+            await ws.close(code=4404)
+            return
+        await ws.accept()
+        session_id: Optional[str] = None
+        meta: Dict[str, Any] = {}
+        try:
+            while True:
+                message = await ws.receive()
+                if "bytes" in message and message["bytes"] is not None:
+                    if not session_id:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_session_id"}))
+                        continue
+                    append_voice_chunk(session_id, message["bytes"])
+                    await ws.send_text(json.dumps({"type": "ack", "event": "chunk"}))
+                    continue
+                if "text" not in message:
+                    continue
+                try:
+                    payload = json.loads(message["text"])
+                except Exception:
+                    await ws.send_text(json.dumps({"type": "error", "error": "invalid_json"}))
+                    continue
+                event = payload.get("event")
+                if event == "start":
+                    session_id = payload.get("session_id")
+                    meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
+                    if not session_id:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_session_id"}))
+                        continue
+                    await ws.send_text(json.dumps({"type": "ack", "event": "start"}))
+                    continue
+                if event == "chunk":
+                    session_id = payload.get("session_id") or session_id
+                    if not session_id:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_session_id"}))
+                        continue
+                    encoded = payload.get("data", "")
+                    if not encoded:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_data"}))
+                        continue
+                    try:
+                        chunk = base64.b64decode(encoded)
+                    except Exception:
+                        await ws.send_text(json.dumps({"type": "error", "error": "invalid_base64"}))
+                        continue
+                    append_voice_chunk(session_id, chunk, payload.get("format", "raw"))
+                    await ws.send_text(json.dumps({"type": "ack", "event": "chunk"}))
+                    continue
+                if event == "text":
+                    session_id = payload.get("session_id") or session_id
+                    content = payload.get("content", "")
+                    if not session_id or not content:
+                        await ws.send_text(json.dumps({"type": "error", "error": "missing_content"}))
+                        continue
+                    meta = payload.get("meta", meta) if isinstance(payload.get("meta"), dict) else meta
+                    meta.setdefault("agent", "orchestrator")
+                    meta.setdefault("channel_id", "voice")
+                    meta.setdefault("scope", "dm")
+                    meta.setdefault("approved", True)
+                    persist_voice_text(
+                        session_id,
+                        {"ts": timestamp(), "event": "text", "content": content, "meta": meta},
+                    )
+                    asyncio.create_task(process_inbound(session_id, content, meta, config))
+                    await ws.send_text(json.dumps({"type": "ack", "event": "text"}))
+                    continue
+                if event == "end":
+                    await ws.send_text(json.dumps({"type": "ack", "event": "end"}))
+                    continue
+                await ws.send_text(json.dumps({"type": "error", "error": "unknown_event"}))
+        except WebSocketDisconnect:
             return
 
     webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
