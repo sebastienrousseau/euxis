@@ -230,7 +230,7 @@ bash: euxis: command not found
 **Diagnosis:**
 
 ```bash
-# Check if ~/bin is in PATH
+# Check if ~/cli/bin is in PATH
 echo $PATH | tr ':' '\n' | grep -E "(home|~).*bin"
 
 # Check if euxis symlink exists
@@ -239,23 +239,23 @@ ls -la ~/cli/bin/euxis
 
 **Solution:**
 
-1. **Add ~/bin to PATH** (choose your shell):
+1. **Add ~/cli/bin to PATH** (choose your shell):
 
    **For Bash (~/.bashrc or ~/.bash_profile):**
    ```bash
-   echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+   echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc
    source ~/.bashrc
    ```
 
    **For Zsh (~/.zshrc):**
    ```bash
-   echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
+   echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.zshrc
    source ~/.zshrc
    ```
 
    **For Fish (~/.config/fish/config.fish):**
    ```fish
-   set -Ux fish_user_paths $HOME/bin $fish_user_paths
+   set -Ux fish_user_paths $HOME/cli/bin $fish_user_paths
    ```
 
 2. **Re-run setup if symlinks are missing:**
@@ -354,7 +354,7 @@ ls -la ~/.euxis/cli/bin/euxis
 
 ```bash
 # Add to ~/.zshrc
-export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/cli/bin:$PATH"
 export EUXIS_HOME="$HOME/.euxis"
 
 # Reload
@@ -365,7 +365,7 @@ source ~/.zshrc
 
 ```bash
 # Add to ~/.bashrc (or ~/.bash_profile on macOS)
-export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/cli/bin:$PATH"
 export EUXIS_HOME="$HOME/.euxis"
 
 # Reload
@@ -376,7 +376,7 @@ source ~/.bashrc
 
 ```fish
 # Run these commands
-set -Ux PATH $HOME/bin $PATH
+set -Ux PATH $HOME/cli/bin $PATH
 set -Ux EUXIS_HOME $HOME/.euxis
 ```
 

@@ -49,10 +49,10 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 
 ```bash
 # For Zsh (macOS default)
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 
 # For Bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 ### 3. Configure a Provider
@@ -118,6 +118,32 @@ A well-designed REST API follows these principles:
 
 1. **Resource-Oriented Design**: URLs represent resources, not actions
    - Good: GET /users/123
+
+---
+
+## Module Map
+
+Euxis is organized into clear, self-contained modules.
+
+- `core/`: shared utilities and validation helpers
+- `agents/`: prompts, squads, and registries
+- `gateway/`: WebSocket control plane and WebChat UI
+- `cli/`: CLI entrypoints (`cli/bin`) and shell helpers
+- `adapters/`: channel adapters (Slack, Telegram, WebChat)
+- `tui/`: ETX Textual UI
+- `memory/`: Cortex storage layout
+- `metrics/`: metrics pipeline and dashboards
+- `config/`: schemas, playbooks, and defaults
+- `docs/`: documentation and ADRs
+- `scripts/`: dev and build tooling
+- `tests/`: cross-module tests
+
+## Boundary Rules
+
+- All modules may depend on `core/`.
+- Modules import only from other modules’ public interfaces.
+- No circular dependencies between modules.
+- Adapters are isolated and never import from each other.
    - Avoid: GET /getUser?id=123
 
 2. **Proper HTTP Methods**: Use verbs correctly
@@ -551,7 +577,7 @@ ollama pull llama2
 **Problem:** Shell can't find Euxis commands.
 
 **Solution:**
-1. Verify PATH: `echo $PATH | grep "$HOME/bin"`
+1. Verify PATH: `echo $PATH | grep "$HOME/cli/bin"`
 2. Restart terminal
 3. Re-run: `source ~/.zshrc` (or `~/.bashrc`)
 
