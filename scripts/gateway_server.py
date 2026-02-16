@@ -249,7 +249,19 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.websocket("/")
     async def websocket_endpoint(ws: WebSocket) -> None:
-        if not is_authorized(ws, config):
+        allowed, reason = is_authorized(ws, config)
+        if not allowed:
+            await ws.accept()
+            await ws.send_text(
+                json.dumps(
+                    {
+                        "type": "response",
+                        "id": "auth",
+                        "ok": False,
+                        "error": {"code": "UNAUTHORIZED", "message": reason or "unauthorized"},
+                    }
+                )
+            )
             await ws.close(code=4401)
             return
         await ws.accept()
@@ -277,39 +289,39 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     return app
 
 
-def is_authorized(ws: WebSocket, config: Dict[str, Any]) -> bool:
+def is_authorized(ws: WebSocket, config: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     mode = config["gateway"]["auth"].get("mode", "token")
     if mode == "token":
         token = config["gateway"]["auth"].get("token", {}).get("value", "")
         if not token:
-            return True
+            return True, None
         header = ws.headers.get("authorization") or ""
         if header.strip() == f"Bearer {token}":
-            return True
+            return True, None
         allow_query = config["gateway"]["auth"].get("token", {}).get("allow_query_param", False)
         if allow_query:
             query_token = ws.query_params.get("token", "")
-            return query_token == token
-        return False
+            return (query_token == token), None
+        return False, "invalid_token"
     if mode == "password":
         password = config["gateway"]["auth"].get("password", {}).get("value", "")
         if not password:
-            return True
+            return True, None
         header = ws.headers.get("authorization") or ""
         if not header.lower().startswith("basic "):
-            return False
+            return False, "missing_basic"
         try:
             import base64
             encoded = header.split(" ", 1)[1].strip()
             decoded = base64.b64decode(encoded).decode("utf-8")
         except Exception:
-            return False
+            return False, "invalid_basic"
         # Expect "username:password" format; only password is checked in v0.1
         if ":" not in decoded:
-            return False
+            return False, "invalid_basic"
         _user, pwd = decoded.split(":", 1)
-        return pwd == password
-    return True
+        return (pwd == password), None
+    return True, None
 
 
 def ensure_session(session_id: str) -> None:

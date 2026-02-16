@@ -48,6 +48,12 @@
       log.scrollTop = log.scrollHeight;
     };
 
+    ws.onclose = () => {
+      const line = document.createElement('div');
+      line.textContent = '[webchat] disconnected';
+      log.appendChild(line);
+    };
+
     tokenInput.addEventListener('change', () => {
       if (ws) ws.close();
       ws = new WebSocket(wsUrl());
