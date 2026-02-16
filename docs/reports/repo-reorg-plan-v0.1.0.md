@@ -11,7 +11,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 - `cli/bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
 - `config/`: config schemas, templates, branding, playbooks, patterns.
 - `crypto_lib/`: Python crypto library code.
-- `data/`: runtime data (bus, cortex, perf, registry pool).
+- `data/`: runtime data (bus, lifecycle, perf, registry pool).
 - `deploy/`: Dockerfiles and deployment compose files.
 - `docs/`: documentation, reference, ADRs, guides, reports.
 - `metrics/`: metrics collection, aggregation, verification, dashboard schemas.
@@ -84,7 +84,7 @@ tests/       # Cross-module integration tests only
 
 ### `memory/`
 - **Purpose**: Cortex storage and memory flows.
-- **Contains**: `data/cortex/` schema + related tools.
+- **Contains**: `memory/cortex/` schema + related tools.
 - **Depends on**: `core/`.
 
 ### `security/`
@@ -107,6 +107,7 @@ tests/       # Cross-module integration tests only
 - `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
 - `scripts/gateway_*` → `gateway/`
 - `adapters/*` → `adapters/`
+- `data/cortex/*` → `memory/cortex/*`
 - `gateway/webchat/*` → `gateway/webchat/*`
 - `gateway/utils.py` → `gateway/utils.py`
 - `gateway/server.py` → `gateway/server.py`

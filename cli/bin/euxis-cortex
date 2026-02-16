@@ -39,7 +39,7 @@ import json
 # ============================================================================
 
 # Store in standard user location valid on Mac/Linux/WSL
-DB_PATH = os.path.expanduser("~/.euxis/data/cortex/db")
+DB_PATH = os.path.expanduser("~/.euxis/memory/cortex/db")
 OS_INFO = platform.system()  # Darwin, Linux, or Windows (WSL reports Linux)
 
 # Detect WSL specifically

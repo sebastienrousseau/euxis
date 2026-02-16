@@ -215,11 +215,11 @@ class LatencyBenchmark:
         Measures the actual vector-search operation, not subprocess cold-start.
         A single subprocess imports chromadb once, then runs N timed queries.
         """
-        cortex_cmd = self.euxis_dir / "bin" / "euxis-cortex"
+        cortex_cmd = self.euxis_dir / "cli" / "bin" / "euxis-cortex"
         if not cortex_cmd.exists():
             return {"error": "euxis-cortex not found"}
 
-        db_path = str(self.euxis_dir / "data" / "cortex" / "db")
+        db_path = str(self.euxis_dir / "memory" / "cortex" / "db")
         test_script = f"""
 import time, os, sys
 try:

@@ -352,7 +352,7 @@ euxis architect "Design the API" gemini
 ### Memory System
 
 The Cortex is persistent, tri‑typed memory backed by a vector + graph hybrid.
-It stores to disk at `~/.euxis/data/cortex/db` and scales with your history.
+It stores to disk at `~/.euxis/memory/cortex/db` and scales with your history.
 Use it to lock in wins, avoid repeat failures, and share team patterns.
 Learn more in [Memory](docs/essentials/core-concepts/memory.md).
 
