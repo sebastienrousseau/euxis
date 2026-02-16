@@ -394,6 +394,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         conn_id = f"conn_{int(time.time() * 1000)}"
         STATE.connections[conn_id] = ws
         STATE.conn_seq[conn_id] = 0
+        STATE.conn_sessions[conn_id] = ""
         seq_state = {"value": 0}
         tick_task = asyncio.create_task(send_ticks(ws, seq_state))
         await send_presence(ws, seq_state)
@@ -507,6 +508,21 @@ async def handle_frame(
     req_id = frame.get("id", "unknown")
     method = frame.get("method", "")
     params = frame.get("params", {}) if isinstance(frame.get("params"), dict) else {}
+
+    if method == "gateway.connect":
+        protocol = params.get("protocol", "")
+        if not protocol:
+            await send_error(ws, req_id, "INVALID_REQUEST", "Missing protocol")
+            return
+        result = {
+            "protocol": "v0.1",
+            "server_time": timestamp(),
+            "stateVersion": STATE.session_version,
+            "sessions_active": STATE.sessions_active,
+        }
+        await send_result(ws, req_id, result)
+        await send_presence(ws, seq_state)
+        return
 
     if method == "chat.history":
         session_id = params.get("session_id", "")

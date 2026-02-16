@@ -24,6 +24,12 @@ FRAME_SCHEMA = SCHEMA_DIR / "gateway-frame.schema.json"
 SAMPLE_FRAMES = [
     {
         "type": "request",
+        "id": "req_connect_1",
+        "method": "gateway.connect",
+        "params": {"protocol": "v0.1", "client_id": "demo"},
+    },
+    {
+        "type": "request",
         "id": "req_01HZX0M0T1Y5GZ9P5E9YB6KXG4",
         "method": "chat.send",
         "params": {
@@ -90,7 +96,10 @@ def minimal_validate(frame: dict) -> None:
                 raise ValidationError(f"missing {key}")
         method = frame["method"]
         params = frame["params"]
-        if method == "chat.history":
+        if method == "gateway.connect":
+            if "protocol" not in params:
+                raise ValidationError("gateway.connect requires protocol")
+        elif method == "chat.history":
             if "session_id" not in params:
                 raise ValidationError("chat.history requires session_id")
         elif method == "chat.send":

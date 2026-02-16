@@ -34,6 +34,16 @@ async def main() -> int:
             json.dumps(
                 {
                     "type": "request",
+                    "id": "req_connect_1",
+                    "method": "gateway.connect",
+                    "params": {"protocol": "v0.1", "client_id": "demo"},
+                }
+            )
+        )
+        await ws.send(
+            json.dumps(
+                {
+                    "type": "request",
                     "id": "req_demo_1",
                     "method": "chat.send",
                     "params": {

@@ -86,6 +86,7 @@ All frames are JSON objects with a top-level `type` field.
 ## Methods
 
 Supported `method` values for request frames:
+- `gateway.connect`
 - `chat.history`
 - `chat.send`
 - `chat.abort`
@@ -101,6 +102,19 @@ Example header:
 ```text
 Authorization: Bearer <token>
 ```
+
+### gateway.connect
+
+Params:
+- `protocol` (required, string)
+- `client_id` (optional)
+- `resume_seq` (optional, integer)
+
+Result:
+- `protocol` (string)
+- `server_time` (ISO timestamp)
+- `stateVersion` (integer)
+- `sessions_active` (integer)
 
 ### chat.history
 
@@ -169,6 +183,7 @@ Data fields:
 
 - Reject unknown `type` values.
 - Reject unknown `method` values.
+- Require `protocol` for `gateway.connect`.
 - Require `session_id` for all chat methods.
 - Require `run_id` for `chat.abort`.
 - Require `role` for `chat.send` and `chat.inject`.

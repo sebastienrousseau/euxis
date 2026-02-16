@@ -10,11 +10,28 @@
     "id": {"type": "string", "minLength": 1},
     "method": {
       "type": "string",
-      "enum": ["chat.history", "chat.send", "chat.abort", "chat.inject"]
+      "enum": ["gateway.connect", "chat.history", "chat.send", "chat.abort", "chat.inject"]
     },
     "params": {"type": "object"}
   },
   "allOf": [
+    {
+      "if": {"properties": {"method": {"const": "gateway.connect"}}},
+      "then": {
+        "properties": {
+          "params": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["protocol"],
+            "properties": {
+              "protocol": {"type": "string", "minLength": 1},
+              "client_id": {"type": "string"},
+              "resume_seq": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
     {
       "if": {"properties": {"method": {"const": "chat.history"}}},
       "then": {

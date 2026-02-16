@@ -22,6 +22,15 @@ async def main():
     async with websockets.connect(uri, extra_headers=headers) as ws:
         await ws.send(json.dumps({
             "type": "request",
+            "id": "req_connect_1",
+            "method": "gateway.connect",
+            "params": {
+                "protocol": "v0.1",
+                "client_id": "quickstart"
+            }
+        }))
+        await ws.send(json.dumps({
+            "type": "request",
             "id": "req_01HZX0M0T1Y5GZ9P5E9YB6KXG4",
             "method": "chat.send",
             "params": {
@@ -49,6 +58,20 @@ wscat -H "Authorization: Bearer YOUR_TOKEN" -c ws://127.0.0.1:18789
 ```
 
 Then paste a request frame:
+
+```json
+{
+  "type": "request",
+  "id": "req_connect_1",
+  "method": "gateway.connect",
+  "params": {
+    "protocol": "v0.1",
+    "client_id": "wscat"
+  }
+}
+```
+
+Then paste a chat request frame:
 
 ```json
 {

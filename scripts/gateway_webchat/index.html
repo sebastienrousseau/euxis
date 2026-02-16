@@ -57,6 +57,21 @@
 
     let ws = new WebSocket(wsUrl());
 
+    function sendConnect() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      const payload = {
+        type: 'request',
+        id: `req_connect_${Date.now()}`,
+        method: 'gateway.connect',
+        params: { protocol: 'v0.1', client_id: 'webchat' }
+      };
+      ws.send(JSON.stringify(payload));
+    }
+
+    ws.onopen = () => {
+      sendConnect();
+    };
+
     ws.onmessage = (evt) => {
       const line = document.createElement('div');
       line.textContent = evt.data;
@@ -73,6 +88,9 @@
     tokenInput.addEventListener('change', () => {
       if (ws) ws.close();
       ws = new WebSocket(wsUrl());
+      ws.onopen = () => {
+        sendConnect();
+      };
     });
 
     sendBtn.onclick = () => {
