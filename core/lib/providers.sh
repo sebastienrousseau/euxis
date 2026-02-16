@@ -8,7 +8,7 @@ set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
-source "${EUXIS_HOME}/bin/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
 
 # Default provider (fallback when no tiering match)
 DEFAULT_PROVIDER="claude"

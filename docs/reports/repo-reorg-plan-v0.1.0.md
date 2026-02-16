@@ -52,7 +52,7 @@ tests/       # Cross-module integration tests only
 
 ### `core/`
 - **Purpose**: Shared primitives and helpers used across modules.
-- **Contains**: `bin/lib/`, common validation utils, shared constants.
+- **Contains**: `core/lib/`, common validation utils, shared constants.
 - **Depends on**: none.
 - **Exports**: helpers, types.
 - **Independent**: not yet (depends on repo layout).
@@ -69,7 +69,7 @@ tests/       # Cross-module integration tests only
 
 ### `cli/`
 - **Purpose**: User entrypoints and shell tooling.
-- **Contains**: `bin/euxis*`, `bin/lib/`.
+- **Contains**: `bin/euxis*`, `core/lib/`.
 - **Depends on**: `core/`, `agents/`, `gateway/`.
 
 ### `tui/`
@@ -121,7 +121,7 @@ tests/       # Cross-module integration tests only
   - Update `from scripts.gateway_utils import ...` → `from gateway.utils import ...`
 - `bin/euxis-gateway` → `cli/bin/euxis-gateway`
   - Update paths to `gateway/server.py` and new adapter locations
-- `tui/*` imports pointing at `bin/lib` → `core/lib`
+- `tui/*` imports pointing at `core/lib` → `core/lib`
 
 ---
 

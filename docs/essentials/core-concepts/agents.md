@@ -137,7 +137,7 @@ cat > ~/my-specialist-manifest.json <<'EOF'
 EOF
 
 # 3. Register and test
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 register_agent_plugin ~/my-specialist-manifest.json
 euxis my-specialist "Test task"
 

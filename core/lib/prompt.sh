@@ -9,9 +9,9 @@ set -euo pipefail
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 
-source "${EUXIS_HOME}/bin/lib/agents.sh"
-source "${EUXIS_HOME}/bin/lib/memory.sh"
-source "${EUXIS_HOME}/bin/lib/template.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/template.sh"
 
 # Max token budget for protocol loading (prevents context bloat)
 EUXIS_PROTOCOL_TOKEN_BUDGET="${EUXIS_PROTOCOL_TOKEN_BUDGET:-12000}"

@@ -113,7 +113,7 @@ EOF
 
 ```bash
 # Source the agents library
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 
 # Register your plugin
 register_agent_plugin ~/my-plugins/code-optimizer-manifest.json
@@ -126,7 +126,7 @@ register_agent_plugin ~/my-plugins/code-optimizer-manifest.json
 euxis-health | grep code-optimizer
 
 # List all plugins
-source ~/.euxis/bin/lib/agents.sh && list_plugins
+source ~/.euxis/core/lib/agents.sh && list_plugins
 
 # Test your agent
 euxis code-optimizer "Analyze this function for performance issues: function slow_search(arr, target) { for(let i = 0; i < arr.length; i++) { if(arr[i] === target) return i; } return -1; }"
@@ -135,7 +135,7 @@ euxis code-optimizer "Analyze this function for performance issues: function slo
 ### 5. Unregister (If Needed)
 
 ```bash
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 unregister_agent_plugin "code-optimizer"
 ```
 
@@ -256,7 +256,7 @@ You MUST [primary responsibility]. [Additional context about the agent's role].
 
 **Example:**
 ```bash
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 register_agent_plugin "/path/to/my-plugin-manifest.json"
 ```
 
@@ -276,7 +276,7 @@ register_agent_plugin "/path/to/my-plugin-manifest.json"
 
 **Example:**
 ```bash
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 unregister_agent_plugin "my-agent"
 ```
 
@@ -290,7 +290,7 @@ unregister_agent_plugin "my-agent"
 
 **Example:**
 ```bash
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 list_plugins
 # Output:
 #     code-optimizer (plugin)
@@ -490,7 +490,7 @@ Choose the appropriate tier for your agent based on its computational requiremen
 | `utility` | `ollama` | Simple tasks, formatting | Helper agents |
 | `standard` | `claude` | Default tier | General purpose agents |
 
-**Note:** The tier field in your manifest is informational. Actual provider assignment is controlled by the `resolve_tiered_provider()` function in `bin/lib/providers.sh`.
+**Note:** The tier field in your manifest is informational. Actual provider assignment is controlled by the `resolve_tiered_provider()` function in `core/lib/providers.sh`.
 
 ## Best Practices
 
@@ -543,17 +543,17 @@ Choose the appropriate tier for your agent based on its computational requiremen
 
 ```bash
 # Check plugin registration status
-source ~/.euxis/bin/lib/agents.sh && list_plugins
+source ~/.euxis/core/lib/agents.sh && list_plugins
 
 # Full health report including plugins
 euxis-health
 
 # Check agent liveness specifically
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 agent_probe_liveness "your-agent-id"
 
 # Check agent readiness specifically
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 agent_probe_readiness "your-agent-id"
 
 # Enable debug logging
@@ -647,7 +647,7 @@ cat > ~/my-plugins/file-organizer/manifest.json <<'EOF'
 EOF
 
 # Register the plugin
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 register_agent_plugin ~/my-plugins/file-organizer/manifest.json
 
 # Test it
@@ -740,7 +740,7 @@ cat > ~/my-plugins/log-analyzer/manifest.json <<'EOF'
 EOF
 
 # Register and test
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 register_agent_plugin ~/my-plugins/log-analyzer/manifest.json
 euxis log-analyzer "Analyze the application logs from the last hour for any error patterns"
 ```

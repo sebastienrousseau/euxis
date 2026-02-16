@@ -203,7 +203,7 @@ validate_euxis_structure() {
     local required_dirs=(
         "$euxis_home"
         "$euxis_home/bin"
-        "$euxis_home/bin/lib"
+        "$euxis_home/core/lib"
         "$euxis_home/prompts"
         "$euxis_home/data"
     )

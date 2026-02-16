@@ -1,7 +1,7 @@
 # (c) 2026 Euxis Fleet. All rights reserved.
 # Euxis API Reference
 
-Complete function reference for all 8 library modules in `bin/lib/`.
+Complete function reference for all 8 library modules in `core/lib/`.
 
 ---
 

@@ -10,8 +10,8 @@ EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 PROMPTS_DIR="${EUXIS_HOME}/prompts"
 
 # Source SQL registry functions if available
-if [[ -f "${EUXIS_HOME}/bin/lib/registry_sql.sh" ]]; then
-    source "${EUXIS_HOME}/bin/lib/registry_sql.sh"
+if [[ -f "${EUXIS_HOME}/core/lib/registry_sql.sh" ]]; then
+    source "${EUXIS_HOME}/core/lib/registry_sql.sh"
     EUXIS_SQL_AVAILABLE=1
 else
     EUXIS_SQL_AVAILABLE=0
@@ -374,7 +374,7 @@ agent_probe_readiness() {
     fi
 
     # Check provider is available
-    source "${EUXIS_HOME}/bin/lib/providers.sh" 2>/dev/null || true
+    source "${EUXIS_HOME}/core/lib/providers.sh" 2>/dev/null || true
     local provider
     provider=$(resolve_tiered_provider "${agent}" 2>/dev/null)
     case "${provider}" in

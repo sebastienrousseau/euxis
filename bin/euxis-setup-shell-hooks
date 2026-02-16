@@ -5,9 +5,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/bin/lib/ui.sh" ]]; then
-  # shellcheck source=bin/lib/ui.sh
-  source "${EUXIS_HOME}/bin/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
   ui_auto_header
 fi
 

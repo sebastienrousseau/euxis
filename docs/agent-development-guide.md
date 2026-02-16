@@ -47,7 +47,7 @@ cat > ~/my-agent-manifest.json <<'EOF'
 EOF
 
 # 3. Register
-source ~/.euxis/bin/lib/agents.sh
+source ~/.euxis/core/lib/agents.sh
 register_agent_plugin ~/my-agent-manifest.json
 
 # 4. Test
@@ -98,7 +98,7 @@ Add the agent entry to `~/.euxis/registry.json`:
 
 ### Step 3: Configure Intelligence Tiering
 
-If the agent needs a specific provider, add a case to `resolve_tiered_provider()` in `bin/lib/providers.sh`:
+If the agent needs a specific provider, add a case to `resolve_tiered_provider()` in `core/lib/providers.sh`:
 
 ```bash
 # In resolve_tiered_provider():
