@@ -38,6 +38,18 @@ def runs_dir() -> Path:
     return base
 
 
+def approvals_dir() -> Path:
+    base = gateway_data_dir() / "approvals"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def audit_dir() -> Path:
+    base = gateway_data_dir() / "audit"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
     path = sessions_dir() / f"{session_id}.jsonl"
     if not path.exists():
@@ -97,3 +109,30 @@ def load_run_events(run_id: str) -> List[Dict[str, Any]]:
         except Exception:
             continue
     return entries
+
+
+def persist_approval(run_id: str, entry: Dict[str, Any]) -> None:
+    path = approvals_dir() / f"{run_id}.json"
+    path.write_text(json.dumps(entry, indent=2), encoding="utf-8")
+
+
+def load_approvals() -> Dict[str, Dict[str, Any]]:
+    approvals: Dict[str, Dict[str, Any]] = {}
+    for path in approvals_dir().glob("*.json"):
+        try:
+            approvals[path.stem] = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+    return approvals
+
+
+def delete_approval(run_id: str) -> None:
+    path = approvals_dir() / f"{run_id}.json"
+    if path.exists():
+        path.unlink()
+
+
+def audit_log(event: Dict[str, Any]) -> None:
+    path = audit_dir() / "gateway_audit.jsonl"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event) + "\n")

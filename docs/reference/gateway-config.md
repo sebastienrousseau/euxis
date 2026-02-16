@@ -35,14 +35,23 @@ Reference for the Gateway configuration file.
         "enabled": false,
         "mode": "socket",
         "token": "",
-        "app_token": ""
+        "app_token": "",
+        "signing_secret": "",
+        "events_path": "/channels/slack/events"
       },
       "telegram": {
         "enabled": false,
         "mode": "webhook",
         "token": "",
-        "webhook_url": ""
+        "webhook_url": "",
+        "webhook_path": "/channels/telegram/webhook",
+        "poll_timeout": 20,
+        "poll_interval": 1.5
       }
+    },
+    "policy": {
+      "mention_required": true,
+      "allowlist": []
     }
   }
 }
@@ -90,13 +99,23 @@ Reference for the Gateway configuration file.
 ### `gateway.channels`
 
 - `slack.enabled` (bool): enable Slack adapter.
-- `slack.mode` (string): `socket` or `http`.
+- `slack.mode` (string): `socket` or `events`.
 - `slack.token` (string): bot token.
 - `slack.app_token` (string): socket mode app token.
+- `slack.signing_secret` (string): signing secret for events verification.
+- `slack.events_path` (string): HTTP path for Slack Events API.
 - `telegram.enabled` (bool): enable Telegram adapter.
 - `telegram.mode` (string): `webhook` or `poll`.
 - `telegram.token` (string): bot token.
 - `telegram.webhook_url` (string): webhook endpoint.
+- `telegram.webhook_path` (string): HTTP path for Telegram webhook.
+- `telegram.poll_timeout` (int): long polling timeout (seconds).
+- `telegram.poll_interval` (float): polling backoff (seconds).
+
+### `gateway.policy`
+
+- `mention_required` (bool): require bot mention in group chats.
+- `allowlist` (array): allowed sender IDs for group chats.
 
 ## Notes
 

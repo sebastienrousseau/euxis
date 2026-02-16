@@ -7,7 +7,6 @@ from typing import Any, Dict
 from gateway_adapters.slack_adapter import SlackAdapter, SlackAdapterConfig
 from gateway_adapters.telegram_adapter import TelegramAdapter, TelegramAdapterConfig
 
-
 def build_adapters(config: Dict[str, Any]) -> Dict[str, Any]:
     channels = config.get("gateway", {}).get("channels", {})
     adapters: Dict[str, Any] = {}
@@ -29,6 +28,8 @@ def build_adapters(config: Dict[str, Any]) -> Dict[str, Any]:
                 token=telegram_cfg.get("token", ""),
                 mode=telegram_cfg.get("mode", "webhook"),
                 webhook_url=telegram_cfg.get("webhook_url", ""),
+                poll_timeout=telegram_cfg.get("poll_timeout", 20),
+                poll_interval=telegram_cfg.get("poll_interval", 1.5),
             )
         )
 

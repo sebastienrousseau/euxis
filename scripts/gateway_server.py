@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
+import hmac
 import json
 import os
 import sys
@@ -12,7 +14,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
@@ -22,10 +24,15 @@ from gateway_utils import (
     load_session_from_disk,
     load_session_meta,
     load_run_events,
+    load_approvals,
+    persist_approval,
+    delete_approval,
+    audit_log,
     persist_message,
     persist_run_event,
     persist_session_meta,
     runs_dir,
+    make_session_id,
     timestamp,
 )
 DEFAULT_CONFIG = {
@@ -41,6 +48,11 @@ DEFAULT_CONFIG = {
             "ask_fallback": "deny",
             "allowlist": [],
         },
+        "channels": {
+            "slack": {"enabled": False, "mode": "socket", "token": "", "app_token": "", "signing_secret": ""},
+            "telegram": {"enabled": False, "mode": "webhook", "token": "", "webhook_url": ""},
+        },
+        "policy": {"mention_required": True, "allowlist": []},
     }
 }
 
@@ -111,12 +123,48 @@ def os_environ() -> Dict[str, str]:
     return dict(**os.environ)
 
 
+def verify_slack_signature(request: Request, body: bytes, signing_secret: str) -> bool:
+    timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
+    signature = request.headers.get("X-Slack-Signature", "")
+    if not timestamp or not signature:
+        return False
+    try:
+        ts_value = int(timestamp)
+    except ValueError:
+        return False
+    if abs(time.time() - ts_value) > 300:
+        return False
+    base = f"v0:{timestamp}:".encode("utf-8") + body
+    digest = hmac.new(signing_secret.encode("utf-8"), base, hashlib.sha256).hexdigest()
+    expected = f"v0={digest}"
+    return hmac.compare_digest(expected, signature)
+
+
 def build_app(config: Dict[str, Any]) -> FastAPI:
     app = FastAPI()
     STATE.adapters = build_adapters(config)
+    STATE.pending_approvals = load_approvals()
+    slack_cfg = config["gateway"].get("channels", {}).get("slack", {})
+    telegram_cfg = config["gateway"].get("channels", {}).get("telegram", {})
 
     health_path = config["gateway"]["health_path"]
     health_enabled = config["gateway"]["health_enabled"]
+
+    @app.on_event("startup")
+    async def startup() -> None:
+        for name, adapter in STATE.adapters.items():
+            try:
+                adapter.connect()
+            except Exception as exc:  # pragma: no cover - best effort
+                print(f"Adapter {name} connect failed: {exc}", file=sys.stderr)
+
+    @app.on_event("shutdown")
+    async def shutdown() -> None:
+        for name, adapter in STATE.adapters.items():
+            try:
+                adapter.disconnect()
+            except Exception as exc:  # pragma: no cover - best effort
+                print(f"Adapter {name} disconnect failed: {exc}", file=sys.stderr)
 
     @app.get(health_path)  # type: ignore[misc]
     async def health() -> JSONResponse:
@@ -135,6 +183,38 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     @app.get("/approvals")
     async def approvals() -> JSONResponse:
         return JSONResponse({"pending": list(STATE.pending_approvals.values())})
+
+    slack_events_path = slack_cfg.get("events_path", "/channels/slack/events")
+    telegram_webhook_path = telegram_cfg.get("webhook_path", "/channels/telegram/webhook")
+
+    @app.post(slack_events_path)
+    async def slack_events(request: Request) -> JSONResponse:
+        adapter = STATE.adapters.get("slack")
+        if not adapter:
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        body = await request.body()
+        try:
+            payload = json.loads(body.decode("utf-8") or "{}")
+        except json.JSONDecodeError:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+
+        if payload.get("type") == "url_verification":
+            return JSONResponse({"challenge": payload.get("challenge", "")})
+
+        signing_secret = slack_cfg.get("signing_secret", "")
+        if signing_secret and not verify_slack_signature(request, body, signing_secret):
+            return JSONResponse({"status": "unauthorized"}, status_code=401)
+
+        adapter.receive(payload)
+        return JSONResponse({"status": "ok"})
+
+    @app.post(telegram_webhook_path)
+    async def telegram_webhook(payload: Dict[str, Any]) -> JSONResponse:
+        adapter = STATE.adapters.get("telegram")
+        if not adapter:
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        adapter.receive(payload)
+        return JSONResponse({"status": "ok"})
 
     @app.get("/sessions")
     async def sessions() -> JSONResponse:
@@ -213,6 +293,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             return JSONResponse({"status": "not_found"}, status_code=404)
         pending["approved"] = True
         STATE.pending_approvals[run_id] = pending
+        persist_approval(run_id, pending)
+        audit_log({"ts": timestamp(), "event": "approval", "run_id": run_id, "status": "approved"})
         # Dispatch immediately to all active connections.
         for conn_id, ws in list(STATE.connections.items()):
             seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
@@ -237,7 +319,51 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         pending = STATE.pending_approvals.pop(run_id, None)
         if not pending:
             return JSONResponse({"status": "not_found"}, status_code=404)
+        delete_approval(run_id)
+        audit_log({"ts": timestamp(), "event": "approval", "run_id": run_id, "status": "rejected"})
         return JSONResponse({"status": "rejected"})
+
+    @app.post("/slack/events")
+    async def slack_events(payload: Dict[str, Any]) -> JSONResponse:
+        if payload.get("type") == "url_verification":
+            return JSONResponse({"challenge": payload.get("challenge", "")})
+        event = payload.get("event", {})
+        if not event or event.get("type") != "message":
+            return JSONResponse({"status": "ignored"})
+        channel_id = event.get("channel", "slack")
+        user_id = event.get("user", "unknown")
+        thread_ts = event.get("thread_ts")
+        session_id = make_session_id("slack", channel_id, thread_ts)
+        meta = {
+            "agent": "architect",
+            "channel_id": "slack",
+            "scope": "group" if event.get("channel_type") in {"channel", "group", "mpim"} else "dm",
+            "sender": user_id,
+            "thread_ts": thread_ts,
+            "approved": True,
+        }
+        await process_inbound(session_id, event.get("text", ""), meta, config)
+        return JSONResponse({"status": "ok"})
+
+    @app.post("/telegram/webhook")
+    async def telegram_webhook(payload: Dict[str, Any]) -> JSONResponse:
+        message = payload.get("message") or payload.get("edited_message") or {}
+        if not message:
+            return JSONResponse({"status": "ignored"})
+        chat = message.get("chat", {})
+        chat_id = chat.get("id", "telegram")
+        thread_id = message.get("message_thread_id")
+        session_id = make_session_id("telegram", str(chat_id), str(thread_id) if thread_id else None)
+        meta = {
+            "agent": "architect",
+            "channel_id": "telegram",
+            "scope": "group" if chat.get("type") in {"group", "supergroup"} else "dm",
+            "sender": (message.get("from") or {}).get("id", "unknown"),
+            "thread_id": thread_id,
+            "approved": True,
+        }
+        await process_inbound(session_id, message.get("text", ""), meta, config)
+        return JSONResponse({"status": "ok"})
 
     @app.post("/admin/exec")
     async def update_exec_policy(payload: Dict[str, Any]) -> JSONResponse:
@@ -419,6 +545,10 @@ async def handle_frame(
         )
         persist_session_meta(session_id, session_meta)
         run_id = f"run_{int(time.time() * 1000)}"
+        if not is_message_allowed(meta, config):
+            await send_error(ws, req_id, "POLICY_BLOCKED", "Message blocked by policy")
+            audit_log({"ts": timestamp(), "event": "policy_block", "session_id": session_id})
+            return
         if not is_exec_allowed(meta, config):
             pending = {
                 "run_id": run_id,
@@ -430,6 +560,8 @@ async def handle_frame(
                 "approved": False,
             }
             STATE.pending_approvals[run_id] = pending
+            persist_approval(run_id, pending)
+            audit_log({"ts": timestamp(), "event": "approval_requested", "run_id": run_id})
             await send_error(ws, req_id, "APPROVAL_REQUIRED", "Execution approval required")
             return
         await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id, "run_id": run_id})
@@ -475,7 +607,18 @@ async def dispatch_agent(
 ) -> None:
     agent_id = meta.get("agent", "architect")
     provider = meta.get("provider")
-    cmd = [str(Path.home() / ".euxis" / "bin" / "euxis"), agent_id, content]
+    mode = meta.get("mode", "agent")
+    if mode == "squad":
+        squad = meta.get("squad", "build")
+        cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-squad"), "deploy", squad, content]
+    elif mode == "combo":
+        combo = meta.get("combo", "envision")
+        cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-combo"), "run", combo, content]
+    elif mode == "playbook":
+        playbook = meta.get("playbook", "zero-to-one")
+        cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-playbook"), "run", playbook, content]
+    else:
+        cmd = [str(Path.home() / ".euxis" / "bin" / "euxis"), agent_id, content]
     if provider:
         cmd.append(provider)
 
@@ -606,6 +749,65 @@ def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
     return approved or ask_fallback == "full"
 
 
+def is_message_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
+    scope = meta.get("scope", "dm")
+    channel_id = meta.get("channel_id", "")
+    policy = config["gateway"].get("policy", {})
+    mention_required = policy.get("mention_required", True)
+    allowlist = set(policy.get("allowlist", []))
+    mentions = meta.get("mentions_bot", False)
+    sender = meta.get("sender", "")
+
+    if scope == "dm":
+        return True
+    if allowlist and sender not in allowlist:
+        return False
+    if mention_required and not mentions:
+        return False
+    return True
+
+
+async def process_inbound(session_id: str, content: str, meta: Dict[str, Any], config: Dict[str, Any]) -> None:
+    ensure_session(session_id)
+    entry = append_message(session_id, "user", content)
+    session_meta = load_session_meta(session_id)
+    session_meta.update(
+        {
+            "session_id": session_id,
+            "channel_id": meta.get("channel_id", "unknown"),
+            "scope": meta.get("scope", "dm"),
+            "owner": meta.get("agent", "architect"),
+            "updated_at": timestamp(),
+        }
+    )
+    persist_session_meta(session_id, session_meta)
+    if not is_message_allowed(meta, config):
+        audit_log({"ts": timestamp(), "event": "policy_block", "session_id": session_id})
+        return
+    run_id = f"run_{int(time.time() * 1000)}"
+    if not is_exec_allowed(meta, config):
+        pending = {
+            "run_id": run_id,
+            "session_id": session_id,
+            "agent_id": meta.get("agent", "architect"),
+            "requested_at": timestamp(),
+            "meta": meta,
+            "content": content,
+            "approved": False,
+        }
+        STATE.pending_approvals[run_id] = pending
+        persist_approval(run_id, pending)
+        audit_log({"ts": timestamp(), "event": "approval_requested", "run_id": run_id})
+        return
+    if not STATE.connections:
+        return
+    conn_id, ws = next(iter(STATE.connections.items()))
+    seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
+    task = asyncio.create_task(dispatch_agent(ws, seq_state, session_id, run_id, meta, content, config))
+    STATE.running[run_id] = task
+    STATE.conn_seq[conn_id] = seq_state["value"]
+
+
 async def send_result(ws: WebSocket, req_id: str, result: Dict[str, Any]) -> None:
     await ws.send_text(
         json.dumps(
@@ -660,7 +862,8 @@ def cmd_status(args: argparse.Namespace) -> int:
         import httpx
 
         resp = httpx.get(url, timeout=2.0)
-        print(resp.text)
+        status = {"health": resp.text, "channels": list(config["gateway"].get("channels", {}).keys())}
+        print(json.dumps(status, indent=2))
         return 0 if resp.status_code == 200 else 1
     except Exception:
         print("Gateway not responding")

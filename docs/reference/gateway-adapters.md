@@ -110,13 +110,18 @@ sequenceDiagram
         "enabled": false,
         "mode": "socket",
         "token": "xoxb-...",
-        "app_token": "xapp-..."
+        "app_token": "xapp-...",
+        "signing_secret": "",
+        "events_path": "/channels/slack/events"
       },
       "telegram": {
         "enabled": false,
         "mode": "webhook",
         "token": "123456:ABC...",
-        "webhook_url": "https://example.com/telegram/webhook"
+        "webhook_url": "https://example.com/telegram/webhook",
+        "webhook_path": "/channels/telegram/webhook",
+        "poll_timeout": 20,
+        "poll_interval": 1.5
       }
     }
   }

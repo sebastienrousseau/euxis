@@ -30,14 +30,23 @@
         "enabled": false,
         "mode": "socket",
         "token": "",
-        "app_token": ""
+        "app_token": "",
+        "signing_secret": "",
+        "events_path": "/channels/slack/events"
       },
       "telegram": {
         "enabled": false,
         "mode": "webhook",
         "token": "",
-        "webhook_url": ""
+        "webhook_url": "",
+        "webhook_path": "/channels/telegram/webhook",
+        "poll_timeout": 20,
+        "poll_interval": 1.5
       }
+    },
+    "policy": {
+      "mention_required": true,
+      "allowlist": []
     }
   }
 }
