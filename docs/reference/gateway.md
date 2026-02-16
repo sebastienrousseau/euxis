@@ -271,6 +271,14 @@ Reject:
 http://127.0.0.1:18789/approvals/<run_id>/reject
 ```
 
+## Session Broadcast
+
+Post a message to all active connections in a session:
+
+```
+http://127.0.0.1:18789/sessions/<session_id>/broadcast
+```
+
 ## Elevated Mode
 
 Set `meta.elevated` to `full` in `chat.send` to request elevated execution. This is governed by `gateway.exec.elevated`.

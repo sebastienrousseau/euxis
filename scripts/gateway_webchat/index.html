@@ -69,6 +69,12 @@
       ws.send(JSON.stringify(payload));
       messageInput.value = '';
     };
+
+    window.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Enter') {
+        sendBtn.click();
+      }
+    });
   </script>
 </body>
 </html>

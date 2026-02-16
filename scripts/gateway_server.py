@@ -57,6 +57,7 @@ class GatewayState:
         self.adapters: Dict[str, Any] = {}
         self.connections: Dict[str, WebSocket] = {}
         self.conn_seq: Dict[str, int] = {}
+        self.conn_sessions: Dict[str, str] = {}
 
 
 STATE = GatewayState()
@@ -157,6 +158,19 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         meta = load_session_meta(session_id)
         return JSONResponse({"session_id": session_id, "meta": meta, "messages": STATE.sessions[session_id]})
 
+    @app.post("/sessions/{session_id}/broadcast")
+    async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+        message = payload.get("message", "")
+        if not message:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        for conn_id, ws in list(STATE.connections.items()):
+            if STATE.conn_sessions.get(conn_id) != session_id:
+                continue
+            seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
+            await send_agent_event(ws, seq_state, f"run_broadcast_{int(time.time() * 1000)}", session_id, "gateway", "final", message)
+            STATE.conn_seq[conn_id] = seq_state["value"]
+        return JSONResponse({"status": "ok"})
+
     @app.get("/sessions/export")
     async def sessions_export() -> JSONResponse:
         data: Dict[str, Any] = {}
@@ -248,11 +262,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         try:
             while True:
                 message = await ws.receive_text()
-                await handle_frame(ws, message, seq_state, config)
+                await handle_frame(ws, message, seq_state, config, conn_id)
         except WebSocketDisconnect:
             tick_task.cancel()
             STATE.connections.pop(conn_id, None)
             STATE.conn_seq.pop(conn_id, None)
+            STATE.conn_sessions.pop(conn_id, None)
             return
 
     webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
@@ -317,7 +332,11 @@ def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
 
 
 async def handle_frame(
-    ws: WebSocket, raw: str, seq_state: Dict[str, int], config: Dict[str, Any]
+    ws: WebSocket,
+    raw: str,
+    seq_state: Dict[str, int],
+    config: Dict[str, Any],
+    conn_id: str,
 ) -> None:
     try:
         frame = json.loads(raw)
@@ -357,6 +376,7 @@ async def handle_frame(
             await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id")
             return
         ensure_session(session_id)
+        STATE.conn_sessions[conn_id] = session_id
         if not STATE.sessions[session_id]:
             STATE.sessions[session_id] = load_session_from_disk(session_id)
         limit = int(params.get("limit", 200))
@@ -373,6 +393,7 @@ async def handle_frame(
             await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id or role")
             return
         ensure_session(session_id)
+        STATE.conn_sessions[conn_id] = session_id
         entry = append_message(session_id, role, content)
         session_meta = load_session_meta(session_id)
         session_meta.update(
@@ -414,6 +435,7 @@ async def handle_frame(
             await send_error(ws, req_id, "INVALID_REQUEST", "Missing session_id or role")
             return
         ensure_session(session_id)
+        STATE.conn_sessions[conn_id] = session_id
         entry = append_message(session_id, role, content)
         await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id})
         return
