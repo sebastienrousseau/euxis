@@ -32,6 +32,6 @@ Maintain the 50-agent architecture with the following constraints:
 
 ## Consequences
 - **Maintenance cost:** Each agent prompt must be version-synced, validated by euxis-lint, and tested via euxis-gym. The lint check (CHECK 1) enforces registry completeness.
-- **Coordination overhead:** Measured via perf/metrics.jsonl. Latency budgets enforce that prompt assembly stays <500ms and total overhead stays predictable regardless of fleet size.
+- **Coordination overhead:** Measured via metrics/events.jsonl. Latency budgets enforce that prompt assembly stays <500ms and total overhead stays predictable regardless of fleet size.
 - **Quality floor:** The gym evaluation and reviewer quality gate ensure no agent degrades the overall system quality.
 - **Extensibility:** The plugin API allows third-party agents without modifying core fleet, reducing merge conflicts and maintenance burden.

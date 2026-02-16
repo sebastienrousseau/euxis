@@ -10,6 +10,7 @@ Core topics and concepts you need to understand Euxis.
 ## Core Concepts
 - [Architecture](architecture.md) - System design and principles
 - [Core Concepts](core-concepts/) - Detailed concept explanations
+- [Security Essentials](security.md) - Approval policy and audit flow
 
 ## What's Next?
 Ready to start building? Check out our [Guides](../guides/) section.

@@ -111,6 +111,10 @@ def load_config(path: Path | None) -> Dict[str, Any]:
             return config
         if isinstance(data, dict):
             config = merge_dicts(config, data)
+        else:
+            print("Gateway config must be a JSON object; ignoring invalid payload.", file=sys.stderr)
+    elif path:
+        print(f"Gateway config not found at {path}; using defaults.", file=sys.stderr)
     return config
 
 

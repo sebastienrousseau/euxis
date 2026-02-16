@@ -1019,7 +1019,7 @@ export EUXIS_DEBUG=1
 euxis architect "Test"
 
 # Check performance metrics
-tail -20 ~/.euxis/data/perf/metrics.jsonl
+tail -20 ~/.euxis/metrics/events.jsonl
 ```
 
 **Solutions:**
@@ -1173,7 +1173,7 @@ euxis architect "Your task"
 | Agent output | `~/.euxis/data/projects/{project}/{agent}/output/*.md` |
 | Agent audit | `~/.euxis/data/projects/{project}/{agent}/audit.md` |
 | Agent memory | `~/.euxis/data/projects/{project}/{agent}/memory.md` |
-| Performance metrics | `~/.euxis/data/perf/metrics.jsonl` |
+| Performance metrics | `~/.euxis/metrics/events.jsonl` |
 | Lifecycle transitions | `~/.euxis/data/lifecycle/transitions.jsonl` |
 | Dispatch logs | `/tmp/euxis_dispatch_*/*.log` |
 | Certification logs | `/tmp/euxis_cert_*.log` |
