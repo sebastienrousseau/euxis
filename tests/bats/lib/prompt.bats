@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/prompt.sh
+# Test suite for core/lib/prompt.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -84,11 +84,11 @@ EOF
     unset _EUXIS_REGISTRY_MTIME
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/bin/lib/common.sh"
-    source "${HOME}/.euxis/bin/lib/agents.sh"
-    source "${HOME}/.euxis/bin/lib/memory.sh"
-    source "${HOME}/.euxis/bin/lib/template.sh"
-    source "${HOME}/.euxis/bin/lib/prompt.sh"
+    source "${HOME}/.euxis/core/lib/common.sh"
+    source "${HOME}/.euxis/core/lib/agents.sh"
+    source "${HOME}/.euxis/core/lib/memory.sh"
+    source "${HOME}/.euxis/core/lib/template.sh"
+    source "${HOME}/.euxis/core/lib/prompt.sh"
 }
 
 teardown() {

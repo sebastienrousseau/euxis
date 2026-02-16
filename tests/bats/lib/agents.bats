@@ -1,9 +1,9 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/agents.sh
+# Test suite for core/lib/agents.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Load dependencies first (agents.sh needs log_info, log_error, log_warn)
-source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
+source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
 
 # Test setup - run before each test
 setup() {
@@ -77,12 +77,12 @@ EOF
 }
 EOF
 
-    # Create empty bin/lib so agents.sh can source registry_sql.sh
-    mkdir -p "${EUXIS_HOME}/bin/lib"
+    # Create empty core/lib so agents.sh can source registry_sql.sh
+    mkdir -p "${EUXIS_HOME}/core/lib"
 
     # Mock date command for consistent timestamps
     cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/bin/bash
+#!/cli/bin/bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260209-123456"
 elif [[ "${1:-}" == "-u" && "${2:-}" == "+%Y-%m-%dT%H:%M:%SZ" ]]; then
@@ -97,8 +97,8 @@ DATEEOF
     # Reset include guard so it re-sources
     unset _EUXIS_LIB_AGENTS
     unset _EUXIS_LIB_COMMON
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/agents.sh"
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/agents.sh"
 }
 
 teardown() {

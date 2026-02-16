@@ -14,7 +14,7 @@
       "delegates": [
         {
           "agent": "architect",
-          "task_template": "Enforce modular, idempotent shell script architecture for: ${goal}. Refactor large scripts (>200 lines) into modular functions with single responsibility. Every script MUST be idempotent: safe to run multiple times without side effects (use mkdir -p not mkdir, use cp -n or check-before-write, guard destructive ops). Enforce: one main() function as entry point, helper functions defined before main, local variables inside functions (local keyword), no global mutable state. Shebang MUST be #!/usr/bin/env bash (not #!/bin/bash). Enforce set -euo pipefail at the top of every script (after shebang). Flag: scripts >300 lines without functions, nested logic >3 levels deep, functions >50 lines, scripts that source more than 3 files. Enforce lib/ directory for shared functions, bin/ for entry points. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
+          "task_template": "Enforce modular, idempotent shell script architecture for: ${goal}. Refactor large scripts (>200 lines) into modular functions with single responsibility. Every script MUST be idempotent: safe to run multiple times without side effects (use mkdir -p not mkdir, use cp -n or check-before-write, guard destructive ops). Enforce: one main() function as entry point, helper functions defined before main, local variables inside functions (local keyword), no global mutable state. Shebang MUST be #!/usr/bin/env bash (not #!/cli/bin/bash). Enforce set -euo pipefail at the top of every script (after shebang). Flag: scripts >300 lines without functions, nested logic >3 levels deep, functions >50 lines, scripts that source more than 3 files. Enforce lib/ directory for shared functions, cli/bin/ for entry points. Score Tech Debt (target 10/10) and Modularity (target 100/100).",
           "verifies": [
             "#!/usr/bin/env bash shebang on every script",
             "set -euo pipefail at top of every script",
@@ -55,14 +55,14 @@
         },
         {
           "agent": "librarian",
-          "task_template": "Audit shell script file organization for: ${goal}. Verify every script has a header comment block explaining purpose, usage, and dependencies. Verify directory structure: bin/ for executable entry points, lib/ for sourced libraries, tests/ for test scripts mirroring bin/ and lib/. Remove orphaned scripts not referenced anywhere. Enforce consistent file naming (kebab-case, no .sh extension on bin/ executables, .sh on lib/ sources). Verify executable permissions set correctly (chmod +x on bin/, not on lib/). Clean up backup files (*~, *.bak, *.swp). Verify .editorconfig sets shell file defaults (indent_style=space, indent_size=2). Verify Makefile or task runner documents available commands.",
+          "task_template": "Audit shell script file organization for: ${goal}. Verify every script has a header comment block explaining purpose, usage, and dependencies. Verify directory structure: cli/bin/ for executable entry points, lib/ for sourced libraries, tests/ for test scripts mirroring cli/bin/ and lib/. Remove orphaned scripts not referenced anywhere. Enforce consistent file naming (kebab-case, no .sh extension on cli/bin/ executables, .sh on lib/ sources). Verify executable permissions set correctly (chmod +x on cli/bin/, not on lib/). Clean up backup files (*~, *.bak, *.swp). Verify .editorconfig sets shell file defaults (indent_style=space, indent_size=2). Verify Makefile or task runner documents available commands.",
           "verifies": [
             "every script has header comment block",
-            "bin/ for executables, lib/ for libraries",
+            "cli/bin/ for executables, lib/ for libraries",
             "test scripts mirror source structure",
             "no orphaned scripts",
             "consistent file naming (kebab-case)",
-            "executable permissions correct (bin/ only)",
+            "executable permissions correct (cli/bin/ only)",
             "Makefile or task runner documents commands"
           ]
         }
@@ -94,7 +94,7 @@
         },
         {
           "agent": "custodian",
-          "task_template": "Audit shell script external dependency health for: ${goal}. Verify every external command used is checked for existence at script start (command -v or type). Document minimum required versions of external tools (jq, curl, git, etc.). Flag: dependency on GNU-specific flags without checking (--long-options not in BSD), tools not available in minimal containers (Alpine/busybox), version-specific behavior without guards. Verify: no reliance on specific PATH ordering, no hardcoded tool paths (/usr/local/bin/...), fallback alternatives for optional deps. Verify .tool-versions or equivalent pins versions. Keep external dependencies minimal: flag scripts requiring >10 external tools. Verify no dev-only tools in production scripts.",
+          "task_template": "Audit shell script external dependency health for: ${goal}. Verify every external command used is checked for existence at script start (command -v or type). Document minimum required versions of external tools (jq, curl, git, etc.). Flag: dependency on GNU-specific flags without checking (--long-options not in BSD), tools not available in minimal containers (Alpine/busybox), version-specific behavior without guards. Verify: no reliance on specific PATH ordering, no hardcoded tool paths (/usr/local/cli/bin/...), fallback alternatives for optional deps. Verify .tool-versions or equivalent pins versions. Keep external dependencies minimal: flag scripts requiring >10 external tools. Verify no dev-only tools in production scripts.",
           "verifies": [
             "every external command checked (command -v)",
             "minimum tool versions documented",
@@ -184,10 +184,10 @@
       "delegates": [
         {
           "agent": "tester",
-          "task_template": "Enforce comprehensive shell script testing for: ${goal}. Test with bats-core (Bash Automated Testing System): every function in lib/ has corresponding .bats test file, every bin/ script has integration test. Achieve function-level coverage of all exported functions. Verify mock discipline: external commands mocked in tests (bats-mock or function overrides), filesystem operations use temp directories (setup/teardown). Test error paths: verify set -e catches failures, verify pipefail catches pipe errors, verify unbound variable detection (set -u). Test edge cases: empty inputs, spaces in filenames, special characters, Unicode filenames, symlinks, missing dependencies (command -v checks). Verify tests do not rely on swizzling or host state. Verify idempotency: run each script twice, verify identical outcome. Test signal handling: SIGTERM/SIGINT trigger cleanup.",
+          "task_template": "Enforce comprehensive shell script testing for: ${goal}. Test with bats-core (Bash Automated Testing System): every function in lib/ has corresponding .bats test file, every cli/bin/ script has integration test. Achieve function-level coverage of all exported functions. Verify mock discipline: external commands mocked in tests (bats-mock or function overrides), filesystem operations use temp directories (setup/teardown). Test error paths: verify set -e catches failures, verify pipefail catches pipe errors, verify unbound variable detection (set -u). Test edge cases: empty inputs, spaces in filenames, special characters, Unicode filenames, symlinks, missing dependencies (command -v checks). Verify tests do not rely on swizzling or host state. Verify idempotency: run each script twice, verify identical outcome. Test signal handling: SIGTERM/SIGINT trigger cleanup.",
           "verifies": [
             "bats-core tests for every lib/ function",
-            "integration tests for every bin/ script",
+            "integration tests for every cli/bin/ script",
             "external commands mocked in tests",
             "error paths tested (set -e, pipefail, set -u)",
             "edge cases tested (spaces, special chars, Unicode)",

@@ -154,28 +154,28 @@ main() {
 
     # Create bin directory
     if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY RUN] Would create directory: ${HOME}/bin"
+        log_info "[DRY RUN] Would create directory: ${HOME}/cli/bin"
     else
-        mkdir -p "${HOME}/bin"
-        log_verbose "Created directory: ${HOME}/bin"
+        mkdir -p "${HOME}/cli/bin"
+        log_verbose "Created directory: ${HOME}/cli/bin"
     fi
 
     # Link tools to ~/bin
     log_info "Linking tools to ~/bin..."
     local linked_count=0
 
-    for script in "${HOME}/.euxis/bin/"*; do
+    for script in "${HOME}/.euxis/cli/bin/"*; do
         if [[ -x "${script}" ]]; then
             local name="$(basename "${script}" .sh)"
 
             # Skip if .sh version exists alongside non-.sh version
-            if [[ "${script}" == *.sh && -x "${HOME}/.euxis/bin/${name}" ]]; then
+            if [[ "${script}" == *.sh && -x "${HOME}/.euxis/cli/bin/${name}" ]]; then
                 log_verbose "Skipping ${name}.sh (non-.sh version exists)"
                 continue
             fi
 
             # Check if link already exists
-            if [[ -L "${HOME}/bin/${name}" ]] && [[ "$FORCE" != "true" ]]; then
+            if [[ -L "${HOME}/cli/bin/${name}" ]] && [[ "$FORCE" != "true" ]]; then
                 log_verbose "Skipping ${name} (already linked)"
                 continue
             fi
@@ -183,7 +183,7 @@ main() {
             if [[ "$DRY_RUN" == "true" ]]; then
                 log_info "[DRY RUN] Would link: ${name}"
             else
-                ln -sf "${script}" "${HOME}/bin/${name}"
+                ln -sf "${script}" "${HOME}/cli/bin/${name}"
                 log_info "  - ${name}"
                 ((++linked_count))
             fi
@@ -197,7 +197,7 @@ main() {
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY RUN] Would run health check"
     else
-        if "${HOME}/bin/euxis-health" --silent 2>/dev/null; then
+        if "${HOME}/cli/bin/euxis-health" --silent 2>/dev/null; then
             log_verbose "Health check passed"
         else
             log_info "Health check flagged issues. Run 'euxis-health' for details."

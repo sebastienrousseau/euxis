@@ -920,7 +920,7 @@ class EuxisCLIBridge:
         provider: str = None) -> Dict[str, Any]:
 
         # Build CLI command
-        cmd = ["/opt/euxis/bin/euxis", agent_id, task]
+        cmd = ["/opt/euxis/cli/bin/euxis", agent_id, task]
         if provider:
             cmd.append(provider)
 

@@ -14,7 +14,7 @@ Comprehensive automation system ensuring Euxis v0.0.8 build/package/runtime pari
 - **Gates:** Environment setup, dependency installation, script verification, runtime testing
 
 ### 2. Local Verification Tool
-**File:** `bin/euxis-cross-platform-verify`
+**File:** `cli/bin/euxis-cross-platform-verify`
 - **Usage:** `euxis-cross-platform-verify [--local-only] [--version VERSION]`
 - **Capabilities:** Platform detection, dependency validation, script testing
 - **Integration:** Can trigger GitHub Actions workflow for full 3-platform verification
@@ -38,7 +38,7 @@ Comprehensive automation system ensuring Euxis v0.0.8 build/package/runtime pari
 - Automatic installation attempt for missing dependencies
 
 ### Gate 3: Core Scripts ✅
-- Executable permission verification for all `bin/euxis*` scripts
+- Executable permission verification for all `cli/bin/euxis*` scripts
 - Script count validation (33+ scripts expected)
 - Basic functionality test with timeout protection
 
@@ -57,16 +57,16 @@ Comprehensive automation system ensuring Euxis v0.0.8 build/package/runtime pari
 ### Local Platform Verification
 ```bash
 # Test current platform only
-./bin/euxis-cross-platform-verify --local-only
+./cli/bin/euxis-cross-platform-verify --local-only
 
 # Test specific version
-./bin/euxis-cross-platform-verify --version v0.0.8 --local-only
+./cli/bin/euxis-cross-platform-verify --version v0.0.8 --local-only
 ```
 
 ### Full Cross-Platform CI
 ```bash
 # Trigger GitHub Actions workflow (requires gh CLI)
-./bin/euxis-cross-platform-verify --version v0.0.8
+./cli/bin/euxis-cross-platform-verify --version v0.0.8
 
 # Manual GitHub workflow trigger
 gh workflow run cross-platform-ci.yml --field version=v0.0.8
@@ -158,7 +158,7 @@ pip install chromadb sentence-transformers
 **Permission Denied**
 ```bash
 # Fix script permissions
-chmod +x bin/euxis*
+chmod +x cli/bin/euxis*
 ```
 
 **Container Build Failures**

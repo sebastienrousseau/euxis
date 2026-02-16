@@ -120,7 +120,7 @@ git_guard
 # Entry Point
 # ============================================================================
 
-EUXIS_BIN="${EUXIS_HOME}/bin"
+EUXIS_BIN="${EUXIS_HOME}/cli/bin"
 
 # Check for help flags before dispatch
 case "${1:-}" in

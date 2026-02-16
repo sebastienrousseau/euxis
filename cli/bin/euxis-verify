@@ -29,7 +29,7 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="${HOME}/.euxis"
-EUXIS_BIN="${EUXIS_HOME}/bin"
+EUXIS_BIN="${EUXIS_HOME}/cli/bin"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin:${EUXIS_BIN}:${PATH}"
 
 echo "INITIATING PRE-FLIGHT SEQUENCE..."

@@ -8,7 +8,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 ## Phase 1 — Current Structure Map
 
 ### Top-level directories and purpose
-- `bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
+- `cli/bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
 - `config/`: config schemas, templates, branding, playbooks, patterns.
 - `crypto_lib/`: Python crypto library code.
 - `data/`: runtime data (bus, cortex, perf, registry pool).
@@ -23,7 +23,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 
 ### Multipurpose directories
 - `scripts/` mixes Gateway runtime, adapters, demos, and tooling.
-- `bin/` mixes user-facing commands with internal helpers.
+- `cli/bin/` mixes user-facing commands with internal helpers.
 - `packages/` overlaps with `crypto_lib/` (duplication risk).
 
 ---
@@ -69,7 +69,7 @@ tests/       # Cross-module integration tests only
 
 ### `cli/`
 - **Purpose**: User entrypoints and shell tooling.
-- **Contains**: `bin/euxis*`, `core/lib/`.
+- **Contains**: `cli/bin/euxis*`, `core/lib/`.
 - **Depends on**: `core/`, `agents/`, `gateway/`.
 
 ### `tui/`
@@ -101,8 +101,8 @@ tests/       # Cross-module integration tests only
 
 ## Phase 4 — Move Manifest (High-Level)
 
-- `bin/*` → `cli/bin/*`
-- `bin/lib/*` → `core/lib/*`
+- `cli/bin/*` → `cli/bin/*`
+- `core/lib/*` → `core/lib/*`
 - `prompts/*` → `agents/prompts/*`
 - `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
 - `scripts/gateway_*` → `gateway/`
@@ -119,7 +119,7 @@ tests/       # Cross-module integration tests only
 
 - `gateway/server.py` → `gateway/server.py`
   - Update `from gateway_utils import ...` → `from gateway.utils import ...`
-- `bin/euxis-gateway` → `cli/bin/euxis-gateway`
+- `cli/bin/euxis-gateway` → `cli/bin/euxis-gateway`
   - Update paths to `gateway/server.py` and new adapter locations
 - `tui/*` imports pointing at `core/lib` → `core/lib`
 

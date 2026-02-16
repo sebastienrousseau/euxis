@@ -34,7 +34,7 @@ services:
     networks:
       - euxis-network
     healthcheck:
-      test: ["CMD-SHELL", "timeout 5 /app/.euxis/bin/euxis --help >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "timeout 5 /app/.euxis/cli/bin/euxis --help >/dev/null 2>&1 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -76,7 +76,7 @@ services:
     environment:
       - EUXIS_VERSION=${VERSION:-v0.0.6}
       - EUXIS_PLATFORM=${TARGETARCH:-amd64}
-    command: ["/app/.euxis/bin/euxis-cross-platform-verify", "--local-only"]
+    command: ["/app/.euxis/cli/bin/euxis-cross-platform-verify", "--local-only"]
     networks:
       - euxis-network
     profiles:

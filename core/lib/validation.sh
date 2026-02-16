@@ -202,7 +202,7 @@ validate_euxis_structure() {
     # Check critical directories exist
     local required_dirs=(
         "$euxis_home"
-        "$euxis_home/bin"
+        "$euxis_home/cli/bin"
         "$euxis_home/core/lib"
         "$euxis_home/agents/prompts"
         "$euxis_home/data"

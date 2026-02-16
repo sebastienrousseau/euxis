@@ -63,23 +63,23 @@ not ok 23 register_agent_plugin validates plugin config
 # (in test file tests/bats/lib/agents.bats, line 298)
 #   `[[ "${output}" =~ "Invalid plugin configuration" ]]' failed
 not ok 24 register_agent_plugin prevents duplicate registration
-# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../core/lib/agents.sh, line 144,
 #  in test file tests/bats/lib/agents.bats, line 305)
 #   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
-# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+# /Users/seb/.euxis/tests/bats/lib/../../../core/lib/agents.sh: line 144: log_error: command not found
 not ok 25 unregister_agent_plugin removes plugin
-# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../core/lib/agents.sh, line 144,
 #  in test file tests/bats/lib/agents.bats, line 316)
 #   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
-# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+# /Users/seb/.euxis/tests/bats/lib/../../../core/lib/agents.sh: line 144: log_error: command not found
 not ok 26 unregister_agent_plugin handles non-existent plugin
 # (in test file tests/bats/lib/agents.bats, line 328)
 #   `[[ "${status}" -eq 1 ]]' failed
 not ok 27 list_plugins shows registered plugins
-# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../core/lib/agents.sh, line 144,
 #  in test file tests/bats/lib/agents.bats, line 336)
 #   `register_agent_plugin "plugin1" "${plugin1}"' failed with status 127
-# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+# /Users/seb/.euxis/tests/bats/lib/../../../core/lib/agents.sh: line 144: log_error: command not found
 not ok 28 list_plugins handles no plugins
 # (in test file tests/bats/lib/agents.bats, line 348)
 #   `[[ "${output}" =~ "No plugins registered" ]]' failed
@@ -121,10 +121,10 @@ not ok 41 agent lifecycle maintains consistency
 #   `[[ "${state1}" == "active" ]]' failed
 # /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.GGEVu0rBHu/date: fork: Resource temporarily unavailable
 not ok 42 plugin management maintains registry integrity
-# (from function `register_agent_plugin' in file tests/bats/lib/../../../bin/lib/agents.sh, line 144,
+# (from function `register_agent_plugin' in file tests/bats/lib/../../../core/lib/agents.sh, line 144,
 #  in test file tests/bats/lib/agents.bats, line 490)
 #   `register_agent_plugin "test-plugin" "${plugin_config}"' failed with status 127
-# /Users/seb/.euxis/tests/bats/lib/../../../bin/lib/agents.sh: line 144: log_error: command not found
+# /Users/seb/.euxis/tests/bats/lib/../../../core/lib/agents.sh: line 144: log_error: command not found
 
 The following warnings were encountered during tests:
 BW01: `run`'s command `unregister_agent_plugin nonexistent-plugin` exited with code 127, indicating 'Command not found'. Use run's return code checks, e.g. `run -127`, to fix this message.

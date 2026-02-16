@@ -1,4 +1,4 @@
-"""Comprehensive unit tests for bin/check_package_maintenance.py.
+"""Comprehensive unit tests for cli/bin/check_package_maintenance.py.
 
 Tests cover: get_package_info, parse_requirements_file,
 check_maintenance_status with various package states.

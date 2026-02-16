@@ -140,7 +140,7 @@ debugging ←→ performance-profiling ←→ test-analysis
 
 ```
 ~/.euxis/
-├── bin/                    # Executables
+├── cli/bin/                    # Executables
 │   ├── euxis              # Main entry point
 │   ├── euxis-*            # CLI tools (dispatch, loop, council, etc.)
 │   └── lib/               # Library modules

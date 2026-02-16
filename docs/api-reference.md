@@ -200,15 +200,15 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 
 | Tool | Description |
 |------|-------------|
-| `bin/euxis.sh` | Main entry point — agent dispatch with latency budgets |
-| `bin/euxis-lint` | 8-check static analysis (registry, protocol, versions, permissions, headers, patterns, compliance, deps) |
-| `bin/euxis-bench` | 7-benchmark performance suite (health, lint, recall, provider, coordination, assembly, memory) |
-| `bin/euxis-health` | System health check with `--silent` mode |
-| `bin/euxis-dispatch` | Multi-agent pipeline orchestration (mesh/federated/sequential) |
-| `bin/euxis-loop` | Iterative agent execution with convergence |
-| `bin/euxis-council` | Multi-agent deliberation and voting |
-| `bin/euxis-graph` | Knowledge graph operations (add-edge, query) |
-| `bin/euxis-kaizen` | Automated maintenance (memory pruning, stale cleanup) |
+| `cli/bin/euxis.sh` | Main entry point — agent dispatch with latency budgets |
+| `cli/bin/euxis-lint` | 8-check static analysis (registry, protocol, versions, permissions, headers, patterns, compliance, deps) |
+| `cli/bin/euxis-bench` | 7-benchmark performance suite (health, lint, recall, provider, coordination, assembly, memory) |
+| `cli/bin/euxis-health` | System health check with `--silent` mode |
+| `cli/bin/euxis-dispatch` | Multi-agent pipeline orchestration (mesh/federated/sequential) |
+| `cli/bin/euxis-loop` | Iterative agent execution with convergence |
+| `cli/bin/euxis-council` | Multi-agent deliberation and voting |
+| `cli/bin/euxis-graph` | Knowledge graph operations (add-edge, query) |
+| `cli/bin/euxis-kaizen` | Automated maintenance (memory pruning, stale cleanup) |
 
 ---
 

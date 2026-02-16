@@ -184,7 +184,7 @@ run_verification_tests() {
             --env EUXIS_VERSION="$VERSION" \
             --env EUXIS_PLATFORM="$arch" \
             "${REGISTRY}/euxis-verification:${VERSION}" \
-            /app/.euxis/bin/euxis-cross-platform-verify --local-only; then
+            /app/.euxis/cli/bin/euxis-cross-platform-verify --local-only; then
             log_success "Verification passed for $platform"
         else
             log_error "Verification failed for $platform"

@@ -119,7 +119,7 @@ my-agent)
 
 ### Step 4: Add to Lint Registry
 
-Add the agent name to the `AGENTS` array in `bin/euxis-lint`:
+Add the agent name to the `AGENTS` array in `cli/bin/euxis-lint`:
 
 ```bash
 AGENTS=("architect" ... "my-agent")

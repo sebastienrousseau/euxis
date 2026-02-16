@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     PowerShell equivalent of setup.sh and the Makefile. By default (no arguments)
-    it runs the installer: creates ~/bin, symlinks tools from ~/.euxis/bin, runs
+    it runs the installer: creates ~/bin, symlinks tools from ~/.euxis/cli/bin, runs
     the health check, and ensures ~/bin is on PATH.
 
     Pass -Target to run Makefile-equivalent build commands:

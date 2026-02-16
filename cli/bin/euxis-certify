@@ -36,7 +36,7 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-BIN_DIR="$EUXIS_HOME/bin"
+BIN_DIR="$EUXIS_HOME/cli/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
 
 # Source validation library for fail-fast gates
@@ -455,7 +455,7 @@ else
 fi
 
 # 5d. Git hook installed and executable
-HOOK_FILE="$EUXIS_HOME/bin/hooks/prepare-commit-msg"
+HOOK_FILE="$EUXIS_HOME/cli/bin/hooks/prepare-commit-msg"
 if [[ -x "$HOOK_FILE" ]]; then
     echo "  PASS: prepare-commit-msg hook is present and executable."
 else

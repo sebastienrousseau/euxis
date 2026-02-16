@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/template.sh (pure-bash substitution)
 
-source "${EUXIS_HOME}/bin/lib/template.sh"
+source "${EUXIS_HOME}/core/lib/template.sh"
 
 # Test template_substitute: basic variable replacement
 result=$(template_substitute "Hello {{SESSION_ID}} world" "" "" "test-123" "")
@@ -38,7 +38,7 @@ assert_eq "all variables replaced" "/a|/m|s1|mod|${EUXIS_HOME}" "${result}"
 
 # Test template_substitute: no sed fork (verify pure bash)
 # If sed is not in the template.sh, substitution is bash-native
-assert_eq "no sed in template.sh" "0" "$(grep -c '| sed' "${EUXIS_HOME}/bin/lib/template.sh")"
+assert_eq "no sed in template.sh" "0" "$(grep -c '| sed' "${EUXIS_HOME}/core/lib/template.sh")"
 
 # Test estimate_tokens: rough estimate
 tokens=$(estimate_tokens "hello world this is a test string")

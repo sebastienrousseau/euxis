@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/cli/bin/bash
 set -euo pipefail
 
 # Euxis Documentation Sync Script

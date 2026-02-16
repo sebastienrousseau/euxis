@@ -125,7 +125,7 @@ class TestCortexScreenLoadStatus(unittest.TestCase):
         mock_process.wait = AsyncMock()
 
         def exists_check(self_path=None):
-            """Return True for ~/bin/euxis-cortex, False otherwise."""
+            """Return True for ~/cli/bin/euxis-cortex, False otherwise."""
             return str(self_path).endswith("euxis-cortex") and "/home" in str(self_path)
 
         with (

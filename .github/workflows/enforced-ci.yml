@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "=== Running flake8 linter ==="
           flake8 --statistics --count --max-line-length=100 --extend-ignore=E203,W503 \
-            --exclude=docs/,projects/,venv/,.venv/,build/,dist/ tui/ tests/ bin/
+            --exclude=docs/,projects/,venv/,.venv/,build/,dist/ tui/ tests/ cli/bin/
 
       - name: Run pylint (Strict mode)
         run: |
@@ -288,7 +288,7 @@ jobs:
 
           # Make scripts executable
           chmod +x tests/*.sh
-          chmod +x bin/*
+          chmod +x cli/bin/*
 
           # Run available shell tests (non-fatal if dependent binaries are missing)
           if [ -f "tests/test_dispatch_concurrency.sh" ]; then
@@ -304,7 +304,7 @@ jobs:
           export EUXIS_HOME="$PWD"
           echo "=== Testing basic euxis functionality ==="
           # Test help command (may fail if binary needs special setup)
-          timeout 30s bash -c 'bin/euxis --help' 2>&1 || echo "Help command completed with status: $?"
+          timeout 30s bash -c 'cli/bin/euxis --help' 2>&1 || echo "Help command completed with status: $?"
 
           # Test Python imports
           python3 -c "

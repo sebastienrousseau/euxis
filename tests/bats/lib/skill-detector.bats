@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/skill-detector.sh
+# Test suite for core/lib/skill-detector.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -19,7 +19,7 @@ setup() {
     unset _EUXIS_LIB_SKILL_DETECTOR
 
     # Source the library from real installation
-    source "${EUXIS_HOME}/bin/lib/skill-detector.sh"
+    source "${EUXIS_HOME}/core/lib/skill-detector.sh"
 }
 
 teardown() {

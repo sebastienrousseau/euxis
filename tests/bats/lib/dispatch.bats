@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/dispatch.sh
+# Test suite for core/lib/dispatch.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -9,7 +9,7 @@ setup() {
 
     # Use real EUXIS_HOME for library sourcing
     export EUXIS_HOME="${HOME}/.euxis"
-    export EUXIS_BIN="${EUXIS_HOME}/bin"
+    export EUXIS_BIN="${EUXIS_HOME}/cli/bin"
     export PROJECTS_DIR="${EUXIS_TEST_TMPDIR}/projects"
     mkdir -p "${PROJECTS_DIR}"
     mkdir -p "${EUXIS_TEST_TMPDIR}/lifecycle"
@@ -29,12 +29,12 @@ setup() {
     unset _EUXIS_LIB_TEMPLATE
 
     # Source dependencies from real EUXIS_HOME
-    source "${EUXIS_HOME}/bin/lib/common.sh"
-    source "${EUXIS_HOME}/bin/lib/validation.sh"
-    source "${EUXIS_HOME}/bin/lib/agents.sh"
-    source "${EUXIS_HOME}/bin/lib/session.sh"
-    source "${EUXIS_HOME}/bin/lib/providers.sh"
-    source "${EUXIS_HOME}/bin/lib/dispatch.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/validation.sh"
+    source "${EUXIS_HOME}/core/lib/agents.sh"
+    source "${EUXIS_HOME}/core/lib/session.sh"
+    source "${EUXIS_HOME}/core/lib/providers.sh"
+    source "${EUXIS_HOME}/core/lib/dispatch.sh"
 }
 
 teardown() {
@@ -91,7 +91,7 @@ teardown() {
 
     # This will exec and exit, so we can't test directly
     # Instead verify the venv path exists
-    [[ -x "${EUXIS_HOME}/.venv/bin/python3" ]]
+    [[ -x "${EUXIS_HOME}/.venv/cli/bin/python3" ]]
 }
 
 @test "_exec_python warns when venv not found" {
@@ -122,7 +122,7 @@ teardown() {
 @test "dispatch_command handles slash commands" {
     # Create mock slash handler
     cat > "${EUXIS_BIN}/euxis-slash" << 'EOF'
-#!/bin/bash
+#!/cli/bin/bash
 echo "MOCK: slash command: $@"
 exit 0
 EOF
@@ -140,7 +140,7 @@ EOF
     for cmd in "${commands[@]}"; do
         # Create mock handler
         cat > "${EUXIS_BIN}/euxis-${cmd}" << 'EOF'
-#!/bin/bash
+#!/cli/bin/bash
 echo "MOCK: handler called"
 exit 0
 EOF
@@ -161,7 +161,7 @@ EOF
         [[ "${cmd}" == "test" ]] && handler="${EUXIS_BIN}/euxis-test-infra"
 
         cat > "${handler}" << 'EOF'
-#!/bin/bash
+#!/cli/bin/bash
 echo "MOCK: quality handler"
 exit 0
 EOF
@@ -177,7 +177,7 @@ EOF
 
     for cmd in "${commands[@]}"; do
         cat > "${EUXIS_BIN}/euxis-${cmd}" << 'EOF'
-#!/bin/bash
+#!/cli/bin/bash
 echo "MOCK: maintenance handler"
 exit 0
 EOF
@@ -194,7 +194,7 @@ EOF
 
     for cmd in "${commands[@]}"; do
         cat > "${EUXIS_BIN}/euxis-${cmd}" << 'EOF'
-#!/bin/bash
+#!/cli/bin/bash
 echo "MOCK: interface handler"
 exit 0
 EOF
@@ -263,6 +263,6 @@ EOF
     # Test that the case statement has all expected patterns
     local patterns=(delegate slash dispatch loop council bus graph squad playbook combo)
     for pattern in "${patterns[@]}"; do
-        grep -q "${pattern}" "${BATS_TEST_DIRNAME}/../../../bin/lib/dispatch.sh"
+        grep -q "${pattern}" "${BATS_TEST_DIRNAME}/../../../core/lib/dispatch.sh"
     done
 }

@@ -34,7 +34,7 @@ echo "[1/10] Library Loading & Boot..."
 
 # T1.1: All library files source without error
 for lib in common providers agents memory session template skill-detector prompt; do
-    if bash -n "${EUXIS_HOME}/bin/lib/${lib}.sh" 2>/dev/null; then
+    if bash -n "${EUXIS_HOME}/core/lib/${lib}.sh" 2>/dev/null; then
         pass "lib/${lib}.sh syntax valid"
     else
         fail "lib/${lib}.sh has syntax errors"
@@ -43,13 +43,13 @@ done
 
 # T1.2: Source guard prevents double loading
 (
-    source "${EUXIS_HOME}/bin/lib/common.sh"
-    source "${EUXIS_HOME}/bin/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
     echo "ok"
 ) | grep -q "ok" && pass "Source guard prevents double load" || fail "Source guard broken"
 
 # T1.3: Health check runs in silent mode
-if "${EUXIS_HOME}/bin/euxis-health" --silent 2>/dev/null; then
+if "${EUXIS_HOME}/cli/bin/euxis-health" --silent 2>/dev/null; then
     pass "euxis-health --silent passes"
 else
     fail "euxis-health --silent failed"
@@ -62,7 +62,7 @@ echo ""
 echo "[2/10] Agent Discovery & Resolution..."
 
 # T2.1: All registered agents resolve to a prompt file
-source "${EUXIS_HOME}/bin/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
 CORE_AGENTS=(architect compliance-officer librarian orchestrator product-manager reviewer system-critic)
 for agent in "${CORE_AGENTS[@]}"; do
     path=$(resolve_agent_path "${agent}" 2>/dev/null)
@@ -82,7 +82,7 @@ else
 fi
 
 # T2.3: Agent lifecycle transitions work
-source "${EUXIS_HOME}/bin/lib/common.sh"
+source "${EUXIS_HOME}/core/lib/common.sh"
 agent_lifecycle_transition "test-agent" "active" "test-session"
 state=$(agent_get_state "test-agent")
 [[ "${state}" == "active" ]] && pass "Lifecycle transition: active" || fail "Lifecycle transition: expected active, got ${state}"
@@ -131,7 +131,7 @@ rm -rf "${PLUGIN_DIR}"
 echo ""
 echo "[3/10] Memory Tiering & Pruning..."
 
-source "${EUXIS_HOME}/bin/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
 
 # T3.1: Keyword extraction works
 keywords=$(_extract_keywords "security authentication credentials")
@@ -175,8 +175,8 @@ rm -f "${TEMP_MEM}"
 echo ""
 echo "[4/10] Protocol & Prompt Assembly..."
 
-source "${EUXIS_HOME}/bin/lib/template.sh"
-source "${EUXIS_HOME}/bin/lib/prompt.sh"
+source "${EUXIS_HOME}/core/lib/template.sh"
+source "${EUXIS_HOME}/core/lib/prompt.sh"
 
 # T4.1: Conditional protocol loading — security keywords
 _EUXIS_PROTO_CACHE=""
@@ -229,7 +229,7 @@ fi
 echo ""
 echo "[5/10] Provider Tiering..."
 
-source "${EUXIS_HOME}/bin/lib/providers.sh"
+source "${EUXIS_HOME}/core/lib/providers.sh"
 
 # T5.1: S-Tier agents route to claude
 for agent in orchestrator architect product-manager reviewer; do
@@ -254,7 +254,7 @@ echo ""
 echo "[6/10] Dispatch Failure Modes..."
 
 # T6.1: Invalid agent name rejected
-output=$(source "${EUXIS_HOME}/bin/lib/agents.sh"; resolve_agent_path "!!!invalid!!!" 2>/dev/null) || true
+output=$(source "${EUXIS_HOME}/core/lib/agents.sh"; resolve_agent_path "!!!invalid!!!" 2>/dev/null) || true
 [[ -z "${output}" || ! -f "${output:-/nonexistent}" ]] && pass "Invalid agent name rejected" || fail "Invalid agent name not rejected"
 
 # T6.2: Invalid provider rejected (test parse_args logic)
@@ -295,13 +295,13 @@ echo "[7/10] Performance Regression..."
 # T7.1: Library sourcing completes in <100ms
 t_start=$(_perf_start)
 (
-    source "${EUXIS_HOME}/bin/lib/common.sh"
-    source "${EUXIS_HOME}/bin/lib/providers.sh"
-    source "${EUXIS_HOME}/bin/lib/agents.sh"
-    source "${EUXIS_HOME}/bin/lib/memory.sh"
-    source "${EUXIS_HOME}/bin/lib/session.sh"
-    source "${EUXIS_HOME}/bin/lib/template.sh"
-    source "${EUXIS_HOME}/bin/lib/prompt.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/providers.sh"
+    source "${EUXIS_HOME}/core/lib/agents.sh"
+    source "${EUXIS_HOME}/core/lib/memory.sh"
+    source "${EUXIS_HOME}/core/lib/session.sh"
+    source "${EUXIS_HOME}/core/lib/template.sh"
+    source "${EUXIS_HOME}/core/lib/prompt.sh"
 )
 ms=$(_perf_elapsed_ms "${t_start}")
 (( ms < 100 )) && pass "Library sourcing: ${ms}ms (budget: 100ms)" || fail "Library sourcing slow: ${ms}ms (budget: 100ms)"
@@ -336,7 +336,7 @@ ms2=$(_perf_elapsed_ms "${t_start}")
 # T7.5: Lint completes in <5s
 if [[ "${QUICK_MODE}" != "--quick" ]]; then
     t_start=$(_perf_start)
-    "${EUXIS_HOME}/bin/euxis-lint" > /dev/null 2>&1
+    "${EUXIS_HOME}/cli/bin/euxis-lint" > /dev/null 2>&1
     ms=$(_perf_elapsed_ms "${t_start}")
     (( ms < 5000 )) && pass "Lint: ${ms}ms (budget: 5000ms)" || fail "Lint slow: ${ms}ms (budget: 5000ms)"
 else
@@ -428,7 +428,7 @@ fi
 echo ""
 echo "[9/10] Semantic Drift Detection..."
 
-source "${EUXIS_HOME}/bin/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
 
 # T9.1: Drift detected on contradicting facts
 TEMP_MEM=$(mktemp)
@@ -465,7 +465,7 @@ rm -f "${TEMP_MEM}"
 echo ""
 echo "[10/10] Agent Health Probes..."
 
-source "${EUXIS_HOME}/bin/lib/agents.sh"
+source "${EUXIS_HOME}/core/lib/agents.sh"
 
 # T10.1: Liveness probe for existing agent
 liveness=$(agent_probe_liveness "architect")

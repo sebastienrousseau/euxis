@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/registry_sql.sh
+# Test suite for core/lib/registry_sql.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -82,8 +82,8 @@ EOF
     unset _EUXIS_LIB_COMMON
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/bin/lib/common.sh"
-    source "${HOME}/.euxis/bin/lib/registry_sql.sh"
+    source "${HOME}/.euxis/core/lib/common.sh"
+    source "${HOME}/.euxis/core/lib/registry_sql.sh"
 }
 
 teardown() {
@@ -294,7 +294,7 @@ teardown() {
     rm -f "${EUXIS_HOME}/agents/registry.db"
 
     # Need to source agents.sh for fallback
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/agents.sh" 2>/dev/null || true
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/agents.sh" 2>/dev/null || true
 
     run list_agents_hybrid 2>&1 || true
     # Should attempt fallback

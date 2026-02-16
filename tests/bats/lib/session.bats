@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/session.sh
+# Test suite for core/lib/session.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -13,7 +13,7 @@ setup() {
 
     # Mock date command for predictable timestamps
     cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/bin/bash
+#!/cli/bin/bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260214-120000"
 else
@@ -30,7 +30,7 @@ DATEEOF
     unset EUXIS_SESSION_ID
 
     # Source the library from real installation
-    source "${HOME}/.euxis/bin/lib/session.sh"
+    source "${HOME}/.euxis/core/lib/session.sh"
 }
 
 teardown() {

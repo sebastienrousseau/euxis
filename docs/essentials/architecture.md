@@ -721,7 +721,7 @@ flowchart TB
 
 ```
 ~/.euxis/
-├── bin/                          # Executables
+├── cli/bin/                          # Executables
 │   ├── euxis                    # Main entry point
 │   ├── euxis-dispatch           # Multi-agent dispatch
 │   ├── euxis-squad              # Squad deployment

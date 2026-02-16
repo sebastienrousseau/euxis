@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/common.sh
+# Test suite for core/lib/common.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -19,7 +19,7 @@ setup() {
 
     # Re-source library (reset include guard)
     unset _EUXIS_LIB_COMMON
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
 }
 
 teardown() {

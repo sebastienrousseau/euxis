@@ -4,7 +4,7 @@
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # ===== memory.sh: No subprocess forks in keyword extraction =====
-mem_file="${EUXIS_HOME}/bin/lib/memory.sh"
+mem_file="${EUXIS_HOME}/core/lib/memory.sh"
 
 # _extract_keywords exists
 if grep -q '_extract_keywords' "${mem_file}"; then
@@ -57,7 +57,7 @@ else
 fi
 
 # ===== skill-detector.sh: No pipe chains =====
-skill_file="${EUXIS_HOME}/bin/lib/skill-detector.sh"
+skill_file="${EUXIS_HOME}/core/lib/skill-detector.sh"
 
 # Uses associative array (local -A)
 if grep -q 'local -A seen' "${skill_file}"; then
@@ -88,7 +88,7 @@ else
 fi
 
 # ===== session.sh: Pure bash basename =====
-session_file="${EUXIS_HOME}/bin/lib/session.sh"
+session_file="${EUXIS_HOME}/core/lib/session.sh"
 
 # No basename subprocess
 if grep -q '$(basename' "${session_file}"; then
@@ -105,7 +105,7 @@ else
 fi
 
 # ===== prompt.sh: Pure bash dirname =====
-prompt_file="${EUXIS_HOME}/bin/lib/prompt.sh"
+prompt_file="${EUXIS_HOME}/core/lib/prompt.sh"
 
 # No dirname subprocess in prompt assembly (comment doesn't count)
 if grep -v '^[[:space:]]*#' "${prompt_file}" | grep -q '$(dirname'; then
@@ -122,7 +122,7 @@ else
 fi
 
 # ===== template.sh: No sed =====
-tpl_file="${EUXIS_HOME}/bin/lib/template.sh"
+tpl_file="${EUXIS_HOME}/core/lib/template.sh"
 if grep -q '| sed' "${tpl_file}"; then
     assert_eq "template no sed" "no-sed" "has-sed"
 else
@@ -130,7 +130,7 @@ else
 fi
 
 # ===== Boot guards exist =====
-euxis_file="${EUXIS_HOME}/bin/euxis.sh"
+euxis_file="${EUXIS_HOME}/cli/bin/euxis.sh"
 
 # Health check skip
 if grep -q 'EUXIS_HEALTH_CHECK.*skip' "${euxis_file}"; then

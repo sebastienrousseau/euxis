@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/providers.sh
+# Test suite for core/lib/providers.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -19,8 +19,8 @@ setup() {
     unset PROVIDER_FLAGS
 
     # Source dependencies from real installation
-    source "${EUXIS_HOME}/bin/lib/common.sh"
-    source "${EUXIS_HOME}/bin/lib/providers.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/providers.sh"
 }
 
 teardown() {

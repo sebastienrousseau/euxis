@@ -217,7 +217,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: bin/, config/, data/, docs/, agents/prompts/, tests/, tui/
+OBSERVATION 1: Found: cli/bin/, config/, data/, docs/, agents/prompts/, tests/, tui/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -226,7 +226,7 @@ FINAL ANSWER:
 
 ## Core Components
 
-### 1. Agent Execution (bin/)
+### 1. Agent Execution (cli/bin/)
 - 38 executable tools for agent deployment
 - Shell libraries in core/lib/ for shared functionality
 - Entry point: `euxis` command
@@ -364,7 +364,7 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 **Diagnosis:**
 ```bash
 echo $PATH | grep "$HOME/bin"
-ls ~/bin/euxis
+ls ~/cli/bin/euxis
 ```
 
 **Solution:**

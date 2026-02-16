@@ -38,8 +38,8 @@ jobs:
             setup_script: |
               sudo apt-get update
               sudo apt-get install -y shellcheck
-              sudo wget -O /usr/local/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
-              sudo chmod +x /usr/local/bin/shfmt
+              sudo wget -O /usr/local/cli/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
+              sudo chmod +x /usr/local/cli/bin/shfmt
           - os: macos-latest
             setup_script: |
               brew install shellcheck shfmt
@@ -64,7 +64,7 @@ jobs:
           # Find .sh files
           find . -name "*.sh" -type f > shell_scripts.list
           # Find shebang-detected scripts
-          find . -type f -exec grep -l "^#!/bin/bash\|^#!/bin/sh\|^#!/usr/bin/env bash" {} \; 2>/dev/null >> shell_scripts.list
+          find . -type f -exec grep -l "^#!/cli/bin/bash\|^#!/cli/bin/sh\|^#!/usr/bin/env bash" {} \; 2>/dev/null >> shell_scripts.list
           # Remove duplicates and exclude venv/build dirs
           sort shell_scripts.list | uniq | grep -v -E "(\.venv/|venv/|build/|dist/|__pycache__/)" > shell_scripts_final.list
           echo "Found $(wc -l < shell_scripts_final.list) shell scripts:"
@@ -196,11 +196,11 @@ jobs:
         run: |
           # Install gitleaks for secret detection
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz | tar -xz
-          sudo mv gitleaks /usr/local/bin/
+          sudo mv gitleaks /usr/local/cli/bin/
 
           # Install trufflehog as backup
           curl -sSfL https://github.com/trufflesecurity/trufflehog/releases/download/v3.63.2/trufflehog_3.63.2_linux_amd64.tar.gz | tar -xz
-          sudo mv trufflehog /usr/local/bin/
+          sudo mv trufflehog /usr/local/cli/bin/
 
       - name: Scan for hardcoded secrets (gitleaks)
         run: |
@@ -357,7 +357,7 @@ jobs:
             fi
 
             # Test critical library functions load without errors
-            for lib in bin/lib/*.sh; do
+            for lib in core/lib/*.sh; do
               if [ -f "$lib" ]; then
                 echo "Testing $lib syntax..."
                 sh -n "$lib" || exit 1
@@ -394,7 +394,7 @@ jobs:
             echo "ShellCheck update available: $current_version -> ${latest_version#v}"
             # Install latest version
             wget -O- https://github.com/koalaman/shellcheck/releases/download/$latest_version/shellcheck-$latest_version.linux.x86_64.tar.xz | tar -xJ
-            sudo cp shellcheck-$latest_version/shellcheck /usr/local/bin/
+            sudo cp shellcheck-$latest_version/shellcheck /usr/local/cli/bin/
           else
             echo "ShellCheck is up to date"
           fi

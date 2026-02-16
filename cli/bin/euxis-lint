@@ -133,7 +133,7 @@ fi
 
 # CHECK 4: Permissions
 echo "[4/8] Checking Script Permissions..."
-for script in "$EUXIS_HOME/bin/"*; do
+for script in "$EUXIS_HOME/cli/bin/"*; do
     # Skip directories (e.g., lib/)
     [[ -f "$script" ]] || continue
     PERMS=$(stat -c "%a" "$script" 2>/dev/null || stat -f "%Lp" "$script" 2>/dev/null)

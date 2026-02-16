@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/validation.sh
+# Test suite for core/lib/validation.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -10,7 +10,7 @@ setup() {
     export EUXIS_HOME="${EUXIS_TEST_TMPDIR}/euxis"
 
     # Create valid Euxis directory structure (needed by validate_euxis_structure)
-    mkdir -p "${EUXIS_HOME}/bin/lib"
+    mkdir -p "${EUXIS_HOME}/core/lib"
     mkdir -p "${EUXIS_HOME}/prompts"
     mkdir -p "${EUXIS_HOME}/data"
 
@@ -30,8 +30,8 @@ EOF
     # Reset include guards and re-source
     unset _EUXIS_LIB_VALIDATION
     unset _EUXIS_LIB_COMMON
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/common.sh"
-    source "${BATS_TEST_DIRNAME}/../../../bin/lib/validation.sh"
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../core/lib/validation.sh"
 }
 
 teardown() {
@@ -175,7 +175,7 @@ teardown() {
 
 @test "validate_file_executable accepts executable file" {
     test_file="${EUXIS_TEST_TMPDIR}/test_executable"
-    echo "#!/bin/bash" > "${test_file}"
+    echo "#!/cli/bin/bash" > "${test_file}"
     chmod +x "${test_file}"
 
     run validate_file_executable "${test_file}"
@@ -208,7 +208,7 @@ teardown() {
 
 @test "validate_file_executable handles files with spaces" {
     test_file="${EUXIS_TEST_TMPDIR}/test file with spaces"
-    echo "#!/bin/bash" > "${test_file}"
+    echo "#!/cli/bin/bash" > "${test_file}"
     chmod +x "${test_file}"
 
     run validate_file_executable "${test_file}"
@@ -218,7 +218,7 @@ teardown() {
 @test "validate_file_executable handles symlinks" {
     target_file="${EUXIS_TEST_TMPDIR}/target"
     link_file="${EUXIS_TEST_TMPDIR}/link"
-    echo "#!/bin/bash" > "${target_file}"
+    echo "#!/cli/bin/bash" > "${target_file}"
     chmod +x "${target_file}"
     ln -s "${target_file}" "${link_file}"
 
@@ -262,7 +262,7 @@ teardown() {
 }
 
 @test "validate_euxis_structure fails on missing bin directory" {
-    rm -rf "${EUXIS_HOME}/bin"
+    rm -rf "${EUXIS_HOME}/cli/bin"
 
     run validate_euxis_structure
     [[ "${status}" -eq 1 ]]
@@ -313,7 +313,7 @@ teardown() {
 }
 
 @test "validate_minimal fails with missing structure" {
-    rm -rf "${EUXIS_HOME}/bin"
+    rm -rf "${EUXIS_HOME}/cli/bin"
 
     run validate_minimal
     [[ "${status}" -eq 1 ]]
@@ -352,7 +352,7 @@ teardown() {
     unicode_dir="${EUXIS_TEST_TMPDIR}/测试目录"
     mkdir -p "${unicode_dir}"
     unicode_file="${unicode_dir}/测试文件"
-    echo "#!/bin/bash" > "${unicode_file}"
+    echo "#!/cli/bin/bash" > "${unicode_file}"
     chmod +x "${unicode_file}"
 
     run validate_file_executable "${unicode_file}"
@@ -367,7 +367,7 @@ teardown() {
     mkdir -p "${long_path}" 2>/dev/null || skip "Path too long for filesystem"
 
     test_file="${long_path}/test_file"
-    echo "#!/bin/bash" > "${test_file}" 2>/dev/null || skip "Cannot create file"
+    echo "#!/cli/bin/bash" > "${test_file}" 2>/dev/null || skip "Cannot create file"
     chmod +x "${test_file}" 2>/dev/null || skip "Cannot set permissions"
 
     run validate_file_executable "${test_file}"

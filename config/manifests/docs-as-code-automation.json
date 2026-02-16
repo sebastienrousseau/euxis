@@ -20,7 +20,7 @@
       "agent": "maintainer",
       "priority": "P2",
       "task": "Create automated documentation linting that validates code snippet syntax, checks for broken command references, and ensures all CLI commands mentioned in docs actually exist in the codebase.",
-      "verify_cmd": "test -f bin/euxis-docs-lint && chmod +x bin/euxis-docs-lint"
+      "verify_cmd": "test -f cli/bin/euxis-docs-lint && chmod +x cli/bin/euxis-docs-lint"
     },
     {
       "agent": "gatekeeper",
@@ -38,7 +38,7 @@
       "agent": "watchdog",
       "priority": "P3",
       "task": "Create monitoring and alerting for documentation drift - detect when CLI commands change but documentation examples are not updated. Implement automated suggestions for fixing broken examples.",
-      "verify_cmd": "test -f bin/euxis-docs-drift-monitor && python3 -c 'import json; json.load(open(\"config/docs-monitoring.json\"))'"
+      "verify_cmd": "test -f cli/bin/euxis-docs-drift-monitor && python3 -c 'import json; json.load(open(\"config/docs-monitoring.json\"))'"
     }
   ]
 }

@@ -113,7 +113,7 @@ The `librarian` agent is responsible for documentation governance sweeps.
 Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 ```
 
-The `prepare-commit-msg` hook at `~/.euxis/bin/hooks/prepare-commit-msg` appends the `Engineered with Euxis` trailer automatically.
+The `prepare-commit-msg` hook at `~/.euxis/cli/bin/hooks/prepare-commit-msg` appends the `Engineered with Euxis` trailer automatically.
 
 **Type prefixes:** `feat`, `fix`, `docs`, `refactor`, `test`, `ci`, `chore`, `perf`, `security`.
 

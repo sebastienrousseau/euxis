@@ -1,5 +1,5 @@
 #!/usr/bin/env bats
-# Test suite for bin/lib/cli.sh
+# Test suite for core/lib/cli.sh
 # (c) 2026 Euxis Fleet. All rights reserved.
 
 # Test setup - run before each test
@@ -30,7 +30,7 @@ EOF
 
     # Mock date command
     cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/bin/bash
+#!/cli/bin/bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260209-123456"
 else
@@ -50,12 +50,12 @@ DATEEOF
     unset _EUXIS_LIB_SESSION
 
     # Source dependencies from real EUXIS_HOME
-    source "${EUXIS_HOME}/bin/lib/common.sh"
-    source "${EUXIS_HOME}/bin/lib/validation.sh"
-    source "${EUXIS_HOME}/bin/lib/agents.sh"
-    source "${EUXIS_HOME}/bin/lib/session.sh"
-    source "${EUXIS_HOME}/bin/lib/providers.sh"
-    source "${EUXIS_HOME}/bin/lib/cli.sh"
+    source "${EUXIS_HOME}/core/lib/common.sh"
+    source "${EUXIS_HOME}/core/lib/validation.sh"
+    source "${EUXIS_HOME}/core/lib/agents.sh"
+    source "${EUXIS_HOME}/core/lib/session.sh"
+    source "${EUXIS_HOME}/core/lib/providers.sh"
+    source "${EUXIS_HOME}/core/lib/cli.sh"
 }
 
 teardown() {

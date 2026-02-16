@@ -310,7 +310,7 @@ resolve_memory_contradiction() {
 auto_evolve_graph() {
     local memory_file="$1"
     local agent="$2"
-    local graph_cmd="${EUXIS_HOME}/bin/euxis-graph"
+    local graph_cmd="${EUXIS_HOME}/cli/bin/euxis-graph"
 
     [[ -x "${graph_cmd}" ]] || return 0
     [[ -f "${memory_file}" ]] || return 0

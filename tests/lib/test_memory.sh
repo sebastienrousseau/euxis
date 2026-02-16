@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests for lib/memory.sh
 
-source "${EUXIS_HOME}/bin/lib/memory.sh"
+source "${EUXIS_HOME}/core/lib/memory.sh"
 
 # Setup: create a temporary memory file
 TEST_TMPDIR=$(mktemp -d)
