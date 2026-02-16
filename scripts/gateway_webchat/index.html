@@ -16,17 +16,30 @@
   <h1>Euxis Gateway WebChat</h1>
   <div id="log"></div>
   <div id="controls">
+    <input id="token" placeholder="token (optional)" />
     <input id="session" placeholder="session_id" value="sess_webchat_demo" />
     <input id="message" placeholder="Type a message" />
     <button id="send">Send</button>
   </div>
   <script>
     const log = document.getElementById('log');
+    const tokenInput = document.getElementById('token');
     const sessionInput = document.getElementById('session');
     const messageInput = document.getElementById('message');
     const sendBtn = document.getElementById('send');
 
-    const ws = new WebSocket(`ws://${location.host}/`);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('token')) {
+      tokenInput.value = params.get('token');
+    }
+
+    function wsUrl() {
+      const token = tokenInput.value.trim();
+      if (!token) return `ws://${location.host}/`;
+      return `ws://${location.host}/?token=${encodeURIComponent(token)}`;
+    }
+
+    let ws = new WebSocket(wsUrl());
 
     ws.onmessage = (evt) => {
       const line = document.createElement('div');
@@ -34,6 +47,11 @@
       log.appendChild(line);
       log.scrollTop = log.scrollHeight;
     };
+
+    tokenInput.addEventListener('change', () => {
+      if (ws) ws.close();
+      ws = new WebSocket(wsUrl());
+    });
 
     sendBtn.onclick = () => {
       const payload = {

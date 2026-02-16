@@ -21,9 +21,11 @@ from gateway_adapter_registry import build_adapters
 from gateway_utils import (
     load_session_from_disk,
     load_session_meta,
+    load_run_events,
     persist_message,
     persist_run_event,
     persist_session_meta,
+    runs_dir,
     timestamp,
 )
 DEFAULT_CONFIG = {
@@ -155,6 +157,41 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         meta = load_session_meta(session_id)
         return JSONResponse({"session_id": session_id, "meta": meta, "messages": STATE.sessions[session_id]})
 
+    @app.get("/sessions/export")
+    async def sessions_export() -> JSONResponse:
+        data: Dict[str, Any] = {}
+        for session_id in STATE.sessions.keys():
+            if not STATE.sessions[session_id]:
+                STATE.sessions[session_id] = load_session_from_disk(session_id)
+            data[session_id] = STATE.sessions[session_id]
+        return JSONResponse({"sessions": data})
+
+    @app.post("/sessions/import")
+    async def sessions_import(payload: Dict[str, Any]) -> JSONResponse:
+        sessions = payload.get("sessions", {})
+        if not isinstance(sessions, dict):
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        count = 0
+        for session_id, entries in sessions.items():
+            if not isinstance(entries, list):
+                continue
+            ensure_session(session_id)
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                persist_message(session_id, entry)
+                count += 1
+        return JSONResponse({"status": "ok", "imported": count})
+
+    @app.get("/runs")
+    async def runs() -> JSONResponse:
+        runs = [p.stem for p in runs_dir().glob("*.jsonl")]
+        return JSONResponse({"runs": runs})
+
+    @app.get("/runs/{run_id}")
+    async def run_detail(run_id: str) -> JSONResponse:
+        return JSONResponse({"run_id": run_id, "events": load_run_events(run_id)})
+
     @app.post("/approvals/{run_id}/approve")
     async def approve(run_id: str) -> JSONResponse:
         pending = STATE.pending_approvals.pop(run_id, None)
@@ -180,6 +217,13 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             STATE.conn_seq[conn_id] = seq_state["value"]
             break
         return JSONResponse({"status": "approved"})
+
+    @app.post("/approvals/{run_id}/reject")
+    async def reject(run_id: str) -> JSONResponse:
+        pending = STATE.pending_approvals.pop(run_id, None)
+        if not pending:
+            return JSONResponse({"status": "not_found"}, status_code=404)
+        return JSONResponse({"status": "rejected"})
 
     @app.post("/admin/exec")
     async def update_exec_policy(payload: Dict[str, Any]) -> JSONResponse:

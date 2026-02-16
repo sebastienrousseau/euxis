@@ -76,3 +76,18 @@ def persist_run_event(run_id: str, entry: Dict[str, Any]) -> None:
     path = runs_dir() / f"{run_id}.jsonl"
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(entry) + "\n")
+
+
+def load_run_events(run_id: str) -> List[Dict[str, Any]]:
+    path = runs_dir() / f"{run_id}.jsonl"
+    if not path.exists():
+        return []
+    entries: List[Dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            entries.append(json.loads(line))
+        except Exception:
+            continue
+    return entries

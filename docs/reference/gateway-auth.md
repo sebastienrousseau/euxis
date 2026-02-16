@@ -19,6 +19,14 @@ Send the token as a WebSocket header:
 Authorization: Bearer <token>
 ```
 
+### WebChat Usage
+
+If `allow_query_param` is enabled, you can pass the token via query param:
+
+```
+http://127.0.0.1:18789/webchat/?token=<token>
+```
+
 ### Example (Python)
 
 ```python

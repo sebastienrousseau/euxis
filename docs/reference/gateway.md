@@ -225,6 +225,52 @@ Fetch a session:
 http://127.0.0.1:18789/sessions/<session_id>
 ```
 
+Export sessions:
+
+```
+http://127.0.0.1:18789/sessions/export
+```
+
+Import sessions (POST JSON body):
+
+```
+http://127.0.0.1:18789/sessions/import
+```
+
+## Run APIs
+
+List runs:
+
+```
+http://127.0.0.1:18789/runs
+```
+
+Fetch a run:
+
+```
+http://127.0.0.1:18789/runs/<run_id>
+```
+
+## Approvals APIs
+
+List approvals:
+
+```
+http://127.0.0.1:18789/approvals
+```
+
+Approve:
+
+```
+http://127.0.0.1:18789/approvals/<run_id>/approve
+```
+
+Reject:
+
+```
+http://127.0.0.1:18789/approvals/<run_id>/reject
+```
+
 Validate custom frames (JSON array or JSONL):
 
 ```bash
