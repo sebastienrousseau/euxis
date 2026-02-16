@@ -193,7 +193,7 @@ Data fields:
 Run the protocol validator:
 
 ```bash
-python3 scripts/gateway_protocol_test.py
+python3 gateway/protocol_test.py
 ```
 
 Optional validator deps:
@@ -207,7 +207,7 @@ pip install jsonschema referencing
 Run a health check against a running gateway:
 
 ```bash
-python3 scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health
+python3 gateway/smoke_test.py --url http://127.0.0.1:18789/health
 ```
 
 ## Demo Client
@@ -215,7 +215,7 @@ python3 scripts/gateway_smoke_test.py --url http://127.0.0.1:18789/health
 Run a minimal WebSocket client:
 
 ```bash
-python3 scripts/gateway_demo.py --url ws://127.0.0.1:18789 --session sess_demo
+python3 gateway/demo.py --url ws://127.0.0.1:18789 --session sess_demo
 ```
 
 ## WebChat UI
@@ -436,7 +436,7 @@ Set `meta.elevated` to `full` in `chat.send` to request elevated execution. This
 Validate custom frames (JSON array or JSONL):
 
 ```bash
-python3 scripts/gateway_protocol_test.py --frames /path/to/frames.jsonl
+python3 gateway/protocol_test.py --frames /path/to/frames.jsonl
 ```
 Canvas schema reference:
 

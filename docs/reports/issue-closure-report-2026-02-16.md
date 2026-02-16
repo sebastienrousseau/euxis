@@ -17,13 +17,13 @@ All open issues were closed after confirming implementation coverage across gate
 - #6 — Epic: Gateway channel adapters MVP (Slack + Telegram)
 
 ## Evidence Pointers
-- Gateway audit log + approvals persistence: scripts/gateway_utils.py, scripts/gateway_server.py
-- Multi-agent routing: scripts/gateway_server.py (`chat.send` meta mode)
-- Diagnostics/status: scripts/gateway_server.py (`status` CLI), docs/reference/gateway-cli.md
-- Adapter SDK/registry: scripts/gateway_adapter_sdk.py, scripts/gateway_adapter_registry.py, docs/reference/gateway-adapters.md
-- Slack/Telegram adapters: scripts/gateway_adapters/slack_adapter.py, scripts/gateway_adapters/telegram_adapter.py
-- Session routing + mention gating: scripts/gateway_server.py (policy + session metadata)
-- WebChat upgrades: scripts/gateway_webchat/index.html
+- Gateway audit log + approvals persistence: gateway/utils.py, gateway/server.py
+- Multi-agent routing: gateway/server.py (`chat.send` meta mode)
+- Diagnostics/status: gateway/server.py (`status` CLI), docs/reference/gateway-cli.md
+- Adapter SDK/registry: adapters/sdk.py, adapters/registry.py, docs/reference/gateway-adapters.md
+- Slack/Telegram adapters: adapters/slack_adapter.py, adapters/telegram_adapter.py
+- Session routing + mention gating: gateway/server.py (policy + session metadata)
+- WebChat upgrades: gateway/webchat/index.html
 
 ## Repository State
 - Open issues: 0

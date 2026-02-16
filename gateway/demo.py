@@ -2,7 +2,7 @@
 """Gateway WebSocket demo client.
 
 Usage:
-  python3 scripts/gateway_demo.py --url ws://127.0.0.1:18789 --session sess_demo
+  python3 gateway/demo.py --url ws://127.0.0.1:18789 --session sess_demo
 """
 
 from __future__ import annotations
