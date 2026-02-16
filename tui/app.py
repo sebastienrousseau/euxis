@@ -53,12 +53,18 @@ class ConfirmDeployScreen(ModalScreen[bool]):
     """
 
     def __init__(
-        self, operation: str, name: str, task: str = "", **kwargs: Any,
+        self,
+        operation: str,
+        name: str,
+        task: str = "",
+        reason: str = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._operation = operation
         self._name = name
         self._task = task
+        self._reason = reason
 
     def compose(self):  # noqa: ANN201
         """Build the confirmation dialog."""
@@ -70,6 +76,8 @@ class ConfirmDeployScreen(ModalScreen[bool]):
         with Vertical():
             yield Label(f"Deploy {self._operation}?", classes="title")
             yield Static(f"  {self._operation.capitalize()}: {self._name}")
+            if self._reason:
+                yield Static(f"  Why: {self._reason}")
             if task_preview:
                 yield Static(f"  Task: {task_preview}")
             with Center(classes="buttons"):
@@ -176,6 +184,8 @@ class EuxisApp(App):
             self.notify(_("Unknown agent: {}").format(agent_id), severity="error")
             return
 
+        reason = self._format_agent_reason(agent)
+
         def _on_confirm(confirmed: bool) -> None:
             if confirmed:
                 self.push_screen(
@@ -184,7 +194,7 @@ class EuxisApp(App):
 
         self.push_screen(
             ConfirmDeployScreen(
-                operation="agent", name=agent_id, task=task,
+                operation="agent", name=agent_id, task=task, reason=reason,
             ),
             callback=_on_confirm,
         )
@@ -252,6 +262,16 @@ class EuxisApp(App):
             ),
             callback=_on_confirm,
         )
+
+    def _format_agent_reason(self, agent: Any) -> str:
+        """Return a short, human-readable reason for the agent selection."""
+        caps = [cap for cap in agent.capability_tags if cap]
+        tags = [tag for tag in agent.tags if tag]
+        if caps:
+            return "specialized in " + ", ".join(caps[:3])
+        if tags:
+            return "strong in " + ", ".join(tags[:3])
+        return f"{agent.tier_label} · {agent.activation_label}"
 
     def action_open_settings(self) -> None:
         """Open the settings screen."""

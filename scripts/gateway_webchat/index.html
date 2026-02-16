@@ -8,7 +8,12 @@
     body { font-family: system-ui, sans-serif; margin: 0; display: flex; height: 100vh; }
     #sidebar { width: 320px; border-right: 1px solid #ddd; padding: 1rem; overflow: auto; }
     #main { flex: 1; padding: 1rem; display: flex; flex-direction: column; }
-    #log { border: 1px solid #ddd; padding: 1rem; flex: 1; overflow: auto; }
+    #log { border: 1px solid #ddd; padding: 1rem; flex: 1; overflow: auto; background: #fff; }
+    .log-item { padding: 0.35rem 0; border-bottom: 1px solid #f0f0f0; }
+    .log-item:last-child { border-bottom: none; }
+    .log-meta { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+    .log-body { font-size: 0.95rem; color: #111; }
+    .log-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; white-space: pre-wrap; }
     #controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
     #canvas { border: 1px dashed #bbb; padding: 0.75rem; margin-top: 1rem; background: #fafafa; }
     #canvas pre { white-space: pre-wrap; font-size: 0.85rem; }
@@ -27,8 +32,13 @@
     <input id="token" placeholder="token (optional)" />
     <h2>Sessions</h2>
     <div id="sessions" class="list"></div>
+    <h2>Current Route</h2>
+    <div id="route" class="list">None</div>
     <h2>Approvals</h2>
     <div id="approvals" class="list"></div>
+    <div id="exports" class="list">
+      <button id="copy-export">Copy Session Export</button>
+    </div>
   </div>
   <div id="main">
     <div id="log"></div>
@@ -54,6 +64,8 @@
     const sendBtn = document.getElementById('send');
     const sessionsEl = document.getElementById('sessions');
     const approvalsEl = document.getElementById('approvals');
+    const routeEl = document.getElementById('route');
+    const copyExportBtn = document.getElementById('copy-export');
     const canvasView = document.getElementById('canvas-view');
     const canvasEditor = document.getElementById('canvas-editor');
     const canvasSave = document.getElementById('canvas-save');
@@ -88,11 +100,93 @@
       sendConnect();
     };
 
-    ws.onmessage = (evt) => {
-      const line = document.createElement('div');
-      line.textContent = evt.data;
-      log.appendChild(line);
+    function renderLogItem(kind, title, body, meta) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'log-item';
+      const metaEl = document.createElement('div');
+      metaEl.className = 'log-meta';
+      metaEl.textContent = meta || kind;
+      const bodyEl = document.createElement('div');
+      bodyEl.className = 'log-body';
+      bodyEl.textContent = title || '';
+      if (body) {
+        const bodyDetail = document.createElement('div');
+        bodyDetail.className = 'log-code';
+        bodyDetail.textContent = body;
+        bodyEl.appendChild(bodyDetail);
+      }
+      wrapper.appendChild(metaEl);
+      wrapper.appendChild(bodyEl);
+      log.appendChild(wrapper);
       log.scrollTop = log.scrollHeight;
+    }
+
+    function formatEvent(data) {
+      if (!data || typeof data !== 'object') {
+        return { kind: 'raw', title: String(data || ''), body: '' };
+      }
+      if (data.type === 'event') {
+        const evt = data.event || 'event';
+        const seq = data.seq ? `#${data.seq}` : '';
+        if (evt === 'agent') {
+          const payload = data.data || {};
+          const agent = payload.agent_id || 'agent';
+          const status = payload.status || 'update';
+          const content = payload.content || '';
+          return {
+            kind: 'agent',
+            title: `${agent} · ${status}`,
+            body: content,
+            meta: `agent ${seq}`.trim(),
+          };
+        }
+        return {
+          kind: evt,
+          title: `${evt} ${seq}`.trim(),
+          body: JSON.stringify(data.data || {}, null, 2),
+          meta: evt,
+        };
+      }
+      if (data.type === 'response') {
+        if (data.ok) {
+          return {
+            kind: 'response',
+            title: 'Request acknowledged',
+            body: JSON.stringify(data.result || {}, null, 2),
+            meta: `response ${data.id || ''}`.trim(),
+          };
+        }
+        return {
+          kind: 'error',
+          title: data.error?.message || 'Request failed',
+          body: JSON.stringify(data.error || {}, null, 2),
+          meta: `error ${data.id || ''}`.trim(),
+        };
+      }
+      if (data.type === 'request') {
+        return {
+          kind: 'request',
+          title: `${data.method || 'request'}`,
+          body: JSON.stringify(data.params || {}, null, 2),
+          meta: `request ${data.id || ''}`.trim(),
+        };
+      }
+      return { kind: 'raw', title: JSON.stringify(data), body: '' };
+    }
+
+    ws.onmessage = (evt) => {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(evt.data);
+      } catch (err) {
+        parsed = null;
+      }
+      if (!parsed) {
+        renderLogItem('raw', evt.data, '', 'raw');
+        return;
+      }
+      const formatted = formatEvent(parsed);
+      renderLogItem(formatted.kind, formatted.title, formatted.body, formatted.meta);
     };
 
     ws.onclose = () => {
@@ -143,6 +237,15 @@
         div.onclick = () => { sessionInput.value = s.session_id; };
         sessionsEl.appendChild(div);
       });
+      const current = (data.sessions || []).find((s) => s.session_id === sessionInput.value);
+      if (current && current.meta) {
+        const owner = current.meta.owner || 'unknown';
+        const channel = current.meta.channel_id || 'webchat';
+        const scope = current.meta.scope || 'dm';
+        routeEl.textContent = `${owner} via ${channel} (${scope})`;
+      } else {
+        routeEl.textContent = 'None';
+      }
     }
 
     async function refreshApprovals() {
@@ -152,7 +255,10 @@
       (data.pending || []).forEach((a) => {
         const div = document.createElement('div');
         div.className = 'item';
-        div.textContent = `${a.run_id} ${a.agent_id}`;
+        const content = (a.content || '').trim();
+        const snippet = content.length > 80 ? `${content.slice(0, 80)}...` : content;
+        const context = snippet || 'Execution approval requested';
+        div.textContent = `${a.agent_id}: ${context}`;
         const approve = document.createElement('button');
         approve.textContent = 'Approve';
         approve.onclick = async () => {
@@ -263,6 +369,28 @@
     refreshSessions();
     refreshApprovals();
     refreshCanvas();
+
+    copyExportBtn.onclick = async () => {
+      try {
+        const res = await fetch('/sessions/export');
+        const data = await res.json();
+        const payload = JSON.stringify(data, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(payload);
+          alert('Session export copied to clipboard.');
+          return;
+        }
+        const temp = document.createElement('textarea');
+        temp.value = payload;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        temp.remove();
+        alert('Session export copied to clipboard.');
+      } catch (err) {
+        alert('Failed to copy export.');
+      }
+    };
   </script>
 </body>
 </html>
