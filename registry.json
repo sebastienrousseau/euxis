@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "protocol_version": "0.0.7",
+  "protocol_version": "0.0.8",
   "last_updated": "2026-02-16",
   "capabilities_registry": "capabilities.json",
   "constitution": "CONSTITUTION.md",

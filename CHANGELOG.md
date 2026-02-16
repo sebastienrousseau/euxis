@@ -7,13 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.0.8] - 2026-02-16
+
 ### Added
-- Documentation audit with AI-ready `llms.txt` file
-- Gateway protocol documentation and quickstart
-- Gateway auth and config references
-- Gateway JSON Schemas for request/response/event frames
-- Gateway protocol validation harness
-- Gateway CLI reference and adapter design notes
+- **Gateway Protocol Architecture**: Complete gateway server implementation with WebSocket support and multi-adapter framework
+- **Voice Streaming Pipeline**: Real-time STT/TTS hooks with streaming WebSocket delivery and webhook payloads
+- **Gateway Authentication System**: Hardened auth with token validation, rate limiting, and secure session management
+- **Voice Command Safety**: Command filtering, audio validation, and safety hooks for voice interactions
+- **Gateway Canvas UI**: Interactive canvas system with gesture support and real-time collaboration
+- **Gateway Adapters**: Slack and Telegram adapter implementations with session management
+- **Gateway CLI Tools**: Complete CLI toolkit for gateway management and testing
+- **Gateway JSON Schemas**: Comprehensive schema validation for request/response/event frames
+- **Gateway Protocol Validation**: Test harness and smoke testing suite for protocol compliance
+- **Documentation Overhaul**: AI-ready `llms.txt` file and comprehensive gateway documentation
+- **New Core Agents**: `guard`, `pair`, `route` for specialized coordination and safety
+- **New Fleet Agents**: `bridge`, `deep-researcher`, `distill`, `govern`, `heal`, `trace` for enhanced capabilities
+- **Crypto Library Enhancements**: Improved error handling, key management, and performance optimizations
+- **TUI Performance Improvements**: Enhanced fleet monitoring, tips system, and configuration management
+- **Benchmark Infrastructure**: TUI performance benchmarking and comprehensive test coverage
+
+### Changed
+- **Voice Retention System**: Enhanced audio processing with configurable retention policies
+- **Gateway Event Handling**: Streamlined event processing with improved error recovery
+- **Authentication Flow**: Simplified handshake process with better security controls
+- **Documentation Architecture**: Restructured gateway docs with progressive disclosure
+- **Agent Escalation Paths**: Enhanced inter-agent communication and conflict resolution
+- **Performance Metrics**: Improved collectors and analyzers for better observability
+- **Test Infrastructure**: Expanded test coverage with property-based and edge case testing
+
+### Fixed
+- **Gateway Auth Vulnerabilities**: Hardened token validation and session security
+- **Voice Command Processing**: Fixed audio stream handling and command safety
+- **TUI Layout Issues**: Resolved fleet monitor grid spacing and responsive design
+- **Crypto Operations**: Fixed error handling in key management and encryption operations
+- **Performance Bottlenecks**: Optimized collectors and reduced memory overhead
+- **Documentation Links**: Fixed cross-references throughout gateway documentation
+- **Test Reliability**: Stabilized flaky tests and improved test isolation
+
+### Security
+- **Gateway Security Hardening**: Input validation, rate limiting, and secure defaults
+- **Voice Command Safety**: Audio validation and command filtering to prevent abuse
+- **Authentication Improvements**: Token expiration, secure session handling, and audit logging
+- **Crypto Library Security**: Enhanced key management and secure random generation
 
 ---
 
@@ -254,7 +291,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Comparison Links
 
-[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...HEAD
+[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.8...HEAD
+[0.0.8]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5
