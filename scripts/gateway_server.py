@@ -48,6 +48,7 @@ class GatewayState:
         self.session_version = 0
         self.last_event_ts = ""
         self.running: Dict[str, asyncio.Task] = {}
+        self.pending_approvals: Dict[str, Dict[str, Any]] = {}
 
 
 STATE = GatewayState()
@@ -119,6 +120,27 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                 "uptime_ms": uptime_ms,
             }
         )
+
+    @app.get("/approvals")
+    async def approvals() -> JSONResponse:
+        return JSONResponse({"pending": list(STATE.pending_approvals.values())})
+
+    @app.post("/approvals/{run_id}/approve")
+    async def approve(run_id: str) -> JSONResponse:
+        pending = STATE.pending_approvals.pop(run_id, None)
+        if not pending:
+            return JSONResponse({"status": "not_found"}, status_code=404)
+        pending["approved"] = True
+        STATE.pending_approvals[run_id] = pending
+        return JSONResponse({"status": "approved"})
+
+    @app.post("/admin/exec")
+    async def update_exec_policy(payload: Dict[str, Any]) -> JSONResponse:
+        exec_cfg = config["gateway"].setdefault("exec", {})
+        for key in ("policy", "ask", "ask_fallback", "allowlist"):
+            if key in payload:
+                exec_cfg[key] = payload[key]
+        return JSONResponse({"status": "ok", "exec": exec_cfg})
 
     @app.websocket("/")
     async def websocket_endpoint(ws: WebSocket) -> None:
@@ -252,11 +274,21 @@ async def handle_frame(
         entry = append_message(session_id, role, content)
         run_id = f"run_{int(time.time() * 1000)}"
         if not is_exec_allowed(meta, config):
+            pending = {
+                "run_id": run_id,
+                "session_id": session_id,
+                "agent_id": meta.get("agent", "architect"),
+                "requested_at": timestamp(),
+                "meta": meta,
+                "content": content,
+                "approved": False,
+            }
+            STATE.pending_approvals[run_id] = pending
             await send_error(ws, req_id, "APPROVAL_REQUIRED", "Execution approval required")
             return
         await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id, "run_id": run_id})
         task = asyncio.create_task(
-            dispatch_agent(ws, seq_state, session_id, run_id, meta, content)
+            dispatch_agent(ws, seq_state, session_id, run_id, meta, content, config)
         )
         STATE.running[run_id] = task
         return
@@ -292,6 +324,7 @@ async def dispatch_agent(
     run_id: str,
     meta: Dict[str, Any],
     content: str,
+    config: Dict[str, Any],
 ) -> None:
     agent_id = meta.get("agent", "architect")
     provider = meta.get("provider")
