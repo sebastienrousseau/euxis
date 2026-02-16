@@ -13,10 +13,29 @@ def timestamp() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
 
-def make_session_id(channel_id: str, chat_id: str, thread_id: str | None = None) -> str:
+def make_session_id(
+    channel_id: str,
+    chat_id: str,
+    thread_id: str | None = None,
+    dm_scope: str = "main",
+    account_id: str | None = None,
+    sender_id: str | None = None,
+) -> str:
+    if dm_scope == "per-peer":
+        suffix = sender_id or "unknown"
+        base = f"{channel_id}:{chat_id}:{suffix}"
+    elif dm_scope == "per-channel-peer":
+        suffix = sender_id or "unknown"
+        base = f"{channel_id}:{chat_id}:{suffix}"
+    elif dm_scope == "per-account-channel-peer":
+        suffix = sender_id or "unknown"
+        account = account_id or "default"
+        base = f"{account}:{channel_id}:{chat_id}:{suffix}"
+    else:
+        base = f"{channel_id}:{chat_id}"
     if thread_id:
-        return f"{channel_id}:{chat_id}:{thread_id}"
-    return f"{channel_id}:{chat_id}"
+        return f"{base}:{thread_id}"
+    return base
 
 
 def gateway_data_dir() -> Path:
@@ -48,6 +67,65 @@ def audit_dir() -> Path:
     base = gateway_data_dir() / "audit"
     base.mkdir(parents=True, exist_ok=True)
     return base
+
+
+def transcripts_dir() -> Path:
+    base = gateway_data_dir() / "transcripts"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def cron_dir() -> Path:
+    base = gateway_data_dir() / "cron"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def cron_path() -> Path:
+    return cron_dir() / "jobs.json"
+
+
+def load_cron_jobs() -> List[Dict[str, Any]]:
+    path = cron_path()
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if isinstance(data, list):
+        return data
+    return []
+
+
+def persist_cron_jobs(jobs: List[Dict[str, Any]]) -> None:
+    path = cron_path()
+    path.write_text(json.dumps(jobs, indent=2), encoding="utf-8")
+
+
+def canvas_dir() -> Path:
+    base = gateway_data_dir() / "canvas"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
+def canvas_state_path(session_id: str) -> Path:
+    return canvas_dir() / f"{session_id}.json"
+
+
+def load_canvas_state(session_id: str) -> Dict[str, Any]:
+    path = canvas_state_path(session_id)
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def persist_canvas_state(session_id: str, state: Dict[str, Any]) -> None:
+    path = canvas_state_path(session_id)
+    path.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
@@ -136,3 +214,9 @@ def audit_log(event: Dict[str, Any]) -> None:
     path = audit_dir() / "gateway_audit.jsonl"
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(event) + "\n")
+
+
+def persist_transcript(run_id: str, entry: Dict[str, Any]) -> None:
+    path = transcripts_dir() / f"{run_id}.jsonl"
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry) + "\n")

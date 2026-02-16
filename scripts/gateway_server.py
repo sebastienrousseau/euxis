@@ -11,6 +11,8 @@ import json
 import os
 import sys
 import time
+from urllib import error as urlerror
+from urllib import request as urlrequest
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -25,12 +27,17 @@ from gateway_utils import (
     load_session_meta,
     load_run_events,
     load_approvals,
+    load_cron_jobs,
+    load_canvas_state,
     persist_approval,
+    persist_cron_jobs,
     delete_approval,
     audit_log,
+    persist_transcript,
     persist_message,
     persist_run_event,
     persist_session_meta,
+    persist_canvas_state,
     runs_dir,
     make_session_id,
     timestamp,
@@ -70,6 +77,10 @@ class GatewayState:
         self.connections: Dict[str, WebSocket] = {}
         self.conn_seq: Dict[str, int] = {}
         self.conn_sessions: Dict[str, str] = {}
+        self.session_locks: Dict[str, asyncio.Lock] = {}
+        self.cron_jobs: List[Dict[str, Any]] = []
+        self.cron_task: Optional[asyncio.Task] = None
+        self.config: Dict[str, Any] = {}
 
 
 STATE = GatewayState()
@@ -142,7 +153,32 @@ def verify_slack_signature(request: Request, body: bytes, signing_secret: str) -
 
 def build_app(config: Dict[str, Any]) -> FastAPI:
     app = FastAPI()
-    STATE.adapters = build_adapters(config)
+    STATE.config = config
+    session_cfg = config["gateway"].setdefault("session", {})
+    session_cfg.setdefault("dm_scope", "main")
+    session_cfg.setdefault("account_id", "default")
+
+    def _adapter_handler(session_id: str, content: str, meta: Dict[str, Any]) -> None:
+        channel_id = meta.get("channel_id", "unknown")
+        chat_id = str(meta.get("chat_id") or meta.get("channel_id") or "unknown")
+        thread_id = meta.get("thread_id") or meta.get("thread_ts")
+        sender = meta.get("sender")
+        resolved_id = make_session_id(
+            channel_id,
+            chat_id,
+            str(thread_id) if thread_id else None,
+            session_cfg.get("dm_scope", "main"),
+            session_cfg.get("account_id", "default"),
+            str(sender) if sender else None,
+        )
+        normalized_meta = dict(meta)
+        normalized_meta.setdefault("channel_id", channel_id)
+        normalized_meta.setdefault("scope", "dm")
+        normalized_meta.setdefault("agent", "architect")
+        normalized_meta.setdefault("approved", True)
+        asyncio.create_task(process_inbound(resolved_id, content, normalized_meta, config))
+
+    STATE.adapters = build_adapters(config, on_message=_adapter_handler)
     STATE.pending_approvals = load_approvals()
     slack_cfg = config["gateway"].get("channels", {}).get("slack", {})
     telegram_cfg = config["gateway"].get("channels", {}).get("telegram", {})
@@ -152,6 +188,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.on_event("startup")
     async def startup() -> None:
+        STATE.cron_jobs = load_cron_jobs()
+        STATE.cron_task = asyncio.create_task(cron_loop(config))
         for name, adapter in STATE.adapters.items():
             try:
                 adapter.connect()
@@ -160,6 +198,8 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.on_event("shutdown")
     async def shutdown() -> None:
+        if STATE.cron_task:
+            STATE.cron_task.cancel()
         for name, adapter in STATE.adapters.items():
             try:
                 adapter.disconnect()
@@ -183,6 +223,40 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     @app.get("/approvals")
     async def approvals() -> JSONResponse:
         return JSONResponse({"pending": list(STATE.pending_approvals.values())})
+
+    @app.get("/automation/cron")
+    async def cron_list() -> JSONResponse:
+        return JSONResponse({"jobs": STATE.cron_jobs})
+
+    @app.post("/automation/cron")
+    async def cron_create(payload: Dict[str, Any]) -> JSONResponse:
+        job_id = payload.get("job_id") or f"cron_{int(time.time() * 1000)}"
+        every = payload.get("every_seconds")
+        session_id = payload.get("session_id", "")
+        content = payload.get("content", "")
+        meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
+        if not every or not session_id or not content:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        job = {
+            "job_id": job_id,
+            "every_seconds": int(every),
+            "session_id": session_id,
+            "content": content,
+            "meta": meta,
+            "last_run": 0,
+        }
+        STATE.cron_jobs = [j for j in STATE.cron_jobs if j.get("job_id") != job_id] + [job]
+        persist_cron_jobs(STATE.cron_jobs)
+        return JSONResponse({"status": "ok", "job": job})
+
+    @app.delete("/automation/cron/{job_id}")
+    async def cron_delete(job_id: str) -> JSONResponse:
+        before = len(STATE.cron_jobs)
+        STATE.cron_jobs = [job for job in STATE.cron_jobs if job.get("job_id") != job_id]
+        persist_cron_jobs(STATE.cron_jobs)
+        if len(STATE.cron_jobs) == before:
+            return JSONResponse({"status": "not_found"}, status_code=404)
+        return JSONResponse({"status": "deleted"})
 
     slack_events_path = slack_cfg.get("events_path", "/channels/slack/events")
     telegram_webhook_path = telegram_cfg.get("webhook_path", "/channels/telegram/webhook")
@@ -237,6 +311,32 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             STATE.sessions[session_id] = load_session_from_disk(session_id)
         meta = load_session_meta(session_id)
         return JSONResponse({"session_id": session_id, "meta": meta, "messages": STATE.sessions[session_id]})
+
+    @app.get("/canvas/{session_id}")
+    async def canvas_get(session_id: str) -> JSONResponse:
+        return JSONResponse({"session_id": session_id, "state": load_canvas_state(session_id)})
+
+    @app.post("/canvas/{session_id}")
+    async def canvas_set(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+        state = payload.get("state", {})
+        if not isinstance(state, dict):
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        persist_canvas_state(session_id, state)
+        return JSONResponse({"status": "ok"})
+
+    @app.post("/voice/wake")
+    async def voice_wake(payload: Dict[str, Any]) -> JSONResponse:
+        session_id = payload.get("session_id", "")
+        content = payload.get("content", "")
+        meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
+        if not session_id or not content:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        meta.setdefault("agent", "orchestrator")
+        meta.setdefault("channel_id", "voice")
+        meta.setdefault("scope", "dm")
+        meta.setdefault("approved", True)
+        asyncio.create_task(process_inbound(session_id, content, meta, config))
+        return JSONResponse({"status": "ok"})
 
     @app.post("/sessions/{session_id}/broadcast")
     async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
@@ -294,12 +394,16 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         pending["approved"] = True
         STATE.pending_approvals[run_id] = pending
         persist_approval(run_id, pending)
+        persist_transcript(
+            run_id,
+            {"ts": timestamp(), "event": "approval", "status": "approved", "entry": pending},
+        )
         audit_log({"ts": timestamp(), "event": "approval", "run_id": run_id, "status": "approved"})
         # Dispatch immediately to all active connections.
         for conn_id, ws in list(STATE.connections.items()):
             seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
             task = asyncio.create_task(
-                dispatch_agent(
+                dispatch_with_lock(
                     ws,
                     seq_state,
                     pending["session_id"],
@@ -320,50 +424,12 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         if not pending:
             return JSONResponse({"status": "not_found"}, status_code=404)
         delete_approval(run_id)
+        persist_transcript(
+            run_id,
+            {"ts": timestamp(), "event": "approval", "status": "rejected", "entry": pending},
+        )
         audit_log({"ts": timestamp(), "event": "approval", "run_id": run_id, "status": "rejected"})
         return JSONResponse({"status": "rejected"})
-
-    @app.post("/slack/events")
-    async def slack_events(payload: Dict[str, Any]) -> JSONResponse:
-        if payload.get("type") == "url_verification":
-            return JSONResponse({"challenge": payload.get("challenge", "")})
-        event = payload.get("event", {})
-        if not event or event.get("type") != "message":
-            return JSONResponse({"status": "ignored"})
-        channel_id = event.get("channel", "slack")
-        user_id = event.get("user", "unknown")
-        thread_ts = event.get("thread_ts")
-        session_id = make_session_id("slack", channel_id, thread_ts)
-        meta = {
-            "agent": "architect",
-            "channel_id": "slack",
-            "scope": "group" if event.get("channel_type") in {"channel", "group", "mpim"} else "dm",
-            "sender": user_id,
-            "thread_ts": thread_ts,
-            "approved": True,
-        }
-        await process_inbound(session_id, event.get("text", ""), meta, config)
-        return JSONResponse({"status": "ok"})
-
-    @app.post("/telegram/webhook")
-    async def telegram_webhook(payload: Dict[str, Any]) -> JSONResponse:
-        message = payload.get("message") or payload.get("edited_message") or {}
-        if not message:
-            return JSONResponse({"status": "ignored"})
-        chat = message.get("chat", {})
-        chat_id = chat.get("id", "telegram")
-        thread_id = message.get("message_thread_id")
-        session_id = make_session_id("telegram", str(chat_id), str(thread_id) if thread_id else None)
-        meta = {
-            "agent": "architect",
-            "channel_id": "telegram",
-            "scope": "group" if chat.get("type") in {"group", "supergroup"} else "dm",
-            "sender": (message.get("from") or {}).get("id", "unknown"),
-            "thread_id": thread_id,
-            "approved": True,
-        }
-        await process_inbound(session_id, message.get("text", ""), meta, config)
-        return JSONResponse({"status": "ok"})
 
     @app.post("/admin/exec")
     async def update_exec_policy(payload: Dict[str, Any]) -> JSONResponse:
@@ -456,6 +522,8 @@ def ensure_session(session_id: str) -> None:
         STATE.sessions[session_id] = []
         STATE.sessions_active = len(STATE.sessions)
         STATE.session_version += 1
+    if session_id not in STATE.session_locks:
+        STATE.session_locks[session_id] = asyncio.Lock()
 
 
 def append_message(session_id: str, role: str, content: str) -> Dict[str, Any]:
@@ -582,7 +650,7 @@ async def handle_frame(
             return
         await send_result(ws, req_id, {"message_id": entry["message_id"], "session_id": session_id, "run_id": run_id})
         task = asyncio.create_task(
-            dispatch_agent(ws, seq_state, session_id, run_id, meta, content, config)
+            dispatch_with_lock(ws, seq_state, session_id, run_id, meta, content, config)
         )
         STATE.running[run_id] = task
         return
@@ -671,6 +739,20 @@ async def dispatch_agent(
     STATE.running.pop(run_id, None)
 
 
+async def dispatch_with_lock(
+    ws: WebSocket,
+    seq_state: Dict[str, int],
+    session_id: str,
+    run_id: str,
+    meta: Dict[str, Any],
+    content: str,
+    config: Dict[str, Any],
+) -> None:
+    lock = STATE.session_locks.setdefault(session_id, asyncio.Lock())
+    async with lock:
+        await dispatch_agent(ws, seq_state, session_id, run_id, meta, content, config)
+
+
 async def send_ticks(ws: WebSocket, seq_state: Dict[str, int]) -> None:
     try:
         while True:
@@ -685,6 +767,33 @@ async def send_ticks(ws: WebSocket, seq_state: Dict[str, int]) -> None:
             }
             STATE.last_event_ts = payload["ts"]
             await ws.send_text(json.dumps(payload))
+    except asyncio.CancelledError:
+        return
+
+
+async def cron_loop(config: Dict[str, Any]) -> None:
+    try:
+        while True:
+            now = time.time()
+            changed = False
+            for job in STATE.cron_jobs:
+                every = int(job.get("every_seconds", 0))
+                if every <= 0:
+                    continue
+                last_run = float(job.get("last_run", 0))
+                if now - last_run < every:
+                    continue
+                job["last_run"] = now
+                changed = True
+                meta = job.get("meta", {})
+                session_id = job.get("session_id", "")
+                content = job.get("content", "")
+                if not session_id or not content:
+                    continue
+                asyncio.create_task(process_inbound(session_id, content, meta, config))
+            if changed:
+                persist_cron_jobs(STATE.cron_jobs)
+            await asyncio.sleep(1)
     except asyncio.CancelledError:
         return
 
@@ -728,6 +837,32 @@ async def send_agent_event(
     STATE.last_event_ts = payload["ts"]
     persist_run_event(run_id, payload)
     await ws.send_text(json.dumps(payload))
+    if status in {"final", "error"}:
+        await notify_webhooks(payload)
+
+
+async def notify_webhooks(payload: Dict[str, Any]) -> None:
+    hooks = STATE.config.get("gateway", {}).get("webhooks", [])
+    if not hooks:
+        return
+    event_name = f"{payload.get('event')}.{payload.get('data', {}).get('status', '')}"
+    body = json.dumps(payload).encode("utf-8")
+    for hook in hooks:
+        url = hook.get("url")
+        events = hook.get("events", ["agent.final", "agent.error"])
+        if not url or event_name not in events:
+            continue
+        req = urlrequest.Request(
+            url,
+            data=body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urlrequest.urlopen(req, timeout=5) as resp:
+                resp.read()
+        except urlerror.URLError:
+            continue
 
 
 def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
@@ -819,7 +954,7 @@ async def process_inbound(session_id: str, content: str, meta: Dict[str, Any], c
         return
     conn_id, ws = next(iter(STATE.connections.items()))
     seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
-    task = asyncio.create_task(dispatch_agent(ws, seq_state, session_id, run_id, meta, content, config))
+    task = asyncio.create_task(dispatch_with_lock(ws, seq_state, session_id, run_id, meta, content, config))
     STATE.running[run_id] = task
     STATE.conn_seq[conn_id] = seq_state["value"]
 

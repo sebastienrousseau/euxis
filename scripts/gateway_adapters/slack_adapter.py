@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 from urllib import error as urlerror
 from urllib import request as urlrequest
 
+from gateway_adapter_sdk import MessageHandler
 from gateway_utils import persist_message, timestamp
 
 LOGGER = logging.getLogger(__name__)
@@ -23,11 +24,12 @@ class SlackAdapterConfig:
 
 
 class SlackAdapter:
-    def __init__(self, config: SlackAdapterConfig) -> None:
+    def __init__(self, config: SlackAdapterConfig, on_message: Optional[MessageHandler] = None) -> None:
         self.config = config
         self.session_meta: Dict[str, Dict[str, Any]] = {}
         self._socket_client: Optional[Any] = None
         self._lock = threading.Lock()
+        self._on_message = on_message
 
     def connect(self) -> None:
         if self.config.mode != "socket":
@@ -71,6 +73,8 @@ class SlackAdapter:
         text = payload.get("text", "") or payload.get("message", "")
         thread_ts = payload.get("thread_ts")
         user = payload.get("user") or payload.get("user_id")
+        channel_type = payload.get("channel_type")
+        scope = "group" if channel_type in {"channel", "group", "mpim"} else "dm"
         session_id = f"slack_{channel}"
         if thread_ts:
             session_id = f"{session_id}:{thread_ts}"
@@ -80,14 +84,17 @@ class SlackAdapter:
             "content": text,
             "timestamp": timestamp(),
             "meta": {
-                "channel": channel,
+                "channel_id": channel,
                 "thread_ts": thread_ts,
-                "user": user,
+                "sender": user,
+                "scope": scope,
             },
         }
         with self._lock:
             self.session_meta[session_id] = {"channel": channel, "thread_ts": thread_ts, "user": user}
         persist_message(session_id, entry)
+        if self._on_message:
+            self._on_message(session_id, text, entry.get("meta", {}))
 
     def send(self, message: str, session_id: str) -> None:
         if not self.config.token:

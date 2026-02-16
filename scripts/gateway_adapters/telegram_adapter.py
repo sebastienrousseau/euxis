@@ -12,6 +12,7 @@ from urllib import error as urlerror
 from urllib import parse as urlparse
 from urllib import request as urlrequest
 
+from gateway_adapter_sdk import MessageHandler
 from gateway_utils import persist_message, timestamp
 
 LOGGER = logging.getLogger(__name__)
@@ -27,12 +28,13 @@ class TelegramAdapterConfig:
 
 
 class TelegramAdapter:
-    def __init__(self, config: TelegramAdapterConfig) -> None:
+    def __init__(self, config: TelegramAdapterConfig, on_message: Optional[MessageHandler] = None) -> None:
         self.config = config
         self._stop_event = threading.Event()
         self._poll_thread: Optional[threading.Thread] = None
         self._offset = 0
         self.session_meta: Dict[str, Dict[str, Any]] = {}
+        self._on_message = on_message
 
     def connect(self) -> None:
         if not self.config.token:
@@ -62,6 +64,7 @@ class TelegramAdapter:
         if chat_id is None:
             return
         text = payload.get("text") or payload.get("caption") or ""
+        scope = "group" if chat.get("type") in {"group", "supergroup"} else "dm"
         session_id = f"telegram_{chat_id}"
         entry = {
             "message_id": payload.get("message_id", f"telegram_{timestamp()}"),
@@ -69,12 +72,18 @@ class TelegramAdapter:
             "content": text,
             "timestamp": timestamp(),
             "meta": {
+                "channel_id": "telegram",
                 "chat_id": chat_id,
+                "thread_id": payload.get("message_thread_id"),
+                "sender": (payload.get("from") or {}).get("id"),
                 "username": (payload.get("from") or {}).get("username"),
+                "scope": scope,
             },
         }
         self.session_meta[session_id] = {"chat_id": chat_id}
         persist_message(session_id, entry)
+        if self._on_message:
+            self._on_message(session_id, text, entry.get("meta", {}))
 
     def send(self, message: str, session_id: str) -> None:
         if not self.config.token:

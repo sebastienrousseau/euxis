@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from gateway_adapters.slack_adapter import SlackAdapter, SlackAdapterConfig
 from gateway_adapters.telegram_adapter import TelegramAdapter, TelegramAdapterConfig
+from gateway_adapter_sdk import MessageHandler
 
-def build_adapters(config: Dict[str, Any]) -> Dict[str, Any]:
+def build_adapters(config: Dict[str, Any], on_message: Optional[MessageHandler] = None) -> Dict[str, Any]:
     channels = config.get("gateway", {}).get("channels", {})
     adapters: Dict[str, Any] = {}
 
@@ -18,7 +19,8 @@ def build_adapters(config: Dict[str, Any]) -> Dict[str, Any]:
                 token=slack_cfg.get("token", ""),
                 app_token=slack_cfg.get("app_token", ""),
                 mode=slack_cfg.get("mode", "socket"),
-            )
+            ),
+            on_message=on_message,
         )
 
     telegram_cfg = channels.get("telegram", {})
@@ -30,7 +32,8 @@ def build_adapters(config: Dict[str, Any]) -> Dict[str, Any]:
                 webhook_url=telegram_cfg.get("webhook_url", ""),
                 poll_timeout=telegram_cfg.get("poll_timeout", 20),
                 poll_interval=telegram_cfg.get("poll_interval", 1.5),
-            )
+            ),
+            on_message=on_message,
         )
 
     return adapters

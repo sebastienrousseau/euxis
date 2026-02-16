@@ -47,6 +47,11 @@
     "policy": {
       "mention_required": true,
       "allowlist": []
-    }
+    },
+    "session": {
+      "dm_scope": "main",
+      "account_id": "default"
+    },
+    "webhooks": []
   }
 }

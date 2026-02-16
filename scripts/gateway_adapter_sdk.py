@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Protocol
+from typing import Any, Callable, Dict, Protocol
+
+MessageHandler = Callable[[str, str, Dict[str, Any]], None]
 
 
 class Adapter(Protocol):

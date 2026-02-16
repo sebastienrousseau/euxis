@@ -52,7 +52,17 @@ Reference for the Gateway configuration file.
     "policy": {
       "mention_required": true,
       "allowlist": []
-    }
+    },
+    "session": {
+      "dm_scope": "main",
+      "account_id": "default"
+    },
+    "webhooks": [
+      {
+        "url": "https://example.com/hooks/gateway",
+        "events": ["agent.final", "agent.error"]
+      }
+    ]
   }
 }
 ```
@@ -116,6 +126,15 @@ Reference for the Gateway configuration file.
 
 - `mention_required` (bool): require bot mention in group chats.
 - `allowlist` (array): allowed sender IDs for group chats.
+
+### `gateway.session`
+
+- `dm_scope` (string): `main`, `per-peer`, `per-channel-peer`, or `per-account-channel-peer`.
+- `account_id` (string): logical account identifier for multi-account gateways.
+
+### `gateway.webhooks`
+
+- List of webhook targets (objects with `url` and `events` array).
 
 ## Notes
 

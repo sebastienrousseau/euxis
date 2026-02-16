@@ -234,6 +234,63 @@ List sessions:
 http://127.0.0.1:18789/sessions
 ```
 
+## Automation APIs
+
+Create a cron job:
+
+```
+POST /automation/cron
+{
+  "job_id": "cron_morning",
+  "every_seconds": 3600,
+  "session_id": "sess_ops",
+  "content": "Run hourly status check",
+  "meta": { "agent": "responder", "approved": true }
+}
+```
+
+List cron jobs:
+
+```
+GET /automation/cron
+```
+
+Delete a cron job:
+
+```
+DELETE /automation/cron/{job_id}
+```
+
+## Canvas APIs
+
+Store canvas state:
+
+```
+POST /canvas/{session_id}
+{
+  "state": { "view": "dashboard", "widgets": [] }
+}
+```
+
+Fetch canvas state:
+
+```
+GET /canvas/{session_id}
+```
+
+## Voice APIs
+
+Wake the voice pipeline:
+
+```
+POST /voice/wake
+{
+  "session_id": "sess_voice",
+  "content": "Start daily standup",
+  "meta": { "agent": "orchestrator" }
+}
+```
+
 Fetch a session:
 
 ```
