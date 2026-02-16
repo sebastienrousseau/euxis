@@ -6,7 +6,7 @@
   <title>Euxis Gateway WebChat</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; display: flex; height: 100vh; }
-    #sidebar { width: 320px; border-right: 1px solid #ddd; padding: 1rem; overflow: auto; }
+    #sidebar { width: 340px; border-right: 1px solid #ddd; padding: 1rem; overflow: auto; }
     #main { flex: 1; padding: 1rem; display: flex; flex-direction: column; }
     #log { border: 1px solid #ddd; padding: 1rem; flex: 1; overflow: auto; background: #fff; }
     .log-item { padding: 0.35rem 0; border-bottom: 1px solid #f0f0f0; }
@@ -23,6 +23,9 @@
     h2 { margin-top: 1rem; }
     .list { font-size: 0.9rem; }
     .item { padding: 0.25rem 0; border-bottom: 1px solid #f0f0f0; }
+    .item small { color: #666; display: block; }
+    .inline { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .badge { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.75rem; }
   </style>
 </head>
 <body>
@@ -34,13 +37,29 @@
     <div id="sessions" class="list"></div>
     <h2>Current Route</h2>
     <div id="route" class="list">None</div>
+    <h2>Trace</h2>
+    <div id="trace" class="list"></div>
+    <h2>Session Details</h2>
+    <div id="session-meta" class="list"></div>
     <h2>Approvals</h2>
     <div id="approvals" class="list"></div>
     <div id="exports" class="list">
       <button id="copy-export">Copy Session Export</button>
+      <button id="copy-session">Copy Current Session</button>
     </div>
   </div>
   <div id="main">
+    <div class="inline" style="margin-bottom: 0.75rem;">
+      <span class="badge">Transcript</span>
+      <button id="clear-log">Clear Log</button>
+      <label for="log-filter">Filter</label>
+      <select id="log-filter">
+        <option value="all">All</option>
+        <option value="agent">Agent</option>
+        <option value="event">Events</option>
+        <option value="error">Errors</option>
+      </select>
+    </div>
     <div id="log"></div>
     <div id="canvas">
       <h2>Canvas State</h2>
@@ -65,7 +84,12 @@
     const sessionsEl = document.getElementById('sessions');
     const approvalsEl = document.getElementById('approvals');
     const routeEl = document.getElementById('route');
+    const traceEl = document.getElementById('trace');
+    const sessionMetaEl = document.getElementById('session-meta');
     const copyExportBtn = document.getElementById('copy-export');
+    const copySessionBtn = document.getElementById('copy-session');
+    const clearLogBtn = document.getElementById('clear-log');
+    const logFilter = document.getElementById('log-filter');
     const canvasView = document.getElementById('canvas-view');
     const canvasEditor = document.getElementById('canvas-editor');
     const canvasSave = document.getElementById('canvas-save');
@@ -84,6 +108,8 @@
     }
 
     let ws = new WebSocket(wsUrl());
+    const traceState = new Map();
+    let logFilterValue = 'all';
 
     function sendConnect() {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
@@ -100,7 +126,16 @@
       sendConnect();
     };
 
+    function shouldRender(kind) {
+      if (logFilterValue === 'all') return true;
+      if (logFilterValue === 'agent') return kind === 'agent';
+      if (logFilterValue === 'event') return kind === 'event' || kind === 'presence' || kind === 'tick';
+      if (logFilterValue === 'error') return kind === 'error';
+      return true;
+    }
+
     function renderLogItem(kind, title, body, meta) {
+      if (!shouldRender(kind)) return;
       const wrapper = document.createElement('div');
       wrapper.className = 'log-item';
       const metaEl = document.createElement('div');
@@ -141,7 +176,7 @@
           };
         }
         return {
-          kind: evt,
+          kind: evt === 'agent' ? 'agent' : 'event',
           title: `${evt} ${seq}`.trim(),
           body: JSON.stringify(data.data || {}, null, 2),
           meta: evt,
@@ -184,6 +219,17 @@
       if (!parsed) {
         renderLogItem('raw', evt.data, '', 'raw');
         return;
+      }
+      if (parsed.type === 'event' && parsed.event === 'agent') {
+        const payload = parsed.data || {};
+        const runId = payload.run_id || 'unknown';
+        traceState.set(runId, {
+          run_id: runId,
+          agent_id: payload.agent_id || 'agent',
+          status: payload.status || 'stream',
+          ts: parsed.ts || '',
+        });
+        renderTrace();
       }
       const formatted = formatEvent(parsed);
       renderLogItem(formatted.kind, formatted.title, formatted.body, formatted.meta);
@@ -243,8 +289,10 @@
         const channel = current.meta.channel_id || 'webchat';
         const scope = current.meta.scope || 'dm';
         routeEl.textContent = `${owner} via ${channel} (${scope})`;
+        renderSessionMeta(current.meta, current.message_count || 0);
       } else {
         routeEl.textContent = 'None';
+        sessionMetaEl.textContent = 'No session selected.';
       }
     }
 
@@ -259,6 +307,11 @@
         const snippet = content.length > 80 ? `${content.slice(0, 80)}...` : content;
         const context = snippet || 'Execution approval requested';
         div.textContent = `${a.agent_id}: ${context}`;
+        if (a.requested_at) {
+          const stamp = document.createElement('small');
+          stamp.textContent = a.requested_at;
+          div.appendChild(stamp);
+        }
         const approve = document.createElement('button');
         approve.textContent = 'Approve';
         approve.onclick = async () => {
@@ -370,6 +423,52 @@
     refreshApprovals();
     refreshCanvas();
 
+    function renderTrace() {
+      traceEl.innerHTML = '';
+      const items = Array.from(traceState.values()).slice(-20);
+      items.reverse().forEach((t) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.textContent = `${t.agent_id} · ${t.status}`;
+        const stamp = document.createElement('small');
+        stamp.textContent = t.run_id;
+        div.appendChild(stamp);
+        traceEl.appendChild(div);
+      });
+    }
+
+    function renderSessionMeta(meta, messageCount) {
+      sessionMetaEl.innerHTML = '';
+      const fields = [
+        ['Session', meta.session_id || sessionInput.value],
+        ['Channel', meta.channel_id || 'webchat'],
+        ['Owner', meta.owner || 'unknown'],
+        ['Scope', meta.scope || 'dm'],
+        ['Messages', String(messageCount)],
+        ['Updated', meta.updated_at || ''],
+      ];
+      fields.forEach(([label, value]) => {
+        const row = document.createElement('div');
+        row.className = 'item';
+        row.textContent = `${label}: ${value}`;
+        sessionMetaEl.appendChild(row);
+      });
+    }
+
+    logFilter.addEventListener('change', () => {
+      logFilterValue = logFilter.value;
+      log.innerHTML = '';
+    });
+
+    clearLogBtn.onclick = () => {
+      log.innerHTML = '';
+    };
+
+    sessionInput.addEventListener('change', () => {
+      refreshSessions();
+      refreshCanvas();
+    });
+
     copyExportBtn.onclick = async () => {
       try {
         const res = await fetch('/sessions/export');
@@ -389,6 +488,33 @@
         alert('Session export copied to clipboard.');
       } catch (err) {
         alert('Failed to copy export.');
+      }
+    };
+
+    copySessionBtn.onclick = async () => {
+      const sessionId = sessionInput.value.trim();
+      if (!sessionId) {
+        alert('No session selected.');
+        return;
+      }
+      try {
+        const res = await fetch(`/sessions/${encodeURIComponent(sessionId)}`);
+        const data = await res.json();
+        const payload = JSON.stringify(data, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(payload);
+          alert('Session copied to clipboard.');
+          return;
+        }
+        const temp = document.createElement('textarea');
+        temp.value = payload;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        temp.remove();
+        alert('Session copied to clipboard.');
+      } catch (err) {
+        alert('Failed to copy session.');
       }
     };
   </script>
