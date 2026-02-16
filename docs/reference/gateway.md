@@ -320,6 +320,12 @@ Client sends:
 { "event": "end", "session_id": "sess_voice" }
 ```
 
+Server may send:
+
+```json
+{ "event": "tts", "session_id": "sess_voice", "content": "Assistant reply" }
+```
+
 ## Webhook APIs
 
 Webhook updates are persisted to `~/.euxis/data/gateway/webhooks.json`.

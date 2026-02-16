@@ -6,7 +6,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def timestamp() -> str:
@@ -182,6 +182,13 @@ def append_voice_chunk(session_id: str, chunk: bytes, suffix: str = "raw") -> Pa
     with path.open("ab") as handle:
         handle.write(chunk)
     return path
+
+
+def resolve_voice_blob(session_id: str, suffix: str = "raw") -> Optional[Path]:
+    path = voice_chunk_path(session_id, suffix)
+    if path.exists():
+        return path
+    return None
 
 
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:

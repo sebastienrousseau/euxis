@@ -44,6 +44,7 @@ from gateway_utils import (
     persist_voice_blob,
     persist_voice_text,
     append_voice_chunk,
+    resolve_voice_blob,
     runs_dir,
     make_session_id,
     timestamp,
@@ -88,6 +89,7 @@ class GatewayState:
         self.cron_task: Optional[asyncio.Task] = None
         self.config: Dict[str, Any] = {}
         self.webhooks: List[Dict[str, Any]] = []
+        self.voice_connections: Dict[str, List[WebSocket]] = {}
 
 
 STATE = GatewayState()
@@ -414,6 +416,20 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         path = persist_voice_blob(session_id, blob, suffix)
         return JSONResponse({"status": "ok", "path": str(path)})
 
+    @app.post("/voice/tts")
+    async def voice_tts(payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        session_id = payload.get("session_id", "")
+        text = payload.get("content", "")
+        if not session_id or not text:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        await push_voice_tts(session_id, text)
+        tts_cfg = config["gateway"].get("voice", {}).get("tts", {})
+        if tts_cfg.get("mode") == "webhook" and tts_cfg.get("webhook_url"):
+            await post_json(tts_cfg["webhook_url"], {"session_id": session_id, "text": text})
+        return JSONResponse({"status": "ok"})
+
     @app.post("/sessions/{session_id}/broadcast")
     async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
         message = payload.get("message", "")
@@ -587,6 +603,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                     if not session_id:
                         await ws.send_text(json.dumps({"type": "error", "error": "missing_session_id"}))
                         continue
+                    STATE.voice_connections.setdefault(session_id, []).append(ws)
                     await ws.send_text(json.dumps({"type": "ack", "event": "start"}))
                     continue
                 if event == "chunk":
@@ -660,14 +677,25 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                     if seen_audio:
                         stt_cfg = config["gateway"].get("voice", {}).get("stt", {})
                         if stt_cfg.get("mode") == "webhook" and stt_cfg.get("webhook_url"):
+                            audio_path = resolve_voice_blob(session_id, payload.get("format", "raw"))
                             await post_json(
                                 stt_cfg["webhook_url"],
-                                {"session_id": session_id, "meta": meta},
+                                {
+                                    "session_id": session_id,
+                                    "meta": meta,
+                                    "audio_path": str(audio_path) if audio_path else None,
+                                },
                             )
                     await ws.send_text(json.dumps({"type": "ack", "event": "end"}))
                     continue
                 await ws.send_text(json.dumps({"type": "error", "error": "unknown_event"}))
         except WebSocketDisconnect:
+            if session_id and session_id in STATE.voice_connections:
+                STATE.voice_connections[session_id] = [
+                    conn for conn in STATE.voice_connections[session_id] if conn is not ws
+                ]
+                if not STATE.voice_connections[session_id]:
+                    STATE.voice_connections.pop(session_id, None)
             return
 
     webchat_dir = Path(__file__).resolve().parent / "gateway_webchat"
@@ -1040,6 +1068,7 @@ async def send_agent_event(
     if status in {"final", "error"}:
         await notify_webhooks(payload)
         await deliver_to_channel(session_id, content)
+        await push_voice_tts(session_id, content)
 
 
 async def notify_webhooks(payload: Dict[str, Any]) -> None:
@@ -1063,9 +1092,9 @@ async def notify_webhooks(payload: Dict[str, Any]) -> None:
             try:
                 await asyncio.to_thread(urlrequest.urlopen, req, 5)
                 break
-            except urlerror.URLError:
-                await asyncio.sleep(0.5 * (attempt + 1))
-                continue
+        except urlerror.URLError:
+            await asyncio.sleep(0.5 * (attempt + 1))
+            continue
 
 
 async def post_json(url: str, payload: Dict[str, Any]) -> None:
@@ -1080,6 +1109,19 @@ async def post_json(url: str, payload: Dict[str, Any]) -> None:
         await asyncio.to_thread(urlrequest.urlopen, req, 10)
     except urlerror.URLError:
         return
+
+
+async def push_voice_tts(session_id: str, content: str) -> None:
+    meta = load_session_meta(session_id)
+    if meta.get("channel_id") != "voice":
+        return
+    payload = {"event": "tts", "session_id": session_id, "content": content}
+    connections = STATE.voice_connections.get(session_id, [])
+    for ws in list(connections):
+        try:
+            await ws.send_text(json.dumps(payload))
+        except Exception:
+            continue
 
 
 def split_message(content: str, max_len: int) -> List[str]:
