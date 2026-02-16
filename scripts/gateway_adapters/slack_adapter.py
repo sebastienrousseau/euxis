@@ -140,6 +140,12 @@ class SlackAdapter:
         if meta:
             return meta.get("channel", ""), meta.get("thread_ts")
         raw = session_id
+        if raw.startswith("slack:"):
+            parts = raw.split(":")
+            if len(parts) >= 3:
+                return parts[1], parts[2]
+            if len(parts) == 2:
+                return parts[1], None
         if raw.startswith("slack_"):
             raw = raw[len("slack_") :]
         if ":" in raw:

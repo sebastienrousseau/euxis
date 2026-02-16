@@ -393,3 +393,8 @@ Validate custom frames (JSON array or JSONL):
 ```bash
 python3 scripts/gateway_protocol_test.py --frames /path/to/frames.jsonl
 ```
+Canvas schema reference:
+
+```
+docs/reference/gateway-canvas.md
+```

@@ -41,6 +41,7 @@ from gateway_utils import (
     persist_session_meta,
     persist_canvas_state,
     persist_voice_blob,
+    persist_voice_text,
     runs_dir,
     make_session_id,
     timestamp,
@@ -350,6 +351,16 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         persist_canvas_state(session_id, state)
         return JSONResponse({"status": "ok"})
 
+    @app.post("/canvas/{session_id}/validate")
+    async def canvas_validate(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("canvas", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        state = payload.get("state", {})
+        if not isinstance(state, dict):
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        errors = validate_canvas(state)
+        return JSONResponse({"status": "ok" if not errors else "invalid", "errors": errors})
+
     @app.post("/voice/wake")
     async def voice_wake(payload: Dict[str, Any]) -> JSONResponse:
         if not config["gateway"].get("voice", {}).get("enabled", True):
@@ -363,6 +374,30 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         meta.setdefault("channel_id", "voice")
         meta.setdefault("scope", "dm")
         meta.setdefault("approved", True)
+        persist_voice_text(
+            session_id,
+            {"ts": timestamp(), "event": "wake", "content": content, "meta": meta},
+        )
+        asyncio.create_task(process_inbound(session_id, content, meta, config))
+        return JSONResponse({"status": "ok"})
+
+    @app.post("/voice/talk")
+    async def voice_talk(payload: Dict[str, Any]) -> JSONResponse:
+        if not config["gateway"].get("voice", {}).get("enabled", True):
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        session_id = payload.get("session_id", "")
+        content = payload.get("content", "")
+        meta = payload.get("meta", {}) if isinstance(payload.get("meta"), dict) else {}
+        if not session_id or not content:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        meta.setdefault("agent", "orchestrator")
+        meta.setdefault("channel_id", "voice")
+        meta.setdefault("scope", "dm")
+        meta.setdefault("approved", True)
+        persist_voice_text(
+            session_id,
+            {"ts": timestamp(), "event": "talk", "content": content, "meta": meta},
+        )
         asyncio.create_task(process_inbound(session_id, content, meta, config))
         return JSONResponse({"status": "ok"})
 
@@ -755,12 +790,15 @@ async def dispatch_agent(
         await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "error", str(exc))
         return
 
+    output_lines: List[str] = []
+
     async def stream_stdout() -> None:
         assert proc.stdout
         async for line in proc.stdout:
             text = line.decode("utf-8", errors="ignore").rstrip()
             if not text:
                 continue
+            output_lines.append(text)
             await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "stream", text)
 
     async def stream_stderr() -> None:
@@ -769,12 +807,14 @@ async def dispatch_agent(
             text = line.decode("utf-8", errors="ignore").rstrip()
             if not text:
                 continue
+            output_lines.append(text)
             await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "stream", text)
 
     await asyncio.gather(stream_stdout(), stream_stderr())
     await proc.wait()
     status = "final" if proc.returncode == 0 else "error"
-    await send_agent_event(ws, seq_state, run_id, session_id, agent_id, status, f"exit {proc.returncode}")
+    final_content = "\n".join(output_lines[-200:]) if output_lines else f"exit {proc.returncode}"
+    await send_agent_event(ws, seq_state, run_id, session_id, agent_id, status, final_content)
     STATE.running.pop(run_id, None)
 
 
@@ -878,6 +918,7 @@ async def send_agent_event(
     await ws.send_text(json.dumps(payload))
     if status in {"final", "error"}:
         await notify_webhooks(payload)
+        await deliver_to_channel(session_id, content)
 
 
 async def notify_webhooks(payload: Dict[str, Any]) -> None:
@@ -904,6 +945,50 @@ async def notify_webhooks(payload: Dict[str, Any]) -> None:
             except urlerror.URLError:
                 await asyncio.sleep(0.5 * (attempt + 1))
                 continue
+
+
+def split_message(content: str, max_len: int) -> List[str]:
+    if max_len <= 0:
+        return [content]
+    if len(content) <= max_len:
+        return [content]
+    chunks: List[str] = []
+    start = 0
+    while start < len(content):
+        end = min(start + max_len, len(content))
+        chunks.append(content[start:end])
+        start = end
+    return chunks
+
+
+async def deliver_to_channel(session_id: str, content: str) -> None:
+    meta = load_session_meta(session_id)
+    channel_id = meta.get("channel_id", "webchat")
+    if channel_id == "webchat":
+        return
+    adapter = STATE.adapters.get(channel_id)
+    if not adapter:
+        return
+    channel_cfg = STATE.config.get("gateway", {}).get("channels", {}).get(channel_id, {})
+    max_len = int(channel_cfg.get("max_length", 3500))
+    for chunk in split_message(content, max_len):
+        try:
+            adapter.send(chunk, session_id)
+        except Exception:
+            continue
+
+
+def validate_canvas(state: Dict[str, Any]) -> List[str]:
+    errors: List[str] = []
+    if "widgets" in state and not isinstance(state.get("widgets"), list):
+        errors.append("widgets must be a list")
+    for idx, widget in enumerate(state.get("widgets", [])):
+        if not isinstance(widget, dict):
+            errors.append(f"widget[{idx}] must be an object")
+            continue
+        if "type" not in widget:
+            errors.append(f"widget[{idx}] missing type")
+    return errors
 
 
 def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:

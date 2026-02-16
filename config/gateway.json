@@ -32,7 +32,8 @@
         "token": "",
         "app_token": "",
         "signing_secret": "",
-        "events_path": "/channels/slack/events"
+        "events_path": "/channels/slack/events",
+        "max_length": 3500
       },
       "telegram": {
         "enabled": false,
@@ -41,7 +42,8 @@
         "webhook_url": "",
         "webhook_path": "/channels/telegram/webhook",
         "poll_timeout": 20,
-        "poll_interval": 1.5
+        "poll_interval": 1.5,
+        "max_length": 4000
       }
     },
     "policy": {

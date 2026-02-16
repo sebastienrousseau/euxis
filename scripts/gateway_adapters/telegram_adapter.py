@@ -126,6 +126,10 @@ class TelegramAdapter:
         if meta and "chat_id" in meta:
             return meta["chat_id"]
         raw = session_id
+        if raw.startswith("telegram:"):
+            parts = raw.split(":")
+            if len(parts) >= 2:
+                raw = parts[1]
         if raw.startswith("telegram_"):
             raw = raw[len("telegram_") :]
         try:

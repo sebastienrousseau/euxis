@@ -37,7 +37,8 @@ Reference for the Gateway configuration file.
         "token": "",
         "app_token": "",
         "signing_secret": "",
-        "events_path": "/channels/slack/events"
+        "events_path": "/channels/slack/events",
+        "max_length": 3500
       },
       "telegram": {
         "enabled": false,
@@ -46,7 +47,8 @@ Reference for the Gateway configuration file.
         "webhook_url": "",
         "webhook_path": "/channels/telegram/webhook",
         "poll_timeout": 20,
-        "poll_interval": 1.5
+        "poll_interval": 1.5,
+        "max_length": 4000
       }
     },
     "policy": {
@@ -120,6 +122,7 @@ Reference for the Gateway configuration file.
 - `slack.app_token` (string): socket mode app token.
 - `slack.signing_secret` (string): signing secret for events verification.
 - `slack.events_path` (string): HTTP path for Slack Events API.
+- `slack.max_length` (int): max characters per message chunk.
 - `telegram.enabled` (bool): enable Telegram adapter.
 - `telegram.mode` (string): `webhook` or `poll`.
 - `telegram.token` (string): bot token.
@@ -127,6 +130,7 @@ Reference for the Gateway configuration file.
 - `telegram.webhook_path` (string): HTTP path for Telegram webhook.
 - `telegram.poll_timeout` (int): long polling timeout (seconds).
 - `telegram.poll_interval` (float): polling backoff (seconds).
+- `telegram.max_length` (int): max characters per message chunk.
 
 ### `gateway.policy`
 

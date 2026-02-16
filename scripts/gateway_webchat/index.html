@@ -187,6 +187,43 @@
           card.appendChild(title);
           card.appendChild(body);
           canvasRender.appendChild(card);
+        } else if (widget.type === 'metric') {
+          const row = document.createElement('div');
+          row.style.marginTop = '0.5rem';
+          const label = document.createElement('strong');
+          label.textContent = widget.label || 'Metric';
+          const value = document.createElement('div');
+          value.textContent = String(widget.value ?? '');
+          row.appendChild(label);
+          row.appendChild(value);
+          canvasRender.appendChild(row);
+        } else if (widget.type === 'list') {
+          const list = document.createElement('ul');
+          (widget.items || []).forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = String(item);
+            list.appendChild(li);
+          });
+          canvasRender.appendChild(list);
+        } else if (widget.type === 'progress') {
+          const bar = document.createElement('div');
+          bar.style.border = '1px solid #ccc';
+          bar.style.marginTop = '0.5rem';
+          const fill = document.createElement('div');
+          const pct = Math.max(0, Math.min(100, widget.percent || 0));
+          fill.style.width = `${pct}%`;
+          fill.style.height = '8px';
+          fill.style.background = '#4a90e2';
+          bar.appendChild(fill);
+          canvasRender.appendChild(bar);
+        } else if (widget.type === 'text') {
+          const p = document.createElement('div');
+          p.textContent = widget.text || '';
+          canvasRender.appendChild(p);
+        } else if (widget.type === 'code') {
+          const pre = document.createElement('pre');
+          pre.textContent = widget.code || '';
+          canvasRender.appendChild(pre);
         }
       });
     }

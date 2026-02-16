@@ -163,6 +163,16 @@ def voice_dir() -> Path:
     return base
 
 
+def voice_transcript_path(session_id: str) -> Path:
+    return voice_dir() / f"{session_id}.jsonl"
+
+
+def persist_voice_text(session_id: str, entry: Dict[str, Any]) -> None:
+    path = voice_transcript_path(session_id)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry) + "\n")
+
+
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:
     path = sessions_dir() / f"{session_id}.jsonl"
     if not path.exists():
