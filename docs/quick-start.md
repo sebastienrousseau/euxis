@@ -65,7 +65,7 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 **Expected output:**
 ```
 Installing Euxis Fleet...
-Linking tools to ~/bin...
+Linking tools to ~/cli/bin...
   ✓ euxis
   ✓ euxis-health
   ✓ euxis-certify
@@ -81,12 +81,12 @@ Make Euxis commands available globally.
 
 **For Zsh (macOS default):**
 ```bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
 **For Bash:**
 ```bash
-echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 <details>
@@ -94,12 +94,12 @@ echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 
 **Fish:**
 ```bash
-echo 'set -gx PATH $HOME/bin $PATH' >> ~/.config/fish/config.fish
+echo 'set -gx PATH $HOME/cli/bin $PATH' >> ~/.config/fish/config.fish
 ```
 
 **Generic (add to your shell's config):**
 ```bash
-export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/cli/bin:$PATH"
 ```
 
 </details>
@@ -134,7 +134,7 @@ Fleet Status: HEALTHY (8/8 checks passed)
 |-------|------------------|
 | Agent Naming | All 50 agents follow naming conventions |
 | Script Hardening | Shell scripts have proper error handling |
-| Orphaned Executables | No broken symlinks in ~/bin |
+| Orphaned Executables | No broken symlinks in ~/cli/bin |
 | Protocol Headers | Agent prompts include required headers |
 | Documentation Drift | Docs match actual capabilities |
 | Certification Status | System passed quality gates |
@@ -333,7 +333,7 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 
 **Diagnosis:**
 ```bash
-echo $PATH | grep "$HOME/bin"
+echo $PATH | grep "$HOME/cli/bin"
 ls ~/cli/bin/euxis
 ```
 
