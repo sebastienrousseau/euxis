@@ -1,6 +1,6 @@
 # Euxis
 
-**42 AI specialists. Deploy in seconds.**
+**50 AI specialists. Deploy in seconds.**
 Version 0.0.7
 
 [![Version][version-badge]][version-url]
@@ -12,7 +12,7 @@ Version 0.0.7
 
 ## What Euxis Does
 
-Euxis coordinates 42 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
+Euxis coordinates 50 specialist AI agents to handle engineering tasks. Each agent masters one domain. You describe what you need. Euxis routes work to the right specialists and delivers verified results.
 
 **Ship features faster.** Break complex goals into tasks. Delegate to specialists. Get working solutions.
 
@@ -384,9 +384,9 @@ Every output passes three verification layers:
 
 ## Agent Fleet
 
-42 specialists organized by authority.
+50 specialists organized by authority.
 
-### Core Agents (9)
+### Core Agents (12)
 
 Define direction. May block progress when necessary.
 
@@ -401,26 +401,29 @@ Define direction. May block progress when necessary.
 | `arbiter` | Resolves conflicts between agents |
 | `librarian` | Knowledge governance and documentation |
 | `historian` | Long-term memory and patterns |
+| `route` | Session and agent routing decisions |
+| `pair` | Channel and device onboarding |
+| `guard` | Execution approval enforcement |
 
-### Default Agents (21)
+### Default Agents (24)
 
-Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-21--auto-available-task-triggered)
+Execute domain work. [See full list →](docs/guides/fleet-guide.md#default-24-auto-available-task-triggered)
 
-`accountant` · `animator` · `automaton` · `debugger` · `designer` · `gatekeeper` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `watchdog` · `writer`
+`accountant` · `animator` · `automaton` · `bridge` · `debugger` · `designer` · `gatekeeper` · `heal` · `inspector` · `interactor` · `investigator` · `maintainer` · `optimizer` · `pentester` · `polyglot` · `repairer` · `responder` · `sentinel` · `tactician` · `telemetrist` · `tester` · `trace` · `watchdog` · `writer`
 
-### On-Demand Agents (8)
+### On-Demand Agents (10)
 
-Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-8-explicit-invocation-only)
+Growth and communication. [See full list →](docs/guides/fleet-guide.md#on-demand-10-explicit-invocation-only)
 
-`ambassador` · `butler` · `evangelist` · `localizer` · `marketer` · `researcher` · `deep-researcher` · `strategist`
+`ambassador` · `butler` · `distill` · `evangelist` · `govern` · `localizer` · `marketer` · `researcher` · `deep-researcher` · `strategist`
 
 ### Specialist Agents (4)
 
-Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4--domain-specific-expertise)
+Deep domain expertise. [See full list →](docs/guides/fleet-guide.md#specialist-4-domain-specific-expertise)
 
 `cryptographer` · `ledger` · `conduit` · `custodian`
 
-**Count check:** 9 core + 21 default + 8 on‑demand + 4 specialist = **42**.
+**Count check:** 12 core + 24 default + 10 on‑demand + 4 specialist = **50**.
 
 ---
 
@@ -448,7 +451,7 @@ Focus: quality • Active: 8 • Cortex: 214 memories
 ```
 
 **Features:**
-- Fleet dashboard with all 42 agents
+- Fleet dashboard with all 50 agents
 - Command palette (`Ctrl+K`)
 - Streaming agent execution
 - Squad monitoring
@@ -496,7 +499,7 @@ Upgrade guidance lives in `docs/guides/migration-guide.md`.
 | [Quick Start](docs/essentials/quick-start.md) | Step-by-step first deployment |
 | [Core Concepts](docs/essentials/) | When to use agents vs squads vs playbooks |
 | [Workflows](docs/guides/workflows/) | Problem-to-solution tutorials |
-| [Fleet Guide](docs/guides/fleet-guide.md) | All 42 agents in detail |
+| [Fleet Guide](docs/guides/fleet-guide.md) | All 50 agents in detail |
 | [User Guide](docs/guides/user-guide.md) | Complete CLI reference |
 | [UI Guide](docs/guides/ui-guide.md) | ETX terminal interface |
 | [API Reference](docs/reference/api-reference.md) | Build custom integrations |
@@ -606,7 +609,7 @@ Engineered with Euxis — Enterprise Unified Execution Intelligence System — h
 [platform-badge]: https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20WSL-lightgrey?style=for-the-badge
 [platform-url]: https://github.com/sebastienrousseau/euxis
 
-[agents-badge]: https://img.shields.io/badge/agents-42-blueviolet?style=for-the-badge
+[agents-badge]: https://img.shields.io/badge/agents-50-blueviolet?style=for-the-badge
 [agents-url]: https://github.com/sebastienrousseau/euxis/blob/main/docs/guides/fleet-guide.md
 
 [claude-url]: https://docs.anthropic.com/en/docs/claude-cli

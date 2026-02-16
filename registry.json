@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "protocol_version": "0.0.7",
-  "last_updated": "2026-02-13",
+  "last_updated": "2026-02-16",
   "capabilities_registry": "capabilities.json",
   "constitution": "CONSTITUTION.md",
   "agents": [
@@ -124,6 +124,24 @@
       "activation": "default"
     },
     {
+      "id": "bridge",
+      "path": "prompts/fleet/bridge.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "channels",
+        "translation",
+        "media"
+      ],
+      "capability_tags": [
+        "channel-translation",
+        "media-bridging"
+      ]
+    },
+    {
       "id": "butler",
       "path": "prompts/fleet/butler.txt",
       "tier": "fleet",
@@ -229,6 +247,24 @@
       "activation": "default"
     },
     {
+      "id": "deep-researcher",
+      "path": "prompts/fleet/deep-researcher.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "tags": [
+        "research",
+        "strategy",
+        "architecture",
+        "synthesis"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "documentation",
+        "test-analysis"
+      ],
+      "activation": "on-demand"
+    },
+    {
       "id": "designer",
       "path": "prompts/fleet/designer.txt",
       "tier": "fleet",
@@ -249,6 +285,24 @@
         "compliance-check"
       ],
       "activation": "default"
+    },
+    {
+      "id": "distill",
+      "path": "prompts/fleet/distill.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "summarization",
+        "context",
+        "memory"
+      ],
+      "capability_tags": [
+        "context-compression",
+        "summarization"
+      ]
     },
     {
       "id": "evangelist",
@@ -282,6 +336,62 @@
         "compliance-check"
       ],
       "activation": "default"
+    },
+    {
+      "id": "govern",
+      "path": "prompts/fleet/govern.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "governance",
+        "policy",
+        "escalation"
+      ],
+      "capability_tags": [
+        "policy-governance",
+        "escalation"
+      ]
+    },
+    {
+      "id": "guard",
+      "path": "prompts/core/guard.txt",
+      "tier": "core",
+      "version": "0.0.7",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "security",
+        "approvals",
+        "audit"
+      ],
+      "capability_tags": [
+        "execution-approval",
+        "security-policy",
+        "audit"
+      ]
+    },
+    {
+      "id": "heal",
+      "path": "prompts/fleet/heal.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "recovery",
+        "health",
+        "resilience"
+      ],
+      "capability_tags": [
+        "recovery",
+        "health-monitoring",
+        "resilience"
+      ]
     },
     {
       "id": "historian",
@@ -471,6 +581,25 @@
       "activation": "core"
     },
     {
+      "id": "pair",
+      "path": "prompts/core/pair.txt",
+      "tier": "core",
+      "version": "0.0.7",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "pairing",
+        "onboarding",
+        "gateway"
+      ],
+      "capability_tags": [
+        "onboarding",
+        "channel-auth",
+        "device-pairing"
+      ]
+    },
+    {
       "id": "pentester",
       "path": "prompts/fleet/pentester.txt",
       "tier": "fleet",
@@ -556,24 +685,6 @@
       "activation": "on-demand"
     },
     {
-      "id": "deep-researcher",
-      "path": "prompts/fleet/deep-researcher.txt",
-      "tier": "fleet",
-      "version": "0.0.7",
-      "tags": [
-        "research",
-        "strategy",
-        "architecture",
-        "synthesis"
-      ],
-      "capability_tags": [
-        "architecture-review",
-        "documentation",
-        "test-analysis"
-      ],
-      "activation": "on-demand"
-    },
-    {
       "id": "responder",
       "path": "prompts/fleet/responder.txt",
       "tier": "fleet",
@@ -606,6 +717,25 @@
         "test-analysis"
       ],
       "activation": "core"
+    },
+    {
+      "id": "route",
+      "path": "prompts/core/route.txt",
+      "tier": "core",
+      "version": "0.0.7",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "routing",
+        "sessions",
+        "gateway"
+      ],
+      "capability_tags": [
+        "routing",
+        "session-routing",
+        "dispatch"
+      ]
     },
     {
       "id": "sentinel",
@@ -691,6 +821,25 @@
         "debugging"
       ],
       "activation": "default"
+    },
+    {
+      "id": "trace",
+      "path": "prompts/fleet/trace.txt",
+      "tier": "fleet",
+      "version": "0.0.7",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ],
+      "capability_tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ]
     },
     {
       "id": "watchdog",

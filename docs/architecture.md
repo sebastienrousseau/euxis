@@ -6,7 +6,7 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 
 **Version:** 0.0.7
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
-**Agent Count:** 42 (9 core + 33 fleet)
+**Agent Count:** 50 (12 core + 38 fleet)
 
 ## System Architecture
 
@@ -29,14 +29,15 @@ Euxis is a multi-provider AI agent orchestration framework with a two-tier agent
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Agent Layer                                │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                    CORE TIER (9)                        │  │
+│   │                    CORE TIER (12)                       │  │
 │   │  orchestrator │ architect │ planner │ reviewer │ critic │  │
-│   │  librarian │ auditor │ arbiter │ historian              │  │
+│   │  librarian │ auditor │ arbiter │ historian │ route      │  │
+│   │  pair │ guard                                         │  │
 │   └─────────────────────────────────────────────────────────┘  │
 │   ┌─────────────────────────────────────────────────────────┐  │
-│   │                   FLEET TIER (33)                       │  │
-│   │  Default (21): debugger, sentinel, writer, accountant   │  │
-│   │  On-Demand (8): deep-researcher, researcher, marketer    │  │
+│   │                   FLEET TIER (38)                       │  │
+│   │  Default (24): debugger, sentinel, writer, bridge       │  │
+│   │  On-Demand (10): deep-researcher, researcher, marketer   │  │
 │   │  Specialist (4): cryptographer, ledger, conduit         │  │
 │   └─────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
@@ -74,20 +75,25 @@ Core agents handle high-level planning, governance, and quality assurance.
 | **critic** | Risk assessment, challenge assumptions | architecture-review, security-audit |
 | **arbiter** | Conflict resolution, final decisions | conflict-resolution, decision-making |
 | **historian** | Long-term memory, temporal patterns | memory-optimization, documentation, pattern-analysis |
+| **route** | Session routing, agent selection | routing, session-routing, dispatch |
+| **pair** | Channel onboarding, device pairing | onboarding, channel-auth |
+| **guard** | Execution approvals, audit enforcement | execution-approval, security-policy |
 
 ### Fleet Tier (Tactical)
 
 Fleet agents are specialists for specific domains and tasks.
 
-**Default (21 — Auto-available, task-triggered):**
+**Default (24 — Auto-available, task-triggered):**
 - accountant, animator, automaton, debugger, designer
 - gatekeeper, inspector, interactor, investigator, maintainer
 - optimizer, pentester, polyglot, repairer, responder
 - sentinel, tactician, telemetrist, tester, watchdog, writer
+- bridge, trace, heal
 
-**On-Demand (8 — Explicit invocation only):**
+**On-Demand (10 — Explicit invocation only):**
 - ambassador, butler, evangelist, localizer
 - marketer, deep-researcher, researcher, strategist
+- distill, govern
 
 **Specialist (4 — Domain-specific expertise):**
 - cryptographer, ledger, conduit, custodian

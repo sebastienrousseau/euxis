@@ -26,7 +26,7 @@ euxis optimizer "Optimize database query performance" ollama
 
 ## Agent Tiers
 
-### Core (9): Authority-bearing, always present
+### Core (12): Authority-bearing, always present
 Block progress to maintain quality. If one is missing, the system is incomplete.
 
 | Agent | Authority Domain |
@@ -40,16 +40,19 @@ Block progress to maintain quality. If one is missing, the system is incomplete.
 | `critic` | Risk, pre-mortems, counter-bias |
 | `arbiter` | Conflict resolution, final decisions |
 | `historian` | Long-term memory, temporal patterns |
+| `route` | Session routing, channel decisions |
+| `pair` | Channel onboarding and authentication |
+| `guard` | Execution approvals, audit trails |
 
-### Default (21): Auto-available, task-triggered
+### Default (24): Auto-available, task-triggered
 Execute and advise within scope. Do not define direction.
 
 **Engineering**: `automaton`, `debugger`, `investigator`, `maintainer`, `tester`, `repairer`
 **Quality**: `telemetrist`, `pentester`, `polyglot`, `optimizer`, `inspector`, `watchdog`
-**Operations**: `responder`, `gatekeeper`, `sentinel`, `accountant`
-**Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`
+**Operations**: `responder`, `gatekeeper`, `sentinel`, `accountant`, `heal`, `trace`
+**Experience**: `writer`, `designer`, `tactician`, `animator`, `interactor`, `bridge`
 
-### On-Demand (8): Explicit invocation only
+### On-Demand (10): Explicit invocation only
 Add capability, not safety. Never block, never override core authority.
 
 | Agent | Domain |
@@ -62,6 +65,8 @@ Add capability, not safety. Never block, never override core authority.
 | `deep-researcher` | CTO-grade strategic briefs |
 | `researcher` | Find what others miss |
 | `strategist` | Amplify your voice |
+| `distill` | Context compression |
+| `govern` | Agent governance policies |
 
 ### Specialist (4): Domain-specific expertise
 Activated for domain-scoped tasks only.

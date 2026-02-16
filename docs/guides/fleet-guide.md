@@ -9,9 +9,9 @@ Version 0.0.7
 
 ## Fleet Overview
 
-42 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
+50 specialist agents organized into four tiers with distinct authority and operational rules. Each agent has a defined scope, optimal provider routing, and clear escalation paths.
 
-### Core (9): Authority-bearing, always present
+### Core (12): Authority-bearing, always present
 
 Nine core agents define direction and may block progress. If one is missing, the system is incomplete.
 
@@ -26,8 +26,11 @@ Nine core agents define direction and may block progress. If one is missing, the
 | `critic` | Challenges assumptions. Surfaces hidden risks. Pre-mortems. | Strategic |
 | `arbiter` | Conflict resolution. Final decisions when agents disagree. | Strategic |
 | `historian` | Long-term memory. Temporal patterns. Institutional knowledge. | Utility |
+| `route` | Session routing. Maps inbound events to agents and squads. | Strategic |
+| `pair` | Channel onboarding. Auth flows and device pairing. | Utility |
+| `guard` | Execution approvals and audit trail enforcement. | Strategic |
 
-### Default (21): Auto-available, task-triggered
+### Default (24): Auto-available, task-triggered
 
 These agents execute domain-specific work when you call them. They advise and deliver: but don't set strategic direction.
 
@@ -36,9 +39,11 @@ These agents execute domain-specific work when you call them. They advise and de
 | `accountant` | Analyzes cloud costs, finds waste, recommends right-sizing. Tracks spend across services and suggests budget allocations. | "Why did our AWS bill spike?" or "Optimize our infrastructure costs" |
 | `animator` | Creates smooth transitions, designs color systems, implements dark mode. Brings interfaces to life with purposeful motion. | "Add page transitions" or "Create a cohesive color palette" |
 | `automaton` | Builds CI/CD pipelines, writes Dockerfiles, configures Terraform. Automates everything between commit and production. | "Set up GitHub Actions" or "Create a deployment pipeline" |
+| `bridge` | Translates message formats across channels. Preserves intent and media. | "Route Slack threads into Telegram" or "Translate Discord blocks to SMS" |
 | `debugger` | Traces bugs to root cause. Reads stack traces, reproduces issues, and delivers surgical fixes with minimal side effects. | "Fix the null pointer in auth.py" or "Why does login fail on Safari?" |
 | `designer` | Creates responsive layouts, builds component libraries, ensures visual consistency. Thinks in design systems, not one-off pages. | "Design a settings page" or "Create a reusable card component" |
 | `gatekeeper` | Manages releases end-to-end. Writes changelogs, bumps versions, coordinates deployments, and ensures nothing ships broken. | "Prepare the v2.1 release" or "What changed since last release?" |
+| `heal` | Detects failures and recovers automatically. Keeps agents and channels alive. | "Auto-recover from agent timeouts" or "Handle dropped channel connections" |
 | `inspector` | Runs comprehensive E2E test suites. Validates user flows work correctly across browsers and devices before shipping. | "Verify the checkout flow" or "Run full regression suite" |
 | `interactor` | Implements keyboard shortcuts, focus management, and input handling. Makes interfaces feel responsive and accessible. | "Add keyboard navigation" or "Implement vim-style bindings" |
 | `investigator` | Performs post-mortem analysis on crashes and outages. Reconstructs timelines, identifies contributing factors, prevents recurrence. | "Why did production crash at 3am?" or "Analyze this crash dump" |
@@ -52,10 +57,11 @@ These agents execute domain-specific work when you call them. They advise and de
 | `tactician` | Designs terminal interfaces. Creates intuitive TUI layouts with proper keyboard navigation and visual hierarchy. | "Design a CLI dashboard" or "Improve the TUI experience" |
 | `telemetrist` | Implements observability. Adds structured logging, configures metrics, builds dashboards, sets up alerting. | "Add logging to the API" or "Create a Grafana dashboard" |
 | `tester` | Writes and maintains tests. Ensures coverage, prevents regressions, catches bugs before they ship. | "Add tests for the auth module" or "Improve test coverage" |
+| `trace` | Captures end-to-end agent decisions, timings, and outcomes. | "Trace a multi-agent workflow" or "Debug routing latency" |
 | `watchdog` | Performs exhaustive pre-merge analysis. Catches regressions, validates behavior changes, blocks risky merges. | "Review this PR thoroughly" or "Check for regressions" |
 | `writer` | Creates documentation that developers actually read. Writes tutorials, API references, and guides that answer real questions. | "Document the API" or "Write a getting started guide" |
 
-### On-Demand (8): Explicit invocation only
+### On-Demand (10): Explicit invocation only
 
 These agents handle specialized growth and communication tasks. They add capability: not safety gates. Call them when you need their specific expertise.
 
@@ -63,7 +69,9 @@ These agents handle specialized growth and communication tasks. They add capabil
 |-------|--------------|----------------|
 | `ambassador` | Builds developer community. Creates tutorials, writes blog posts, prepares conference talks, engages on forums. | "Write a tutorial for our API" or "Prepare a conference talk" |
 | `butler` | Summarizes for voice and audio. Converts technical output into clear, spoken English optimized for TTS systems. | "Summarize this for voice output" or "Create an audio briefing" |
+| `distill` | Compresses long context without losing critical decisions. | "Summarize this 200-message thread" |
 | `evangelist` | Crafts brand voice and visual identity. Tells compelling stories about your product. Makes technical work resonate. | "Write launch announcement copy" or "Define our brand voice" |
+| `govern` | Defines and enforces agent capability boundaries and escalation rules. | "Define escalation policies for security work" |
 | `localizer` | Adapts products for global markets. Handles i18n, l10n, RTL layouts, Unicode validation, and cultural adaptation. | "Localize for Japanese market" or "Add RTL support" |
 | `marketer` | Drives growth through SEO, funnel optimization, and go-to-market strategy. Turns features into user acquisition. | "Improve our SEO" or "Plan the product launch" |
 | `deep-researcher` | Produces CTO-grade strategic briefs. Synthesizes academic, industry, and standards evidence with citations. | "Produce a strategic brief on AI system modularity" |

@@ -119,7 +119,7 @@ euxis-certify
 --------------------------------------------------
   Running full validation...
   Running minimal validation...
-  Registry database valid (42 agents)
+  Registry database valid (50 agents)
   Euxis directory structure is valid
   All system dependencies available
   Full validation passed.

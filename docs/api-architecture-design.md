@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document defines a comprehensive API-first architecture for Euxis that exposes the existing 42-agent orchestration framework through modern REST and GraphQL endpoints, while adding enterprise authentication, rate limiting, webhook notifications, and SDKs.
+This document defines a comprehensive API-first architecture for Euxis that exposes the existing 50-agent orchestration framework through modern REST and GraphQL endpoints, while adding enterprise authentication, rate limiting, webhook notifications, and SDKs.
 
 **Key Components:**
 - REST/GraphQL API Gateway with OpenAPI 3.1 specifications
@@ -19,7 +19,7 @@ This document defines a comprehensive API-first architecture for Euxis that expo
 ### Existing Architecture Strengths
 | Component | Current State | API Integration Points |
 |-----------|---------------|----------------------|
-| **Agent System** | 42 agents in 2-tier hierarchy | Agent discovery, execution, lifecycle management |
+| **Agent System** | 50 agents in 2-tier hierarchy | Agent discovery, execution, lifecycle management |
 | **Memory System** | Tiered memory with drift detection | Session persistence, cross-agent context sharing |
 | **Provider Layer** | 8 AI provider integrations | Provider routing, model selection, execution tracking |
 | **CLI Tools** | 13 specialized CLI commands | Command execution bridge, batch operations |
@@ -1192,7 +1192,7 @@ info:
   description: |
     Enterprise AI Agent Orchestration API
 
-    The Euxis API provides programmatic access to 42 specialist AI agents
+    The Euxis API provides programmatic access to 50 specialist AI agents
     for complex engineering tasks. Features include real-time execution
     tracking, persistent memory management, and enterprise authentication.
 
