@@ -103,6 +103,35 @@ def persist_cron_jobs(jobs: List[Dict[str, Any]]) -> None:
     path.write_text(json.dumps(jobs, indent=2), encoding="utf-8")
 
 
+def webhooks_path() -> Path:
+    return gateway_data_dir() / "webhooks.json"
+
+
+def load_webhooks() -> List[Dict[str, Any]]:
+    path = webhooks_path()
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if isinstance(data, list):
+        return data
+    return []
+
+
+def persist_webhooks(hooks: List[Dict[str, Any]]) -> None:
+    path = webhooks_path()
+    path.write_text(json.dumps(hooks, indent=2), encoding="utf-8")
+
+
+def persist_voice_blob(session_id: str, blob: bytes, suffix: str) -> Path:
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    path = voice_dir() / f"{session_id}_{stamp}.{suffix}"
+    path.write_bytes(blob)
+    return path
+
+
 def canvas_dir() -> Path:
     base = gateway_data_dir() / "canvas"
     base.mkdir(parents=True, exist_ok=True)
@@ -126,6 +155,12 @@ def load_canvas_state(session_id: str) -> Dict[str, Any]:
 def persist_canvas_state(session_id: str, state: Dict[str, Any]) -> None:
     path = canvas_state_path(session_id)
     path.write_text(json.dumps(state, indent=2), encoding="utf-8")
+
+
+def voice_dir() -> Path:
+    base = gateway_data_dir() / "voice"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
 
 
 def load_session_from_disk(session_id: str) -> List[Dict[str, Any]]:

@@ -16,7 +16,7 @@ from urllib import request as urlrequest
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
@@ -29,8 +29,10 @@ from gateway_utils import (
     load_approvals,
     load_cron_jobs,
     load_canvas_state,
+    load_webhooks,
     persist_approval,
     persist_cron_jobs,
+    persist_webhooks,
     delete_approval,
     audit_log,
     persist_transcript,
@@ -38,6 +40,7 @@ from gateway_utils import (
     persist_run_event,
     persist_session_meta,
     persist_canvas_state,
+    persist_voice_blob,
     runs_dir,
     make_session_id,
     timestamp,
@@ -81,6 +84,7 @@ class GatewayState:
         self.cron_jobs: List[Dict[str, Any]] = []
         self.cron_task: Optional[asyncio.Task] = None
         self.config: Dict[str, Any] = {}
+        self.webhooks: List[Dict[str, Any]] = []
 
 
 STATE = GatewayState()
@@ -189,6 +193,11 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
     @app.on_event("startup")
     async def startup() -> None:
         STATE.cron_jobs = load_cron_jobs()
+        persisted_hooks = load_webhooks()
+        if persisted_hooks:
+            STATE.webhooks = persisted_hooks
+        else:
+            STATE.webhooks = config["gateway"].get("webhooks", [])
         STATE.cron_task = asyncio.create_task(cron_loop(config))
         for name, adapter in STATE.adapters.items():
             try:
@@ -257,6 +266,19 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         if len(STATE.cron_jobs) == before:
             return JSONResponse({"status": "not_found"}, status_code=404)
         return JSONResponse({"status": "deleted"})
+
+    @app.get("/webhooks")
+    async def webhooks_list() -> JSONResponse:
+        return JSONResponse({"webhooks": STATE.webhooks})
+
+    @app.post("/webhooks")
+    async def webhooks_set(payload: Dict[str, Any]) -> JSONResponse:
+        hooks = payload.get("webhooks", [])
+        if not isinstance(hooks, list):
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        STATE.webhooks = hooks
+        persist_webhooks(hooks)
+        return JSONResponse({"status": "ok", "webhooks": hooks})
 
     slack_events_path = slack_cfg.get("events_path", "/channels/slack/events")
     telegram_webhook_path = telegram_cfg.get("webhook_path", "/channels/telegram/webhook")
@@ -337,6 +359,15 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         meta.setdefault("approved", True)
         asyncio.create_task(process_inbound(session_id, content, meta, config))
         return JSONResponse({"status": "ok"})
+
+    @app.post("/voice/upload")
+    async def voice_upload(session_id: str, file: UploadFile = File(...)) -> JSONResponse:
+        if not session_id:
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        blob = await file.read()
+        suffix = (file.filename or "audio").split(".")[-1]
+        path = persist_voice_blob(session_id, blob, suffix)
+        return JSONResponse({"status": "ok", "path": str(path)})
 
     @app.post("/sessions/{session_id}/broadcast")
     async def session_broadcast(session_id: str, payload: Dict[str, Any]) -> JSONResponse:
@@ -842,7 +873,7 @@ async def send_agent_event(
 
 
 async def notify_webhooks(payload: Dict[str, Any]) -> None:
-    hooks = STATE.config.get("gateway", {}).get("webhooks", [])
+    hooks = STATE.webhooks or STATE.config.get("gateway", {}).get("webhooks", [])
     if not hooks:
         return
     event_name = f"{payload.get('event')}.{payload.get('data', {}).get('status', '')}"
@@ -852,17 +883,19 @@ async def notify_webhooks(payload: Dict[str, Any]) -> None:
         events = hook.get("events", ["agent.final", "agent.error"])
         if not url or event_name not in events:
             continue
-        req = urlrequest.Request(
-            url,
-            data=body,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        try:
-            with urlrequest.urlopen(req, timeout=5) as resp:
-                resp.read()
-        except urlerror.URLError:
-            continue
+        for attempt in range(3):
+            req = urlrequest.Request(
+                url,
+                data=body,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            try:
+                await asyncio.to_thread(urlrequest.urlopen, req, 5)
+                break
+            except urlerror.URLError:
+                await asyncio.sleep(0.5 * (attempt + 1))
+                continue
 
 
 def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:

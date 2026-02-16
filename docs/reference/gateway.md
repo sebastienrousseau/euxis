@@ -291,6 +291,33 @@ POST /voice/wake
 }
 ```
 
+Upload voice audio:
+
+```
+POST /voice/upload?session_id=sess_voice
+Content-Type: multipart/form-data
+file=@audio.wav
+```
+
+## Webhook APIs
+
+List webhooks:
+
+```
+GET /webhooks
+```
+
+Update webhooks:
+
+```
+POST /webhooks
+{
+  "webhooks": [
+    { "url": "https://example.com/hooks/gateway", "events": ["agent.final"] }
+  ]
+}
+```
+
 Fetch a session:
 
 ```

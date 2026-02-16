@@ -10,6 +10,9 @@
     #main { flex: 1; padding: 1rem; display: flex; flex-direction: column; }
     #log { border: 1px solid #ddd; padding: 1rem; flex: 1; overflow: auto; }
     #controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    #canvas { border: 1px dashed #bbb; padding: 0.75rem; margin-top: 1rem; background: #fafafa; }
+    #canvas pre { white-space: pre-wrap; font-size: 0.85rem; }
+    textarea { width: 100%; height: 120px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     input { flex: 1; padding: 0.5rem; }
     button { padding: 0.5rem 1rem; }
     h2 { margin-top: 1rem; }
@@ -29,6 +32,14 @@
   </div>
   <div id="main">
     <div id="log"></div>
+    <div id="canvas">
+      <h2>Canvas State</h2>
+      <pre id="canvas-view">{}</pre>
+      <textarea id="canvas-editor" placeholder='{"view":"dashboard","widgets":[{"type":"card","title":"Status","body":"OK"}]}'></textarea>
+      <button id="canvas-save">Save Canvas</button>
+      <button id="canvas-refresh">Refresh Canvas</button>
+      <div id="canvas-render"></div>
+    </div>
     <div id="controls">
       <input id="session" placeholder="session_id" value="sess_webchat_demo" />
       <input id="message" placeholder="Type a message" />
@@ -43,6 +54,11 @@
     const sendBtn = document.getElementById('send');
     const sessionsEl = document.getElementById('sessions');
     const approvalsEl = document.getElementById('approvals');
+    const canvasView = document.getElementById('canvas-view');
+    const canvasEditor = document.getElementById('canvas-editor');
+    const canvasSave = document.getElementById('canvas-save');
+    const canvasRefresh = document.getElementById('canvas-refresh');
+    const canvasRender = document.getElementById('canvas-render');
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('token')) {
@@ -155,10 +171,61 @@
       });
     }
 
+    function renderCanvas(state) {
+      canvasRender.innerHTML = '';
+      const widgets = (state && state.widgets) || [];
+      widgets.forEach((widget) => {
+        if (widget.type === 'card') {
+          const card = document.createElement('div');
+          card.style.border = '1px solid #ddd';
+          card.style.padding = '0.5rem';
+          card.style.marginTop = '0.5rem';
+          const title = document.createElement('strong');
+          title.textContent = widget.title || 'Card';
+          const body = document.createElement('div');
+          body.textContent = widget.body || '';
+          card.appendChild(title);
+          card.appendChild(body);
+          canvasRender.appendChild(card);
+        }
+      });
+    }
+
+    async function refreshCanvas() {
+      const sessionId = sessionInput.value.trim();
+      if (!sessionId) return;
+      const res = await fetch(`/canvas/${encodeURIComponent(sessionId)}`);
+      const data = await res.json();
+      canvasView.textContent = JSON.stringify(data.state || {}, null, 2);
+      renderCanvas(data.state || {});
+    }
+
+    canvasSave.onclick = async () => {
+      const sessionId = sessionInput.value.trim();
+      if (!sessionId) return;
+      let state = {};
+      try {
+        state = JSON.parse(canvasEditor.value || '{}');
+      } catch (err) {
+        alert('Invalid JSON');
+        return;
+      }
+      await fetch(`/canvas/${encodeURIComponent(sessionId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state })
+      });
+      refreshCanvas();
+    };
+
+    canvasRefresh.onclick = refreshCanvas;
+
     setInterval(refreshSessions, 3000);
     setInterval(refreshApprovals, 3000);
+    setInterval(refreshCanvas, 5000);
     refreshSessions();
     refreshApprovals();
+    refreshCanvas();
   </script>
 </body>
 </html>
