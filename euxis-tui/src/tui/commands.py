@@ -106,11 +106,36 @@ class SystemCommandProvider(Provider):
     """Command provider for system commands via > prefix."""
 
     SYSTEM_COMMANDS: ClassVar[list[tuple[str, str, str]]] = [
+        # Core system commands
         ("Health Check", "Run euxis-health to verify system status", "health"),
         ("Certification", "Run euxis-certify to validate all gates", "certify"),
         ("Lint Fleet", "Run euxis-lint to check fleet integrity", "lint"),
-        ("Cortex Status", "Check semantic memory status", "cortex_status"),
-        ("Sync Docs", "Synchronize documentation", "sync_docs"),
+        ("Refresh", "Reload fleet registry", "refresh"),
+
+        # Router commands (cost optimization)
+        ("Router Status", "Show model routing configuration and costs", "router_stats"),
+        ("Router Benchmark", "Estimate costs for benchmark mission", "router_benchmark"),
+        ("Router Config", "View router.json configuration", "router_config"),
+
+        # Mesh commands (A2A communication) — Full mesh.sh primitives
+        ("Mesh Status", "Show mesh network state and online agents", "mesh_status"),
+        ("Mesh Discover", "Find agents by capability tag", "mesh_discover"),
+        ("Mesh Online Agents", "List all currently online agents", "mesh_list_online"),
+        ("Mesh Inbox", "Check pending messages for current session", "mesh_inbox"),
+        ("Mesh Heartbeat", "Update agent heartbeat timestamp", "mesh_heartbeat"),
+        ("Mesh Cleanup", "Remove old messages and offline agents", "mesh_cleanup"),
+        ("Mesh State", "View shared mesh state JSON", "mesh_state"),
+        ("Mesh Deadlock Check", "Detect circular waits between agents", "mesh_deadlock"),
+
+        # Dispatch commands (from euxis-dispatch)
+        ("Dispatch Mission", "Launch a mission via dispatch", "dispatch_mission"),
+        ("Dispatch Playbook", "Execute a playbook via dispatch", "dispatch_playbook"),
+
+        # Resource commands
+        ("Resource Status", "Show CPU/RAM/thermal status", "resource_status"),
+        ("Resource Throttle", "View thermal throttling status", "resource_throttle"),
+
+        # Navigation
         ("Toggle Theme", "Switch between dark/light/contrast themes", "toggle_theme"),
         ("Settings", "Open settings panel", "settings"),
         ("Fleet Monitor", "Monitor active agent execution", "fleet_monitor"),
@@ -120,8 +145,18 @@ class SystemCommandProvider(Provider):
         ("Playbooks", "Browse and inspect playbooks", "playbooks"),
         ("Metrics", "View performance metrics dashboard", "metrics"),
         ("Cortex Memory", "Browse semantic memory system", "cortex"),
+        ("Cortex Status", "Check semantic memory status", "cortex_status"),
+        ("Sync Docs", "Synchronize documentation", "sync_docs"),
         ("Squad & Combo Details", "View squad compositions and combo chains", "squad_detail"),
-        ("Refresh", "Reload fleet registry", "refresh"),
+
+        # Focus/Zoom commands
+        ("Maximize Pane", "Toggle fullscreen for focused pane (z)", "maximize_pane"),
+        ("Focus Next", "Move focus to next pane (Tab/l)", "focus_next"),
+        ("Focus Prev", "Move focus to previous pane (Shift+Tab/h)", "focus_prev"),
+
+        # Durable execution
+        ("Time-Travel Debugger", "Replay mission timeline, recover from checkpoints", "time_travel"),
+        ("Mission History", "List all recorded missions", "mission_history"),
     ]
 
     @property

@@ -17,6 +17,7 @@ from textual.widgets import Input, ProgressBar, Static
 from tui.core.runner import run_combo, run_squad
 from tui.widgets.header import ETXHeader
 from tui.widgets.output_panel import OutputPanel
+from tui.widgets.resource_monitor import ResourceMonitor
 from tui.widgets.shortcut_bar import ShortcutBar
 
 if TYPE_CHECKING:
@@ -67,6 +68,15 @@ class AgentMonitorRow(Horizontal):
             progress_bar.progress = 100
         elif status == "error":
             status_widget.update("[bold red]Error[/]")
+        elif status == "throttled":
+            # Resource Guard triggered - system cooling down
+            status_widget.update("[bold yellow]⏸ Throttled[/]")
+        elif status == "cooling":
+            # Waiting for system resources to recover
+            status_widget.update("[bold yellow]🌡 Cooling...[/]")
+        elif status == "queued":
+            # Waiting for concurrency slot
+            status_widget.update("[dim cyan]Queued[/]")
         else:
             status_widget.update("[dim]Pending[/]")
             progress_bar.progress = 0
@@ -112,6 +122,9 @@ class FleetMonitorScreen(Screen[None]):
                 yield Static(id="monitor-title")
                 yield Static(id="monitor-stats")
 
+            # Real-time resource visualization (CPU/RAM sparklines)
+            yield ResourceMonitor(id="resource-monitor")
+
             yield VerticalScroll(id="monitor-grid")
 
             yield OutputPanel(id="monitor-output")
@@ -148,6 +161,10 @@ class FleetMonitorScreen(Screen[None]):
     _RE_DELEGATING = re.compile(r"Delegating to\s+(\S+)")
     _RE_COMPLETE = re.compile(r"(?:complete|finished|done)\b", re.IGNORECASE)
     _RE_ERROR = re.compile(r"(?:error|failed|abort)", re.IGNORECASE)
+    # Resource Guard patterns from resources.sh
+    _RE_THROTTLE = re.compile(r"\[THROTTLE\]|\bthrottl", re.IGNORECASE)
+    _RE_COOLING = re.compile(r"(?:cooling|overload|waiting for resources)", re.IGNORECASE)
+    _RE_QUEUED = re.compile(r"\[QUEUE\]|queued|waiting", re.IGNORECASE)
 
     def _get_stream(self) -> AsyncIterator[str]:
         """Return the async output stream for the selected operation."""
@@ -243,6 +260,18 @@ class FleetMonitorScreen(Screen[None]):
         if current_agent and self._RE_ERROR.search(line) and "[euxis]" in line:
             self._set_agent_status(current_agent, "error")
 
+    def _handle_throttle_line(self, line: str, current_agent: str | None) -> bool:
+        """Handle Resource Guard throttle/cooling states."""
+        if self._RE_THROTTLE.search(line):
+            if current_agent:
+                self._set_agent_status(current_agent, "throttled")
+            return True
+        if self._RE_COOLING.search(line):
+            if current_agent:
+                self._set_agent_status(current_agent, "cooling")
+            return True
+        return False
+
     def _mark_remaining_complete(self) -> None:
         """Mark any pending agents as complete."""
         for member in self.members:
@@ -313,6 +342,10 @@ class FleetMonitorScreen(Screen[None]):
                 if handled:
                     continue
 
+                # ── Resource Guard throttle/cooling ──
+                if self._handle_throttle_line(line, current_agent):
+                    continue
+
                 # ── Error in output ──
                 self._handle_error_line(line, current_agent)
 
@@ -350,8 +383,8 @@ class FleetMonitorScreen(Screen[None]):
             bar.update(
                 "[bold] Esc [/][dim] Dashboard[/]  "
                 "[bold] Enter [/][dim] Re-run[/]  "
-                "[bold] ^K [/][dim] Commands[/]  "
-                "[bold] ^P [/][dim] Playbooks[/]  "
+                "[bold] / [/][dim] Commands[/]  "
+                "[bold] ^B [/][dim] Playbooks[/]  "
                 "[bold] ^Q [/][dim] Quit[/]"
             )
         except NoMatches:

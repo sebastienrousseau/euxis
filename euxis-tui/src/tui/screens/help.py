@@ -22,17 +22,18 @@ HELP_CONTENT = """\
 # Welcome to ETX
 
 **ETX** (Euxis Terminal Experience) is a keyboard-first terminal interface
-for the Euxis 42-agent fleet. Deploy AI specialists, monitor operations,
+for the Euxis agent fleet. Deploy AI specialists, monitor operations,
 and manage your fleet — all from the terminal.
 
 ---
 
 ## Pro Tips
 
-- **Command palette is your hub** — press `Ctrl+K` to access everything
+- **Command palette is your hub** — press `/` or `Ctrl+K` or `Ctrl+P` to access everything
 - **Use prefixes** — `@agent`, `#squad`, `>command` narrow searches instantly
-- **Theme cycling** — `Ctrl+T` rotates Dark → Light → Contrast
-- **Quick search** — press `/` on the dashboard to filter agents
+- **Vim navigation** — use `h/j/k/l` to navigate between panes
+- **Maximize any pane** — press `z` to zoom the focused pane full-screen
+- **Theme cycling** — `F3` rotates through 24 themes
 - **Refresh anytime** — `F5` reloads the fleet registry
 
 ---
@@ -43,25 +44,28 @@ and manage your fleet — all from the terminal.
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+K` | Open command palette |
-| `Tab` | Next focusable element |
-| `Shift+Tab` | Previous focusable element |
+| `/` | Open command palette (fuzzy search) |
+| `Ctrl+K` | Open command palette (alias) |
+| `Ctrl+P` | Open command palette (alias) |
+| `Tab` / `j` / `l` | Next focusable element |
+| `Shift+Tab` / `k` / `h` | Previous focusable element |
+| `z` | Maximize/zoom focused pane |
 | `Arrow Keys` | Navigate within groups |
 | `Enter` | Activate / select |
 | `Escape` | Go back / dismiss |
 | `?` | Show help (keyboard reference) |
-| `/` | Focus search on dashboard |
 | `F5` | Refresh fleet registry |
 
 ### Screens
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+T` | Cycle theme (Glass → Light → Contrast) |
-| `Ctrl+S` | Open settings |
+| `F3` | Cycle theme (24 themes) |
+| `F4` | Open settings |
 | `Ctrl+M` | Open fleet monitor |
-| `Ctrl+O` | Open log viewer |
-| `Ctrl+P` | Browse playbooks |
+| `F6` | Open log viewer |
+| `Ctrl+B` | Browse playbooks |
+| `F7` | Router status |
 | `Ctrl+Q` | Quit ETX |
 | `F1` | Show this help |
 | `F2` | Return to welcome screen |
@@ -71,12 +75,12 @@ and manage your fleet — all from the terminal.
 | Screen | Access | Description |
 |--------|--------|-------------|
 | Welcome | `F2` | Splash screen with fleet stats |
-| Dashboard | Default | Fleet grid with all 42 agents, squads, and combos |
+| Dashboard | Default | Fleet grid with all agents, squads, and combos |
 | Agent Execution | Click agent / command palette | Deploy and stream agent output |
-| Fleet Monitor | `Ctrl+M` / command palette | Monitor squad/dispatch operations |
-| Settings | `Ctrl+S` / command palette | Theme, provider, accessibility |
-| Log Viewer | `Ctrl+O` / command palette | Browse agent output history |
-| Playbook Browser | `Ctrl+P` / command palette | Inspect playbook gate structure |
+| Fleet Monitor | `Ctrl+M` / command palette | Monitor squad/dispatch operations with CPU/RAM sparklines |
+| Settings | `F4` / command palette | Theme, provider, accessibility |
+| Log Viewer | `F6` / command palette | Browse agent output history |
+| Playbook Browser | `Ctrl+B` / command palette | Inspect playbook gate structure |
 | Metrics Dashboard | Command palette | Performance sparklines and stats |
 | Squad Details | Command palette | Squad compositions and combo chains |
 | Cortex Memory | Command palette | Browse and query semantic memory |
@@ -91,6 +95,17 @@ and manage your fleet — all from the terminal.
 | `Ctrl+L` | Clear output |
 | `Escape` | Return to dashboard |
 
+### Log Viewer
+
+| Shortcut | Action |
+|----------|--------|
+| `/` | Focus search |
+| `t` | Toggle live tail |
+| `c` | Clear search filter |
+| `g` | Scroll to top |
+| `G` | Scroll to bottom |
+| `Escape` | Return to previous screen |
+
 ### Command Palette Prefixes
 
 | Prefix | Category | Example |
@@ -98,7 +113,7 @@ and manage your fleet — all from the terminal.
 | *(none)* | Search all | `architect` |
 | `@` | Agents | `@pentester` |
 | `#` | Squads | `#quality` |
-| `>` | System commands | `>health` |
+| `>` | System commands | `>health`, `>mesh`, `>router` |
 
 ---
 
@@ -108,25 +123,25 @@ and manage your fleet — all from the terminal.
 2. **Deploy**: Type an agent name and press `Enter`
 3. **Execute**: Enter your task and press `Enter`
 4. **Monitor**: Use `Ctrl+M` to watch fleet operations
-5. **Review**: Use `Ctrl+O` to browse output history
+5. **Review**: Use `F6` to browse output history
 
 ---
 
 ## Agent Tiers
 
-- **CORE** (9 agents): Define direction and block progress when needed
-- **DEFAULT** (21 agents): Execute domain work automatically
-- **ON-DEMAND** (8 agents): Growth and communication tasks
+- **CORE** (12 agents): Define direction and block progress when needed
+- **DEFAULT** (24 agents): Execute domain work automatically
+- **ON-DEMAND** (10 agents): Growth and communication tasks
 - **SPECIALIST** (4 agents): Deep domain expertise
 
 ## Squads
 
 | Squad | Purpose | Members |
 |-------|---------|---------|
-| Vision | Strategy & Discovery | orchestrator, architect, planner, deep-researcher |
-| Build | Engineering & Execution | debugger, maintainer, automaton, tester |
-| Quality | Assurance & Security | reviewer, inspector, sentinel, pentester |
-| Growth | Branding & Documentation | writer, evangelist, strategist, ambassador |
+| Vision | Strategy & Research | orchestrator, architect, planner, deep-researcher, researcher, historian, accountant |
+| Build | Engineering & Execution | debugger, maintainer, automaton, tester, investigator, repairer |
+| Quality | Assurance & Security | reviewer, inspector, sentinel, pentester, auditor, optimizer, watchdog, polyglot, arbiter |
+| Growth | Branding & Documentation | writer, evangelist, strategist, ambassador, marketer, localizer |
 | Experience | UI Excellence | designer, tactician, animator, interactor |
 | Specialist | Domain Expertise | cryptographer, ledger, conduit, custodian |
 

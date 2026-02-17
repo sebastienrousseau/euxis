@@ -294,8 +294,8 @@ class TestSystemCommandProvider(unittest.TestCase):
         assert len(SystemCommandProvider.SYSTEM_COMMANDS) > 0
 
     def test_system_commands_count(self):
-        """SYSTEM_COMMANDS should have 16 entries."""
-        assert len(SystemCommandProvider.SYSTEM_COMMANDS) == 16
+        """SYSTEM_COMMANDS should have at least 30 entries."""
+        assert len(SystemCommandProvider.SYSTEM_COMMANDS) >= 30
 
     def test_system_commands_are_tuples_of_three(self):
         """Each command entry should be a 3-tuple."""

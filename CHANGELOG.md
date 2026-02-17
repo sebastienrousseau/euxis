@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-02-17
 
 ### Added
+- **Multi-Tier Model Routing**: Intelligent cost optimization with capability-to-model mapping (`router.sh`)
+- **ClawRouter Task Analysis**: Automatic task complexity classification for optimal model selection
+- **Local Model Fallback**: Ollama integration for zero-cost routine operations (heartbeats, status checks)
+- **Prompt Caching Support**: Cache control hints for 90% API cost reduction on long prompts
+- **Benchmark Tool**: `euxis-bench` for cost estimation and multi-tier performance validation
+- **TUI Router Transparency**: Color-coded cost tier indicators on agent cards ($=Routine, $$$$=Reason)
+- **TUI Throttle UX**: Visual "Throttled" and "Cooling" states when Resource Guard triggers
+- **TUI Audit Mode**: `python -m tui --audit` for performance benchmarking and cross-platform checks
+- **TUI Router Shortcut**: `Ctrl+R` shows router status in notification
 - **A2A Mesh Communication Protocol**: Peer-to-peer agent discovery, shared state sync, and hand-off with deadlock detection (`mesh.sh`)
 - **Hardware-Aware Resource Throttling**: Automatic CPU/RAM/load detection with thermal-aware staggered agent launches (`resources.sh`)
 - **Agent Bootstrap Wrapper**: Mesh-mode agent launcher with capability registration and cleanup handling
@@ -52,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Repository Reorganization**: Modular `euxis-*` directory structure for distribution readiness
 - **Dispatch Mode Integration**: Mesh mode now uses bootstrap wrapper instead of prompt-only coordination
+- **Agent Bootstrap Enhancement**: Added router integration for automatic model selection before agent launch
+- **Cost Tier Configuration**: Added `router.json` for customizable model mappings and cost estimates
 - **Dynamic Load Thresholds**: Changed from static per-core limits to `nproc × 0.8` formula
 - **Memory Threshold**: Lowered to 75% for macOS swap safety (was 85%)
 - **Version Alignment**: All 102 files synchronized to registry.json as single source of truth

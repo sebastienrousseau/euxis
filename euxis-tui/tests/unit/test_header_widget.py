@@ -76,9 +76,9 @@ class TestETXHeaderReactiveDefaults(unittest.TestCase):
         assert descriptor._default == "claude"
 
     def test_default_agent_count(self):
-        """Test default agent_count reactive value is 41."""
+        """Test default agent_count reactive value is 50."""
         descriptor = ETXHeader.__dict__["agent_count"]
-        assert descriptor._default == 42
+        assert descriptor._default == 50
 
     def test_default_version(self):
         """Test default version reactive value is '0.1.0'."""
@@ -115,11 +115,11 @@ class TestETXHeaderCompose(unittest.TestCase):
     """Tests for the compose() method."""
 
     @patch("tui.widgets.header.Static")
-    def test_compose_yields_three_statics(self, mock_static):
-        """Test compose() yields three Static widgets."""
+    def test_compose_yields_four_statics(self, mock_static):
+        """Test compose() yields four Static widgets (logo, context, burn rate, status)."""
         header = ETXHeader()
         result = list(header.compose())
-        assert len(result) == 3
+        assert len(result) == 4
 
     @patch("tui.widgets.header.Static")
     def test_compose_creates_logo_static(self, mock_static):
@@ -212,7 +212,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         header, _, _, mock_status = self._create_header_with_mocks()
         header._update_display()
         text = mock_status.update.call_args[0][0]
-        assert "42" in text
+        assert "50" in text
         assert "agents" in text
 
     def test_update_display_status_contains_provider(self):

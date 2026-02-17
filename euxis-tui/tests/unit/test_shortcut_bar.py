@@ -51,12 +51,12 @@ class TestShortcutBarDefaults(unittest.TestCase):
     def test_quit_shortcut_present(self):
         """Test quit shortcut is included."""
         keys = [k for k, _ in DEFAULT_SHORTCUTS]
-        assert "^Q" in keys
+        assert "Ctrl+Q" in keys
 
-    def test_commands_shortcut_present(self):
-        """Test commands shortcut is included."""
+    def test_theme_shortcut_present(self):
+        """Test theme shortcut is included."""
         keys = [k for k, _ in DEFAULT_SHORTCUTS]
-        assert "^K" in keys
+        assert "F3" in keys
 
 
 class TestShortcutBarInit(unittest.TestCase):
@@ -139,9 +139,10 @@ class TestShortcutBarOnMount(unittest.TestCase):
         bar.on_mount()
 
         content = bar.update.call_args[0][0]
-        assert "x" in content
+        # Keys are uppercased by format_shortcut
+        assert "X" in content
         assert "Exit" in content
-        assert "h" in content
+        assert "H" in content
         assert "Help" in content
 
     def test_on_mount_uses_bold_for_keys(self):
