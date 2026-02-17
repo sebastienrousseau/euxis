@@ -604,3 +604,244 @@ mesh_cleanup() {
     # Remove offline agents from state (locked)
     _mesh_locked_write '.agents |= with_entries(select(.value.status != "offline"))'
 }
+
+# ============================================================================
+# Flight Recorder — Durable Execution State Persistence
+# ============================================================================
+# Records mission state snapshots for time-travel debugging and crash recovery.
+# Snapshots are stored in JSONL format (append-only) for durability.
+
+FLIGHT_RECORDER_DIR="${EUXIS_HOME}/euxis-runtime/history"
+_FLIGHT_MISSION_ID=""
+_FLIGHT_MISSION_FILE=""
+
+# Initialize flight recorder for a mission
+# Usage: flight_init "mission-id" ["description"]
+flight_init() {
+    local mission_id="$1"
+    local description="${2:-}"
+
+    _FLIGHT_MISSION_ID="$mission_id"
+    mkdir -p "$FLIGHT_RECORDER_DIR"
+    _FLIGHT_MISSION_FILE="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    # Record mission start event
+    local start_event
+    start_event=$(jq -n \
+        --arg type "mission_start" \
+        --arg mission_id "$mission_id" \
+        --arg description "$description" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        --arg agent "$_MESH_AGENT_ID" \
+        '{
+            type: $type,
+            mission_id: $mission_id,
+            description: $description,
+            timestamp: $timestamp,
+            initiator: $agent
+        }')
+
+    echo "$start_event" >> "$_FLIGHT_MISSION_FILE"
+    echo "[flight] Recording started: $mission_id" >&2
+}
+
+# Record a state snapshot
+# Usage: flight_snapshot "event_type" "data_json"
+# Event types: agent_start, agent_complete, thought, tool_call, tool_result,
+#              checkpoint, error, handoff, decision
+flight_snapshot() {
+    local event_type="$1"
+    local data="$2"
+
+    [[ -z "$_FLIGHT_MISSION_FILE" ]] && return 1
+
+    local snapshot
+    snapshot=$(jq -n \
+        --arg type "$event_type" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        --arg agent "$_MESH_AGENT_ID" \
+        --arg session "$_MESH_SESSION_ID" \
+        --argjson data "$data" \
+        '{
+            type: $type,
+            timestamp: $timestamp,
+            agent: $agent,
+            session: $session,
+            data: $data
+        }')
+
+    echo "$snapshot" >> "$_FLIGHT_MISSION_FILE"
+}
+
+# Record agent thought stream (for live thought visualization)
+# Usage: flight_thought "thought content"
+flight_thought() {
+    local thought="$1"
+    flight_snapshot "thought" "$(jq -n --arg t "$thought" '{content: $t}')"
+}
+
+# Record tool invocation
+# Usage: flight_tool_call "tool_name" "args_json"
+flight_tool_call() {
+    local tool="$1"
+    local args="$2"
+    flight_snapshot "tool_call" "$(jq -n --arg t "$tool" --argjson a "$args" '{tool: $t, args: $a}')"
+}
+
+# Record tool result
+# Usage: flight_tool_result "tool_name" "result_json" "success|error"
+flight_tool_result() {
+    local tool="$1"
+    local result="$2"
+    local status="${3:-success}"
+    flight_snapshot "tool_result" "$(jq -n --arg t "$tool" --argjson r "$result" --arg s "$status" '{tool: $t, result: $r, status: $s}')"
+}
+
+# Record a checkpoint (resumable state)
+# Usage: flight_checkpoint "checkpoint_name" "state_json"
+flight_checkpoint() {
+    local name="$1"
+    local state="$2"
+
+    # Also capture current mesh state
+    local mesh_state="{}"
+    [[ -f "$MESH_STATE" ]] && mesh_state=$(cat "$MESH_STATE")
+
+    flight_snapshot "checkpoint" "$(jq -n \
+        --arg name "$name" \
+        --argjson state "$state" \
+        --argjson mesh "$mesh_state" \
+        '{name: $name, state: $state, mesh_state: $mesh}')"
+
+    echo "[flight] Checkpoint saved: $name" >&2
+}
+
+# Record mission completion
+# Usage: flight_complete "success|error" ["summary"]
+flight_complete() {
+    local status="$1"
+    local summary="${2:-}"
+
+    [[ -z "$_FLIGHT_MISSION_FILE" ]] && return 1
+
+    local end_event
+    end_event=$(jq -n \
+        --arg type "mission_complete" \
+        --arg status "$status" \
+        --arg summary "$summary" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        '{
+            type: $type,
+            status: $status,
+            summary: $summary,
+            timestamp: $timestamp
+        }')
+
+    echo "$end_event" >> "$_FLIGHT_MISSION_FILE"
+    echo "[flight] Recording complete: $status" >&2
+}
+
+# Record cost event (for burn rate tracking)
+# Usage: flight_cost "model" "input_tokens" "output_tokens" "cost_usd"
+flight_cost() {
+    local model="$1"
+    local input_tokens="$2"
+    local output_tokens="$3"
+    local cost_usd="$4"
+
+    flight_snapshot "cost" "$(jq -n \
+        --arg model "$model" \
+        --argjson input "$input_tokens" \
+        --argjson output "$output_tokens" \
+        --argjson cost "$cost_usd" \
+        '{model: $model, input_tokens: $input, output_tokens: $output, cost_usd: $cost}')"
+}
+
+# ============================================================================
+# Flight Recorder — Replay Functions
+# ============================================================================
+
+# List all recorded missions
+# Usage: flight_list → outputs mission IDs
+flight_list() {
+    ls -1 "$FLIGHT_RECORDER_DIR"/*.jsonl 2>/dev/null | \
+        xargs -I{} basename {} .jsonl | \
+        sort -r
+}
+
+# Get mission metadata
+# Usage: flight_info "mission-id" → JSON with start/end times, status, event count
+flight_info() {
+    local mission_id="$1"
+    local file="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    [[ ! -f "$file" ]] && echo '{"error": "not found"}' && return 1
+
+    local start_event end_event event_count
+    start_event=$(head -1 "$file")
+    end_event=$(grep '"type":"mission_complete"' "$file" | tail -1)
+    event_count=$(wc -l < "$file")
+
+    jq -n \
+        --argjson start "$start_event" \
+        --argjson end "${end_event:-null}" \
+        --argjson count "$event_count" \
+        '{
+            mission_id: $start.mission_id,
+            description: $start.description,
+            started: $start.timestamp,
+            completed: (if $end then $end.timestamp else null end),
+            status: (if $end then $end.status else "in_progress" end),
+            event_count: $count
+        }'
+}
+
+# Get events in time range
+# Usage: flight_events "mission-id" [start_idx] [count] → JSONL events
+flight_events() {
+    local mission_id="$1"
+    local start_idx="${2:-1}"
+    local count="${3:-100}"
+    local file="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    [[ ! -f "$file" ]] && return 1
+
+    tail -n +"$start_idx" "$file" | head -n "$count"
+}
+
+# Get checkpoint by name
+# Usage: flight_get_checkpoint "mission-id" "checkpoint-name" → JSON state
+flight_get_checkpoint() {
+    local mission_id="$1"
+    local checkpoint_name="$2"
+    local file="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    [[ ! -f "$file" ]] && return 1
+
+    grep '"type":"checkpoint"' "$file" | \
+        jq -s --arg name "$checkpoint_name" \
+        '[.[] | select(.data.name == $name)] | last'
+}
+
+# Get latest checkpoint
+# Usage: flight_latest_checkpoint "mission-id" → JSON state
+flight_latest_checkpoint() {
+    local mission_id="$1"
+    local file="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    [[ ! -f "$file" ]] && return 1
+
+    grep '"type":"checkpoint"' "$file" | tail -1
+}
+
+# Calculate total mission cost
+# Usage: flight_total_cost "mission-id" → cost in USD
+flight_total_cost() {
+    local mission_id="$1"
+    local file="${FLIGHT_RECORDER_DIR}/${mission_id}.jsonl"
+
+    [[ ! -f "$file" ]] && echo "0" && return 1
+
+    grep '"type":"cost"' "$file" | \
+        jq -s '[.[].data.cost_usd] | add // 0'
+}

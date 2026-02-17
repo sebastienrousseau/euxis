@@ -21,6 +21,16 @@ fi
 # Default provider (fallback when no tiering match)
 DEFAULT_PROVIDER="${EUXIS_DEFAULT_PROVIDER:-claude}"
 
+# Source router for cost-optimized model selection
+ROUTER_SH="${EUXIS_HOME}/euxis-core/lib/router.sh"
+if [[ -f "$ROUTER_SH" ]]; then
+    # shellcheck source=euxis-core/lib/router.sh
+    source "$ROUTER_SH"
+    ROUTER_INTEGRATED=true
+else
+    ROUTER_INTEGRATED=false
+fi
+
 # Configurable timeouts for provider API calls (in seconds)
 EUXIS_API_TIMEOUT="${EUXIS_API_TIMEOUT:-300}"  # 5 minutes default
 
@@ -519,6 +529,75 @@ run_goose() {
         log_error "goose not found — install via: brew install block/tap/goose"
         exit 1
     fi
+}
+
+# ============================================================================
+# Router-Aware Execution (v0.1.0)
+# Uses router.sh for cost-optimized model selection when available.
+# Falls back to tiered provider selection if router unavailable.
+# ============================================================================
+
+# Execute with router-optimized model selection
+# Usage: execute_with_router <agent_id> <task> <full_prompt>
+execute_with_router() {
+    local agent_id="$1"
+    local task="$2"
+    local full_prompt="$3"
+
+    # Use router for model selection if available
+    if [[ "${ROUTER_INTEGRATED:-false}" == "true" ]]; then
+        # Check for local model fallback (zero cost)
+        if router_should_use_local "$task" 2>/dev/null; then
+            local local_model
+            local_model=$(router_local_model)
+            log_info "Using local model: ${local_model} (zero cost)"
+            PROVIDER_MODEL="$local_model"
+            run_ollama "$full_prompt"
+            return $?
+        fi
+
+        # Use router for optimal model selection
+        local selected_model
+        selected_model=$(router_select_model "$agent_id" "$task" 2>/dev/null)
+
+        if [[ -n "$selected_model" ]]; then
+            # Map model to provider
+            local provider
+            case "$selected_model" in
+                *opus*|*sonnet*)
+                    provider="claude"
+                    ;;
+                *gemini*|*flash*)
+                    provider="gemini"
+                    ;;
+                *deepseek*|*qwen*)
+                    provider="ollama"
+                    selected_model="${EUXIS_OLLAMA_MODEL:-$selected_model}"
+                    ;;
+                *gpt*)
+                    provider="openai"
+                    ;;
+                *)
+                    provider="claude"
+                    ;;
+            esac
+
+            # Override the model if router selected one
+            if [[ -n "${EUXIS_MODEL_OVERRIDE:-}" ]]; then
+                selected_model="$EUXIS_MODEL_OVERRIDE"
+            fi
+
+            log_info "Router selected: ${selected_model} via ${provider}"
+            PROVIDER_MODEL="$selected_model"
+            execute_provider "$provider" "$full_prompt"
+            return $?
+        fi
+    fi
+
+    # Fallback to tiered provider selection
+    local provider
+    provider=$(resolve_tiered_provider "$agent_id")
+    execute_provider "$provider" "$full_prompt"
 }
 
 execute_provider() {

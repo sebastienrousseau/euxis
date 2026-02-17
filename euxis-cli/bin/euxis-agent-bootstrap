@@ -2,13 +2,15 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2026 Euxis Contributors
 #
-# euxis-agent-bootstrap — Mesh-aware agent launcher
+# euxis-agent-bootstrap — Mesh-aware agent launcher with intelligent model routing
 #
 # This script bootstraps an agent into the mesh communication network:
-#   1. Sources the mesh.sh library
-#   2. Registers the agent with its capabilities
-#   3. Sets up cleanup on exit
-#   4. Executes the actual agent loop
+#   1. Sources the mesh.sh library for peer communication
+#   2. Sources the router.sh library for cost-optimized model selection
+#   3. Registers the agent with its capabilities
+#   4. Selects optimal model based on agent tier + task complexity
+#   5. Sets up cleanup on exit
+#   6. Executes the actual agent loop
 #
 # Usage:
 #   euxis-agent-bootstrap <agent-id> <task> [verify-cmd] [max-iterations] [capabilities]
@@ -17,6 +19,8 @@
 #   EUXIS_HOME          - Base directory (default: ~/.euxis)
 #   EUXIS_MESH_SESSION  - Shared session ID for coordinated agents
 #   EUXIS_MESH_VERBOSE  - Enable verbose mesh logging (default: false)
+#   EUXIS_MODEL_OVERRIDE - Force specific model (bypasses router)
+#   EUXIS_LOCAL_ONLY    - Use only local models (Ollama)
 
 set -u
 
@@ -49,6 +53,21 @@ else
     echo "[bootstrap] Warning: mesh.sh not found at $MESH_LIB" >&2
     echo "[bootstrap] Running in non-mesh mode" >&2
     # Fall through to execute without mesh
+fi
+
+# ============================================================================
+# Source Router Library (Cost Optimization)
+# ============================================================================
+
+ROUTER_LIB="${EUXIS_HOME}/euxis-core/lib/router.sh"
+
+if [[ -f "$ROUTER_LIB" ]]; then
+    source "$ROUTER_LIB"
+    ROUTER_AVAILABLE=true
+else
+    echo "[bootstrap] Warning: router.sh not found at $ROUTER_LIB" >&2
+    echo "[bootstrap] Using default model routing" >&2
+    ROUTER_AVAILABLE=false
 fi
 
 # ============================================================================
@@ -110,6 +129,42 @@ fi
 AUGMENTED_TASK="${MESH_CONTEXT}${TASK}"
 
 # ============================================================================
+# Model Selection (Cost Optimization)
+# ============================================================================
+
+SELECTED_MODEL=""
+USE_LOCAL=false
+
+if [[ "$ROUTER_AVAILABLE" == "true" ]]; then
+    # Check if task should use local model (Ollama)
+    if router_should_use_local "$TASK"; then
+        USE_LOCAL=true
+        SELECTED_MODEL=$(router_local_model)
+        [[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+            echo "[bootstrap] Using local model: $SELECTED_MODEL (zero cost)" >&2
+    else
+        # Select optimal model based on agent capabilities + task complexity
+        SELECTED_MODEL=$(router_select_model "$AGENT_ID" "$TASK")
+        [[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+            echo "[bootstrap] Selected model: $SELECTED_MODEL (via router)" >&2
+    fi
+
+    # Record estimated cost for telemetry
+    if [[ -n "$SELECTED_MODEL" ]]; then
+        ESTIMATED_COST=$(router_cost_estimate "$SELECTED_MODEL" "50000")  # ~50k tokens assumed
+        [[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+            echo "[bootstrap] Estimated cost: $ESTIMATED_COST (per 50k tokens)" >&2
+    fi
+
+    # Check if cache warmup needed
+    if router_should_warmup; then
+        [[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+            echo "[bootstrap] Prompt cache needs warmup" >&2
+        router_record_warmup
+    fi
+fi
+
+# ============================================================================
 # Execute Agent Loop
 # ============================================================================
 
@@ -121,6 +176,16 @@ export EUXIS_MESH_STATE="${EUXIS_HOME}/euxis-runtime/mesh/state.json"
 export EUXIS_MESH_INBOX="${EUXIS_HOME}/euxis-runtime/mesh/inbox"
 export EUXIS_AGENT_ID="$AGENT_ID"
 export EUXIS_MESH_SESSION="$MESH_SESSION"
+
+# Export model selection for child processes
+if [[ -n "$SELECTED_MODEL" ]]; then
+    export EUXIS_SELECTED_MODEL="$SELECTED_MODEL"
+    # Only set override if not already set (preserve explicit user choice)
+    if [[ -z "${EUXIS_MODEL_OVERRIDE:-}" ]]; then
+        export EUXIS_MODEL_OVERRIDE="$SELECTED_MODEL"
+    fi
+fi
+export EUXIS_USE_LOCAL="$USE_LOCAL"
 
 # Execute the actual agent loop
 exec "${EUXIS_HOME}/euxis-cli/bin/euxis-loop" "$AGENT_ID" "$AUGMENTED_TASK" "$VERIFY_CMD" "$MAX_ITERATIONS"

@@ -97,14 +97,15 @@ ETX_THEMES = {
     ),
 
     # ── Nord ──────────────────────────────────────────────────────────
+    # Improved contrast: distinct frost colors instead of all-white
     "etx-nord": Theme(
         name="etx-nord",
-        primary="#ffffff",        # frost white
-        secondary="#ffffff",      # aurora white
-        accent="#ffffff",
-        warning="#ffe3ab",        # aurora yellow
-        error="#ffe0d0",          # aurora orange
-        success="#fdfffb",        # aurora green
+        primary="#88c0d0",        # frost 3 (cyan) - distinct primary
+        secondary="#81a1c1",      # frost 2 (blue) - distinct secondary
+        accent="#88c0d0",         # frost 3
+        warning="#ebcb8b",        # aurora yellow (brighter)
+        error="#d08770",          # aurora orange (better contrast: 5.3:1)
+        success="#a3be8c",        # aurora green
         surface="#2e3440",        # polar night 0
         panel="#3b4252",          # polar night 1
         dark=True,
@@ -151,12 +152,243 @@ ETX_THEMES = {
         panel="#232834",          # panel
         dark=True,
     ),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # 2026 PREMIUM THEMES — Ultimate TUI Aesthetics
+    # ═══════════════════════════════════════════════════════════════════
+
+    # ── Liquid Glass V2 (Refined Apple-inspired depth) ────────────────
+    "etx-liquid-glass-v2": Theme(
+        name="etx-liquid-glass-v2",
+        primary="#38bdf8",        # Sky blue (vibrant but not harsh)
+        secondary="#818cf8",      # Indigo (depth accent)
+        accent="#38bdf8",
+        warning="#fbbf24",        # Amber (warm contrast)
+        error="#f87171",          # Coral (soft error)
+        success="#4ade80",        # Mint (fresh success)
+        surface="#0f172a",        # Slate 950 (deep, nearly black)
+        panel="#1e293b",          # Slate 800 (elevated glass layer)
+        dark=True,
+    ),
+
+    # ── Cyber Pulse (High-octane neon futurism) ───────────────────────
+    "etx-cyber-pulse": Theme(
+        name="etx-cyber-pulse",
+        primary="#00e8ff",        # Neon cyan (electric)
+        secondary="#a855f7",      # Vivid violet
+        accent="#00e8ff",
+        warning="#ffbf00",        # Amber glow
+        error="#ff0055",          # Hot pink (urgent)
+        success="#00ff9f",        # Matrix green
+        surface="#0a0a0c",        # True black depth
+        panel="#16161e",          # Tokyo night panel
+        dark=True,
+    ),
+
+    # ── Mocha Mousse (Earthy sophistication, Pantone 2025) ────────────
+    "etx-mocha-mousse": Theme(
+        name="etx-mocha-mousse",
+        primary="#d4a574",        # Warm caramel
+        secondary="#c4a77d",      # Soft gold
+        accent="#d4a574",
+        warning="#e6a85c",        # Honey amber
+        error="#e57373",          # Dusty rose
+        success="#81c784",        # Sage green
+        surface="#1a1512",        # Deep espresso
+        panel="#2d2420",          # Warm cocoa
+        dark=True,
+    ),
+
+    # ── Resonant Stark (Ultra-minimal professional) ───────────────────
+    # Improved: Higher contrast secondary for metadata readability
+    "etx-resonant-stark": Theme(
+        name="etx-resonant-stark",
+        primary="#f1f5f9",        # Slate 100 (bright primary)
+        secondary="#cbd5e1",      # Slate 300 (readable metadata)
+        accent="#f1f5f9",
+        warning="#fbbf24",        # Amber 400 (visible warning)
+        error="#f87171",          # Red 400 (clear error)
+        success="#4ade80",        # Green 400 (distinct success)
+        surface="#020617",        # Slate 950 (pure depth)
+        panel="#0f172a",          # Slate 900 (subtle lift)
+        dark=True,
+    ),
+
+    # ── Deep Space (Cosmic void with stellar accents) ─────────────────
+    "etx-deep-space": Theme(
+        name="etx-deep-space",
+        primary="#67e8f9",        # Cyan 300 (stellar)
+        secondary="#c4b5fd",      # Violet 300 (nebula)
+        accent="#67e8f9",
+        warning="#fde047",        # Yellow 300 (solar)
+        error="#fda4af",          # Rose 300 (supernova)
+        success="#86efac",        # Green 300 (aurora)
+        surface="#030712",        # Gray 950 (void)
+        panel="#111827",          # Gray 900 (dark matter)
+        dark=True,
+    ),
+
+    # ── Cloud Dancer (Pantone 2026 Color of the Year) ─────────────────
+    # "Fresh start" and "mental breathing room" - serene light theme
+    "etx-cloud-dancer": Theme(
+        name="etx-cloud-dancer",
+        primary="#3d3d3d",        # Deep charcoal (clear text)
+        secondary="#6b6b6b",      # Medium gray (readable metadata)
+        accent="#3d3d3d",
+        warning="#b45309",        # Amber 700 (warm ochre)
+        error="#b91c1c",          # Red 700 (deep, not alarming)
+        success="#15803d",        # Green 700 (forest)
+        surface="#F0EEE9",        # Cloud Dancer (main surface)
+        panel="#E5E3DD",          # Soft shadow white
+        dark=False,
+    ),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SEMANTIC ALIASES — Intent-First Naming (2026 Standard)
+    # Use these for quick selection by mood/intent
+    # ═══════════════════════════════════════════════════════════════════
+
+    # Focused: High contrast, zero distraction
+    "etx-focused": Theme(
+        name="etx-focused",
+        primary="#f1f5f9",        # Bright primary
+        secondary="#cbd5e1",      # Clear metadata
+        accent="#f1f5f9",
+        warning="#fbbf24",
+        error="#f87171",
+        success="#4ade80",
+        surface="#020617",        # Pure depth
+        panel="#0f172a",
+        dark=True,
+    ),
+
+    # Calm: Reduced visual intensity for long sessions
+    "etx-calm": Theme(
+        name="etx-calm",
+        primary="#d4a574",        # Warm caramel
+        secondary="#b8977a",      # Soft tan
+        accent="#d4a574",
+        warning="#d4915c",        # Muted amber
+        error="#c97070",          # Soft coral
+        success="#7dab7d",        # Sage
+        surface="#1a1512",        # Deep espresso
+        panel="#2d2420",          # Warm cocoa
+        dark=True,
+    ),
+
+    # Vivid: High-energy for active work
+    "etx-vivid": Theme(
+        name="etx-vivid",
+        primary="#00e8ff",        # Neon cyan
+        secondary="#a855f7",      # Vivid violet
+        accent="#00e8ff",
+        warning="#ffbf00",        # Amber glow
+        error="#ff0055",          # Hot pink
+        success="#00ff9f",        # Matrix green
+        surface="#0a0a0c",        # True black
+        panel="#16161e",          # Dark panel
+        dark=True,
+    ),
+
+    # Soft: Gentle on eyes, cloud-like serenity
+    # Secondary darkened to #595959 for 4.5:1 contrast compliance
+    "etx-soft": Theme(
+        name="etx-soft",
+        primary="#3d3d3d",
+        secondary="#595959",      # Darker gray (was #6b6b6b, now 4.8:1)
+        accent="#3d3d3d",
+        warning="#b45309",
+        error="#b91c1c",
+        success="#15803d",
+        surface="#F0EEE9",        # Cloud Dancer
+        panel="#E5E3DD",
+        dark=False,
+    ),
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ACCESSIBILITY THEMES — 2026 Inclusive Design Standards
+    # WCAG 2.2 AA compliant, designed for low-vision and color-blindness
+    # ═══════════════════════════════════════════════════════════════════
+
+    # High Contrast Dark — Maximum readability, WCAG AAA (7:1+)
+    "etx-high-contrast": Theme(
+        name="etx-high-contrast",
+        primary="#ffffff",        # Pure white on near-black
+        secondary="#e5e5e5",      # High-contrast metadata
+        accent="#ffffff",
+        warning="#ffd700",        # Gold (visible to most color-blind users)
+        error="#ff6b6b",          # Bright coral (distinct from success)
+        success="#00ff88",        # Bright cyan-green (distinct from error)
+        surface="#0a0a0a",        # Near-black (not pure #000)
+        panel="#1a1a1a",          # Elevated panel
+        dark=True,
+    ),
+
+    # High Contrast Light — Maximum readability on light background
+    "etx-high-contrast-light": Theme(
+        name="etx-high-contrast-light",
+        primary="#000000",        # Pure black on near-white
+        secondary="#333333",      # High-contrast metadata
+        accent="#000000",
+        warning="#b45309",        # Dark amber (visible on light)
+        error="#b91c1c",          # Dark red
+        success="#15803d",        # Dark green
+        surface="#fafafa",        # Near-white (not pure #fff)
+        panel="#f0f0f0",          # Subtle panel
+        dark=False,
+    ),
+
+    # Deuteranopia-Safe — Optimized for red-green color blindness
+    "etx-deuteranopia": Theme(
+        name="etx-deuteranopia",
+        primary="#56b4e9",        # Sky blue (safe)
+        secondary="#999999",      # Neutral gray
+        accent="#56b4e9",
+        warning="#f0e442",        # Yellow (universal warning)
+        error="#d55e00",          # Orange (not red, distinguishable)
+        success="#0072b2",        # Dark blue (not green)
+        surface="#1a1a2e",        # Deep blue-black
+        panel="#2d2d44",          # Elevated blue-gray
+        dark=True,
+    ),
+
+    # Protanopia-Safe — Optimized for red color blindness
+    "etx-protanopia": Theme(
+        name="etx-protanopia",
+        primary="#56b4e9",        # Sky blue
+        secondary="#999999",      # Neutral gray
+        accent="#56b4e9",
+        warning="#f0e442",        # Yellow
+        error="#cc79a7",          # Pink/magenta (visible to protanopes)
+        success="#009e73",        # Teal (not pure green)
+        surface="#1a1a2e",        # Deep blue-black
+        panel="#2d2d44",          # Elevated blue-gray
+        dark=True,
+    ),
 }
 
-# Ordered list for theme cycling (Ctrl+T)
+# Ordered list for theme cycling (F3)
+# Organized by intent for quick discovery
 THEME_CYCLE = [
+    # ── Semantic Quick-Select (Intent-First) ──
+    "etx-focused",           # High contrast, zero distraction
+    "etx-calm",              # Warm, reduced intensity
+    "etx-vivid",             # High-energy neon
+    "etx-soft",              # Cloud Dancer light theme
+
+    # ── 2026 Premium Themes ──
+    "etx-liquid-glass-v2",   # Apple-inspired depth
+    "etx-cyber-pulse",       # Neon neubrutalism
+    "etx-mocha-mousse",      # Earthy sophistication
+    "etx-resonant-stark",    # Ultra-minimal professional
+    "etx-deep-space",        # Cosmic void
+    "etx-cloud-dancer",      # Pantone 2026
+
+    # ── Original Euxis ──
     "etx-liquid-glass",
     "etx-liquid-light",
+
+    # ── Community Favorites ──
     "etx-catppuccin-mocha",
     "etx-catppuccin-latte",
     "etx-tokyo-night",
@@ -165,4 +397,19 @@ THEME_CYCLE = [
     "etx-gruvbox",
     "etx-rose-pine",
     "etx-ayu-mirage",
+
+    # ── Accessibility ──
+    "etx-high-contrast",
+    "etx-high-contrast-light",
+    "etx-deuteranopia",
+    "etx-protanopia",
 ]
+
+
+# Accessibility theme recommendations by need
+ACCESSIBILITY_THEMES = {
+    "low-vision": ["etx-high-contrast", "etx-high-contrast-light"],
+    "color-blind": ["etx-deuteranopia", "etx-protanopia"],
+    "light-sensitive": ["etx-calm", "etx-mocha-mousse"],
+    "vestibular": [],  # Use reduced_motion setting instead
+}

@@ -81,6 +81,7 @@ if [[ "${1:-}" == "--symlinks" ]]; then
         "euxis-loop"
         "euxis-playbook"
         "euxis-agent-bootstrap"
+        "euxis-bench"
     )
 
     for cmd in "${CLI_COMMANDS[@]}"; do

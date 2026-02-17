@@ -1440,3 +1440,38 @@
   "ms": 92916,
   "status": "concurrent_agents=6"
 }
+{
+  "ts": "2026-02-17T20:21:46Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 204,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T20:23:29Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 103434,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T20:23:29Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 103789,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T20:23:29Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 103789,
+  "status": "concurrent_agents=6"
+}
+{
+  "ts": "2026-02-17T20:57:50Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 108,
+  "status": "ok"
+}

@@ -1,7 +1,21 @@
-/* ETX: Euxis Terminal Experience — Minimal Stylesheet */
+/* ETX: Euxis Terminal Experience — 2026 Premium Stylesheet
+ *
+ * Design Philosophy:
+ * - Liquid Glass: Layered depth via border progression (none → round → thick → double)
+ * - Resonant Stark: Typography hierarchy (bold primary, dim secondary, italic hints)
+ * - Micro-Interactions: State-based class changes simulate animation
+ * - Breathing Room: Consistent spacing for visual comfort
+ *
+ * Border Depth Scale:
+ *   Level 0: none (background elements)
+ *   Level 1: round (resting state)
+ *   Level 2: tall (hover/soft focus)
+ *   Level 3: thick (active focus)
+ *   Level 4: double (emphasized/selected)
+ */
 
 /* ========================================================================
-   APP LAYOUT
+   APP LAYOUT — Deep background for contrast depth
    ======================================================================== */
 
 Screen {
@@ -9,8 +23,13 @@ Screen {
     background: $surface;
 }
 
+/* Global focus indicator - clear visual feedback */
+*:focus {
+    /* Textual handles focus styling per-widget */
+}
+
 /* ========================================================================
-   HEADER BAR — Clean navigation with subtle separator
+   HEADER BAR — 2026 Premium Navigation with Depth
    ======================================================================== */
 
 ETXHeader {
@@ -20,15 +39,15 @@ ETXHeader {
     color: $text;
     padding: 0 2;
     layout: horizontal;
-    border-bottom: solid $accent 40%;
+    border-bottom: solid $accent;
 }
 
 #etx-header-logo {
     width: auto;
-    min-width: 22;
+    min-width: 24;
     content-align-vertical: middle;
-    padding: 0 1;
-    color: $accent;
+    padding: 0 2;
+    color: $primary;
     text-style: bold;
 }
 
@@ -39,13 +58,23 @@ ETXHeader {
     color: $text;
 }
 
-#etx-header-status {
+#etx-header-cost {
     width: auto;
-    min-width: 28;
+    min-width: 18;
     content-align-vertical: middle;
     content-align: right middle;
-    padding: 0 1;
-    color: $text;
+    padding: 0 2;
+    color: $warning;
+    text-style: bold;
+}
+
+#etx-header-status {
+    width: auto;
+    min-width: 30;
+    content-align-vertical: middle;
+    content-align: right middle;
+    padding: 0 2;
+    color: $text-muted;
 }
 
 /* ========================================================================
@@ -57,45 +86,104 @@ ETXHeader {
     padding: 1 2;
 }
 
+/* Search "Slot" — Command bar */
 #fleet-search {
     dock: top;
-    height: auto;
-    max-height: 5;
+    height: 3;
     margin: 0 0 1 0;
     width: 100%;
+    background: $panel;
+    border: round $accent;
+    padding: 0 1;
 }
 
 #fleet-search Input {
     width: 100%;
+    background: transparent;
+    border: none;
+}
+
+#fleet-search Input:focus {
+    border: none;
+}
+
+/* Active agents breadcrumb indicator */
+.active-indicator {
+    height: 1;
+    padding: 0 1;
+    background: $panel;
+    color: $text;
+}
+
+.active-indicator.hidden {
+    display: none;
 }
 
 #fleet-scroll {
     height: 1fr;
+    width: 100%;
 }
 
+/* Section headers with typographic hierarchy */
 .section-title {
     height: 1;
-    padding: 0 1;
-    margin: 1 0 1 0;
+    padding: 0 2;
+    margin: 2 0 1 0;
     text-style: bold;
-    color: $accent;
+    color: $primary;
 }
 
+.section-desc {
+    height: 1;
+    padding: 0 2;
+    margin: 0 0 1 0;
+    color: $text-muted;
+    text-style: italic;
+}
+
+/* Fleet grid row - breathing room for cards */
 .fleet-row {
     height: auto;
-    padding: 0;
+    width: 100%;
+    padding: 0 1;
     margin: 0 0 1 0;
 }
 
 .fleet-row AgentCard {
     width: 1fr;
     max-width: 30;
-    margin: 0 1 0 0;
+    margin: 0 1 1 0;
+}
+
+/* Divider between sections */
+.fleet-divider {
+    height: 1;
+    padding: 0 2;
+    margin: 1 0;
+    color: $text-muted;
 }
 
 /* ========================================================================
-   AGENT CARDS
+   AGENT CARDS — Tactile depth with rounded borders
    ======================================================================== */
+
+/* Agent avatar (Unicode or graphics-based) */
+.agent-avatar {
+    width: 2;
+    height: 1;
+    content-align: center middle;
+    margin: 0 1 0 0;
+}
+
+/* Avatar state classes for visual hierarchy */
+.avatar-active {
+    text-style: bold;
+}
+
+.avatar-error {
+    text-style: bold;
+    background: $error;
+}
 
 .agent-card-name {
     text-style: bold;
@@ -109,25 +197,232 @@ ETXHeader {
 }
 
 .agent-card-tags {
-    color: $text-muted;
     width: 100%;
 }
 
+/* Status indicators */
+.agent-card-status {
+    height: 1;
+    padding: 0 1;
+}
+
 /* ========================================================================
-   TIP BAR
+   AGENT CARDS — Tactile depth with border progression
+   ======================================================================== */
+
+/* Card base state */
+AgentCard {
+    height: auto;
+    min-height: 5;
+    padding: 1;
+    border: round $surface;
+}
+
+/* Hover brings card to attention */
+AgentCard:hover {
+    border: round $accent;
+}
+
+/* Focus state - prominent border */
+AgentCard:focus {
+    border: thick $accent;
+    background: $panel;
+}
+
+/* Active/Running agent */
+AgentCard.status-active {
+    border: round $success;
+}
+
+AgentCard.status-active:focus {
+    border: thick $success;
+}
+
+/* ========================================================================
+   PULSE ANIMATION — Breathing effect for active agents (timer-driven)
+   ======================================================================== */
+
+/* Pulse "on" state - bright, prominent */
+AgentCard.pulse-on {
+    border: thick $success;
+    background: $panel;
+}
+
+/* Pulse "off" state - subtle, dimmed */
+AgentCard.pulse-off {
+    border: round $success;
+    background: $surface;
+}
+
+/* ========================================================================
+   ERROR STATE — Highest visual priority
+   ======================================================================== */
+
+AgentCard.status-error {
+    border: round $error;
+}
+
+AgentCard.status-error:focus {
+    border: thick $error;
+    background: $panel;
+}
+
+/* Error state context hints */
+AgentCard.status-error .agent-thought {
+    color: $error;
+}
+
+/* ========================================================================
+   TIER STYLING
+   ======================================================================== */
+
+/* Core tier gets slightly different base styling */
+AgentCard.tier-core {
+    border: round $secondary;
+}
+
+/* ========================================================================
+   STATUS-BASED GROUPING — 2026 UX Pattern (Active vs Standby)
+   ======================================================================== */
+
+/* Status group subtitle (Active/Standby headers) */
+.status-group-title {
+    height: 1;
+    padding: 0 2;
+    margin: 0 0 0 0;
+}
+
+/* Active agents row - full brightness */
+.fleet-row-active AgentCard {
+    border: round $success;
+}
+
+.fleet-row-active AgentCard:focus {
+    border: thick $success;
+    background: $panel;
+}
+
+/* Standby agents - dimmed to reduce cognitive load */
+.fleet-row-standby AgentCard {
+    color: $text-muted;
+    border: round $surface;
+}
+
+.fleet-row-standby AgentCard .agent-card-name {
+    color: $text-muted;
+}
+
+.fleet-row-standby AgentCard .agent-card-tier {
+    color: $text-muted;
+}
+
+/* Standby cards brighten on focus */
+.fleet-row-standby AgentCard:focus {
+    border: thick $accent;
+    background: $panel;
+    color: $text;
+}
+
+.fleet-row-standby AgentCard:focus .agent-card-name {
+    color: $primary;
+}
+
+/* ========================================================================
+   ENHANCED FOCUS STATES — 2026 "Glow" Pattern
+   ======================================================================== */
+
+/* Focused card gets prominent glow-like border */
+AgentCard:focus {
+    border: double $accent;
+    background: $panel;
+}
+
+/* ========================================================================
+   TOKEN ODOMETER — 2026 FinOps Resource Governance
+   ======================================================================== */
+
+/* Odometer display in agent cards */
+.agent-odometer {
+    width: 100%;
+    height: 1;
+    margin-top: 1;
+    color: $text-muted;
+}
+
+/* Budget exceeded state - soft error */
+AgentCard.budget-exceeded {
+    border: round $warning;
+}
+
+AgentCard.budget-exceeded:focus {
+    border: thick $warning;
+    background: $panel;
+}
+
+AgentCard.budget-exceeded .agent-odometer {
+    color: $warning;
+    text-style: bold;
+}
+
+/* ========================================================================
+   SUPERVISION HIERARCHY — 2026 Multi-Agent Orchestration
+   ======================================================================== */
+
+/* Supervisor tier (arbiter, orchestrator) - prominent styling */
+AgentCard.tier-supervisor {
+    border: round $primary;
+}
+
+AgentCard.tier-supervisor .agent-card-name {
+    color: $primary;
+    text-style: bold;
+}
+
+/* Coordinator tier (architect, auditor) - secondary prominence */
+AgentCard.tier-coordinator {
+    border: round $secondary;
+}
+
+AgentCard.tier-coordinator .agent-card-name {
+    color: $secondary;
+}
+
+/* Specialist tier - default styling (already covered by base) */
+
+/* Hierarchy section headers */
+.hierarchy-title {
+    height: 1;
+    padding: 0 2;
+    margin: 1 0 0 0;
+    text-style: bold italic;
+    color: $accent;
+}
+
+.hierarchy-supervisors {
+    margin-bottom: 1;
+}
+
+.hierarchy-coordinators {
+    margin-bottom: 1;
+}
+
+/* ========================================================================
+   TIP BAR — Subtle contextual guidance
    ======================================================================== */
 
 .tip-bar {
     height: 1;
     padding: 0 2;
-    background: $panel;
+    background: $surface;
     color: $text-muted;
     text-style: italic;
-    border-bottom: solid $accent 30%;
+    border-top: round $panel;
+    border-bottom: round $panel;
 }
 
 .tip-bar:hover {
     color: $text;
+    background: $panel;
 }
 
 /* ========================================================================
@@ -169,7 +464,7 @@ ETXHeader {
     padding: 0 1;
     background: $panel;
     margin: 0 0 1 0;
-    border-bottom: solid $accent 40%;
+    border-bottom: solid $surface;
 }
 
 #agent-name-display {
@@ -207,7 +502,7 @@ ETXHeader {
     background: $panel;
     padding: 1;
     scrollbar-size: 1 1;
-    border: round $accent 30%;
+    border: round $surface;
 }
 
 #agent-output:focus {
@@ -229,7 +524,7 @@ ETXHeader {
     padding: 0 1;
     margin: 0 0 1 0;
     layout: horizontal;
-    border-bottom: solid $accent 40%;
+    border-bottom: solid $surface;
 }
 
 #monitor-title {
@@ -260,7 +555,7 @@ ETXHeader {
 }
 
 .monitor-agent-row:hover {
-    background: $accent 5%;
+    background: $panel;
 }
 
 .monitor-agent-name {
@@ -287,7 +582,7 @@ ETXHeader {
 #next-task-input {
     height: 3;
     margin: 1 0 0 0;
-    border: round $accent 60%;
+    border: round $surface;
     background: $panel;
 }
 
@@ -308,7 +603,7 @@ ETXHeader {
     height: 1fr;
     padding: 1 2;
     background: $panel;
-    border: round $accent 30%;
+    border: round $surface;
 }
 
 .settings-group {
@@ -501,12 +796,12 @@ ETXHeader {
 
 .squad-row:hover,
 .combo-row:hover {
-    background: $accent 10%;
+    background: $panel;
 }
 
 .squad-row:focus,
 .combo-row:focus {
-    background: $accent 15%;
+    background: $accent;
     text-style: bold;
 }
 
@@ -520,5 +815,291 @@ ShortcutBar {
     padding: 0 1;
     background: $panel;
     color: $text;
-    border-top: solid $accent 40%;
+    border-top: solid $surface;
+}
+
+/* ========================================================================
+   FOCUS MANAGEMENT — 100% clarity on which pane is receiving input
+   ======================================================================== */
+
+/* Note: Wildcard rules removed to prevent layout issues.
+   Focus styling is applied per-widget in specific rules above. */
+
+/* Extra highlight for major panels when focused */
+OutputPanel:focus,
+RichLog:focus,
+#agent-output:focus,
+#monitor-output:focus,
+#log-content:focus,
+FleetGrid:focus,
+#fleet-scroll:focus {
+    border: double $accent;
+}
+
+/* Focused agent cards get extra visual pop */
+AgentCard:focus {
+    border: thick $accent;
+}
+
+/* Focused squad/combo rows */
+.squad-row:focus,
+.combo-row:focus {
+    border: round $accent;
+}
+
+/* ========================================================================
+   MAXIMIZE/ZOOM MODE — Full-screen pane (press 'z')
+   ======================================================================== */
+
+.maximized {
+    position: absolute;
+    offset: 0 0;
+    width: 100%;
+    height: 100%;
+    layer: maximized;
+    background: $surface;
+    border: thick $accent;
+    padding: 1;
+}
+
+/* ========================================================================
+   ROUTER TIER INDICATORS — Cost tier colors on agent cards
+   ======================================================================== */
+
+/* Routine tier (cheap - green) */
+.tier-routine {
+    color: $success;
+}
+
+/* Data tier (moderate - cyan) */
+.tier-data {
+    color: $primary;
+}
+
+/* Code tier (standard - yellow) */
+.tier-code {
+    color: $warning;
+}
+
+/* Reason tier (expensive - red) */
+.tier-reason {
+    color: $error;
+}
+
+/* ========================================================================
+   SPARKLINE WIDGETS — Real-time data visualization
+   ======================================================================== */
+
+Sparkline {
+    height: 1;
+    color: $primary;
+}
+
+.sparkline-cpu {
+    color: $warning;
+}
+
+.sparkline-memory {
+    color: $success;
+}
+
+.sparkline-cost {
+    color: $error;
+}
+
+/* ========================================================================
+   RESOURCE MONITOR — Real-time CPU/RAM/Thermal visualization
+   ======================================================================== */
+
+#resource-monitor {
+    height: 2;
+    background: $panel;
+    border-bottom: solid $surface;
+    padding: 0 1;
+}
+
+ResourceMonitor {
+    height: 2;
+    width: 100%;
+}
+
+ResourceMonitor .cpu-spark {
+    color: $warning;
+}
+
+ResourceMonitor .mem-spark {
+    color: $success;
+}
+
+ResourceMonitor .temp-hot {
+    color: $error;
+    text-style: bold;
+}
+
+/* ========================================================================
+   CONTEXT-AWARE AGENT CARDS — UI adapts based on Agent Phase
+   ======================================================================== */
+
+/* Base expanded card state */
+AgentCard.expanded {
+    height: auto;
+    min-height: 8;
+    border: round $accent;
+}
+
+/* Context area within card */
+AgentCard .agent-context {
+    height: auto;
+    padding: 0 1;
+    margin-top: 1;
+}
+
+AgentCard .agent-context.hidden {
+    display: none;
+}
+
+/* Thought process display (for Reasoning phase) */
+AgentCard .agent-thought {
+    height: auto;
+    text-style: italic;
+    padding: 0 0 0 1;
+}
+
+/* Counter display (Links Found, Files Written) */
+AgentCard .agent-counter {
+    height: 1;
+    padding: 0 0 0 1;
+}
+
+/* Progress bar within card */
+AgentCard .agent-progress {
+    height: 1;
+    margin: 0 1;
+}
+
+AgentCard .agent-progress.hidden {
+    display: none;
+}
+
+/* Phase-specific styling */
+AgentCard.phase-research .agent-counter {
+    color: $primary;
+}
+
+AgentCard.phase-coding .agent-counter {
+    color: $warning;
+}
+
+AgentCard.phase-reasoning {
+    border: round $error;
+}
+
+AgentCard.phase-reasoning .agent-thought {
+    color: $error;
+}
+
+AgentCard.phase-complete {
+    border: round $success;
+}
+
+/* ========================================================================
+   INDETERMINATE PROGRESS — Visual indicator for unknown completion time
+   ======================================================================== */
+
+.pulse {
+    text-style: bold;
+    color: $accent;
+}
+
+/* Throttled/Cooling state styling */
+.throttled {
+    color: $warning;
+    text-style: bold;
+}
+
+.cooling {
+    color: $warning;
+}
+
+/* ========================================================================
+   TIME-TRAVEL DEBUGGER — Mission replay and checkpoint recovery
+   ======================================================================== */
+
+#time-travel-container {
+    layout: horizontal;
+    height: 1fr;
+    padding: 1;
+}
+
+#mission-list-panel {
+    width: 30;
+    border-right: solid $surface;
+    padding: 0 1;
+}
+
+#event-panel {
+    width: 1fr;
+    padding: 0 1;
+}
+
+.panel-title {
+    height: 2;
+    text-style: bold;
+    color: $accent;
+    border-bottom: solid $surface;
+}
+
+#mission-list {
+    height: 1fr;
+}
+
+#timeline-scrubber {
+    height: 2;
+    padding: 0 1;
+    background: $panel;
+    margin: 1 0;
+}
+
+#timeline-position {
+    width: 12;
+    content-align: left middle;
+}
+
+#timeline-bar {
+    width: 1fr;
+}
+
+#event-scroll {
+    height: 1fr;
+    border: round $surface;
+    padding: 1;
+}
+
+#checkpoint-actions {
+    height: 3;
+    margin-top: 1;
+}
+
+#checkpoint-actions Button {
+    margin-right: 1;
+}
+
+/* Event cards */
+EventCard {
+    height: auto;
+    padding: 0;
+    margin: 0 0 1 0;
+}
+
+EventCard.current-event {
+    background: $panel;
+    border: round $accent;
+}
+
+.event-type {
+    text-style: bold;
+}
+
+.event-content {
+    color: $text;
 }

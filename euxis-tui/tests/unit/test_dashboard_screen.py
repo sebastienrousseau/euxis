@@ -38,7 +38,7 @@ class TestDashboardScreenInitialization(unittest.TestCase):
     def test_bindings_count(self):
         """Test expected number of bindings."""
         screen = DashboardScreen()
-        assert len(screen.BINDINGS) == 4
+        assert len(screen.BINDINGS) == 5
 
     def test_bindings_keys(self):
         """Test BINDINGS contains expected keys."""

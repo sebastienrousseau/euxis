@@ -135,3 +135,6 @@
 {"ts":"2026-02-17T15:08:40Z","agent":"reviewer","state":"completed","session":"20260217-150628"}
 {"ts":"2026-02-17T15:41:04Z","agent":"librarian","state":"active","session":"20260217-154104"}
 {"ts":"2026-02-17T15:42:37Z","agent":"librarian","state":"completed","session":"20260217-154104"}
+{"ts":"2026-02-17T20:21:46Z","agent":"architect","state":"active","session":"20260217-202146"}
+{"ts":"2026-02-17T20:23:29Z","agent":"architect","state":"completed","session":"20260217-202146"}
+{"ts":"2026-02-17T20:57:49Z","agent":"architect","state":"active","session":"20260217-205749"}

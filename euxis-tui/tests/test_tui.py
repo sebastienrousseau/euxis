@@ -285,14 +285,16 @@ class TestEuxisApp:
         binding_keys = [b.key for b in EuxisApp.BINDINGS]
         assert "ctrl+k" in binding_keys
         assert "ctrl+q" in binding_keys
-        assert "ctrl+t" in binding_keys
+        assert "f3" in binding_keys
         assert "f1" in binding_keys
 
     @pytest.mark.asyncio
     async def test_app_commands(self):
         from tui.app import EuxisApp
 
-        assert len(EuxisApp.COMMANDS) == 3
+        # COMMANDS is populated in __init__, check instance
+        app = EuxisApp()
+        assert len(app.COMMANDS) == 3
 
 
 class TestCommands:

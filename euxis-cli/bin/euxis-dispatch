@@ -46,6 +46,14 @@ if [[ -f "${EUXIS_HOME}/euxis-core/lib/mesh.sh" ]]; then
   MESH_AVAILABLE=true
 fi
 
+# Source router library (for cost optimization)
+ROUTER_AVAILABLE=false
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/router.sh" ]]; then
+  # shellcheck source=euxis-core/lib/router.sh
+  source "${EUXIS_HOME}/euxis-core/lib/router.sh"
+  ROUTER_AVAILABLE=true
+fi
+
 # Mesh session ID (shared across all agents in this dispatch)
 MESH_SESSION=""
 
@@ -57,6 +65,7 @@ euxis-dispatch — Fleet deployment engine
 Usage:
   euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
   euxis-dispatch --resources
+  euxis-dispatch --router
 
 Reads an Architect Mission Manifest and deploys agent loops.
 
@@ -69,6 +78,7 @@ Options:
   -h, --help     Show this help text
   --mode MODE    Set dispatch mode
   --resources    Show system resource status and exit
+  --router       Show model router configuration and exit
 
 Resource Management:
   Dispatch automatically detects system resources (CPU, RAM, load) and
@@ -82,7 +92,15 @@ Resource Management:
     EUXIS_MIN_AGENTS=1          Minimum agents even under load (default: 1)
     EUXIS_STAGGER_DELAY=2       Seconds between agent launches (default: 2)
     EUXIS_NICE=15               Process priority (0-19, 0=disable, default: 15)
-  --mode MODE   Set dispatch mode
+
+Cost Optimization:
+  Dispatch uses intelligent model routing to minimize API costs:
+    EUXIS_MODEL_OVERRIDE        Force specific model for all agents
+    EUXIS_LOCAL_ONLY=true       Use only local models (Ollama)
+    EUXIS_MODEL_ROUTINE         Model for routine tasks (default: gemini-flash-lite)
+    EUXIS_MODEL_DATA            Model for data tasks (default: deepseek-v3)
+    EUXIS_MODEL_CODE            Model for code tasks (default: claude-sonnet-4)
+    EUXIS_MODEL_REASON          Model for reasoning tasks (default: claude-opus-4)
 EOF
 }
 
@@ -104,6 +122,14 @@ while [[ $# -gt 0 ]]; do
                 resource_status
             else
                 echo "Resource management not available (resources.sh not found)"
+            fi
+            exit 0
+            ;;
+        --router)
+            if [[ "$ROUTER_AVAILABLE" == "true" ]]; then
+                router_status
+            else
+                echo "Router not available (router.sh not found)"
             fi
             exit 0
             ;;
@@ -205,6 +231,13 @@ if [[ "$HAS_PHASES" == "true" ]]; then
 fi
 if [[ "$MODE" == "mesh" ]] && [[ -n "$MESH_SESSION" ]]; then
     echo "  Mesh:       $MESH_SESSION (A2A protocol active)"
+fi
+if [[ "$ROUTER_AVAILABLE" == "true" ]]; then
+    if router_ollama_available 2>/dev/null; then
+        echo "  Router:     Active (local fallback: $(router_local_model))"
+    else
+        echo "  Router:     Active (API models only)"
+    fi
 fi
 
 # Resource-aware concurrency
