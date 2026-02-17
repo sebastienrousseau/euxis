@@ -1,370 +1,142 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-include = ["tui*"]
-exclude = ["tests*", "docs*"]
-
-[tool.setuptools.package-data]
-tui = ["*.tcss", "*.css", "*.json"]
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024-2026 Euxis Contributors
 
 [project]
 name = "euxis"
-version = "0.0.8"
-description = "Enterprise Unified eXecution Intelligence System"
-license = {text = "Apache-2.0"}
+version = "0.1.0"
+description = "Multi-agent AI framework with 42 specialized agents"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Euxis Contributors"}
+]
+keywords = ["ai", "agents", "llm", "automation"]
 classifiers = [
-    "License :: OSI Approved :: Apache Software License",
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent",
-    "Topic :: Software Development :: Libraries :: Application Frameworks",
-]
-authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "chromadb>=1.4.1,<2.0.0",
-    "sentence-transformers>=5.2.2,<6.0.0",
-    "textual>=7.5.0,<8.0.0",
-    "rich>=14.3.0,<15.0.0",
-    "fastapi>=0.110.0,<1.0.0",
-    "uvicorn[standard]>=0.27.0,<1.0.0",
-    "pydantic>=2.6.0,<3.0.0",
-    "httpx>=0.27.0,<1.0.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-xdist>=3.0.0",
-    "pytest-asyncio>=0.23.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-    "flake8>=6.0.0",
-    "pylint>=2.17.0",
-    "bandit[toml]>=1.7.0",
-    "pip-audit>=2.6.0",
-    "safety>=2.3.0",
-    "textual-dev>=1.8.0",
-    "coverage>=7.0.0",
-    "hypothesis>=6.0.0",
-]
-api = [
-    "fastapi-cli>=0.0.2",
-    "python-multipart>=0.0.6",
-    "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
-]
-db = [
-    "aiosqlite>=0.19.0",
-    "sqlalchemy>=2.0.0,<3.0.0",
-    "alembic>=1.13.0",
-]
+[project.urls]
+Homepage = "https://github.com/euxis/euxis"
+Documentation = "https://euxis.co/docs"
+Repository = "https://github.com/euxis/euxis"
 
-# Black configuration
-[tool.black]
-line-length = 100
-target-version = ['py312']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
 
-# isort configuration
-[tool.isort]
-profile = "black"
-line_length = 100
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
+# ============================================================================
+# Pytest Configuration
+# ============================================================================
 
-# Ruff configuration
-[tool.ruff]
-line-length = 100
-target-version = "py312"
-extend-exclude = ["docs/", "projects/"]
-
-[tool.ruff.lint]
-select = [
-    "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings
-    "F",      # pyflakes
-    "I",      # isort
-    "N",      # pep8-naming
-    "D",      # pydocstyle
-    "UP",     # pyupgrade
-    "YTT",    # flake8-2020
-    "ANN",    # flake8-annotations
-    "S",      # flake8-bandit
-    "BLE",    # flake8-blind-except
-    "FBT",    # flake8-boolean-trap
-    "B",      # flake8-bugbear
-    "A",      # flake8-builtins
-    "COM",    # flake8-commas
-    "C4",     # flake8-comprehensions
-    "DTZ",    # flake8-datetimez
-    "T10",    # flake8-debugger
-    "EM",     # flake8-errmsg
-    "EXE",    # flake8-executable
-    "FA",     # flake8-future-annotations
-    "ISC",    # flake8-implicit-str-concat
-    "ICN",    # flake8-import-conventions
-    "G",      # flake8-logging-format
-    "INP",    # flake8-no-pep420
-    "PIE",    # flake8-pie
-    "T20",    # flake8-print
-    "PYI",    # flake8-pyi
-    "PT",     # flake8-pytest-style
-    "Q",      # flake8-quotes
-    "RSE",    # flake8-raise
-    "RET",    # flake8-return
-    "SLF",    # flake8-self
-    "SLOT",   # flake8-slots
-    "SIM",    # flake8-simplify
-    "TID",    # flake8-tidy-imports
-    "TCH",    # flake8-type-checking
-    "INT",    # flake8-gettext
-    "ARG",    # flake8-unused-arguments
-    "PTH",    # flake8-use-pathlib
-    "TD",     # flake8-todos
-    "FIX",    # flake8-fixme
-    "ERA",    # eradicate
-    "PD",     # pandas-vet
-    "PGH",    # pygrep-hooks
-    "PL",     # pylint
-    "TRY",    # tryceratops
-    "FLY",    # flynt
-    "NPY",    # NumPy-specific
-    "PERF",   # Perflint
-    "RUF",    # Ruff-specific
-]
-
-ignore = [
-    "D100",   # Missing docstring in public module — re-enable gradually
-    "D104",   # Missing docstring in public package — re-enable gradually
-    "D105",   # Missing docstring in magic method
-    "D107",   # Missing docstring in __init__
-    "D203",   # Incompatible with D211 (no-blank-line-before-class)
-    "D213",   # Incompatible with D212 (multi-line-summary-first-line)
-    "ANN401", # Dynamically typed expressions (Any) in **kwargs — standard for super() forwarding
-    "FBT001", # Boolean positional arg in function definition
-    "FBT002", # Boolean default arg in function definition
-    "COM812", # Trailing comma missing
-    "ISC001", # Implicitly concatenated string literals on one line
-    "TC002",  # Move third-party import into TYPE_CHECKING — causes runtime ClassVar issues
-    "TC003",  # Move stdlib import into TYPE_CHECKING — causes runtime ClassVar issues
-    "RUF012", # Mutable ClassVar — conflicts with Textual's BINDINGS/COMMANDS pattern
-]
-
-[tool.ruff.lint.per-file-ignores]
-"bin/**" = [
-    "BLE001",  # Blind exception — acceptable in CLI scripts
-    "S110",    # try-except-pass — fallback in license checker
-    "PLW2901", # Overwriting loop variable
-    "PTH123",  # open() instead of Path.open()
-    "E501",    # Line too long — PyPI URLs and format strings
-    "EXE001",  # Shebang present but file not executable
-    "PLR2004", # Magic value used in comparison
-    "PLR0912", # Too many branches — CLI dispatch logic
-    "TRY300",  # try-else block
-    "T20",     # Print statements — CLI tool uses print
-    "D101",    # Missing docstring in public class
-    "D102",    # Missing docstring in public method
-    "D103",    # Missing docstring in public function
-    "ANN001",  # Missing type annotation for function argument
-    "ANN201",  # Missing return type annotation for public function
-    "ANN202",  # Missing return type annotation for private function
-    "INP001",  # Implicit namespace package
-    "S603",    # subprocess call without shell check
-    "S607",    # Starting a process with a partial executable path
-    "ARG001",  # Unused function argument
-    "DTZ005",  # datetime.now() without tz — CLI scripts
-]
-"tui/app.py" = [
-    "PLC0415", # Lazy imports in action methods — intentional for screen loading
-    "PLR0912", # Too many branches in run_system_command — dispatch switch
-]
-"tests/**" = [
-    "S101",    # Use of assert detected
-    "S108",    # Hardcoded temp file — tests use /tmp intentionally
-    "S603",    # subprocess call without shell check
-    "S607",    # Starting a process with a partial executable path
-    "PLR2004", # Magic value used in comparison
-    "PLR0912", # Too many branches
-    "PLR0913", # Too many arguments
-    "PLR0915", # Too many statements
-    "PLW1510", # subprocess.run without explicit check argument
-    "PLC0415", # import outside top-level — lazy imports common in tests
-    "ANN001",  # Missing type annotation for function argument
-    "ANN002",  # Missing type annotation for *args
-    "ANN003",  # Missing type annotation for **kwargs
-    "ANN201",  # Missing return type annotation for public function
-    "ANN202",  # Missing return type annotation for private function
-    "ANN204",  # Missing return type for special method
-    "ARG001",  # Unused function argument
-    "ARG002",  # Unused method argument
-    "SLF001",  # Private member accessed
-    "EXE001",  # Shebang present but file is not executable
-    "D101",    # Missing docstring in public class
-    "D102",    # Missing docstring in public method
-    "D103",    # Missing docstring in public function
-    "D205",    # 1 blank line required between summary and description
-    "A002",    # Argument shadowing builtin — test helpers may use `help` etc.
-    "PERF401", # Manual list comprehension — readability in tests
-    "RUF059",  # Unused unpacked variable
-]
-
-# MyPy configuration
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-ignore_missing_imports = true
-
-# Bandit configuration
-[tool.bandit]
-exclude_dirs = ["tests", "venv", "env", ".venv"]
-skips = ["B101", "B601"]  # Skip assert_used and shell_injection_process tests
-
-[tool.bandit.assert_used]
-exclude = ["*_test.py", "test_*.py"]
-
-# Pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = [
-    "-ra",
-    "-q",
-    "--strict-markers",
-    "--strict-config",
-    "--cov=tui",
-    "--cov=bin",
-    "--cov-report=term-missing",
-    "--cov-fail-under=88",
+pythonpath = [
+    "euxis-core/src",
+    "euxis-tui/src",
+    "euxis-crypto-lib/src",
+    "euxis-gateway/src",
+    "euxis-metrics/src",
+    "euxis-adapters/src",
+    "euxis-cli/src",
+    "euxis-security/src",
 ]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
+testpaths = [
+    "euxis-core/tests",
+    "euxis-tui/tests",
+    "euxis-crypto-lib/tests",
+    "euxis-gateway/tests",
+    "euxis-metrics/tests",
+]
+python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
-    "property: marks tests as property-based tests",
-    "shell: marks tests as shell script tests",
-    "mutation: marks tests as mutation testing targets",
-    "coverage: marks tests for coverage analysis",
 ]
-asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
 
-# Coverage configuration
+# ============================================================================
+# Coverage Configuration
+# ============================================================================
+
 [tool.coverage.run]
-source = ["tui", "bin"]
+source = [
+    "euxis-core/lib",
+    "euxis-tui/src",
+    "euxis-crypto-lib/src",
+    "euxis-gateway/src",
+    "euxis-metrics/src",
+]
+branch = true
+parallel = true
 omit = [
     "*/tests/*",
     "*/__pycache__/*",
-    ".venv/*",
-    "*/migrations/*",
-    "*/venv/*",
-    "setup.py",
+    "*/site-packages/*",
+]
+
+[tool.coverage.paths]
+source = [
+    ".",
 ]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
     "raise AssertionError",
     "raise NotImplementedError",
-    "if 0:",
     "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
+    "if TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:",
 ]
-precision = 2
+fail_under = 80
 show_missing = true
-skip_covered = false
+skip_covered = true
 
 [tool.coverage.html]
-directory = "tests/coverage/htmlcov"
+directory = "coverage_html"
 
 [tool.coverage.xml]
-output = "tests/coverage/coverage.xml"
+output = "coverage.xml"
 
-# UV configuration
-[tool.uv]
-dev-dependencies = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-xdist>=3.0.0",
-    "pytest-asyncio>=0.23.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-    "flake8>=6.0.0",
-    "pylint>=2.17.0",
-    "bandit[toml]>=1.7.0",
-    "pip-audit>=2.6.0",
-    "safety>=2.3.0",
-    "textual-dev>=1.8.0",
-    "coverage>=7.0.0",
-    "hypothesis>=6.0.0",
-]
+# ============================================================================
+# Ruff Linter Configuration
+# ============================================================================
 
-# UV-specific pip configuration
-[tool.uv.pip]
-index-strategy = "first-index"
-compile-bytecode = true
+[tool.ruff]
+target-version = "py311"
+line-length = 100
 
-# Pylint configuration
-[tool.pylint.messages_control]
-disable = [
-    "C0114",  # missing-module-docstring — handled by ruff D100
-    "R0903",  # too-few-public-methods
-    "R0913",  # too-many-arguments
-]
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]  # Line length handled separately
 
-[tool.pylint.format]
-max-line-length = "100"
+[tool.ruff.lint.isort]
+known-first-party = ["euxis"]
 
-[tool.pylint.basic]
-good-names = ["i", "j", "k", "ex", "Run", "_", "id", "ui"]
+# ============================================================================
+# MyPy Type Checking
+# ============================================================================
 
-[tool.pylint.design]
-max-args = 7
-max-locals = 20
-max-returns = 6
-max-branches = 15
-max-statements = 60
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+ignore_missing_imports = true

@@ -1,0 +1,1592 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="euxis-gateway" href="euxis-gateway.html"><link rel="prev" title="euxis-crypto-lib" href="euxis-crypto-lib.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>euxis-tui - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.0.8)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/agent-selection.html">Agent Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/agents.html">Agents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/branding.html">Branding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/choosing-coordination.html">Choosing Coordination Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/codex.html">Codex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/combos.html">Combos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/index.html">Euxis Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/manifests.html">Dispatch Manifests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/memory.html">Memory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/playbooks.html">Playbooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/provider-routing.html">Provider Routing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/squads.html">Squads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/core-concepts/templates.html">Templates</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/development/plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/development/plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/development/plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/development/plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/development/plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-crypto-lib.html">euxis-crypto-lib</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture-decisions/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../reference/architecture-decisions/index.html">Architecture Decision Records</a><input aria-label="Toggle navigation of Architecture Decision Records" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/graphs/dependency-graph.html">Dependency Graph</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../decisions/index.html">Decisions</a><input aria-label="Toggle navigation of Decisions" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reports/index.html">Reports</a><input aria-label="Toggle navigation of Reports" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/20260130_0917/logic_audit.html">Architectural Review: Euxis Prompt System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../audits/20260130_0924/logic_audit.html">Architectural Review: Euxis Prompt System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../audits/20260130_1031/logic_audit.html">Architectural Review: Euxis Prompt System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../audits/20260201_2227/logic_audit.html">Scope: [0;36m.euxis[0m/.  Branch: [1;33mfeat/v0.0.6-release[0m</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../templates/index.html">Templates</a><input aria-label="Toggle navigation of Templates" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../policies/index.html">Policies</a><input aria-label="Toggle navigation of Policies" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="simple">
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/audits/v0.0.6-performance-audit.html">EUXIS v0.0.7 PERFORMANCE VERIFICATION AUDIT</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/api/euxis-tui.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="euxis-tui">
+<h1>euxis-tui<a class="headerlink" href="#euxis-tui" title="Link to this heading">¶</a></h1>
+<p>Terminal User Interface for the Euxis Fleet.</p>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id1">Overview</a></p></li>
+<li><p><a class="reference internal" href="#features" id="id2">Features</a></p></li>
+<li><p><a class="reference internal" href="#architecture" id="id3">Architecture</a></p></li>
+<li><p><a class="reference internal" href="#modules" id="id4">Modules</a></p>
+<ul>
+<li><p><a class="reference internal" href="#tui-core-services" id="id5">tui.core.services</a></p></li>
+<li><p><a class="reference internal" href="#tui-core-config" id="id6">tui.core.config</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#usage" id="id7">Usage</a></p></li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">euxis-tui</span></code> package provides a rich terminal interface built with
+the Textual framework for monitoring and controlling the fleet.</p>
+</section>
+<section id="features">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Features</a><a class="headerlink" href="#features" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Real-time fleet monitoring</p></li>
+<li><p>Agent status dashboards</p></li>
+<li><p>Playbook execution</p></li>
+<li><p>Cortex memory visualization</p></li>
+</ul>
+</section>
+<section id="architecture">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Architecture</a><a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h2>
+<p>The TUI is built using the Textual framework with a modular screen-based
+architecture:</p>
+<ul class="simple">
+<li><p><strong>App</strong>: Main application entry point (<code class="docutils literal notranslate"><span class="pre">tui.app.EuxisApp</span></code>)</p></li>
+<li><p><strong>Screens</strong>: Individual views (dashboard, fleet, cortex, etc.)</p></li>
+<li><p><strong>Widgets</strong>: Reusable UI components (agent cards, sparklines, etc.)</p></li>
+<li><p><strong>Services</strong>: Backend services and dependency injection</p></li>
+</ul>
+</section>
+<section id="modules">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Modules</a><a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
+<section id="tui-core-services">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">tui.core.services</a><a class="headerlink" href="#tui-core-services" title="Link to this heading">¶</a></h3>
+<p>Service classes and dependency injection.</p>
+<p id="module-tui.core.services">Core service infrastructure for dependency injection and CryptoService.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">CryptographicAlgorithm</span></span><a class="reference internal" href="../_modules/tui/core/services.html#CryptographicAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<p>Protocol defining interface for cryptographic algorithms.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.encrypt">
+<span class="sig-name descname"><span class="pre">encrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptographicAlgorithm.encrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.encrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Encrypt data with the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.decrypt">
+<span class="sig-name descname"><span class="pre">decrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptographicAlgorithm.decrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.decrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Decrypt data with the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptographicAlgorithm.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.hash" title="Link to this definition">¶</a></dt>
+<dd><p>Hash data and return digest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.name" title="Link to this definition">¶</a></dt>
+<dd><p>Return algorithm name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.key_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.key_size" title="Link to this definition">¶</a></dt>
+<dd><p>Return required key size in bytes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptographicAlgorithm.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tui.core.services.CryptographicAlgorithm.__init__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">AlgorithmInfo</span></span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmInfo" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Metadata about a cryptographic algorithm.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.AlgorithmInfo.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo.key_size">
+<span class="sig-name descname"><span class="pre">key_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#tui.core.services.AlgorithmInfo.key_size" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.AlgorithmInfo.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo.algorithm_type">
+<span class="sig-name descname"><span class="pre">algorithm_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.AlgorithmInfo.algorithm_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmInfo.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tui.core.services.AlgorithmInfo.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>key_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>algorithm_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">AlgorithmRegistry</span></span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Registry for managing cryptographic algorithms.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.register" title="Link to this definition">¶</a></dt>
+<dd><p>Register a cryptographic algorithm with metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algorithm</strong> (<a class="reference internal" href="#tui.core.services.CryptographicAlgorithm" title="tui.core.services.CryptographicAlgorithm"><em>CryptographicAlgorithm</em></a>)</p></li>
+<li><p><strong>metadata</strong> (<a class="reference internal" href="#tui.core.services.AlgorithmInfo" title="tui.core.services.AlgorithmInfo"><em>AlgorithmInfo</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.get_algorithm">
+<span class="sig-name descname"><span class="pre">get_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.get_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.get_algorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve algorithm by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm" title="tui.core.services.CryptographicAlgorithm"><em>CryptographicAlgorithm</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.get_metadata">
+<span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.get_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.get_metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Get metadata for algorithm by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#tui.core.services.AlgorithmInfo" title="tui.core.services.AlgorithmInfo"><em>AlgorithmInfo</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.list_algorithms">
+<span class="sig-name descname"><span class="pre">list_algorithms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.list_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.list_algorithms" title="Link to this definition">¶</a></dt>
+<dd><p>Return list of available algorithm names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AlgorithmRegistry.list_by_type">
+<span class="sig-name descname"><span class="pre">list_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AlgorithmRegistry.list_by_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AlgorithmRegistry.list_by_type" title="Link to this definition">¶</a></dt>
+<dd><p>Return algorithms of specific type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>algorithm_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">KeyManagementService</span></span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for key management services.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService.generate_key">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">generate_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService.generate_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService.generate_key" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a new key for the specified algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService.store_key">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">store_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService.store_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService.store_key" title="Link to this definition">¶</a></dt>
+<dd><p>Store a key with given identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService.retrieve_key">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">retrieve_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService.retrieve_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService.retrieve_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve stored key by identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService.delete_key">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">delete_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService.delete_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService.delete_key" title="Link to this definition">¶</a></dt>
+<dd><p>Delete stored key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.KeyManagementService.list_keys">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">list_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#KeyManagementService.list_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.KeyManagementService.list_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Return list of stored key identifiers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">InMemoryKeyManager</span></span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tui.core.services.KeyManagementService" title="tui.core.services.KeyManagementService"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeyManagementService</span></code></a></p>
+<p>Simple in-memory key management implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.set_algorithm_registry">
+<span class="sig-name descname"><span class="pre">set_algorithm_registry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.set_algorithm_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.set_algorithm_registry" title="Link to this definition">¶</a></dt>
+<dd><p>Set reference to algorithm registry for key generation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>registry</strong> (<a class="reference internal" href="#tui.core.services.AlgorithmRegistry" title="tui.core.services.AlgorithmRegistry"><em>AlgorithmRegistry</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.generate_key">
+<span class="sig-name descname"><span class="pre">generate_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.generate_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.generate_key" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a new key for the specified algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.store_key">
+<span class="sig-name descname"><span class="pre">store_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.store_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.store_key" title="Link to this definition">¶</a></dt>
+<dd><p>Store a key with given identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.retrieve_key">
+<span class="sig-name descname"><span class="pre">retrieve_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.retrieve_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.retrieve_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieve stored key by identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.delete_key">
+<span class="sig-name descname"><span class="pre">delete_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.delete_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.delete_key" title="Link to this definition">¶</a></dt>
+<dd><p>Delete stored key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.InMemoryKeyManager.list_keys">
+<span class="sig-name descname"><span class="pre">list_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#InMemoryKeyManager.list_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.InMemoryKeyManager.list_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Return list of stored key identifiers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">SimpleXORAlgorithm</span></span><a class="reference internal" href="../_modules/tui/core/services.html#SimpleXORAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Simple XOR encryption for demonstration purposes.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm.name" title="Link to this definition">¶</a></dt>
+<dd><p>Return algorithm name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm.key_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm.key_size" title="Link to this definition">¶</a></dt>
+<dd><p>Return required key size in bytes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm.encrypt">
+<span class="sig-name descname"><span class="pre">encrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SimpleXORAlgorithm.encrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm.encrypt" title="Link to this definition">¶</a></dt>
+<dd><p>XOR encrypt data with key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm.decrypt">
+<span class="sig-name descname"><span class="pre">decrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SimpleXORAlgorithm.decrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm.decrypt" title="Link to this definition">¶</a></dt>
+<dd><p>XOR decrypt (same as encrypt for XOR).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SimpleXORAlgorithm.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SimpleXORAlgorithm.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SimpleXORAlgorithm.hash" title="Link to this definition">¶</a></dt>
+<dd><p>SHA-256 hash of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">SHA256Algorithm</span></span><a class="reference internal" href="../_modules/tui/core/services.html#SHA256Algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SHA256Algorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>SHA-256 hashing algorithm.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.SHA256Algorithm.name" title="Link to this definition">¶</a></dt>
+<dd><p>Return algorithm name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm.key_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#tui.core.services.SHA256Algorithm.key_size" title="Link to this definition">¶</a></dt>
+<dd><p>Return required key size in bytes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm.encrypt">
+<span class="sig-name descname"><span class="pre">encrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SHA256Algorithm.encrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SHA256Algorithm.encrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Not applicable for hash algorithms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm.decrypt">
+<span class="sig-name descname"><span class="pre">decrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SHA256Algorithm.decrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SHA256Algorithm.decrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Not applicable for hash algorithms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.SHA256Algorithm.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#SHA256Algorithm.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.SHA256Algorithm.hash" title="Link to this definition">¶</a></dt>
+<dd><p>SHA-256 hash of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">AES256GCMAlgorithm</span></span><a class="reference internal" href="../_modules/tui/core/services.html#AES256GCMAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>AES-256-GCM encryption using crypto_lib core functions.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm.name">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm.name" title="Link to this definition">¶</a></dt>
+<dd><p>Return algorithm name.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm.key_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm.key_size" title="Link to this definition">¶</a></dt>
+<dd><p>Return required key size in bytes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm.encrypt">
+<span class="sig-name descname"><span class="pre">encrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AES256GCMAlgorithm.encrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm.encrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Encrypt data using AES-256-GCM from crypto_lib.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm.decrypt">
+<span class="sig-name descname"><span class="pre">decrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AES256GCMAlgorithm.decrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm.decrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Decrypt data using AES-256-GCM from crypto_lib.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.AES256GCMAlgorithm.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#AES256GCMAlgorithm.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.AES256GCMAlgorithm.hash" title="Link to this definition">¶</a></dt>
+<dd><p>SHA-256 hash of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">CryptoService</span></span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Main cryptographic service with dependency injection.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_manager</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple-xor'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algorithm_registry</strong> (<a class="reference internal" href="#tui.core.services.AlgorithmRegistry" title="tui.core.services.AlgorithmRegistry"><em>AlgorithmRegistry</em></a>)</p></li>
+<li><p><strong>key_manager</strong> (<a class="reference internal" href="#tui.core.services.KeyManagementService" title="tui.core.services.KeyManagementService"><em>KeyManagementService</em></a>)</p></li>
+<li><p><strong>default_algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.algorithm_registry">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">algorithm_registry</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tui.core.services.AlgorithmRegistry" title="tui.core.services.AlgorithmRegistry"><span class="pre">AlgorithmRegistry</span></a></span><a class="headerlink" href="#tui.core.services.CryptoService.algorithm_registry" title="Link to this definition">¶</a></dt>
+<dd><p>Access to algorithm registry.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.key_manager">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">key_manager</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tui.core.services.KeyManagementService" title="tui.core.services.KeyManagementService"><span class="pre">KeyManagementService</span></a></span><a class="headerlink" href="#tui.core.services.CryptoService.key_manager" title="Link to this definition">¶</a></dt>
+<dd><p>Access to key management service.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.encrypt">
+<span class="sig-name descname"><span class="pre">encrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.encrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.encrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Encrypt data using specified algorithm and key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.decrypt">
+<span class="sig-name descname"><span class="pre">decrypt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encrypted_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.decrypt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.decrypt" title="Link to this definition">¶</a></dt>
+<dd><p>Decrypt data using specified algorithm and key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encrypted_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sha256'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.hash" title="Link to this definition">¶</a></dt>
+<dd><p>Hash data using specified algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>)</p></li>
+<li><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.generate_and_store_key">
+<span class="sig-name descname"><span class="pre">generate_and_store_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.generate_and_store_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.generate_and_store_key" title="Link to this definition">¶</a></dt>
+<dd><p>Generate and store a new key for the specified algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.switch_algorithm">
+<span class="sig-name descname"><span class="pre">switch_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_default</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.switch_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.switch_algorithm" title="Link to this definition">¶</a></dt>
+<dd><p>Switch the default algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_default</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.list_available_algorithms">
+<span class="sig-name descname"><span class="pre">list_available_algorithms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.list_available_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.list_available_algorithms" title="Link to this definition">¶</a></dt>
+<dd><p>Return list of available algorithms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.CryptoService.get_algorithm_info">
+<span class="sig-name descname"><span class="pre">get_algorithm_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#CryptoService.get_algorithm_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.CryptoService.get_algorithm_info" title="Link to this definition">¶</a></dt>
+<dd><p>Get information about a specific algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>algorithm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#tui.core.services.AlgorithmInfo" title="tui.core.services.AlgorithmInfo"><em>AlgorithmInfo</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.services.ServiceContainer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">ServiceContainer</span></span><a class="reference internal" href="../_modules/tui/core/services.html#ServiceContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.ServiceContainer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Simple dependency injection container.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.ServiceContainer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#ServiceContainer.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.ServiceContainer.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.ServiceContainer.register_singleton">
+<span class="sig-name descname"><span class="pre">register_singleton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#ServiceContainer.register_singleton"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.ServiceContainer.register_singleton" title="Link to this definition">¶</a></dt>
+<dd><p>Register a singleton instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a>)</p></li>
+<li><p><strong>instance</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.ServiceContainer.register_transient">
+<span class="sig-name descname"><span class="pre">register_transient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#ServiceContainer.register_transient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.ServiceContainer.register_transient" title="Link to this definition">¶</a></dt>
+<dd><p>Register a transient service factory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a>)</p></li>
+<li><p><strong>factory</strong> (<em>callable</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.services.ServiceContainer.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#ServiceContainer.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.ServiceContainer.get" title="Link to this definition">¶</a></dt>
+<dd><p>Get service instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>service_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tui.core.services.create_default_crypto_service">
+<span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">create_default_crypto_service</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#create_default_crypto_service"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.create_default_crypto_service" title="Link to this definition">¶</a></dt>
+<dd><p>Create a CryptoService with default implementations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tui.core.services.CryptoService" title="tui.core.services.CryptoService"><em>CryptoService</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tui.core.services.setup_service_container">
+<span class="sig-prename descclassname"><span class="pre">tui.core.services.</span></span><span class="sig-name descname"><span class="pre">setup_service_container</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/services.html#setup_service_container"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.services.setup_service_container" title="Link to this definition">¶</a></dt>
+<dd><p>Set up the service container with crypto services.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tui.core.services.ServiceContainer" title="tui.core.services.ServiceContainer"><em>ServiceContainer</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="tui-core-config">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">tui.core.config</a><a class="headerlink" href="#tui-core-config" title="Link to this heading">¶</a></h3>
+<p>Configuration management.</p>
+<p id="module-tui.core.config">ETX configuration management.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">tui.core.config.</span></span><span class="sig-name descname"><span class="pre">ETXConfig</span></span><a class="reference internal" href="../_modules/tui/core/config.html#ETXConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.config.ETXConfig" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>User-configurable ETX settings.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.theme">
+<span class="sig-name descname"><span class="pre">theme</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'etx-liquid-glass'</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.theme" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.default_provider">
+<span class="sig-name descname"><span class="pre">default_provider</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'claude'</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.default_provider" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.show_agent_tags">
+<span class="sig-name descname"><span class="pre">show_agent_tags</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.show_agent_tags" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.reduced_motion">
+<span class="sig-name descname"><span class="pre">reduced_motion</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.reduced_motion" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.accessible_mode">
+<span class="sig-name descname"><span class="pre">accessible_mode</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.accessible_mode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.locale">
+<span class="sig-name descname"><span class="pre">locale</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'en'</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.locale" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.grid_columns">
+<span class="sig-name descname"><span class="pre">grid_columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.grid_columns" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.recent_agents">
+<span class="sig-name descname"><span class="pre">recent_agents</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#tui.core.config.ETXConfig.recent_agents" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.recent_commands">
+<span class="sig-name descname"><span class="pre">recent_commands</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#tui.core.config.ETXConfig.recent_commands" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.MAX_RECENT">
+<span class="sig-name descname"><span class="pre">MAX_RECENT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#tui.core.config.ETXConfig.MAX_RECENT" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.load">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/config.html#ETXConfig.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.config.ETXConfig.load" title="Link to this definition">¶</a></dt>
+<dd><p>Load configuration from disk or return defaults.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tui.core.config.ETXConfig" title="tui.core.config.ETXConfig"><em>ETXConfig</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/config.html#ETXConfig.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.config.ETXConfig.save" title="Link to this definition">¶</a></dt>
+<dd><p>Persist configuration to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.add_recent_agent">
+<span class="sig-name descname"><span class="pre">add_recent_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/config.html#ETXConfig.add_recent_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.config.ETXConfig.add_recent_agent" title="Link to this definition">¶</a></dt>
+<dd><p>Track a recently used agent, moving it to front of list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>agent_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.add_recent_command">
+<span class="sig-name descname"><span class="pre">add_recent_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tui/core/config.html#ETXConfig.add_recent_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tui.core.config.ETXConfig.add_recent_command" title="Link to this definition">¶</a></dt>
+<dd><p>Track a recently used command, moving it to front of list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>command</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tui.core.config.ETXConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theme</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'etx-liquid-glass'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_provider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'claude'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_agent_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_motion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accessible_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'en'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent_agents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recent_commands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tui.core.config.ETXConfig.__init__" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theme</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>default_provider</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>show_agent_tags</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+<li><p><strong>reduced_motion</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+<li><p><strong>accessible_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>)</p></li>
+<li><p><strong>locale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>)</p></li>
+<li><p><strong>grid_columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
+<li><p><strong>recent_agents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>recent_commands</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="usage">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Usage</a><a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Start the TUI with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">euxis</span><span class="o">-</span><span class="n">tui</span>
+</pre></div>
+</div>
+<p>Or programmatically:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tui.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">EuxisApp</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">EuxisApp</span><span class="p">()</span>
+<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="euxis-gateway.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">euxis-gateway</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="euxis-crypto-lib.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">euxis-crypto-lib</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">euxis-tui</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#architecture">Architecture</a></li>
+<li><a class="reference internal" href="#modules">Modules</a><ul>
+<li><a class="reference internal" href="#tui-core-services">tui.core.services</a><ul>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.encrypt"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.encrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.decrypt"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.decrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.hash"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.hash()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.name"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.name</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.key_size"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.key_size</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptographicAlgorithm.__init__"><code class="docutils literal notranslate"><span class="pre">CryptographicAlgorithm.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo.name"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo.name</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo.key_size"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo.key_size</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo.description"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo.description</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo.algorithm_type"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo.algorithm_type</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmInfo.__init__"><code class="docutils literal notranslate"><span class="pre">AlgorithmInfo.__init__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.__init__"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.register"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.register()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.get_algorithm"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.get_algorithm()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.get_metadata"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.get_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.list_algorithms"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.list_algorithms()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AlgorithmRegistry.list_by_type"><code class="docutils literal notranslate"><span class="pre">AlgorithmRegistry.list_by_type()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService"><code class="docutils literal notranslate"><span class="pre">KeyManagementService</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService.generate_key"><code class="docutils literal notranslate"><span class="pre">KeyManagementService.generate_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService.store_key"><code class="docutils literal notranslate"><span class="pre">KeyManagementService.store_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService.retrieve_key"><code class="docutils literal notranslate"><span class="pre">KeyManagementService.retrieve_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService.delete_key"><code class="docutils literal notranslate"><span class="pre">KeyManagementService.delete_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.KeyManagementService.list_keys"><code class="docutils literal notranslate"><span class="pre">KeyManagementService.list_keys()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.__init__"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.set_algorithm_registry"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.set_algorithm_registry()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.generate_key"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.generate_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.store_key"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.store_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.retrieve_key"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.retrieve_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.delete_key"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.delete_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.InMemoryKeyManager.list_keys"><code class="docutils literal notranslate"><span class="pre">InMemoryKeyManager.list_keys()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm.name"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm.name</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm.key_size"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm.key_size</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm.encrypt"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm.encrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm.decrypt"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm.decrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SimpleXORAlgorithm.hash"><code class="docutils literal notranslate"><span class="pre">SimpleXORAlgorithm.hash()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm.name"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm.name</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm.key_size"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm.key_size</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm.encrypt"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm.encrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm.decrypt"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm.decrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.SHA256Algorithm.hash"><code class="docutils literal notranslate"><span class="pre">SHA256Algorithm.hash()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm.name"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm.name</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm.key_size"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm.key_size</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm.encrypt"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm.encrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm.decrypt"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm.decrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.AES256GCMAlgorithm.hash"><code class="docutils literal notranslate"><span class="pre">AES256GCMAlgorithm.hash()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService"><code class="docutils literal notranslate"><span class="pre">CryptoService</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.__init__"><code class="docutils literal notranslate"><span class="pre">CryptoService.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.algorithm_registry"><code class="docutils literal notranslate"><span class="pre">CryptoService.algorithm_registry</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.key_manager"><code class="docutils literal notranslate"><span class="pre">CryptoService.key_manager</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.encrypt"><code class="docutils literal notranslate"><span class="pre">CryptoService.encrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.decrypt"><code class="docutils literal notranslate"><span class="pre">CryptoService.decrypt()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.hash"><code class="docutils literal notranslate"><span class="pre">CryptoService.hash()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.generate_and_store_key"><code class="docutils literal notranslate"><span class="pre">CryptoService.generate_and_store_key()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.switch_algorithm"><code class="docutils literal notranslate"><span class="pre">CryptoService.switch_algorithm()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.list_available_algorithms"><code class="docutils literal notranslate"><span class="pre">CryptoService.list_available_algorithms()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.CryptoService.get_algorithm_info"><code class="docutils literal notranslate"><span class="pre">CryptoService.get_algorithm_info()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.ServiceContainer"><code class="docutils literal notranslate"><span class="pre">ServiceContainer</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.services.ServiceContainer.__init__"><code class="docutils literal notranslate"><span class="pre">ServiceContainer.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.ServiceContainer.register_singleton"><code class="docutils literal notranslate"><span class="pre">ServiceContainer.register_singleton()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.ServiceContainer.register_transient"><code class="docutils literal notranslate"><span class="pre">ServiceContainer.register_transient()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.ServiceContainer.get"><code class="docutils literal notranslate"><span class="pre">ServiceContainer.get()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui.core.services.create_default_crypto_service"><code class="docutils literal notranslate"><span class="pre">create_default_crypto_service()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.services.setup_service_container"><code class="docutils literal notranslate"><span class="pre">setup_service_container()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui-core-config">tui.core.config</a><ul>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig"><code class="docutils literal notranslate"><span class="pre">ETXConfig</span></code></a><ul>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.theme"><code class="docutils literal notranslate"><span class="pre">ETXConfig.theme</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.default_provider"><code class="docutils literal notranslate"><span class="pre">ETXConfig.default_provider</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.show_agent_tags"><code class="docutils literal notranslate"><span class="pre">ETXConfig.show_agent_tags</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.reduced_motion"><code class="docutils literal notranslate"><span class="pre">ETXConfig.reduced_motion</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.accessible_mode"><code class="docutils literal notranslate"><span class="pre">ETXConfig.accessible_mode</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.locale"><code class="docutils literal notranslate"><span class="pre">ETXConfig.locale</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.grid_columns"><code class="docutils literal notranslate"><span class="pre">ETXConfig.grid_columns</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.recent_agents"><code class="docutils literal notranslate"><span class="pre">ETXConfig.recent_agents</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.recent_commands"><code class="docutils literal notranslate"><span class="pre">ETXConfig.recent_commands</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.MAX_RECENT"><code class="docutils literal notranslate"><span class="pre">ETXConfig.MAX_RECENT</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.load"><code class="docutils literal notranslate"><span class="pre">ETXConfig.load()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.save"><code class="docutils literal notranslate"><span class="pre">ETXConfig.save()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.add_recent_agent"><code class="docutils literal notranslate"><span class="pre">ETXConfig.add_recent_agent()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.add_recent_command"><code class="docutils literal notranslate"><span class="pre">ETXConfig.add_recent_command()</span></code></a></li>
+<li><a class="reference internal" href="#tui.core.config.ETXConfig.__init__"><code class="docutils literal notranslate"><span class="pre">ETXConfig.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=38b66d78"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

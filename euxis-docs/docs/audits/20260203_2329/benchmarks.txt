@@ -1,0 +1,17 @@
+==================================================
+  EUXIS PERFORMANCE BENCHMARK
+  Platform: Linux (x86_64)
+==================================================
+
+[1/4] Health Check (silent)...
+  Latency: 23620ms
+
+[2/4] Lint...
+  Latency: 2343ms
+
+[3/4] Cortex Recall...
+  Latency: 24952ms
+
+[4/4] Provider Latency...
+  claude: 8684ms
+  ollama: 

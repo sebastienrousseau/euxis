@@ -1,0 +1,878 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "0.1.0",
+  "last_updated": "2026-02-16",
+  "capabilities_registry": "capabilities.json",
+  "constitution": "CONSTITUTION.md",
+  "agents": [
+    {
+      "id": "accountant",
+      "path": "agents/prompts/fleet/accountant.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "cost",
+        "budget",
+        "efficiency",
+        "resources",
+        "optimization"
+      ],
+      "capability_tags": [
+        "cost-analysis",
+        "resource-management"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "ambassador",
+      "path": "agents/prompts/fleet/ambassador.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "devrel",
+        "community",
+        "content"
+      ],
+      "capability_tags": [
+        "documentation"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "animator",
+      "path": "agents/prompts/fleet/animator.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "theming",
+        "color",
+        "motion",
+        "dark-mode",
+        "animation"
+      ],
+      "capability_tags": [
+        "theming",
+        "compliance-check"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "arbiter",
+      "path": "agents/prompts/core/arbiter.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "resolution",
+        "decisions",
+        "arbitration",
+        "consensus"
+      ],
+      "capability_tags": [
+        "conflict-resolution",
+        "decision-making"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "architect",
+      "path": "agents/prompts/core/architect.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "architecture",
+        "design",
+        "engineering"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "code-review",
+        "design-patterns"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "auditor",
+      "path": "agents/prompts/core/auditor.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "compliance",
+        "security",
+        "legal"
+      ],
+      "capability_tags": [
+        "compliance-check",
+        "security-audit"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "automaton",
+      "path": "agents/prompts/fleet/automaton.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "automation",
+        "cicd",
+        "infrastructure"
+      ],
+      "capability_tags": [
+        "cicd-pipeline",
+        "infrastructure-provisioning",
+        "build-optimization"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "bridge",
+      "path": "agents/prompts/fleet/bridge.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "channels",
+        "translation",
+        "media"
+      ],
+      "capability_tags": [
+        "channel-translation",
+        "media-bridging"
+      ]
+    },
+    {
+      "id": "butler",
+      "path": "agents/prompts/fleet/butler.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "voice",
+        "tts",
+        "summarization"
+      ],
+      "capability_tags": [
+        "documentation",
+        "summarization"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "conduit",
+      "path": "agents/prompts/fleet/conduit.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "audio",
+        "realtime",
+        "latency",
+        "voice",
+        "dsp"
+      ],
+      "capability_tags": [
+        "performance-profiling",
+        "debugging"
+      ],
+      "activation": "specialist"
+    },
+    {
+      "id": "critic",
+      "path": "agents/prompts/core/critic.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "critic",
+        "risk",
+        "challenge",
+        "decision-quality"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "security-audit",
+        "compliance-check"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "cryptographer",
+      "path": "agents/prompts/fleet/cryptographer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "cryptography",
+        "security",
+        "correctness",
+        "pqc",
+        "hashing"
+      ],
+      "capability_tags": [
+        "security-audit",
+        "code-review"
+      ],
+      "activation": "specialist"
+    },
+    {
+      "id": "custodian",
+      "path": "agents/prompts/fleet/custodian.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "rust",
+        "crates",
+        "publishing",
+        "msrv",
+        "docs"
+      ],
+      "capability_tags": [
+        "code-review",
+        "compliance-check"
+      ],
+      "activation": "specialist"
+    },
+    {
+      "id": "debugger",
+      "path": "agents/prompts/fleet/debugger.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "debugging",
+        "fixes",
+        "engineering"
+      ],
+      "capability_tags": [
+        "debugging",
+        "code-review",
+        "test-analysis"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "deep-researcher",
+      "path": "agents/prompts/fleet/deep-researcher.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "research",
+        "strategy",
+        "architecture",
+        "synthesis"
+      ],
+      "capability_tags": [
+        "architecture-review",
+        "documentation",
+        "test-analysis"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "designer",
+      "path": "agents/prompts/fleet/designer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "web",
+        "ui",
+        "ux",
+        "design-system",
+        "components",
+        "responsive",
+        "accessibility"
+      ],
+      "capability_tags": [
+        "design-system",
+        "code-review",
+        "architecture-review",
+        "compliance-check"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "distill",
+      "path": "agents/prompts/fleet/distill.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "summarization",
+        "context",
+        "memory"
+      ],
+      "capability_tags": [
+        "context-compression",
+        "summarization"
+      ]
+    },
+    {
+      "id": "evangelist",
+      "path": "agents/prompts/fleet/evangelist.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "brand",
+        "voice",
+        "content",
+        "design"
+      ],
+      "capability_tags": [
+        "documentation",
+        "compliance-check"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "gatekeeper",
+      "path": "agents/prompts/fleet/gatekeeper.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "releases",
+        "versioning",
+        "coordination"
+      ],
+      "capability_tags": [
+        "documentation",
+        "compliance-check"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "govern",
+      "path": "agents/prompts/fleet/govern.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "on-demand",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "governance",
+        "policy",
+        "escalation"
+      ],
+      "capability_tags": [
+        "policy-governance",
+        "escalation"
+      ]
+    },
+    {
+      "id": "guard",
+      "path": "agents/prompts/core/guard.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "security",
+        "approvals",
+        "audit"
+      ],
+      "capability_tags": [
+        "execution-approval",
+        "security-policy",
+        "audit"
+      ]
+    },
+    {
+      "id": "heal",
+      "path": "agents/prompts/fleet/heal.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "recovery",
+        "health",
+        "resilience"
+      ],
+      "capability_tags": [
+        "recovery",
+        "health-monitoring",
+        "resilience"
+      ]
+    },
+    {
+      "id": "historian",
+      "path": "agents/prompts/core/historian.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "memory",
+        "patterns",
+        "evolution",
+        "temporal",
+        "narrative"
+      ],
+      "capability_tags": [
+        "memory-optimization",
+        "documentation",
+        "pattern-analysis"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "inspector",
+      "path": "agents/prompts/fleet/inspector.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "testing",
+        "qa",
+        "e2e",
+        "coordination"
+      ],
+      "capability_tags": [
+        "test-analysis",
+        "code-review"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "interactor",
+      "path": "agents/prompts/fleet/interactor.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "keyboard",
+        "focus",
+        "input",
+        "shortcuts",
+        "navigation"
+      ],
+      "capability_tags": [
+        "keyboard-navigation",
+        "compliance-check"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "investigator",
+      "path": "agents/prompts/fleet/investigator.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "crash",
+        "forensics",
+        "debugging",
+        "investigation"
+      ],
+      "capability_tags": [
+        "debugging",
+        "code-review"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "ledger",
+      "path": "agents/prompts/fleet/ledger.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "payments",
+        "iso20022",
+        "finance",
+        "schema",
+        "compliance"
+      ],
+      "capability_tags": [
+        "compliance-check",
+        "code-review"
+      ],
+      "activation": "specialist"
+    },
+    {
+      "id": "librarian",
+      "path": "agents/prompts/core/librarian.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "memory",
+        "knowledge",
+        "optimization",
+        "docs"
+      ],
+      "capability_tags": [
+        "documentation",
+        "memory-optimization"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "localizer",
+      "path": "agents/prompts/fleet/localizer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "i18n",
+        "l10n",
+        "globalization"
+      ],
+      "capability_tags": [
+        "compliance-check"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "maintainer",
+      "path": "agents/prompts/fleet/maintainer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "legacy",
+        "maintenance",
+        "migrations"
+      ],
+      "capability_tags": [
+        "code-review",
+        "documentation",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "marketer",
+      "path": "agents/prompts/fleet/marketer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "marketing",
+        "growth",
+        "seo"
+      ],
+      "capability_tags": [
+        "documentation"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "optimizer",
+      "path": "agents/prompts/fleet/optimizer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "performance",
+        "profiling",
+        "optimization"
+      ],
+      "capability_tags": [
+        "performance-profiling",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "orchestrator",
+      "path": "agents/prompts/core/orchestrator.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "orchestration",
+        "delegation",
+        "planning"
+      ],
+      "capability_tags": [
+        "task-decomposition",
+        "delegation",
+        "synthesis",
+        "replanning"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "pair",
+      "path": "agents/prompts/core/pair.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "pairing",
+        "onboarding",
+        "gateway"
+      ],
+      "capability_tags": [
+        "onboarding",
+        "channel-auth",
+        "device-pairing"
+      ]
+    },
+    {
+      "id": "pentester",
+      "path": "agents/prompts/fleet/pentester.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "security",
+        "testing",
+        "vulnerabilities"
+      ],
+      "capability_tags": [
+        "security-audit",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "planner",
+      "path": "agents/prompts/core/planner.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "product",
+        "requirements",
+        "planning"
+      ],
+      "capability_tags": [
+        "documentation",
+        "architecture-review"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "polyglot",
+      "path": "agents/prompts/fleet/polyglot.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "languages",
+        "patterns",
+        "idioms",
+        "polyglot"
+      ],
+      "capability_tags": [
+        "code-review",
+        "debugging",
+        "compliance-check"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "repairer",
+      "path": "agents/prompts/fleet/repairer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "repair",
+        "healing",
+        "automation",
+        "fixes",
+        "recovery"
+      ],
+      "capability_tags": [
+        "debugging",
+        "automation",
+        "self-healing"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "researcher",
+      "path": "agents/prompts/fleet/researcher.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "research",
+        "analysis",
+        "knowledge"
+      ],
+      "capability_tags": [
+        "documentation",
+        "test-analysis"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "responder",
+      "path": "agents/prompts/fleet/responder.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "incident",
+        "response",
+        "reliability",
+        "postmortem"
+      ],
+      "capability_tags": [
+        "debugging",
+        "architecture-review"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "reviewer",
+      "path": "agents/prompts/core/reviewer.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "tags": [
+        "quality",
+        "review",
+        "validation"
+      ],
+      "capability_tags": [
+        "code-review",
+        "compliance-check",
+        "test-analysis"
+      ],
+      "activation": "core"
+    },
+    {
+      "id": "route",
+      "path": "agents/prompts/core/route.txt",
+      "tier": "core",
+      "version": "0.1.0",
+      "activation": "core",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "routing",
+        "sessions",
+        "gateway"
+      ],
+      "capability_tags": [
+        "routing",
+        "session-routing",
+        "dispatch"
+      ]
+    },
+    {
+      "id": "sentinel",
+      "path": "agents/prompts/fleet/sentinel.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "security",
+        "governance",
+        "policy",
+        "threat-modeling"
+      ],
+      "capability_tags": [
+        "security-audit",
+        "compliance-check",
+        "architecture-review"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "strategist",
+      "path": "agents/prompts/fleet/strategist.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "social",
+        "content",
+        "community",
+        "strategy"
+      ],
+      "capability_tags": [
+        "documentation"
+      ],
+      "activation": "on-demand"
+    },
+    {
+      "id": "tactician",
+      "path": "agents/prompts/fleet/tactician.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "tui",
+        "cli",
+        "terminal",
+        "keyboard",
+        "design"
+      ],
+      "capability_tags": [
+        "tui-design",
+        "keyboard-navigation",
+        "code-review"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "telemetrist",
+      "path": "agents/prompts/fleet/telemetrist.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "observability",
+        "telemetry",
+        "data"
+      ],
+      "capability_tags": [
+        "performance-profiling",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "tester",
+      "path": "agents/prompts/fleet/tester.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "testing",
+        "quality",
+        "automation"
+      ],
+      "capability_tags": [
+        "test-analysis",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "trace",
+      "path": "agents/prompts/fleet/trace.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "default",
+      "created_at": "2026-02-16T00:26:09.425730Z",
+      "updated_at": "2026-02-16T00:26:09.425730Z",
+      "tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ],
+      "capability_tags": [
+        "observability",
+        "tracing",
+        "telemetry"
+      ]
+    },
+    {
+      "id": "watchdog",
+      "path": "agents/prompts/fleet/watchdog.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "regression",
+        "analysis",
+        "review",
+        "prevention"
+      ],
+      "capability_tags": [
+        "code-review",
+        "test-analysis",
+        "debugging"
+      ],
+      "activation": "default"
+    },
+    {
+      "id": "writer",
+      "path": "agents/prompts/fleet/writer.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "tags": [
+        "documentation",
+        "writing",
+        "content"
+      ],
+      "capability_tags": [
+        "documentation"
+      ],
+      "activation": "default"
+    }
+  ]
+}

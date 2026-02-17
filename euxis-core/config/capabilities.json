@@ -1,0 +1,446 @@
+{
+  "version": "0.0.8",
+  "capabilities": [
+    {
+      "id": "code-review",
+      "name": "Code Review",
+      "description": "Systematic code quality analysis with style, correctness, and maintainability checks",
+      "prompt_fragment": "You MUST review code for: correctness, style consistency, maintainability, and performance. Flag issues with severity (CRITICAL/HIGH/MEDIUM/LOW) and provide concrete fix suggestions.",
+      "required_tools": ["grep", "cat", "find"],
+      "compatible_with": ["security-audit", "performance-profiling", "debugging", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "security-audit",
+      "name": "Security Audit",
+      "description": "Vulnerability assessment covering OWASP Top 10, input validation, and auth flaws",
+      "prompt_fragment": "You MUST scan for: injection vulnerabilities (SQL, command, XSS), authentication flaws, authorization bypasses, sensitive data exposure, and OWASP Top 10. Every finding MUST include severity, proof-of-concept, and remediation.",
+      "required_tools": ["grep", "find", "curl"],
+      "compatible_with": ["code-review", "debugging", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "performance-profiling",
+      "name": "Performance Profiling",
+      "description": "Latency, throughput, and resource usage analysis with optimization recommendations",
+      "prompt_fragment": "You MUST analyze: execution time bottlenecks, memory allocation patterns, I/O blocking, N+1 queries, and cache effectiveness. Every finding MUST include measurement data and a concrete optimization with expected improvement.",
+      "required_tools": ["time", "ps", "top"],
+      "compatible_with": ["code-review", "debugging", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "debugging",
+      "name": "Debugging",
+      "description": "Root cause analysis with hypothesis-driven investigation",
+      "prompt_fragment": "You MUST use hypothesis-driven debugging: form a hypothesis, design a test, observe, refine. Track all hypotheses with status (confirmed/rejected/pending). Produce a root cause chain from symptom to origin.",
+      "required_tools": ["grep", "cat", "find"],
+      "compatible_with": ["code-review", "security-audit", "performance-profiling", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "test-analysis",
+      "name": "Test Analysis",
+      "description": "Test coverage assessment, flaky test detection, and test strategy recommendations",
+      "prompt_fragment": "You MUST analyze: test coverage gaps, flaky test patterns (shared state, timing, ordering), assertion quality, and edge case coverage. Recommend concrete tests to add with priority based on risk.",
+      "required_tools": ["grep", "find"],
+      "compatible_with": ["code-review", "debugging", "performance-profiling"],
+      "conflicts_with": []
+    },
+    {
+      "id": "compliance-check",
+      "name": "Compliance Check",
+      "description": "License, PII, and regulatory compliance scanning",
+      "prompt_fragment": "You MUST scan for: license incompatibilities, PII exposure (emails, IPs, keys), GDPR/CCPA violations, and copyright issues. Every finding MUST include the regulation violated and remediation steps.",
+      "required_tools": ["grep", "find"],
+      "compatible_with": ["security-audit"],
+      "conflicts_with": []
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "description": "Technical writing with API reference, tutorials, and inline documentation",
+      "prompt_fragment": "You MUST produce: clear, concise technical documentation following the project's existing style. Include code examples, parameter tables, and common pitfalls. Every public API MUST have a documented contract.",
+      "required_tools": ["cat", "find"],
+      "compatible_with": [],
+      "conflicts_with": []
+    },
+    {
+      "id": "architecture-review",
+      "name": "Architecture Review",
+      "description": "Structural analysis with pattern detection and modularity assessment",
+      "prompt_fragment": "You MUST evaluate: separation of concerns, dependency management, coupling/cohesion ratios, and architectural pattern adherence. Produce ADR-formatted recommendations for any structural changes.",
+      "required_tools": ["find", "grep", "cat"],
+      "compatible_with": ["code-review", "performance-profiling"],
+      "conflicts_with": []
+    },
+    {
+      "id": "task-decomposition",
+      "name": "Task Decomposition",
+      "description": "Break complex goals into discrete, assignable subtasks with dependency DAGs",
+      "prompt_fragment": "You MUST decompose complex tasks into phases with clear success criteria, dependencies, and priority. Output a DAG-based plan with parallel groups identified.",
+      "required_tools": [],
+      "compatible_with": ["delegation", "synthesis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "delegation",
+      "name": "Delegation",
+      "description": "Route subtasks to the most qualified agent with appropriate cost tier",
+      "prompt_fragment": "You MUST match each subtask to the most qualified agent, assign cost tier routing, and define success criteria before delegating.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "synthesis", "replanning"],
+      "conflicts_with": []
+    },
+    {
+      "id": "synthesis",
+      "name": "Synthesis",
+      "description": "Aggregate and reconcile multi-agent outputs into cohesive deliverables",
+      "prompt_fragment": "You MUST synthesize outputs from multiple agents, detect conflicts, and produce a unified deliverable that preserves all relevant findings.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "delegation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "replanning",
+      "name": "Replanning",
+      "description": "Dynamic plan revision when phase results invalidate downstream assumptions",
+      "prompt_fragment": "You MUST evaluate each phase result against downstream assumptions. If invalidated, revise affected phases while preserving completed work. Log checkpoint decisions.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "delegation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "design-patterns",
+      "name": "Design Patterns",
+      "description": "Pattern selection, evaluation, and application for software architecture",
+      "prompt_fragment": "You MUST identify applicable design patterns, evaluate trade-offs (complexity vs flexibility), and recommend the simplest pattern that meets requirements. Reference GoF, SOLID, or domain-specific patterns.",
+      "required_tools": ["find", "grep", "cat"],
+      "compatible_with": ["architecture-review", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "cicd-pipeline",
+      "name": "CI/CD Pipeline",
+      "description": "Continuous integration and deployment pipeline design, implementation, and optimization",
+      "prompt_fragment": "You MUST design pipelines with: build, test, lint, security scan, and deploy stages. Enforce fail-fast on critical gates. Minimize build times through caching and parallelization.",
+      "required_tools": ["grep", "find", "cat"],
+      "compatible_with": ["build-optimization", "infrastructure-provisioning", "test-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "infrastructure-provisioning",
+      "name": "Infrastructure Provisioning",
+      "description": "Infrastructure as Code design and implementation using Docker, Terraform, and cloud services",
+      "prompt_fragment": "You MUST produce idempotent, version-controlled infrastructure definitions. Include health checks, rollback procedures, and resource limits.",
+      "required_tools": ["find", "cat"],
+      "compatible_with": ["cicd-pipeline", "build-optimization"],
+      "conflicts_with": []
+    },
+    {
+      "id": "build-optimization",
+      "name": "Build Optimization",
+      "description": "Build system performance tuning, caching strategies, and dependency management",
+      "prompt_fragment": "You MUST analyze build bottlenecks, implement caching layers, parallelize independent steps, and minimize artifact size. Measure before/after build times.",
+      "required_tools": ["time", "find"],
+      "compatible_with": ["cicd-pipeline", "performance-profiling"],
+      "conflicts_with": []
+    },
+    {
+      "id": "memory-optimization",
+      "name": "Memory Optimization",
+      "description": "Context window management, knowledge compression, and memory lifecycle governance",
+      "prompt_fragment": "You MUST manage context efficiently: compress verbose content, archive stale knowledge, and maintain retrieval accuracy. Track memory usage and prune when approaching limits.",
+      "required_tools": [],
+      "compatible_with": ["documentation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "summarization",
+      "name": "Summarization",
+      "description": "Concise synthesis of complex information optimized for target audience and delivery format",
+      "prompt_fragment": "You MUST produce summaries that preserve key facts, decisions, and action items. Adapt format to delivery channel (text, voice, report). Never introduce information not in the source.",
+      "required_tools": [],
+      "compatible_with": ["documentation", "memory-optimization"],
+      "conflicts_with": []
+    },
+    {
+      "id": "tui-design",
+      "name": "TUI Design",
+      "description": "Terminal UI layout, rendering, and interaction design for keyboard-first CLI experiences",
+      "prompt_fragment": "You MUST design TUI layouts with clear spatial hierarchy, low-latency rendering, and graceful degradation. Every view MUST support keyboard-only operation with predictable focus management.",
+      "required_tools": [],
+      "compatible_with": ["keyboard-navigation", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "design-system",
+      "name": "Design System",
+      "description": "Token-based design system architecture with component contracts, responsive layouts, and multi-input modality",
+      "prompt_fragment": "You MUST define tokens (spacing, typography, elevation, radii), component contracts (props, states, ARIA, keyboard), and responsive behavior. Every component MUST work across keyboard, mouse, and touch.",
+      "required_tools": [],
+      "compatible_with": ["theming", "keyboard-navigation", "architecture-review", "code-review"],
+      "conflicts_with": []
+    },
+    {
+      "id": "theming",
+      "name": "Theming",
+      "description": "Adaptive Light/Dark appearance systems, semantic color tokens, motion rules, and contrast compliance",
+      "prompt_fragment": "You MUST produce co-equal Light and Dark token sets, enforce WCAG AA contrast minimums, define motion duration/easing scales with reduced-motion fallbacks, and respect all user appearance preferences.",
+      "required_tools": [],
+      "compatible_with": ["design-system", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "keyboard-navigation",
+      "name": "Keyboard Navigation",
+      "description": "Full keyboard navigation model, focus management, shortcut registry, and command palette design",
+      "prompt_fragment": "You MUST map complete focus orders, implement roving tabindex for composite widgets, maintain a conflict-free shortcut registry, and ensure focus traps restore correctly. No mouse required MUST be genuinely true.",
+      "required_tools": [],
+      "compatible_with": ["tui-design", "design-system", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "audit",
+      "name": "Audit",
+      "description": "System audit trail management, compliance logging, and forensic analysis",
+      "prompt_fragment": "You MUST maintain immutable audit logs with timestamps, actor identification, and action details. Support forensic queries and compliance reporting.",
+      "required_tools": ["grep", "find"],
+      "compatible_with": ["compliance-check", "security-audit"],
+      "conflicts_with": []
+    },
+    {
+      "id": "automation",
+      "name": "Automation",
+      "description": "Task automation, workflow orchestration, and scheduled job management",
+      "prompt_fragment": "You MUST design idempotent automation workflows with proper error handling, retry logic, and observability. Support both scheduled and event-driven triggers.",
+      "required_tools": [],
+      "compatible_with": ["dispatch", "routing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "channel-auth",
+      "name": "Channel Authentication",
+      "description": "Multi-channel authentication and authorization for messaging platforms",
+      "prompt_fragment": "You MUST implement secure authentication flows for each channel, validate tokens, and enforce authorization policies.",
+      "required_tools": [],
+      "compatible_with": ["security-audit", "session-routing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "channel-translation",
+      "name": "Channel Translation",
+      "description": "Cross-platform message format translation and protocol bridging",
+      "prompt_fragment": "You MUST translate messages between platform formats while preserving semantic meaning, attachments, and metadata.",
+      "required_tools": [],
+      "compatible_with": ["media-bridging", "routing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "conflict-resolution",
+      "name": "Conflict Resolution",
+      "description": "Detect and resolve conflicting agent outputs, merge strategies, and consensus building",
+      "prompt_fragment": "You MUST detect conflicts between agent outputs, apply merge strategies, and escalate unresolvable conflicts with clear context.",
+      "required_tools": [],
+      "compatible_with": ["synthesis", "escalation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "context-compression",
+      "name": "Context Compression",
+      "description": "Intelligent context window management through summarization and prioritization",
+      "prompt_fragment": "You MUST compress context while preserving critical information, prioritize recent and relevant data, and maintain retrieval accuracy.",
+      "required_tools": [],
+      "compatible_with": ["memory-optimization", "summarization"],
+      "conflicts_with": []
+    },
+    {
+      "id": "cost-analysis",
+      "name": "Cost Analysis",
+      "description": "API cost tracking, budget management, and cost optimization recommendations",
+      "prompt_fragment": "You MUST track API usage costs, enforce budget limits, and recommend cost-effective provider routing strategies.",
+      "required_tools": [],
+      "compatible_with": ["observability", "routing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "decision-making",
+      "name": "Decision Making",
+      "description": "Structured decision frameworks, trade-off analysis, and recommendation generation",
+      "prompt_fragment": "You MUST apply structured decision frameworks, document trade-offs, and produce actionable recommendations with clear rationale.",
+      "required_tools": [],
+      "compatible_with": ["task-decomposition", "synthesis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "device-pairing",
+      "name": "Device Pairing",
+      "description": "Multi-device session management, handoff protocols, and sync coordination",
+      "prompt_fragment": "You MUST manage secure device pairing, implement seamless session handoff, and maintain state consistency across devices.",
+      "required_tools": [],
+      "compatible_with": ["session-routing", "channel-auth"],
+      "conflicts_with": []
+    },
+    {
+      "id": "dispatch",
+      "name": "Dispatch",
+      "description": "Task routing, agent selection, and workload distribution",
+      "prompt_fragment": "You MUST route tasks to appropriate agents based on capability matching, cost tier, and current workload. Implement fair scheduling and priority handling.",
+      "required_tools": [],
+      "compatible_with": ["delegation", "routing", "automation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "escalation",
+      "name": "Escalation",
+      "description": "Issue escalation protocols, severity assessment, and notification routing",
+      "prompt_fragment": "You MUST assess issue severity, route escalations to appropriate handlers, and ensure timely notification with full context.",
+      "required_tools": [],
+      "compatible_with": ["conflict-resolution", "health-monitoring"],
+      "conflicts_with": []
+    },
+    {
+      "id": "execution-approval",
+      "name": "Execution Approval",
+      "description": "Human-in-the-loop approval workflows for sensitive operations",
+      "prompt_fragment": "You MUST gate sensitive operations behind approval workflows, provide clear context for decisions, and maintain audit trails.",
+      "required_tools": [],
+      "compatible_with": ["security-policy", "audit"],
+      "conflicts_with": []
+    },
+    {
+      "id": "health-monitoring",
+      "name": "Health Monitoring",
+      "description": "System health checks, liveness probes, and availability monitoring",
+      "prompt_fragment": "You MUST implement comprehensive health checks, detect degraded states early, and trigger appropriate remediation or escalation.",
+      "required_tools": [],
+      "compatible_with": ["observability", "self-healing", "telemetry"],
+      "conflicts_with": []
+    },
+    {
+      "id": "media-bridging",
+      "name": "Media Bridging",
+      "description": "Cross-platform media format conversion and delivery optimization",
+      "prompt_fragment": "You MUST convert media between platform formats, optimize for delivery constraints, and preserve quality where possible.",
+      "required_tools": [],
+      "compatible_with": ["channel-translation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "observability",
+      "name": "Observability",
+      "description": "Metrics collection, distributed tracing, and system visibility",
+      "prompt_fragment": "You MUST implement comprehensive observability with metrics, traces, and logs. Enable root cause analysis and performance debugging.",
+      "required_tools": [],
+      "compatible_with": ["telemetry", "tracing", "health-monitoring"],
+      "conflicts_with": []
+    },
+    {
+      "id": "onboarding",
+      "name": "Onboarding",
+      "description": "User and system onboarding workflows, progressive disclosure, and guided setup",
+      "prompt_fragment": "You MUST design intuitive onboarding flows with progressive disclosure, clear success indicators, and graceful error recovery.",
+      "required_tools": [],
+      "compatible_with": ["documentation"],
+      "conflicts_with": []
+    },
+    {
+      "id": "pattern-analysis",
+      "name": "Pattern Analysis",
+      "description": "Usage pattern detection, anomaly identification, and trend analysis",
+      "prompt_fragment": "You MUST analyze usage patterns, detect anomalies, and identify trends that inform optimization or alert on potential issues.",
+      "required_tools": [],
+      "compatible_with": ["observability", "cost-analysis"],
+      "conflicts_with": []
+    },
+    {
+      "id": "policy-governance",
+      "name": "Policy Governance",
+      "description": "Policy definition, enforcement, and compliance verification",
+      "prompt_fragment": "You MUST define clear policies, implement automated enforcement, and verify compliance with audit trails.",
+      "required_tools": [],
+      "compatible_with": ["security-policy", "compliance-check"],
+      "conflicts_with": []
+    },
+    {
+      "id": "recovery",
+      "name": "Recovery",
+      "description": "Failure recovery, state restoration, and disaster recovery procedures",
+      "prompt_fragment": "You MUST implement recovery procedures for all failure modes, maintain backup state, and verify recovery success.",
+      "required_tools": [],
+      "compatible_with": ["resilience", "self-healing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "resilience",
+      "name": "Resilience",
+      "description": "Fault tolerance, graceful degradation, and circuit breaker patterns",
+      "prompt_fragment": "You MUST implement fault tolerance with circuit breakers, retries with backoff, and graceful degradation under load.",
+      "required_tools": [],
+      "compatible_with": ["recovery", "self-healing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "resource-management",
+      "name": "Resource Management",
+      "description": "Resource allocation, quota management, and capacity planning",
+      "prompt_fragment": "You MUST manage resource allocation efficiently, enforce quotas, and plan for capacity growth with appropriate headroom.",
+      "required_tools": [],
+      "compatible_with": ["cost-analysis", "observability"],
+      "conflicts_with": []
+    },
+    {
+      "id": "routing",
+      "name": "Routing",
+      "description": "Intelligent request routing, load balancing, and failover strategies",
+      "prompt_fragment": "You MUST implement intelligent routing with health-aware load balancing, automatic failover, and latency optimization.",
+      "required_tools": [],
+      "compatible_with": ["dispatch", "session-routing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "security-policy",
+      "name": "Security Policy",
+      "description": "Security policy definition, access control, and threat mitigation",
+      "prompt_fragment": "You MUST define and enforce security policies, implement least-privilege access control, and mitigate identified threats.",
+      "required_tools": [],
+      "compatible_with": ["security-audit", "policy-governance"],
+      "conflicts_with": []
+    },
+    {
+      "id": "self-healing",
+      "name": "Self Healing",
+      "description": "Automatic issue detection and remediation without human intervention",
+      "prompt_fragment": "You MUST detect issues automatically, apply safe remediation strategies, and verify recovery success. Escalate when self-healing fails.",
+      "required_tools": [],
+      "compatible_with": ["health-monitoring", "recovery", "resilience"],
+      "conflicts_with": []
+    },
+    {
+      "id": "session-routing",
+      "name": "Session Routing",
+      "description": "Session affinity, stateful routing, and session lifecycle management",
+      "prompt_fragment": "You MUST maintain session affinity where required, manage session lifecycle, and handle session migration gracefully.",
+      "required_tools": [],
+      "compatible_with": ["routing", "device-pairing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "telemetry",
+      "name": "Telemetry",
+      "description": "System telemetry collection, aggregation, and analysis",
+      "prompt_fragment": "You MUST collect comprehensive telemetry, aggregate efficiently, and enable real-time and historical analysis.",
+      "required_tools": [],
+      "compatible_with": ["observability", "tracing"],
+      "conflicts_with": []
+    },
+    {
+      "id": "tracing",
+      "name": "Tracing",
+      "description": "Distributed tracing, request correlation, and latency analysis",
+      "prompt_fragment": "You MUST implement distributed tracing with proper context propagation, request correlation, and latency breakdown analysis.",
+      "required_tools": [],
+      "compatible_with": ["observability", "telemetry"],
+      "conflicts_with": []
+    }
+  ]
+}

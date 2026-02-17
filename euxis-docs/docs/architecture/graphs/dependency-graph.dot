@@ -1,0 +1,17 @@
+digraph deps {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  "adapters" [label="adapters"]; 
+  "api" [label="api"]; 
+  "cli" [label="cli"]; 
+  "core" [label="core"]; 
+  "crypto" [label="crypto"]; 
+  "metrics" [label="metrics"]; 
+  "ui" [label="ui"]; 
+  "config" [label="config"]; 
+  "security" [label="security"]; 
+  "packages/shared" [label="packages/shared"]; 
+  "adapters" -> "packages/shared";
+  "api" -> "packages/shared";
+  "ui" -> "packages/shared";
+}

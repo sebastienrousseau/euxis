@@ -1,0 +1,720 @@
+#!/usr/bin/env bash
+#
+# euxis-bench - Performance benchmarking suite for Euxis
+#
+# Measures:
+#   - Cold start latency (first invocation)
+#   - Warm start latency (cached invocation)
+#   - Memory footprint (RAM usage)
+#   - Agent dispatch latency
+#   - File I/O performance (registry load, session persistence)
+#
+
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+VERSION="0.1.0"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Configuration & Defaults
+# ────────────────────────────────────────────────────────────────────────────────
+
+ITERATIONS=5
+VERBOSE=false
+JSON_OUTPUT=false
+
+# Performance thresholds (in milliseconds / megabytes)
+THRESHOLD_COLD_START=50
+THRESHOLD_WARM_START=30
+THRESHOLD_MEMORY_MB=50
+THRESHOLD_AGENT_DISPATCH=200
+THRESHOLD_REGISTRY_LOAD=50
+THRESHOLD_SESSION_PERSIST=50
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Colors & Icons
+# ────────────────────────────────────────────────────────────────────────────────
+
+setup_colors() {
+    if [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
+        RESET="" BOLD="" DIM=""
+        RED="" GREEN="" YELLOW="" CYAN="" WHITE="" MAGENTA=""
+    else
+        RESET='\033[0m'
+        BOLD='\033[1m'
+        DIM='\033[2m'
+        RED='\033[38;5;203m'
+        GREEN='\033[38;5;42m'
+        YELLOW='\033[38;5;220m'
+        CYAN='\033[38;5;87m'
+        WHITE='\033[38;5;255m'
+        MAGENTA='\033[38;5;141m'
+    fi
+}
+
+# Unicode support detection
+supports_unicode() {
+    [[ "${LANG:-}" == *UTF-8* ]] || [[ "${LC_ALL:-}" == *UTF-8* ]] || \
+    [[ "${TERM:-}" == *256color* ]] || [[ "${TERM:-}" == *xterm* ]]
+}
+
+setup_icons() {
+    if supports_unicode; then
+        ICON_PASS="[PASS]"
+        ICON_FAIL="[FAIL]"
+        ICON_WARN="[WARN]"
+        ICON_SKIP="[SKIP]"
+        LINE_DOUBLE="══════════════════════════════════════════════════"
+        LINE_SINGLE="──────────────────────────────────────────────────"
+    else
+        ICON_PASS="[PASS]"
+        ICON_FAIL="[FAIL]"
+        ICON_WARN="[WARN]"
+        ICON_SKIP="[SKIP]"
+        LINE_DOUBLE="=================================================="
+        LINE_SINGLE="--------------------------------------------------"
+    fi
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Usage & Argument Parsing
+# ────────────────────────────────────────────────────────────────────────────────
+
+usage() {
+    cat <<EOF
+euxis-bench - Performance benchmarking suite
+
+Usage:
+  euxis bench [options]
+
+Measures cold/warm start latency, memory usage, agent dispatch,
+and file I/O performance against defined thresholds.
+
+Options:
+  --iterations N   Run N iterations per benchmark (default: 5)
+  --json           Output results in JSON format
+  --verbose        Show detailed timing breakdown
+  -h, --help       Show this help text
+
+Thresholds:
+  Cold Start:      <${THRESHOLD_COLD_START}ms
+  Warm Start:      <${THRESHOLD_WARM_START}ms
+  Memory Usage:    <${THRESHOLD_MEMORY_MB}MB
+  Agent Dispatch:  <${THRESHOLD_AGENT_DISPATCH}ms
+  Registry Load:   <${THRESHOLD_REGISTRY_LOAD}ms
+  Session Persist: <${THRESHOLD_SESSION_PERSIST}ms
+
+Examples:
+  euxis bench                    # Run with defaults
+  euxis bench --iterations 10    # Run 10 iterations
+  euxis bench --json             # Output JSON for CI pipelines
+  euxis bench --verbose          # Detailed breakdown
+
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --iterations)
+                if [[ -n "${2:-}" ]] && [[ "$2" =~ ^[0-9]+$ ]]; then
+                    ITERATIONS="$2"
+                    shift 2
+                else
+                    echo "Error: --iterations requires a positive integer" >&2
+                    exit 1
+                fi
+                ;;
+            --json)
+                JSON_OUTPUT=true
+                shift
+                ;;
+            --verbose)
+                VERBOSE=true
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1" >&2
+                usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Timing Utilities
+# ────────────────────────────────────────────────────────────────────────────────
+
+# Get current time in nanoseconds (cross-platform)
+get_time_ns() {
+    if [[ -n "${EPOCHREALTIME:-}" ]]; then
+        # Bash 5.0+ with EPOCHREALTIME
+        local epoch_real="$EPOCHREALTIME"
+        local seconds="${epoch_real%%.*}"
+        local fractional="${epoch_real#*.}"
+        # Pad fractional to 9 digits
+        while [[ ${#fractional} -lt 9 ]]; do
+            fractional="${fractional}0"
+        done
+        fractional="${fractional:0:9}"
+        echo "${seconds}${fractional}"
+    elif command -v gdate &>/dev/null; then
+        # macOS with GNU coreutils
+        gdate +%s%N
+    elif [[ "$(uname)" == "Darwin" ]]; then
+        # macOS fallback using python
+        python3 -c "import time; print(int(time.time() * 1e9))"
+    else
+        # Linux
+        date +%s%N
+    fi
+}
+
+# Convert nanoseconds to milliseconds
+ns_to_ms() {
+    local ns="$1"
+    echo $(( ns / 1000000 ))
+}
+
+# Calculate elapsed time in ms
+elapsed_ms() {
+    local start="$1"
+    local end="$2"
+    ns_to_ms $(( end - start ))
+}
+
+# Calculate average from array of values
+calculate_avg() {
+    local -n arr=$1
+    local sum=0
+    local count=${#arr[@]}
+    [[ $count -eq 0 ]] && echo "0" && return
+    for val in "${arr[@]}"; do
+        sum=$((sum + val))
+    done
+    echo $((sum / count))
+}
+
+# Calculate min from array
+calculate_min() {
+    local -n arr=$1
+    local min=${arr[0]:-0}
+    for val in "${arr[@]}"; do
+        [[ $val -lt $min ]] && min=$val
+    done
+    echo "$min"
+}
+
+# Calculate max from array
+calculate_max() {
+    local -n arr=$1
+    local max=${arr[0]:-0}
+    for val in "${arr[@]}"; do
+        [[ $val -gt $max ]] && max=$val
+    done
+    echo "$max"
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Memory Measurement
+# ────────────────────────────────────────────────────────────────────────────────
+
+# Get memory usage in KB for current process tree
+get_memory_kb() {
+    local pid="${1:-$$}"
+    local mem_kb=0
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        # macOS: use ps with RSS
+        mem_kb=$(ps -o rss= -p "$pid" 2>/dev/null | tr -d ' ' || echo "0")
+    elif [[ -f "/proc/$pid/status" ]]; then
+        # Linux: use /proc
+        mem_kb=$(grep -i 'VmRSS:' "/proc/$pid/status" 2>/dev/null | awk '{print $2}' || echo "0")
+    else
+        # Fallback: ps
+        mem_kb=$(ps -o rss= -p "$pid" 2>/dev/null | tr -d ' ' || echo "0")
+    fi
+
+    echo "${mem_kb:-0}"
+}
+
+# Get total memory usage of euxis processes in MB
+get_euxis_memory_mb() {
+    local total_kb=0
+    local pids
+
+    # Find euxis-related processes
+    if command -v pgrep &>/dev/null; then
+        pids=$(pgrep -f "euxis-bus|euxis-cortex|euxis-daemon" 2>/dev/null || true)
+    fi
+
+    if [[ -n "$pids" ]]; then
+        for pid in $pids; do
+            local mem=$(get_memory_kb "$pid")
+            total_kb=$((total_kb + mem))
+        done
+    fi
+
+    # If no euxis processes, measure current shell's baseline
+    if [[ $total_kb -eq 0 ]]; then
+        total_kb=$(get_memory_kb $$)
+    fi
+
+    echo $((total_kb / 1024))
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Benchmark Functions
+# ────────────────────────────────────────────────────────────────────────────────
+
+declare -a COLD_START_TIMES=()
+declare -a WARM_START_TIMES=()
+declare -a DISPATCH_TIMES=()
+declare -a REGISTRY_TIMES=()
+declare -a SESSION_TIMES=()
+
+# Benchmark: Cold Start Latency
+bench_cold_start() {
+    $VERBOSE && printf "  %bMeasuring cold start latency (%d iterations)...%b\n" "$DIM" "$ITERATIONS" "$RESET"
+
+    COLD_START_TIMES=()
+    local euxis_bin="${EUXIS_HOME}/euxis-cli/bin/euxis"
+
+    for i in $(seq 1 "$ITERATIONS"); do
+        # Clear any caches by creating unique env
+        local start end elapsed
+
+        # Clear shell hash table
+        hash -r 2>/dev/null || true
+
+        # Drop filesystem caches if possible (non-privileged)
+        sync 2>/dev/null || true
+
+        start=$(get_time_ns)
+        if [[ -x "$euxis_bin" ]]; then
+            "$euxis_bin" --help >/dev/null 2>&1 || true
+        else
+            # Fallback to euxis in PATH
+            command euxis --help >/dev/null 2>&1 || true
+        fi
+        end=$(get_time_ns)
+
+        elapsed=$(elapsed_ms "$start" "$end")
+        COLD_START_TIMES+=("$elapsed")
+
+        $VERBOSE && printf "    %bIteration %d: %dms%b\n" "$DIM" "$i" "$elapsed" "$RESET"
+
+        # Small delay between cold start tests
+        sleep 0.1
+    done
+}
+
+# Benchmark: Warm Start Latency
+bench_warm_start() {
+    $VERBOSE && printf "  %bMeasuring warm start latency (%d iterations)...%b\n" "$DIM" "$ITERATIONS" "$RESET"
+
+    WARM_START_TIMES=()
+    local euxis_bin="${EUXIS_HOME}/euxis-cli/bin/euxis"
+
+    # Warm up first
+    if [[ -x "$euxis_bin" ]]; then
+        "$euxis_bin" --help >/dev/null 2>&1 || true
+        "$euxis_bin" --help >/dev/null 2>&1 || true
+    else
+        command euxis --help >/dev/null 2>&1 || true
+        command euxis --help >/dev/null 2>&1 || true
+    fi
+
+    for i in $(seq 1 "$ITERATIONS"); do
+        local start end elapsed
+
+        start=$(get_time_ns)
+        if [[ -x "$euxis_bin" ]]; then
+            "$euxis_bin" --help >/dev/null 2>&1 || true
+        else
+            command euxis --help >/dev/null 2>&1 || true
+        fi
+        end=$(get_time_ns)
+
+        elapsed=$(elapsed_ms "$start" "$end")
+        WARM_START_TIMES+=("$elapsed")
+
+        $VERBOSE && printf "    %bIteration %d: %dms%b\n" "$DIM" "$i" "$elapsed" "$RESET"
+    done
+}
+
+# Benchmark: Agent Dispatch Latency
+bench_agent_dispatch() {
+    $VERBOSE && printf "  %bMeasuring agent dispatch latency...%b\n" "$DIM" "$RESET"
+
+    DISPATCH_TIMES=()
+
+    # Instead of sourcing the full library stack (which may have side effects),
+    # we simulate the core dispatch operations: file I/O for lifecycle state
+
+    local lifecycle_dir="${EUXIS_HOME}/euxis-runtime/data/lifecycle"
+    mkdir -p "$lifecycle_dir" 2>/dev/null || true
+
+    for i in $(seq 1 "$ITERATIONS"); do
+        local start end elapsed
+        local agent_id="bench-agent-${i}-$$"
+        local state_file="${lifecycle_dir}/${agent_id}.state"
+
+        start=$(get_time_ns)
+
+        # Simulate lifecycle transition: write state file (atomic via temp)
+        local tmp_state="${state_file}.tmp.$$"
+        cat > "$tmp_state" <<EOSTATE
+{
+  "agent": "${agent_id}",
+  "state": "active",
+  "session": "bench-session-$$",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "pid": $$
+}
+EOSTATE
+        mv "$tmp_state" "$state_file" 2>/dev/null || true
+
+        # Simulate route resolution: read registry entry
+        local registry_db="${EUXIS_HOME}/euxis-core/agents/registry.db"
+        local registry_json="${EUXIS_HOME}/euxis-core/agents/registry.json"
+
+        if [[ -f "$registry_db" ]]; then
+            python3 -c "
+import sqlite3
+conn = sqlite3.connect('$registry_db')
+list(conn.execute('SELECT id, role FROM agents LIMIT 1'))
+conn.close()
+" 2>/dev/null || true
+        elif [[ -f "$registry_json" ]] && command -v jq &>/dev/null; then
+            jq -r '.agents[0].id' "$registry_json" >/dev/null 2>&1 || true
+        fi
+
+        end=$(get_time_ns)
+        elapsed=$(elapsed_ms "$start" "$end")
+        DISPATCH_TIMES+=("$elapsed")
+
+        $VERBOSE && printf "    %bIteration %d: %dms%b\n" "$DIM" "$i" "$elapsed" "$RESET"
+
+        # Cleanup
+        rm -f "$state_file" 2>/dev/null || true
+    done
+
+    return 0
+}
+
+# Benchmark: Registry Load Time
+bench_registry_load() {
+    $VERBOSE && printf "  %bMeasuring registry load time...%b\n" "$DIM" "$RESET"
+
+    REGISTRY_TIMES=()
+    local registry_json="${EUXIS_HOME}/euxis-core/agents/registry.json"
+    local registry_db="${EUXIS_HOME}/euxis-core/agents/registry.db"
+
+    for i in $(seq 1 "$ITERATIONS"); do
+        local start end elapsed
+
+        start=$(get_time_ns)
+
+        if [[ -f "$registry_db" ]]; then
+            # SQLite registry
+            python3 -c "
+import sqlite3
+conn = sqlite3.connect('$registry_db')
+list(conn.execute('SELECT id, role, tier FROM agents'))
+conn.close()
+" 2>/dev/null || true
+        elif [[ -f "$registry_json" ]] && command -v jq &>/dev/null; then
+            # JSON registry
+            jq -r '.agents[].id' "$registry_json" >/dev/null 2>&1 || true
+        fi
+
+        end=$(get_time_ns)
+        elapsed=$(elapsed_ms "$start" "$end")
+        REGISTRY_TIMES+=("$elapsed")
+
+        $VERBOSE && printf "    %bIteration %d: %dms%b\n" "$DIM" "$i" "$elapsed" "$RESET"
+    done
+}
+
+# Benchmark: Session Persistence Time
+bench_session_persist() {
+    $VERBOSE && printf "  %bMeasuring session persistence time...%b\n" "$DIM" "$RESET"
+
+    SESSION_TIMES=()
+    local session_lib="${EUXIS_HOME}/euxis-core/lib/session.sh"
+    local session_dir="${EUXIS_HOME}/euxis-runtime/sessions"
+
+    mkdir -p "$session_dir" 2>/dev/null || true
+
+    for i in $(seq 1 "$ITERATIONS"); do
+        local start end elapsed
+        local session_file="${session_dir}/bench-session-${i}-$$.json"
+
+        start=$(get_time_ns)
+
+        # Write a sample session file
+        cat > "$session_file" <<EOJSON
+{
+  "session_id": "bench-${i}-$$",
+  "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "agent": "bench-agent",
+  "messages": [
+    {"role": "user", "content": "benchmark test message"},
+    {"role": "assistant", "content": "benchmark response"}
+  ],
+  "metadata": {
+    "iteration": $i,
+    "benchmark": true
+  }
+}
+EOJSON
+
+        # Force sync
+        sync 2>/dev/null || true
+
+        end=$(get_time_ns)
+        elapsed=$(elapsed_ms "$start" "$end")
+        SESSION_TIMES+=("$elapsed")
+
+        $VERBOSE && printf "    %bIteration %d: %dms%b\n" "$DIM" "$i" "$elapsed" "$RESET"
+
+        # Cleanup
+        rm -f "$session_file" 2>/dev/null || true
+    done
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Results & Output
+# ────────────────────────────────────────────────────────────────────────────────
+
+# Format result line with PASS/FAIL indicator
+format_result() {
+    local name="$1"
+    local value="$2"
+    local unit="$3"
+    local threshold="$4"
+
+    local status icon color
+    if [[ $value -le $threshold ]]; then
+        status="PASS"
+        icon="$ICON_PASS"
+        color="$GREEN"
+    else
+        status="FAIL"
+        icon="$ICON_FAIL"
+        color="$RED"
+    fi
+
+    # Use printf with explicit escape interpretation
+    printf "  %b%-18s%b %4d%-3s  %b%s%b  %b(target: <%d%s)%b\n" \
+        "$WHITE" "$name" "$RESET" "$value" "$unit" "$color" "$icon" "$RESET" "$DIM" "$threshold" "$unit" "$RESET"
+}
+
+# Print human-readable results
+print_results() {
+    local cold_avg=$(calculate_avg COLD_START_TIMES)
+    local warm_avg=$(calculate_avg WARM_START_TIMES)
+    local memory_mb=$(get_euxis_memory_mb)
+    local dispatch_avg=$(calculate_avg DISPATCH_TIMES)
+    local registry_avg=$(calculate_avg REGISTRY_TIMES)
+    local session_avg=$(calculate_avg SESSION_TIMES)
+
+    # Count passes
+    local pass_count=0
+    local total_count=5
+
+    [[ $cold_avg -le $THRESHOLD_COLD_START ]] && pass_count=$((pass_count + 1)) || true
+    [[ $warm_avg -le $THRESHOLD_WARM_START ]] && pass_count=$((pass_count + 1)) || true
+    [[ $memory_mb -le $THRESHOLD_MEMORY_MB ]] && pass_count=$((pass_count + 1)) || true
+    [[ ${#DISPATCH_TIMES[@]} -gt 0 ]] && [[ $dispatch_avg -le $THRESHOLD_AGENT_DISPATCH ]] && pass_count=$((pass_count + 1)) || true
+    [[ $registry_avg -le $THRESHOLD_REGISTRY_LOAD ]] && pass_count=$((pass_count + 1)) || true
+
+    # Header
+    echo ""
+    printf "%bEUXIS PERFORMANCE BENCHMARK%b %bv%s%b\n" "$BOLD$CYAN" "$RESET" "$DIM" "$VERSION" "$RESET"
+    printf "%b%s%b\n" "$CYAN" "$LINE_DOUBLE" "$RESET"
+    echo ""
+
+    # Results
+    format_result "Cold Start" "$cold_avg" "ms" "$THRESHOLD_COLD_START"
+    format_result "Warm Start" "$warm_avg" "ms" "$THRESHOLD_WARM_START"
+    format_result "Memory Usage" "$memory_mb" "MB" "$THRESHOLD_MEMORY_MB"
+
+    if [[ ${#DISPATCH_TIMES[@]} -gt 0 ]]; then
+        format_result "Agent Dispatch" "$dispatch_avg" "ms" "$THRESHOLD_AGENT_DISPATCH"
+    else
+        printf "  %b%-18s%b %4s%-3s  %b%s%b  %b(libraries not found)%b\n" \
+            "$WHITE" "Agent Dispatch" "$RESET" "N/A" "" "$YELLOW" "$ICON_SKIP" "$RESET" "$DIM" "$RESET"
+        total_count=4
+    fi
+
+    format_result "Registry Load" "$registry_avg" "ms" "$THRESHOLD_REGISTRY_LOAD"
+
+    echo ""
+    printf "%b%s%b\n" "$CYAN" "$LINE_DOUBLE" "$RESET"
+
+    # Summary
+    if [[ $pass_count -eq $total_count ]]; then
+        printf "  %bOverall: PASS%b (%d/%d benchmarks within threshold)\n" "$GREEN" "$RESET" "$pass_count" "$total_count"
+    else
+        local fail_count=$((total_count - pass_count))
+        printf "  %bOverall: FAIL%b (%d/%d benchmarks exceeded threshold)\n" "$RED" "$RESET" "$fail_count" "$total_count"
+    fi
+    echo ""
+
+    # Verbose details
+    if $VERBOSE; then
+        printf "%bDetailed Statistics:%b\n" "$DIM" "$RESET"
+        printf "%b%s%b\n" "$DIM" "$LINE_SINGLE" "$RESET"
+
+        if [[ ${#COLD_START_TIMES[@]} -gt 0 ]]; then
+            printf "  %bCold Start:%b\n" "$DIM" "$RESET"
+            printf "    Min: %dms  Max: %dms  Avg: %dms\n" "$(calculate_min COLD_START_TIMES)" "$(calculate_max COLD_START_TIMES)" "$cold_avg"
+        fi
+
+        if [[ ${#WARM_START_TIMES[@]} -gt 0 ]]; then
+            printf "  %bWarm Start:%b\n" "$DIM" "$RESET"
+            printf "    Min: %dms  Max: %dms  Avg: %dms\n" "$(calculate_min WARM_START_TIMES)" "$(calculate_max WARM_START_TIMES)" "$warm_avg"
+        fi
+
+        if [[ ${#DISPATCH_TIMES[@]} -gt 0 ]]; then
+            printf "  %bAgent Dispatch:%b\n" "$DIM" "$RESET"
+            printf "    Min: %dms  Max: %dms  Avg: %dms\n" "$(calculate_min DISPATCH_TIMES)" "$(calculate_max DISPATCH_TIMES)" "$dispatch_avg"
+        fi
+
+        if [[ ${#REGISTRY_TIMES[@]} -gt 0 ]]; then
+            printf "  %bRegistry Load:%b\n" "$DIM" "$RESET"
+            printf "    Min: %dms  Max: %dms  Avg: %dms\n" "$(calculate_min REGISTRY_TIMES)" "$(calculate_max REGISTRY_TIMES)" "$registry_avg"
+        fi
+
+        echo ""
+        printf "  %bIterations: %d%b\n" "$DIM" "$ITERATIONS" "$RESET"
+        printf "  %bPlatform: %s (%s)%b\n" "$DIM" "$(uname -s)" "$(uname -m)" "$RESET"
+        echo ""
+    fi
+
+    return $((total_count - pass_count))
+}
+
+# Print JSON results
+print_json_results() {
+    local cold_avg=$(calculate_avg COLD_START_TIMES)
+    local warm_avg=$(calculate_avg WARM_START_TIMES)
+    local memory_mb=$(get_euxis_memory_mb)
+    local dispatch_avg=$(calculate_avg DISPATCH_TIMES)
+    local registry_avg=$(calculate_avg REGISTRY_TIMES)
+    local session_avg=$(calculate_avg SESSION_TIMES)
+
+    # Count passes
+    local pass_count=0
+    local total_count=5
+
+    [[ $cold_avg -le $THRESHOLD_COLD_START ]] && pass_count=$((pass_count + 1)) || true
+    [[ $warm_avg -le $THRESHOLD_WARM_START ]] && pass_count=$((pass_count + 1)) || true
+    [[ $memory_mb -le $THRESHOLD_MEMORY_MB ]] && pass_count=$((pass_count + 1)) || true
+    if [[ ${#DISPATCH_TIMES[@]} -gt 0 ]]; then
+        [[ $dispatch_avg -le $THRESHOLD_AGENT_DISPATCH ]] && pass_count=$((pass_count + 1)) || true
+    else
+        total_count=4
+    fi
+    [[ $registry_avg -le $THRESHOLD_REGISTRY_LOAD ]] && pass_count=$((pass_count + 1)) || true
+
+    local overall_status="pass"
+    [[ $pass_count -lt $total_count ]] && overall_status="fail"
+
+    cat <<EOJSON
+{
+  "version": "${VERSION}",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "platform": "$(uname -s)",
+  "arch": "$(uname -m)",
+  "iterations": ${ITERATIONS},
+  "results": {
+    "cold_start": {
+      "value_ms": ${cold_avg},
+      "threshold_ms": ${THRESHOLD_COLD_START},
+      "pass": $([[ $cold_avg -le $THRESHOLD_COLD_START ]] && echo "true" || echo "false"),
+      "samples": [$(IFS=,; echo "${COLD_START_TIMES[*]}")]
+    },
+    "warm_start": {
+      "value_ms": ${warm_avg},
+      "threshold_ms": ${THRESHOLD_WARM_START},
+      "pass": $([[ $warm_avg -le $THRESHOLD_WARM_START ]] && echo "true" || echo "false"),
+      "samples": [$(IFS=,; echo "${WARM_START_TIMES[*]}")]
+    },
+    "memory_usage": {
+      "value_mb": ${memory_mb},
+      "threshold_mb": ${THRESHOLD_MEMORY_MB},
+      "pass": $([[ $memory_mb -le $THRESHOLD_MEMORY_MB ]] && echo "true" || echo "false")
+    },
+    "agent_dispatch": {
+      "value_ms": $([[ ${#DISPATCH_TIMES[@]} -gt 0 ]] && echo "$dispatch_avg" || echo "null"),
+      "threshold_ms": ${THRESHOLD_AGENT_DISPATCH},
+      "pass": $([[ ${#DISPATCH_TIMES[@]} -gt 0 ]] && [[ $dispatch_avg -le $THRESHOLD_AGENT_DISPATCH ]] && echo "true" || echo "false"),
+      "samples": [$(IFS=,; echo "${DISPATCH_TIMES[*]:-}")]
+    },
+    "registry_load": {
+      "value_ms": ${registry_avg},
+      "threshold_ms": ${THRESHOLD_REGISTRY_LOAD},
+      "pass": $([[ $registry_avg -le $THRESHOLD_REGISTRY_LOAD ]] && echo "true" || echo "false"),
+      "samples": [$(IFS=,; echo "${REGISTRY_TIMES[*]}")]
+    }
+  },
+  "summary": {
+    "status": "${overall_status}",
+    "passed": ${pass_count},
+    "total": ${total_count}
+  }
+}
+EOJSON
+
+    return $((total_count - pass_count))
+}
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Main
+# ────────────────────────────────────────────────────────────────────────────────
+
+main() {
+    parse_args "$@"
+    setup_colors
+    setup_icons
+
+    # Run benchmarks
+    if ! $JSON_OUTPUT; then
+        echo ""
+        printf "%bRunning performance benchmarks (%d iterations)...%b\n" "$DIM" "$ITERATIONS" "$RESET"
+        echo ""
+    fi
+
+    # Temporarily disable errexit for benchmarks (they may fail gracefully)
+    set +e
+    bench_cold_start
+    bench_warm_start
+    bench_agent_dispatch
+    bench_registry_load
+    bench_session_persist
+    set -e
+
+    # Output results (capture exit code for overall status)
+    local exit_code=0
+    set +e
+    if $JSON_OUTPUT; then
+        print_json_results
+        exit_code=$?
+    else
+        print_results
+        exit_code=$?
+    fi
+    set -e
+
+    exit "$exit_code"
+}
+
+main "$@"

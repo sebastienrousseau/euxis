@@ -1,0 +1,144 @@
+---
+protocol_id: versioning-compatibility
+version: "0.0.8"
+last_updated: "2026-01-31"
+priority: "ORANGE"
+---
+
+## VERSIONING & COMPATIBILITY PROTOCOL (v0.0.8)
+
+This protocol establishes a single source of truth for version governance across the Euxis fleet. All version references MUST conform to this protocol.
+
+### 1. Version Authority
+
+The **single source of truth** for the current Euxis system version is:
+
+```
+~/.euxis/registry.json → "protocol_version" field
+```
+
+**Current system version: 0.0.8**
+
+No other file, prompt, or agent may independently declare a system version. All version references MUST derive from `registry.json`.
+
+### 2. Version Scheme
+
+Euxis follows **Semantic Versioning 2.0.0** (semver.org):
+
+```
+MAJOR.MINOR.PATCH
+```
+
+| Component | Incremented When | Example |
+|-----------|-----------------|---------|
+| **MAJOR** | Breaking changes to protocol, agent contracts, or CLI interface | `1.0.0` — Protocol v2 with incompatible handoff schema |
+| **MINOR** | New agents, new protocols, new capabilities (backward-compatible) | `0.1.0` — Added critic agent |
+| **PATCH** | Bug fixes, prompt refinements, documentation corrections | `0.0.8` — Fixed librarian version reference |
+
+### 3. What Gets Versioned
+
+| Entity | Version Source | Update Rule |
+|--------|--------------|-------------|
+| **System (Euxis)** | `registry.json → protocol_version` | Follows semver. All other versions derive from this. |
+| **Agent prompts** | YAML frontmatter `version:` field | MUST match `protocol_version` at release time. |
+| **Protocols** | YAML frontmatter `version:` field | MUST match `protocol_version` at release time. |
+| **CLI tools** (`bin/`) | Embedded version constant | MUST match `protocol_version` at release time. |
+| **Registry schema** | `registry.json → schema_version` | Independent versioning. Only bumped on schema changes. |
+
+### 4. Version Synchronization Rules
+
+1. **At release time**, ALL of the following MUST have matching version numbers:
+   - `registry.json → protocol_version`
+   - Every file in `prompts/core/*.txt` → YAML `version:`
+   - Every file in `prompts/fleet/*.txt` → YAML `version:`
+   - Every file in `prompts/protocols/*.txt` → YAML `version:`
+   - `README.md` version reference
+   - `docs/user-guide.md` version reference
+   - `docs/fleet-guide.md` version reference
+
+2. **Between releases**, working copies MAY have mixed versions during development. The `librarian` agent MUST flag mismatches.
+
+3. **The `gatekeeper` agent** is responsible for bumping all version references during a release cycle.
+
+### 5. Version Verification
+
+The `euxis-certify` pipeline (Gate 6) verifies version consistency:
+- README references correct version
+- USER_GUIDE and FLEET_GUIDE reference correct version
+- Registry JSON is valid
+
+The `librarian` agent MUST verify version tags during documentation governance sweeps.
+
+**Automated check command:**
+```bash
+euxis-lint --check versions
+```
+
+### 6. Deprecated Version References
+
+The following version references are **DEPRECATED** and MUST NOT be used:
+
+| Deprecated Reference | Correct Reference | Found In |
+|---------------------|-------------------|----------|
+| `v5.0` | `0.0.8` | `librarian.txt` line 27 (fixed) |
+| Internal build numbers | semver only | — |
+| Date-based versions | semver only | — |
+
+### 7. Upgrade & Migration Rules
+
+1. **PATCH upgrades** (0.0.X): No migration required. Drop-in replacement.
+2. **MINOR upgrades** (0.X.0): New files may be added. Existing files unchanged. Run `euxis-sync-docs` after upgrade.
+3. **MAJOR upgrades** (X.0.0): Breaking changes. MUST include migration guide. `gatekeeper` MUST coordinate. `critic` MUST review.
+
+### 8. Compatibility Matrix
+
+| Component A | Component B | Compatibility Rule |
+|-------------|-------------|-------------------|
+| Agent prompt v0.0.8 | Protocol v0.0.8 | MUST match — same MAJOR.MINOR required |
+| Agent prompt v0.0.5 | Protocol v0.0.8 | COMPATIBLE — PATCH mismatch tolerated |
+| Agent prompt v0.1.0 | Protocol v0.0.8 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
+| CLI tool v0.0.8 | Protocol v0.0.8 | MUST match |
+
+### 9. Fleet Freeze Rule
+
+New permanent agents MUST NOT be added unless they introduce a **new axis of responsibility** — a domain that no existing agent covers. Refinements of an existing agent's scope MUST be implemented as capability extensions to that agent, not as new agents.
+
+**Admission criteria for a new permanent agent:**
+
+| Criterion | Required |
+|-----------|----------|
+| Introduces a responsibility axis not covered by any existing agent | YES |
+| Cannot be achieved by extending an existing agent's scope | YES |
+| Has at least 2 inbound escalation sources from existing agents | YES |
+| Justified in writing with rationale reviewed by `planner` | YES |
+| Approved by user | YES |
+
+**Transient agents** (created via `euxis-synthesize compose`) are exempt from this rule — they are temporary by design and dissolved after task completion.
+
+### 10. Agent Classification & Activation Modes
+
+Agents are classified into three tiers per the Fleet Constitution (`CONSTITUTION.md`):
+
+| Class | Activation | Rule |
+|-------|-----------|------|
+| **Core** (7) | Always present, authority-bearing | Define direction and may block progress |
+| **Default** (13) | Auto-available, task-triggered | Execute and advise within scope; do not define direction |
+| **On-Demand** (7) | Explicit invocation only | Add leverage, not safety; never block, never override core authority |
+
+The `activation` field in `registry.json` records this:
+- Core agents have no `activation` field (always present by definition).
+- Default agents: `"activation": "default"`.
+- On-demand agents: `"activation": "on-demand"`.
+
+On-demand agents are fully capable — they are not degraded or disabled. The distinction reduces cognitive load during orchestration by narrowing the default candidate set.
+
+**Current on-demand agents:** `evangelist`, `butler`, `researcher`, `ambassador`, `localizer`, `marketer`, `social`.
+
+### 11. Enforcement
+
+- The `librarian` MUST flag version mismatches during documentation governance.
+- The `reviewer` MUST verify version consistency as part of quality gate checks.
+- `euxis-certify` Gate 6 MUST verify version references in documentation.
+- Any agent detecting a version mismatch MUST escalate as S2 (MEDIUM) per the Escalation & Severity Protocol.
+
+# Enterprise Unified eXecution Intelligence System

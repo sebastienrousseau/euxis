@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "euxis-adapters"
+version = "0.1.0"
+description = "Channel adapters (Slack, Telegram, etc.) for the Euxis Agent Framework"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "euxis-gateway>=0.1.0",
+    "slack_sdk>=3.0.0,<4.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "ruff>=0.5.0", "black>=24.0.0"]
+telegram = ["python-telegram-bot>=20.0"]
+
+[project.urls]
+Homepage = "https://euxis.co"
+Repository = "https://github.com/euxis/euxis-adapters"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

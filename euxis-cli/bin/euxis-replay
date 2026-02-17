@@ -1,0 +1,283 @@
+#!/usr/bin/env bash
+#
+# euxis-replay - Replay recorded agent traces
+#
+# Re-watch agent thought processes, council debates, and system events
+# from the trace archive.
+#
+
+set -uo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+TRACES_DIR="${EUXIS_HOME}/traces"
+
+# Source libraries
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+fi
+
+# Colors (256-color, consistent with main CLI)
+setup_colors() {
+    if [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
+        RESET="" BOLD="" DIM=""
+        RED="" GREEN="" YELLOW="" CYAN="" WHITE="" MAGENTA=""
+    else
+        RESET='\033[0m'
+        BOLD='\033[1m'
+        DIM='\033[2m'
+        RED='\033[38;5;203m'
+        GREEN='\033[38;5;42m'
+        YELLOW='\033[38;5;220m'
+        CYAN='\033[38;5;87m'
+        WHITE='\033[38;5;255m'
+        MAGENTA='\033[38;5;211m'
+    fi
+}
+
+# Icons
+setup_icons() {
+    if [[ "${LANG:-}" == *UTF-8* ]] || [[ "${LC_ALL:-}" == *UTF-8* ]]; then
+        ICON_CHECK="✓"
+        ICON_CROSS="✗"
+        ICON_WARN="⚠"
+        ICON_ARROW="→"
+        ICON_BULLET="▸"
+        ICON_PLAY="▶"
+        ICON_PAUSE="⏸"
+    else
+        ICON_CHECK="+"
+        ICON_CROSS="x"
+        ICON_WARN="!"
+        ICON_ARROW="->"
+        ICON_BULLET=">"
+        ICON_PLAY=">"
+        ICON_PAUSE="||"
+    fi
+}
+
+_print_section() {
+    local title="$1"
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} ${title}${RESET}"
+}
+
+usage() {
+    setup_colors
+    setup_icons
+
+    echo -e ""
+    echo -e "  ${BOLD}${WHITE}USAGE${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis replay ${DIM}<trace-id> [options]${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis replay ${DIM}--list${RESET}"
+    echo -e ""
+
+    _print_section "DESCRIPTION"
+    echo -e "    Re-watch agent interactions, council debates, and system events"
+    echo -e "    from the trace archive. Useful for debugging and auditing."
+    echo -e ""
+
+    _print_section "OPTIONS"
+    echo -e "    ${CYAN}--list${RESET}             ${DIM}List recent traces${RESET}"
+    echo -e "    ${CYAN}--speed N${RESET}          ${DIM}Playback speed multiplier (default: 1.0)${RESET}"
+    echo -e "    ${CYAN}--no-delay${RESET}         ${DIM}Show all events instantly${RESET}"
+    echo -e "    ${CYAN}--json${RESET}             ${DIM}Output raw JSON${RESET}"
+    echo -e "    ${CYAN}-h, --help${RESET}         ${DIM}Show this help${RESET}"
+    echo -e ""
+
+    _print_section "EXAMPLES"
+    echo -e "    ${CYAN}\$${RESET} euxis replay --list"
+    echo -e "    ${CYAN}\$${RESET} euxis replay 1708123456-12345"
+    echo -e "    ${CYAN}\$${RESET} euxis replay 1708123456-12345 --speed 2"
+    echo -e ""
+
+    exit 0
+}
+
+# List traces
+list_traces() {
+    setup_colors
+    setup_icons
+
+    echo -e ""
+    _print_section "RECENT TRACES"
+    echo -e ""
+
+    if [[ ! -d "$TRACES_DIR" ]] || [[ -z "$(ls -A "$TRACES_DIR" 2>/dev/null)" ]]; then
+        echo -e "    ${DIM}No traces found.${RESET}"
+        echo -e "    ${DIM}Traces are created when running council, squad, or playbook commands.${RESET}"
+        echo -e ""
+        return
+    fi
+
+    # Header
+    printf "    ${DIM}%-22s %-10s %-10s %s${RESET}\n" "TRACE ID" "TYPE" "STATUS" "DESCRIPTION"
+    echo -e "    ${DIM}────────────────────────────────────────────────────────────${RESET}"
+
+    ls -t "$TRACES_DIR"/*.json 2>/dev/null | head -n 15 | while read -r file; do
+        local id=$(basename "$file" .json)
+        local type=$(jq -r '.type // "unknown"' "$file" 2>/dev/null)
+        local status=$(jq -r '.status // "unknown"' "$file" 2>/dev/null)
+        local desc=$(jq -r '.description // ""' "$file" 2>/dev/null | head -c 40)
+
+        local status_icon status_color
+        case "$status" in
+            success)  status_icon="$ICON_CHECK"; status_color="$GREEN" ;;
+            failed)   status_icon="$ICON_CROSS"; status_color="$RED" ;;
+            running)  status_icon="$ICON_PLAY"; status_color="$YELLOW" ;;
+            *)        status_icon="$ICON_BULLET"; status_color="$DIM" ;;
+        esac
+
+        printf "    ${CYAN}%-22s${RESET} %-10s ${status_color}${status_icon} %-8s${RESET} ${DIM}%s${RESET}\n" \
+            "$id" "$type" "$status" "$desc"
+    done
+
+    echo -e ""
+}
+
+# Replay a trace
+replay_trace() {
+    local trace_id="$1"
+    local speed="${2:-1.0}"
+    local no_delay="${3:-false}"
+    local json_output="${4:-false}"
+
+    local trace_file="${TRACES_DIR}/${trace_id}.json"
+
+    if [[ ! -f "$trace_file" ]]; then
+        echo -e "${RED}${ICON_CROSS}${RESET} Trace not found: ${CYAN}${trace_id}${RESET}" >&2
+        echo -e "${DIM}Run 'euxis replay --list' to see available traces.${RESET}" >&2
+        exit 1
+    fi
+
+    if [[ "$json_output" == "true" ]]; then
+        cat "$trace_file"
+        return
+    fi
+
+    setup_colors
+    setup_icons
+
+    # Read trace metadata
+    local type=$(jq -r '.type' "$trace_file")
+    local description=$(jq -r '.description' "$trace_file")
+    local started=$(jq -r '.started_at' "$trace_file")
+    local ended=$(jq -r '.ended_at // "running"' "$trace_file")
+    local status=$(jq -r '.status' "$trace_file")
+    local event_count=$(jq -r '.event_count // 0' "$trace_file")
+
+    echo -e ""
+    echo -e "  ${BOLD}${CYAN}${ICON_PLAY} REPLAYING TRACE${RESET}"
+    echo -e ""
+    echo -e "    ${DIM}ID:${RESET}          ${CYAN}${trace_id}${RESET}"
+    echo -e "    ${DIM}Type:${RESET}        ${type}"
+    echo -e "    ${DIM}Description:${RESET} ${description}"
+    echo -e "    ${DIM}Started:${RESET}     ${started}"
+    echo -e "    ${DIM}Events:${RESET}      ${event_count}"
+    echo -e ""
+    echo -e "  ${DIM}────────────────────────────────────────────────────────────${RESET}"
+    echo -e ""
+
+    # Replay events
+    local event_index=0
+    local prev_timestamp=""
+
+    jq -c '.events[]' "$trace_file" 2>/dev/null | while read -r event; do
+        local timestamp=$(echo "$event" | jq -r '.timestamp')
+        local agent=$(echo "$event" | jq -r '.agent')
+        local action=$(echo "$event" | jq -r '.action')
+        local evt_status=$(echo "$event" | jq -r '.status')
+        local message=$(echo "$event" | jq -r '.message')
+
+        # Calculate delay between events
+        if [[ "$no_delay" != "true" ]] && [[ -n "$prev_timestamp" ]]; then
+            # Simple delay simulation (0.3 seconds base)
+            local delay=$(echo "0.3 / $speed" | bc -l 2>/dev/null || echo "0.3")
+            sleep "$delay" 2>/dev/null || sleep 0.3
+        fi
+        prev_timestamp="$timestamp"
+
+        # Format output based on status
+        local icon color
+        case "$evt_status" in
+            success|completed) icon="$ICON_CHECK"; color="$GREEN" ;;
+            failed|error)      icon="$ICON_CROSS"; color="$RED" ;;
+            running|started)   icon="$ICON_ARROW"; color="$YELLOW" ;;
+            data|output)       icon="$ICON_BULLET"; color="$CYAN" ;;
+            *)                 icon="$ICON_BULLET"; color="$DIM" ;;
+        esac
+
+        # Print event
+        printf "  ${color}${icon}${RESET} ${BOLD}%-12s${RESET} ${DIM}[%s]${RESET}\n" "$agent" "$action"
+
+        if [[ -n "$message" ]] && [[ "$message" != "null" ]]; then
+            echo -e "    ${DIM}${message}${RESET}" | head -c 500
+            echo ""
+        fi
+
+        event_index=$((event_index + 1))
+    done
+
+    echo -e ""
+    echo -e "  ${DIM}────────────────────────────────────────────────────────────${RESET}"
+
+    # Final status
+    local final_icon final_color
+    case "$status" in
+        success)  final_icon="$ICON_CHECK"; final_color="$GREEN" ;;
+        failed)   final_icon="$ICON_CROSS"; final_color="$RED" ;;
+        *)        final_icon="$ICON_BULLET"; final_color="$YELLOW" ;;
+    esac
+
+    echo -e "  ${final_color}${final_icon}${RESET} Trace completed with status: ${final_color}${status}${RESET}"
+    echo -e ""
+}
+
+# Parse arguments
+TRACE_ID=""
+SPEED="1.0"
+NO_DELAY="false"
+JSON_OUTPUT="false"
+LIST_MODE="false"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            usage
+            ;;
+        --list)
+            LIST_MODE="true"
+            shift
+            ;;
+        --speed)
+            SPEED="${2:-1.0}"
+            shift 2
+            ;;
+        --no-delay)
+            NO_DELAY="true"
+            shift
+            ;;
+        --json)
+            JSON_OUTPUT="true"
+            shift
+            ;;
+        -*)
+            echo -e "${RED}Unknown option: $1${RESET}" >&2
+            usage
+            ;;
+        *)
+            TRACE_ID="$1"
+            shift
+            ;;
+    esac
+done
+
+# Execute
+setup_colors
+setup_icons
+
+if [[ "$LIST_MODE" == "true" ]]; then
+    list_traces
+elif [[ -n "$TRACE_ID" ]]; then
+    replay_trace "$TRACE_ID" "$SPEED" "$NO_DELAY" "$JSON_OUTPUT"
+else
+    usage
+fi

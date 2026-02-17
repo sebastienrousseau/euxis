@@ -1,0 +1,55 @@
+{
+  "project": "euxis-performance-optimization",
+  "version": "0.1.0",
+  "description": "Aggressive performance optimization to achieve cold start <=20ms, memory <=10MB, response time <=10ms, TPS >=1000",
+  "dispatches": [
+    {
+      "agent": "optimizer",
+      "priority": "P0",
+      "task": "Replace TUI Textual framework with lightweight curses implementation, target <2MB memory footprint",
+      "verify_cmd": "python3 -c 'import psutil, subprocess; p = subprocess.Popen([\"python3\", \"-m\", \"tui\"], stdout=subprocess.DEVNULL); import time; time.sleep(1); mem = psutil.Process(p.pid).memory_info().rss / 1024 / 1024; p.terminate(); exit(0 if mem < 10 else 1)'"
+    },
+    {
+      "agent": "optimizer",
+      "priority": "P0",
+      "task": "Implement lazy import system for all packages using importlib, defer heavy dependencies until actually needed",
+      "verify_cmd": "python3 -c 'import time; start = time.time(); import tui.app; cold = (time.time() - start) * 1000; exit(0 if cold < 20 else 1)'"
+    },
+    {
+      "agent": "cryptographer",
+      "priority": "P0",
+      "task": "Rewrite crypto-lib with async operations, connection pooling, and cipher context caching for 1000+ TPS",
+      "verify_cmd": "python3 -c 'import asyncio, time, crypto_lib.core as crypto; async def test(): start = time.time(); tasks = [crypto.async_encrypt(b\"test\", b\"key\" * 8) for _ in range(100)]; await asyncio.gather(*tasks); duration = time.time() - start; exit(0 if duration < 0.1 else 1)'; asyncio.run(test())"
+    },
+    {
+      "agent": "optimizer",
+      "priority": "P1",
+      "task": "Eliminate runtime path resolution in gateway, pre-compute all import paths during build",
+      "verify_cmd": "python3 -c 'import time; start = time.time(); import gateway.server; cold = (time.time() - start) * 1000; exit(0 if cold < 5 else 1)'"
+    },
+    {
+      "agent": "telemetrist",
+      "priority": "P1",
+      "task": "Replace JSON metrics with binary format, implement async batched collection with <1ms hot path overhead",
+      "verify_cmd": "python3 -c 'import time, metrics.collectors.performance_collector as pc; start = time.time(); pc.record_metric(\"test\", 1.0); overhead = (time.time() - start) * 1000; exit(0 if overhead < 1 else 1)'"
+    },
+    {
+      "agent": "polyglot",
+      "priority": "P1",
+      "task": "Analyze import dependencies across all packages, identify and eliminate circular dependencies causing initialization delays",
+      "verify_cmd": "python3 -c 'import ast, os; files = []; [files.extend([os.path.join(r,f) for f in fs if f.endswith(\".py\")]) for r,ds,fs in os.walk(\".\")]; circles = sum(1 for f in files if \"import\" in open(f).read() and any(pkg in open(f).read() for pkg in [\"euxis-core\", \"euxis-tui\", \"euxis-gateway\"])); exit(0 if circles == 0 else 1)'"
+    },
+    {
+      "agent": "watchdog",
+      "priority": "P1",
+      "task": "Implement performance regression testing suite with automated benchmarking for cold start, memory, response time, and throughput",
+      "verify_cmd": "pytest tests/performance/ -v --benchmark-min-rounds=3"
+    },
+    {
+      "agent": "reviewer",
+      "priority": "P1",
+      "task": "Validate all performance optimizations maintain functional correctness and security properties",
+      "verify_cmd": "pytest tests/ -x && python3 -m bandit -r src/ -q"
+    }
+  ]
+}

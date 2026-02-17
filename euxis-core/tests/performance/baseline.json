@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "targets": {
+    "cold_start_ms": 20,
+    "memory_mb": 10,
+    "response_time_ms": 10,
+    "tps": 1000
+  },
+  "measurements": {
+    "last_run": null,
+    "cold_start_ms": null,
+    "memory_mb": null,
+    "response_time_ms": null,
+    "tps": null
+  }
+}

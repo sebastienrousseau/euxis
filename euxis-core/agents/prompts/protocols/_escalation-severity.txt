@@ -1,0 +1,100 @@
+---
+protocol_id: escalation-severity
+version: "0.0.8"
+last_updated: "2026-01-31"
+priority: "ORANGE"
+---
+
+## ESCALATION & SEVERITY PROTOCOL (v0.0.8)
+
+This protocol defines the unified severity taxonomy and escalation rules for the entire Euxis fleet. All agents MUST use this taxonomy — no agent-specific severity scales are permitted.
+
+### 1. Unified Severity Taxonomy
+
+| Level | Label | Definition | Response Time | Escalation Target |
+|-------|-------|-----------|---------------|-------------------|
+| **S0** | `CRITICAL` | System down, data loss, security breach, or user-blocking failure | Immediate — drop all other work | `orchestrator` + user notification |
+| **S1** | `HIGH` | Core functionality degraded, significant risk, or blocking dependency | Current session — prioritize above P2/P3 work | `orchestrator` |
+| **S2** | `MEDIUM` | Non-blocking issue with measurable impact, quality degradation | Next available phase — schedule in plan | Relevant specialist agent |
+| **S3** | `LOW` | Cosmetic, minor inconsistency, nice-to-have improvement | Backlog — address if capacity exists | Log only, no escalation required |
+
+### 2. Severity Assignment Rules
+
+1. **Security vulnerabilities** are ALWAYS `S0` or `S1`. Never downgrade a security finding below `S1`.
+2. **Data integrity issues** (corruption, loss, inconsistency) are ALWAYS `S0`.
+3. **Breaking changes** in public APIs or contracts are `S1` minimum.
+4. **Test failures** in CI are `S1` if they block a release, `S2` otherwise.
+5. **Documentation gaps** are `S2` if they affect user workflows, `S3` otherwise.
+6. **When in doubt, round UP** — it is safer to over-escalate than under-escalate.
+
+### 3. Escalation Flow
+
+```
+Agent detects issue
+    │
+    ├─ S3 (LOW) ──→ Log in findings. No escalation required.
+    │
+    ├─ S2 (MEDIUM) ──→ Include in EUXIS_HANDOFF findings.
+    │                   Orchestrator schedules in next available phase.
+    │
+    ├─ S1 (HIGH) ──→ Include in EUXIS_HANDOFF findings + blockers.
+    │                 Publish to message bus: `euxis-bus publish escalations "<summary>" --sender <agent> --priority P1`
+    │                 Orchestrator MUST address before proceeding to next phase.
+    │
+    └─ S0 (CRITICAL) ──→ HALT current work.
+                          Publish to message bus: `euxis-bus publish escalations "<summary>" --sender <agent> --priority P0`
+                          Orchestrator MUST notify user immediately.
+                          All downstream phases are SUSPENDED until resolved.
+```
+
+### 4. Escalation Message Format
+
+Every escalation MUST include:
+
+```markdown
+### ESCALATION: <Title>
+- **Severity:** S0 | S1 | S2 | S3
+- **From:** <agent_id>
+- **To:** <target agent_id or "orchestrator">
+- **Issue:** <One-sentence description>
+- **Evidence:** <Specific observation or data supporting the escalation>
+- **Impact:** <What breaks or degrades if unresolved>
+- **Recommended Action:** <Concrete next step>
+- **Deadline:** Immediate | Current Session | Next Phase | Backlog
+```
+
+### 5. Priority-to-Severity Mapping
+
+The orchestrator's priority framework (P0-P3) maps to severity as follows:
+
+| Priority | Default Severity | Override Condition |
+|----------|-----------------|-------------------|
+| P0 | S0 (CRITICAL) | — |
+| P1 | S1 (HIGH) | May be S0 if security-related |
+| P2 | S2 (MEDIUM) | May be S1 if blocking a P1 task |
+| P3 | S3 (LOW) | May be S2 if affecting user experience |
+
+### 6. Cross-Agent Escalation Matrix
+
+| Finding Domain | Primary Escalation Target | Secondary |
+|---------------|--------------------------|-----------|
+| Security vulnerability | `sentinel` | `pentester` + `compliance` |
+| Architectural risk | `architect` | `critic` |
+| Data integrity | `telemetry` | `orchestrator` |
+| Test failure (blocking) | `qa` | `tester` |
+| Compliance violation | `compliance` | `orchestrator` |
+| Performance degradation | `optimizer` | `architect` |
+| User-facing breakage | `planner` | `ux` |
+| Release blocker | `gatekeeper` | `orchestrator` |
+| Incident / outage | `responder` | `orchestrator` |
+
+### 7. Escalation Rules
+
+1. **No silent drops.** Every S1+ finding MUST be escalated. Suppressing an escalation is a protocol violation.
+2. **Single-hop escalation.** Escalate to the most relevant agent directly — do NOT chain through multiple agents.
+3. **Bidirectional.** The receiving agent MUST acknowledge and respond. If the receiving agent cannot resolve, it MUST escalate back with explanation.
+4. **De-escalation.** An S1+ issue may be de-escalated ONLY with explicit justification logged as an EPISODIC memory.
+5. **Timeout.** If an S0 escalation receives no response within the current session, the orchestrator MUST notify the user.
+6. **Conflict escalation.** When agents disagree on severity, the higher severity wins until the conflict is resolved per the Conflict Resolution Protocol.
+
+# Enterprise Unified eXecution Intelligence System

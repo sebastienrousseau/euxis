@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# Install shell script quality pre-commit hooks
+
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
+  ui_auto_header
+fi
+
+
+# Configuration
+SCRIPT_NAME="euxis-setup-shell-hooks"
+EUXIS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+GIT_HOOKS_DIR="${EUXIS_ROOT}/.git/hooks"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}[${SCRIPT_NAME}]${NC} $*"
+}
+
+log_success() {
+    echo -e "${GREEN}[${SCRIPT_NAME}]${NC} $*"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[${SCRIPT_NAME}]${NC} $*"
+}
+
+log_error() {
+    echo -e "${RED}[${SCRIPT_NAME}]${NC} $*"
+}
+
+# Check if we're in a git repository
+check_git_repo() {
+    if [[ ! -d "${EUXIS_ROOT}/.git" ]]; then
+        log_error "Not in a git repository or .git directory not found"
+        exit 1
+    fi
+    log_info "Git repository confirmed"
+}
+
+# Install pre-commit hook
+install_pre_commit_hook() {
+    local source_hook="${EUXIS_ROOT}/hooks/pre-commit"
+    local target_hook="${GIT_HOOKS_DIR}/pre-commit"
+
+    if [[ ! -f "${source_hook}" ]]; then
+        log_error "Source pre-commit hook not found: ${source_hook}"
+        exit 1
+    fi
+
+    # Backup existing hook if present
+    if [[ -f "${target_hook}" ]]; then
+        log_warning "Existing pre-commit hook found, backing up"
+        mv "${target_hook}" "${target_hook}.backup.$(date +%Y%m%d-%H%M%S)"
+    fi
+
+    # Create symbolic link
+    ln -sf "${source_hook}" "${target_hook}"
+    chmod +x "${target_hook}"
+
+    log_success "Pre-commit hook installed: ${target_hook}"
+}
+
+# Verify hook dependencies
+verify_dependencies() {
+    log_info "Verifying hook dependencies..."
+    local missing_tools=()
+
+    if ! command -v shellcheck &>/dev/null; then
+        missing_tools+=("shellcheck")
+    fi
+
+    if ! command -v shfmt &>/dev/null; then
+        missing_tools+=("shfmt")
+    fi
+
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        log_warning "Missing tools: ${missing_tools[*]}"
+        log_info "Install commands:"
+        echo "  macOS: brew install ${missing_tools[*]}"
+        echo "  Ubuntu: sudo apt-get install ${missing_tools[*]}"
+        log_warning "Pre-commit hook will fail until these tools are installed"
+    else
+        log_success "All dependencies available"
+    fi
+}
+
+# Test the hook
+test_hook() {
+    log_info "Testing pre-commit hook..."
+
+    # Create a test script to trigger the hook
+    local test_script="${EUXIS_ROOT}/test_hook_script.sh"
+    cat > "${test_script}" << 'EOF'
+#!/bin/bash
+# Test script for pre-commit hook
+set -euo pipefail
+
+echo "This is a test script"
+EOF
+
+    # Add to git
+    git add "${test_script}"
+
+    # Test the hook (this should pass)
+    if "${GIT_HOOKS_DIR}/pre-commit"; then
+        log_success "Pre-commit hook test passed"
+    else
+        log_error "Pre-commit hook test failed"
+    fi
+
+    # Clean up
+    git reset HEAD "${test_script}"
+    rm -f "${test_script}"
+}
+
+# Print usage information
+print_usage() {
+    cat << EOF
+Usage: ${SCRIPT_NAME} [OPTIONS]
+
+Install and configure shell script quality pre-commit hooks.
+
+OPTIONS:
+    --test      Test the hook after installation
+    --help      Show this help message
+
+DESCRIPTION:
+    This script installs a comprehensive pre-commit hook that enforces:
+    - ShellCheck analysis (all warnings as errors)
+    - Shell script formatting with shfmt
+    - Strict error handling verification
+    - Basic security pattern checks
+
+The hook will prevent commits that don't meet quality standards.
+EOF
+}
+
+# Main execution
+main() {
+    local test_hook_flag=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --test)
+                test_hook_flag=true
+                shift
+                ;;
+            --help)
+                print_usage
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                print_usage
+                exit 1
+                ;;
+        esac
+    done
+
+    log_info "Installing shell script quality hooks"
+
+    # Run setup steps
+    check_git_repo
+    install_pre_commit_hook
+    verify_dependencies
+
+    if [[ "${test_hook_flag}" == true ]]; then
+        test_hook
+    fi
+
+    echo ""
+    log_success "Shell script hooks installation complete"
+    echo ""
+    echo "The pre-commit hook will now enforce:"
+    echo "  ✅ ShellCheck analysis (error-level)"
+    echo "  ✅ Format verification (shfmt)"
+    echo "  ✅ Error handling checks"
+    echo "  ✅ Basic security patterns"
+    echo ""
+    echo "To bypass hooks temporarily: git commit --no-verify"
+    echo "To test hooks manually: .git/hooks/pre-commit"
+}
+
+# Handle command line
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

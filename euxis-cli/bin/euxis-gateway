@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+exec python3 "${EUXIS_HOME}/api/src/gateway/server.py" "$@"

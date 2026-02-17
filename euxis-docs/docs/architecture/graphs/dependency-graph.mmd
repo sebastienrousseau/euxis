@@ -1,0 +1,14 @@
+graph LR
+  adapters[adapters]
+  api[api]
+  cli[cli]
+  core[core]
+  crypto[crypto]
+  metrics[metrics]
+  ui[ui]
+  config[config]
+  security[security]
+  packages_shared[packages/shared]
+  adapters --> packages_shared
+  api --> packages_shared
+  ui --> packages_shared

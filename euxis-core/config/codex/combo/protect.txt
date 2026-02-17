@@ -1,0 +1,128 @@
+# Codex Template: Protect
+# Target Agents: guard, pentester, auditor, reviewer
+# Category: combo
+# Output: manifest
+
+You are running the **Protect** combo — a 4-agent security hardening chain that performs comprehensive threat analysis, vulnerability discovery, compliance verification, and final security sign-off.
+
+## Inputs
+
+- **Target System:** `{{CODEX_TARGET}}`
+- **Threat Model Focus:** {{CODEX_THREAT_MODEL}} *(optional - defaults to full spectrum)*
+
+## Mission
+
+Generate a dispatch manifest that chains 4 security-focused agents in sequence. Each agent builds on the previous agent's findings. The final output is a security manifest with categorized findings, remediation steps, compliance checklist, and executive summary.
+
+## Severity Classification
+
+All findings must be categorized using the S1-S4 severity scale:
+
+- **S1 (Critical):** Immediate exploitation risk, data breach potential, system compromise
+- **S2 (High):** Significant security gap, exploitable with effort, regulatory violation
+- **S3 (Medium):** Security weakness, defense-in-depth concern, best practice deviation
+- **S4 (Low):** Informational, hardening opportunity, minor configuration issue
+
+## Agent Chain
+
+### Agent 1: guard
+**Task:** Perform initial security scan and threat modeling for the target system. Identify attack surfaces, trust boundaries, and potential threat vectors. If a threat model focus is specified, prioritize those categories. Output a threat assessment report with:
+- Attack surface inventory
+- Trust boundary map
+- Threat vector analysis
+- Initial risk ratings (S1-S4)
+
+### Agent 2: pentester
+**Task:** Using the threat assessment, conduct active vulnerability discovery. Test identified attack surfaces, attempt exploitation paths, and document proof-of-concept findings. Output a vulnerability report with:
+- Discovered vulnerabilities (S1-S4 rated)
+- Exploitation evidence
+- Attack chain analysis
+- Technical remediation steps for each finding
+
+### Agent 3: auditor
+**Task:** Using the vulnerability report, verify compliance against security policies and standards. Check alignment with OWASP, CIS benchmarks, and organizational security requirements. Output a compliance report with:
+- Policy compliance status
+- Standards alignment (OWASP, CIS, etc.)
+- Gap analysis
+- Compliance remediation requirements
+
+### Agent 4: reviewer
+**Task:** Consolidate all findings from guard, pentester, and auditor. Produce the final security manifest with executive summary, prioritized remediation roadmap, and security sign-off verdict: SECURE, CONDITIONAL, or CRITICAL.
+
+## Output Format
+
+Generate a dispatch manifest:
+
+```json
+{
+  "project": "protect-{{CODEX_TARGET}}",
+  "mode": "hierarchical",
+  "dispatches": [
+    {
+      "agent": "guard",
+      "priority": "P0",
+      "task": "Security scan and threat model for: {{CODEX_TARGET}}. Threat focus: {{CODEX_THREAT_MODEL}}. Identify attack surfaces, trust boundaries, threat vectors. Rate findings S1-S4."
+    },
+    {
+      "agent": "pentester",
+      "priority": "P0",
+      "task": "Vulnerability discovery for: {{CODEX_TARGET}}. Test attack surfaces from threat assessment. Document exploits, attack chains, and technical remediation. Rate findings S1-S4."
+    },
+    {
+      "agent": "auditor",
+      "priority": "P1",
+      "task": "Compliance verification for: {{CODEX_TARGET}}. Check OWASP, CIS benchmarks, security policies. Document gaps and compliance remediation requirements."
+    },
+    {
+      "agent": "reviewer",
+      "priority": "P0",
+      "task": "Security sign-off for: {{CODEX_TARGET}}. Consolidate all findings. Produce security manifest with executive summary, remediation roadmap. Verdict: SECURE, CONDITIONAL, or CRITICAL."
+    }
+  ]
+}
+```
+
+## Security Manifest Structure
+
+The final reviewer output must include:
+
+### 1. Executive Summary
+- Overall security posture assessment
+- Critical findings count by severity (S1/S2/S3/S4)
+- Key risk areas
+- Recommended immediate actions
+
+### 2. Findings by Severity
+- **S1 Findings:** [list with details and remediation]
+- **S2 Findings:** [list with details and remediation]
+- **S3 Findings:** [list with details and remediation]
+- **S4 Findings:** [list with details and remediation]
+
+### 3. Remediation Roadmap
+- Immediate actions (S1 - within 24 hours)
+- Short-term fixes (S2 - within 1 week)
+- Medium-term improvements (S3 - within 1 month)
+- Long-term hardening (S4 - next quarter)
+
+### 4. Compliance Checklist
+- [ ] Authentication controls verified
+- [ ] Authorization model validated
+- [ ] Data encryption at rest/transit confirmed
+- [ ] Input validation implemented
+- [ ] Logging and monitoring active
+- [ ] Secrets management secure
+- [ ] Dependency vulnerabilities addressed
+- [ ] Network segmentation verified
+
+### 5. Security Verdict
+- **SECURE:** No S1/S2 findings, minimal S3, acceptable risk posture
+- **CONDITIONAL:** No S1, limited S2, remediation plan required before deployment
+- **CRITICAL:** S1 findings present, deployment blocked until resolved
+
+## Constraints
+
+- All agents operate with P0 priority except auditor (P1) — security is non-negotiable.
+- Each agent's task must be self-contained with full context for independent execution.
+- Threat model focus, if specified, scopes all agents to those threat categories.
+- All findings must include actionable remediation steps.
+- Maximum output: 3000 words.
