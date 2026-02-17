@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.0.8
+Version 0.1.0
 
 ## CLI Tools
 
@@ -396,4 +396,4 @@ euxis-combo run envision "Design new onboarding flow"
 
 ---
 
-*Euxis v0.0.8 · Build something that matters.*
+*Euxis v0.1.0 · Build something that matters.*

@@ -133,7 +133,7 @@ euxis-certify
   User guide exists
   Fleet guide exists
   Temporary file write access verified
-  Current version detected: 0.0.8
+  Current version detected: 0.1.0
   All certification prerequisites met
 
 [GATE 0b] Security & Quality Enforcement...
@@ -185,7 +185,7 @@ euxis-certify
   PASS: docs/guides/user-guide.md exists.
   PASS: docs/guides/fleet-guide.md exists.
   PASS: All documentation is current (updated within 7 days).
-  PASS: README.md references version 0.0.8.
+  PASS: README.md references version 0.1.0.
   Validating JSON manifest files...
   PASS: agents/registry.json is valid JSON.
   PASS: agents/squads.json is valid JSON.

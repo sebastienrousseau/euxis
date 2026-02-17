@@ -5,7 +5,7 @@ last_updated: "2026-01-31"
 priority: "ORANGE"
 ---
 
-## ESCALATION & SEVERITY PROTOCOL (v0.0.8)
+## ESCALATION & SEVERITY PROTOCOL (v0.1.0)
 
 This protocol defines the unified severity taxonomy and escalation rules for the entire Euxis fleet. All agents MUST use this taxonomy — no agent-specific severity scales are permitted.
 

@@ -2,7 +2,7 @@
 
 Comprehensive architectural documentation for the Euxis multi-provider AI agent orchestration framework.
 
-**Version:** 0.0.8
+**Version:** 0.1.0
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 
@@ -765,7 +765,7 @@ flowchart TB
 
 ---
 
-*Euxis v0.0.8 - Build something that matters.*
+*Euxis v0.1.0 - Build something that matters.*
 
 ### Observability (metrics/src/metrics/)
 Euxis records fleet events and performance data in `~/.euxis/metrics/events.jsonl` for analysis and dashboards.

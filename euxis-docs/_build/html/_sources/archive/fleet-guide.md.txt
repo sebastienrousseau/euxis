@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.0.8
+Version 0.1.0
 
 ---
 
@@ -455,4 +455,4 @@ euxis-hooks status                      # Check installation
 
 ---
 
-*Euxis v0.0.8 · Build something that matters.*
+*Euxis v0.1.0 · Build something that matters.*
