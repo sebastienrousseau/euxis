@@ -2,16 +2,16 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+  # shellcheck source=euxis-core/lib/ui.sh
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
 
-EUXIS_DIR="$HOME/.euxis"
+EUXIS_DIR="$EUXIS_HOME"
 SQUADS_FILE="$EUXIS_DIR/euxis-core/agents/squads.json"
-PLAYBOOKS_DIR="$EUXIS_DIR/config/playbooks"
+PLAYBOOKS_DIR="$EUXIS_DIR/euxis-core/config/playbooks"
 SESSION_DIR="/tmp/euxis_playbook_sessions"
 
 usage() {
