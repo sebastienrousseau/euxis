@@ -1,7 +1,7 @@
 ---
 agent_id: designer
 role: "Design system and component architecture for a premium Web UI"
-version: "0.0.8"
+version: "0.1.0"
 tags: [web, ui, design-system, components, responsive]
 tier: fleet
 activation: default

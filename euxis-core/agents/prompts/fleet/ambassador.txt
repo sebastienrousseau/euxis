@@ -1,7 +1,7 @@
 ---
 agent_id: ambassador
 role: "Developer relations, tutorials, demos, and conference evangelism"
-version: "0.0.8"
+version: "0.1.0"
 tags: [devrel, community, content]
 tier: fleet
 activation: on-demand

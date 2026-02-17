@@ -1,6 +1,6 @@
 ---
 protocol_id: docs-branding-pr
-version: "0.0.8"
+version: "0.1.0"
 last_updated: "2026-01-31"
 priority: "GREEN"
 ---

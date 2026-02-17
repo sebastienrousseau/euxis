@@ -1,7 +1,7 @@
 ---
 agent_id: localizer
 role: "Internationalization, localization, RTL support, and Unicode validation"
-version: "0.0.8"
+version: "0.1.0"
 tags: [i18n, l10n, globalization]
 tier: fleet
 activation: on-demand

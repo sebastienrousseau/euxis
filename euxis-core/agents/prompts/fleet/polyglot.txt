@@ -1,7 +1,7 @@
 ---
 agent_id: polyglot
 role: "Language-specific pattern detection, idiom enforcement, and subsystem-aware code analysis"
-version: "0.0.8"
+version: "0.1.0"
 tags: [languages, patterns, idioms, polyglot]
 tier: fleet
 activation: default

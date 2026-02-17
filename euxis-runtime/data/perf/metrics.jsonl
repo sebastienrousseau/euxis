@@ -1090,3 +1090,353 @@
   "ms": 75231,
   "status": "concurrent_agents=10"
 }
+{
+  "ts": "2026-02-17T14:39:44Z",
+  "op": "prompt_assembly",
+  "agent": "librarian",
+  "ms": 159,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:41:04Z",
+  "op": "provider_execution",
+  "agent": "librarian",
+  "ms": 79878,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:41:04Z",
+  "op": "total_agent_run",
+  "agent": "librarian",
+  "ms": 80171,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:41:04Z",
+  "op": "coordination_overhead",
+  "agent": "librarian",
+  "ms": 80171,
+  "status": "concurrent_agents=10"
+}
+{
+  "ts": "2026-02-17T14:41:04Z",
+  "op": "prompt_assembly",
+  "agent": "writer",
+  "ms": 146,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:43:18Z",
+  "op": "provider_execution",
+  "agent": "writer",
+  "ms": 133462,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:43:18Z",
+  "op": "total_agent_run",
+  "agent": "writer",
+  "ms": 133758,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:43:18Z",
+  "op": "coordination_overhead",
+  "agent": "writer",
+  "ms": 133758,
+  "status": "concurrent_agents=9"
+}
+{
+  "ts": "2026-02-17T14:43:18Z",
+  "op": "prompt_assembly",
+  "agent": "strategist",
+  "ms": 164,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:43:37Z",
+  "op": "provider_execution",
+  "agent": "strategist",
+  "ms": 19036,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:43:37Z",
+  "op": "total_agent_run",
+  "agent": "strategist",
+  "ms": 19340,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:43:37Z",
+  "op": "coordination_overhead",
+  "agent": "strategist",
+  "ms": 19340,
+  "status": "concurrent_agents=9"
+}
+{
+  "ts": "2026-02-17T14:43:38Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 133,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:44:17Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 166,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:46:34Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 137543,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:46:34Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 137842,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:46:34Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 137842,
+  "status": "concurrent_agents=9"
+}
+{
+  "ts": "2026-02-17T14:51:02Z",
+  "op": "prompt_assembly",
+  "agent": "optimizer",
+  "ms": 144,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:51:04Z",
+  "op": "prompt_assembly",
+  "agent": "custodian",
+  "ms": 186,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:51:06Z",
+  "op": "prompt_assembly",
+  "agent": "automaton",
+  "ms": 262,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:51:08Z",
+  "op": "prompt_assembly",
+  "agent": "investigator",
+  "ms": 345,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:51:10Z",
+  "op": "prompt_assembly",
+  "agent": "sentinel",
+  "ms": 414,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:52:24Z",
+  "op": "provider_execution",
+  "agent": "sentinel",
+  "ms": 73130,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:52:24Z",
+  "op": "total_agent_run",
+  "agent": "sentinel",
+  "ms": 73905,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:52:24Z",
+  "op": "coordination_overhead",
+  "agent": "sentinel",
+  "ms": 73905,
+  "status": "concurrent_agents=11"
+}
+{
+  "ts": "2026-02-17T14:52:51Z",
+  "op": "provider_execution",
+  "agent": "automaton",
+  "ms": 105188,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:52:51Z",
+  "op": "total_agent_run",
+  "agent": "automaton",
+  "ms": 105683,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:52:51Z",
+  "op": "coordination_overhead",
+  "agent": "automaton",
+  "ms": 105683,
+  "status": "concurrent_agents=10"
+}
+{
+  "ts": "2026-02-17T14:52:59Z",
+  "op": "provider_execution",
+  "agent": "optimizer",
+  "ms": 117544,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:52:59Z",
+  "op": "total_agent_run",
+  "agent": "optimizer",
+  "ms": 117808,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:52:59Z",
+  "op": "coordination_overhead",
+  "agent": "optimizer",
+  "ms": 117808,
+  "status": "concurrent_agents=9"
+}
+{
+  "ts": "2026-02-17T14:53:10Z",
+  "op": "provider_execution",
+  "agent": "custodian",
+  "ms": 126116,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:53:10Z",
+  "op": "total_agent_run",
+  "agent": "custodian",
+  "ms": 126469,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:53:10Z",
+  "op": "coordination_overhead",
+  "agent": "custodian",
+  "ms": 126469,
+  "status": "concurrent_agents=8"
+}
+{
+  "ts": "2026-02-17T14:53:47Z",
+  "op": "provider_execution",
+  "agent": "investigator",
+  "ms": 158586,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T14:53:47Z",
+  "op": "total_agent_run",
+  "agent": "investigator",
+  "ms": 159142,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T14:53:47Z",
+  "op": "coordination_overhead",
+  "agent": "investigator",
+  "ms": 159142,
+  "status": "concurrent_agents=7"
+}
+{
+  "ts": "2026-02-17T14:53:49Z",
+  "op": "prompt_assembly",
+  "agent": "tester",
+  "ms": 128,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:03:27Z",
+  "op": "prompt_assembly",
+  "agent": "tester",
+  "ms": 104,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:06:28Z",
+  "op": "provider_execution",
+  "agent": "tester",
+  "ms": 181036,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T15:06:28Z",
+  "op": "total_agent_run",
+  "agent": "tester",
+  "ms": 181239,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:06:28Z",
+  "op": "coordination_overhead",
+  "agent": "tester",
+  "ms": 181239,
+  "status": "concurrent_agents=6"
+}
+{
+  "ts": "2026-02-17T15:06:29Z",
+  "op": "prompt_assembly",
+  "agent": "reviewer",
+  "ms": 225,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:08:40Z",
+  "op": "provider_execution",
+  "agent": "reviewer",
+  "ms": 131213,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T15:08:40Z",
+  "op": "total_agent_run",
+  "agent": "reviewer",
+  "ms": 131643,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:08:40Z",
+  "op": "coordination_overhead",
+  "agent": "reviewer",
+  "ms": 131643,
+  "status": "concurrent_agents=6"
+}
+{
+  "ts": "2026-02-17T15:41:04Z",
+  "op": "prompt_assembly",
+  "agent": "librarian",
+  "ms": 130,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:42:37Z",
+  "op": "provider_execution",
+  "agent": "librarian",
+  "ms": 92688,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-17T15:42:37Z",
+  "op": "total_agent_run",
+  "agent": "librarian",
+  "ms": 92916,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-17T15:42:37Z",
+  "op": "coordination_overhead",
+  "agent": "librarian",
+  "ms": 92916,
+  "status": "concurrent_agents=6"
+}

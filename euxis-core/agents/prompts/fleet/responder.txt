@@ -1,7 +1,7 @@
 ---
 agent_id: responder
 role: "Incident response coordination, root cause analysis, and post-mortem facilitation"
-version: "0.0.8"
+version: "0.1.0"
 tags: [incident, response, reliability, postmortem]
 tier: fleet
 activation: default

@@ -13,7 +13,7 @@ v0.0.9 is a security-focused release that hardens dependencies and aligns all ve
 - **Tag:** v0.0.9
 - **Commit:** 8f344c809075c06162e067786989035f2ab98f7d
 
-## Changelog (v0.0.8 → v0.0.9)
+## Changelog (v0.1.0 → v0.0.9)
 - 8f344c8 — Release v0.0.9: Security Updates & Issue Closure
 
 ## Artifacts
