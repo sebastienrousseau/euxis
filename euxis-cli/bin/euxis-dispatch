@@ -23,10 +23,19 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+  # shellcheck source=euxis-core/lib/ui.sh
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
+fi
+
+# Source resource management library
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/resources.sh" ]]; then
+  # shellcheck source=euxis-core/lib/resources.sh
+  source "${EUXIS_HOME}/euxis-core/lib/resources.sh"
+  RESOURCE_AWARE=true
+else
+  RESOURCE_AWARE=false
 fi
 
 
@@ -36,6 +45,7 @@ euxis-dispatch — Fleet deployment engine
 
 Usage:
   euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
+  euxis-dispatch --resources
 
 Reads an Architect Mission Manifest and deploys agent loops.
 
@@ -45,7 +55,20 @@ Dispatch Modes:
   federated     Agents operate autonomously on separate project scopes
 
 Options:
-  -h, --help    Show this help text
+  -h, --help     Show this help text
+  --mode MODE    Set dispatch mode
+  --resources    Show system resource status and exit
+
+Resource Management:
+  Dispatch automatically detects system resources (CPU, RAM, load) and
+  limits concurrent agents to prevent overheating and performance issues.
+
+  Environment variables to customize thresholds:
+    EUXIS_CPU_THRESHOLD=80      Max CPU % before throttling (default: 80)
+    EUXIS_MEM_THRESHOLD=85      Max memory % before throttling (default: 85)
+    EUXIS_LOAD_THRESHOLD=1.5    Max load per core before throttling
+    EUXIS_MAX_AGENTS=8          Maximum concurrent agents (default: 8)
+    EUXIS_MIN_AGENTS=1          Minimum agents even under load (default: 1)
   --mode MODE   Set dispatch mode
 EOF
 }
@@ -60,6 +83,14 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
             usage
+            exit 0
+            ;;
+        --resources)
+            if [[ "$RESOURCE_AWARE" == "true" ]]; then
+                resource_status
+            else
+                echo "Resource management not available (resources.sh not found)"
+            fi
             exit 0
             ;;
         --mode)
@@ -142,6 +173,29 @@ if [[ -n "$CURRENT_BRANCH" ]]; then
 fi
 if [[ "$HAS_PHASES" == "true" ]]; then
     echo "  Phases:     $PHASE_COUNT (phased rollout)"
+fi
+
+# Resource-aware concurrency
+if [[ "$RESOURCE_AWARE" == "true" ]]; then
+    MAX_CONCURRENT=$(resource_max_concurrent_agents)
+    CPU_CORES=$(resource_cpu_cores)
+    CPU_USAGE=$(resource_cpu_usage)
+    MEM_USAGE=$(resource_mem_usage)
+    echo "  Resources:  ${CPU_CORES} cores, ${CPU_USAGE}% CPU, ${MEM_USAGE}% RAM"
+    echo "  Concurrency: max $MAX_CONCURRENT agents (auto-detected)"
+
+    # Wait if system is already overloaded
+    if resource_is_overloaded; then
+        echo ""
+        echo "  ⚠️  System overloaded — waiting for resources..."
+        resource_wait_if_overloaded 30 || {
+            echo "  ERROR: System still overloaded after 30s. Aborting dispatch."
+            exit 1
+        }
+        echo "  ✓ Resources available, proceeding..."
+    fi
+else
+    MAX_CONCURRENT=4  # Safe default
 fi
 echo ""
 
@@ -564,15 +618,41 @@ execute_by_stages() {
             continue
         fi
 
-        # Execute stage agents in parallel (within stage)
+        # Execute stage agents in parallel (within stage, resource-aware)
         local stage_pids=()
+        local running_count=0
+
         for i in "${!stage_indices[@]}"; do
             local idx="${stage_indices[$i]}"
             local agent="${stage_agents[$i]}"
 
+            # Resource-aware throttling: wait if at max concurrency
+            if [[ "$RESOURCE_AWARE" == "true" ]]; then
+                while [[ $running_count -ge $MAX_CONCURRENT ]]; do
+                    # Wait for any agent to finish
+                    sleep 2
+                    # Recount running processes
+                    running_count=0
+                    for entry in "${stage_pids[@]}"; do
+                        local check_pid
+                        check_pid=$(echo "$entry" | cut -d' ' -f1)
+                        if kill -0 "$check_pid" 2>/dev/null; then
+                            ((running_count++))
+                        fi
+                    done
+                done
+
+                # Check if system became overloaded
+                if resource_is_overloaded; then
+                    echo "  [THROTTLE] System load high, pausing..."
+                    resource_wait_if_overloaded 15 || echo "  [WARN] Still loaded, continuing cautiously"
+                fi
+            fi
+
             if acquire_agent_locks "$agent" "$idx"; then
                 dispatch_agent_with_cleanup "$idx"
                 stage_pids+=("$__dispatch_pid $agent $idx")
+                ((running_count++))
                 sleep 1  # Stagger startup
             else
                 echo "  [FAIL] $agent - could not acquire required locks"
