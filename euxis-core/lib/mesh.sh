@@ -28,6 +28,7 @@
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 MESH_DIR="${EUXIS_HOME}/euxis-runtime/mesh"
 MESH_STATE="${MESH_DIR}/state.json"
+MESH_LOCK="${MESH_DIR}/.state.lock"
 MESH_INBOX="${MESH_DIR}/inbox"
 MESH_REGISTRY="${EUXIS_HOME}/euxis-core/agents/registry.json"
 
@@ -39,6 +40,87 @@ MESH_DEADLOCK_TIMEOUT="${MESH_DEADLOCK_TIMEOUT:-60}" # Seconds before deadlock d
 # Current agent identity (set via mesh_init)
 _MESH_AGENT_ID=""
 _MESH_SESSION_ID=""
+
+# ============================================================================
+# Locking (for concurrent safety)
+# ============================================================================
+
+# Internal: perform locked write operation
+# Usage: _mesh_locked_write "jq_command" "args..."
+# This is the core pattern: read state, transform, write atomically under lock
+_mesh_locked_write() {
+    local jq_filter="$1"
+    shift
+    local jq_args=("$@")
+
+    # Create lock file if needed
+    mkdir -p "$(dirname "$MESH_LOCK")"
+
+    if command -v flock &>/dev/null; then
+        # flock available - use subshell pattern for clean fd handling
+        (
+            flock -w 5 200 || exit 1
+
+            # Ensure state file exists
+            if [[ ! -f "$MESH_STATE" ]]; then
+                cat > "$MESH_STATE" <<'INITEOF'
+{
+  "version": "1.0",
+  "created": "",
+  "agents": {},
+  "shared": {},
+  "locks": {}
+}
+INITEOF
+            fi
+
+            local tmp="${MESH_STATE}.tmp.$$"
+            if jq "${jq_args[@]}" "$jq_filter" "$MESH_STATE" > "$tmp" 2>/dev/null; then
+                mv "$tmp" "$MESH_STATE"
+            else
+                rm -f "$tmp" 2>/dev/null
+                exit 1
+            fi
+        ) 200>"$MESH_LOCK"
+    else
+        # Fallback for systems without flock (macOS without coreutils)
+        # Use mkdir as atomic lock
+        local lock_dir="${MESH_LOCK}.d"
+        local waited=0
+        while ! mkdir "$lock_dir" 2>/dev/null; do
+            sleep 0.1
+            waited=$((waited + 1))
+            if [[ $waited -gt 50 ]]; then
+                return 1  # 5 second timeout
+            fi
+        done
+
+        # Ensure state file exists
+        if [[ ! -f "$MESH_STATE" ]]; then
+            cat > "$MESH_STATE" <<'INITEOF'
+{
+  "version": "1.0",
+  "created": "",
+  "agents": {},
+  "shared": {},
+  "locks": {}
+}
+INITEOF
+        fi
+
+        local tmp="${MESH_STATE}.tmp.$$"
+        local rc=0
+        if jq "${jq_args[@]}" "$jq_filter" "$MESH_STATE" > "$tmp" 2>/dev/null; then
+            mv "$tmp" "$MESH_STATE"
+        else
+            rm -f "$tmp" 2>/dev/null
+            rc=1
+        fi
+
+        rmdir "$lock_dir" 2>/dev/null || true
+        return $rc
+    fi
+}
 
 # ============================================================================
 # Initialization
@@ -226,53 +308,34 @@ mesh_state_get() {
     jq -r "getpath($path_array) // empty" "$MESH_STATE"
 }
 
-# Set value in shared state (atomic)
+# Set value in shared state (atomic + locked)
 # Usage: mesh_state_set "path.to.key" "value"
 # Note: Uses setpath() to handle keys with special chars (hyphens, etc.)
 mesh_state_set() {
     local path="$1"
     local value="$2"
 
-    if [[ ! -f "$MESH_STATE" ]]; then
-        mesh_state_init
-    fi
-
-    local tmp="${MESH_STATE}.tmp.$$"
-
     # Convert dot notation to array for setpath
     local path_array
     path_array=$(echo "$path" | sed 's/\./","/g' | sed 's/^/["/' | sed 's/$/"]/')
 
-    # Atomic write: write to temp, then rename
-    if jq --arg val "$value" "setpath($path_array; \$val)" "$MESH_STATE" > "$tmp" 2>/dev/null; then
-        mv "$tmp" "$MESH_STATE"
-    else
-        rm -f "$tmp" 2>/dev/null
-        return 1
-    fi
+    _mesh_locked_write "setpath($path_array; \$val)" --arg val "$value"
 }
 
-# Set JSON object in shared state
+# Set JSON object in shared state (atomic + locked)
 # Usage: mesh_state_set_json "path.to.key" '{"foo": "bar"}'
 mesh_state_set_json() {
     local path="$1"
     local json="$2"
 
-    local tmp="${MESH_STATE}.tmp.$$"
-
     # Convert dot notation to array for setpath
     local path_array
     path_array=$(echo "$path" | sed 's/\./","/g' | sed 's/^/["/' | sed 's/$/"]/')
 
-    if jq --argjson val "$json" "setpath($path_array; \$val)" "$MESH_STATE" > "$tmp" 2>/dev/null; then
-        mv "$tmp" "$MESH_STATE"
-    else
-        rm -f "$tmp" 2>/dev/null
-        return 1
-    fi
+    _mesh_locked_write "setpath($path_array; \$val)" --argjson val "$json"
 }
 
-# Write to shared research log (append-only)
+# Write to shared research log (append-only, locked)
 # Usage: mesh_log "Research completed: found 5 results"
 mesh_log() {
     local message="$1"
@@ -286,8 +349,7 @@ mesh_log() {
         --arg msg "$message" \
         '{"timestamp": $ts, "agent": $agent, "message": $msg}')
 
-    local tmp="${MESH_STATE}.tmp.$$"
-    jq --argjson entry "$entry" '.shared.log = (.shared.log // []) + [$entry]' "$MESH_STATE" > "$tmp" && mv "$tmp" "$MESH_STATE"
+    _mesh_locked_write '.shared.log = (.shared.log // []) + [$entry]' --argjson entry "$entry"
 }
 
 # Read shared log
@@ -539,7 +601,6 @@ mesh_cleanup() {
     # Remove read messages older than 1 hour
     find "$MESH_INBOX" -name "*.msg.read" -mmin +60 -delete 2>/dev/null || true
 
-    # Remove offline agents from state
-    local tmp="${MESH_STATE}.tmp.$$"
-    jq '.agents |= with_entries(select(.value.status != "offline"))' "$MESH_STATE" > "$tmp" && mv "$tmp" "$MESH_STATE"
+    # Remove offline agents from state (locked)
+    _mesh_locked_write '.agents |= with_entries(select(.value.status != "offline"))'
 }
