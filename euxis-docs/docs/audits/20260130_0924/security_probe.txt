@@ -1,0 +1,10 @@
+# Security Probe Report — Fri 30 Jan 09:26:34 GMT 2026
+
+## Probe 1: Shell injection in agent argument
+  PASS: Agent argument is not injectable.
+## Probe 2: Path traversal in agent name
+  PASS: Path traversal blocked.
+## Probe 3: Null byte injection
+  PASS: Null byte handled without crash.
+
+## Summary: 3 passed, 0 failed

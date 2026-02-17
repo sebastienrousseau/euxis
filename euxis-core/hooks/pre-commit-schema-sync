@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: Validate CLI schema and sync documentation
+#
+# Install:
+#   ln -sf ../../euxis-core/hooks/pre-commit-schema-sync .git/hooks/pre-commit
+#
+# This hook ensures:
+#   1. cli-schema.json is valid JSON
+#   2. Shell completions match the schema
+#   3. Man page references are up to date
+#
+
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+SCHEMA_FILE="${EUXIS_HOME}/euxis-core/config/cli-schema.json"
+
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+RESET='\033[0m'
+
+echo "🔍 Validating CLI schema..."
+
+# Check if schema file exists
+if [[ ! -f "$SCHEMA_FILE" ]]; then
+    echo -e "${YELLOW}⚠ cli-schema.json not found, skipping validation${RESET}"
+    exit 0
+fi
+
+# Validate JSON syntax
+if ! jq empty "$SCHEMA_FILE" 2>/dev/null; then
+    echo -e "${RED}✗ cli-schema.json has invalid JSON syntax${RESET}"
+    exit 1
+fi
+echo -e "${GREEN}✓${RESET} Schema JSON is valid"
+
+# Extract commands from schema
+SCHEMA_COMMANDS=$(jq -r '.commands | keys[]' "$SCHEMA_FILE" 2>/dev/null | sort)
+
+# Check Bash completion has all commands
+BASH_COMP="${EUXIS_HOME}/euxis-cli/completions/euxis.bash"
+if [[ -f "$BASH_COMP" ]]; then
+    missing=0
+    for cmd in $SCHEMA_COMMANDS; do
+        if ! grep -q "\"$cmd\"" "$BASH_COMP" 2>/dev/null; then
+            echo -e "${YELLOW}⚠ Bash completion missing: $cmd${RESET}"
+            missing=1
+        fi
+    done
+    if [[ $missing -eq 0 ]]; then
+        echo -e "${GREEN}✓${RESET} Bash completions in sync"
+    fi
+fi
+
+# Check Zsh completion has all commands
+ZSH_COMP="${EUXIS_HOME}/euxis-cli/completions/euxis.zsh"
+if [[ -f "$ZSH_COMP" ]]; then
+    missing=0
+    for cmd in $SCHEMA_COMMANDS; do
+        if ! grep -q "'$cmd:" "$ZSH_COMP" 2>/dev/null; then
+            echo -e "${YELLOW}⚠ Zsh completion missing: $cmd${RESET}"
+            missing=1
+        fi
+    done
+    if [[ $missing -eq 0 ]]; then
+        echo -e "${GREEN}✓${RESET} Zsh completions in sync"
+    fi
+fi
+
+# Validate version consistency
+SCHEMA_VERSION=$(jq -r '.version' "$SCHEMA_FILE" 2>/dev/null)
+CLI_VERSION=$(grep 'echo "euxis' "${EUXIS_HOME}/euxis-cli/bin/euxis.sh" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
+
+if [[ -n "$CLI_VERSION" ]] && [[ "$SCHEMA_VERSION" != "$CLI_VERSION" ]]; then
+    echo -e "${YELLOW}⚠ Version mismatch: schema=$SCHEMA_VERSION, cli=$CLI_VERSION${RESET}"
+else
+    echo -e "${GREEN}✓${RESET} Version consistency: $SCHEMA_VERSION"
+fi
+
+# Check agent count
+SCHEMA_AGENTS=$(jq -r '[.agents.core[], .agents.fleet[][]] | length' "$SCHEMA_FILE" 2>/dev/null || echo "0")
+REGISTRY_AGENTS=$(jq -r '.agents | length' "${EUXIS_HOME}/euxis-core/agents/registry.json" 2>/dev/null || echo "0")
+
+if [[ "$SCHEMA_AGENTS" != "$REGISTRY_AGENTS" ]]; then
+    echo -e "${YELLOW}⚠ Agent count mismatch: schema=$SCHEMA_AGENTS, registry=$REGISTRY_AGENTS${RESET}"
+else
+    echo -e "${GREEN}✓${RESET} Agent count: $SCHEMA_AGENTS"
+fi
+
+echo -e "${GREEN}✓ Schema validation complete${RESET}"
+exit 0

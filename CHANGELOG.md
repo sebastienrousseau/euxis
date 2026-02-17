@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.0.8] - 2026-02-16
+## [0.1.0] - 2026-02-16
 
 ### Added
 - **Gateway Protocol Architecture**: Complete gateway server implementation with WebSocket support and multi-adapter framework
@@ -304,8 +304,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Comparison Links
 
-[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.8...HEAD
-[0.0.8]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.8
+[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.1.0
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5

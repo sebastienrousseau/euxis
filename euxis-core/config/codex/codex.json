@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "protocol_version": "0.0.8",
+  "last_updated": "2026-01-31",
+  "templates": [
+    {
+      "id": "xray",
+      "name": "System X-Ray",
+      "category": "architect",
+      "description": "Trace the critical data path through a codebase. Produces dependency map, hot paths, risk zones, and mermaid diagram.",
+      "file": "architect/xray.txt",
+      "target_agents": ["architect"],
+      "required_vars": ["CODEX_CODEBASE_PATH", "CODEX_ENTRY_POINT"],
+      "optional_vars": ["CODEX_FOCUS_AREA"],
+      "tags": ["architecture", "analysis", "visualization"],
+      "output_type": "markdown"
+    },
+    {
+      "id": "surgical-fix",
+      "name": "Surgical Strike",
+      "category": "code",
+      "description": "Fix ONLY the failing function with zero side effects. Includes mandatory regression test, before/after diff, and blast radius verification.",
+      "file": "code/surgical-fix.txt",
+      "target_agents": ["debugger"],
+      "required_vars": ["CODEX_BUG_DESCRIPTION", "CODEX_FAILING_FUNCTION"],
+      "optional_vars": ["CODEX_REPRODUCTION_STEPS"],
+      "tags": ["debugging", "bugfix", "surgical"],
+      "output_type": "diff"
+    },
+    {
+      "id": "decision-matrix",
+      "name": "Executive Decision",
+      "category": "research",
+      "description": "Produce a weighted decision matrix with 2026 data. Includes criteria weighting, per-score justification, risk assessment, and ADR.",
+      "file": "research/decision-matrix.txt",
+      "target_agents": ["deep-researcher"],
+      "required_vars": ["CODEX_DECISION_TOPIC", "CODEX_ALTERNATIVES"],
+      "optional_vars": ["CODEX_CONSTRAINTS", "CODEX_CRITERIA"],
+      "tags": ["research", "decision", "strategy"],
+      "output_type": "markdown"
+    },
+    {
+      "id": "feature-factory",
+      "name": "Feature Factory",
+      "category": "combo",
+      "description": "Meta-prompt chaining 5 agents: deep-researcher, architect, bug-fixer, unit-tester, reviewer. Generates a dispatch manifest for full feature delivery.",
+      "file": "combo/feature-factory.txt",
+      "target_agents": ["deep-researcher", "architect", "debugger", "tester", "reviewer"],
+      "required_vars": ["CODEX_FEATURE_IDEA"],
+      "optional_vars": ["CODEX_TARGET_CODEBASE"],
+      "tags": ["combo", "feature", "end-to-end"],
+      "output_type": "manifest"
+    },
+    {
+      "id": "protect",
+      "name": "Protect",
+      "category": "combo",
+      "description": "Security hardening chain with 4 agents: guard, pentester, auditor, reviewer. Performs threat modeling, vulnerability discovery, compliance verification, and security sign-off. Outputs security manifest with S1-S4 severity findings.",
+      "file": "combo/protect.txt",
+      "target_agents": ["guard", "pentester", "auditor", "reviewer"],
+      "required_vars": ["CODEX_TARGET"],
+      "optional_vars": ["CODEX_THREAT_MODEL"],
+      "tags": ["combo", "security", "hardening", "audit", "compliance"],
+      "output_type": "manifest"
+    }
+  ]
+}

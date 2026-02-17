@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# EUXIS POLISH: Apply the Euxis Standard to any content.
+# Usage: euxis-polish [file_or_directory]
+
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
+  ui_auto_header
+fi
+
+
+usage() {
+    cat <<'EOF'
+euxis-polish — Apply the Euxis Standard to content
+
+Usage:
+  euxis-polish [file_or_directory]
+
+Rewrites content to align with the Euxis Standard using the
+brand-evangelist agent. Default target: ~/.euxis/README.md
+
+Options:
+  -h, --help  Show this help text
+EOF
+}
+
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
+
+_self="$0"
+while [ -L "$_self" ]; do
+    _dir="$(cd "$(dirname "$_self")" && pwd)"
+    _self="$(readlink "$_self")"
+    [[ "$_self" != /* ]] && _self="$_dir/$_self"
+done
+SCRIPT_DIR="$(cd "$(dirname "$_self")" && pwd)"
+export PATH="$PATH:$HOME/bin"
+
+TARGET="${1:-$HOME/.euxis/README.md}"
+
+if [[ ! -f "$TARGET" ]]; then
+    echo "Error: File not found — $TARGET"
+    exit 1
+fi
+
+echo "POLISHING: Applying the Euxis Standard to $TARGET..."
+
+POLISHED_FILE="${TARGET}.polished"
+
+"$SCRIPT_DIR/euxis.sh" brand-evangelist "
+Here is the content of '$TARGET':
+
+$(cat "$TARGET")
+
+TASK:
+Rewrite this entire content to align with the Euxis Standard.
+- Principle 5: Cut the filler. Eliminate the unnecessary.
+- Principle 4: Focus on the user's ambition, not just the specs.
+- Tone: Apple Developer Documentation — clear, essential, professional.
+
+OUTPUT:
+Only the rewritten markdown. No conversational filler.
+" claude > "$POLISHED_FILE" 2>/dev/null
+
+if [[ ! -s "$POLISHED_FILE" ]]; then
+    echo "No output from brand-evangelist. Nothing to apply."
+    rm -f "$POLISHED_FILE"
+    exit 0
+fi
+
+echo "---------------------------------------------------"
+echo "REVIEW CHANGES:"
+echo "---------------------------------------------------"
+diff "$TARGET" "$POLISHED_FILE" | head -n 40
+echo "..."
+echo "---------------------------------------------------"
+
+read -rp "Apply these changes? (y/N): " -n 1
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    mv "$POLISHED_FILE" "$TARGET"
+    echo "Content polished."
+else
+    rm -f "$POLISHED_FILE"
+    echo "Reverted."
+fi

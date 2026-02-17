@@ -1,0 +1,1398 @@
+# Euxis API - OpenAPI 3.1 Specification
+
+openapi: 3.1.0
+
+info:
+  title: Euxis API
+  version: 0.0.8
+  description: |
+    REST API for the Euxis Enterprise Unified eXecution Intelligence System.
+
+    Euxis provides multi-agent orchestration, tiered memory management, and intelligent
+    task coordination capabilities. This API exposes the core CLI operations as HTTP
+    endpoints for programmatic integration.
+
+    ## Key Concepts
+
+    - **Agents**: Specialized AI entities with defined roles, capabilities, and intelligence tiers
+    - **Squads**: Coordinated groups of agents for team-based operations
+    - **Combos**: Predefined sequences of operations for common workflows
+    - **Playbooks**: Multi-phase orchestration plans with checkpoints and abort conditions
+    - **Memory**: Tiered knowledge storage (episodic, semantic, procedural) with drift detection
+
+    ## Intelligence Tiers
+
+    | Tier | Provider | Use Case |
+    |------|----------|----------|
+    | S-Tier (Strategic) | claude | Orchestration, architecture, planning |
+    | A-Tier (Research) | gemini | Research, analysis |
+    | A-Tier (Enterprise) | amazon-q | Enterprise integration |
+    | B-Tier (Coding) | goose | Debugging, testing, automation |
+    | C-Tier (Utility) | ollama | Documentation, utilities |
+  contact:
+    name: Euxis Fleet
+    url: https://euxis.co/
+  license:
+    name: Proprietary
+    url: https://euxis.co/license
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: http://localhost:8081
+    description: Staging server
+  - url: https://api.euxis.co
+    description: Production server (requires authentication)
+
+tags:
+  - name: Agents
+    description: Agent discovery, dispatch, and lifecycle management
+  - name: Squads
+    description: Squad-based agent group coordination
+  - name: Combos
+    description: Predefined operation sequences
+  - name: Playbooks
+    description: Multi-phase orchestration workflows
+  - name: Memory
+    description: Tiered memory storage and retrieval
+  - name: Health
+    description: System health and monitoring
+  - name: Knowledge Graph
+    description: Entity relationships and semantic connections
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      description: |
+        Returns the current health status of the Euxis system including
+        provider availability, memory status, and active agent count.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              example:
+                status: healthy
+                version: "0.0.8"
+                uptime_seconds: 3600
+                providers:
+                  claude: available
+                  gemini: available
+                  ollama: available
+                active_agents: 2
+                memory_usage_mb: 128
+                last_check: "2026-02-14T12:00:00Z"
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /agents:
+    get:
+      operationId: listAgents
+      summary: List all agents
+      description: |
+        Returns a list of all registered agents including core and fleet agents.
+        Supports filtering by tier, activation status, and capability tags.
+      tags:
+        - Agents
+      parameters:
+        - name: tier
+          in: query
+          description: Filter by agent tier (core or fleet)
+          schema:
+            type: string
+            enum: [core, fleet]
+        - name: activation
+          in: query
+          description: Filter by activation status
+          schema:
+            type: string
+            enum: [core, default, on-demand, specialist]
+        - name: capability
+          in: query
+          description: Filter by capability tag
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: Filter by lifecycle state
+          schema:
+            $ref: '#/components/schemas/AgentState'
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentSummary'
+                  total:
+                    type: integer
+                    description: Total number of agents
+              example:
+                agents:
+                  - id: orchestrator
+                    tier: core
+                    state: idle
+                    tags: [orchestration, delegation, planning]
+                  - id: debugger
+                    tier: fleet
+                    state: active
+                    tags: [debugging, fixes, engineering]
+                total: 50
+
+  /agents/{agentId}:
+    get:
+      operationId: getAgent
+      summary: Get agent details
+      description: |
+        Returns detailed information about a specific agent including its
+        prompt path, capabilities, version, and current lifecycle state.
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agentId}/dispatch:
+    post:
+      operationId: dispatchTask
+      summary: Dispatch task to agent
+      description: |
+        Dispatches a task to a specific agent for execution. The agent will
+        transition to 'active' state and process the task according to its
+        capabilities and intelligence tier.
+
+        The provider is automatically selected based on the agent's tier unless
+        explicitly overridden. Task priority affects provider routing for P0 tasks.
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchRequest'
+            example:
+              task: "Review the authentication module for security vulnerabilities"
+              priority: P1
+              project: auth-service
+              session_id: "sess_20260214_120000"
+              context:
+                memory_tier: hot
+                include_cross_agent: true
+      responses:
+        '202':
+          description: Task accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Agent is not ready (liveness/readiness probe failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agentId}/status:
+    get:
+      operationId: getAgentStatus
+      summary: Get agent lifecycle state
+      description: |
+        Returns the current lifecycle state of an agent along with session
+        information and timing data.
+
+        **Lifecycle States:**
+        - `idle` - Agent is available for tasks
+        - `active` - Agent is currently processing a task
+        - `completed` - Agent finished task successfully
+        - `failed` - Agent encountered an error
+        - `timeout` - Agent exceeded time budget
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/agentId'
+      responses:
+        '200':
+          description: Agent status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStatus'
+              example:
+                agent_id: debugger
+                state: active
+                session_id: "sess_20260214_120000"
+                started_at: "2026-02-14T12:00:00Z"
+                duration_ms: 45000
+                liveness: live
+                readiness: ready
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /squads/{squadId}/deploy:
+    post:
+      operationId: deploySquad
+      summary: Deploy a squad
+      description: |
+        Deploys a squad of agents for coordinated team operations. All squad
+        members will be activated and assigned to the specified mission.
+
+        Squad deployment creates a shared context for inter-agent communication
+        and coordinates handoffs between members.
+      tags:
+        - Squads
+      parameters:
+        - $ref: '#/components/parameters/squadId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SquadDeployRequest'
+            example:
+              mission: "Perform comprehensive security audit of payment module"
+              project: payment-service
+              mode: hierarchical
+              coordination_budget_ms: 300000
+      responses:
+        '202':
+          description: Squad deployment accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SquadDeployResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Squad not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /combos/{comboId}/run:
+    post:
+      operationId: runCombo
+      summary: Run a combo
+      description: |
+        Executes a predefined sequence of Euxis operations. Combos are
+        optimized workflows for common tasks like deploy-prep, full-audit,
+        or release-validation.
+
+        Each step in the combo is executed sequentially unless parallel
+        execution is enabled for independent steps.
+      tags:
+        - Combos
+      parameters:
+        - $ref: '#/components/parameters/comboId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComboRunRequest'
+            example:
+              target: "src/"
+              dry_run: false
+              parallel: true
+      responses:
+        '202':
+          description: Combo execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComboRunResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Combo not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /playbooks/{playbookId}/run:
+    post:
+      operationId: runPlaybook
+      summary: Run a playbook
+      description: |
+        Executes a multi-phase playbook with checkpoint validation and
+        abort conditions. Playbooks coordinate complex workflows across
+        multiple agents and phases.
+
+        **Modes:**
+        - `hierarchical` - Central coordination, all agents report to orchestrator
+        - `mesh` - Agents with dispatch authority coordinate sub-workflows
+        - `federated` - Agents operate autonomously across project boundaries
+
+        **Restart Policy:**
+        - `from_failed_gate` - Resume from the last failed checkpoint
+        - `from_start` - Restart the entire playbook
+      tags:
+        - Playbooks
+      parameters:
+        - $ref: '#/components/parameters/playbookId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaybookRunRequest'
+            example:
+              goal: "Release v0.0.8 with security audit and performance validation"
+              mode: hierarchical
+              restart_policy: from_failed_gate
+              abort_on_failure: true
+      responses:
+        '202':
+          description: Playbook execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaybookRunResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Playbook not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /memory/{projectId}:
+    get:
+      operationId: getProjectMemory
+      summary: Get project memory
+      description: |
+        Retrieves memory entries for a project with support for tiered access:
+
+        - **Tier 1 (Hot)**: Last 20 lines of recent memory
+        - **Tier 2 (Relevant)**: Keyword-matched entries (up to 10)
+        - **Tier 3 (Cross-Agent)**: Related memories from sibling agents
+
+        Memory types include episodic (events), semantic (facts), and
+        procedural (workflows). Reflection and contraindication entries
+        are preserved permanently.
+      tags:
+        - Memory
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: tier
+          in: query
+          description: Memory tier to retrieve
+          schema:
+            type: string
+            enum: [hot, relevant, cross_agent, all]
+            default: hot
+        - name: type
+          in: query
+          description: Filter by memory type
+          schema:
+            $ref: '#/components/schemas/MemoryType'
+        - name: agent
+          in: query
+          description: Filter by agent ID (for cross-agent memories)
+          schema:
+            type: string
+        - name: query
+          in: query
+          description: Search query for relevant memory retrieval
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of entries to return
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Memory entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryResponse'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /memory/{projectId}/remember:
+    post:
+      operationId: storeMemory
+      summary: Store memory
+      description: |
+        Stores a new memory entry for a project. Supports semantic drift
+        detection to identify contradictions with existing memories.
+
+        Memory entries are automatically classified by type based on content
+        patterns unless explicitly specified.
+
+        **Drift Detection:**
+        When a new fact contradicts existing memories, the API returns a
+        drift warning with resolution options: supersede, keep_both, or reject.
+      tags:
+        - Memory
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryStoreRequest'
+            example:
+              fact: "Authentication module migrated to JWT with RS256 signing"
+              source: architect
+              type: semantic
+              agent: architect
+              detect_drift: true
+      responses:
+        '201':
+          description: Memory stored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStoreResponse'
+        '200':
+          description: Memory stored with drift detection warning
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryStoreResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /graph/{projectId}/edges:
+    post:
+      operationId: addGraphEdge
+      summary: Add knowledge graph edge
+      description: |
+        Creates a relationship between two entities in the knowledge graph.
+
+        **Supported Relations:**
+        - `related_to` - General relationship
+        - `produced_by` - Output/artifact relationship
+        - `depends_on` - Dependency relationship
+        - `contradicts` - Conflicting information
+        - `references` - Citation relationship
+        - `part_of` - Containment relationship
+      tags:
+        - Knowledge Graph
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphEdgeRequest'
+            example:
+              source: jwt-implementation
+              target: auth-module
+              relation: part_of
+              metadata:
+                created_by: architect
+                confidence: 0.95
+      responses:
+        '201':
+          description: Edge created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphEdgeResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /graph/{projectId}/query:
+    get:
+      operationId: queryGraph
+      summary: Query knowledge graph
+      description: |
+        Queries the knowledge graph for entities and their relationships.
+        Supports traversal depth control and relation filtering.
+      tags:
+        - Knowledge Graph
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: entity
+          in: query
+          required: true
+          description: Entity to query
+          schema:
+            type: string
+        - name: depth
+          in: query
+          description: Maximum traversal depth
+          schema:
+            type: integer
+            default: 1
+            maximum: 5
+        - name: relation
+          in: query
+          description: Filter by relation type
+          schema:
+            $ref: '#/components/schemas/GraphRelation'
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQueryResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Euxis-API-Key
+      description: API key for authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for session-based authentication
+
+  parameters:
+    agentId:
+      name: agentId
+      in: path
+      required: true
+      description: Unique identifier for the agent
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9-]*$'
+        minLength: 2
+        maxLength: 50
+      example: debugger
+
+    squadId:
+      name: squadId
+      in: path
+      required: true
+      description: Unique identifier for the squad
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9-]*$'
+        minLength: 2
+        maxLength: 50
+      example: security-team
+
+    comboId:
+      name: comboId
+      in: path
+      required: true
+      description: Unique identifier for the combo
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9-]*$'
+        minLength: 2
+        maxLength: 50
+      example: deploy-prep
+
+    playbookId:
+      name: playbookId
+      in: path
+      required: true
+      description: Unique identifier for the playbook
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9-]*$'
+        minLength: 2
+        maxLength: 50
+      example: crypto-audit
+
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      description: Unique identifier for the project
+      schema:
+        type: string
+        pattern: '^[a-zA-Z][a-zA-Z0-9_-]*$'
+        minLength: 1
+        maxLength: 100
+      example: auth-service
+
+  schemas:
+    Agent:
+      type: object
+      required:
+        - id
+        - path
+        - tier
+        - version
+        - activation
+      properties:
+        id:
+          type: string
+          description: Unique agent identifier
+          example: debugger
+        path:
+          type: string
+          description: Path to agent prompt file
+          example: agents/prompts/fleet/debugger.txt
+        tier:
+          type: string
+          enum: [core, fleet]
+          description: Agent tier (core or fleet)
+        version:
+          type: string
+          description: Agent version
+          example: "0.0.8"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Descriptive tags for the agent
+          example: [debugging, fixes, engineering]
+        capability_tags:
+          type: array
+          items:
+            type: string
+          description: Capability tags for routing and matching
+          example: [debugging, code-review, test-analysis]
+        activation:
+          type: string
+          enum: [core, default, on-demand, specialist]
+          description: Activation mode
+        state:
+          $ref: '#/components/schemas/AgentState'
+        liveness:
+          type: string
+          enum: [live, dead]
+          description: Liveness probe result
+        readiness:
+          type: string
+          description: Readiness probe result (ready or not_ready:reason)
+
+    AgentSummary:
+      type: object
+      required:
+        - id
+        - tier
+        - state
+      properties:
+        id:
+          type: string
+          description: Unique agent identifier
+        tier:
+          type: string
+          enum: [core, fleet]
+        state:
+          $ref: '#/components/schemas/AgentState'
+        tags:
+          type: array
+          items:
+            type: string
+
+    AgentState:
+      type: string
+      enum: [idle, active, completed, failed, timeout]
+      description: Agent lifecycle state
+
+    AgentStatus:
+      type: object
+      required:
+        - agent_id
+        - state
+        - liveness
+        - readiness
+      properties:
+        agent_id:
+          type: string
+          description: Agent identifier
+        state:
+          $ref: '#/components/schemas/AgentState'
+        session_id:
+          type: string
+          description: Current session identifier
+        started_at:
+          type: string
+          format: date-time
+          description: Task start timestamp
+        duration_ms:
+          type: integer
+          description: Current task duration in milliseconds
+        liveness:
+          type: string
+          enum: [live, dead]
+        readiness:
+          type: string
+          description: Readiness status
+
+    DispatchRequest:
+      type: object
+      required:
+        - task
+      properties:
+        task:
+          type: string
+          description: Task description to dispatch
+          minLength: 1
+          maxLength: 10000
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+          default: P2
+          description: Task priority (P0 forces claude provider)
+        project:
+          type: string
+          description: Project context for the task
+        session_id:
+          type: string
+          description: Session identifier for tracking
+        provider:
+          type: string
+          enum: [claude, gemini, openai, ollama, qwen, goose]
+          description: Override default provider selection
+        context:
+          type: object
+          properties:
+            memory_tier:
+              type: string
+              enum: [hot, relevant, full]
+              default: hot
+              description: Memory tier to include in context
+            include_cross_agent:
+              type: boolean
+              default: false
+              description: Include cross-agent memory context
+            protocol_keywords:
+              type: array
+              items:
+                type: string
+              description: Keywords to trigger conditional protocol loading
+
+    DispatchResponse:
+      type: object
+      required:
+        - dispatch_id
+        - agent_id
+        - status
+      properties:
+        dispatch_id:
+          type: string
+          description: Unique dispatch identifier
+          format: uuid
+        agent_id:
+          type: string
+          description: Agent handling the dispatch
+        status:
+          type: string
+          enum: [accepted, queued, processing]
+        session_id:
+          type: string
+          description: Session identifier
+        provider:
+          type: string
+          description: Selected provider for execution
+        estimated_duration_ms:
+          type: integer
+          description: Estimated task duration
+
+    Squad:
+      type: object
+      required:
+        - id
+        - name
+        - members
+      properties:
+        id:
+          type: string
+          description: Squad identifier
+        name:
+          type: string
+          description: Squad display name
+        description:
+          type: string
+          description: Squad purpose and scope
+        members:
+          type: array
+          items:
+            type: string
+          description: Agent IDs in this squad
+        lead:
+          type: string
+          description: Lead agent for coordination
+        capabilities:
+          type: array
+          items:
+            type: string
+          description: Combined capability tags
+
+    SquadDeployRequest:
+      type: object
+      required:
+        - mission
+      properties:
+        mission:
+          type: string
+          description: Mission description for the squad
+          minLength: 1
+          maxLength: 10000
+        project:
+          type: string
+          description: Project context
+        mode:
+          type: string
+          enum: [hierarchical, mesh, federated]
+          default: hierarchical
+          description: Coordination mode
+        coordination_budget_ms:
+          type: integer
+          description: Time budget for coordination overhead
+          default: 60000
+        priority:
+          type: string
+          enum: [P0, P1, P2, P3]
+          default: P1
+
+    SquadDeployResponse:
+      type: object
+      required:
+        - deployment_id
+        - squad_id
+        - status
+      properties:
+        deployment_id:
+          type: string
+          format: uuid
+        squad_id:
+          type: string
+        status:
+          type: string
+          enum: [deployed, deploying, failed]
+        activated_agents:
+          type: array
+          items:
+            type: string
+        coordination_session:
+          type: string
+
+    Combo:
+      type: object
+      required:
+        - id
+        - name
+        - steps
+      properties:
+        id:
+          type: string
+          description: Combo identifier
+        name:
+          type: string
+          description: Combo display name
+        description:
+          type: string
+          description: What this combo accomplishes
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComboStep'
+
+    ComboStep:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          description: Euxis command to execute
+        args:
+          type: array
+          items:
+            type: string
+          description: Command arguments
+        parallel:
+          type: boolean
+          description: Can run in parallel with next step
+          default: false
+        continue_on_failure:
+          type: boolean
+          default: false
+
+    ComboRunRequest:
+      type: object
+      properties:
+        target:
+          type: string
+          description: Target path or scope for the combo
+        dry_run:
+          type: boolean
+          default: false
+          description: Preview without executing
+        parallel:
+          type: boolean
+          default: false
+          description: Enable parallel execution where possible
+        args:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional arguments for combo steps
+
+    ComboRunResponse:
+      type: object
+      required:
+        - execution_id
+        - combo_id
+        - status
+      properties:
+        execution_id:
+          type: string
+          format: uuid
+        combo_id:
+          type: string
+        status:
+          type: string
+          enum: [started, completed, failed]
+        steps_total:
+          type: integer
+        steps_completed:
+          type: integer
+
+    Playbook:
+      type: object
+      required:
+        - id
+        - name
+        - phases
+      properties:
+        id:
+          type: string
+          description: Playbook identifier
+        name:
+          type: string
+          description: Playbook display name
+        description:
+          type: string
+          description: What this playbook accomplishes
+        schema_version:
+          type: string
+          default: "1.0"
+        version:
+          type: string
+        restart_policy:
+          type: string
+          enum: [from_failed_gate, from_start]
+          default: from_failed_gate
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybookPhase'
+
+    PlaybookPhase:
+      type: object
+      required:
+        - phase
+        - name
+        - mode
+      properties:
+        phase:
+          type: integer
+          description: Phase number (0-indexed)
+        name:
+          type: string
+          description: Phase name
+        mode:
+          type: string
+          enum: [hierarchical, mesh, federated]
+        delegates:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaybookDelegate'
+        squad:
+          type: string
+          description: Squad ID to deploy for this phase
+        checkpoint:
+          type: string
+          description: Success criteria for this phase
+        abort_on_failure:
+          type: boolean
+          default: true
+
+    PlaybookDelegate:
+      type: object
+      required:
+        - agent
+        - task_template
+      properties:
+        agent:
+          type: string
+          description: Agent ID to delegate to
+        task_template:
+          type: string
+          description: Task template with ${variable} substitution
+
+    PlaybookRunRequest:
+      type: object
+      required:
+        - goal
+      properties:
+        goal:
+          type: string
+          description: Goal to substitute in task templates
+          minLength: 1
+          maxLength: 10000
+        mode:
+          type: string
+          enum: [hierarchical, mesh, federated]
+          default: hierarchical
+        restart_policy:
+          type: string
+          enum: [from_failed_gate, from_start]
+        abort_on_failure:
+          type: boolean
+          default: true
+        start_phase:
+          type: integer
+          description: Phase to start from (for restarts)
+          default: 0
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional variables for template substitution
+
+    PlaybookRunResponse:
+      type: object
+      required:
+        - execution_id
+        - playbook_id
+        - status
+      properties:
+        execution_id:
+          type: string
+          format: uuid
+        playbook_id:
+          type: string
+        status:
+          type: string
+          enum: [started, in_progress, checkpoint, completed, failed, aborted]
+        current_phase:
+          type: integer
+        total_phases:
+          type: integer
+        checkpoint_message:
+          type: string
+
+    Memory:
+      type: object
+      required:
+        - id
+        - content
+        - type
+        - timestamp
+      properties:
+        id:
+          type: string
+          description: Memory entry identifier
+        content:
+          type: string
+          description: Memory content
+        type:
+          $ref: '#/components/schemas/MemoryType'
+        source:
+          type: string
+          description: Source agent or system
+        agent:
+          type: string
+          description: Agent that created the memory
+        timestamp:
+          type: string
+          format: date-time
+        permanent:
+          type: boolean
+          description: Whether this memory is pruning-exempt
+          default: false
+
+    MemoryType:
+      type: string
+      enum: [episodic, semantic, procedural, reflection, contraindication]
+      description: |
+        Type of memory entry:
+        - episodic: Specific events, outcomes, timestamps
+        - semantic: General facts, rules, relationships
+        - procedural: Reusable workflows, patterns
+        - reflection: Learning insights (permanent)
+        - contraindication: What to avoid (permanent)
+
+    MemoryResponse:
+      type: object
+      required:
+        - project_id
+        - entries
+      properties:
+        project_id:
+          type: string
+        tier:
+          type: string
+          enum: [hot, relevant, cross_agent, all]
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Memory'
+        total:
+          type: integer
+        query:
+          type: string
+          description: Search query if provided
+
+    MemoryStoreRequest:
+      type: object
+      required:
+        - fact
+      properties:
+        fact:
+          type: string
+          description: Memory content to store
+          minLength: 1
+          maxLength: 5000
+        source:
+          type: string
+          description: Source of the memory
+        type:
+          $ref: '#/components/schemas/MemoryType'
+        agent:
+          type: string
+          description: Agent creating the memory
+        detect_drift:
+          type: boolean
+          default: true
+          description: Enable semantic drift detection
+
+    MemoryStoreResponse:
+      type: object
+      required:
+        - id
+        - stored
+      properties:
+        id:
+          type: string
+          description: Stored memory ID
+        stored:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/MemoryType'
+        drift_detected:
+          type: boolean
+          description: Whether semantic drift was detected
+        drift_warning:
+          $ref: '#/components/schemas/DriftWarning'
+
+    DriftWarning:
+      type: object
+      properties:
+        conflicting_memory_id:
+          type: string
+        conflicting_content:
+          type: string
+        resolution_options:
+          type: array
+          items:
+            type: string
+            enum: [supersede, keep_both, reject]
+
+    GraphRelation:
+      type: string
+      enum: [related_to, produced_by, depends_on, contradicts, references, part_of]
+      description: Type of relationship between entities
+
+    GraphEdgeRequest:
+      type: object
+      required:
+        - source
+        - target
+        - relation
+      properties:
+        source:
+          type: string
+          description: Source entity
+        target:
+          type: string
+          description: Target entity
+        relation:
+          $ref: '#/components/schemas/GraphRelation'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional edge metadata
+
+    GraphEdgeResponse:
+      type: object
+      required:
+        - edge_id
+        - created
+      properties:
+        edge_id:
+          type: string
+        created:
+          type: boolean
+        source:
+          type: string
+        target:
+          type: string
+        relation:
+          $ref: '#/components/schemas/GraphRelation'
+
+    GraphQueryResponse:
+      type: object
+      properties:
+        entity:
+          type: string
+        edges:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                type: string
+              target:
+                type: string
+              relation:
+                $ref: '#/components/schemas/GraphRelation'
+              depth:
+                type: integer
+        related_entities:
+          type: array
+          items:
+            type: string
+
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - version
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall system health status
+        version:
+          type: string
+          description: Euxis version
+          example: "0.0.8"
+        uptime_seconds:
+          type: integer
+          description: System uptime in seconds
+        providers:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [available, unavailable, degraded]
+          description: Provider availability status
+        active_agents:
+          type: integer
+          description: Number of currently active agents
+        memory_usage_mb:
+          type: integer
+          description: Memory usage in megabytes
+        cortex_status:
+          type: string
+          enum: [online, offline, degraded]
+          description: Cortex memory system status
+        last_check:
+          type: string
+          format: date-time
+          description: Timestamp of last health check
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: AGENT_NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+        trace_id:
+          type: string
+          description: Request trace ID for debugging
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []

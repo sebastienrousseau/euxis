@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "cli": "euxis",
+  "version": "0.1.0",
+  "description": "Enterprise Unified eXecution Intelligence System",
+  "homepage": "https://docs.euxis.co",
+  "repository": "https://github.com/euxis/euxis",
+  "commands": {
+    "squad": {
+      "description": "Manage agent squads",
+      "category": "FLEET OPERATIONS",
+      "subcommands": {
+        "list": { "description": "List all available squads" },
+        "info": { "description": "Show squad details", "args": ["squad-id"] },
+        "deploy": { "description": "Deploy a squad", "args": ["squad-id", "task"] }
+      },
+      "options": ["--provider", "--json", "--verbose"]
+    },
+    "combo": {
+      "description": "Chain agents sequentially",
+      "category": "FLEET OPERATIONS",
+      "subcommands": {
+        "list": { "description": "List all available combos" },
+        "info": { "description": "Show combo chain details", "args": ["combo-id"] },
+        "run": { "description": "Execute a combo chain", "args": ["combo-id", "task"] }
+      },
+      "options": ["--provider", "--json", "--verbose"]
+    },
+    "playbook": {
+      "description": "Phased execution with stage gates",
+      "category": "FLEET OPERATIONS",
+      "subcommands": {
+        "list": { "description": "List all playbooks" },
+        "info": { "description": "Show playbook phases", "args": ["playbook-id"] },
+        "run": { "description": "Execute a playbook", "args": ["playbook-id", "task"] }
+      },
+      "options": ["--provider", "--json", "--verbose"]
+    },
+    "dispatch": {
+      "description": "Deploy fleet from architect manifest",
+      "category": "FLEET OPERATIONS",
+      "args": ["manifest"],
+      "options": ["--dry-run", "--provider", "--json"]
+    },
+    "council": {
+      "description": "Multi-agent adversarial debate",
+      "category": "FLEET OPERATIONS",
+      "args": ["topic"],
+      "options": ["--rounds", "--provider"]
+    },
+    "loop": {
+      "description": "Autonomous retry loop with learning",
+      "category": "FLEET OPERATIONS",
+      "args": ["agent", "task"],
+      "options": ["--max-retries", "--provider"]
+    },
+    "verify": {
+      "description": "Run pre-commit quality gates",
+      "category": "QUALITY & INFRA",
+      "options": ["--fix", "--json"]
+    },
+    "health": {
+      "description": "Check system probes and connectivity",
+      "category": "QUALITY & INFRA",
+      "options": ["--silent", "--json"]
+    },
+    "certify": {
+      "description": "Full certification pipeline",
+      "category": "QUALITY & INFRA",
+      "options": ["--strict", "--json"]
+    },
+    "lint": {
+      "description": "Static analysis pipeline",
+      "category": "QUALITY & INFRA",
+      "options": ["--fix", "--json"]
+    },
+    "test": {
+      "description": "Infrastructure unit tests",
+      "category": "QUALITY & INFRA",
+      "options": ["--coverage", "--json"]
+    },
+    "audit": {
+      "description": "Security audit with probes",
+      "category": "QUALITY & INFRA",
+      "options": ["--deep", "--json"]
+    },
+    "bench": {
+      "description": "Performance benchmarking",
+      "category": "QUALITY & INFRA",
+      "options": ["--iterations", "--json"]
+    },
+    "cortex": {
+      "description": "Vector memory interface (ChromaDB)",
+      "category": "MEMORY & KNOWLEDGE",
+      "subcommands": {
+        "search": { "description": "Search memories", "args": ["query"] },
+        "prune": { "description": "Clean old memories" },
+        "sync": { "description": "Sync with remote" },
+        "stats": { "description": "Show memory statistics" }
+      },
+      "options": ["--db-path", "--collection", "--json"]
+    },
+    "graph": {
+      "description": "GraphRAG knowledge graph",
+      "category": "MEMORY & KNOWLEDGE",
+      "subcommands": {
+        "query": { "description": "Query the graph", "args": ["query"] },
+        "add": { "description": "Add to graph", "args": ["entity"] },
+        "visualize": { "description": "Open graph visualization" }
+      },
+      "options": ["--json"]
+    },
+    "bus": {
+      "description": "Async pub/sub message bus",
+      "category": "MEMORY & KNOWLEDGE",
+      "subcommands": {
+        "publish": { "description": "Publish a message", "args": ["topic", "message"] },
+        "subscribe": { "description": "Subscribe to topic", "args": ["topic"] },
+        "topics": { "description": "List all topics" }
+      },
+      "options": ["--json"]
+    },
+    "gateway": {
+      "description": "Gateway control plane",
+      "category": "INFRASTRUCTURE",
+      "subcommands": {
+        "start": { "description": "Start gateway server" },
+        "stop": { "description": "Stop gateway server" },
+        "status": { "description": "Show gateway status" }
+      },
+      "options": ["--port", "--host", "--json"]
+    },
+    "deploy": {
+      "description": "Spin up via Docker Compose",
+      "category": "INFRASTRUCTURE",
+      "options": ["--detach", "--build", "--json"]
+    },
+    "daemon": {
+      "description": "Periodic kaizen with fail-safe",
+      "category": "INFRASTRUCTURE",
+      "args": ["interval"],
+      "options": ["--json"]
+    },
+    "gym": {
+      "description": "Agent evaluation & A/B testing",
+      "category": "DEVELOPMENT",
+      "args": ["agent", "test"],
+      "options": ["--iterations", "--json"]
+    },
+    "kaizen": {
+      "description": "Continuous self-improvement",
+      "category": "DEVELOPMENT",
+      "options": ["--dry-run", "--json"]
+    },
+    "doctor": {
+      "description": "Verify installation and environment",
+      "category": "QUALITY & INFRA",
+      "options": ["--json"]
+    },
+    "agents": {
+      "description": "List all agents with descriptions",
+      "category": "DISCOVERY",
+      "options": ["--json", "--category"]
+    },
+    "search": {
+      "description": "Find agents by capability",
+      "category": "DISCOVERY",
+      "args": ["keyword"],
+      "options": ["--json"]
+    }
+  },
+  "globalOptions": {
+    "--provider": {
+      "description": "Override AI provider",
+      "values": ["claude", "gemini", "openai", "ollama", "qwen", "crush", "kiro-cli", "goose"]
+    },
+    "--json": {
+      "description": "Output as JSON for piping to jq"
+    },
+    "--verbose": {
+      "description": "Enable verbose logging"
+    },
+    "--no-color": {
+      "description": "Disable colored output"
+    },
+    "--help": {
+      "description": "Show help for command"
+    },
+    "--version": {
+      "description": "Show version information"
+    }
+  },
+  "agents": {
+    "core": ["arbiter", "architect", "auditor", "critic", "guard", "historian", "librarian", "orchestrator", "pair", "planner", "reviewer", "route"],
+    "fleet": {
+      "development": ["debugger", "tester", "repairer", "maintainer", "optimizer"],
+      "research": ["researcher", "deep-researcher", "investigator", "inspector"],
+      "security": ["pentester", "sentinel", "watchdog", "gatekeeper", "cryptographer"],
+      "creative": ["designer", "writer", "animator", "marketer", "evangelist"],
+      "operations": ["automaton", "butler", "custodian", "heal", "govern", "trace"],
+      "integration": ["bridge", "conduit", "ambassador", "interactor", "responder"],
+      "analytics": ["strategist", "tactician", "accountant", "ledger", "telemetrist"],
+      "language": ["polyglot", "localizer", "distill"]
+    }
+  },
+  "squads": ["vision", "build", "quality", "growth", "experience", "specialist"],
+  "combos": ["envision", "protect", "craft", "refine", "seal"],
+  "exitCodes": {
+    "0": "Success",
+    "1": "General error",
+    "2": "Usage error / Invalid arguments",
+    "3": "Agent not found",
+    "4": "Provider error / Connection failed",
+    "5": "Manifest validation failed"
+  }
+}
