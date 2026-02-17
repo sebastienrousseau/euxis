@@ -653,7 +653,9 @@ execute_by_stages() {
                 dispatch_agent_with_cleanup "$idx"
                 stage_pids+=("$__dispatch_pid $agent $idx")
                 ((running_count++))
-                sleep 1  # Stagger startup
+                # Stagger startup to prevent thermal spikes and fan noise
+                # Uses EUXIS_STAGGER_DELAY (default 2s) for thermal stabilization
+                sleep "${EUXIS_STAGGER_DELAY:-2}"
             else
                 echo "  [FAIL] $agent - could not acquire required locks"
                 ((total_failed++))
