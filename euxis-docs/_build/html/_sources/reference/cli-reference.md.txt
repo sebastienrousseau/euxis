@@ -220,7 +220,7 @@ Cross-platform semantic memory system using vector and graph hybrid storage. Man
 
 **Examples:**
 ```bash
-euxis-cortex remember 'Deployed v0.0.8 to staging, all tests passed' 'gatekeeper' --type episodic
+euxis-cortex remember 'Deployed v0.1.0 to staging, all tests passed' 'gatekeeper' --type episodic
 euxis-cortex recall 'auth token' 5 --hybrid
 euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 ```
@@ -807,7 +807,7 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 
 ---
 
-*Euxis v0.0.8 · Build something that matters.*
+*Euxis v0.1.0 · Build something that matters.*
 
 ---
 

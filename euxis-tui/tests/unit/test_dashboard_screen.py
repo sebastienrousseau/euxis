@@ -108,7 +108,7 @@ class TestDashboardScreenCompose(unittest.TestCase):
         self.mock_app = Mock()
         self.registry = FleetRegistry()
         self.registry.agents = [
-            Agent(id="architect", tier="core", version="0.0.8", tags=(), activation="default"),
+            Agent(id="architect", tier="core", version="0.1.0", tags=(), activation="default"),
         ]
         self.mock_app.fleet_registry = self.registry
         self._patcher = None

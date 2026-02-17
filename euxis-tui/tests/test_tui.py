@@ -329,7 +329,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="core",
-            version="0.0.8",
+            version="0.1.0",
             tags=["test", "debug"],
             activation="default",
         )
@@ -344,7 +344,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="fleet",
-            version="0.0.8",
+            version="0.1.0",
             tags=["test"],
             activation="default",
         )

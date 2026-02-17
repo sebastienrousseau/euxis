@@ -33,9 +33,9 @@ assert_eq "all agents have tier" "0" "${all_have_tier}"
 all_have_version=$(jq '[.agents[] | select(.version == null or .version == "")] | length' "${registry}" 2>/dev/null)
 assert_eq "all agents have version" "0" "${all_have_version}"
 
-# All versions are 0.0.8
-non_007=$(jq '[.agents[] | select(.version != "0.0.8")] | length' "${registry}" 2>/dev/null)
-assert_eq "all versions 0.0.8" "0" "${non_007}"
+# All versions are 0.1.0
+non_007=$(jq '[.agents[] | select(.version != "0.1.0")] | length' "${registry}" 2>/dev/null)
+assert_eq "all versions 0.1.0" "0" "${non_007}"
 
 # All prompt files exist
 while IFS= read -r agent_path; do

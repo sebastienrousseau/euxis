@@ -35,7 +35,7 @@ def _make_agent(**overrides):
     defaults = {
         "id": "architect",
         "tier": "core",
-        "version": "0.0.8",
+        "version": "0.1.0",
         "tags": ("design", "plan", "review"),
         "activation": "default",
     }

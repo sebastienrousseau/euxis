@@ -4,7 +4,7 @@ version: "0.1.0"
 last_updated: "2026-01-31"
 ---
 
-## EUXIS MANDATORY PROTOCOL (v0.0.8)
+## EUXIS MANDATORY PROTOCOL (v0.1.0)
 
 ### 0. SESSION INITIALIZATION
 On first activation, you MUST:

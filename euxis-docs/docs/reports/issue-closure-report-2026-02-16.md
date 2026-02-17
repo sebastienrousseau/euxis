@@ -32,4 +32,4 @@ All open issues were closed after confirming implementation coverage across gate
 
 ## Next Actions
 - Merge PR #17 (security: update cryptography) after required review/checks.
-- Cut v0.0.9 release once PR #17 is merged.
+- Cut v0.1.0 release once PR #17 is merged.

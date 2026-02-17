@@ -122,7 +122,7 @@ class TestUnicodeAndSpecialCharacters:
         unicode_data.update({
             "tags": (),
             "activation": "default",
-            "version": "0.0.8"
+            "version": "0.1.0"
         })
 
         agent = Agent(**unicode_data)
@@ -277,7 +277,7 @@ class TestConcurrentAccess:
         from tui.core.registry import FleetRegistry
 
         registry_data = {
-            "protocol_version": "0.0.8",
+            "protocol_version": "0.1.0",
             "agents": (
                 [
                     {"id": "core_agent_0", "tier": "core", "tags": [], "activation": "core"},
@@ -338,7 +338,7 @@ class TestNoneAndNullValues:
         # Add required fields
         none_field.setdefault("tags", ())
         none_field.setdefault("activation", "default")
-        none_field.setdefault("version", "0.0.8")
+        none_field.setdefault("version", "0.1.0")
 
         try:
             agent = Agent(**none_field)
@@ -448,7 +448,7 @@ class TestPerformanceBoundaries:
 
         # Create large dataset
         large_dataset = {
-            "protocol_version": "0.0.8",
+            "protocol_version": "0.1.0",
             "agents": [
                 {
                     "id": f"agent_{i}",

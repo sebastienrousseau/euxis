@@ -176,7 +176,7 @@ ui_auto_header_args() {
   local cmd="${1:-}"
   # Show logo for help with special subtitle
   if [[ "$cmd" == "-h" || "$cmd" == "--help" || "$cmd" == "help" ]]; then
-    ui_header "Euxis" "v0.0.8"
+    ui_header "Euxis" "v0.1.0"
     return 0
   fi
   if [[ -z "$cmd" ]]; then

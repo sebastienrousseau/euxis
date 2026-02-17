@@ -35,7 +35,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
 
     def test_load_registry_json(self):
         data = {
-            "protocol_version": "0.0.8",
+            "protocol_version": "0.1.0",
             "agents": [
                 {"id": "architect", "tier": "core", "tags": ["design"], "activation": "default"},
                 {"id": "debugger", "tier": "fleet", "tags": ["fix"], "activation": "on-demand"},
@@ -46,7 +46,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
 
         reg = FleetRegistry.load(euxis_home=self.home)
         assert len(reg.agents) == 2
-        assert reg.version == "0.0.8"
+        assert reg.version == "0.1.0"
         assert reg.agents[0].id == "architect"
         assert reg.agents[0].tier == "core"
         assert reg.agents[1].activation == "on-demand"
