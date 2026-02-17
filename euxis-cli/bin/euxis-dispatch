@@ -86,7 +86,8 @@ Resource Management:
 EOF
 }
 
-export PATH="$PATH:$HOME/bin"
+# Ensure euxis CLI tools are in PATH
+export PATH="${EUXIS_HOME}/euxis-cli/bin:$PATH:$HOME/bin"
 
 # Parse arguments
 MANIFEST_FILE=""

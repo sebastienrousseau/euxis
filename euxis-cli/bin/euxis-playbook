@@ -9,6 +9,9 @@ if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
 fi
 
 
+# Ensure euxis CLI tools are in PATH
+export PATH="${EUXIS_HOME}/euxis-cli/bin:$PATH"
+
 EUXIS_DIR="$EUXIS_HOME"
 SQUADS_FILE="$EUXIS_DIR/euxis-core/agents/squads.json"
 PLAYBOOKS_DIR="$EUXIS_DIR/euxis-core/config/playbooks"
