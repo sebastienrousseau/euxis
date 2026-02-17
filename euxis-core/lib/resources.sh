@@ -22,10 +22,20 @@
 # Maximum CPU usage % before throttling (default: 80%)
 EUXIS_CPU_THRESHOLD="${EUXIS_CPU_THRESHOLD:-80}"
 
-# Maximum memory usage % before throttling (default: 85%)
-EUXIS_MEM_THRESHOLD="${EUXIS_MEM_THRESHOLD:-85}"
+# Maximum memory usage % before throttling (default: 75%)
+# Note: 85% is danger zone on macOS where swap hits SSD hard
+# 75% leaves headroom for UI responsiveness and file caching
+EUXIS_MEM_THRESHOLD="${EUXIS_MEM_THRESHOLD:-75}"
 
-# Maximum load average per core before throttling (default: 1.5)
+# Load threshold mode: "dynamic" (nproc * factor) or "static" (fixed value)
+# Dynamic is recommended as it scales with core count
+EUXIS_LOAD_MODE="${EUXIS_LOAD_MODE:-dynamic}"
+
+# Dynamic load factor: threshold = nproc * factor (default: 0.8)
+# On 8-core: threshold = 6.4, on 16-core: threshold = 12.8
+EUXIS_LOAD_FACTOR="${EUXIS_LOAD_FACTOR:-0.8}"
+
+# Static load threshold per core (only used if EUXIS_LOAD_MODE=static)
 EUXIS_LOAD_THRESHOLD="${EUXIS_LOAD_THRESHOLD:-1.5}"
 
 # Minimum agents to allow even under load (default: 1)
@@ -36,6 +46,9 @@ EUXIS_MAX_AGENTS="${EUXIS_MAX_AGENTS:-8}"
 
 # Seconds to wait when throttled (default: 5)
 EUXIS_THROTTLE_WAIT="${EUXIS_THROTTLE_WAIT:-5}"
+
+# Stagger delay between agent launches to prevent thermal spikes (default: 2s)
+EUXIS_STAGGER_DELAY="${EUXIS_STAGGER_DELAY:-2}"
 
 # Enable verbose resource logging (default: false)
 EUXIS_RESOURCE_VERBOSE="${EUXIS_RESOURCE_VERBOSE:-false}"
@@ -76,13 +89,15 @@ resource_cpu_cores() {
 }
 
 # Get current CPU usage percentage (0-100)
+# Note: On Linux, reading /proc/stat is nearly "free" in CPU cost
+# On macOS, we use sysctl which is lightweight (avoid top which is heavy)
 resource_cpu_usage() {
     local platform
     platform=$(_resource_platform)
 
     case "$platform" in
         linux)
-            # Use /proc/stat for accurate CPU usage
+            # Use /proc/stat - nearly zero overhead on Linux/WSL
             if [[ -f /proc/stat ]]; then
                 local cpu_line1 cpu_line2
                 cpu_line1=$(head -1 /proc/stat)
@@ -113,8 +128,17 @@ resource_cpu_usage() {
             fi
             ;;
         macos)
-            # Use top for macOS
-            top -l 1 -n 0 2>/dev/null | awk '/CPU usage/ {print int($3)}' || echo 50
+            # Use sysctl - lightweight, preferred over top which is CPU-heavy
+            # Get CPU load from vm.loadavg and convert to approximate usage %
+            local load cores
+            load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}' | tr -d '{}')
+            cores=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
+            if [[ -n "$load" && -n "$cores" ]]; then
+                # Convert load to approximate CPU %: (load / cores) * 100, capped at 100
+                awk "BEGIN {pct = ($load / $cores) * 100; if (pct > 100) pct = 100; printf \"%d\", pct}"
+            else
+                echo 50  # Fallback
+            fi
             ;;
         *)
             echo 50  # Safe default
@@ -294,20 +318,38 @@ resource_max_concurrent_agents() {
 # Throttling
 # ============================================================================
 
+# Calculate effective load threshold based on mode
+_resource_load_threshold() {
+    local cores
+    cores=$(resource_cpu_cores)
+
+    if [[ "$EUXIS_LOAD_MODE" == "dynamic" ]]; then
+        # Dynamic: threshold = nproc * factor
+        # On 8-core with 0.8 factor: threshold = 6.4
+        # On 16-core with 0.8 factor: threshold = 12.8
+        awk "BEGIN {printf \"%.2f\", $cores * $EUXIS_LOAD_FACTOR}"
+    else
+        # Static: threshold = cores * per-core-threshold
+        awk "BEGIN {printf \"%.2f\", $cores * $EUXIS_LOAD_THRESHOLD}"
+    fi
+}
+
 # Check if system is overloaded
 resource_is_overloaded() {
-    local cpu_usage mem_usage load_per_core
+    local cpu_usage mem_usage load_avg load_threshold
     cpu_usage=$(resource_cpu_usage)
     mem_usage=$(resource_mem_usage)
-    load_per_core=$(resource_load_per_core)
+    load_avg=$(resource_load_avg)
+    load_threshold=$(_resource_load_threshold)
 
-    local load_threshold_x100=$((${EUXIS_LOAD_THRESHOLD%.*} * 100))
-    local load_x100
-    load_x100=$(awk "BEGIN {printf \"%d\", $load_per_core * 100}")
+    # Convert to integers for comparison (x100)
+    local load_x100 threshold_x100
+    load_x100=$(awk "BEGIN {printf \"%d\", $load_avg * 100}")
+    threshold_x100=$(awk "BEGIN {printf \"%d\", $load_threshold * 100}")
 
     if [[ $cpu_usage -gt $EUXIS_CPU_THRESHOLD ]] || \
        [[ $mem_usage -gt $EUXIS_MEM_THRESHOLD ]] || \
-       [[ $load_x100 -gt $load_threshold_x100 ]]; then
+       [[ $load_x100 -gt $threshold_x100 ]]; then
         return 0  # true, is overloaded
     fi
     return 1  # false, not overloaded
@@ -337,8 +379,9 @@ resource_wait_if_overloaded() {
 
 # Print current resource status
 resource_status() {
-    local cores cpu_usage mem_usage mem_total mem_avail load_avg load_per_core temp max_agents
+    local cores cpu_usage mem_usage mem_total mem_avail load_avg load_per_core temp max_agents load_threshold platform
 
+    platform=$(_resource_platform)
     cores=$(resource_cpu_cores)
     cpu_usage=$(resource_cpu_usage)
     mem_total=$(resource_ram_total)
@@ -346,19 +389,21 @@ resource_status() {
     mem_usage=$(resource_mem_usage)
     load_avg=$(resource_load_avg)
     load_per_core=$(resource_load_per_core)
+    load_threshold=$(_resource_load_threshold)
     temp=$(resource_cpu_temp)
     max_agents=$(resource_max_concurrent_agents)
 
     echo "┌─────────────────────────────────────────────"
-    echo "│ System Resources"
+    echo "│ System Resources ($platform)"
     echo "├─────────────────────────────────────────────"
     printf "│ CPU:     %d cores, %d%% used" "$cores" "$cpu_usage"
     [[ "$temp" != "unknown" ]] && printf ", %d°C" "$temp"
     echo ""
-    printf "│ Memory:  %dMB / %dMB (%d%% used)\n" "$((mem_total - mem_avail))" "$mem_total" "$mem_usage"
-    printf "│ Load:    %s (%.2f per core)\n" "$load_avg" "$load_per_core"
+    printf "│ Memory:  %dMB / %dMB (%d%% used, threshold %d%%)\n" "$((mem_total - mem_avail))" "$mem_total" "$mem_usage" "$EUXIS_MEM_THRESHOLD"
+    printf "│ Load:    %s / %.1f threshold (%.2f per core)\n" "$load_avg" "$load_threshold" "$load_per_core"
     echo "├─────────────────────────────────────────────"
     printf "│ Max concurrent agents: %d\n" "$max_agents"
+    printf "│ Stagger delay: %ds between launches\n" "$EUXIS_STAGGER_DELAY"
 
     if resource_is_overloaded; then
         echo "│ Status:  ⚠️  THROTTLED"
