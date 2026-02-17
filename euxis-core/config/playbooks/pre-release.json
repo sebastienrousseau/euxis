@@ -1,0 +1,325 @@
+{
+  "schema_version": "1.0",
+  "id": "pre-release",
+  "name": "Pre-Release Gate v0.1.0",
+  "description": "Sequential audit of the entire system before release. Seven gates: lint, test, security, branding, bench, platform, docs. All gates must pass before release is authorized.",
+  "restart_policy": "from_failed_gate",
+  "stop_on_failure": true,
+  "parallel": false,
+  "timeout_minutes": 30,
+  "notify_on_complete": true,
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Code Quality Checks",
+      "gate": "lint",
+      "principle": "Is the code clean, consistent, and warning-free?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "polyglot",
+          "task_template": "Run shell script linting with shellcheck on all .sh files for: ${goal}. Enforce strict mode (-o all). Flag: unquoted variables, missing error handling, non-portable constructs, unused variables. Zero warnings policy.",
+          "verifies": [
+            "shellcheck passes on all .sh files",
+            "strict mode enforced (-o all)",
+            "no unquoted variables",
+            "proper error handling throughout",
+            "portable POSIX constructs only"
+          ]
+        },
+        {
+          "agent": "polyglot",
+          "task_template": "Run Python linting with ruff and flake8 on all .py files for: ${goal}. Enforce: E/W/F rules, import sorting, docstring presence, type hints on public APIs. Zero warnings policy.",
+          "verifies": [
+            "ruff passes with zero warnings",
+            "flake8 passes with zero warnings",
+            "imports sorted correctly",
+            "docstrings present on public functions",
+            "type hints on public APIs"
+          ]
+        },
+        {
+          "agent": "librarian",
+          "task_template": "Validate all JSON configuration files against their schemas for: ${goal}. Verify: playbooks match playbook schema, manifests match manifest schema, registry entries are well-formed. Flag any malformed JSON or schema violations.",
+          "verifies": [
+            "all JSON files parse correctly",
+            "playbooks match playbook schema",
+            "manifests match manifest schema",
+            "registry entries well-formed",
+            "no schema violations"
+          ]
+        }
+      ],
+      "checkpoint": "All linters pass with zero warnings, JSON schemas validated",
+      "abort_on_failure": true,
+      "failure_message": "Lint gate failed. Fix code quality issues before proceeding."
+    },
+    {
+      "phase": 2,
+      "name": "Test Suite Execution",
+      "gate": "test",
+      "principle": "Do all tests pass with comprehensive coverage?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "tester",
+          "task_template": "Execute full unit test suite for: ${goal}. Run pytest for Python, bats for shell scripts. Verify 90%+ line coverage. Flag any failing tests with root cause analysis.",
+          "verifies": [
+            "all unit tests pass",
+            "pytest exits with code 0",
+            "bats tests pass",
+            "line coverage >= 90%",
+            "no skipped tests without justification"
+          ]
+        },
+        {
+          "agent": "tester",
+          "task_template": "Execute integration tests for: ${goal}. Test component interactions: CLI to core, gateway to adapters, memory subsystem. Verify end-to-end data flow integrity.",
+          "verifies": [
+            "all integration tests pass",
+            "CLI to core communication verified",
+            "gateway to adapter flow tested",
+            "memory subsystem integration validated",
+            "end-to-end data flow intact"
+          ]
+        },
+        {
+          "agent": "tester",
+          "task_template": "Run golden file tests for: ${goal}. Compare agent outputs against golden reference files. Flag any drift from expected behavior. Update golden files only with explicit approval.",
+          "verifies": [
+            "golden file tests pass",
+            "agent outputs match references",
+            "no unexpected behavioral drift",
+            "golden files are current"
+          ]
+        }
+      ],
+      "checkpoint": "All test suites pass with 90%+ coverage, golden files verified",
+      "abort_on_failure": true,
+      "failure_message": "Test gate failed. Fix failing tests and coverage gaps before proceeding."
+    },
+    {
+      "phase": 3,
+      "name": "Security Audit",
+      "gate": "security",
+      "principle": "Is the codebase secure and the supply chain clean?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "pentester",
+          "task_template": "Perform secret scanning for: ${goal}. Scan all files for hardcoded secrets, API keys, tokens, passwords. Check .env files are gitignored. Verify no credentials in commit history. Flag severity S0-S3.",
+          "verifies": [
+            "no hardcoded secrets in source",
+            "no API keys or tokens exposed",
+            ".env files excluded from git",
+            "git history clean of credentials",
+            "secret findings classified S0-S3"
+          ]
+        },
+        {
+          "agent": "sentinel",
+          "task_template": "Audit dependencies for: ${goal}. Scan requirements.txt and package.json for known CVEs. Check for unmaintained packages (>12 months). Verify license compatibility. Flag typosquatting risks.",
+          "verifies": [
+            "no known CVEs in dependencies",
+            "all dependencies actively maintained",
+            "license compatibility verified",
+            "no typosquatting risks",
+            "lock files committed"
+          ]
+        },
+        {
+          "agent": "pentester",
+          "task_template": "Run SAST checks for: ${goal}. Static analysis for: injection vulnerabilities, unsafe deserialization, command injection, path traversal. Verify input validation at system boundaries.",
+          "verifies": [
+            "no injection vulnerabilities",
+            "no unsafe deserialization",
+            "no command injection vectors",
+            "no path traversal risks",
+            "input validation at boundaries"
+          ]
+        }
+      ],
+      "checkpoint": "Security scans clean, dependencies audited, no vulnerabilities",
+      "abort_on_failure": true,
+      "failure_message": "Security gate failed. Critical vulnerabilities detected. Do not release."
+    },
+    {
+      "phase": 4,
+      "name": "Brand Consistency",
+      "gate": "branding",
+      "principle": "Is the brand identity consistent across all touchpoints?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "gatekeeper",
+          "task_template": "Verify version synchronization for: ${goal}. Check VERSION file, pyproject.toml, package.json, CLI --version output all match. Verify CHANGELOG.md has entry for current version. Flag any version drift.",
+          "verifies": [
+            "VERSION file matches release target",
+            "pyproject.toml version matches",
+            "package.json version matches",
+            "CLI --version output matches",
+            "CHANGELOG.md has current version entry"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Audit help menus for: ${goal}. Verify all CLI commands have --help text. Check consistency of flag naming conventions. Verify examples are runnable. Flag missing or outdated help text.",
+          "verifies": [
+            "all CLI commands have --help",
+            "flag naming conventions consistent",
+            "help examples are runnable",
+            "no outdated help text",
+            "brand voice in help output"
+          ]
+        },
+        {
+          "agent": "evangelist",
+          "task_template": "Validate ASCII art and branding assets for: ${goal}. Verify logo renders correctly in terminals. Check signature.txt is current. Validate branding consistency in TUI headers and splash screens.",
+          "verifies": [
+            "ASCII logo renders correctly",
+            "signature.txt is current",
+            "TUI headers use correct branding",
+            "splash screens consistent",
+            "no legacy branding references"
+          ]
+        }
+      ],
+      "checkpoint": "Version synced, help audited, branding validated",
+      "abort_on_failure": true,
+      "failure_message": "Branding gate failed. Version mismatch or branding inconsistency detected."
+    },
+    {
+      "phase": 5,
+      "name": "Performance Gates",
+      "gate": "bench",
+      "principle": "Does the system meet performance budgets?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "optimizer",
+          "task_template": "Benchmark cold start performance for: ${goal}. Measure CLI cold start time from process spawn to first output. Target: < 50ms. Run 10 iterations, report p50/p95/p99. Flag any regression from baseline.",
+          "verifies": [
+            "cold start p50 < 50ms",
+            "cold start p95 < 75ms",
+            "cold start p99 < 100ms",
+            "no regression from baseline",
+            "10 iterations measured"
+          ]
+        },
+        {
+          "agent": "optimizer",
+          "task_template": "Measure memory footprint for: ${goal}. Profile resident memory during typical operations. Target: < 50MB peak. Check for memory leaks under sustained load. Flag unbounded growth.",
+          "verifies": [
+            "peak memory < 50MB",
+            "no memory leaks detected",
+            "no unbounded growth under load",
+            "memory profile documented"
+          ]
+        },
+        {
+          "agent": "optimizer",
+          "task_template": "Benchmark dispatch latency for: ${goal}. Measure time from task submission to agent activation. Target: < 200ms. Test single dispatch and concurrent dispatch scenarios. Flag queue bottlenecks.",
+          "verifies": [
+            "dispatch latency p50 < 200ms",
+            "dispatch latency p95 < 300ms",
+            "concurrent dispatch stable",
+            "no queue bottlenecks",
+            "baseline comparison documented"
+          ]
+        }
+      ],
+      "checkpoint": "Cold start < 50ms, memory < 50MB, dispatch < 200ms",
+      "abort_on_failure": true,
+      "failure_message": "Bench gate failed. Performance budgets exceeded. Optimize before release."
+    },
+    {
+      "phase": 6,
+      "name": "Cross-Platform Validation",
+      "gate": "platform",
+      "principle": "Does it work identically on all target platforms?",
+      "mode": "parallel",
+      "delegates": [
+        {
+          "agent": "inspector",
+          "task_template": "Verify path compatibility for: ${goal}. Check all file path operations use portable APIs. No hardcoded path separators. $HOME and XDG paths handled correctly. Verify paths work on macOS, Linux, and WSL.",
+          "verifies": [
+            "portable path APIs used throughout",
+            "no hardcoded path separators",
+            "$HOME expansion works correctly",
+            "XDG directories respected",
+            "paths validated on macOS, Linux, WSL"
+          ]
+        },
+        {
+          "agent": "inspector",
+          "task_template": "Test clipboard fallbacks for: ${goal}. Verify clipboard operations detect available backends (pbcopy, xclip, xsel, wl-copy). Test graceful degradation when no clipboard available. Flag missing fallback paths.",
+          "verifies": [
+            "clipboard backend detection works",
+            "pbcopy fallback (macOS)",
+            "xclip/xsel fallback (Linux X11)",
+            "wl-copy fallback (Wayland)",
+            "graceful degradation when unavailable"
+          ]
+        },
+        {
+          "agent": "inspector",
+          "task_template": "Verify terminal degradation for: ${goal}. Test behavior in dumb terminals, over SSH, in tmux/screen. Verify NO_COLOR is respected. Test 256-color and true-color fallbacks. Flag any hard failures on limited terminals.",
+          "verifies": [
+            "dumb terminal mode works",
+            "SSH session compatible",
+            "tmux/screen compatible",
+            "NO_COLOR respected",
+            "color fallbacks work correctly"
+          ]
+        }
+      ],
+      "checkpoint": "Path handling portable, clipboard fallbacks work, terminal degradation graceful",
+      "abort_on_failure": true,
+      "failure_message": "Platform gate failed. Cross-platform compatibility issues detected."
+    },
+    {
+      "phase": 7,
+      "name": "Documentation Completeness",
+      "gate": "docs",
+      "principle": "Is documentation complete, accurate, and current?",
+      "mode": "hierarchical",
+      "delegates": [
+        {
+          "agent": "writer",
+          "task_template": "Audit README accuracy for: ${goal}. Verify installation instructions work. Test quickstart examples. Check feature list matches current functionality. Flag stale or misleading content.",
+          "verifies": [
+            "installation instructions work",
+            "quickstart examples run successfully",
+            "feature list is current",
+            "no stale content",
+            "links are valid"
+          ]
+        },
+        {
+          "agent": "writer",
+          "task_template": "Verify man page generation for: ${goal}. Check all CLI commands have man pages. Verify man page content matches --help output. Test man page rendering. Flag missing or outdated man pages.",
+          "verifies": [
+            "man pages exist for all commands",
+            "man content matches --help",
+            "man pages render correctly",
+            "no outdated man pages"
+          ]
+        },
+        {
+          "agent": "writer",
+          "task_template": "Audit API documentation for: ${goal}. Verify all public APIs are documented. Check code examples compile/run. Verify OpenAPI spec matches implementation. Flag undocumented public interfaces.",
+          "verifies": [
+            "all public APIs documented",
+            "code examples verified",
+            "OpenAPI spec current",
+            "no undocumented interfaces",
+            "doc site builds without warnings"
+          ]
+        }
+      ],
+      "checkpoint": "README accurate, man pages current, API docs complete",
+      "abort_on_failure": true,
+      "failure_message": "Docs gate failed. Documentation gaps or inaccuracies detected."
+    }
+  ]
+}

@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 7 (API Design & UX) completed","timestamp":"2026-02-09T00:11:04Z","correlation_id":"1770595864-45892-31600"}

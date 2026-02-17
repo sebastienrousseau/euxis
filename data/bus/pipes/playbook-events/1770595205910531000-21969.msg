@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 4 (Testing & Coverage) completed","timestamp":"2026-02-09T00:00:05Z","correlation_id":"1770595205-81347-31156"}

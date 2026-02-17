@@ -1,0 +1,75 @@
+{
+  "version": "0.1.0",
+  "description": "Model routing configuration for cost optimization",
+
+  "models": {
+    "routine": "gemini-2.5-flash-lite",
+    "data": "deepseek-v3",
+    "code": "claude-sonnet-4",
+    "reason": "claude-opus-4"
+  },
+
+  "local": {
+    "enabled": false,
+    "auto_fallback": false,
+    "endpoint": "http://localhost:11434",
+    "model": "qwen3:32b",
+    "fallback_model": "llama3.3:8b",
+    "tasks": ["heartbeat", "status", "mesh_discover", "deadlock_check"],
+    "note": "Set EUXIS_LOCAL_ONLY=true to force local models, or enabled=true for auto-fallback"
+  },
+
+  "caching": {
+    "enabled": true,
+    "ttl_seconds": 3300,
+    "warmup_interval_seconds": 3000,
+    "min_tokens": 1024,
+    "providers": {
+      "anthropic": {
+        "method": "cache_control",
+        "breakpoint": "after_system"
+      },
+      "openai": {
+        "method": "automatic",
+        "prefix_match": true
+      },
+      "google": {
+        "method": "context_caching",
+        "ttl_minutes": 60
+      }
+    }
+  },
+
+  "capability_tiers": {
+    "routine": [
+      "heartbeat", "status", "ping", "health", "monitor"
+    ],
+    "data": [
+      "formatting", "parsing", "logging", "metrics", "telemetry",
+      "localization", "i18n", "transformation"
+    ],
+    "code": [
+      "code-review", "debugging", "testing", "refactoring",
+      "documentation", "api-design", "implementation"
+    ],
+    "reason": [
+      "architecture", "planning", "security", "research",
+      "audit", "synthesis", "strategy", "analysis"
+    ]
+  },
+
+  "task_keywords": {
+    "routine": ["check", "status", "health", "ping", "heartbeat", "verify", "list"],
+    "data": ["format", "parse", "log", "metric", "convert", "transform", "summarize"],
+    "code": ["fix", "debug", "implement", "refactor", "write", "test", "review"],
+    "reason": ["architect", "design", "plan", "strategy", "research", "analyze", "mission"]
+  },
+
+  "cost_estimates": {
+    "routine": 0.10,
+    "data": 0.27,
+    "code": 3.00,
+    "reason": 15.00,
+    "local": 0.00
+  }
+}

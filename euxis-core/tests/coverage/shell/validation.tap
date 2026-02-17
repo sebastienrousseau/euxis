@@ -1,0 +1,105 @@
+1..38
+not ok 1 validation_error outputs error message and exits with status 1
+# (in test file tests/bats/lib/validation.bats, line 50)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 2 validation_warning outputs warning message and continues
+# (in test file tests/bats/lib/validation.bats, line 58)
+#   `[[ "${output}" =~ "VALIDATION WARNING" ]]' failed
+not ok 3 validation_pass outputs success message
+# (in test file tests/bats/lib/validation.bats, line 65)
+#   `[[ "${output}" =~ "VALIDATION PASS" ]]' failed
+not ok 4 validate_agent_name accepts valid core agent
+# (in test file tests/bats/lib/validation.bats, line 76)
+#   `[[ "${output}" =~ "Valid agent: architect" ]]' failed
+not ok 5 validate_agent_name accepts valid default agent
+# (in test file tests/bats/lib/validation.bats, line 82)
+#   `[[ "${output}" =~ "Valid agent: tester" ]]' failed
+not ok 6 validate_agent_name rejects invalid agent name
+# (in test file tests/bats/lib/validation.bats, line 87)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 7 validate_agent_name rejects empty agent name
+# (in test file tests/bats/lib/validation.bats, line 95)
+#   `[[ "${output}" =~ "VALIDATION ERROR" ]]' failed
+not ok 8 validate_agent_name handles missing registry file
+# (in test file tests/bats/lib/validation.bats, line 101)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 9 validate_agent_name handles malformed JSON registry
+# (in test file tests/bats/lib/validation.bats, line 108)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 10 validate_task_input accepts non-empty task
+# (in test file tests/bats/lib/validation.bats, line 119)
+#   `[[ "${output}" =~ "Valid task input" ]]' failed
+not ok 11 validate_task_input rejects empty task
+# (in test file tests/bats/lib/validation.bats, line 125)
+#   `[[ "${output}" =~ "Task input cannot be empty" ]]' failed
+not ok 12 validate_task_input rejects whitespace-only task
+# (in test file tests/bats/lib/validation.bats, line 130)
+#   `[[ "${status}" -eq 1 ]]' failed
+ok 13 validate_task_input handles tasks with special characters
+ok 14 validate_task_input handles Unicode in task
+not ok 15 validate_task_input enforces maximum length
+# (in test file tests/bats/lib/validation.bats, line 148)
+#   `[[ "${status}" -eq 1 ]]' failed
+not ok 16 validate_file_executable accepts executable file
+# (in test file tests/bats/lib/validation.bats, line 163)
+#   `[[ "${output}" =~ "File is executable" ]]' failed
+not ok 17 validate_file_executable rejects non-executable file
+# (in test file tests/bats/lib/validation.bats, line 173)
+#   `[[ "${output}" =~ "File is not executable" ]]' failed
+not ok 18 validate_file_executable rejects non-existent file
+# (in test file tests/bats/lib/validation.bats, line 179)
+#   `[[ "${output}" =~ "File does not exist" ]]' failed
+not ok 19 validate_file_executable rejects directory
+# (in test file tests/bats/lib/validation.bats, line 185)
+#   `[[ "${output}" =~ "Path is not a regular file" ]]' failed
+ok 20 validate_file_executable handles files with spaces
+ok 21 validate_file_executable handles symlinks
+not ok 22 validate_file_executable handles broken symlinks
+# (in test file tests/bats/lib/validation.bats, line 214)
+#   `[[ "${output}" =~ "File does not exist" ]]' failed
+ok 23 validate_system_dependencies checks for required commands
+not ok 24 validate_system_dependencies fails on missing critical dependency
+# (in test file tests/bats/lib/validation.bats, line 249)
+#   `[[ "${status}" -eq 1 ]]' failed
+ok 25 validate_system_dependencies handles command version checks
+not ok 26 validate_euxis_structure accepts valid structure
+# (in test file tests/bats/lib/validation.bats, line 280)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 27 validate_euxis_structure fails on missing bin directory
+# (in test file tests/bats/lib/validation.bats, line 290)
+#   `[[ "${output}" =~ "Missing required directory: bin" ]]' failed
+not ok 28 validate_euxis_structure fails on missing registry
+# (in test file tests/bats/lib/validation.bats, line 300)
+#   `[[ "${output}" =~ "Missing agents/registry.json" ]]' failed
+not ok 29 validate_minimal runs basic checks only
+# (in test file tests/bats/lib/validation.bats, line 313)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 30 validate_full runs comprehensive checks
+# (in test file tests/bats/lib/validation.bats, line 332)
+#   `[[ "${status}" -eq 0 ]]' failed
+not ok 31 validate_comprehensive runs all possible checks
+# (in test file tests/bats/lib/validation.bats, line 351)
+#   `[[ "${status}" -eq 0 ]]' failed
+ok 32 validation handles set -u mode
+ok 33 validation handles pipefail mode
+ok 34 validation functions handle Unicode file paths
+ok 35 validation handles very long file paths # skip Path too long for filesystem
+not ok 36 validation functions are idempotent
+# (in test file tests/bats/lib/validation.bats, line 408)
+#   `run1_output=$(validate_minimal 2>&1)' failed
+not ok 37 validation handles concurrent execution
+# (in test file tests/bats/lib/validation.bats, line 427)
+#   `wait $pid1 && wait $pid2' failed
+# Running minimal validation...
+# Running minimal validation...
+#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
+#   ❌ Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
+#   ✅ All system dependencies available
+#
+#   ✅ All system dependencies available
+# Validation errors (1):
+#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
+#
+# Validation errors (1):
+#   ERROR: Required directory missing: /var/folders/2k/1mtvvw2s0pxgbrfmj7shswch0000gn/T/tmp.vGQtaXzxb8/euxis/core/lib
+ok 38 validation handles signal interruption # skip Signal handling test requires complex setup

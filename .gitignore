@@ -131,12 +131,16 @@ $RECYCLE.BIN/
 # EUXIS RUNTIME DATA
 # ============================================================================
 # Runtime project data (agent outputs, memory, audits)
-data/projects/
-data/cortex/db/
-data/lifecycle/
-data/perf/
-data/bus/pipes/
+runtime/data/**
+runtime/memory/cortex/db/
+runtime/locks/
+runtime/locales/
+runtime/baseline/
 projects/
+
+# Keep runtime schemas/config that are meant to be tracked
+!runtime/data/bus/
+!runtime/data/bus/topics.json
 
 # Vector database (ChromaDB runtime)
 cortex_db/
@@ -150,7 +154,7 @@ metrics/reports/
 observability/
 
 # Runtime locks
-locks/
+runtime/locks/
 
 # Audit artifacts (session-specific)
 docs/audits/

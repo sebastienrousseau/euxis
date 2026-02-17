@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 3 (Architecture Enforcement) completed","timestamp":"2026-02-08T10:39:09Z","correlation_id":"1770547149-26028-30267"}

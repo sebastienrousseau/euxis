@@ -1,0 +1,92 @@
+---
+protocol_id: evidence-citation
+version: "0.1.0"
+last_updated: "2026-01-31"
+priority: "YELLOW"
+---
+
+## EVIDENCE & CITATION PROTOCOL (v0.1.0)
+
+Every claim, finding, and recommendation produced by an Euxis agent MUST be grounded in evidence. Unsupported assertions are protocol violations.
+
+### 1. Evidence Grade Hierarchy
+
+Evidence is graded on a 5-level scale. Higher grades take precedence in conflicts.
+
+| Grade | Label | Definition | Example |
+|-------|-------|-----------|---------|
+| **E1** | `VERIFIED` | Confirmed by automated tool output, test result, or direct observation | `grep` output, test pass/fail, `git log` entry |
+| **E2** | `MEASURED` | Quantified by profiling, benchmarking, or metric collection | Latency measurement, coverage percentage, memory profile |
+| **E3** | `OBSERVED` | Seen in source code, logs, or documentation but not independently verified | Code pattern found by reading, log entry content |
+| **E4** | `INFERRED` | Logically deduced from multiple observations, not directly confirmed | "Module A depends on B because A imports B and B's removal breaks tests" |
+| **E5** | `SPECULATED` | **FORBIDDEN.** Guesses, hunches, or assumptions without supporting observations | "This might cause issues" without any observation |
+
+### 2. Citation Rules
+
+1. **Every finding** in an `ANALYSIS_REPORT` or `REVIEW_VERDICT` MUST cite at least one evidence source at grade E1-E4.
+2. **Every recommendation** MUST reference the finding it addresses.
+3. **E5 (SPECULATED)** evidence is FORBIDDEN in final deliverables. If you cannot support a claim with E1-E4 evidence, you MUST either:
+   - Perform additional investigation to gather evidence, or
+   - Explicitly flag it as `[UNVERIFIED — NEEDS INVESTIGATION]` and do NOT include it as a finding.
+4. **Conflicting evidence**: When E1-E4 evidence conflicts, the higher grade wins. Equal grades trigger the Conflict Resolution Protocol.
+
+### 3. Citation Format
+
+Inline citations use this format:
+
+```markdown
+<Claim> [E<grade>: <source description>]
+```
+
+**Examples:**
+```markdown
+The auth module uses JWT with RS256 signing. [E3: Observed in src/auth/token.py line 42]
+Response time increased 340% after the migration. [E2: Measured via k6 load test, run #847]
+The config file exists at ~/.config/app/settings.toml. [E1: Verified by `ls -la ~/.config/app/settings.toml`]
+Module A likely depends on Module B due to import chain. [E4: Inferred from import graph analysis]
+```
+
+### 4. Evidence Requirements by Artifact Type
+
+| Artifact Type | Minimum Evidence Grade | Citation Required |
+|---------------|----------------------|-------------------|
+| `CODE_CHANGE` | E1 (test evidence must be verified) | Every rationale claim |
+| `ANALYSIS_REPORT` | E3 (observed minimum) | Every finding |
+| `TEST_REPORT` | E1 (all results must be verified) | Every pass/fail entry |
+| `REVIEW_VERDICT` | E3 (observed minimum) | Every checklist item |
+| `CHALLENGE_REPORT` | E4 (inference acceptable for pre-mortem) | Every assumption tested |
+| `PLAN` | E4 (inference acceptable for planning) | Key assumptions |
+| `DOCUMENTATION` | E3 (observed minimum) | Technical claims |
+| `RELEASE_ARTIFACT` | E1 (changelog entries must be verified) | Every entry |
+
+### 5. Evidence Collection Commands
+
+Agents MUST use verifiable commands to collect evidence:
+
+| Evidence Type | Tool | Grade |
+|--------------|------|-------|
+| File existence | `ls`, `find` | E1 |
+| File content | `cat`, `grep`, `Read` | E1 |
+| Test results | `pytest`, `jest`, test runner output | E1 |
+| Git history | `git log`, `git diff`, `git blame` | E1 |
+| Performance | `time`, `k6`, profiler output | E2 |
+| Code patterns | `grep`, `rg`, static analysis | E3 |
+| Dependencies | Import analysis, dependency graphs | E3-E4 |
+| Cortex recall | `euxis-cortex recall` | E3 (may be stale) |
+
+### 6. Stale Evidence
+
+Evidence degrades over time:
+- **E1/E2 evidence** from the current session is fresh.
+- **E1/E2 evidence** from Cortex memories older than 7 days SHOULD be re-verified before citing.
+- **E3/E4 evidence** from Cortex MUST be flagged as `[CORTEX — <date>]` to indicate age.
+
+### 7. Enforcement
+
+1. The `reviewer` agent MUST reject artifacts with E5 evidence in findings.
+2. The `reviewer` agent MUST flag findings with no citation as incomplete.
+3. During conflict resolution, evidence grade determines winner when priority is equal (per Conflict Resolution Protocol).
+4. The `critic` MUST verify evidence grades when challenging assumptions.
+5. The `researcher` MUST cite all sources with explicit grades in research outputs.
+
+# Enterprise Unified eXecution Intelligence System

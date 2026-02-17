@@ -1,0 +1,309 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+  # shellcheck source=core/lib/ui.sh
+  source "${EUXIS_HOME}/core/lib/ui.sh"
+  ui_auto_header
+fi
+
+
+# Euxis Documentation-as-Code Testing Framework
+# Validates all code snippets in documentation files
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEST_LOG="$REPO_ROOT/docs-test-results.json"
+FAILED_TESTS=()
+PASSED_TESTS=()
+SKIPPED_TESTS=()
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Test configuration
+declare -A TEST_PATTERNS=(
+    ["euxis-health"]="HEALTH CHECK.*PASSED|Fleet.*integrity.*100%"
+    ["euxis --help"]="Usage:|Multi-Provider AI Agent Framework"
+    ["euxis-dispatch --help"]="hierarchical|mesh|federated"
+    ["euxis-cortex"]="remember|recall|Semantic Memory"
+    ["bash --version"]="bash.*version.*[45]\."
+    ["python3 --version"]="Python.*3\.[89]"
+    ["euxis-squad list"]="ID.*NAME.*PURPOSE|Squad"
+    ["euxis-combo list"]="ID.*NAME.*DESCRIPTION|Combo"
+    ["euxis-playbook list"]="ID.*NAME.*DESCRIPTION|Playbook"
+)
+
+declare -A EXPECTED_EXIT_CODES=(
+    ["euxis --help"]=1
+    ["euxis-dispatch --help"]=1
+    ["euxis-cortex --help"]=1
+)
+
+# JSON logging functions
+init_test_log() {
+    cat > "$TEST_LOG" <<EOF
+{
+    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+    "framework": "euxis-docs-test",
+    "version": "0.0.8",
+    "platform": "$(uname -s)",
+    "tests": []
+}
+EOF
+}
+
+log_test_result() {
+    local test_name="$1"
+    local status="$2"
+    local command="$3"
+    local expected_pattern="$4"
+    local actual_exit_code="$5"
+    local output="$6"
+    local reason="${7:-}"
+
+    # Create temporary file for this test result
+    local temp_result=$(mktemp)
+    cat > "$temp_result" <<EOF
+{
+    "name": "$test_name",
+    "status": "$status",
+    "command": "$command",
+    "expected_pattern": "$expected_pattern",
+    "exit_code": $actual_exit_code,
+    "output_preview": "$(echo "$output" | head -3 | tr '\n' ' ' | sed 's/"/\\"/g')",
+    "reason": "$reason",
+    "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+}
+EOF
+
+    # Append to main log
+    if [ -s "$TEST_LOG" ]; then
+        # Insert into the tests array
+        python3 -c "
+import json
+with open('$TEST_LOG', 'r') as f: data = json.load(f)
+with open('$temp_result', 'r') as f: test = json.load(f)
+data['tests'].append(test)
+with open('$TEST_LOG', 'w') as f: json.dump(data, f, indent=2)
+"
+    fi
+
+    rm "$temp_result"
+}
+
+run_documentation_test() {
+    local test_name="$1"
+    local command="$2"
+    local pattern="${3:-}"
+    local expected_exit_code="${4:-0}"
+
+    echo -n "Testing: $test_name ... "
+
+    # Run command and capture output and exit code
+    set +e
+    local output
+    output=$(eval "$command" 2>&1)
+    local actual_exit_code=$?
+    set -e
+
+    local status="PASS"
+    local reason=""
+
+    # Check exit code first
+    if [ "$expected_exit_code" != "*" ] && [ "$actual_exit_code" != "$expected_exit_code" ]; then
+        status="FAIL"
+        reason="Expected exit code $expected_exit_code, got $actual_exit_code"
+    # Check pattern if specified
+    elif [ -n "$pattern" ] && ! echo "$output" | grep -E -q "$pattern"; then
+        status="FAIL"
+        reason="Output did not match expected pattern: $pattern"
+    fi
+
+    # Log result
+    log_test_result "$test_name" "$status" "$command" "$pattern" "$actual_exit_code" "$output" "$reason"
+
+    # Display result
+    case "$status" in
+        "PASS")
+            echo -e "${GREEN}PASS${NC}"
+            PASSED_TESTS+=("$test_name")
+            ;;
+        "FAIL")
+            echo -e "${RED}FAIL${NC}"
+            FAILED_TESTS+=("$test_name")
+            echo -e "  ${YELLOW}Reason:${NC} $reason"
+            ;;
+        "SKIP")
+            echo -e "${BLUE}SKIP${NC}"
+            SKIPPED_TESTS+=("$test_name")
+            echo -e "  ${YELLOW}Reason:${NC} $reason"
+            ;;
+    esac
+}
+
+# Test category functions
+test_tool_availability() {
+    echo ""
+    echo -e "${BLUE}📋 Testing Tool Availability${NC}"
+    echo "-------------------------------"
+
+    local tools=(
+        "euxis"
+        "euxis-health"
+        "euxis-certify"
+        "euxis-cortex"
+        "euxis-squad"
+        "euxis-combo"
+        "euxis-playbook"
+        "euxis-dispatch"
+    )
+
+    for tool in "${tools[@]}"; do
+        run_documentation_test "Tool exists: $tool" "command -v $tool" ".*$tool"
+    done
+}
+
+test_basic_functionality() {
+    echo ""
+    echo -e "${BLUE}🏥 Testing Basic Functionality${NC}"
+    echo "--------------------------------"
+
+    # Health check
+    run_documentation_test "Health Check" "euxis-health" "${TEST_PATTERNS["euxis-health"]}" 0
+
+    # List commands
+    run_documentation_test "Squad List" "euxis-squad list" "${TEST_PATTERNS["euxis-squad list"]}" 0
+    run_documentation_test "Combo List" "euxis-combo list" "${TEST_PATTERNS["euxis-combo list"]}" 0
+    run_documentation_test "Playbook List" "euxis-playbook list" "${TEST_PATTERNS["euxis-playbook list"]}" 0
+}
+
+test_help_commands() {
+    echo ""
+    echo -e "${BLUE}📖 Testing Help Commands${NC}"
+    echo "--------------------------"
+
+    # Commands that return exit code 1 but provide valid help
+    run_documentation_test "Main Help" "euxis --help" "${TEST_PATTERNS["euxis --help"]}" 1
+    run_documentation_test "Dispatch Help" "euxis-dispatch --help" "${TEST_PATTERNS["euxis-dispatch --help"]}" 1
+    run_documentation_test "Cortex Help" "euxis-cortex" "${TEST_PATTERNS["euxis-cortex"]}" 1
+}
+
+test_prerequisites() {
+    echo ""
+    echo -e "${BLUE}⚡ Testing Prerequisites${NC}"
+    echo "-------------------------"
+
+    run_documentation_test "Bash Version" "bash --version" "${TEST_PATTERNS["bash --version"]}" 0
+    run_documentation_test "Python3 Version" "python3 --version" "${TEST_PATTERNS["python3 --version"]}" 0
+}
+
+test_configuration_integrity() {
+    echo ""
+    echo -e "${BLUE}🔧 Testing Configuration Integrity${NC}"
+    echo "-----------------------------------"
+
+    run_documentation_test "Registry JSON Valid" "python3 -m json.tool ~/.euxis/agents/registry.json > /dev/null" "" 0
+    run_documentation_test "Agent Prompts Directory" "test -d ~/.euxis/prompts" "" 0
+    run_documentation_test "Config Directory" "test -d ~/.euxis/config" "" 0
+}
+
+extract_and_test_readme_snippets() {
+    echo ""
+    echo -e "${BLUE}📄 Testing README Code Snippets${NC}"
+    echo "--------------------------------"
+
+    # Extract code blocks from README and test safe ones
+    local readme_file="$REPO_ROOT/README.md"
+
+    if [ -f "$readme_file" ]; then
+        # Test installation verification (safe to run multiple times)
+        run_documentation_test "README: Health Check" "euxis-health > /dev/null" "" 0
+
+        # Test provider listing
+        run_documentation_test "README: Provider Check" "euxis-health 2>&1 | grep -E 'FOUND:|NOT FOUND:' | wc -l" "^[0-9]+$" 0
+
+        echo "  Note: Installation and agent deployment examples skipped (would modify system)"
+    else
+        run_documentation_test "README File Exists" "test -f $readme_file" "" 0
+    fi
+}
+
+generate_summary() {
+    echo ""
+    echo -e "${BLUE}📊 Test Summary${NC}"
+    echo "================"
+
+    local total_tests=$((${#PASSED_TESTS[@]} + ${#FAILED_TESTS[@]} + ${#SKIPPED_TESTS[@]}))
+    local pass_rate=0
+    if [ $total_tests -gt 0 ]; then
+        pass_rate=$((${#PASSED_TESTS[@]} * 100 / total_tests))
+    fi
+
+    echo "Total Tests: $total_tests"
+    echo -e "Passed: ${GREEN}${#PASSED_TESTS[@]}${NC}"
+    echo -e "Failed: ${RED}${#FAILED_TESTS[@]}${NC}"
+    echo -e "Skipped: ${BLUE}${#SKIPPED_TESTS[@]}${NC}"
+    echo "Pass Rate: $pass_rate%"
+
+    # Update summary in JSON log
+    python3 -c "
+import json
+with open('$TEST_LOG', 'r') as f: data = json.load(f)
+data['summary'] = {
+    'total': $total_tests,
+    'passed': ${#PASSED_TESTS[@]},
+    'failed': ${#FAILED_TESTS[@]},
+    'skipped': ${#SKIPPED_TESTS[@]},
+    'pass_rate': $pass_rate
+}
+with open('$TEST_LOG', 'w') as f: json.dump(data, f, indent=2)
+"
+
+    echo ""
+    echo -e "📄 Full results logged to: ${YELLOW}$TEST_LOG${NC}"
+
+    if [ ${#FAILED_TESTS[@]} -eq 0 ]; then
+        echo -e "\n${GREEN}✅ All documentation code snippets validated successfully!${NC}"
+        return 0
+    else
+        echo -e "\n${RED}❌ Some documentation code snippets failed validation.${NC}"
+        echo -e "${YELLOW}Failed tests:${NC}"
+        for test in "${FAILED_TESTS[@]}"; do
+            echo "  - $test"
+        done
+        return 1
+    fi
+}
+
+main() {
+    echo -e "${BLUE}🧪 Euxis Documentation-as-Code Testing${NC}"
+    echo "======================================="
+    echo "Framework: euxis-docs-test v0.0.8"
+    echo "Platform: $(uname -s)"
+    echo ""
+
+    # Initialize test log
+    init_test_log
+
+    # Run test suites
+    test_tool_availability
+    test_basic_functionality
+    test_help_commands
+    test_prerequisites
+    test_configuration_integrity
+    extract_and_test_readme_snippets
+
+    # Generate summary and exit
+    generate_summary
+}
+
+# Allow sourcing for testing
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

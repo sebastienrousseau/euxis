@@ -10,8 +10,8 @@ We provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.0.8   | :white_check_mark: |
-| < 0.0.8 | :x:                |
+| 0.1.0   | :white_check_mark: |
+| < 0.1.0 | :x:                |
 
 Users are strongly encouraged to upgrade to the latest supported version to ensure they receive all security patches.
 

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+_self="$0"
+while [ -L "$_self" ]; do
+    _dir="$(cd "$(dirname "$_self")" && pwd)"
+    _self="$(readlink "$_self")"
+    [[ "$_self" != /* ]] && _self="$_dir/$_self"
+done
+SCRIPT_DIR="$(cd "$(dirname "$_self")" && pwd)"
+exec "$SCRIPT_DIR/euxis.sh" "$@"

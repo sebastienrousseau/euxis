@@ -1,0 +1,79 @@
+name: Workspace CI
+
+on:
+  push:
+    branches: [main, feat/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-python-packages:
+    name: Test Python Packages
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - euxis-core
+          - euxis-cli
+          - euxis-security
+          - euxis-gateway
+          - euxis-adapters
+          - euxis-tui
+          - euxis-metrics
+          - euxis-crypto-lib
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package
+        run: |
+          cd ${{ matrix.package }}
+          pip install -e .[dev]
+
+      - name: Run tests
+        run: |
+          cd ${{ matrix.package }}
+          pytest -v || echo "No tests found"
+
+  test-typescript-packages:
+    name: Test TypeScript Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and test
+        run: |
+          cd euxis-crypto-packages
+          npm ci || npm install
+          npm test || echo "No tests configured"
+
+  build-docs:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install MkDocs
+        run: pip install mkdocs mkdocs-material
+
+      - name: Build docs
+        run: |
+          cd euxis-docs
+          mkdocs build

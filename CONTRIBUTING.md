@@ -14,6 +14,7 @@ Welcome to the Euxis project! We appreciate your interest in contributing. This 
   - [Clone and Setup](#clone-and-setup)
   - [Running Tests](#running-tests)
 - [Coding Standards](#coding-standards)
+  - [Naming Conventions](#naming-conventions)
   - [Shell Scripts](#shell-scripts)
   - [Python](#python)
   - [Copyright Headers](#copyright-headers)
@@ -144,6 +145,16 @@ python -m pytest
 ```
 
 ## Coding Standards
+
+### Naming Conventions
+
+Follow `docs/policies/namingConventions.md` for folder and file names. For local checks:
+
+```bash
+python scripts/check-naming-conventions.py --changed
+```
+
+If a language or toolchain requires different naming, use `config/namingExceptions.txt` and keep exceptions narrowly scoped.
 
 ### Shell Scripts
 

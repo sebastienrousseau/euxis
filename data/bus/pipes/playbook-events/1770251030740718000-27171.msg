@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'verify-everything' gate 2 (Structural Verification) completed","timestamp":"2026-02-05T00:23:50Z","correlation_id":"1770251030-17622-5187"}

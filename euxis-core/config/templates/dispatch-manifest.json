@@ -1,0 +1,19 @@
+{
+  "project": "${PROJECT_NAME}",
+  "mode": "hierarchical",
+  "routing": {
+    "enabled": true,
+    "local_fallback": true,
+    "cache_prompts": true
+  },
+  "dispatches": [
+    {
+      "agent": "${AGENT_ID}",
+      "priority": "P0",
+      "task": "${TASK_DESCRIPTION}",
+      "verify_cmd": "${VERIFY_COMMAND}",
+      "model": "auto",
+      "tier": "auto"
+    }
+  ]
+}
