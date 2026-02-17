@@ -65,10 +65,12 @@ Resource Management:
 
   Environment variables to customize thresholds:
     EUXIS_CPU_THRESHOLD=80      Max CPU % before throttling (default: 80)
-    EUXIS_MEM_THRESHOLD=85      Max memory % before throttling (default: 85)
-    EUXIS_LOAD_THRESHOLD=1.5    Max load per core before throttling
+    EUXIS_MEM_THRESHOLD=75      Max memory % before throttling (default: 75)
+    EUXIS_LOAD_FACTOR=0.8       Dynamic load threshold = nproc × factor
     EUXIS_MAX_AGENTS=8          Maximum concurrent agents (default: 8)
     EUXIS_MIN_AGENTS=1          Minimum agents even under load (default: 1)
+    EUXIS_STAGGER_DELAY=2       Seconds between agent launches (default: 2)
+    EUXIS_NICE=15               Process priority (0-19, 0=disable, default: 15)
   --mode MODE   Set dispatch mode
 EOF
 }
@@ -516,21 +518,29 @@ dispatch_agent() {
     echo "  [$PRIORITY] -> $AGENT ($MODE)"
     LOG_FILE="$LOG_DIR/${AGENT}_${i}.log"
 
+    # Use nice to lower agent priority, ensuring UI responsiveness
+    # nice -n 15 = "good neighbor" mode, uses idle CPU cycles
+    # Set EUXIS_NICE=0 to disable, or customize value (0-19)
+    local NICE_PREFIX=""
+    if [[ "${EUXIS_NICE:-15}" != "0" ]]; then
+        NICE_PREFIX="nice -n ${EUXIS_NICE:-15}"
+    fi
+
     case "$MODE" in
         hierarchical)
-            euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            $NICE_PREFIX euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
         mesh)
             if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
                 MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
-                euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             else
-                euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                $NICE_PREFIX euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             fi
             ;;
         federated)
             FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $TASK"
-            euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            $NICE_PREFIX euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
     esac
 
@@ -561,21 +571,27 @@ ATOMIC FILE OPERATIONS REQUIRED:
 - This prevents corruption if your process is interrupted
 - Pattern: write_content > temp_file && mv temp_file final_file"
 
+    # Use nice to lower agent priority, ensuring UI responsiveness
+    local NICE_PREFIX=""
+    if [[ "${EUXIS_NICE:-15}" != "0" ]]; then
+        NICE_PREFIX="nice -n ${EUXIS_NICE:-15}"
+    fi
+
     case "$MODE" in
         hierarchical)
-            euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            $NICE_PREFIX euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
         mesh)
             if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
                 MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $ATOMIC_TASK"
-                euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             else
-                euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                $NICE_PREFIX euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             fi
             ;;
         federated)
             FED_TASK="[FEDERATED MODE] Operate autonomously on project '$PROJECT'. Produce complete output independently. $ATOMIC_TASK"
-            euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            $NICE_PREFIX euxis-loop "$AGENT" "$FED_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
     esac
 
