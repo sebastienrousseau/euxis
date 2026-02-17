@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 3 (Safety & Security) completed","timestamp":"2026-02-08T23:55:05Z","correlation_id":"1770594905-3661-31334"}

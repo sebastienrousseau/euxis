@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'verify-everything' gate 5 (Final Truth Gate) completed","timestamp":"2026-02-05T00:38:54Z","correlation_id":"1770251934-38950-27750"}

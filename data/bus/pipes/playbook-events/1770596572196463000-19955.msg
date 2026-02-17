@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'rust' gate 9 (Final Truth Gate) completed","timestamp":"2026-02-09T00:22:52Z","correlation_id":"1770596572-24050-3138"}
