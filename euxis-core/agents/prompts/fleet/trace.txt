@@ -1,7 +1,7 @@
 ---
 agent_id: trace
 role: "End-to-end observability and interaction tracing"
-version: "0.0.8"
+version: "0.1.0"
 tags: [observability, tracing, telemetry]
 tier: fleet
 activation: default

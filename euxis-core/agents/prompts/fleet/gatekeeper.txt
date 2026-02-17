@@ -1,7 +1,7 @@
 ---
 agent_id: gatekeeper
 role: "Changelogs, semantic versioning, and release coordination"
-version: "0.0.8"
+version: "0.1.0"
 tags: [releases, versioning, coordination]
 tier: fleet
 activation: default

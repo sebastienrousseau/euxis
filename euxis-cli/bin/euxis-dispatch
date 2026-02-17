@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EUXIS DISPATCH: The Fleet Deployment Engine (v0.0.8)
+# EUXIS DISPATCH: The Fleet Deployment Engine (v0.1.0)
 # Reads an Architect Mission Manifest and fires agent loops.
 #
 # Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]

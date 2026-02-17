@@ -1,7 +1,7 @@
 ---
 agent_id: guard
 role: "Execution approval and security enforcement"
-version: "0.0.8"
+version: "0.1.0"
 tags: [security, approvals, audit]
 tier: core
 activation: core
