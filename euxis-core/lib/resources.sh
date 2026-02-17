@@ -404,6 +404,12 @@ resource_status() {
     echo "├─────────────────────────────────────────────"
     printf "│ Max concurrent agents: %d\n" "$max_agents"
     printf "│ Stagger delay: %ds between launches\n" "$EUXIS_STAGGER_DELAY"
+    local nice_val="${EUXIS_NICE:-15}"
+    if [[ "$nice_val" == "0" ]]; then
+        echo "│ Process priority: normal (nice disabled)"
+    else
+        printf "│ Process priority: nice -n %s (background)\n" "$nice_val"
+    fi
 
     if resource_is_overloaded; then
         echo "│ Status:  ⚠️  THROTTLED"
