@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'rust' completed for: this repository","timestamp":"2026-02-08T14:22:27Z","correlation_id":"1770560547-7499-31417"}

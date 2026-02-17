@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 5 (Final Truth Gate) completed","timestamp":"2026-02-08T11:24:28Z","correlation_id":"1770549868-79792-15013"}

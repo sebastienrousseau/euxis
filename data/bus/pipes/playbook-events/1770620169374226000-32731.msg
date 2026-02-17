@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 0 (Architecture & Idioms) completed","timestamp":"2026-02-09T06:56:09Z","correlation_id":"1770620169-54933-19809"}

@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P2","payload":"Playbook 'standards' gate 5 (CI & Automation) completed","timestamp":"2026-02-09T07:18:01Z","correlation_id":"1770621481-16683-26946"}

@@ -1,1 +1,0 @@
-{"sender":"euxis-playbook","topic":"playbook-events","priority":"P1","payload":"Playbook 'rust' completed for: Certify langweave v0.0.2: verify 15-language support, 95%+ coverage, all CI passing","timestamp":"2026-02-09T00:22:52Z","correlation_id":"1770596572-24061-2643"}
