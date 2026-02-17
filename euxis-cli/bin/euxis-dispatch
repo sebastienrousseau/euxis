@@ -266,18 +266,62 @@ ensure_lock_dir() {
     mkdir -p "$LOCK_DIR"
 }
 
-# Cleanup all locks on unexpected exit
-cleanup_all_locks() {
+# Track spawned agent PIDs for cleanup
+SPAWNED_PIDS_FILE=""
+
+init_pid_tracking() {
+    SPAWNED_PIDS_FILE=$(mktemp /tmp/euxis_dispatch_pids_XXXXXX)
+}
+
+track_pid() {
+    local pid="$1"
+    local agent="$2"
+    [[ -n "$SPAWNED_PIDS_FILE" ]] && echo "$pid $agent" >> "$SPAWNED_PIDS_FILE"
+}
+
+# Cleanup all locks AND kill orphaned child processes on unexpected exit
+# This prevents "zombies" when user hits Ctrl+C during stagger phase
+cleanup_all() {
     local _exit_code=$?
-    echo "  [CLEANUP] Releasing all locks due to process termination..."
+
+    # First, terminate all spawned agent processes
+    if [[ -f "$SPAWNED_PIDS_FILE" ]]; then
+        echo ""
+        echo "  [CLEANUP] Terminating spawned agents..."
+        while read -r pid agent; do
+            if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+                echo "  [CLEANUP] Stopping $agent (PID $pid)"
+                kill -TERM "$pid" 2>/dev/null || true
+            fi
+        done < "$SPAWNED_PIDS_FILE"
+
+        # Give agents 2s to terminate gracefully, then force kill
+        sleep 2
+        while read -r pid agent; do
+            if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+                echo "  [CLEANUP] Force killing $agent (PID $pid)"
+                kill -9 "$pid" 2>/dev/null || true
+            fi
+        done < "$SPAWNED_PIDS_FILE"
+
+        rm -f "$SPAWNED_PIDS_FILE" 2>/dev/null || true
+    fi
+
+    # Also kill any child processes of this script (belt and suspenders)
+    pkill -P $$ 2>/dev/null || true
+
+    # Release file locks
+    echo "  [CLEANUP] Releasing all locks..."
     if [[ -d "$LOCK_DIR" ]]; then
         find "$LOCK_DIR" -name '*.lock' -newer "/tmp/.euxis_dispatch_start_$$" -delete 2>/dev/null || true
     fi
     rm -f "/tmp/.euxis_dispatch_start_$$" 2>/dev/null || true
+
+    echo "  [CLEANUP] Done."
     exit "$_exit_code"
 }
 
-trap cleanup_all_locks EXIT INT TERM HUP
+trap cleanup_all EXIT INT TERM HUP
 
 acquire_file_lock() {
     local file_path="$1"
@@ -440,6 +484,9 @@ ensure_project_env
 
 LOG_DIR=$(mktemp -d /tmp/euxis_dispatch_XXXXXX)
 
+# Initialize PID tracking for orphan cleanup on Ctrl+C
+init_pid_tracking
+
 # Agents with dispatch authority (can coordinate sub-workflows in mesh mode)
 DISPATCH_AGENTS="architect inspector responder gatekeeper"
 
@@ -488,6 +535,7 @@ dispatch_agent() {
     esac
 
     __dispatch_pid="$!"
+    track_pid "$__dispatch_pid" "$AGENT"
 }
 
 # ============================================================================
@@ -532,6 +580,7 @@ ATOMIC FILE OPERATIONS REQUIRED:
     esac
 
     __dispatch_pid="$!"
+    track_pid "$__dispatch_pid" "$AGENT"
 }
 
 # ============================================================================
