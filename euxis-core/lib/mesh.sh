@@ -78,6 +78,67 @@ _mesh_cleanup() {
     fi
 }
 
+# Register agent with capabilities (extends mesh_init)
+# Usage: mesh_register "agent-id" "capability1,capability2,..." ["session-id"]
+# This is the full bootstrap call that makes an agent discoverable
+mesh_register() {
+    local agent_id="$1"
+    local capabilities="$2"
+    local session_id="${3:-$(date +%Y%m%d-%H%M%S)-$$}"
+
+    # Initialize base mesh state
+    mesh_init "$agent_id" "$session_id"
+
+    # Store capabilities as JSON array for discovery
+    local caps_json
+    if [[ -n "$capabilities" ]]; then
+        # Convert comma-separated to JSON array: "a,b,c" → ["a","b","c"]
+        caps_json=$(echo "$capabilities" | tr ',' '\n' | jq -R . | jq -s .)
+    else
+        caps_json="[]"
+    fi
+
+    # Register capabilities in mesh state
+    mesh_state_set_json "agents.$agent_id.capabilities" "$caps_json"
+    mesh_state_set "agents.$agent_id.pid" "$$"
+
+    echo "[mesh] Agent '$agent_id' registered with capabilities: $capabilities" >&2
+}
+
+# Discover agents by capability from mesh state (runtime discovery)
+# Usage: mesh_discover_runtime "capability" → returns online agent IDs
+# Unlike mesh_discover (registry-based), this finds currently active agents
+mesh_discover_runtime() {
+    local capability="$1"
+
+    if [[ ! -f "$MESH_STATE" ]]; then
+        return 1
+    fi
+
+    # Find online agents with matching capability
+    jq -r --arg cap "$capability" '
+        .agents | to_entries[] |
+        select(.value.status == "online") |
+        select(.value.capabilities[]? == $cap) |
+        .key
+    ' "$MESH_STATE" 2>/dev/null
+}
+
+# Get agent info from mesh state (runtime)
+# Usage: mesh_agent_info "agent-id" → JSON with status, capabilities, last_seen
+mesh_agent_info() {
+    local agent_id="$1"
+
+    if [[ ! -f "$MESH_STATE" ]]; then
+        echo "{}"
+        return 1
+    fi
+
+    # Build path array for getpath
+    local path_array="[\"agents\",\"$agent_id\"]"
+    jq "getpath($path_array) // {}" "$MESH_STATE"
+}
+
 # Initialize empty state file
 mesh_state_init() {
     cat > "$MESH_STATE" <<'EOF'

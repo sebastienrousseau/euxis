@@ -38,6 +38,17 @@ else
   RESOURCE_AWARE=false
 fi
 
+# Source mesh communication library (for mesh mode)
+MESH_AVAILABLE=false
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/mesh.sh" ]]; then
+  # shellcheck source=euxis-core/lib/mesh.sh
+  source "${EUXIS_HOME}/euxis-core/lib/mesh.sh"
+  MESH_AVAILABLE=true
+fi
+
+# Mesh session ID (shared across all agents in this dispatch)
+MESH_SESSION=""
+
 
 usage() {
     cat <<'EOF'
@@ -150,6 +161,21 @@ case "$MODE" in
         ;;
 esac
 
+# Initialize mesh session for mesh mode
+if [[ "$MODE" == "mesh" ]]; then
+    if [[ "$MESH_AVAILABLE" == "true" ]]; then
+        MESH_SESSION="dispatch-$(date +%Y%m%d-%H%M%S)-$$"
+        export EUXIS_MESH_SESSION="$MESH_SESSION"
+
+        # Initialize mesh state for this dispatch session
+        mesh_init "dispatcher" "$MESH_SESSION"
+        mesh_log "Dispatch session started: $PROJECT ($DISPATCH_COUNT agents)"
+    else
+        echo "Warning: Mesh mode requested but mesh.sh library not found." >&2
+        echo "  Falling back to prompt-based mesh mode." >&2
+    fi
+fi
+
 # Branch guard: refuse to run on protected branches
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [[ -n "$CURRENT_BRANCH" ]]; then
@@ -175,6 +201,9 @@ if [[ -n "$CURRENT_BRANCH" ]]; then
 fi
 if [[ "$HAS_PHASES" == "true" ]]; then
     echo "  Phases:     $PHASE_COUNT (phased rollout)"
+fi
+if [[ "$MODE" == "mesh" ]] && [[ -n "$MESH_SESSION" ]]; then
+    echo "  Mesh:       $MESH_SESSION (A2A protocol active)"
 fi
 
 # Resource-aware concurrency
@@ -531,11 +560,19 @@ dispatch_agent() {
             $NICE_PREFIX euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
         mesh)
-            if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
-                $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            # Use mesh bootstrap for library-driven peer coordination
+            if [[ "$MESH_AVAILABLE" == "true" ]]; then
+                # Bootstrap injects mesh context and registers agent
+                $NICE_PREFIX "${EUXIS_HOME}/euxis-cli/bin/euxis-agent-bootstrap" \
+                    "$AGENT" "$TASK" "$VERIFY" 3 "" > "$LOG_FILE" 2>&1 &
             else
-                $NICE_PREFIX euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                # Fallback to prompt-based mesh mode
+                if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
+                    MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
+                    $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                else
+                    $NICE_PREFIX euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                fi
             fi
             ;;
         federated)
@@ -582,11 +619,19 @@ ATOMIC FILE OPERATIONS REQUIRED:
             $NICE_PREFIX euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
             ;;
         mesh)
-            if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $ATOMIC_TASK"
-                $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+            # Use mesh bootstrap for library-driven peer coordination
+            if [[ "$MESH_AVAILABLE" == "true" ]]; then
+                # Bootstrap injects mesh context and registers agent
+                $NICE_PREFIX "${EUXIS_HOME}/euxis-cli/bin/euxis-agent-bootstrap" \
+                    "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 "" > "$LOG_FILE" 2>&1 &
             else
-                $NICE_PREFIX euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                # Fallback to prompt-based mesh mode
+                if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
+                    MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $ATOMIC_TASK"
+                    $NICE_PREFIX euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                else
+                    $NICE_PREFIX euxis-loop "$AGENT" "$ATOMIC_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                fi
             fi
             ;;
         federated)
@@ -921,11 +966,18 @@ else
                 euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
                 ;;
             mesh)
-                if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
-                    MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
-                    euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                # Use mesh bootstrap for library-driven peer coordination
+                if [[ "$MESH_AVAILABLE" == "true" ]]; then
+                    "${EUXIS_HOME}/euxis-cli/bin/euxis-agent-bootstrap" \
+                        "$AGENT" "$TASK" "$VERIFY" 3 "" > "$LOG_FILE" 2>&1 &
                 else
-                    euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                    # Fallback to prompt-based mesh mode
+                    if echo "$DISPATCH_AGENTS" | grep -qw "$AGENT"; then
+                        MESH_TASK="[MESH MODE] You have dispatch authority. You MAY produce a sub-manifest to coordinate specialized agents directly. $TASK"
+                        euxis-loop "$AGENT" "$MESH_TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                    else
+                        euxis-loop "$AGENT" "$TASK" "$VERIFY" 3 > "$LOG_FILE" 2>&1 &
+                    fi
                 fi
                 ;;
             federated)
@@ -1027,6 +1079,24 @@ else
     echo ""
 
     echo ""
+
+    # Mesh summary and cleanup
+    if [[ "$MODE" == "mesh" ]] && [[ "$MESH_AVAILABLE" == "true" ]]; then
+        mesh_log "Dispatch session complete: $FAILED failures of $DISPATCH_COUNT agents"
+        mesh_state_set "agents.dispatcher.status" "offline"
+
+        # Show mesh activity summary
+        local log_count
+        log_count=$(jq '.shared.log | length // 0' "$MESH_STATE" 2>/dev/null || echo 0)
+        local online_count
+        online_count=$(mesh_list_online | wc -l)
+        echo "  Mesh Summary:"
+        echo "    Session:     $MESH_SESSION"
+        echo "    Log entries: $log_count"
+        echo "    Online now:  $online_count agents"
+        echo ""
+    fi
+
     if [[ $FAILED -eq 0 ]]; then
         echo "ALL $DISPATCH_COUNT MISSIONS COMPLETE ($MODE mode)."
         exit 0

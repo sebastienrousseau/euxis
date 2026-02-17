@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024-2026 Euxis Contributors
+#
+# euxis-agent-bootstrap — Mesh-aware agent launcher
+#
+# This script bootstraps an agent into the mesh communication network:
+#   1. Sources the mesh.sh library
+#   2. Registers the agent with its capabilities
+#   3. Sets up cleanup on exit
+#   4. Executes the actual agent loop
+#
+# Usage:
+#   euxis-agent-bootstrap <agent-id> <task> [verify-cmd] [max-iterations] [capabilities]
+#
+# Environment:
+#   EUXIS_HOME          - Base directory (default: ~/.euxis)
+#   EUXIS_MESH_SESSION  - Shared session ID for coordinated agents
+#   EUXIS_MESH_VERBOSE  - Enable verbose mesh logging (default: false)
+
+set -u
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+
+# ============================================================================
+# Arguments
+# ============================================================================
+
+AGENT_ID="${1:-}"
+TASK="${2:-}"
+VERIFY_CMD="${3:-}"
+MAX_ITERATIONS="${4:-3}"
+CAPABILITIES="${5:-}"
+
+if [[ -z "$AGENT_ID" ]] || [[ -z "$TASK" ]]; then
+    echo "Usage: euxis-agent-bootstrap <agent-id> <task> [verify-cmd] [max-iterations] [capabilities]" >&2
+    exit 1
+fi
+
+# ============================================================================
+# Source Mesh Library
+# ============================================================================
+
+MESH_LIB="${EUXIS_HOME}/euxis-core/lib/mesh.sh"
+
+if [[ -f "$MESH_LIB" ]]; then
+    source "$MESH_LIB"
+else
+    echo "[bootstrap] Warning: mesh.sh not found at $MESH_LIB" >&2
+    echo "[bootstrap] Running in non-mesh mode" >&2
+    # Fall through to execute without mesh
+fi
+
+# ============================================================================
+# Mesh Registration
+# ============================================================================
+
+# Use shared session ID if provided, otherwise generate one
+MESH_SESSION="${EUXIS_MESH_SESSION:-dispatch-$(date +%Y%m%d-%H%M%S)}"
+
+# If capabilities not provided, try to look them up from registry
+if [[ -z "$CAPABILITIES" ]] && [[ -f "${EUXIS_HOME}/euxis-core/agents/registry.json" ]]; then
+    CAPABILITIES=$(jq -r --arg id "$AGENT_ID" \
+        '.agents[] | select(.id == $id) | .capability_tags // [] | join(",")' \
+        "${EUXIS_HOME}/euxis-core/agents/registry.json" 2>/dev/null || echo "")
+fi
+
+# Register in mesh if library is available
+if type mesh_register &>/dev/null; then
+    mesh_register "$AGENT_ID" "$CAPABILITIES" "$MESH_SESSION"
+
+    # Set up cleanup trap
+    cleanup_mesh() {
+        [[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+            echo "[bootstrap] Agent '$AGENT_ID' going offline" >&2
+        mesh_state_set "agents.$AGENT_ID.status" "offline" 2>/dev/null || true
+    }
+    trap cleanup_mesh EXIT
+fi
+
+# ============================================================================
+# Inject Mesh Context into Task
+# ============================================================================
+
+# Add mesh protocol instructions to the task
+MESH_CONTEXT=""
+if type mesh_discover_runtime &>/dev/null; then
+    MESH_CONTEXT="
+[MESH PROTOCOL ACTIVE]
+You are connected to the Euxis mesh network as agent '$AGENT_ID'.
+Session: $MESH_SESSION
+
+Available Mesh Operations (via shell):
+- Discover peers: mesh_discover_runtime \"capability\"
+- Send message: mesh_send \"target-agent\" '{\"type\":\"request\", \"data\":...}'
+- Check messages: mesh_receive
+- Shared state: mesh_state_get \"key\" / mesh_state_set \"key\" \"value\"
+- Log to shared log: mesh_log \"message\"
+- Hand-off work: mesh_handoff \"target-agent\" \"task description\"
+
+Protocol:
+1. Before starting complex sub-tasks, check if a specialized peer is online
+2. Use shared state for research results to avoid context bloat
+3. If handing off, wait for acknowledgment before proceeding
+4. Call mesh_heartbeat periodically during long operations
+
+"
+fi
+
+AUGMENTED_TASK="${MESH_CONTEXT}${TASK}"
+
+# ============================================================================
+# Execute Agent Loop
+# ============================================================================
+
+[[ "${EUXIS_MESH_VERBOSE:-false}" == "true" ]] && \
+    echo "[bootstrap] Launching agent '$AGENT_ID' with mesh context" >&2
+
+# Export mesh state location for child processes
+export EUXIS_MESH_STATE="${EUXIS_HOME}/euxis-runtime/mesh/state.json"
+export EUXIS_MESH_INBOX="${EUXIS_HOME}/euxis-runtime/mesh/inbox"
+export EUXIS_AGENT_ID="$AGENT_ID"
+export EUXIS_MESH_SESSION="$MESH_SESSION"
+
+# Execute the actual agent loop
+exec "${EUXIS_HOME}/euxis-cli/bin/euxis-loop" "$AGENT_ID" "$AUGMENTED_TASK" "$VERIFY_CMD" "$MAX_ITERATIONS"
