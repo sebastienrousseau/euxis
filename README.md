@@ -3,6 +3,7 @@
 **Enterprise Unified eXecution Intelligence System**
 
 [![License][license-badge]][license-url]
+[![Version][version-badge]][version-url]
 
 ---
 
@@ -115,8 +116,13 @@ MIT License - see [LICENSE](LICENSE)
 
 ---
 
+Version 0.1.0
+
 Designed by Sebastien Rousseau — https://sebastienrousseau.com
 Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
+Euxis v0.1.0
 
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE
+[version-badge]: https://img.shields.io/badge/version-0.1.0-green.svg
+[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.1.0
