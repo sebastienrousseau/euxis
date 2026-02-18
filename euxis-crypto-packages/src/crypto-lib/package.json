@@ -52,7 +52,11 @@
     "typescript": "^5.0.0",
     "vitest": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
-    "eslint": "^8.0.0"
+    "eslint": "^9.39.2"
+  },
+  "overrides": {
+    "minimatch": ">=10.1.2",
+    "ajv": ">=8.18.0"
   },
   "vitest": {
     "test": {
