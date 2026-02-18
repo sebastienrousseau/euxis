@@ -110,16 +110,18 @@ registry_query() {
     temp_file=$(mktemp "${TMPDIR:-/tmp}/euxis_registry_query.XXXXXX") || { umask "${old_umask}"; log_error "mktemp failed for registry query"; _registry_release_connection "${conn_id}"; return 1; }
     umask "${old_umask}"
 
-    {
-        if [[ ${#args[@]} -gt 0 ]]; then
-            printf '.parameter init\n'
-            local i
-            for ((i = 0; i < ${#args[@]}; i++)); do
-                printf '.parameter set $%d "%s"\n' $((i + 1)) "${args[i]}"
-            done
-        fi
-        printf '%s\n' "${sql}"
-    } | sqlite3 -init /dev/null "${REGISTRY_DB}" > "${temp_file}" 2>&1
+    local sql_exec="${sql}"
+    if [[ ${#args[@]} -gt 0 ]]; then
+        local arg escaped quoted
+        for arg in "${args[@]}"; do
+            escaped="${arg//\'/\'\'}"
+            quoted="'${escaped}'"
+            # Replace first positional '?' with safely quoted value.
+            sql_exec="${sql_exec/\?/${quoted}}"
+        done
+    fi
+
+    printf '%s\n' "${sql_exec}" | sqlite3 -init /dev/null -batch -noheader "${REGISTRY_DB}" > "${temp_file}" 2>&1
 
     local exit_code=$?
     result=$(cat "${temp_file}")

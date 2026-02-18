@@ -15,7 +15,7 @@ setup() {
     unset _EUXIS_LIB_TEMPLATE
 
     # Source the library from real installation
-    source "${HOME}/.euxis/core/lib/template.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/template.sh"
 }
 
 teardown() {
@@ -67,7 +67,7 @@ teardown() {
     local text="Prompts: {{PROMPTS_DIR}}"
     run template_substitute "${text}" "" "" "" ""
     [[ "${status}" -eq 0 ]]
-    [[ "${output}" == "Prompts: ${EUXIS_HOME}/prompts" ]]
+    [[ "${output}" == "Prompts: ${EUXIS_HOME}/euxis-core/agents/prompts" ]]
 }
 
 @test "template_substitute replaces PROJECTS_DIR" {

@@ -1,8 +1,4 @@
 Examples
 ========
 
-.. toctree::
-   :maxdepth: 3
-   :glob:
-
-   **/*
+Examples will be published here as end-to-end workflows are added.

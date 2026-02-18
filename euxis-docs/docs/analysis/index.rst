@@ -5,4 +5,4 @@ Analysis
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

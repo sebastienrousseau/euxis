@@ -5,4 +5,4 @@ Adr
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

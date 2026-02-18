@@ -5,4 +5,4 @@ Audits
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

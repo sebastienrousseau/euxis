@@ -5,4 +5,4 @@ Archive
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

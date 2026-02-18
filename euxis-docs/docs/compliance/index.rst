@@ -5,4 +5,4 @@ Compliance
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

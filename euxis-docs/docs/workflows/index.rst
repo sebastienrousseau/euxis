@@ -5,4 +5,4 @@ Workflows
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

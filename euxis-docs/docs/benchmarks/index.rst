@@ -5,4 +5,4 @@ Benchmarks
    :maxdepth: 3
    :glob:
 
-   **/*
+   *
