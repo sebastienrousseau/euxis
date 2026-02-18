@@ -29,7 +29,7 @@ from pathlib import Path
 def _ensure_repo_paths() -> None:
     repo_root = Path(__file__).resolve().parents[2]
     module_src_dirs = [
-        "metrics/src",
+        "euxis-metrics/src",
         "packages/shared/src",
     ]
     if str(repo_root) not in sys.path:
