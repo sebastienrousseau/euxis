@@ -24,16 +24,6 @@ Features
 Modules
 -------
 
-crypto_lib
-^^^^^^^^^^
-
-Main package exports.
-
-.. automodule:: crypto_lib
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 crypto_lib.core
 ^^^^^^^^^^^^^^^
 

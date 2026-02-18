@@ -1,0 +1,46 @@
+1..45
+ok 1 detect_project_domain detects Node.js project
+ok 2 detect_project_domain detects TypeScript project
+ok 3 detect_project_domain detects node_modules
+ok 4 detect_project_domain detects Python pyproject.toml
+ok 5 detect_project_domain detects Python setup.py
+ok 6 detect_project_domain detects Python requirements.txt
+ok 7 detect_project_domain detects Dockerfile
+ok 8 detect_project_domain detects docker-compose.yml
+ok 9 detect_project_domain detects docker-compose.yaml
+ok 10 detect_project_domain detects k8s directory
+ok 11 detect_project_domain detects helm directory
+ok 12 detect_project_domain detects .env file
+ok 13 detect_project_domain detects .env.example
+ok 14 detect_project_domain detects certs directory
+ok 15 detect_project_domain detects GitHub workflows
+ok 16 detect_project_domain detects GitLab CI
+ok 17 detect_project_domain detects Jenkinsfile
+ok 18 detect_project_domain detects docs directory
+ok 19 detect_project_domain detects README.md
+ok 20 detect_project_domain detects Rust Cargo.toml
+ok 21 detect_project_domain detects Go go.mod
+ok 22 detect_project_domain detects Makefile
+ok 23 detect_project_domain detects Ruby Gemfile
+ok 24 detect_project_domain detects .ruby-version
+ok 25 detect_project_domain detects crypto in Cargo.toml
+ok 26 detect_project_domain returns empty for empty directory
+ok 27 detect_project_domain handles missing directory
+ok 28 detect_project_domain uses PWD as default
+ok 29 detect_project_domain deduplicates agents
+ok 30 detect_project_type identifies Node project
+ok 31 detect_project_type identifies Python project
+ok 32 detect_project_type identifies Rust project
+ok 33 detect_project_type identifies Go project
+ok 34 detect_project_type identifies Docker project
+ok 35 detect_project_type identifies GitHub project
+ok 36 detect_project_type identifies Make project
+ok 37 detect_project_type returns generic for empty directory
+ok 38 detect_project_type identifies multiple types
+ok 39 detect_project_type uses PWD as default
+ok 40 skill-detector functions handle set -u mode
+ok 41 skill-detector functions handle pipefail mode
+ok 42 skill-detector module loads without errors
+ok 43 detect_project_domain returns sorted results
+ok 44 detection is consistent across calls
+ok 45 detect_project_type is idempotent for stable project layout

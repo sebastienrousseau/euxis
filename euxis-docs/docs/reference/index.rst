@@ -5,4 +5,4 @@ Reference
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

@@ -196,6 +196,28 @@ _euxis_now_ns() {
     fi
 }
 
+# euxis_ts_utc_ms - Portable UTC timestamp with millisecond precision
+#
+# DESCRIPTION:
+#     Returns ISO-8601 UTC timestamp with milliseconds (e.g. 2026-02-18T13:52:37.123Z)
+#     on both GNU/Linux and macOS.
+#
+# OUTPUTS:
+#     stdout         UTC timestamp with millisecond precision
+euxis_ts_utc_ms() {
+    if command -v gdate &>/dev/null; then
+        gdate -u +"%Y-%m-%dT%H:%M:%S.%3NZ"
+        return
+    fi
+
+    if command -v python3 &>/dev/null; then
+        python3 -c 'from datetime import datetime, timezone; print(datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z")'
+        return
+    fi
+
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
 # _perf_start - Start a performance timer
 #
 # DESCRIPTION:

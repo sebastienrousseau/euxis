@@ -12,7 +12,7 @@ setup() {
 
     # Mock date command for predictable timestamps
     cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/cli/bin/bash
+#!/usr/bin/env bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260214-120000"
 else
@@ -29,7 +29,7 @@ DATEEOF
     unset EUXIS_SESSION_ID
 
     # Source the library from real installation
-    source "${HOME}/.euxis/core/lib/session.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/session.sh"
 }
 
 teardown() {

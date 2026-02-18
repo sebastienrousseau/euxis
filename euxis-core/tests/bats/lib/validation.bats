@@ -9,9 +9,12 @@ setup() {
     export EUXIS_HOME="${EUXIS_TEST_TMPDIR}/euxis"
 
     # Create valid Euxis directory structure (needed by validate_euxis_structure)
+    mkdir -p "${EUXIS_HOME}/euxis-cli/bin"
     mkdir -p "${EUXIS_HOME}/euxis-core/lib"
-    mkdir -p "${EUXIS_HOME}/prompts"
-    mkdir -p "${EUXIS_HOME}/euxis-runtime/data"
+    mkdir -p "${EUXIS_HOME}/euxis-core/agents"
+    mkdir -p "${EUXIS_HOME}/euxis-core/agents/prompts"
+    mkdir -p "${EUXIS_HOME}/euxis-runtime/memory/cortex"
+    mkdir -p "${EUXIS_HOME}/data"
 
     # Mock external commands
     export PATH="${EUXIS_TEST_TMPDIR}:${PATH}"
@@ -29,8 +32,8 @@ EOF
     # Reset include guards and re-source
     unset _EUXIS_LIB_VALIDATION
     unset _EUXIS_LIB_COMMON
-    source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
-    source "${BATS_TEST_DIRNAME}/../../../core/lib/validation.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/validation.sh"
 }
 
 teardown() {
@@ -169,6 +172,29 @@ teardown() {
 }
 
 # ============================================================================
+# TASK SANITIZATION
+# ============================================================================
+
+@test "sanitize_task_input strips control characters" {
+    local raw cleaned
+    raw=$'hello\x01\x02\tworld\nok'
+    run sanitize_task_input "${raw}"
+    [[ "${status}" -eq 0 ]]
+    cleaned="${output}"
+    [[ "${cleaned}" == $'hello\tworld\nok' ]]
+}
+
+@test "sanitize_task_input escapes backticks" {
+    local raw cleaned
+    raw='run `uname -a` safely'
+    run sanitize_task_input "${raw}"
+    [[ "${status}" -eq 0 ]]
+    cleaned="${output}"
+    [[ "${cleaned}" != *'`'* ]]
+    [[ "${cleaned}" == *'\\'* ]]
+}
+
+# ============================================================================
 # FILE EXECUTABLE VALIDATION
 # ============================================================================
 
@@ -269,7 +295,7 @@ teardown() {
 }
 
 @test "validate_euxis_structure fails on missing prompts directory" {
-    rm -rf "${EUXIS_HOME}/prompts"
+    rm -rf "${EUXIS_HOME}/euxis-core/agents/prompts"
 
     run validate_euxis_structure
     [[ "${status}" -eq 1 ]]
@@ -277,7 +303,7 @@ teardown() {
 }
 
 @test "validate_euxis_structure fails on missing data directory" {
-    rm -rf "${EUXIS_HOME}/euxis-runtime/data"
+    rm -rf "${EUXIS_HOME}/data"
 
     run validate_euxis_structure
     [[ "${status}" -eq 1 ]]

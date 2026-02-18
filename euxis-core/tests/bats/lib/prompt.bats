@@ -11,6 +11,7 @@ setup() {
     mkdir -p "${EUXIS_HOME}/euxis-core/agents/prompts/core"
     mkdir -p "${EUXIS_HOME}/euxis-core/agents/prompts/fleet"
     mkdir -p "${EUXIS_HOME}/euxis-core/agents/prompts/protocols"
+    mkdir -p "${EUXIS_HOME}/euxis-core/lib"
     mkdir -p "${EUXIS_HOME}/euxis-runtime/data/projects/test/architect"
     mkdir -p "${EUXIS_HOME}/euxis-runtime/data/lifecycle"
 
@@ -71,6 +72,14 @@ EOF
 
     export PATH="${EUXIS_TEST_TMPDIR}:${PATH}"
 
+    # Prompt library sources dependencies from ${EUXIS_HOME}/euxis-core/lib.
+    # Provide symlinks to the repo libraries while keeping test data isolated.
+    ln -sf "${BATS_TEST_DIRNAME}/../../../lib/common.sh" "${EUXIS_HOME}/euxis-core/lib/common.sh"
+    ln -sf "${BATS_TEST_DIRNAME}/../../../lib/agents.sh" "${EUXIS_HOME}/euxis-core/lib/agents.sh"
+    ln -sf "${BATS_TEST_DIRNAME}/../../../lib/memory.sh" "${EUXIS_HOME}/euxis-core/lib/memory.sh"
+    ln -sf "${BATS_TEST_DIRNAME}/../../../lib/template.sh" "${EUXIS_HOME}/euxis-core/lib/template.sh"
+    ln -sf "${BATS_TEST_DIRNAME}/../../../lib/prompt.sh" "${EUXIS_HOME}/euxis-core/lib/prompt.sh"
+
     # Reset include guards
     unset _EUXIS_LIB_PROMPT
     unset _EUXIS_LIB_COMMON
@@ -83,11 +92,11 @@ EOF
     unset _EUXIS_REGISTRY_MTIME
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/core/lib/common.sh"
-    source "${HOME}/.euxis/core/lib/agents.sh"
-    source "${HOME}/.euxis/core/lib/memory.sh"
-    source "${HOME}/.euxis/core/lib/template.sh"
-    source "${HOME}/.euxis/core/lib/prompt.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/agents.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/memory.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/template.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/prompt.sh"
 }
 
 teardown() {
@@ -219,6 +228,33 @@ teardown() {
     run resolve_protocols "security task"
     [[ "${status}" -eq 0 ]]
     [[ "${output}" =~ "Common Protocol" ]]
+}
+
+# ============================================================================
+# COMPACTION / COMPRESSION HELPER TESTS
+# ============================================================================
+
+@test "_head_tail_compact returns original text when under limit" {
+    local text="short text"
+    run _head_tail_compact "${text}" 100
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "${text}" ]]
+}
+
+@test "_head_tail_compact inserts compact marker when over limit" {
+    local text
+    text="$(printf 'A%.0s' $(seq 1 300))"
+    run _head_tail_compact "${text}" 100
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "COMPACTED CONTEXT" ]]
+}
+
+@test "_compress_prompt_whitespace compresses spaces and blank lines" {
+    local text=$'line1   with   spaces\n\n\nline2\t\twith\t tabs'
+    run _compress_prompt_whitespace "${text}"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "line1 with spaces" ]]
+    [[ "${output}" =~ "line2 with tabs" ]]
 }
 
 # ============================================================================
@@ -383,4 +419,12 @@ teardown() {
     result2=$(prepare_prompt "architect" "consistent task" "${audit_path}" "${memory_path}" "session" "model")
 
     [[ "${result1}" == "${result2}" ]]
+}
+
+@test "_compress_prompt_whitespace is idempotent" {
+    local text=$'x   y\n\n\nz'
+    local once twice
+    once=$(_compress_prompt_whitespace "${text}")
+    twice=$(_compress_prompt_whitespace "${once}")
+    [[ "${once}" == "${twice}" ]]
 }

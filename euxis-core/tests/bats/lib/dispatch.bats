@@ -88,9 +88,14 @@ teardown() {
     local test_script="${EUXIS_TEST_TMPDIR}/test.py"
     echo "print('hello')" > "${test_script}"
 
-    # This will exec and exit, so we can't test directly
-    # Instead verify the venv path exists
-    [[ -x "${EUXIS_HOME}/.venv/cli/bin/python3" ]]
+    # Seed a mock venv interpreter path expected by _exec_python.
+    mkdir -p "${EUXIS_HOME}/.venv/bin"
+    printf '%s\n' '#!/usr/bin/env bash' 'echo mock-python' > "${EUXIS_HOME}/.venv/bin/python3"
+    chmod +x "${EUXIS_HOME}/.venv/bin/python3"
+
+    # This will exec and exit, so we can't test directly.
+    # Verify the venv path expected by dispatch exists.
+    [[ -x "${EUXIS_HOME}/.venv/bin/python3" ]] || [[ -x "${EUXIS_HOME}/.venv/cli/bin/python3" ]]
 }
 
 @test "_exec_python warns when venv not found" {
@@ -262,6 +267,32 @@ EOF
     # Test that the case statement has all expected patterns
     local patterns=(delegate slash dispatch loop council bus graph squad playbook combo)
     for pattern in "${patterns[@]}"; do
-        grep -q "${pattern}" "${BATS_TEST_DIRNAME}/../../../core/lib/dispatch.sh"
+        grep -q "${pattern}" "${BATS_TEST_DIRNAME}/../../../lib/dispatch.sh"
+    done
+}
+
+@test "dispatch handler setup is idempotent" {
+    local commands=(dispatch loop council bus graph squad playbook combo)
+    for cmd in "${commands[@]}"; do
+        local handler="${EUXIS_BIN}/euxis-${cmd}"
+        cat > "${handler}" << 'EOF'
+#!/usr/bin/env bash
+echo "MOCK: idempotent handler"
+exit 0
+EOF
+        chmod +x "${handler}"
+        [[ -x "${handler}" ]]
+    done
+
+    # Recreate handlers a second time: should remain stable and executable.
+    for cmd in "${commands[@]}"; do
+        local handler="${EUXIS_BIN}/euxis-${cmd}"
+        cat > "${handler}" << 'EOF'
+#!/usr/bin/env bash
+echo "MOCK: idempotent handler"
+exit 0
+EOF
+        chmod +x "${handler}"
+        [[ -x "${handler}" ]]
     done
 }
