@@ -1,0 +1,64 @@
+# Semgrep ignore patterns for Euxis project
+# https://semgrep.dev/docs/ignoring-files/
+
+# Test files - different security standards
+**/test/**
+**/tests/**
+**/*_test.py
+**/test_*.py
+**/conftest.py
+
+# Build and dependency directories
+**/build/**
+**/dist/**
+**/__pycache__/**
+**/node_modules/**
+**/.pytest_cache/**
+**/coverage_html/**
+
+# Virtual environments
+**/venv/**
+**/.venv/**
+**/env/**
+
+# IDE and editor files
+**/.vscode/**
+**/.idea/**
+**/*.swp
+**/*.swo
+**/*~
+
+# Temporary files
+**/tmp/**
+**/temp/**
+**/*.tmp
+**/*.log
+**/*.bak
+
+# Generated documentation
+**/docs/_build/**
+**/site/**
+
+# Configuration files with acceptable patterns
+**/.github/workflows/*.yml
+**/pyproject.toml
+**/package.json
+**/tsconfig.json
+
+# Data and runtime directories
+**/euxis-runtime/**
+**/*.db
+**/*.sqlite
+**/*.jsonl
+
+# Cryptographic test vectors and examples (acceptable in context)
+**/euxis-crypto-**/examples/**
+**/test-vectors/**
+
+# Third-party code
+**/vendor/**
+**/third-party/**
+
+# Specific files with known acceptable security patterns
+euxis-core/lib/providers.sh
+bin/lib/*.sh

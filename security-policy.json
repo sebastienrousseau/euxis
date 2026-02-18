@@ -1,0 +1,161 @@
+{
+  "security_policy": {
+    "version": "1.0",
+    "last_updated": "2026-02-18",
+    "scope": "Euxis Agent Framework",
+    "maintainer": "Sebastien Rousseau <sebastien.rousseau@gmail.com>"
+  },
+  "vulnerability_management": {
+    "scan_frequency": "weekly",
+    "scan_triggers": [
+      "push_to_main",
+      "pull_request",
+      "dependency_update",
+      "scheduled"
+    ],
+    "severity_thresholds": {
+      "fail_build": ["critical", "high"],
+      "require_review": ["high", "medium"],
+      "track_only": ["low", "info"]
+    },
+    "response_sla": {
+      "critical": "7_days",
+      "high": "14_days",
+      "medium": "30_days",
+      "low": "90_days"
+    }
+  },
+  "scanning_tools": {
+    "python": {
+      "dependency_scanners": [
+        {
+          "name": "safety",
+          "version": "3.0.1",
+          "purpose": "Known vulnerability database",
+          "config": "default"
+        },
+        {
+          "name": "pip-audit",
+          "version": "2.6.3",
+          "purpose": "Comprehensive package audit",
+          "config": "default"
+        }
+      ],
+      "code_scanners": [
+        {
+          "name": "bandit",
+          "version": "1.7.5",
+          "purpose": "Static security analysis",
+          "config": ".bandit.yml"
+        },
+        {
+          "name": "semgrep",
+          "version": "1.52.0",
+          "purpose": "Advanced pattern matching",
+          "config": "auto"
+        }
+      ]
+    },
+    "nodejs": {
+      "dependency_scanners": [
+        {
+          "name": "npm-audit",
+          "version": "builtin",
+          "purpose": "Node.js vulnerability database",
+          "config": "audit-level: high"
+        }
+      ],
+      "code_scanners": [
+        {
+          "name": "semgrep",
+          "version": "1.52.0",
+          "purpose": "JavaScript/TypeScript analysis",
+          "config": "auto"
+        }
+      ]
+    }
+  },
+  "security_gates": {
+    "pre_merge": {
+      "required_checks": [
+        "dependency_scan",
+        "code_security_analysis",
+        "secret_detection"
+      ],
+      "fail_conditions": [
+        "critical_vulnerabilities > 0",
+        "high_vulnerabilities > 0",
+        "secrets_detected > 0"
+      ]
+    },
+    "post_merge": {
+      "notifications": [
+        "security_team",
+        "project_maintainer"
+      ],
+      "reports": [
+        "vulnerability_summary",
+        "security_metrics"
+      ]
+    }
+  },
+  "approved_dependencies": {
+    "python": {
+      "cryptography": {
+        "purpose": "Cryptographic operations",
+        "min_version": "41.0.0",
+        "security_notes": "Use latest stable version"
+      },
+      "requests": {
+        "purpose": "HTTP client",
+        "min_version": "2.31.0",
+        "security_notes": "Verify SSL by default"
+      }
+    },
+    "nodejs": {
+      "typescript": {
+        "purpose": "Type safety",
+        "min_version": "5.0.0",
+        "security_notes": "Latest stable recommended"
+      }
+    }
+  },
+  "security_exceptions": {
+    "test_code": {
+      "allowed_patterns": [
+        "hardcoded_test_credentials",
+        "mock_security_functions"
+      ],
+      "scope": ["**/test/**", "**/tests/**", "**/*_test.py"]
+    },
+    "development_tools": {
+      "allowed_patterns": [
+        "dev_only_debug_output"
+      ],
+      "scope": ["development"]
+    }
+  },
+  "incident_response": {
+    "contact": "security@euxis.co",
+    "escalation_path": [
+      "security_team",
+      "project_maintainer",
+      "technical_lead"
+    ],
+    "communication_channels": [
+      "email",
+      "github_security_advisories"
+    ]
+  },
+  "compliance": {
+    "standards": [
+      "OWASP_Top_10",
+      "SANS_Top_25"
+    ],
+    "audit_frequency": "quarterly",
+    "documentation_requirements": [
+      "security_impact_assessment",
+      "vulnerability_remediation_plan"
+    ]
+  }
+}
