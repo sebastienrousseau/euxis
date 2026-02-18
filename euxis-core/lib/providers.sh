@@ -33,8 +33,6 @@ fi
 
 # Configurable timeouts for provider API calls (in seconds)
 EUXIS_API_TIMEOUT="${EUXIS_API_TIMEOUT:-300}"  # 5 minutes default
-EUXIS_PRESERVE_PROVIDER_SESSION="${EUXIS_PRESERVE_PROVIDER_SESSION:-1}"
-
 # Resolve active provider from current CLI session context.
 # Priority:
 # 1) Explicit EUXIS_SESSION_PROVIDER override
@@ -1256,26 +1254,16 @@ run_claude() {
     # Use timeout wrapper for the claude command
     # Tools include WebSearch and WebFetch for external research capability
     # Default max turns: 50 for complex analysis tasks, configurable via EUXIS_MAX_TURNS
-    # By default, preserve current Claude session env to reuse existing auth/session context.
-    if [[ "${EUXIS_PRESERVE_PROVIDER_SESSION}" == "1" ]]; then
-        printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
-            claude \
-            --print \
-            --model "${PROVIDER_MODEL}" \
-            --tools "Read,Edit,Write,Bash,WebSearch,WebFetch" \
-            --allowedTools "${allowed_tools}" \
-            --max-turns "${EUXIS_MAX_TURNS:-50}"
-    else
-        # Legacy behavior: strip parent session env and require fresh auth context.
-        printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
-            env -u CLAUDECODE -u CLAUDE_CODE_ENTRYPOINT \
-            claude \
-            --print \
-            --model "${PROVIDER_MODEL}" \
-            --tools "Read,Edit,Write,Bash,WebSearch,WebFetch" \
-            --allowedTools "${allowed_tools}" \
-            --max-turns "${EUXIS_MAX_TURNS:-50}"
-    fi
+    # Always strip CLAUDECODE/CLAUDE_CODE_ENTRYPOINT to prevent nested session errors.
+    # Claude Code rejects launches inside an existing session; env -u ensures clean subprocess.
+    printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
+        env -u CLAUDECODE -u CLAUDE_CODE_ENTRYPOINT \
+        claude \
+        --print \
+        --model "${PROVIDER_MODEL}" \
+        --tools "Read,Edit,Write,Bash,WebSearch,WebFetch" \
+        --allowedTools "${allowed_tools}" \
+        --max-turns "${EUXIS_MAX_TURNS:-50}"
 }
 
 run_gemini() {
