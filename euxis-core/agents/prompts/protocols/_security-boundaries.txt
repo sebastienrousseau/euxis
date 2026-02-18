@@ -37,9 +37,12 @@ Agents are restricted to the authorized tool belt defined in the Mandatory Proto
 
 | Category | Allowed | Denied |
 |----------|---------|--------|
-| **Read-only** | `grep`, `ls`, `find`, `cat`, `head`, `tail` | — |
+| **Read-only** | `grep`, `ls`, `find`, `cat`, `head`, `tail`, `wc`, `diff`, `sort` | — |
 | **Text processing** | `sed`, `awk` | — |
+| **File operations** | `mkdir`, `touch`, `cp`, `mv`, `chmod` (owner only) | `rm -rf`, `chmod 777` |
 | **Version control** | `git status`, `git diff`, `git log`, `git add`, `git commit` | `git push --force`, `git reset --hard` (without user approval) |
+| **Build tools** | `npm`, `npx`, `cargo`, `make`, `docker build` | `docker run --privileged` |
+| **Python** | `python3`, `pytest`, `pip`, `uv` | — |
 | **Network** | `curl`, `wget` (read-only fetches) | Arbitrary outbound connections to unknown hosts |
 | **Euxis tools** | `euxis-cortex`, `euxis-bus`, `euxis-graph`, `euxis-hooks`, `euxis-lint`, `euxis-certify` | — |
 | **FORBIDDEN** | — | `rm -rf`, `sudo`, `dd`, `shutdown`, `mkfs`, `chmod 777` |

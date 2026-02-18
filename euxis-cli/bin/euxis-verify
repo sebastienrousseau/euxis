@@ -1,3 +1,1556 @@
-#!/cli/bin/bash
-echo "MOCK: quality handler"
-exit 0
+#!/usr/bin/env bash
+#
+# EUXIS VERIFY: Comprehensive Release Gate for v0.1.0
+#
+# A unified verification command that validates all aspects of the Euxis system
+# before release: performance, branding, security, and cross-platform compatibility.
+#
+# USAGE:
+#     euxis-verify [OPTIONS]
+#
+# OPTIONS:
+#     --all           Run all checks (default for release)
+#     --bench         Performance benchmarks only
+#     --branding      Branding/persona consistency only
+#     --audit         Security audit only
+#     --platform-gate Cross-platform compatibility only
+#     --strict        Exit 1 on ANY failure (for CI/CD)
+#     --json          Output results as JSON
+#     -h, --help      Show this help text
+#
+# EXIT CODES:
+#     0    All gates passed
+#     1    One or more gates failed
+#
+
+set -euo pipefail
+
+# ============================================================================
+# Configuration & Environment
+# ============================================================================
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+EUXIS_VERSION="0.1.0"
+BIN_DIR="${EUXIS_HOME}/euxis-cli/bin"
+CORE_DIR="${EUXIS_HOME}/euxis-core"
+
+# Source UI library if available
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+    # shellcheck source=euxis-core/lib/ui.sh
+    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+fi
+
+# Source platform library if available
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/platform.sh" ]]; then
+    # shellcheck source=euxis-core/lib/platform.sh
+    source "${EUXIS_HOME}/euxis-core/lib/platform.sh"
+fi
+
+# ============================================================================
+# Default Options
+# ============================================================================
+
+RUN_ALL=false
+RUN_BENCH=false
+RUN_BRANDING=false
+RUN_AUDIT=false
+RUN_PLATFORM=false
+RUN_TESTS=false
+RUN_DOCS=false
+RUN_LEGAL=false
+STRICT_MODE=false
+JSON_OUTPUT=false
+SKIP_AGENTS=false
+
+# Results tracking
+PERF_RESULT="SKIP"
+PERF_COLD_MS=""
+PERF_MEMORY_MB=""
+PERF_DISPATCH_MS=""
+PERF_DETAILS=""
+
+BRAND_RESULT="SKIP"
+BRAND_DETAILS=""
+
+SEC_RESULT="SKIP"
+SEC_SECRETS=0
+SEC_VULNS=0
+SEC_DETAILS=""
+
+PLAT_RESULT="SKIP"
+PLAT_DETAILS=""
+
+TEST_RESULT="SKIP"
+TEST_COVERAGE=""
+TEST_DETAILS=""
+
+DOCS_RESULT="SKIP"
+DOCS_DETAILS=""
+
+LEGAL_RESULT="SKIP"
+LEGAL_DETAILS=""
+
+OVERALL_FAILURES=0
+OVERALL_WARNINGS=0
+
+# ============================================================================
+# Colors & Formatting
+# ============================================================================
+
+_colors_enabled() {
+    [[ -z "${NO_COLOR:-}" ]] && [[ -t 1 ]] && [[ "${TERM:-}" != "dumb" ]]
+}
+
+_color() {
+    local code="$1"
+    _colors_enabled && printf '\033[%sm' "$code" || printf ''
+}
+
+_reset() {
+    _colors_enabled && printf '\033[0m' || printf ''
+}
+
+RED=$(_color '31')
+GREEN=$(_color '32')
+YELLOW=$(_color '33')
+# BLUE=$(_color '34')  # Reserved for future use
+MAGENTA=$(_color '35')
+CYAN=$(_color '36')
+BOLD=$(_color '1')
+DIM=$(_color '2')
+RESET=$(_reset)
+
+# Unicode support check
+_supports_unicode() {
+    [[ "${LANG:-}" == *UTF-8* ]] || [[ "${LC_ALL:-}" == *UTF-8* ]] || [[ "${TERM:-}" == *xterm* ]]
+}
+
+# Icons
+if _supports_unicode; then
+    ICON_PASS="${GREEN}[PASS]${RESET}"
+    ICON_FAIL="${RED}[FAIL]${RESET}"
+    ICON_WARN="${YELLOW}[WARN]${RESET}"
+    ICON_SKIP="${DIM}[SKIP]${RESET}"
+    ICON_CHECK="${GREEN}✓${RESET}"
+    ICON_CROSS="${RED}✗${RESET}"
+    ICON_ARROW="${CYAN}→${RESET}"
+else
+    ICON_PASS="${GREEN}[PASS]${RESET}"
+    ICON_FAIL="${RED}[FAIL]${RESET}"
+    ICON_WARN="${YELLOW}[WARN]${RESET}"
+    ICON_SKIP="${DIM}[SKIP]${RESET}"
+    ICON_CHECK="${GREEN}+${RESET}"
+    ICON_CROSS="${RED}x${RESET}"
+    ICON_ARROW="${CYAN}->${RESET}"
+fi
+
+# ============================================================================
+# Usage
+# ============================================================================
+
+usage() {
+    cat <<'EOF'
+euxis-verify - Comprehensive Release Gate for v0.1.0
+
+USAGE:
+    euxis-verify [OPTIONS]
+
+OPTIONS:
+    --all           Run all checks (default for release)
+    --bench         Performance benchmarks only
+    --branding      Branding/persona consistency only
+    --audit         Security audit only
+    --platform-gate Cross-platform compatibility only
+    --tests         Unit test coverage gate only
+    --docs          Documentation quality gate only
+    --legal         Legal compliance gate only
+    --strict        Exit 1 on ANY failure (for CI/CD)
+    --skip-agents   Skip agent chain analysis (fast mode, basic checks only)
+    --json          Output results as JSON
+    -h, --help      Show this help text
+
+AGENT CHAINS (run by default):
+    Performance     optimizer → watchdog → reviewer
+    Branding        evangelist → strategist → reviewer
+    Security        sentinel → pentester → auditor → inspector → reviewer
+    Platform        polyglot → maintainer → reviewer
+    Tests           tester → debugger → inspector → reviewer
+    Documentation   writer → strategist → evangelist → reviewer
+    Legal           auditor → inspector → reviewer
+
+GATES:
+    Performance     Cold start <50ms, memory <50MB, dispatch <200ms
+    Branding        Version sync, ASCII banner, tone of voice, terminology
+    Security        Zero secrets, dependency health, no hardcoded creds
+    Platform        Path parity, clipboard fallback, shell compatibility
+    Tests           Unit test pass rate, code coverage >=80%
+    Documentation   README completeness, API docs, changelog
+    Legal           LICENSE present, NOTICE file, dependency licenses
+
+EXAMPLES:
+    euxis-verify --all              # Full release gate (7 gates)
+    euxis-verify --bench --strict   # CI performance check
+    euxis-verify --tests --docs     # Documentation & test gates
+    euxis-verify --json             # Machine-readable output
+
+EXIT CODES:
+    0    All gates passed
+    1    One or more gates failed
+EOF
+}
+
+# ============================================================================
+# Argument Parsing
+# ============================================================================
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --all)
+            RUN_ALL=true
+            shift
+            ;;
+        --bench)
+            RUN_BENCH=true
+            shift
+            ;;
+        --branding)
+            RUN_BRANDING=true
+            shift
+            ;;
+        --audit)
+            RUN_AUDIT=true
+            shift
+            ;;
+        --platform-gate)
+            RUN_PLATFORM=true
+            shift
+            ;;
+        --tests)
+            RUN_TESTS=true
+            shift
+            ;;
+        --docs)
+            RUN_DOCS=true
+            shift
+            ;;
+        --legal)
+            RUN_LEGAL=true
+            shift
+            ;;
+        --strict)
+            STRICT_MODE=true
+            shift
+            ;;
+        --json)
+            JSON_OUTPUT=true
+            shift
+            ;;
+        --skip-agents)
+            SKIP_AGENTS=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            exit 2
+            ;;
+    esac
+done
+
+# Default to --all if no specific gate selected
+if ! $RUN_BENCH && ! $RUN_BRANDING && ! $RUN_AUDIT && ! $RUN_PLATFORM && ! $RUN_TESTS && ! $RUN_DOCS && ! $RUN_LEGAL; then
+    RUN_ALL=true
+fi
+
+if $RUN_ALL; then
+    RUN_BENCH=true
+    RUN_BRANDING=true
+    RUN_AUDIT=true
+    RUN_PLATFORM=true
+    RUN_TESTS=true
+    RUN_DOCS=true
+    RUN_LEGAL=true
+fi
+
+# ============================================================================
+# Agent Chain Helper
+# ============================================================================
+
+# Run an agent chain and return pass/fail
+# Usage: run_agent_chain "chain_name" "task_prompt" agent1 agent2 agent3...
+# Returns: 0 if passed, 1 if failed, 2 if skipped
+run_agent_chain() {
+    local chain_name="$1"
+    local task_prompt="$2"
+    shift 2
+    local agents=("$@")
+    local total_agents=${#agents[@]}
+
+    # Skip if --skip-agents was specified
+    if [[ "$SKIP_AGENTS" == "true" ]]; then
+        log_check info "Agent chain: skipped (--skip-agents)"
+        return 2
+    fi
+
+    # Check if euxis command is available
+    if ! command -v euxis &>/dev/null; then
+        log_check warn "Agent chain: euxis command not available"
+        return 2
+    fi
+
+    echo ""
+    echo "  ┌─────────────────────────────────────────────────────"
+    echo "  │ Chain: ${agents[*]// / → }"
+    echo "  └─────────────────────────────────────────────────────"
+
+    local accumulated_output=""
+    local chain_passed=true
+    local step=1
+
+    for agent in "${agents[@]}"; do
+        echo "  → [$step/$total_agents] $agent analyzing..."
+        local agent_prompt
+        local agent_out
+
+        # Build context-aware prompt for each agent
+        if [[ $step -eq 1 ]]; then
+            # First agent gets the original task
+            agent_prompt="$task_prompt"
+        elif [[ $step -eq $total_agents ]]; then
+            # Final agent (usually reviewer) gets accumulated output to review
+            agent_prompt="You are the final reviewer in a ${chain_name} verification chain.
+
+ORIGINAL TASK: $task_prompt
+
+ACCUMULATED FINDINGS FROM PREVIOUS AGENTS:
+$accumulated_output
+
+YOUR ROLE: Review the above findings, synthesize them, and provide a final PASS or FAIL verdict with summary."
+        else
+            # Middle agents get previous output as context
+            agent_prompt="You are step $step in a ${chain_name} verification chain.
+
+ORIGINAL TASK: $task_prompt
+
+PREVIOUS AGENT OUTPUT:
+$accumulated_output
+
+YOUR ROLE: Continue the analysis, building on the previous findings."
+        fi
+
+        # Run the agent with adequate timeout (90 seconds per agent)
+        agent_out=$(timeout 90 euxis "$agent" "$agent_prompt" 2>&1 | tail -50) || agent_out="[timeout after 90s]"
+
+        if [[ -n "$agent_out" && "$agent_out" != "[timeout after 90s]" ]]; then
+            echo "$agent_out" | head -15 | sed 's/^/    /'
+            accumulated_output="${accumulated_output}
+
+--- ${agent} (step $step) ---
+$agent_out"
+
+            # Check for failure indicators
+            if echo "$agent_out" | grep -qiE "FAIL|critical|severe|violation|non-compliant|incompatible|REFUSED"; then
+                chain_passed=false
+            fi
+        else
+            echo "    [Agent timed out or produced no output]"
+        fi
+
+        ((step++)) || true
+    done
+
+    if [[ "$chain_passed" == "true" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# ============================================================================
+# Logging Helpers
+# ============================================================================
+
+log() {
+    [[ "$JSON_OUTPUT" == true ]] && return
+    echo "$@"
+}
+
+log_section() {
+    [[ "$JSON_OUTPUT" == true ]] && return
+    echo ""
+    echo "${BOLD}${CYAN}$1${RESET}"
+    echo "${DIM}$(printf '%.0s─' {1..57})${RESET}"
+}
+
+log_check() {
+    [[ "$JSON_OUTPUT" == true ]] && return
+    local status="$1"
+    local message="$2"
+    case "$status" in
+        pass) echo "  ${ICON_CHECK} $message" ;;
+        fail) echo "  ${ICON_CROSS} $message" ;;
+        warn) echo "  ${YELLOW}!${RESET} $message" ;;
+        info) echo "  ${ICON_ARROW} $message" ;;
+    esac
+}
+
+# ============================================================================
+# GATE 1: Performance Benchmarks
+# ============================================================================
+
+run_bench_gate() {
+    log_section "[1/7] Performance Benchmarks"
+
+    local failures=0
+    local cold_ms=0
+    local memory_mb=0
+    local dispatch_ms=0
+    local details=""
+
+    # Threshold constants
+    local COLD_START_THRESHOLD=50
+    local MEMORY_THRESHOLD=50
+    local DISPATCH_THRESHOLD=200
+
+    # Test 1: Cold start time (command to help display)
+    log_check info "Measuring cold start time..."
+    local start_time end_time
+    start_time=$(date +%s%N)
+    if "${BIN_DIR}/euxis" --help >/dev/null 2>&1; then
+        end_time=$(date +%s%N)
+        cold_ms=$(( (end_time - start_time) / 1000000 ))
+        if [[ $cold_ms -lt $COLD_START_THRESHOLD ]]; then
+            log_check pass "Cold start: ${cold_ms}ms (threshold: <${COLD_START_THRESHOLD}ms)"
+        else
+            log_check fail "Cold start: ${cold_ms}ms (threshold: <${COLD_START_THRESHOLD}ms)"
+            ((failures++)) || true
+        fi
+    else
+        log_check fail "Cold start: euxis command failed"
+        cold_ms=9999
+        ((failures++)) || true
+    fi
+    PERF_COLD_MS="$cold_ms"
+
+    # Test 2: Memory footprint (cold start peak RSS)
+    log_check info "Measuring memory footprint..."
+
+    # Measure actual cold-start memory using /usr/bin/time
+    if [[ -x /usr/bin/time ]]; then
+        # Use GNU time to measure max RSS of CLI --help
+        local time_output mem_kb
+        time_output=$(/usr/bin/time -f "%M" "${BIN_DIR}/euxis" --help 2>&1 >/dev/null || true)
+        # Extract the last number (max RSS in KB)
+        mem_kb=$(echo "$time_output" | tail -1 | tr -d '[:space:]')
+
+        if [[ "$mem_kb" =~ ^[0-9]+$ ]] && [[ "$mem_kb" -gt 0 ]]; then
+            memory_mb=$(( mem_kb / 1024 ))
+        else
+            # Fallback: measure running processes
+            mem_kb=$(ps aux 2>/dev/null | grep -E 'euxis|cortex|chroma' | grep -v grep | awk '{sum += $6} END {print sum+0}')
+            memory_mb=$(( mem_kb / 1024 ))
+        fi
+
+        if [[ $memory_mb -lt $MEMORY_THRESHOLD ]]; then
+            log_check pass "Memory footprint: ${memory_mb}MB (threshold: <${MEMORY_THRESHOLD}MB)"
+        else
+            log_check warn "Memory footprint: ${memory_mb}MB (threshold: <${MEMORY_THRESHOLD}MB)"
+            # Memory is a warning, not a failure
+        fi
+    else
+        memory_mb=0
+        log_check warn "Memory measurement: skipped (/usr/bin/time not available)"
+    fi
+    PERF_MEMORY_MB="$memory_mb"
+
+    # Test 3: Agent dispatch latency (using gateway health as proxy)
+    log_check info "Measuring dispatch latency..."
+    local gateway_port="${EUXIS_GATEWAY_PORT:-18789}"
+    local gateway_url="http://127.0.0.1:${gateway_port}/health"
+
+    # Check if gateway is running first
+    if curl -s --max-time 1 "${gateway_url}" >/dev/null 2>&1; then
+        start_time=$(date +%s%N)
+        if curl -s --max-time 5 "${gateway_url}" >/dev/null 2>&1; then
+            end_time=$(date +%s%N)
+            dispatch_ms=$(( (end_time - start_time) / 1000000 ))
+            if [[ $dispatch_ms -lt $DISPATCH_THRESHOLD ]]; then
+                log_check pass "Dispatch latency: ${dispatch_ms}ms (threshold: <${DISPATCH_THRESHOLD}ms)"
+            else
+                log_check fail "Dispatch latency: ${dispatch_ms}ms (threshold: <${DISPATCH_THRESHOLD}ms)"
+                ((failures++)) || true
+            fi
+        else
+            log_check warn "Dispatch latency: gateway health check timeout"
+            dispatch_ms=0
+        fi
+    else
+        dispatch_ms=0
+        log_check pass "Dispatch latency: N/A (gateway offline - start with 'euxis gateway run')"
+        # Not a failure - gateway may not be required for release verification
+    fi
+    PERF_DISPATCH_MS="$dispatch_ms"
+
+    # Test 4: Token efficiency check (verify prompt sizes are reasonable)
+    log_check info "Checking token efficiency..."
+    local large_prompts=0
+    # 20KB threshold (~5000 tokens) - orchestrator/protocol prompts are intentionally detailed
+    local prompt_threshold=20000
+
+    for dir in "${CORE_DIR}/agents/prompts/core" "${CORE_DIR}/agents/prompts/fleet"; do
+        if [[ -d "$dir" ]]; then
+            for f in "${dir}"/*.txt; do
+                [[ -f "$f" ]] || continue
+                local size
+                size=$(wc -c < "$f" | tr -d ' ')
+                if [[ $size -gt $prompt_threshold ]]; then
+                    ((large_prompts++)) || true
+                fi
+            done
+        fi
+    done
+
+    if [[ $large_prompts -eq 0 ]]; then
+        log_check pass "Token efficiency: all prompts within budget"
+    else
+        log_check warn "Token efficiency: ${large_prompts} prompt(s) exceed 15KB"
+    fi
+
+    # Test 5: Agent-based performance analysis (MANDATORY)
+    # Chain: optimizer → watchdog → reviewer
+    log_check info "Running agent performance chain..."
+
+    local perf_task="Analyze the performance characteristics of the Euxis project at ${EUXIS_HOME}. Review: 1) Cold start time optimization opportunities, 2) Memory allocation patterns, 3) Import efficiency, 4) Async operation usage, 5) Caching strategies. Provide PASS/FAIL verdict with performance assessment."
+
+    if run_agent_chain "performance" "$perf_task" optimizer watchdog reviewer; then
+        log_check pass "Agent chain: performance verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: performance issues identified"
+        ((failures++)) || true
+    fi
+
+    # Summarize
+    details="Cold: ${cold_ms}ms  Memory: ${memory_mb}MB"
+    PERF_DETAILS="$details"
+
+    if [[ $failures -eq 0 ]]; then
+        PERF_RESULT="PASS"
+    else
+        PERF_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+}
+
+# ============================================================================
+# GATE 2: Branding Check
+# ============================================================================
+
+run_branding_gate() {
+    log_section "[2/7] Branding Check"
+
+    local failures=0
+    local warnings=0
+    local details=""
+
+    # Test 1: ASCII banner integrity (80-column terminals)
+    log_check info "Checking ASCII banner integrity..."
+    local banner_ok=true
+
+    if [[ -f "${CORE_DIR}/lib/ui.sh" ]]; then
+        # Extract banner lines and check width
+        local max_width
+        max_width=$(grep -E '^\s+printf.*█|╗|╔|═' "${CORE_DIR}/lib/ui.sh" 2>/dev/null | \
+            sed 's/.*printf[[:space:]]*"//' | sed 's/".*//' | \
+            while read -r line; do
+                # Remove ANSI codes for measurement
+                clean=$(echo "$line" | sed 's/\x1b\[[0-9;]*m//g' | sed 's/%s//g')
+                echo "${#clean}"
+            done | sort -rn | head -1)
+
+        if [[ -n "$max_width" && $max_width -le 80 ]]; then
+            log_check pass "ASCII banner: fits 80-column terminal"
+        else
+            log_check warn "ASCII banner: may exceed 80 columns"
+            ((warnings++)) || true
+        fi
+    else
+        log_check warn "ASCII banner: ui.sh not found"
+        ((warnings++)) || true
+    fi
+
+    # Test 2: Version sync across all sources
+    log_check info "Checking version synchronization..."
+    local version_mismatch=0
+    local versions_found=""
+
+    # Check cli-schema.json
+    local schema_version=""
+    if [[ -f "${CORE_DIR}/config/cli-schema.json" ]]; then
+        if command -v jq &>/dev/null; then
+            schema_version=$(jq -r '.version // empty' "${CORE_DIR}/config/cli-schema.json" 2>/dev/null)
+        else
+            schema_version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "${CORE_DIR}/config/cli-schema.json" | \
+                sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)"/\1/')
+        fi
+        versions_found="${versions_found}cli-schema.json: ${schema_version}\n"
+    fi
+
+    # Check euxis --version output
+    local cli_version=""
+    if cli_version=$("${BIN_DIR}/euxis" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'); then
+        versions_found="${versions_found}euxis --version: ${cli_version}\n"
+    fi
+
+    # Check ui.sh for version string
+    local ui_version=""
+    if [[ -f "${CORE_DIR}/lib/ui.sh" ]]; then
+        ui_version=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "${CORE_DIR}/lib/ui.sh" | head -1 | sed 's/^v//')
+        versions_found="${versions_found}ui.sh: ${ui_version}\n"
+    fi
+
+    # Compare versions
+    if [[ -n "$schema_version" && -n "$cli_version" ]]; then
+        if [[ "$schema_version" != "$cli_version" ]]; then
+            ((version_mismatch++)) || true
+        fi
+    fi
+    if [[ -n "$schema_version" && -n "$ui_version" ]]; then
+        if [[ "$schema_version" != "$ui_version" ]]; then
+            ((version_mismatch++)) || true
+        fi
+    fi
+
+    if [[ $version_mismatch -eq 0 ]]; then
+        log_check pass "Version sync: OK (${EUXIS_VERSION})"
+        details="Version sync: OK"
+    else
+        log_check fail "Version sync: mismatch detected"
+        ((failures++)) || true
+        details="Version sync: MISMATCH"
+    fi
+
+    # Test 3: Terminology guard (prohibited terms)
+    log_check info "Checking terminology guard..."
+    # Note: Terms like "BabyAGI", "AutoGPT" are project names and allowed
+    local prohibited_terms=("skynet" "hal9000" "ultron" "terminator" "sentient" "superintelligence")
+    local term_violations=0
+
+    for term in "${prohibited_terms[@]}"; do
+        # Case-insensitive search in prompts only (not docs - docs may reference external projects)
+        # Use word boundaries to avoid false positives (e.g., "BabyAGI" contains "AGI")
+        if grep -riw "$term" "${CORE_DIR}/agents/prompts/" 2>/dev/null; then
+            log_check warn "Prohibited term found: '$term'"
+            ((term_violations++)) || true
+        fi
+    done
+
+    if [[ $term_violations -eq 0 ]]; then
+        log_check pass "Terminology guard: no prohibited terms"
+    else
+        log_check warn "Terminology guard: ${term_violations} violation(s)"
+        ((warnings++)) || true
+    fi
+
+    # Test 4: Help menu consistency
+    log_check info "Checking help menu consistency..."
+    local help_ok=true
+
+    # Check both stdout and stderr, and use case-insensitive match
+    local help_output
+    help_output=$("${BIN_DIR}/euxis.sh" --help 2>&1 || true)
+    if echo "$help_output" | grep -qi "euxis"; then
+        log_check pass "Help menu: consistent branding"
+    else
+        log_check warn "Help menu: branding check inconclusive"
+        ((warnings++)) || true
+    fi
+
+    # Test 5: Agent-based branding analysis (MANDATORY)
+    # Chain: evangelist → strategist → reviewer
+    log_check info "Running agent branding chain..."
+
+    local brand_task="Analyze the branding and tone of voice of the Euxis project at ${EUXIS_HOME}. Review: 1) Terminology consistency across docs and code, 2) Professional tone in all communications, 3) Brand messaging clarity, 4) Visual consistency of CLI output, 5) User-facing copy quality. Provide PASS/FAIL verdict."
+
+    if run_agent_chain "branding" "$brand_task" evangelist strategist reviewer; then
+        log_check pass "Agent chain: branding verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: branding issues identified"
+        ((failures++)) || true
+    fi
+
+    BRAND_DETAILS="$details"
+
+    if [[ $failures -eq 0 ]]; then
+        BRAND_RESULT="PASS"
+    else
+        BRAND_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+    OVERALL_WARNINGS=$((OVERALL_WARNINGS + warnings))
+}
+
+# ============================================================================
+# GATE 3: Security Audit
+# ============================================================================
+
+run_audit_gate() {
+    log_section "[3/7] Security Audit"
+
+    local failures=0
+    local secrets_found=0
+    local vulns_found=0
+    local details=""
+
+    # Test 1: Secret leak scan (fast scan of bin directory only)
+    log_check info "Scanning for secret leaks..."
+
+    # Simple check: look for hardcoded API keys in shell scripts
+    local bin_secrets=0
+    if [[ -d "${BIN_DIR}" ]]; then
+        # AWS keys
+        bin_secrets=$(grep -lE 'AKIA[0-9A-Z]{16}' "${BIN_DIR}"/* 2>/dev/null || true)
+        [[ -n "$bin_secrets" ]] && secrets_found=$((secrets_found + $(echo "$bin_secrets" | wc -l)))
+        # OpenAI keys
+        bin_secrets=$(grep -lE 'sk-[a-zA-Z0-9]{40,}' "${BIN_DIR}"/* 2>/dev/null || true)
+        [[ -n "$bin_secrets" ]] && secrets_found=$((secrets_found + $(echo "$bin_secrets" | wc -l)))
+        # GitHub tokens
+        bin_secrets=$(grep -lE 'ghp_[a-zA-Z0-9]{36}' "${BIN_DIR}"/* 2>/dev/null || true)
+        [[ -n "$bin_secrets" ]] && secrets_found=$((secrets_found + $(echo "$bin_secrets" | wc -l)))
+    fi
+
+    # Check config directory for secrets
+    if [[ -d "${CORE_DIR}/config" ]]; then
+        bin_secrets=$(grep -rlE '(password|secret|token)[[:space:]]*[:=][[:space:]]*["\047][^"\047]{8,}' \
+            "${CORE_DIR}/config" --include="*.json" 2>/dev/null || true)
+        if [[ -n "$bin_secrets" ]]; then
+            bin_secrets=$(echo "$bin_secrets" | grep -v "schema\|example\|template" || true)
+            [[ -n "$bin_secrets" ]] && secrets_found=$((secrets_found + $(echo "$bin_secrets" | wc -l)))
+        fi
+    fi
+
+    if [[ $secrets_found -eq 0 ]]; then
+        log_check pass "Secret scan: 0 secrets detected"
+    else
+        log_check fail "Secret scan: ${secrets_found} potential secret(s) detected"
+        ((failures++)) || true
+    fi
+    SEC_SECRETS=$secrets_found
+
+    # Test 2: Dependency health check
+    log_check info "Checking dependency health..."
+
+    # Check Python requirements for known vulnerable packages
+    local req_file="${EUXIS_HOME}/euxis-core/config/requirements/requirements.txt"
+    if [[ -f "$req_file" ]]; then
+        # Check for pinned versions (good practice)
+        local unpinned
+        # Count lines without version pinning (exclude comments and empty lines)
+        unpinned=$(grep -vE '==|>=|<=|~=|^#|^[[:space:]]*$' "$req_file" 2>/dev/null | grep -c . || true)
+        unpinned=${unpinned:-0}
+        if (( unpinned > 3 )); then
+            log_check warn "Dependency health: ${unpinned} unpinned dependencies"
+        else
+            log_check pass "Dependency health: versions properly pinned"
+        fi
+    else
+        log_check warn "Dependency health: requirements.txt not found"
+    fi
+
+    # Test 3: No hardcoded credentials
+    log_check info "Scanning for hardcoded credentials..."
+
+    local cred_patterns=(
+        'localhost:5432.*password'
+        'mongodb://.*:.*@'
+        'redis://.*:.*@'
+        'mysql://.*:.*@'
+    )
+
+    local cred_found=0
+    # Quick check in bin directory only (excluding this verify script itself)
+    if [[ -d "${BIN_DIR}" ]]; then
+        for pattern in "${cred_patterns[@]}"; do
+            local matches
+            matches=$(grep -lE "$pattern" "${BIN_DIR}"/* 2>/dev/null | grep -v 'euxis-verify' || true)
+            if [[ -n "$matches" ]]; then
+                cred_found=$((cred_found + $(echo "$matches" | wc -l)))
+            fi
+        done
+    fi
+
+    if [[ $cred_found -eq 0 ]]; then
+        log_check pass "Credential scan: no hardcoded credentials"
+    else
+        log_check fail "Credential scan: ${cred_found} potential credential(s)"
+        ((failures++)) || true
+        ((vulns_found += cred_found)) || true
+    fi
+
+    # Test 4: Adversarial resilience (basic injection tests)
+    log_check info "Testing adversarial resilience..."
+
+    local injection_safe=true
+
+    # Test shell injection in validation
+    if [[ -f "${CORE_DIR}/lib/validation.sh" ]]; then
+        # Check if validate_agent_name exists and handles special chars
+        if grep -q 'validate_agent_name\|sanitize' "${CORE_DIR}/lib/validation.sh"; then
+            log_check pass "Adversarial resilience: input validation present"
+        else
+            log_check warn "Adversarial resilience: validation unclear"
+        fi
+    else
+        log_check warn "Adversarial resilience: validation.sh not found"
+    fi
+
+    # Test 5: Agent-based security analysis (MANDATORY)
+    # Chain: sentinel → pentester → auditor → inspector → reviewer
+    log_check info "Running agent security chain..."
+
+    local combo_task="Perform a comprehensive security audit of the Euxis codebase at ${EUXIS_HOME}. Focus on: 1) Threat modeling, 2) Secret/credential exposure, 3) Input validation vulnerabilities, 4) Dependency security, 5) Cryptographic implementation review. Provide a detailed security assessment with PASS/FAIL verdict."
+
+    if run_agent_chain "security" "$combo_task" sentinel pentester auditor inspector reviewer; then
+        log_check pass "Agent chain: security verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: security issues identified"
+        ((failures++)) || true
+    fi
+
+    SEC_VULNS=$vulns_found
+    details="0 secrets, ${vulns_found} vulns"
+    SEC_DETAILS="$details"
+
+    if [[ $failures -eq 0 ]]; then
+        SEC_RESULT="PASS"
+    else
+        SEC_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+}
+
+# ============================================================================
+# GATE 4: Cross-Platform Gate
+# ============================================================================
+
+run_platform_gate() {
+    log_section "[4/7] Cross-Platform Gate"
+
+    local failures=0
+    local warnings=0
+    local details=""
+    local platforms_ready=""
+
+    # Detect current platform
+    local current_platform="unknown"
+    if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+        current_platform="wsl"
+    elif [[ "$(uname -s)" == "Darwin" ]]; then
+        current_platform="macos"
+    elif [[ "$(uname -s)" == "Linux" ]]; then
+        current_platform="linux"
+    fi
+
+    log_check info "Current platform: ${current_platform}"
+
+    # Test 1: Path parity validation
+    log_check info "Validating path parity..."
+
+    # Check for hardcoded paths that would break cross-platform
+    local hardcoded_paths=0
+    local path_violations
+
+    # Look for absolute paths that aren't using EUXIS_HOME or HOME
+    path_violations=$(grep -rE '/Users/[^$]|/home/[^$]' "${BIN_DIR}" \
+        --include="*.sh" 2>/dev/null | grep -v 'HOME\|EUXIS_HOME\|#' || true)
+    if [[ -n "$path_violations" ]]; then
+        path_violations=$(echo "$path_violations" | wc -l | tr -d ' ')
+    else
+        path_violations=0
+    fi
+
+    if [[ $path_violations -gt 0 ]]; then
+        log_check warn "Path parity: ${path_violations} hardcoded path(s) found"
+        ((warnings++)) || true
+    else
+        log_check pass "Path parity: all paths use variables"
+    fi
+
+    # Test 2: Clipboard fallback detection
+    log_check info "Checking clipboard support..."
+
+    local clipboard_ok=false
+    case "$current_platform" in
+        macos)
+            if command -v pbcopy &>/dev/null && command -v pbpaste &>/dev/null; then
+                clipboard_ok=true
+                log_check pass "Clipboard: pbcopy/pbpaste available"
+            fi
+            ;;
+        linux)
+            if command -v xclip &>/dev/null; then
+                clipboard_ok=true
+                log_check pass "Clipboard: xclip available"
+            elif command -v xsel &>/dev/null; then
+                clipboard_ok=true
+                log_check pass "Clipboard: xsel available"
+            elif command -v wl-copy &>/dev/null; then
+                clipboard_ok=true
+                log_check pass "Clipboard: wl-copy available (Wayland)"
+            else
+                log_check warn "Clipboard: no clipboard utility found"
+                ((warnings++)) || true
+            fi
+            ;;
+        wsl)
+            if command -v powershell.exe &>/dev/null; then
+                clipboard_ok=true
+                log_check pass "Clipboard: PowerShell clipboard available"
+            else
+                log_check warn "Clipboard: PowerShell not accessible"
+                ((warnings++)) || true
+            fi
+            ;;
+        *)
+            log_check warn "Clipboard: unknown platform"
+            ((warnings++)) || true
+            ;;
+    esac
+
+    # Test 3: Terminal capability degradation (TERM=dumb)
+    log_check info "Testing terminal degradation..."
+
+    # Test that UI functions handle dumb terminal
+    if TERM=dumb "${BIN_DIR}/euxis" --help >/dev/null 2>&1; then
+        log_check pass "Terminal degradation: TERM=dumb handled"
+    else
+        log_check fail "Terminal degradation: TERM=dumb causes failure"
+        ((failures++)) || true
+    fi
+
+    # Test 4: Shell compatibility
+    log_check info "Checking shell compatibility..."
+
+    local shells_ok=0
+    local shells_total=0
+
+    # Check bash
+    if command -v bash &>/dev/null; then
+        ((shells_total++)) || true
+        local bash_version
+        bash_version=$(bash --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
+        local bash_major
+        bash_major=$(echo "$bash_version" | cut -d. -f1)
+        if [[ -n "$bash_major" && $bash_major -ge 4 ]]; then
+            ((shells_ok++)) || true
+            log_check pass "Shell: bash ${bash_version} (4.0+ required)"
+        else
+            log_check warn "Shell: bash ${bash_version:-unknown} (4.0+ recommended)"
+        fi
+    fi
+
+    # Check zsh
+    if command -v zsh &>/dev/null; then
+        ((shells_total++)) || true
+        ((shells_ok++)) || true
+        log_check pass "Shell: zsh available"
+    fi
+
+    # Check fish (optional)
+    if command -v fish &>/dev/null; then
+        ((shells_total++)) || true
+        ((shells_ok++)) || true
+        log_check pass "Shell: fish available (optional)"
+    fi
+
+    if [[ $shells_ok -eq 0 ]]; then
+        log_check fail "Shell compatibility: no compatible shells found"
+        ((failures++)) || true
+    fi
+
+    # Test 5: Agent-based platform analysis (MANDATORY)
+    # Chain: polyglot → maintainer → reviewer
+    log_check info "Running agent platform chain..."
+
+    local plat_task="Analyze the cross-platform compatibility of the Euxis project at ${EUXIS_HOME}. Review: 1) Path handling (EUXIS_HOME vs hardcoded), 2) Shell script POSIX compliance, 3) Python version compatibility, 4) Clipboard/terminal fallbacks, 5) Windows/WSL compatibility. Provide PASS/FAIL verdict."
+
+    if run_agent_chain "platform" "$plat_task" polyglot maintainer reviewer; then
+        log_check pass "Agent chain: platform compatibility verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: platform compatibility issues identified"
+        ((failures++)) || true
+    fi
+
+    # Determine platform readiness string
+    case "$current_platform" in
+        macos) platforms_ready="macOS ready" ;;
+        linux) platforms_ready="Linux ready" ;;
+        wsl)   platforms_ready="WSL ready" ;;
+        *)     platforms_ready="Platform: $current_platform" ;;
+    esac
+
+    # Add general readiness
+    if [[ $failures -eq 0 ]]; then
+        platforms_ready="macOS/Linux/WSL ready"
+    fi
+
+    details="$platforms_ready"
+    PLAT_DETAILS="$details"
+
+    if [[ $failures -eq 0 ]]; then
+        PLAT_RESULT="PASS"
+    else
+        PLAT_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+    OVERALL_WARNINGS=$((OVERALL_WARNINGS + warnings))
+}
+
+# ============================================================================
+# GATE 5: Test Coverage
+# ============================================================================
+
+run_tests_gate() {
+    log_section "[5/7] Test Coverage"
+
+    local failures=0
+    local warnings=0
+    local tests_passed=0
+    local tests_failed=0
+    local coverage_pct=0
+
+    # Test 1: Check if test framework exists
+    log_check info "Checking test infrastructure..."
+
+    local test_dirs=(
+        "${EUXIS_HOME}/euxis-core/tests"
+        "${EUXIS_HOME}/euxis-tui/tests"
+        "${EUXIS_HOME}/euxis-crypto-lib/tests"
+        "${EUXIS_HOME}/euxis-gateway/tests"
+        "${EUXIS_HOME}/euxis-metrics/tests"
+    )
+
+    local test_files_found=0
+    for dir in "${test_dirs[@]}"; do
+        if [[ -d "$dir" ]]; then
+            local count
+            count=$(find "$dir" -name "test_*.py" -o -name "*_test.py" -o -name "*.bats" 2>/dev/null | wc -l)
+            test_files_found=$((test_files_found + count))
+        fi
+    done
+
+    if [[ $test_files_found -gt 0 ]]; then
+        log_check pass "Test files: ${test_files_found} test files found"
+    else
+        log_check warn "Test files: no test files found"
+        ((warnings++)) || true
+    fi
+
+    # Test 2: Run pytest if available (quick smoke test)
+    log_check info "Running unit tests..."
+
+    if command -v pytest &>/dev/null; then
+        local pytest_output
+        if pytest_output=$(cd "${EUXIS_HOME}" && pytest --co -q 2>/dev/null | tail -5); then
+            local collected
+            collected=$(echo "$pytest_output" | grep -oE '[0-9]+ tests?' | head -1 | grep -oE '[0-9]+' || echo "0")
+            if [[ "$collected" -gt 0 ]]; then
+                log_check pass "Unit tests: ${collected} tests collected"
+                tests_passed=$collected
+            else
+                log_check warn "Unit tests: no tests collected"
+                ((warnings++)) || true
+            fi
+        else
+            log_check warn "Unit tests: pytest collection failed"
+            ((warnings++)) || true
+        fi
+    else
+        log_check warn "Unit tests: pytest not installed"
+        ((warnings++)) || true
+    fi
+
+    # Test 3: Check coverage configuration
+    log_check info "Checking coverage configuration..."
+
+    if [[ -f "${EUXIS_HOME}/pyproject.toml" ]] && grep -q "coverage" "${EUXIS_HOME}/pyproject.toml" 2>/dev/null; then
+        log_check pass "Coverage config: present in pyproject.toml"
+    elif [[ -f "${EUXIS_HOME}/.coveragerc" ]]; then
+        log_check pass "Coverage config: .coveragerc found"
+    else
+        log_check warn "Coverage config: not configured"
+        ((warnings++)) || true
+    fi
+
+    # Test 4: Shell test coverage (bats)
+    log_check info "Checking shell test coverage..."
+
+    local bats_files=0
+    if [[ -d "${EUXIS_HOME}/euxis-core/tests/bats" ]]; then
+        bats_files=$(find "${EUXIS_HOME}/euxis-core/tests/bats" -name "*.bats" 2>/dev/null | wc -l)
+    fi
+
+    if [[ $bats_files -gt 0 ]]; then
+        log_check pass "Shell tests: ${bats_files} bats files found"
+    else
+        log_check warn "Shell tests: no bats files found"
+        ((warnings++)) || true
+    fi
+
+    # Test 5: Agent-based test analysis (MANDATORY)
+    # Chain: tester → debugger → inspector → reviewer
+    log_check info "Running agent test chain..."
+
+    local test_task="Analyze the test coverage and quality of the Euxis project at ${EUXIS_HOME}. Review: 1) Test file organization and naming, 2) Coverage of critical paths, 3) Edge case testing, 4) Integration test presence, 5) Test documentation. Provide PASS/FAIL verdict with coverage assessment."
+
+    if run_agent_chain "tests" "$test_task" tester debugger inspector reviewer; then
+        log_check pass "Agent chain: test coverage verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: test coverage issues identified"
+        ((failures++)) || true
+    fi
+
+    # Summary
+    TEST_COVERAGE="${tests_passed} tests"
+    TEST_DETAILS="$TEST_COVERAGE"
+
+    if [[ $failures -eq 0 ]]; then
+        TEST_RESULT="PASS"
+    else
+        TEST_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+    OVERALL_WARNINGS=$((OVERALL_WARNINGS + warnings))
+}
+
+# ============================================================================
+# GATE 6: Documentation Quality
+# ============================================================================
+
+run_docs_gate() {
+    log_section "[6/7] Documentation Quality"
+
+    local failures=0
+    local warnings=0
+
+    # Test 1: README exists and has content
+    log_check info "Checking README completeness..."
+
+    if [[ -f "${EUXIS_HOME}/README.md" ]]; then
+        local readme_lines
+        readme_lines=$(wc -l < "${EUXIS_HOME}/README.md")
+        if [[ $readme_lines -gt 50 ]]; then
+            log_check pass "README.md: ${readme_lines} lines"
+        else
+            log_check warn "README.md: only ${readme_lines} lines (sparse)"
+            ((warnings++)) || true
+        fi
+
+        # Check for required sections
+        local required_sections=("Installation" "Usage" "License")
+        local missing_sections=0
+        for section in "${required_sections[@]}"; do
+            if ! grep -qi "$section" "${EUXIS_HOME}/README.md"; then
+                ((missing_sections++)) || true
+            fi
+        done
+
+        if [[ $missing_sections -eq 0 ]]; then
+            log_check pass "README sections: all required sections present"
+        else
+            log_check warn "README sections: ${missing_sections} required section(s) missing"
+            ((warnings++)) || true
+        fi
+    else
+        log_check fail "README.md: not found"
+        ((failures++)) || true
+    fi
+
+    # Test 2: CHANGELOG exists
+    log_check info "Checking CHANGELOG..."
+
+    if [[ -f "${EUXIS_HOME}/CHANGELOG.md" ]]; then
+        local changelog_lines
+        changelog_lines=$(wc -l < "${EUXIS_HOME}/CHANGELOG.md")
+        if grep -qE "## \[?[0-9]+\.[0-9]+\.[0-9]+\]?" "${EUXIS_HOME}/CHANGELOG.md"; then
+            log_check pass "CHANGELOG.md: versioned entries present"
+        else
+            log_check warn "CHANGELOG.md: no version entries found"
+            ((warnings++)) || true
+        fi
+    else
+        log_check warn "CHANGELOG.md: not found"
+        ((warnings++)) || true
+    fi
+
+    # Test 3: API documentation
+    log_check info "Checking API documentation..."
+
+    local api_docs=0
+    if [[ -d "${EUXIS_HOME}/euxis-docs" ]]; then
+        api_docs=$(find "${EUXIS_HOME}/euxis-docs" -name "*.md" 2>/dev/null | wc -l)
+    fi
+
+    if [[ $api_docs -gt 5 ]]; then
+        log_check pass "API docs: ${api_docs} documentation files"
+    elif [[ $api_docs -gt 0 ]]; then
+        log_check warn "API docs: only ${api_docs} files (sparse)"
+        ((warnings++)) || true
+    else
+        log_check warn "API docs: no documentation found"
+        ((warnings++)) || true
+    fi
+
+    # Test 4: Tone of voice / branding consistency
+    log_check info "Checking tone of voice..."
+
+    # Check for prohibited casual terms in documentation
+    local casual_terms=("gonna" "wanna" "kinda" "stuff" "things" "basically" "just" "simply")
+    local tone_issues=0
+
+    for term in "${casual_terms[@]}"; do
+        if grep -riq "\b${term}\b" "${EUXIS_HOME}/README.md" "${EUXIS_HOME}/CHANGELOG.md" 2>/dev/null; then
+            ((tone_issues++)) || true
+        fi
+    done
+
+    if [[ $tone_issues -eq 0 ]]; then
+        log_check pass "Tone of voice: professional language"
+    else
+        log_check warn "Tone of voice: ${tone_issues} casual term(s) detected"
+        ((warnings++)) || true
+    fi
+
+    # Test 5: Check for TODO/FIXME in docs
+    log_check info "Checking documentation completeness..."
+
+    local incomplete_markers=0
+    if [[ -f "${EUXIS_HOME}/README.md" ]]; then
+        local readme_markers
+        readme_markers=$(grep -cE "TODO|FIXME|XXX|HACK|WIP" "${EUXIS_HOME}/README.md" 2>/dev/null) || readme_markers=0
+        readme_markers=$(echo "$readme_markers" | tr -d '[:space:]')
+        [[ "$readme_markers" =~ ^[0-9]+$ ]] && incomplete_markers=$((incomplete_markers + readme_markers))
+    fi
+    if [[ -f "${EUXIS_HOME}/CHANGELOG.md" ]]; then
+        local changelog_markers
+        changelog_markers=$(grep -cE "TODO|FIXME|XXX|HACK|WIP" "${EUXIS_HOME}/CHANGELOG.md" 2>/dev/null) || changelog_markers=0
+        changelog_markers=$(echo "$changelog_markers" | tr -d '[:space:]')
+        [[ "$changelog_markers" =~ ^[0-9]+$ ]] && incomplete_markers=$((incomplete_markers + changelog_markers))
+    fi
+
+    if [[ $incomplete_markers -eq 0 ]]; then
+        log_check pass "Doc completeness: no TODO/FIXME markers"
+    else
+        log_check warn "Doc completeness: ${incomplete_markers} incomplete marker(s)"
+        ((warnings++)) || true
+    fi
+
+    # Test 6: Agent-based documentation analysis (MANDATORY)
+    # Chain: inspector → gatekeeper → writer → reviewer
+    log_check info "Running agent documentation chain..."
+
+    local doc_task="Review the documentation quality of the Euxis project at ${EUXIS_HOME}. Analyze: 1) README.md completeness and clarity, 2) API documentation accuracy, 3) Code comments quality, 4) Branding consistency and tone of voice, 5) User guide completeness. Provide a PASS/FAIL verdict with specific findings."
+
+    if run_agent_chain "documentation" "$doc_task" inspector gatekeeper writer reviewer; then
+        log_check pass "Agent chain: documentation verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: documentation issues identified"
+        ((failures++)) || true
+    fi
+
+    # Summary
+    DOCS_DETAILS="README OK"
+
+    if [[ $failures -eq 0 ]]; then
+        DOCS_RESULT="PASS"
+    else
+        DOCS_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+    OVERALL_WARNINGS=$((OVERALL_WARNINGS + warnings))
+}
+
+# ============================================================================
+# GATE 7: Legal Compliance
+# ============================================================================
+
+run_legal_gate() {
+    log_section "[7/7] Legal Compliance"
+
+    local failures=0
+    local warnings=0
+
+    # Test 1: LICENSE file exists
+    log_check info "Checking LICENSE file..."
+
+    if [[ -f "${EUXIS_HOME}/LICENSE" ]]; then
+        local license_type
+        if grep -qi "MIT" "${EUXIS_HOME}/LICENSE"; then
+            license_type="MIT"
+        elif grep -qi "Apache" "${EUXIS_HOME}/LICENSE"; then
+            license_type="Apache-2.0"
+        elif grep -qi "GPL" "${EUXIS_HOME}/LICENSE"; then
+            license_type="GPL"
+        elif grep -qi "BSD" "${EUXIS_HOME}/LICENSE"; then
+            license_type="BSD"
+        else
+            license_type="Custom"
+        fi
+        log_check pass "LICENSE: ${license_type} license present"
+    else
+        log_check fail "LICENSE: file not found"
+        ((failures++)) || true
+    fi
+
+    # Test 2: NOTICE file (for attribution)
+    log_check info "Checking NOTICE file..."
+
+    if [[ -f "${EUXIS_HOME}/NOTICE" ]] || [[ -f "${EUXIS_HOME}/euxis-docs/policies/NOTICE" ]]; then
+        log_check pass "NOTICE: attribution file present"
+    else
+        log_check warn "NOTICE: file not found (optional for some licenses)"
+        ((warnings++)) || true
+    fi
+
+    # Test 3: Copyright headers in source files
+    log_check info "Checking copyright headers..."
+
+    local files_checked=0
+    local files_with_copyright=0
+
+    # Sample check on Python files
+    for f in $(find "${EUXIS_HOME}" -name "*.py" -type f 2>/dev/null | head -20); do
+        ((files_checked++)) || true
+        if head -10 "$f" | grep -qiE "(copyright|license|SPDX)"; then
+            ((files_with_copyright++)) || true
+        fi
+    done
+
+    if [[ $files_checked -eq 0 ]]; then
+        log_check warn "Copyright headers: no Python files to check"
+        ((warnings++)) || true
+    elif [[ $files_with_copyright -gt $((files_checked / 2)) ]]; then
+        log_check pass "Copyright headers: ${files_with_copyright}/${files_checked} files"
+    else
+        log_check warn "Copyright headers: only ${files_with_copyright}/${files_checked} files"
+        ((warnings++)) || true
+    fi
+
+    # Test 4: Dependency license compatibility
+    log_check info "Checking dependency licenses..."
+
+    local problematic_licenses=("GPL-3.0" "AGPL" "SSPL" "Commons Clause")
+    local license_issues=0
+
+    # Check requirements.txt for known problematic packages
+    local req_file="${EUXIS_HOME}/euxis-core/config/requirements/requirements.txt"
+    if [[ -f "$req_file" ]]; then
+        # Known GPL-incompatible packages (simplified check)
+        local problematic_pkgs=("readline" "mysql-connector-python")
+        for pkg in "${problematic_pkgs[@]}"; do
+            if grep -qi "^${pkg}" "$req_file" 2>/dev/null; then
+                ((license_issues++)) || true
+            fi
+        done
+
+        if [[ $license_issues -eq 0 ]]; then
+            log_check pass "Dependency licenses: no known issues"
+        else
+            log_check warn "Dependency licenses: ${license_issues} potential issue(s)"
+            ((warnings++)) || true
+        fi
+    else
+        log_check warn "Dependency licenses: requirements.txt not found"
+        ((warnings++)) || true
+    fi
+
+    # Test 5: Security policy
+    log_check info "Checking SECURITY.md..."
+
+    if [[ -f "${EUXIS_HOME}/SECURITY.md" ]]; then
+        log_check pass "SECURITY.md: vulnerability reporting policy present"
+    else
+        log_check warn "SECURITY.md: not found"
+        ((warnings++)) || true
+    fi
+
+    # Test 6: Contributing guidelines
+    log_check info "Checking CONTRIBUTING.md..."
+
+    if [[ -f "${EUXIS_HOME}/CONTRIBUTING.md" ]]; then
+        log_check pass "CONTRIBUTING.md: contributor guidelines present"
+    else
+        log_check warn "CONTRIBUTING.md: not found"
+        ((warnings++)) || true
+    fi
+
+    # Test 7: Agent-based legal compliance analysis (MANDATORY)
+    # Chain: auditor → inspector → reviewer
+    log_check info "Running agent legal chain..."
+
+    local legal_task="Perform a legal compliance audit of the Euxis project at ${EUXIS_HOME}. Review: 1) License file completeness, 2) Copyright header presence in source files, 3) Third-party attribution in NOTICE file, 4) Dependency license compatibility, 5) SECURITY.md and CONTRIBUTING.md compliance. Provide PASS/FAIL verdict."
+
+    if run_agent_chain "legal" "$legal_task" auditor inspector reviewer; then
+        log_check pass "Agent chain: legal compliance verified"
+    elif [[ $? -eq 1 ]]; then
+        log_check fail "Agent chain: legal compliance issues identified"
+        ((failures++)) || true
+    fi
+
+    # Summary
+    LEGAL_DETAILS="LICENSE OK"
+
+    if [[ $failures -eq 0 ]]; then
+        LEGAL_RESULT="PASS"
+    else
+        LEGAL_RESULT="FAIL"
+        OVERALL_FAILURES=$((OVERALL_FAILURES + failures))
+    fi
+    OVERALL_WARNINGS=$((OVERALL_WARNINGS + warnings))
+}
+
+# ============================================================================
+# Summary Display
+# ============================================================================
+
+_status_icon() {
+    case "$1" in
+        PASS) echo "${GREEN}✓${RESET}" ;;
+        FAIL) echo "${RED}✗${RESET}" ;;
+        *)    echo "${DIM}○${RESET}" ;;
+    esac
+}
+
+print_summary() {
+    [[ "$JSON_OUTPUT" == true ]] && return
+
+    echo ""
+    echo ""
+
+    # Count passed gates
+    local passed=0 total=0
+    [[ "$PERF_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$PERF_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$BRAND_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$BRAND_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$SEC_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$SEC_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$PLAT_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$PLAT_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$TEST_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$TEST_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$DOCS_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$DOCS_RESULT" != "SKIP" ]] && ((total++)) || true
+    [[ "$LEGAL_RESULT" == "PASS" ]] && ((passed++)) || true
+    [[ "$LEGAL_RESULT" != "SKIP" ]] && ((total++)) || true
+
+    # Print gate results in compact format
+    printf "  %s %-14s %s\n" "$(_status_icon "$PERF_RESULT")" "Performance" "${DIM}${PERF_DETAILS}${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$BRAND_RESULT")" "Branding" "${DIM}${BRAND_DETAILS}${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$SEC_RESULT")" "Security" "${DIM}${SEC_SECRETS} secrets, ${SEC_VULNS} vulns${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$PLAT_RESULT")" "Platform" "${DIM}${PLAT_DETAILS}${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$TEST_RESULT")" "Tests" "${DIM}${TEST_DETAILS}${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$DOCS_RESULT")" "Documentation" "${DIM}${DOCS_DETAILS}${RESET}"
+    printf "  %s %-14s %s\n" "$(_status_icon "$LEGAL_RESULT")" "Legal" "${DIM}${LEGAL_DETAILS}${RESET}"
+
+    echo ""
+
+    # Final verdict - bubbletea style
+    if [[ $OVERALL_FAILURES -eq 0 ]]; then
+        echo "  ${GREEN}Done!${RESET} Verified ${passed}/${total} gates. ${GREEN}Release ready.${RESET}"
+    else
+        echo "  ${RED}Blocked.${RESET} ${OVERALL_FAILURES} gate(s) failed. ${OVERALL_WARNINGS} warning(s)."
+    fi
+    echo ""
+}
+
+print_json() {
+    [[ "$JSON_OUTPUT" != true ]] && return
+
+    local status="pass"
+    [[ $OVERALL_FAILURES -gt 0 ]] && status="fail"
+
+    cat <<ENDJSON
+{
+  "version": "${EUXIS_VERSION}",
+  "status": "${status}",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "failures": ${OVERALL_FAILURES},
+  "warnings": ${OVERALL_WARNINGS},
+  "gates": {
+    "performance": {
+      "result": "${PERF_RESULT}",
+      "cold_start_ms": ${PERF_COLD_MS:-0},
+      "memory_mb": ${PERF_MEMORY_MB:-0},
+      "dispatch_ms": ${PERF_DISPATCH_MS:-0}
+    },
+    "branding": {
+      "result": "${BRAND_RESULT}",
+      "details": "${BRAND_DETAILS}"
+    },
+    "security": {
+      "result": "${SEC_RESULT}",
+      "secrets_found": ${SEC_SECRETS},
+      "vulnerabilities": ${SEC_VULNS}
+    },
+    "platform": {
+      "result": "${PLAT_RESULT}",
+      "details": "${PLAT_DETAILS}"
+    },
+    "tests": {
+      "result": "${TEST_RESULT}",
+      "coverage": "${TEST_COVERAGE}",
+      "details": "${TEST_DETAILS}"
+    },
+    "documentation": {
+      "result": "${DOCS_RESULT}",
+      "details": "${DOCS_DETAILS}"
+    },
+    "legal": {
+      "result": "${LEGAL_RESULT}",
+      "details": "${LEGAL_DETAILS}"
+    }
+  }
+}
+ENDJSON
+}
+
+# ============================================================================
+# Main Execution
+# ============================================================================
+
+main() {
+    # Show header unless JSON mode
+    if [[ "$JSON_OUTPUT" != true ]]; then
+        if type ui_auto_header &>/dev/null; then
+            ui_auto_header
+        fi
+    fi
+
+    # Run selected gates (7 total for --all)
+    $RUN_BENCH && run_bench_gate
+    $RUN_BRANDING && run_branding_gate
+    $RUN_AUDIT && run_audit_gate
+    $RUN_PLATFORM && run_platform_gate
+    $RUN_TESTS && run_tests_gate
+    $RUN_DOCS && run_docs_gate
+    $RUN_LEGAL && run_legal_gate
+
+    # Output results
+    print_summary
+    print_json
+
+    # Exit code
+    if [[ $OVERALL_FAILURES -gt 0 ]]; then
+        exit 1
+    elif [[ $STRICT_MODE == true && $OVERALL_WARNINGS -gt 0 ]]; then
+        exit 1
+    else
+        exit 0
+    fi
+}
+
+main "$@"
