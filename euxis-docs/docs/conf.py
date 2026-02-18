@@ -42,7 +42,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "myst_parser",
 ]
@@ -56,6 +55,8 @@ myst_enable_extensions = [
     "attrs_inline",
 ]
 myst_heading_anchors = 3
+myst_highlight_code_blocks = False
+myst_suppress_warnings = ["xref_missing"]
 
 # Suppress warnings for missing cross-references in markdown
 myst_url_schemes = ["http", "https", "mailto"]
@@ -125,6 +126,9 @@ autodoc_mock_imports = [
     "uvicorn",
     "slack_sdk",
     "telegram",
+    "cryptography",
+    "shared",
+    "shared.crypto_bridge",
 ]
 
 # -- Options for autosummary -------------------------------------------------
@@ -137,12 +141,6 @@ napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
 napoleon_include_private_with_doc = False
-
-# -- Options for intersphinx -------------------------------------------------
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-}
 
 # -- Options for todo extension ----------------------------------------------
 

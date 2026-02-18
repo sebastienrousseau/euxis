@@ -1,8 +1,4 @@
 Decisions
 =========
 
-.. toctree::
-   :maxdepth: 3
-   :glob:
-
-   **/*
+Decision records are maintained under ``reference/architecture-decisions``.

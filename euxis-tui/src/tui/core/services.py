@@ -12,11 +12,32 @@ from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
 # Import crypto bridge for production-grade AES implementation
-from shared.crypto_bridge import decrypt as crypto_decrypt
-from shared.crypto_bridge import encrypt as crypto_encrypt
-from shared.crypto_bridge import crypto_errors, is_available
+try:
+    from shared.crypto_bridge import decrypt as crypto_decrypt
+    from shared.crypto_bridge import encrypt as crypto_encrypt
+    from shared.crypto_bridge import crypto_errors, is_available
+    _errors = crypto_errors()
+    if not isinstance(_errors, tuple) or len(_errors) != 3:
+        raise RuntimeError("crypto_errors() returned unexpected shape")
+except Exception:  # pragma: no cover - fallback for docs/minimal environments
+    class _FallbackCryptoError(Exception):
+        """Fallback crypto exception when bridge is unavailable."""
 
-CryptoError, DecryptionError, InvalidKeyError = crypto_errors()
+    CryptoError = _FallbackCryptoError
+    DecryptionError = _FallbackCryptoError
+    InvalidKeyError = _FallbackCryptoError
+
+    def crypto_encrypt(*_args: object, **_kwargs: object) -> Any:
+        raise RuntimeError("shared.crypto_bridge is unavailable")
+
+    def crypto_decrypt(*_args: object, **_kwargs: object) -> Any:
+        raise RuntimeError("shared.crypto_bridge is unavailable")
+
+    def is_available() -> bool:
+        return False
+else:
+    CryptoError, DecryptionError, InvalidKeyError = _errors
+
 CRYPTO_LIB_AVAILABLE = is_available()
 
 

@@ -24,7 +24,7 @@ Euxis introduces a minimal Gateway control plane to front agent execution with a
 **Entry Point:**
 - `euxis-gateway run` (see `docs/reference/gateway-cli.md`)
 
-```mermaid
+```text
 flowchart TB
     subgraph CLI["CLI Layer"]
         direction LR
@@ -107,7 +107,7 @@ Euxis supports four distinct coordination patterns, each optimized for different
 
 Direct invocation of a single agent for a specific task.
 
-```mermaid
+```text
 sequenceDiagram
     participant User
     participant CLI as euxis CLI
@@ -134,7 +134,7 @@ sequenceDiagram
 
 Multiple agents execute simultaneously with a designated lead agent receiving priority.
 
-```mermaid
+```text
 sequenceDiagram
     participant User
     participant Squad as euxis-squad
@@ -169,7 +169,7 @@ sequenceDiagram
 
 Agents execute in sequence, with each agent receiving the output of the previous agent as context.
 
-```mermaid
+```text
 sequenceDiagram
     participant User
     participant Combo as euxis-combo
@@ -207,7 +207,7 @@ sequenceDiagram
 
 Complex workflows with multiple phases, checkpoints, and failure handling.
 
-```mermaid
+```text
 sequenceDiagram
     participant User
     participant Playbook as euxis-playbook
@@ -259,7 +259,7 @@ Euxis implements a sophisticated three-tier memory system inspired by MemGPT, en
 
 ### Three-Tier Memory Model
 
-```mermaid
+```text
 flowchart TB
     subgraph Task["Incoming Task"]
         task_input[Task: "fix auth bug"]
@@ -307,7 +307,7 @@ flowchart TB
 
 ### Memory Types and Operations
 
-```mermaid
+```text
 flowchart LR
     subgraph Types["Memory Entry Types"]
         episodic["EPISODIC<br/>Session events, task outcomes"]
@@ -342,7 +342,7 @@ flowchart LR
 
 ### Memory Pruning Strategy
 
-```mermaid
+```text
 flowchart TB
     start([Memory File > 500 Lines]) --> extract_header[Extract Header Line]
     extract_header --> extract_permanent[Extract REFLECTION &<br/>CONTRAINDICATION Entries]
@@ -365,7 +365,7 @@ flowchart TB
 
 When new information potentially contradicts existing memory, the system detects and resolves conflicts.
 
-```mermaid
+```text
 flowchart TB
     new_fact["New Fact: 'API uses OAuth'"] --> extract_entities
     extract_entities["Extract Entities<br/>(words >= 5 chars)"] --> search_existing
@@ -401,7 +401,7 @@ Euxis implements intelligent provider routing based on agent role, task priority
 
 ### Intelligence Tier Routing
 
-```mermaid
+```text
 flowchart TB
     subgraph Input["Routing Input"]
         agent["Agent Name"]
@@ -467,7 +467,7 @@ flowchart TB
 
 ### Provider Selection Logic
 
-```mermaid
+```text
 flowchart TB
     start([resolve_tiered_provider]) --> check_priority
 
@@ -502,7 +502,7 @@ flowchart TB
 
 ### Provider Fallback Mechanisms
 
-```mermaid
+```text
 flowchart TB
     subgraph Execution["Provider Execution"]
         execute["execute_provider()"]
@@ -552,7 +552,7 @@ Agents transition through a defined set of states during execution. The lifecycl
 
 ### State Diagram
 
-```mermaid
+```text
 stateDiagram-v2
     [*] --> idle: Agent registered
 
@@ -584,7 +584,7 @@ stateDiagram-v2
 
 ### Lifecycle State Flow
 
-```mermaid
+```text
 flowchart TB
     subgraph Entry["Task Entry"]
         cmd["euxis agent task"]
@@ -629,7 +629,7 @@ flowchart TB
 
 ### Lifecycle Tracking Files
 
-```mermaid
+```text
 flowchart LR
     subgraph StateFiles["State Files"]
         direction TB
@@ -663,7 +663,7 @@ flowchart LR
 
 ### Complete Request Flow
 
-```mermaid
+```text
 flowchart TB
     subgraph User["User Input"]
         cmd["euxis architect 'review auth system'"]

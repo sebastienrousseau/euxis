@@ -28,7 +28,7 @@ Each adapter exposes a minimal interface:
 
 ### Flow (Mermaid)
 
-```mermaid
+```text
 sequenceDiagram
     participant Slack
     participant Adapter
@@ -68,7 +68,7 @@ sequenceDiagram
 
 ### Flow (Mermaid)
 
-```mermaid
+```text
 sequenceDiagram
     participant Telegram
     participant Adapter
