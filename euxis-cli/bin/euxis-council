@@ -1,3 +1,632 @@
 #!/usr/bin/env bash
-echo "MOCK: idempotent handler"
-exit 0
+#
+# euxis-council - Multi-agent adversarial debate with zero-sum personas
+#
+# Convenes a council of agents to stress-test proposals through rigorous debate.
+# Uses hidden context strategy for maximum friction and honest critique.
+#
+# USAGE:
+#     euxis council <topic> [--max-rounds N] [--provider PROVIDER]
+#
+# AGENTS:
+#     architect  - The Proposer (generates initial proposal)
+#     critic     - The Steel-Man Opponent (destructive testing)
+#     arbiter    - The Final Adjudicator (synthesis and verdict)
+#
+
+set -uo pipefail
+
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+
+# Source libraries
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+fi
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/common.sh" ]]; then
+    source "${EUXIS_HOME}/euxis-core/lib/common.sh"
+fi
+
+# Defaults
+MAX_ROUNDS=1
+PROVIDER="${EUXIS_COUNCIL_PROVIDER:-claude}"
+VERBOSE=0
+OUTPUT_JSON=0
+
+# Colors (256-color, consistent with main CLI)
+setup_colors() {
+    if [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
+        RESET="" BOLD="" DIM=""
+        RED="" GREEN="" YELLOW="" MAGENTA="" CYAN="" WHITE=""
+    else
+        RESET='\033[0m'
+        BOLD='\033[1m'
+        DIM='\033[2m'
+        RED='\033[38;5;203m'
+        GREEN='\033[38;5;42m'
+        YELLOW='\033[38;5;220m'
+        MAGENTA='\033[38;5;211m'
+        CYAN='\033[38;5;87m'
+        WHITE='\033[38;5;255m'
+    fi
+}
+
+# Icons with Unicode fallback
+setup_icons() {
+    if [[ "${LANG:-}" == *UTF-8* ]] || [[ "${LC_ALL:-}" == *UTF-8* ]]; then
+        ICON_CHECK="✓"
+        ICON_CROSS="✗"
+        ICON_WARN="⚠"
+        ICON_ARROW="→"
+        ICON_BULLET="▸"
+    else
+        ICON_CHECK="+"
+        ICON_CROSS="x"
+        ICON_WARN="!"
+        ICON_ARROW="->"
+        ICON_BULLET=">"
+    fi
+}
+
+# Section header (consistent with main CLI)
+_print_section() {
+    local title="$1"
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} ${title}${RESET}"
+}
+
+usage() {
+    setup_colors
+    setup_icons
+
+    echo -e ""
+    echo -e "  ${BOLD}${WHITE}USAGE${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis council ${DIM}<topic> [options]${RESET}"
+    echo -e ""
+
+    _print_section "DESCRIPTION"
+    echo -e "    Convenes a council of agents to stress-test proposals through"
+    echo -e "    adversarial debate. Uses zero-sum personas for maximum rigor."
+    echo -e ""
+
+    _print_section "COUNCIL AGENTS (3)"
+    echo -e "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}architect${RESET}        ${DIM}The Proposer - generates initial proposal${RESET}"
+    echo -e "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}critic${RESET}           ${DIM}The Steel-Man Opponent - destructive testing${RESET}"
+    echo -e "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}arbiter${RESET}          ${DIM}The Final Adjudicator - synthesis and verdict${RESET}"
+    echo -e ""
+
+    _print_section "OPTIONS"
+    echo -e "    ${CYAN}--max-rounds N${RESET}     ${DIM}Number of debate rounds (default: 1, max: 5)${RESET}"
+    echo -e "    ${CYAN}--provider NAME${RESET}    ${DIM}Override AI provider (default: claude)${RESET}"
+    echo -e "    ${CYAN}--verbose${RESET}          ${DIM}Show full agent reasoning${RESET}"
+    echo -e "    ${CYAN}--json${RESET}             ${DIM}Output as JSON${RESET}"
+    echo -e "    ${CYAN}-h, --help${RESET}         ${DIM}Show this help${RESET}"
+    echo -e ""
+
+    _print_section "EXAMPLES"
+    echo -e "    ${CYAN}\$${RESET} euxis council ${DIM}\"Should we use JWT or session-based auth?\"${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis council ${DIM}\"Migrate from PostgreSQL to CockroachDB\"${RESET} --max-rounds 3"
+    echo -e "    ${CYAN}\$${RESET} euxis council ${DIM}\"Add real-time features\"${RESET} --verbose"
+    echo -e ""
+
+    exit 0
+}
+
+# Sanitize input
+sanitize_input() {
+    local input="$1"
+    if [[ "$input" =~ [\`\$\;\|\&\>\<\(\)\{\}] ]]; then
+        echo "ERROR: Input contains forbidden characters." >&2
+        exit 1
+    fi
+    printf '%s' "$input"
+}
+
+# Parse arguments
+parse_args() {
+    if [[ $# -lt 1 ]]; then
+        usage
+    fi
+
+    TOPIC=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                usage
+                ;;
+            --max-rounds)
+                MAX_ROUNDS="$2"
+                if [[ $MAX_ROUNDS -lt 1 ]] || [[ $MAX_ROUNDS -gt 5 ]]; then
+                    echo "Error: --max-rounds must be between 1 and 5" >&2
+                    exit 1
+                fi
+                shift 2
+                ;;
+            --provider)
+                PROVIDER="$2"
+                shift 2
+                ;;
+            --verbose)
+                VERBOSE=1
+                shift
+                ;;
+            --json)
+                OUTPUT_JSON=1
+                shift
+                ;;
+            -*)
+                echo "Error: Unknown option $1" >&2
+                exit 1
+                ;;
+            *)
+                TOPIC=$(sanitize_input "$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [[ -z "$TOPIC" ]]; then
+        echo "Error: Topic is required" >&2
+        usage
+    fi
+}
+
+# Session management
+SESSION_ID=$(date +%Y%m%d_%H%M%S)_$(openssl rand -hex 4 2>/dev/null || echo "$$")
+TRANSCRIPT_DIR="${EUXIS_HOME}/euxis-runtime/data/sessions"
+TRANSCRIPT_FILE="${TRANSCRIPT_DIR}/${SESSION_ID}_council.md"
+
+init_session() {
+    mkdir -p "$TRANSCRIPT_DIR"
+
+    cat > "$TRANSCRIPT_FILE" <<EOF
+# Council Session: ${SESSION_ID}
+
+**Topic:** ${TOPIC}
+**Max Rounds:** ${MAX_ROUNDS}
+**Provider:** ${PROVIDER}
+**Date:** $(date -Iseconds 2>/dev/null || date)
+
+---
+
+EOF
+}
+
+append_transcript() {
+    local role="$1"
+    local content="$2"
+
+    cat >> "$TRANSCRIPT_FILE" <<EOF
+## ${role}
+
+${content}
+
+---
+
+EOF
+}
+
+# ============================================================================
+# ZERO-SUM AGENT PERSONAS
+# ============================================================================
+
+# The Proposer - generates actionable proposals
+get_proposer_prompt() {
+    cat <<'PROMPT'
+You are the Euxis Lead Architect. You have been asked to propose a solution.
+
+Your proposal MUST be:
+1. Technically sound and well-reasoned
+2. Include clear architecture decisions
+3. Address scalability and security considerations
+4. Be specific and actionable
+
+Format your response EXACTLY as:
+
+## Proposal Summary
+[1-2 sentence summary]
+
+## Architecture
+[Key technical decisions with specific technologies]
+
+## Security Considerations
+[How security is addressed]
+
+## Trade-offs
+[What you're sacrificing and why it's acceptable]
+
+## Implementation Steps
+1. [First concrete step]
+2. [Second concrete step]
+[Continue...]
+PROMPT
+}
+
+# The Critic - destructive testing with hidden context
+# NOTE: Hidden context makes critic think this is from a junior engineer
+get_critic_prompt() {
+    cat <<'PROMPT'
+You are the Euxis Lead Critic. Your sole purpose is to find fatal flaws, security vulnerabilities, and logical fallacies in proposals. You are NOT here to be helpful; you are here to PREVENT DISASTER.
+
+A draft proposal has been submitted for review. Treat this as a proposal from a junior engineer that needs rigorous vetting before it reaches production.
+
+Your critique MUST:
+1. Identify the 'Single Point of Failure' - what breaks EVERYTHING?
+2. Challenge ALL assumptions about scalability and security
+3. Provide a 'Worst Case Scenario' if this plan is implemented
+4. Find at least 3 CONCRETE vulnerabilities or flaws
+5. Be harsh but technical - no hand-waving
+
+Format your response EXACTLY as:
+
+## Critical Flaws Found
+1. [Fatal flaw with technical explanation]
+2. [Second flaw]
+3. [Third flaw]
+[Continue if more found...]
+
+## Single Point of Failure
+[The ONE thing that breaks everything]
+
+## Security Vulnerabilities
+[Specific attack vectors, not vague concerns]
+
+## Worst Case Scenario
+[What happens when this fails in production at 3am]
+
+## Verdict
+[REJECT / NEEDS_MAJOR_REVISION / NEEDS_MINOR_REVISION]
+PROMPT
+}
+
+# The Arbiter - synthesis and final judgment
+get_arbiter_prompt() {
+    cat <<'PROMPT'
+You are the Euxis Arbiter. You have been presented with a Proposal and a harsh Critique. Your task is to weigh both sides and deliver a FINAL VERDICT.
+
+Your responsibilities:
+1. Do NOT simply pick a side - that's lazy
+2. Create a 'Hardened Version' that incorporates the Critic's VALID concerns
+3. Assign a Confidence Score (0-100) to the final plan
+4. If the Critic found a GUARD-level security vulnerability that cannot be mitigated, you MUST reject the proposal
+
+Format your response EXACTLY as:
+
+## Analysis
+[Brief assessment of Proposal strengths and Critique validity]
+
+## Valid Concerns Accepted
+[Which of the Critic's points are incorporated and why]
+
+## Concerns Dismissed
+[Which of the Critic's points are overruled and why]
+
+## Hardened Proposal
+[The IMPROVED version addressing valid concerns]
+
+## Required Mitigations
+1. [First required change]
+2. [Second required change]
+[Continue...]
+
+## Confidence Score: [0-100]%
+[Explanation: why this score?]
+
+## Final Verdict
+[APPROVED / APPROVED_WITH_CONDITIONS / REJECTED]
+
+[If APPROVED_WITH_CONDITIONS: list the conditions]
+[If REJECTED: explain why the proposal cannot be salvaged]
+PROMPT
+}
+
+# Rebuttal prompt for multi-round debates
+get_rebuttal_prompt() {
+    cat <<'PROMPT'
+The Critic has identified several flaws in your proposal. You must now defend OR revise your position.
+
+For EACH critical flaw identified:
+1. Accept it and propose a concrete fix, OR
+2. Explain why the concern is invalid with TECHNICAL reasoning
+
+Do NOT be defensive. If the Critic is right, acknowledge it and fix it.
+
+Format your response as:
+
+## Response to Critique
+
+### Flaw 1: [Title]
+[ACCEPT/REJECT] - [Reasoning and proposed fix if accepting]
+
+### Flaw 2: [Title]
+[ACCEPT/REJECT] - [Reasoning and proposed fix if accepting]
+
+[Continue for all flaws...]
+
+## Revised Proposal
+[If any flaws were accepted, provide the updated proposal]
+PROMPT
+}
+
+# ============================================================================
+# AGENT EXECUTION
+# ============================================================================
+
+call_agent() {
+    local agent_name="$1"
+    local system_prompt="$2"
+    local user_prompt="$3"
+
+    local full_prompt="${system_prompt}
+
+---
+
+${user_prompt}"
+
+    local response=""
+
+    case "$PROVIDER" in
+        claude)
+            response=$(echo "$full_prompt" | claude --print 2>/dev/null) || response=""
+            ;;
+        gemini)
+            response=$(echo "$full_prompt" | gemini 2>/dev/null) || response=""
+            ;;
+        openai)
+            response=$(echo "$full_prompt" | openai 2>/dev/null) || response=""
+            ;;
+        ollama)
+            local model="${EUXIS_OLLAMA_MODEL:-llama3.2}"
+            response=$(ollama run "$model" "$full_prompt" 2>/dev/null) || response=""
+            ;;
+        goose)
+            response=$(echo "$full_prompt" | goose 2>/dev/null) || response=""
+            ;;
+        *)
+            # Default to claude
+            response=$(echo "$full_prompt" | claude --print 2>/dev/null) || response=""
+            ;;
+    esac
+
+    echo "$response"
+}
+
+# Extract confidence score
+extract_confidence() {
+    local response="$1"
+    local score=$(echo "$response" | grep -oE 'Confidence Score:?\s*\[?([0-9]+)' | grep -oE '[0-9]+' | head -1)
+    echo "${score:-50}"
+}
+
+# Extract verdict
+extract_verdict() {
+    local response="$1"
+    if echo "$response" | grep -qiE "Final Verdict.*REJECTED|REJECTED"; then
+        echo "REJECTED"
+    elif echo "$response" | grep -qiE "APPROVED_WITH_CONDITIONS|APPROVED WITH CONDITIONS"; then
+        echo "APPROVED_WITH_CONDITIONS"
+    elif echo "$response" | grep -qiE "Final Verdict.*APPROVED|APPROVED"; then
+        echo "APPROVED"
+    else
+        echo "UNKNOWN"
+    fi
+}
+
+# Count flaws in critique
+count_flaws() {
+    local critique="$1"
+    echo "$critique" | grep -cE '^\s*[0-9]+\.\s+' || echo "0"
+}
+
+# ============================================================================
+# MAIN COUNCIL EXECUTION
+# ============================================================================
+
+run_council() {
+    setup_colors
+    setup_icons
+    init_session
+
+    # Header
+    echo ""
+    echo -e "${BOLD}${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo -e "${BOLD}${MAGENTA}  COUNCIL OF EUXIS${RESET}"
+    echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo ""
+    echo -e "  ${DIM}Topic:${RESET}  ${TOPIC}"
+    echo -e "  ${DIM}Rounds:${RESET} ${MAX_ROUNDS}"
+    echo -e "  ${DIM}Provider:${RESET} ${PROVIDER}"
+    echo ""
+
+    local proposal=""
+    local critique=""
+    local verdict=""
+    local round=1
+
+    # ─────────────────────────────────────────────────────────
+    # DEBATE ROUNDS
+    # ─────────────────────────────────────────────────────────
+
+    while [[ $round -le $MAX_ROUNDS ]]; do
+        if [[ $MAX_ROUNDS -gt 1 ]]; then
+            echo -e "${BOLD}━━━ Round ${round}/${MAX_ROUNDS} ━━━${RESET}"
+            echo ""
+        fi
+
+        # Phase 1: Architect proposes
+        echo -e "  ${CYAN}[${ICON_SPINNER}]${RESET} ${BOLD}architect${RESET} ${DIM}generating proposal...${RESET}"
+
+        local proposer_system=$(get_proposer_prompt)
+        local proposer_user="Topic: ${TOPIC}"
+
+        if [[ $round -gt 1 ]] && [[ -n "$critique" ]]; then
+            proposer_system=$(get_rebuttal_prompt)
+            proposer_user="Original Topic: ${TOPIC}
+
+Previous Proposal:
+${proposal}
+
+Critique Received:
+${critique}
+
+Defend or revise your proposal."
+        fi
+
+        proposal=$(call_agent "architect" "$proposer_system" "$proposer_user")
+
+        if [[ -z "$proposal" ]]; then
+            echo -e "  ${RED}${ICON_CROSS}${RESET} ${BOLD}architect${RESET} ${RED}failed to respond${RESET}"
+            exit 1
+        fi
+
+        echo -e "\r  ${GREEN}${ICON_CHECK}${RESET} ${BOLD}architect${RESET} ${DIM}proposal generated${RESET}    "
+        append_transcript "Architect (Round $round)" "$proposal"
+
+        if [[ $VERBOSE -eq 1 ]]; then
+            echo ""
+            echo -e "${DIM}┌─── Proposal ───────────────────────────────────────────┐${RESET}"
+            echo "$proposal" | sed 's/^/  /'
+            echo -e "${DIM}└────────────────────────────────────────────────────────┘${RESET}"
+        fi
+
+        # Phase 2: Critic attacks (with hidden context)
+        echo -e "  ${YELLOW}[${ICON_SPINNER}]${RESET} ${BOLD}critic${RESET} ${DIM}analyzing for vulnerabilities...${RESET}"
+
+        local critic_system=$(get_critic_prompt)
+        # Hidden context: Critic doesn't know this is from the architect AI
+        local critic_user="A junior engineer has submitted the following proposal for review. Find all fatal flaws before this reaches production:
+
+${proposal}"
+
+        critique=$(call_agent "critic" "$critic_system" "$critic_user")
+
+        if [[ -z "$critique" ]]; then
+            echo -e "  ${RED}${ICON_CROSS}${RESET} ${BOLD}critic${RESET} ${RED}failed to respond${RESET}"
+            exit 1
+        fi
+
+        local flaw_count=$(count_flaws "$critique")
+        echo -e "\r  ${GREEN}${ICON_CHECK}${RESET} ${BOLD}critic${RESET} ${YELLOW}${flaw_count} vulnerabilities identified${RESET}    "
+        append_transcript "Critic (Round $round)" "$critique"
+
+        if [[ $VERBOSE -eq 1 ]]; then
+            echo ""
+            echo -e "${DIM}┌─── Critique ───────────────────────────────────────────┐${RESET}"
+            echo "$critique" | sed 's/^/  /'
+            echo -e "${DIM}└────────────────────────────────────────────────────────┘${RESET}"
+        fi
+
+        round=$((round + 1))
+    done
+
+    # ─────────────────────────────────────────────────────────
+    # FINAL ARBITER SYNTHESIS
+    # ─────────────────────────────────────────────────────────
+
+    echo ""
+    echo -e "  ${GREEN}[${ICON_SPINNER}]${RESET} ${BOLD}arbiter${RESET} ${DIM}synthesizing final verdict...${RESET}"
+
+    local arbiter_system=$(get_arbiter_prompt)
+    local arbiter_user="Original Topic: ${TOPIC}
+
+## Proposal
+${proposal}
+
+## Critique
+${critique}
+
+Weigh both sides and deliver your FINAL VERDICT."
+
+    verdict=$(call_agent "arbiter" "$arbiter_system" "$arbiter_user")
+
+    if [[ -z "$verdict" ]]; then
+        echo -e "  ${RED}${ICON_CROSS}${RESET} ${BOLD}arbiter${RESET} ${RED}failed to respond${RESET}"
+        exit 1
+    fi
+
+    echo -e "\r  ${GREEN}${ICON_CHECK}${RESET} ${BOLD}arbiter${RESET} ${DIM}verdict delivered${RESET}    "
+    append_transcript "Arbiter (Final Verdict)" "$verdict"
+
+    # ─────────────────────────────────────────────────────────
+    # DISPLAY RESULTS
+    # ─────────────────────────────────────────────────────────
+
+    local confidence=$(extract_confidence "$verdict")
+    local final_verdict=$(extract_verdict "$verdict")
+
+    echo ""
+    echo -e "${BOLD}${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+    echo ""
+    echo -e "  ${BOLD}FINAL VERDICT${RESET}"
+    echo ""
+
+    # Confidence bar
+    local bar_filled=$((confidence / 5))
+    local bar_empty=$((20 - bar_filled))
+    local bar=""
+    for ((i=0; i<bar_filled; i++)); do bar+="█"; done
+    for ((i=0; i<bar_empty; i++)); do bar+="░"; done
+
+    local conf_color="$GREEN"
+    if [[ $confidence -lt 50 ]]; then
+        conf_color="$RED"
+    elif [[ $confidence -lt 75 ]]; then
+        conf_color="$YELLOW"
+    fi
+
+    echo -e "  ${DIM}Confidence${RESET} ${conf_color}${bar}${RESET} ${BOLD}${conf_color}${confidence}%${RESET}"
+    echo ""
+
+    # Verdict display
+    case "$final_verdict" in
+        "APPROVED")
+            echo -e "  ${GREEN}${BOLD}${ICON_CHECK} APPROVED${RESET}"
+            echo -e "  ${DIM}The proposal is sound and ready for implementation.${RESET}"
+            ;;
+        "APPROVED_WITH_CONDITIONS")
+            echo -e "  ${YELLOW}${BOLD}${ICON_WARN} APPROVED WITH CONDITIONS${RESET}"
+            echo -e "  ${DIM}The proposal requires specific mitigations before proceeding.${RESET}"
+            ;;
+        "REJECTED")
+            echo -e "  ${RED}${BOLD}${ICON_CROSS} REJECTED${RESET}"
+            echo -e "  ${DIM}The proposal has fatal flaws that cannot be mitigated.${RESET}"
+            ;;
+        *)
+            echo -e "  ${DIM}Verdict: ${final_verdict}${RESET}"
+            ;;
+    esac
+
+    echo ""
+    echo -e "${BOLD}${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+
+    # Show key mitigations if any
+    if echo "$verdict" | grep -q "Required Mitigations"; then
+        echo ""
+        echo -e "${BOLD}Required Mitigations:${RESET}"
+        echo "$verdict" | sed -n '/Required Mitigations/,/Confidence Score\|Final Verdict/p' | head -10 | tail -n +2 | sed 's/^/  /'
+    fi
+
+    echo ""
+    echo -e "${DIM}Full transcript: ${TRANSCRIPT_FILE}${RESET}"
+    echo ""
+
+    # JSON output if requested
+    if [[ $OUTPUT_JSON -eq 1 ]]; then
+        cat <<EOF
+{
+  "session_id": "${SESSION_ID}",
+  "topic": "${TOPIC}",
+  "rounds": ${MAX_ROUNDS},
+  "confidence": ${confidence},
+  "verdict": "${final_verdict}",
+  "transcript": "${TRANSCRIPT_FILE}"
+}
+EOF
+    fi
+}
+
+# ============================================================================
+# ENTRY POINT
+# ============================================================================
+
+parse_args "$@"
+run_council

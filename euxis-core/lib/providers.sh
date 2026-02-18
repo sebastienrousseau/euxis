@@ -1237,7 +1237,7 @@ run_claude() {
     local full_prompt="$1"
 
     # Check for optional dependencies and adjust tools accordingly
-    local allowed_tools="Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*) Bash(curl:*)"
+    local allowed_tools="Read,Edit,Write,Bash(grep:*) Bash(find:*) Bash(python3:*) Bash(pytest:*) Bash(cat:*) Bash(ls:*) Bash(test:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(mkdir:*) Bash(touch:*) Bash(pip:*) Bash(uv:*) Bash(curl:*) Bash(git:*) Bash(sed:*) Bash(awk:*) Bash(cp:*) Bash(mv:*) Bash(npm:*) Bash(npx:*) Bash(cargo:*) Bash(make:*) Bash(chmod:*) Bash(tar:*) Bash(zip:*) Bash(unzip:*) Bash(docker:*) Bash(diff:*) Bash(sort:*) Bash(tee:*) Bash(xargs:*)"
 
     # Add jq support if available, otherwise warn
     if command -v jq &>/dev/null; then
@@ -1302,7 +1302,7 @@ run_gemini() {
         fi
 
         local guard
-        guard="IMPORTANT: This is plain-text mode. Do not call tools or output ACTION/OBSERVATION steps. Respond only with the final answer in the required Output Format."
+        guard="IMPORTANT: This is plain-text mode. You do not have structured tool access, but you CAN and SHOULD output complete file contents in fenced code blocks with file paths. Use markdown code blocks with the filename as a comment on the first line. When implementation requires creating files, output the full file contents so they can be applied."
         # SECURITY: Use private temp directory to prevent race conditions (S4-002 fix)
         local err_file secure_tmpdir
         secure_tmpdir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/euxis-$$"

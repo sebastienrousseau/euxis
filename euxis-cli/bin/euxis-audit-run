@@ -30,7 +30,7 @@ EOF
 
 EUXIS_HOME="$HOME/.euxis"
 BIN_DIR="$EUXIS_HOME/euxis-cli/bin"
-REPORT_DIR="$EUXIS_HOME/docs/audits/$(date +%Y%m%d_%H%M)"
+REPORT_DIR="$EUXIS_HOME/euxis-docs/docs/audits/$(date +%Y%m%d_%H%M)"
 mkdir -p "$REPORT_DIR"
 
 GATE_PASS=0
@@ -145,7 +145,7 @@ $LOGIC
 
 --- SECURITY ---
 $SECURITY
-" claude > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md" 2>/dev/null
+" claude > "$EUXIS_HOME/euxis-docs/docs/audits/v6.0-readiness-report.md" 2>/dev/null
     gate_result "Report consolidation" $?
 else
     {
@@ -155,7 +155,7 @@ else
         echo "Gates passed: $GATE_PASS / $((GATE_PASS + GATE_FAIL))"
         echo ""
         echo "See individual reports in: $REPORT_DIR/"
-    } > "$EUXIS_HOME/docs/audits/v6.0-readiness-report.md"
+    } > "$EUXIS_HOME/euxis-docs/docs/audits/v6.0-readiness-report.md"
     gate_result "Report consolidation (offline)" 0
 fi
 

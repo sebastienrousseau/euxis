@@ -152,13 +152,32 @@ resolve_agent_path_sql() {
 
     local path
     path=$(registry_query "SELECT path FROM agents WHERE id = ?" "${agent}")
+    [[ -n "${path}" ]] || return 1
 
-    if [[ -n "${path}" ]]; then
-        echo "${EUXIS_HOME}/${path}"
-        return 0
-    else
-        return 1
+    # Support both modern and legacy registry path layouts:
+    # - euxis-core/agents/prompts/core/foo.txt (modern)
+    # - agents/prompts/core/foo.txt
+    # - prompts/core/foo.txt (legacy)
+    local candidate
+    local -a candidates=()
+    candidates+=("${path}")
+    if [[ "${path}" == prompts/* ]]; then
+        candidates+=("euxis-core/agents/${path}")
     fi
+    if [[ "${path}" == agents/* ]]; then
+        candidates+=("euxis-core/${path}")
+    fi
+
+    for candidate in "${candidates[@]}"; do
+        if [[ "${candidate}" == /* ]]; then
+            [[ -f "${candidate}" ]] && { echo "${candidate}"; return 0; }
+        else
+            local resolved="${EUXIS_HOME}/${candidate}"
+            [[ -f "${resolved}" ]] && { echo "${resolved}"; return 0; }
+        fi
+    done
+
+    return 1
 }
 
 get_agent_tier_sql() {
