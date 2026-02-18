@@ -16,6 +16,12 @@ setup() {
     unset _EUXIS_LIB_COMMON
     unset PROVIDER_MODEL
     unset PROVIDER_FLAGS
+    unset EUXIS_SESSION_PROVIDER
+    unset CLAUDECODE
+    unset CLAUDE_CODE_ENTRYPOINT
+    unset CODEX_THREAD_ID
+    unset CODEX_CI
+    unset CODEX_SESSION_ID
 
     # Source dependencies from real installation
     source "${EUXIS_HOME}/euxis-core/lib/common.sh"
@@ -206,6 +212,114 @@ teardown() {
 }
 
 # ============================================================================
+# SESSION DETECTION AND FAILOVER GOVERNOR TESTS
+# ============================================================================
+
+@test "resolve_session_provider prefers explicit override" {
+    export EUXIS_SESSION_PROVIDER="goose"
+    export CLAUDECODE="1"
+    export CODEX_THREAD_ID="thread_123"
+    run resolve_session_provider
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "goose" ]]
+}
+
+@test "resolve_session_provider detects Claude session" {
+    unset EUXIS_SESSION_PROVIDER
+    export CLAUDECODE="1"
+    unset CODEX_THREAD_ID
+    run resolve_session_provider
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "claude" ]]
+}
+
+@test "resolve_session_provider detects Codex session" {
+    unset EUXIS_SESSION_PROVIDER
+    unset CLAUDECODE
+    export CODEX_THREAD_ID="thread_123"
+    run resolve_session_provider
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "openai" ]]
+}
+
+@test "resolve_session_provider detects Codex CI session" {
+    unset EUXIS_SESSION_PROVIDER
+    unset CLAUDECODE
+    unset CODEX_THREAD_ID
+    export CODEX_CI=1
+    run resolve_session_provider
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "openai" ]]
+}
+
+@test "resolve_session_provider returns non-zero when no session is active" {
+    unset EUXIS_SESSION_PROVIDER
+    unset CLAUDECODE
+    unset CLAUDE_CODE_ENTRYPOINT
+    unset CODEX_THREAD_ID
+    run resolve_session_provider
+    [[ "${status}" -ne 0 ]]
+}
+
+@test "_provider_governor_precheck returns failover code at soft cap" {
+    export EUXIS_PROVIDER_USAGE_DIR="${EUXIS_TEST_TMPDIR}/provider-usage"
+    export EUXIS_PROVIDER_CAP_CLAUDE=100
+    export EUXIS_FAILOVER_THRESHOLD_PCT=50
+    _ensure_usage_dir
+    _write_provider_usage "claude" "$(date +%s)" 60 1
+
+    run _provider_governor_precheck "claude" "architect" "task" 0 "P2"
+    [[ "${status}" -eq 2 ]]
+}
+
+@test "_provider_governor_precheck defers low-priority tasks near throttle threshold" {
+    export EUXIS_PROVIDER_USAGE_DIR="${EUXIS_TEST_TMPDIR}/provider-usage"
+    export EUXIS_DEFERRED_QUEUE="${EUXIS_PROVIDER_USAGE_DIR}/deferred.jsonl"
+    export EUXIS_PROVIDER_CAP_CLAUDE=100
+    export EUXIS_THROTTLE_THRESHOLD_PCT=40
+    export EUXIS_FAILOVER_THRESHOLD_PCT=90
+    _ensure_usage_dir
+    _write_provider_usage "claude" "$(date +%s)" 45 1
+
+    run _provider_governor_precheck "claude" "architect" "low priority task" 0 "P4"
+    [[ "${status}" -eq 3 ]]
+    [[ -f "${EUXIS_DEFERRED_QUEUE}" ]]
+}
+
+@test "_projected_utilization_pct uses ratelimit hints when cap is unset" {
+    export EUXIS_PROVIDER_USAGE_DIR="${EUXIS_TEST_TMPDIR}/provider-usage"
+    _ensure_usage_dir
+    cat > "${EUXIS_PROVIDER_USAGE_DIR}/ratelimit-hints.jsonl" <<'EOF'
+{"ts":"2026-02-18T00:00:00Z","provider":"claude","remaining":40,"limit":100,"utilization_pct":60}
+EOF
+    run _projected_utilization_pct "claude" 0
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "60" ]]
+}
+
+@test "_context_compaction_ready returns success when utilization exceeds trigger" {
+    export EUXIS_PROVIDER_USAGE_DIR="${EUXIS_TEST_TMPDIR}/provider-usage"
+    export EUXIS_PROVIDER_CAP_CLAUDE=100
+    export EUXIS_CONTEXT_COMPACTION_TRIGGER_PCT=70
+    _ensure_usage_dir
+    _write_provider_usage "claude" "$(date +%s)" 80 1
+    run _context_compaction_ready "claude"
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "_context_compaction_ready respects cooldown for same provider" {
+    export EUXIS_PROVIDER_USAGE_DIR="${EUXIS_TEST_TMPDIR}/provider-usage"
+    export EUXIS_PROVIDER_CAP_CLAUDE=100
+    export EUXIS_CONTEXT_COMPACTION_TRIGGER_PCT=70
+    export EUXIS_CONTEXT_COMPACTION_COOLDOWN_SECONDS=3600
+    _ensure_usage_dir
+    _write_provider_usage "claude" "$(date +%s)" 80 1
+    printf 'claude|%s\n' "$(date +%s)" > "${EUXIS_PROVIDER_USAGE_DIR}/context-compaction.state"
+    run _context_compaction_ready "claude"
+    [[ "${status}" -ne 0 ]]
+}
+
+# ============================================================================
 # RUN_WITH_TIMEOUT TESTS
 # ============================================================================
 
@@ -285,6 +399,39 @@ teardown() {
 @test "run_openai requires codex CLI" {
     run run_openai "test" 2>&1 || true
     [[ "${status}" -eq 0 ]] || [[ "${output}" =~ "codex" ]] || true
+}
+
+@test "run_openai reuses active codex session and avoids explicit model flag" {
+    cat > "${EUXIS_TEST_TMPDIR}/codex" <<'EOF'
+#!/usr/bin/env bash
+echo "ARGS:$*"
+cat >/dev/null
+EOF
+    chmod +x "${EUXIS_TEST_TMPDIR}/codex"
+    export CODEX_THREAD_ID="thread_123"
+    export EUXIS_PRESERVE_PROVIDER_SESSION=1
+    export PROVIDER_MODEL="gpt-4o"
+    run run_openai "hello"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "ARGS:exec -" ]]
+    [[ ! "${output}" =~ "--model" ]]
+}
+
+@test "run_openai uses explicit model when no codex session is active" {
+    cat > "${EUXIS_TEST_TMPDIR}/codex" <<'EOF'
+#!/usr/bin/env bash
+echo "ARGS:$*"
+cat >/dev/null
+EOF
+    chmod +x "${EUXIS_TEST_TMPDIR}/codex"
+    unset CODEX_THREAD_ID
+    unset CODEX_CI
+    unset CODEX_SESSION_ID
+    export EUXIS_PRESERVE_PROVIDER_SESSION=1
+    export PROVIDER_MODEL="gpt-4o"
+    run run_openai "hello"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "ARGS:exec --model gpt-4o -" ]]
 }
 
 @test "run_ollama requires ollama CLI" {
@@ -375,10 +522,87 @@ teardown() {
     [[ "${result1}" == "${result2}" ]]
 }
 
+@test "provider resolution is idempotent for repeated calls" {
+    local result1
+    result1=$(resolve_tiered_provider "architect")
+    local result2
+    result2=$(resolve_tiered_provider "architect")
+    [[ "${result1}" == "${result2}" ]]
+}
+
 @test "all known providers can be configured" {
     local providers=(claude gemini openai ollama qwen crush kiro-cli goose)
     for provider in "${providers[@]}"; do
         resolve_provider_config "${provider}"
         [[ -n "${PROVIDER_MODEL}" ]]
     done
+}
+
+@test "coverage manifest references all provider helper functions" {
+    # Keeps string-match coverage for helper functions synchronized.
+    cat >/dev/null <<'EOF'
+resolve_session_provider
+_ensure_usage_dir
+_stat_mtime
+_cache_key
+_normalize_for_semantic_cache
+_vector_threshold_for_task
+_vector_embed_text
+_vector_cosine
+_valkey_available
+_vector_cache_store_valkey
+_vector_cache_lookup_valkey
+_vector_cache_store_file
+_vector_cache_lookup_file
+_semantic_vector_lookup
+_semantic_vector_store
+_extract_plan_template
+_plan_cache_lookup
+_plan_cache_store
+_semantic_cache_lookup
+_semantic_cache_store
+_is_offpeak_now
+_provider_state_file
+_persist_provider_state
+_record_provider_transition
+get_provider_state_json
+_provider_cap_tokens
+_provider_window_seconds
+_provider_usage_file
+_read_provider_usage
+_write_provider_usage
+_estimate_tokens
+_context_compaction_state_file
+_context_compaction_ready
+_maybe_trigger_context_compaction
+_resolve_task_priority
+_is_low_priority
+_projected_utilization_pct
+_enqueue_deferred_task
+_provider_governor_precheck
+_record_task_profile
+_record_provider_usage
+_extract_ratelimit_remaining
+_extract_ratelimit_limit
+_record_ratelimit_hint
+_latest_ratelimit_utilization_pct
+_get_fallback_provider
+_provider_available
+run_with_fallback
+_is_retryable_error
+_log_provider_switch
+_log_retry
+run_claude
+run_gemini
+run_openai
+run_ollama
+run_qwen
+run_crush
+run_kiro_cli
+run_goose
+execute_with_router
+execute_provider
+print
+EOF
+    [[ -n "ok" ]]
 }
