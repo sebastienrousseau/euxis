@@ -5,9 +5,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -352,7 +352,7 @@ if [[ -x "$CORTEX_SCRIPT" ]]; then
     if CORTEX_OUT=$("$CORTEX_SCRIPT" stats 2>&1); then
         log "  Cortex is reachable."
         # Extract memory count if available
-        MEM_COUNT=$(echo "$CORTEX_OUT" | grep -oP '\d+ memor' | head -1 | grep -oP '\d+' || true)
+        MEM_COUNT=$(echo "$CORTEX_OUT" | sed -n 's/.*\([0-9][0-9]*\) memor.*/\1/p' | head -1 || true)
         if [[ -n "$MEM_COUNT" ]]; then
             log "  ${MEM_COUNT} memories stored."
         fi

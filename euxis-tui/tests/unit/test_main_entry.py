@@ -24,7 +24,10 @@ class TestMainEntry(unittest.TestCase):
         # Remove cached module to ensure clean reload
         sys.modules.pop("tui.__main__", None)
 
-        import tui.__main__  # noqa: F401
+        from tui.__main__ import main
+        # Simulate normal TUI mode (no CLI args)
+        with patch.object(sys, "argv", ["tui"]):
+            main()
 
         mock_app_cls.assert_called()
         mock_instance.run.assert_called_once_with()

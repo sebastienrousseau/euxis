@@ -4,9 +4,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -29,7 +29,7 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-BIN_DIR="$EUXIS_HOME/cli/bin"
+BIN_DIR="$EUXIS_HOME/euxis-cli/bin"
 REPORT_DIR="$EUXIS_HOME/docs/audits/$(date +%Y%m%d_%H%M)"
 mkdir -p "$REPORT_DIR"
 

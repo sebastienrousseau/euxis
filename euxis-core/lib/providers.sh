@@ -397,7 +397,9 @@ run_claude() {
     # Default max turns: 50 for complex analysis tasks, configurable via EUXIS_MAX_TURNS
     # SECURITY: Removed --dangerously-skip-permissions flag (S3-002 fix)
     # Permission checks are enforced - use allowedTools for fine-grained control
+    # Unset Claude Code session env vars to allow nested invocation
     printf '%s\n' "${full_prompt}" | run_with_timeout "${EUXIS_API_TIMEOUT}" "claude API" \
+        env -u CLAUDECODE -u CLAUDE_CODE_ENTRYPOINT \
         claude \
         --print \
         --model "${PROVIDER_MODEL}" \

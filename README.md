@@ -1,6 +1,6 @@
 # Euxis
 
-**Multi-repo workspace for the Euxis Agent Framework**
+**Enterprise Unified eXecution Intelligence System**
 
 [![License][license-badge]][license-url]
 
@@ -8,7 +8,7 @@
 
 ## Repositories
 
-This workspace contains the following packages:
+Euxis is a modular multi-package workspace. Each package serves a distinct function within the agent framework:
 
 | Package | Description | Version |
 |---------|-------------|---------|
@@ -96,7 +96,10 @@ MIT License - see [LICENSE](LICENSE)
 
 ---
 
-*Part of the [Euxis Agent Framework](https://euxis.co)*
+---
+
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
 
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE
