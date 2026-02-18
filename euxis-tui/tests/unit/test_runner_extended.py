@@ -189,7 +189,6 @@ class TestAgentRunner:
 
         with (
             patch("tui.core.runner.asyncio.create_subprocess_exec", return_value=mock_process),
-            patch("tui.core.runner.asyncio.wait_for", side_effect=asyncio.TimeoutError),
             patch("tui.core.runner.Path.exists", return_value=True),
         ):
             result = await runner.execute("slow task")
@@ -234,7 +233,7 @@ class TestAgentRunner:
         agent = self._make_agent()
         runner = AgentRunner(agent, "claude", timeout=10.0)
 
-        mock_process = AsyncMock()
+        mock_process = MagicMock()
         mock_process.communicate = AsyncMock(return_value=(b"ok", b""))
         mock_process.returncode = 0
 
