@@ -35,7 +35,7 @@ This document defines a comprehensive API-first architecture for Euxis that expo
 
 ## API Architecture Overview
 
-```mermaid
+```text
 graph TB
     subgraph "Client Layer"
         WEB[Web Applications]
@@ -111,7 +111,7 @@ graph TB
 **Core Endpoints:**
 
 #### Agent Management
-```http
+```text
 GET    /v1/agents                    # List available agents
 GET    /v1/agents/{agent_id}         # Get agent details
 POST   /v1/agents/{agent_id}/execute # Execute agent task
@@ -120,7 +120,7 @@ POST   /v1/agents/batch              # Batch agent execution
 ```
 
 #### Session Management
-```http
+```text
 POST   /v1/sessions                  # Create new session
 GET    /v1/sessions/{session_id}     # Get session details
 PUT    /v1/sessions/{session_id}     # Update session
@@ -129,7 +129,7 @@ GET    /v1/sessions/{session_id}/logs # Get session audit trail
 ```
 
 #### Memory Operations
-```http
+```text
 GET    /v1/memory/{project_id}       # Get project memory
 POST   /v1/memory/{project_id}       # Add memory entry
 PUT    /v1/memory/{project_id}       # Update memory
@@ -138,7 +138,7 @@ GET    /v1/memory/search             # Search across memories
 ```
 
 #### Webhook Management
-```http
+```text
 POST   /v1/webhooks                  # Register webhook
 GET    /v1/webhooks                  # List webhooks
 PUT    /v1/webhooks/{webhook_id}     # Update webhook
@@ -150,7 +150,7 @@ POST   /v1/webhooks/test             # Test webhook delivery
 
 **Schema Design:**
 
-```graphql
+```text
 type Query {
   agent(id: ID!): Agent
   agents(filter: AgentFilter): [Agent!]!
@@ -252,7 +252,7 @@ interface SystemHealthEvent {
 ### 1. Authentication Methods
 
 **OAuth 2.1 with PKCE:**
-```http
+```text
 # Authorization Code Flow
 GET /auth/authorize?client_id={id}&response_type=code&redirect_uri={uri}&code_challenge={challenge}
 POST /auth/token
@@ -274,7 +274,7 @@ POST /auth/token
 ```
 
 **API Keys:**
-```http
+```text
 Authorization: Bearer euxis_ak_1234567890abcdef
 X-API-Key: euxis_ak_1234567890abcdef
 ```
@@ -369,7 +369,7 @@ tiers:
 - Rate limit headers in responses
 
 **Headers:**
-```http
+```text
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 845
 X-RateLimit-Reset: 1707663660
@@ -477,7 +477,7 @@ events:
 ```
 
 **Signature Verification:**
-```http
+```text
 POST /webhook-endpoint HTTP/1.1
 Content-Type: application/json
 X-Euxis-Signature: sha256=a1b2c3d4e5f6...
@@ -1069,7 +1069,7 @@ CREATE TABLE executions (
 ### 1. Health Checks
 
 **Service Health Endpoints:**
-```http
+```text
 GET /health              # Basic health check
 GET /health/ready        # Readiness probe
 GET /health/live         # Liveness probe
