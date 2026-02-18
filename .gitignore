@@ -138,6 +138,23 @@ runtime/locales/
 runtime/baseline/
 projects/
 
+# Monorepo runtime paths
+euxis-runtime/data/provider-usage/
+euxis-runtime/history/
+euxis-runtime/mesh/
+euxis-runtime/metrics/events.jsonl
+euxis-runtime/memory/cortex/db/
+euxis-runtime/memory/cortex/db/*.sqlite3
+euxis-runtime/memory/cortex/db/*.sqlite3-*
+euxis-runtime/memory/cortex/db/*.db
+euxis-runtime/memory/cortex/db/*.db-*
+
+# SQLite transient files
+*.db-wal
+*.db-shm
+euxis-core/agents/registry.db-wal
+euxis-core/agents/registry.db-shm
+
 # Keep runtime schemas/config that are meant to be tracked
 !runtime/data/bus/
 !runtime/data/bus/topics.json
@@ -158,6 +175,9 @@ runtime/locks/
 
 # Audit artifacts (session-specific)
 docs/audits/
+
+# Generated docs
+euxis-docs/_build/
 
 # Voice/TTS (large binary models)
 .piper-voices/
@@ -226,3 +246,6 @@ temp/
 # Keep example env file
 !.env.example
 tests/*_report.md
+
+# Shell test generated artifacts
+euxis-core/tests/coverage/shell/*.tap
