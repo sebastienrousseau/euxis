@@ -34,8 +34,8 @@ EOF
     unset _EUXIS_LIB_COMMON
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/core/lib/common.sh"
-    source "${HOME}/.euxis/core/lib/memory.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/memory.sh"
 }
 
 teardown() {
@@ -220,7 +220,7 @@ teardown() {
 # ============================================================================
 
 @test "prune_memory skips small files" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/small_memory.md"
+    local memory_file="${EUXIS_HOME}/small_memory.md"
     echo "# Memory: test" > "${memory_file}"
     echo "Small content" >> "${memory_file}"
 
@@ -236,7 +236,7 @@ teardown() {
 }
 
 @test "prune_memory reduces large files" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/large_memory.md"
+    local memory_file="${EUXIS_HOME}/large_memory.md"
     echo "# Memory: test" > "${memory_file}"
     for i in $(seq 1 600); do
         echo "[2026-01-01] Entry ${i}" >> "${memory_file}"
@@ -251,7 +251,7 @@ teardown() {
 }
 
 @test "prune_memory preserves REFLECTION entries" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/reflection_memory.md"
+    local memory_file="${EUXIS_HOME}/reflection_memory.md"
     echo "# Memory: test" > "${memory_file}"
     for i in $(seq 1 600); do
         echo "[2026-01-01] Entry ${i}" >> "${memory_file}"
@@ -265,7 +265,7 @@ teardown() {
 }
 
 @test "prune_memory preserves CONTRAINDICATION entries" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/contra_memory.md"
+    local memory_file="${EUXIS_HOME}/contra_memory.md"
     echo "# Memory: test" > "${memory_file}"
     for i in $(seq 1 600); do
         echo "[2026-01-01] Entry ${i}" >> "${memory_file}"
@@ -279,7 +279,8 @@ teardown() {
 }
 
 @test "prune_memory handles missing file" {
-    run prune_memory "/nonexistent/memory.md"
+    local missing_file="${EUXIS_HOME}/missing/memory.md"
+    run prune_memory "${missing_file}"
     [[ "${status}" -eq 0 ]]
 }
 
@@ -298,7 +299,7 @@ teardown() {
 }
 
 @test "prune_project_memory processes all agent memory files" {
-    local project_dir="${EUXIS_TEST_TMPDIR}/project"
+    local project_dir="${EUXIS_HOME}/project"
     mkdir -p "${project_dir}/agent1" "${project_dir}/agent2"
     echo "# Memory" > "${project_dir}/agent1/memory.md"
     echo "# Memory" > "${project_dir}/agent2/memory.md"
@@ -348,7 +349,7 @@ teardown() {
 # ============================================================================
 
 @test "resolve_memory_contradiction supersedes old entries" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/memory.md"
+    local memory_file="${EUXIS_HOME}/memory.md"
     echo "# Memory" > "${memory_file}"
 
     run resolve_memory_contradiction "${memory_file}" "New fact about system" "architect" "supersede"
@@ -358,7 +359,7 @@ teardown() {
 }
 
 @test "resolve_memory_contradiction keeps both entries" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/memory.md"
+    local memory_file="${EUXIS_HOME}/memory.md"
     echo "# Memory" > "${memory_file}"
 
     run resolve_memory_contradiction "${memory_file}" "Conflicting fact" "architect" "keep_both"
@@ -368,7 +369,7 @@ teardown() {
 }
 
 @test "resolve_memory_contradiction rejects new entry" {
-    local memory_file="${EUXIS_TEST_TMPDIR}/memory.md"
+    local memory_file="${EUXIS_HOME}/memory.md"
     echo "# Memory" > "${memory_file}"
 
     run resolve_memory_contradiction "${memory_file}" "Bad fact" "architect" "reject"
@@ -453,4 +454,25 @@ teardown() {
     result2=$(build_tiered_memory "${memory_file}" "test" "${project_dir}" "architect")
 
     [[ "${result1}" == "${result2}" ]]
+}
+
+@test "prune_memory is idempotent on repeated runs" {
+    local memory_file="${EUXIS_HOME}/idempotent_memory.md"
+    echo "# Memory: test" > "${memory_file}"
+    for i in $(seq 1 600); do
+        echo "[2026-01-01] Entry ${i}" >> "${memory_file}"
+    done
+    echo "[2026-01-01] REFLECTION: Keep me" >> "${memory_file}"
+
+    run prune_memory "${memory_file}" 500 100
+    [[ "${status}" -eq 0 ]]
+    local first
+    first="$(cat "${memory_file}")"
+
+    run prune_memory "${memory_file}" 500 100
+    [[ "${status}" -eq 0 ]]
+    local second
+    second="$(cat "${memory_file}")"
+
+    [[ "${first}" == "${second}" ]]
 }

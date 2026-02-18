@@ -39,9 +39,17 @@ main() {
 
     _t_provider=$(_perf_start)
     start_spinner "${AGENT} (${PROVIDER})..."
+    trap 'stop_spinner' EXIT
     local output
-    output=$(execute_provider "${PROVIDER}" "${full_prompt}")
+    if ! output=$(run_with_fallback "${PROVIDER}" "${full_prompt}" "${AGENT}" "${TASK}"); then
+        stop_spinner
+        trap - EXIT
+        agent_lifecycle_transition "${AGENT}" "failed" "${SESSION_ID}"
+        log_error "Agent execution failed for ${AGENT} (provider: ${PROVIDER})"
+        exit 1
+    fi
     stop_spinner
+    trap - EXIT
     _ms_provider=$(_perf_elapsed_ms "${_t_provider}")
     _perf_record "provider_execution" "${_ms_provider}" "${AGENT}" "${PROVIDER}"
 
@@ -198,6 +206,7 @@ dispatch_command() {
         bench)      exec "${EUXIS_BIN}/euxis-bench" "$@" ;;
         # Memory
         cortex)     _exec_python "${EUXIS_BIN}/euxis-cortex" "$@" ;;
+        context-worker) exec "${EUXIS_BIN}/euxis-context-worker" "$@" ;;
         # Maintenance
         kaizen)     exec "${EUXIS_BIN}/euxis-kaizen" "$@" ;;
         daemon)     exec "${EUXIS_BIN}/euxis-daemon" "$@" ;;

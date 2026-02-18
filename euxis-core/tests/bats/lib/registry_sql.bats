@@ -81,8 +81,8 @@ EOF
     unset _EUXIS_LIB_COMMON
 
     # Source dependencies from real installation
-    source "${HOME}/.euxis/core/lib/common.sh"
-    source "${HOME}/.euxis/core/lib/registry_sql.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/registry_sql.sh"
 }
 
 teardown() {
@@ -293,11 +293,18 @@ teardown() {
     rm -f "${EUXIS_HOME}/euxis-core/agents/registry.db"
 
     # Need to source agents.sh for fallback
-    source "${BATS_TEST_DIRNAME}/../../../core/lib/agents.sh" 2>/dev/null || true
+    source "${BATS_TEST_DIRNAME}/../../../lib/agents.sh" 2>/dev/null || true
 
     run list_agents_hybrid 2>&1 || true
     # Should attempt fallback
     [[ "${status}" -eq 0 ]] || [[ "${output}" =~ "falling back" ]] || true
+}
+
+@test "resolve_agent_path_hybrid returns SQL-backed path when available" {
+    command -v sqlite3 &>/dev/null || skip "sqlite3 not available"
+    run resolve_agent_path_hybrid "architect"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "agents/prompts/core/architect.txt" ]]
 }
 
 # ============================================================================
@@ -371,6 +378,23 @@ teardown() {
     [[ "${output}" =~ "failed" ]] || [[ "${output}" =~ "Error" ]] || [[ "${output}" =~ "error" ]]
 }
 
+@test "registry_rebuild succeeds as no-op when migration script is missing" {
+    run registry_rebuild
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "_registry_auto_rebuild succeeds when db is present" {
+    command -v sqlite3 &>/dev/null || skip "sqlite3 not available"
+    run _registry_auto_rebuild
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "_registry_auto_rebuild succeeds when db is missing and migration script absent" {
+    rm -f "${REGISTRY_DB}"
+    run _registry_auto_rebuild
+    [[ "${status}" -eq 0 ]]
+}
+
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
@@ -395,4 +419,12 @@ teardown() {
     result2=$(list_agents_sql)
 
     [[ "${result1}" == "${result2}" ]]
+}
+
+@test "registry query results are idempotent across repeated calls" {
+    command -v sqlite3 &>/dev/null || skip "sqlite3 not available"
+    local first second
+    first=$(find_agents_by_tier_sql "core")
+    second=$(find_agents_by_tier_sql "core")
+    [[ "${first}" == "${second}" ]]
 }

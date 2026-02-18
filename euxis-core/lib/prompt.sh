@@ -14,6 +14,11 @@ source "${EUXIS_HOME}/euxis-core/lib/template.sh"
 
 # Max token budget for protocol loading (prevents context bloat)
 EUXIS_PROTOCOL_TOKEN_BUDGET="${EUXIS_PROTOCOL_TOKEN_BUDGET:-12000}"
+EUXIS_CONTEXT_COMPACTION="${EUXIS_CONTEXT_COMPACTION:-1}"
+EUXIS_MEMORY_CONTEXT_MAX_CHARS="${EUXIS_MEMORY_CONTEXT_MAX_CHARS:-16000}"
+EUXIS_PROMPT_COMPRESSION="${EUXIS_PROMPT_COMPRESSION:-1}"
+EUXIS_PROMPT_MAX_CHARS="${EUXIS_PROMPT_MAX_CHARS:-90000}"
+EUXIS_USE_COMPACTED_MEMORY="${EUXIS_USE_COMPACTED_MEMORY:-1}"
 
 # Protocol cache TTL in seconds (skip re-reading files within window)
 _EUXIS_PROTO_CACHE_TTL="${_EUXIS_PROTO_CACHE_TTL:-60}"
@@ -177,6 +182,34 @@ _get_fleet_roster() {
     fi
 }
 
+_head_tail_compact() {
+    local text="$1"
+    local max_chars="$2"
+    if [[ ${#text} -le ${max_chars} ]]; then
+        printf '%s' "${text}"
+        return
+    fi
+    local half=$(( max_chars / 2 ))
+    local prefix="${text:0:half}"
+    local suffix="${text: -half}"
+    printf '%s\n%s\n%s' "${prefix}" "... [COMPACTED CONTEXT] ..." "${suffix}"
+}
+
+_compress_prompt_whitespace() {
+    local text="$1"
+    if command -v python3 &>/dev/null; then
+        python3 - <<'PY' "${text}"
+import re, sys
+t = sys.argv[1]
+t = re.sub(r'[ \t]+', ' ', t)
+t = re.sub(r'\n{3,}', '\n\n', t)
+print(t, end="")
+PY
+    else
+        printf '%s' "${text}" | sed -E 's/[[:space:]]+/ /g' | sed -E 's/\n{3,}/\n\n/g'
+    fi
+}
+
 # ============================================================================
 # Prompt Assembly (optimized: bash-native substitution, cached protocols,
 # memoized registry, token-aware)
@@ -217,8 +250,19 @@ prepare_prompt() {
         project_dir=""
     fi
 
+    local effective_memory_path="${memory_path}"
+    if [[ "${EUXIS_USE_COMPACTED_MEMORY}" == "1" ]]; then
+        local compacted_path="${memory_path%/*}/memory.compacted.md"
+        if [[ -f "${compacted_path}" ]]; then
+            effective_memory_path="${compacted_path}"
+        fi
+    fi
+
     local memory_context
-    memory_context=$(build_tiered_memory "${memory_path}" "${task}" "${project_dir}" "${agent}")
+    memory_context=$(build_tiered_memory "${effective_memory_path}" "${task}" "${project_dir}" "${agent}")
+    if [[ "${EUXIS_CONTEXT_COMPACTION}" == "1" ]]; then
+        memory_context=$(_head_tail_compact "${memory_context}" "${EUXIS_MEMORY_CONTEXT_MAX_CHARS}")
+    fi
 
     # Build fleet roster (memoized)
     local fleet_roster
@@ -256,7 +300,8 @@ Rules:
 - Downstream agents will parse this block — do NOT omit it.'
     fi
 
-    cat <<EOF
+    local assembled
+    assembled=$(cat <<EOF
 ${prompt}
 
 ---
@@ -269,7 +314,21 @@ Use ONLY agents from this list in mission manifests: ${fleet_roster}
 ${dispatch_directive}
 
 ---
+## EXECUTION NOTES CONTRACT
+Keep only milestone notes in active reasoning:
+- milestone: one sentence
+- decision: chosen path and why
+- artifact_refs: file paths only (load content just-in-time)
+- next_step: immediate action
+
+---
 ## CURRENT TASK
 ${task}
 EOF
+)
+    if [[ "${EUXIS_PROMPT_COMPRESSION}" == "1" ]]; then
+        assembled=$(_compress_prompt_whitespace "${assembled}")
+    fi
+    assembled=$(_head_tail_compact "${assembled}" "${EUXIS_PROMPT_MAX_CHARS}")
+    printf '%s' "${assembled}"
 }

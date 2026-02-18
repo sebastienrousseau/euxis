@@ -410,3 +410,14 @@ teardown() {
 
     [[ "${result1}" == "${result2}" ]]
 }
+
+@test "detect_project_type is idempotent for stable project layout" {
+    touch "${TEST_PROJECT_DIR}/package.json"
+    touch "${TEST_PROJECT_DIR}/Dockerfile"
+
+    local result1 result2
+    result1=$(detect_project_type "${TEST_PROJECT_DIR}")
+    result2=$(detect_project_type "${TEST_PROJECT_DIR}")
+
+    [[ "${result1}" == "${result2}" ]]
+}

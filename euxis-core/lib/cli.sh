@@ -311,7 +311,47 @@ parse_args() {
 
     AGENT="$1"
     TASK="$2"
-    PROVIDER="${3:-}"
+    PROVIDER=""
+    shift 2
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --provider)
+                if [[ $# -lt 2 ]]; then
+                    log_error "--provider requires a value"
+                    exit 2
+                fi
+                PROVIDER="$2"
+                shift 2
+                ;;
+            --provider=*)
+                PROVIDER="${1#*=}"
+                shift
+                ;;
+            --json)
+                export EUXIS_JSON=1
+                shift
+                ;;
+            --verbose)
+                export EUXIS_DEBUG=1
+                shift
+                ;;
+            --no-color)
+                export NO_COLOR=1
+                shift
+                ;;
+            *)
+                # Backward compatibility: third positional provider
+                if [[ -z "${PROVIDER}" ]]; then
+                    PROVIDER="$1"
+                    shift
+                else
+                    log_error "Unexpected argument: $1"
+                    exit 2
+                fi
+                ;;
+        esac
+    done
 
     # Security validation: validate agent name and task input
     if ! validate_agent_name "${AGENT}"; then
@@ -335,7 +375,13 @@ parse_args() {
     fi
 
     if [[ -z "${PROVIDER}" ]]; then
-        PROVIDER=$(resolve_tiered_provider "${AGENT}")
+        local session_provider=""
+        session_provider=$(resolve_session_provider 2>/dev/null || true)
+        if [[ -n "${session_provider}" ]]; then
+            PROVIDER="${session_provider}"
+        else
+            PROVIDER=$(resolve_tiered_provider "${AGENT}")
+        fi
     fi
 
     case "${PROVIDER}" in
@@ -355,6 +401,7 @@ parse_args() {
 setup_session() {
     PROJECT=$(get_project_name)
     SESSION_ID=$(get_session_id)
+    export EUXIS_SESSION_ID="${SESSION_ID}"
 
     ensure_project_dirs "${PROJECT}" "${AGENT}"
 

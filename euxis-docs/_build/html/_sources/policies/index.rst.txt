@@ -5,4 +5,4 @@ Policies
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

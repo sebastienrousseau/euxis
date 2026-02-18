@@ -11,15 +11,21 @@ EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 # Validate memory file path: reject path traversal and paths outside EUXIS_HOME
 _validate_memory_path() {
     local path="$1"
+    local home_prefix="${EUXIS_HOME%/}/"
+
+    # Normalize relative paths to absolute for prefix checks.
+    if [[ "${path}" != /* ]]; then
+        path="${PWD}/${path}"
+    fi
+
     # Reject path traversal
     if [[ "$path" == *".."* ]]; then
         log_error "Path traversal rejected: ${path}"
         return 1
     fi
-    # Ensure path is under EUXIS_HOME
-    local resolved
-    resolved="$(cd "$(dirname "$path")" 2>/dev/null && pwd)/$(basename "$path")"
-    if [[ "$resolved" != "${EUXIS_HOME}"/* ]]; then
+
+    # Ensure path is under EUXIS_HOME (without requiring file/dir existence)
+    if [[ "${path}" != ${home_prefix}* ]]; then
         log_error "Path outside EUXIS_HOME rejected: ${path}"
         return 1
     fi
@@ -165,9 +171,9 @@ prune_memory() {
     # No pruning needed if under threshold
     (( total_lines <= max_lines )) && return 0
 
-    local temp_file
+    local temp_file=""
     temp_file=$(mktemp "${memory_file}.prune.XXXXXX") || { log_error "Failed to create temp file for pruning"; return 1; }
-    trap 'rm -f "${temp_file}"' RETURN
+    trap 'rm -f "${temp_file:-}"' RETURN
 
     local header_line
 

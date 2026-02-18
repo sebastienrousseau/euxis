@@ -1,5 +1,5 @@
 {
-  "theme": "etx-deep-space",
+  "theme": "etx-focused",
   "default_provider": "claude",
   "show_agent_tags": true,
   "reduced_motion": false,

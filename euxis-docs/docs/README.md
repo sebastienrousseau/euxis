@@ -10,7 +10,10 @@ Project documentation, architecture notes, guides, and policies.
 
 ## Usage
 
-Start with `docs/index.md` and follow the structure from there.
+Start with `docs/index.rst` and follow the structure from there.
+
+Current quality/performance status:
+- `docs/reports/initial-user-expectations-2026-02-18.md`
 
 ## Dependencies
 

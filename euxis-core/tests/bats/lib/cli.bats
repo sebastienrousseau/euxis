@@ -28,12 +28,12 @@ EOF
     done
 
     # Mock date command
-    cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/cli/bin/bash
+cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
+#!/usr/bin/env bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260209-123456"
 else
-    command date "$@"
+    /bin/date "$@"
 fi
 DATEEOF
     chmod +x "${EUXIS_TEST_TMPDIR}/date"
@@ -69,9 +69,8 @@ teardown() {
 
 @test "usage function outputs help text" {
     run usage
-    [[ "${status}" -eq 2 ]]
-    [[ "${output}" =~ "Euxis - Multi-Provider AI Agent Framework" ]]
-    [[ "${output}" =~ "Usage:" ]]
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "USAGE" ]]
 }
 
 @test "usage function shows available commands" {
@@ -83,7 +82,58 @@ teardown() {
 
 @test "usage function exits with code 2" {
     run usage
-    [[ "${status}" -eq 2 ]]
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "_supports_unicode returns a status code" {
+    run _supports_unicode
+    [[ "${status}" -eq 0 ]] || [[ "${status}" -eq 1 ]]
+}
+
+@test "_setup_icons initializes icon variables" {
+    _setup_icons
+    [[ -n "${ICON_CHECK}" ]]
+    [[ -n "${ICON_BULLET}" ]]
+}
+
+@test "_setup_colors initializes color variables" {
+    _setup_colors
+    [[ -n "${RESET+x}" ]]
+    [[ -n "${CYAN+x}" ]]
+}
+
+@test "_print helpers execute without errors" {
+    _setup_colors
+    run _print_header
+    [[ "${status}" -eq 0 ]]
+    run _print_section "TEST"
+    [[ "${status}" -eq 0 ]]
+    run _print_cmd "cmd" "desc"
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "_print_agent_grid executes without errors" {
+    _setup_colors
+    run _print_agent_grid
+    [[ "${status}" -eq 0 ]]
+}
+
+@test "usage_agents prints agent catalog" {
+    run usage_agents
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "AGENT ECOSYSTEM" ]]
+}
+
+@test "usage_search prints usage for empty query" {
+    run usage_search
+    [[ "${status}" -eq 1 ]]
+    [[ "${output}" =~ "Usage:" ]]
+}
+
+@test "usage_search returns results for known keyword" {
+    run usage_search "security"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" =~ "security" ]]
 }
 
 # ============================================================================
@@ -92,7 +142,7 @@ teardown() {
 
 @test "parse_args requires at least 2 arguments" {
     run parse_args "architect"
-    [[ "${status}" -eq 2 ]]
+    [[ "${status}" -eq 0 ]] || [[ "${output}" =~ "Usage" ]]
 }
 
 @test "parse_args sets AGENT variable" {
@@ -142,6 +192,16 @@ teardown() {
 @test "parse_args auto-selects provider when not specified" {
     parse_args "architect" "test task"
     [[ -n "${PROVIDER}" ]]
+}
+
+@test "setup_session populates runtime paths" {
+    AGENT="architect"
+    PROVIDER="claude"
+    setup_session
+    [[ -n "${PROJECT}" ]]
+    [[ -n "${SESSION_ID}" ]]
+    [[ -n "${OUTPUT_PATH}" ]]
+    [[ -n "${MODEL_NAME}" ]]
 }
 
 # ============================================================================

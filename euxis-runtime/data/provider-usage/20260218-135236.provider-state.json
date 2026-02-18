@@ -1,0 +1,25 @@
+{
+  "initial_provider": "openai",
+  "current_provider": "crush",
+  "transitions": [
+    {
+      "from": "openai",
+      "to": "kiro-cli",
+      "reason": "quota_soft_cap",
+      "timestamp": "2026-02-18T13:52:36.3NZ"
+    },
+    {
+      "from": "kiro-cli",
+      "to": "qwen",
+      "reason": "provider_failure",
+      "timestamp": "2026-02-18T13:52:36.3NZ"
+    },
+    {
+      "from": "qwen",
+      "to": "crush",
+      "reason": "provider_failure",
+      "timestamp": "2026-02-18T13:52:37.3NZ"
+    }
+  ],
+  "updated_at": "2026-02-18T13:52:38Z"
+}

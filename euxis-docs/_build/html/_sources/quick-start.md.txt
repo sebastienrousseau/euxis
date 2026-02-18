@@ -2,6 +2,10 @@
 
 **Get your AI agent fleet running in 5 minutes.**
 
+> Status note (February 18, 2026): for current test/coverage/performance
+> verification metrics and known stabilization areas, see
+> `reports/initial-user-expectations-2026-02-18.md`.
+
 ---
 
 ## What You'll Accomplish

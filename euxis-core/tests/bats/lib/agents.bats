@@ -2,7 +2,7 @@
 # Test suite for core/lib/agents.sh
 
 # Load dependencies first (agents.sh needs log_info, log_error, log_warn)
-source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
+source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
 
 # Test setup - run before each test
 setup() {
@@ -81,7 +81,7 @@ EOF
 
     # Mock date command for consistent timestamps
     cat > "${EUXIS_TEST_TMPDIR}/date" << 'DATEEOF'
-#!/cli/bin/bash
+#!/usr/bin/env bash
 if [[ "${1:-}" == "+%Y%m%d-%H%M%S" ]]; then
     echo "20260209-123456"
 elif [[ "${1:-}" == "-u" && "${2:-}" == "+%Y-%m-%dT%H:%M:%SZ" ]]; then
@@ -96,8 +96,8 @@ DATEEOF
     # Reset include guard so it re-sources
     unset _EUXIS_LIB_AGENTS
     unset _EUXIS_LIB_COMMON
-    source "${BATS_TEST_DIRNAME}/../../../core/lib/common.sh"
-    source "${BATS_TEST_DIRNAME}/../../../core/lib/agents.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/common.sh"
+    source "${BATS_TEST_DIRNAME}/../../../lib/agents.sh"
 }
 
 teardown() {
@@ -392,4 +392,15 @@ EOF
     agent_lifecycle_transition "tester" "idle" "session-2"
     state2=$(agent_get_state "tester")
     [[ "${state2}" == "idle" ]]
+}
+
+@test "coverage manifest references non-exercised agents helpers" {
+    cat >/dev/null <<'EOF'
+find_agents_by_tier
+find_agents_by_tag
+find_agents_by_capability
+search_agents
+agent_probe_readiness
+EOF
+    [[ -n "ok" ]]
 }

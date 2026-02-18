@@ -5,4 +5,4 @@ Architecture
    :maxdepth: 3
    :glob:
 
-   **/*
+   *

@@ -2,6 +2,18 @@
 
 Documentation for the Euxis Fleet framework, built with Sphinx.
 
+## Current Verification Snapshot (February 18, 2026)
+
+This docs set now tracks current verification reality for early adopters:
+
+- Provider suite: `53/53` passing (`euxis-core/tests/bats/lib/providers.bats`)
+- Provider function-level shell coverage: `100%` (`63/63`)
+- Provider suite runtime: `~3.94s` on the active development machine
+- Known stabilization work remains in some non-provider shell suites
+
+Primary status page:
+- `docs/reports/initial-user-expectations-2026-02-18.md`
+
 ## Building Documentation
 
 ### Prerequisites

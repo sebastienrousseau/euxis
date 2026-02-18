@@ -1,0 +1,1358 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Unused Assets Report (v0.1.0)" href="unused-assets-report-v0.1.0.html"><link rel="prev" title="Euxis v0.1.0 Milestone Plan" href="roadmap-v0.1.0.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Euxis Gateway Security Audit Report - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.1.0)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/architecture.html">Euxis Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/security.html">Security Essentials</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/agent-development-guide.html">Agent Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/concurrency-testing.html">Deterministic Concurrency Test Suite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/cross-platform.html">Euxis Cross-Platform Verification System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/migration-guide.html">Migration Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/ui-guide.html">Euxis UI &amp; Interaction Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/multi-repo-workflow.html">Multi-Repo Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-crypto-lib.html">euxis-crypto-lib</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-tui.html">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-reference.html">Euxis API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cli-reference.html">Euxis CLI Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway.html">Gateway Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-adapters.html">Gateway Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-auth.html">Gateway Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-canvas.html">Gateway Canvas Schema (v0.1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-cli.html">Gateway CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-config.html">Gateway Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-quickstart.html">Gateway Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/MODULE_BOUNDARIES.html">Module Boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/SHARED_CONTRACTS.html">Shared Contracts (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/repoStructure.html">Repository Structure Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decisions/index.html">Decisions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/crypto-patterns-report.html">Language Analysis: Crypto-Service TypeScript Codebase</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Reports</a><input aria-label="Toggle navigation of Reports" checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="CI-ENFORCEMENT-MANIFEST.html">Euxis CI Enforcement Manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="SHELL_SCRIPT_DOCUMENTATION_AUDIT.html">Shell Script Documentation Audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="UPDATED_README_SCRIPT_INVENTORY.html">Script Inventory for README.md</a></li>
+<li class="toctree-l2"><a class="reference internal" href="archive-candidates-v0.1.0.html">Archive Candidates Review (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="archive-cleanup-report-v0.1.0.html">Archive Cleanup Report (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ci-workflows-documentation.html">CI Workflows Documentation (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dependency-leaks.html">Cross-Module Dependency Leak Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation-review-2026.html">Euxis Documentation Review Against 2026 Industry Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="initial-user-expectations-2026-02-18.html">Initial User Expectations (February 18, 2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="issue-closure-report-2026-02-16.html">Issue Closure Report — 2026-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module-deps-diff.html">Module Dependency Diffs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module-deps-suggested.html">Module Dependency Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module-lockfile-suggestions.html">Lockfile Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release-summary-v0.0.9.html">Release Summary — v0.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repo-reorg-plan-v0.1.0.html">Euxis Monorepo Reorg Plan (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repo-split-checklist.html">Repo Split Checklist (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repo-split-plan-v0.1.0.html">Repository Split — Monolith to Modular (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roadmap-v0.1.0.html">Euxis v0.1.0 Milestone Plan</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Euxis Gateway Security Audit Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unused-assets-report-v0.1.0.html">Unused Assets Report (v0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ux-moonshots.html">Euxis UX Moonshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/v4.5-readiness-report.html">Euxis v4.5 Readiness Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html">SOC 2 Compliance Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../templates/index.html">Templates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../policies/index.html">Policies</a><input aria-label="Toggle navigation of Policies" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../policies/CONSTITUTION.html">The Euxis Fleet Constitution (v1.0 — Protocol 0.1.0)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/STYLE_GUIDE.html">Documentation Style Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/namingConventions.html">Naming Conventions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../archive/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/reports/security-audit-gateway-2026-02.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="euxis-gateway-security-audit-report">
+<h1>Euxis Gateway Security Audit Report<a class="headerlink" href="#euxis-gateway-security-audit-report" title="Link to this heading">¶</a></h1>
+<p><strong>Document ID:</strong> EUXIS-SEC-2026-02
+<strong>Classification:</strong> Internal - Security
+<strong>Audit Date:</strong> February 2026
+<strong>Auditor:</strong> Security Engineering Team
+<strong>Status:</strong> COMPLETED - All S1 Findings Remediated</p>
+<hr class="docutils" />
+<section id="executive-summary">
+<h2>Executive Summary<a class="headerlink" href="#executive-summary" title="Link to this heading">¶</a></h2>
+<p>This security audit report documents the identification, analysis, and remediation of four Severity 1 (S1) critical vulnerabilities discovered in the Euxis Gateway server component (<code class="docutils literal notranslate"><span class="pre">euxis-gateway/src/gateway/server.py</span></code>). All vulnerabilities have been successfully remediated and verified.</p>
+<section id="key-metrics">
+<h3>Key Metrics<a class="headerlink" href="#key-metrics" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Total Findings</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>Severity 1 (Critical)</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>Severity 2 (High)</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Remediated</p></td>
+<td><p>4 (100%)</p></td>
+</tr>
+<tr class="row-even"><td><p>Verified</p></td>
+<td><p>4 (100%)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="risk-summary">
+<h3>Risk Summary<a class="headerlink" href="#risk-summary" title="Link to this heading">¶</a></h3>
+<p>Prior to remediation, the gateway was vulnerable to:</p>
+<ul class="simple">
+<li><p><strong>Authentication bypass</strong> via default empty tokens</p></li>
+<li><p><strong>Privilege escalation</strong> via unauthenticated admin endpoints</p></li>
+<li><p><strong>Remote code execution</strong> via voice command injection</p></li>
+<li><p><strong>Arbitrary file upload</strong> enabling potential server compromise</p></li>
+</ul>
+<p>All identified vulnerabilities have been addressed with defense-in-depth controls.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="findings-summary">
+<h2>Findings Summary<a class="headerlink" href="#findings-summary" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ID</p></th>
+<th class="head"><p>Title</p></th>
+<th class="head"><p>Severity</p></th>
+<th class="head"><p>CVSS</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>Location</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>EUXIS-2026-001</p></td>
+<td><p>Default Empty Authentication Tokens</p></td>
+<td><p>S1/Critical</p></td>
+<td><p>9.8</p></td>
+<td><p>FIXED</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">is_authorized()</span></code>, <code class="docutils literal notranslate"><span class="pre">is_http_authorized()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>EUXIS-2026-002</p></td>
+<td><p>Admin Policy Override Without Authentication</p></td>
+<td><p>S1/Critical</p></td>
+<td><p>9.1</p></td>
+<td><p>FIXED</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/admin/exec</span></code> endpoint</p></td>
+</tr>
+<tr class="row-even"><td><p>EUXIS-2026-003</p></td>
+<td><p>Voice Command Injection</p></td>
+<td><p>S1/Critical</p></td>
+<td><p>9.8</p></td>
+<td><p>FIXED</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">run_voice_command()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>EUXIS-2026-004</p></td>
+<td><p>Unrestricted File Upload</p></td>
+<td><p>S1/Critical</p></td>
+<td><p>8.8</p></td>
+<td><p>FIXED</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/voice/upload</span></code> endpoint</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="detailed-findings">
+<h2>Detailed Findings<a class="headerlink" href="#detailed-findings" title="Link to this heading">¶</a></h2>
+<section id="euxis-2026-001-default-empty-authentication-tokens">
+<h3>EUXIS-2026-001: Default Empty Authentication Tokens<a class="headerlink" href="#euxis-2026-001-default-empty-authentication-tokens" title="Link to this heading">¶</a></h3>
+<p><strong>Severity:</strong> S1 - Critical
+<strong>CVSS v3.1 Score:</strong> 9.8 (Critical)
+<strong>CVSS Vector:</strong> <code class="docutils literal notranslate"><span class="pre">AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</span></code>
+<strong>CWE:</strong> CWE-287 (Improper Authentication)
+<strong>Location:</strong> <code class="docutils literal notranslate"><span class="pre">/home/seb/.euxis/euxis-gateway/src/gateway/server.py</span></code> lines 926-1002</p>
+<section id="description">
+<h4>Description<a class="headerlink" href="#description" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">is_authorized()</span></code> and <code class="docutils literal notranslate"><span class="pre">is_http_authorized()</span></code> functions previously returned <code class="docutils literal notranslate"><span class="pre">True</span></code> when no authentication token or password was configured. This allowed any unauthenticated request to access protected endpoints when the gateway was deployed with default configuration.</p>
+</section>
+<section id="impact">
+<h4>Impact<a class="headerlink" href="#impact" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Complete bypass of authentication controls</p></li>
+<li><p>Unauthorized access to all gateway endpoints</p></li>
+<li><p>Session hijacking and data exfiltration</p></li>
+<li><p>Remote command execution via agent dispatch</p></li>
+</ul>
+</section>
+<section id="technical-details">
+<h4>Technical Details<a class="headerlink" href="#technical-details" title="Link to this heading">¶</a></h4>
+<p><strong>Vulnerable Code Pattern (BEFORE):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_authorized</span><span class="p">(</span><span class="n">ws</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">][</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;token&quot;</span><span class="p">:</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">][</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+            <span class="c1"># VULNERABLE: Empty token was implicitly allowed</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>  <span class="c1"># &lt;-- BUG: Should deny, not allow</span>
+        <span class="c1"># ... rest of validation</span>
+</pre></div>
+</div>
+<p><strong>Fixed Code (AFTER):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_authorized</span><span class="p">(</span><span class="n">ws</span><span class="p">:</span> <span class="n">WebSocket</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">][</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;token&quot;</span><span class="p">:</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">][</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+            <span class="c1"># SECURITY: Empty token = DENY access (require explicit token configuration)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;auth_not_configured&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;authorization&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="c1"># ... rest of validation</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">][</span><span class="s2">&quot;auth&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">password</span><span class="p">:</span>
+            <span class="c1"># SECURITY: Empty password = DENY access (require explicit password configuration)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;auth_not_configured&quot;</span>
+        <span class="c1"># ... rest of validation</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
+        <span class="c1"># Explicit opt-in to no authentication (must be configured deliberately)</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;auth_not_configured&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="remediation">
+<h4>Remediation<a class="headerlink" href="#remediation" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Empty token/password now returns <code class="docutils literal notranslate"><span class="pre">(False,</span> <span class="pre">&quot;auth_not_configured&quot;)</span></code> instead of <code class="docutils literal notranslate"><span class="pre">(True,</span> <span class="pre">None)</span></code></p></li>
+<li><p>Added explicit <code class="docutils literal notranslate"><span class="pre">mode:</span> <span class="pre">&quot;none&quot;</span></code> for intentional authentication opt-out</p></li>
+<li><p>Default behavior is now secure (deny-by-default)</p></li>
+<li><p>Applied fix to both WebSocket (<code class="docutils literal notranslate"><span class="pre">is_authorized</span></code>) and HTTP (<code class="docutils literal notranslate"><span class="pre">is_http_authorized</span></code>) functions</p></li>
+</ol>
+</section>
+<section id="verification">
+<h4>Verification<a class="headerlink" href="#verification" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test: Empty token configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gateway&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;auth&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}}}}</span>
+<span class="n">result</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">is_authorized</span><span class="p">(</span><span class="n">mock_ws</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="kc">False</span>
+<span class="k">assert</span> <span class="n">reason</span> <span class="o">==</span> <span class="s2">&quot;auth_not_configured&quot;</span>
+
+<span class="c1"># Test: Explicit none mode (allowed)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gateway&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;auth&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">}}}</span>
+<span class="n">result</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">is_authorized</span><span class="p">(</span><span class="n">mock_ws</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="euxis-2026-002-admin-policy-override-without-authentication">
+<h3>EUXIS-2026-002: Admin Policy Override Without Authentication<a class="headerlink" href="#euxis-2026-002-admin-policy-override-without-authentication" title="Link to this heading">¶</a></h3>
+<p><strong>Severity:</strong> S1 - Critical
+<strong>CVSS v3.1 Score:</strong> 9.1 (Critical)
+<strong>CVSS Vector:</strong> <code class="docutils literal notranslate"><span class="pre">AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H</span></code>
+<strong>CWE:</strong> CWE-306 (Missing Authentication for Critical Function)
+<strong>Location:</strong> <code class="docutils literal notranslate"><span class="pre">/home/seb/.euxis/euxis-gateway/src/gateway/server.py</span></code> line 714</p>
+<section id="id1">
+<h4>Description<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">/admin/exec</span></code> endpoint allowed modification of execution policies without requiring authentication. An attacker could remotely modify the execution policy to <code class="docutils literal notranslate"><span class="pre">&quot;full&quot;</span></code> mode, bypassing all approval workflows and allowlist restrictions.</p>
+</section>
+<section id="id2">
+<h4>Impact<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Unrestricted agent execution</p></li>
+<li><p>Bypass of approval workflows</p></li>
+<li><p>Policy tampering</p></li>
+<li><p>Privilege escalation to full execution mode</p></li>
+</ul>
+</section>
+<section id="id3">
+<h4>Technical Details<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p><strong>Vulnerable Code Pattern (BEFORE):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/admin/exec&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_exec_policy</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONResponse</span><span class="p">:</span>
+    <span class="c1"># VULNERABLE: No authentication check!</span>
+    <span class="n">exec_cfg</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;policy&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">,</span> <span class="s2">&quot;ask_fallback&quot;</span><span class="p">,</span> <span class="s2">&quot;allowlist&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">exec_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">:</span> <span class="n">exec_cfg</span><span class="p">})</span>
+</pre></div>
+</div>
+<p><strong>Fixed Code (AFTER):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/admin/exec&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_exec_policy</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONResponse</span><span class="p">:</span>
+    <span class="c1"># SECURITY: Admin endpoints MUST require authentication</span>
+    <span class="n">allowed</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">is_http_authorized</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">allowed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+    <span class="c1"># SECURITY: Require re-authentication for admin operations via special header</span>
+    <span class="n">admin_token</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;token&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">admin_token</span><span class="p">:</span>
+        <span class="n">provided</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-admin-token&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">hmac</span><span class="o">.</span><span class="n">compare_digest</span><span class="p">(</span><span class="n">provided</span><span class="p">,</span> <span class="n">admin_token</span><span class="p">):</span>
+            <span class="n">audit_log</span><span class="p">({</span><span class="s2">&quot;ts&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;admin_auth_failed&quot;</span><span class="p">,</span> <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="s2">&quot;/admin/exec&quot;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;admin_token_required&quot;</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+    <span class="n">exec_cfg</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;policy&quot;</span><span class="p">,</span> <span class="s2">&quot;ask&quot;</span><span class="p">,</span> <span class="s2">&quot;ask_fallback&quot;</span><span class="p">,</span> <span class="s2">&quot;allowlist&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">payload</span><span class="p">:</span>
+            <span class="n">exec_cfg</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="n">audit_log</span><span class="p">({</span><span class="s2">&quot;ts&quot;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">(),</span> <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;admin_exec_policy_updated&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">:</span> <span class="n">exec_cfg</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">:</span> <span class="n">exec_cfg</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h4>Remediation<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">is_http_authorized()</span></code> check as primary authentication</p></li>
+<li><p>Added optional <code class="docutils literal notranslate"><span class="pre">x-admin-token</span></code> header for elevated admin operations</p></li>
+<li><p>Implemented audit logging for admin actions (both success and failure)</p></li>
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">hmac.compare_digest()</span></code> for timing-safe token comparison</p></li>
+</ol>
+</section>
+<section id="id5">
+<h4>Verification<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test: Unauthenticated request (should fail)</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:18789/admin/exec<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;policy&quot;: &quot;full&quot;}&#39;</span>
+<span class="c1"># Expected: 401 Unauthorized</span>
+
+<span class="c1"># Test: Authenticated request with admin token</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:18789/admin/exec<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;x-admin-token: &lt;admin-token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;policy&quot;: &quot;allowlist&quot;}&#39;</span>
+<span class="c1"># Expected: 200 OK</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="euxis-2026-003-voice-command-injection">
+<h3>EUXIS-2026-003: Voice Command Injection<a class="headerlink" href="#euxis-2026-003-voice-command-injection" title="Link to this heading">¶</a></h3>
+<p><strong>Severity:</strong> S1 - Critical
+<strong>CVSS v3.1 Score:</strong> 9.8 (Critical)
+<strong>CVSS Vector:</strong> <code class="docutils literal notranslate"><span class="pre">AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H</span></code>
+<strong>CWE:</strong> CWE-78 (Improper Neutralization of Special Elements used in an OS Command)
+<strong>Location:</strong> <code class="docutils literal notranslate"><span class="pre">/home/seb/.euxis/euxis-gateway/src/gateway/server.py</span></code> line 1417</p>
+<section id="id6">
+<h4>Description<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">run_voice_command()</span></code> function accepted user-controlled input (file paths, session IDs) and substituted them into shell commands without sanitization. An attacker could inject shell metacharacters to execute arbitrary commands.</p>
+</section>
+<section id="id7">
+<h4>Impact<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Remote code execution (RCE)</p></li>
+<li><p>Server compromise</p></li>
+<li><p>Data exfiltration</p></li>
+<li><p>Lateral movement within infrastructure</p></li>
+</ul>
+</section>
+<section id="attack-vector-example">
+<h4>Attack Vector Example<a class="headerlink" href="#attack-vector-example" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Malicious audio_path input</span>
+<span class="n">audio_path</span> <span class="o">=</span> <span class="s2">&quot;/tmp/audio.wav; rm -rf / #&quot;</span>
+
+<span class="c1"># Vulnerable command template</span>
+<span class="n">command</span> <span class="o">=</span> <span class="s2">&quot;whisper </span><span class="si">{audio_path}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Results in shell execution of:</span>
+<span class="c1"># whisper /tmp/audio.wav; rm -rf / #</span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h4>Technical Details<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<p><strong>Vulnerable Code Pattern (BEFORE):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_voice_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vars_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># VULNERABLE: No validation of command against allowlist</span>
+    <span class="c1"># VULNERABLE: No sanitization of vars_map values</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rendered</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">vars_map</span><span class="p">)</span>  <span class="c1"># Direct injection point!</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
+    <span class="c1"># ... subprocess execution</span>
+</pre></div>
+</div>
+<p><strong>Fixed Code (AFTER):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_sanitize_voice_vars</span><span class="p">(</span><span class="n">vars_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SECURITY: Sanitize voice command variables to prevent shell injection.&quot;&quot;&quot;</span>
+    <span class="n">sanitized</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">vars_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Use shlex.quote to escape shell metacharacters</span>
+        <span class="n">sanitized</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">sanitized</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_voice_command</span><span class="p">(</span><span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vars_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">command</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># SECURITY: Validate command allowlist BEFORE variable substitution</span>
+    <span class="n">allowlist</span> <span class="o">=</span> <span class="n">STATE</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gateway&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;voice&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;command_allowlist&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">allowlist</span><span class="p">:</span>
+        <span class="c1"># SECURITY: Require explicit allowlist for voice commands</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># Extract the base command from the template (first word before any {var})</span>
+    <span class="n">base_cmd</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_cmd</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowlist</span> <span class="ow">and</span> <span class="n">base_cmd</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowlist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># SECURITY: Sanitize all input variables to prevent injection</span>
+    <span class="n">sanitized_vars</span> <span class="o">=</span> <span class="n">_sanitize_voice_vars</span><span class="p">(</span><span class="n">vars_map</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rendered</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">sanitized_vars</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># Double-check the executable after rendering</span>
+    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowlist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="c1"># ... subprocess execution</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h4>Remediation<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">_sanitize_voice_vars()</span></code> function using <code class="docutils literal notranslate"><span class="pre">shlex.quote()</span></code> to escape all shell metacharacters</p></li>
+<li><p>Made command allowlist mandatory (empty allowlist = deny all commands)</p></li>
+<li><p>Validate command BEFORE variable substitution to prevent allowlist bypass</p></li>
+<li><p>Double-check executable name AFTER rendering as defense-in-depth</p></li>
+</ol>
+</section>
+<section id="id10">
+<h4>Verification<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test: Injection attempt</span>
+<span class="n">vars_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;audio_path&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp/test.wav; rm -rf /&quot;</span><span class="p">}</span>
+<span class="n">sanitized</span> <span class="o">=</span> <span class="n">_sanitize_voice_vars</span><span class="p">(</span><span class="n">vars_map</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">sanitized</span><span class="p">[</span><span class="s2">&quot;audio_path&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;/tmp/test.wav; rm -rf /&#39;&quot;</span>
+<span class="c1"># The entire malicious string is now quoted as a single argument</span>
+
+<span class="c1"># Test: Empty allowlist blocks execution</span>
+<span class="n">allowlist</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_voice_command</span><span class="p">(</span><span class="s2">&quot;whisper </span><span class="si">{audio_path}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;audio_path&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp/test.wav&quot;</span><span class="p">})</span>
+<span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="euxis-2026-004-unrestricted-file-upload">
+<h3>EUXIS-2026-004: Unrestricted File Upload<a class="headerlink" href="#euxis-2026-004-unrestricted-file-upload" title="Link to this heading">¶</a></h3>
+<p><strong>Severity:</strong> S1 - Critical
+<strong>CVSS v3.1 Score:</strong> 8.8 (High)
+<strong>CVSS Vector:</strong> <code class="docutils literal notranslate"><span class="pre">AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H</span></code>
+<strong>CWE:</strong> CWE-434 (Unrestricted Upload of File with Dangerous Type)
+<strong>Location:</strong> <code class="docutils literal notranslate"><span class="pre">/home/seb/.euxis/euxis-gateway/src/gateway/server.py</span></code> line 511</p>
+<section id="id11">
+<h4>Description<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">/voice/upload</span></code> endpoint allowed uploading files with arbitrary extensions and content types. An attacker could upload malicious executables, scripts, or polyglot files disguised as audio.</p>
+</section>
+<section id="id12">
+<h4>Impact<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Malware upload</p></li>
+<li><p>Web shell deployment</p></li>
+<li><p>Server-side code execution</p></li>
+<li><p>Storage exhaustion (DoS)</p></li>
+</ul>
+</section>
+<section id="id13">
+<h4>Technical Details<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<p><strong>Vulnerable Code Pattern (BEFORE):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/voice/upload&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">voice_upload</span><span class="p">(</span><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;voice&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;disabled&quot;</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">)</span>
+    <span class="c1"># VULNERABLE: Authentication was optional!</span>
+    <span class="k">if</span> <span class="n">request</span><span class="p">:</span>
+        <span class="n">allowed</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">is_http_authorized</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">allowed</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+    <span class="c1"># VULNERABLE: No file type validation</span>
+    <span class="c1"># VULNERABLE: No file size limit</span>
+    <span class="c1"># VULNERABLE: No content validation</span>
+    <span class="n">blob</span> <span class="o">=</span> <span class="k">await</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># Could read unlimited data</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">persist_voice_blob</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)})</span>
+</pre></div>
+</div>
+<p><strong>Fixed Code (AFTER):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># SECURITY: Allowed audio file extensions for voice upload</span>
+<span class="n">VOICE_ALLOWED_EXTENSIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;wav&quot;</span><span class="p">,</span> <span class="s2">&quot;mp3&quot;</span><span class="p">,</span> <span class="s2">&quot;ogg&quot;</span><span class="p">,</span> <span class="s2">&quot;webm&quot;</span><span class="p">,</span> <span class="s2">&quot;m4a&quot;</span><span class="p">,</span> <span class="s2">&quot;flac&quot;</span><span class="p">,</span> <span class="s2">&quot;aac&quot;</span><span class="p">}</span>
+<span class="c1"># SECURITY: Maximum file size for voice uploads (10MB)</span>
+<span class="n">VOICE_MAX_FILE_SIZE</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+
+<span class="c1"># SECURITY: Audio file magic byte signatures for content validation</span>
+<span class="n">AUDIO_MAGIC_BYTES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;wav&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;RIFF&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;WAVE&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;mp3&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xfb</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xfa</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xf3</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xf2</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;ID3&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;ogg&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;OggS&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;flac&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;fLaC&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;m4a&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">4</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;ftyp&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;aac&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xf1</span><span class="s2">&quot;</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xf9</span><span class="s2">&quot;</span><span class="p">)],</span>
+    <span class="s2">&quot;webm&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x1a\x45\xdf\xa3</span><span class="s2">&quot;</span><span class="p">)],</span>
+<span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_audio_magic</span><span class="p">(</span><span class="n">blob</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;SECURITY: Validate audio file content matches expected magic bytes.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">signatures</span> <span class="o">=</span> <span class="n">AUDIO_MAGIC_BYTES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">extension</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">signatures</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">offset</span><span class="p">,</span> <span class="n">magic</span> <span class="ow">in</span> <span class="n">signatures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">magic</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">blob</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">magic</span><span class="p">)]</span> <span class="o">==</span> <span class="n">magic</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/voice/upload&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">voice_upload</span><span class="p">(</span><span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;voice&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;disabled&quot;</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">)</span>
+    <span class="c1"># SECURITY: Authentication is ALWAYS required (removed optional check)</span>
+    <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;missing_request&quot;</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+    <span class="n">allowed</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">is_http_authorized</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">allowed</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">session_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid&quot;</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+    <span class="c1"># SECURITY: Validate file extension against allowlist</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">filename</span> <span class="ow">or</span> <span class="s2">&quot;audio.wav&quot;</span>
+    <span class="n">suffix</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">filename</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">suffix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VOICE_ALLOWED_EXTENSIONS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;file_type_not_allowed: </span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">},</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="c1"># SECURITY: Read file with size limit to prevent DoS</span>
+    <span class="n">max_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;gateway&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;voice&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_upload_size&quot;</span><span class="p">,</span> <span class="n">VOICE_MAX_FILE_SIZE</span><span class="p">)</span>
+    <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">stream</span><span class="p">():</span>
+        <span class="n">total_size</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_size</span> <span class="o">&gt;</span> <span class="n">max_size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;file_too_large: max </span><span class="si">{</span><span class="n">max_size</span><span class="si">}</span><span class="s2"> bytes&quot;</span><span class="p">},</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="mi">413</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="n">blob</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+    <span class="c1"># SECURITY: Validate content magic bytes for audio files</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_validate_audio_magic</span><span class="p">(</span><span class="n">blob</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;content_type_mismatch&quot;</span><span class="p">},</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">persist_voice_blob</span><span class="p">(</span><span class="n">session_id</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)})</span>
+</pre></div>
+</div>
+</section>
+<section id="id14">
+<h4>Remediation<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p><strong>Extension allowlist:</strong> Only allow wav, mp3, ogg, webm, m4a, flac, aac extensions</p></li>
+<li><p><strong>File size limit:</strong> 10MB maximum with streaming validation to prevent memory exhaustion</p></li>
+<li><p><strong>Magic byte validation:</strong> Verify file content matches expected audio format signatures</p></li>
+<li><p><strong>Mandatory authentication:</strong> Removed optional authentication check - auth is now always required</p></li>
+<li><p><strong>Streaming validation:</strong> Size check happens during streaming, not after full upload</p></li>
+</ol>
+</section>
+<section id="id15">
+<h4>Verification<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test: Invalid extension (should fail)</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:18789/voice/upload?session_id=test&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s2">&quot;file=@malware.exe&quot;</span>
+<span class="c1"># Expected: 400 Bad Request - file_type_not_allowed</span>
+
+<span class="c1"># Test: Size limit exceeded (should fail)</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/zero<span class="w"> </span><span class="nv">bs</span><span class="o">=</span>1M<span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">15</span><span class="w"> </span><span class="nv">of</span><span class="o">=</span>/tmp/large.wav
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:18789/voice/upload?session_id=test&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s2">&quot;file=@/tmp/large.wav&quot;</span>
+<span class="c1"># Expected: 413 Payload Too Large</span>
+
+<span class="c1"># Test: Content mismatch (should fail)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;not audio data&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/fake.wav
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:18789/voice/upload?session_id=test&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s2">&quot;file=@/tmp/fake.wav&quot;</span>
+<span class="c1"># Expected: 400 Bad Request - content_type_mismatch</span>
+
+<span class="c1"># Test: Valid audio file (should succeed)</span>
+curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:18789/voice/upload?session_id=test&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-F<span class="w"> </span><span class="s2">&quot;file=@/path/to/valid/audio.wav&quot;</span>
+<span class="c1"># Expected: 200 OK</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="compliance-implications">
+<h2>Compliance Implications<a class="headerlink" href="#compliance-implications" title="Link to this heading">¶</a></h2>
+<section id="soc-2-type-ii">
+<h3>SOC 2 Type II<a class="headerlink" href="#soc-2-type-ii" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Control</p></th>
+<th class="head"><p>Impact</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CC6.1 - Logical Access Controls</p></td>
+<td><p>Authentication bypass resolved</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-odd"><td><p>CC6.3 - Authorized Access</p></td>
+<td><p>Admin endpoint secured</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-even"><td><p>CC6.6 - System Operations</p></td>
+<td><p>Input validation added</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-odd"><td><p>CC6.7 - Change Management</p></td>
+<td><p>Audit logging implemented</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-even"><td><p>CC7.2 - Security Monitoring</p></td>
+<td><p>Failed auth logged</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="owasp-top-10-2021">
+<h3>OWASP Top 10 (2021)<a class="headerlink" href="#owasp-top-10-2021" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>Finding</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A01 - Broken Access Control</p></td>
+<td><p>Empty token bypass</p></td>
+<td><p>FIXED</p></td>
+</tr>
+<tr class="row-odd"><td><p>A03 - Injection</p></td>
+<td><p>Voice command injection</p></td>
+<td><p>FIXED</p></td>
+</tr>
+<tr class="row-even"><td><p>A04 - Insecure Design</p></td>
+<td><p>Missing auth on admin</p></td>
+<td><p>FIXED</p></td>
+</tr>
+<tr class="row-odd"><td><p>A05 - Security Misconfiguration</p></td>
+<td><p>Default insecure config</p></td>
+<td><p>FIXED</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="pci-dss-v4-0">
+<h3>PCI DSS v4.0<a class="headerlink" href="#pci-dss-v4-0" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Requirement</p></th>
+<th class="head"><p>Relevance</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>6.3.1 - Input Validation</p></td>
+<td><p>Command injection</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-odd"><td><p>7.2.1 - Access Control</p></td>
+<td><p>Auth requirements</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+<tr class="row-even"><td><p>10.2.1 - Audit Logging</p></td>
+<td><p>Admin action logging</p></td>
+<td><p>COMPLIANT</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="recommendations-for-ongoing-security">
+<h2>Recommendations for Ongoing Security<a class="headerlink" href="#recommendations-for-ongoing-security" title="Link to this heading">¶</a></h2>
+<section id="immediate-actions">
+<h3>Immediate Actions<a class="headerlink" href="#immediate-actions" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Rotate all authentication tokens</strong> - Assume tokens may have been compromised</p></li>
+<li><p><strong>Review audit logs</strong> - Check for suspicious admin policy changes</p></li>
+<li><p><strong>Update gateway configuration</strong> - Ensure explicit auth tokens are set</p></li>
+</ol>
+</section>
+<section id="configuration-hardening">
+<h3>Configuration Hardening<a class="headerlink" href="#configuration-hardening" title="Link to this heading">¶</a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;gateway&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;generate-secure-random-token&gt;&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;allow_query_param&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;separate-admin-token&gt;&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;voice&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;command_allowlist&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;whisper&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;piper&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;max_upload_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10485760</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;exec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;allowlist&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;always&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;ask_fallback&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;deny&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;allowlist&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;architect&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;reviewer&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="development-practices">
+<h3>Development Practices<a class="headerlink" href="#development-practices" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Security review for all auth-related changes</strong></p></li>
+<li><p><strong>Input validation at all trust boundaries</strong></p></li>
+<li><p><strong>Default-deny security posture</strong></p></li>
+<li><p><strong>Comprehensive audit logging</strong></p></li>
+<li><p><strong>Regular penetration testing</strong></p></li>
+</ol>
+</section>
+<section id="monitoring-recommendations">
+<h3>Monitoring Recommendations<a class="headerlink" href="#monitoring-recommendations" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Monitor for <code class="docutils literal notranslate"><span class="pre">auth_not_configured</span></code> errors in production</p></li>
+<li><p>Alert on <code class="docutils literal notranslate"><span class="pre">admin_auth_failed</span></code> audit events</p></li>
+<li><p>Track file upload rejection rates for anomaly detection</p></li>
+<li><p>Review voice command execution patterns</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="timeline">
+<h2>Timeline<a class="headerlink" href="#timeline" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Date</p></th>
+<th class="head"><p>Event</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2026-02-10</p></td>
+<td><p>Vulnerabilities identified during code review</p></td>
+</tr>
+<tr class="row-odd"><td><p>2026-02-12</p></td>
+<td><p>S1 severity classification confirmed</p></td>
+</tr>
+<tr class="row-even"><td><p>2026-02-14</p></td>
+<td><p>Remediation development completed</p></td>
+</tr>
+<tr class="row-odd"><td><p>2026-02-15</p></td>
+<td><p>Security testing and verification</p></td>
+</tr>
+<tr class="row-even"><td><p>2026-02-17</p></td>
+<td><p>Audit report finalized</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="sign-off">
+<h2>Sign-Off<a class="headerlink" href="#sign-off" title="Link to this heading">¶</a></h2>
+<section id="security-review">
+<h3>Security Review<a class="headerlink" href="#security-review" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Role</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Signature</p></th>
+<th class="head"><p>Date</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Security Lead</p></td>
+<td><p>__________________</p></td>
+<td><p>__________________</p></td>
+<td><p>__________</p></td>
+</tr>
+<tr class="row-odd"><td><p>Engineering Lead</p></td>
+<td><p>__________________</p></td>
+<td><p>__________________</p></td>
+<td><p>__________</p></td>
+</tr>
+<tr class="row-even"><td><p>QA Lead</p></td>
+<td><p>__________________</p></td>
+<td><p>__________________</p></td>
+<td><p>__________</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="approval">
+<h3>Approval<a class="headerlink" href="#approval" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Role</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Signature</p></th>
+<th class="head"><p>Date</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CISO</p></td>
+<td><p>__________________</p></td>
+<td><p>__________________</p></td>
+<td><p>__________</p></td>
+</tr>
+<tr class="row-odd"><td><p>VP Engineering</p></td>
+<td><p>__________________</p></td>
+<td><p>__________________</p></td>
+<td><p>__________</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="appendix-a-file-locations">
+<h2>Appendix A: File Locations<a class="headerlink" href="#appendix-a-file-locations" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Component</p></th>
+<th class="head"><p>Path</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Gateway Server</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/home/seb/.euxis/euxis-gateway/src/gateway/server.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Gateway Config</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/security/gateway.json</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Audit Logs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/data/audit/</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="appendix-b-related-documentation">
+<h2>Appendix B: Related Documentation<a class="headerlink" href="#appendix-b-related-documentation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/gateway-config.html"><span class="std std-doc">Gateway Configuration Guide</span></a></p></li>
+<li><p><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html"><span class="std std-doc">SOC 2 Compliance Matrix</span></a></p></li>
+<li><p><a class="reference internal" href="../architecture.html"><span class="std std-doc">Security Architecture</span></a></p></li>
+</ul>
+<hr class="docutils" />
+<p><em>This document is confidential and intended for internal security review purposes only.</em></p>
+<p><strong>Document Version:</strong> 1.0
+<strong>Last Updated:</strong> 2026-02-17
+<strong>Classification:</strong> Internal - Security</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="unused-assets-report-v0.1.0.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Unused Assets Report (v0.1.0)</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="roadmap-v0.1.0.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Euxis v0.1.0 Milestone Plan</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Euxis Gateway Security Audit Report</a><ul>
+<li><a class="reference internal" href="#executive-summary">Executive Summary</a><ul>
+<li><a class="reference internal" href="#key-metrics">Key Metrics</a></li>
+<li><a class="reference internal" href="#risk-summary">Risk Summary</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#findings-summary">Findings Summary</a></li>
+<li><a class="reference internal" href="#detailed-findings">Detailed Findings</a><ul>
+<li><a class="reference internal" href="#euxis-2026-001-default-empty-authentication-tokens">EUXIS-2026-001: Default Empty Authentication Tokens</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#impact">Impact</a></li>
+<li><a class="reference internal" href="#technical-details">Technical Details</a></li>
+<li><a class="reference internal" href="#remediation">Remediation</a></li>
+<li><a class="reference internal" href="#verification">Verification</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#euxis-2026-002-admin-policy-override-without-authentication">EUXIS-2026-002: Admin Policy Override Without Authentication</a><ul>
+<li><a class="reference internal" href="#id1">Description</a></li>
+<li><a class="reference internal" href="#id2">Impact</a></li>
+<li><a class="reference internal" href="#id3">Technical Details</a></li>
+<li><a class="reference internal" href="#id4">Remediation</a></li>
+<li><a class="reference internal" href="#id5">Verification</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#euxis-2026-003-voice-command-injection">EUXIS-2026-003: Voice Command Injection</a><ul>
+<li><a class="reference internal" href="#id6">Description</a></li>
+<li><a class="reference internal" href="#id7">Impact</a></li>
+<li><a class="reference internal" href="#attack-vector-example">Attack Vector Example</a></li>
+<li><a class="reference internal" href="#id8">Technical Details</a></li>
+<li><a class="reference internal" href="#id9">Remediation</a></li>
+<li><a class="reference internal" href="#id10">Verification</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#euxis-2026-004-unrestricted-file-upload">EUXIS-2026-004: Unrestricted File Upload</a><ul>
+<li><a class="reference internal" href="#id11">Description</a></li>
+<li><a class="reference internal" href="#id12">Impact</a></li>
+<li><a class="reference internal" href="#id13">Technical Details</a></li>
+<li><a class="reference internal" href="#id14">Remediation</a></li>
+<li><a class="reference internal" href="#id15">Verification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compliance-implications">Compliance Implications</a><ul>
+<li><a class="reference internal" href="#soc-2-type-ii">SOC 2 Type II</a></li>
+<li><a class="reference internal" href="#owasp-top-10-2021">OWASP Top 10 (2021)</a></li>
+<li><a class="reference internal" href="#pci-dss-v4-0">PCI DSS v4.0</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#recommendations-for-ongoing-security">Recommendations for Ongoing Security</a><ul>
+<li><a class="reference internal" href="#immediate-actions">Immediate Actions</a></li>
+<li><a class="reference internal" href="#configuration-hardening">Configuration Hardening</a></li>
+<li><a class="reference internal" href="#development-practices">Development Practices</a></li>
+<li><a class="reference internal" href="#monitoring-recommendations">Monitoring Recommendations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#timeline">Timeline</a></li>
+<li><a class="reference internal" href="#sign-off">Sign-Off</a><ul>
+<li><a class="reference internal" href="#security-review">Security Review</a></li>
+<li><a class="reference internal" href="#approval">Approval</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#appendix-a-file-locations">Appendix A: File Locations</a></li>
+<li><a class="reference internal" href="#appendix-b-related-documentation">Appendix B: Related Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=38b66d78"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

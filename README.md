@@ -66,6 +66,23 @@ euxis ui
 
 See individual package READMEs for detailed usage instructions.
 
+## Current Status (February 18, 2026)
+
+Euxis is usable, but early users should expect active stabilization in some test
+surfaces while provider workflows are already in strong shape.
+
+- Provider shell unit suite: `53/53` passing (`euxis-core/tests/bats/lib/providers.bats`)
+- Provider helper coverage (function-level shell gate): `100%` (`63/63`)
+- Provider suite local runtime: `~3.94s` on the current dev machine
+- Adjacent shell suites still being stabilized:
+  - `common.bats`: `29/30` passing
+  - `session.bats`: `30/34` passing
+- Python coverage policy remains `fail_under = 95` in `pyproject.toml`
+
+For full context, caveats, and a verification command list, see:
+- `euxis-docs/docs/reports/initial-user-expectations-2026-02-18.md`
+- `euxis-docs/docs/index.rst`
+
 ## Dependency Graph
 
 ```

@@ -42,6 +42,32 @@ MESH_DEADLOCK_TIMEOUT="${MESH_DEADLOCK_TIMEOUT:-60}" # Seconds before deadlock d
 _MESH_AGENT_ID=""
 _MESH_SESSION_ID=""
 
+# Portable UTC timestamp with millisecond precision (without sourcing common.sh)
+_mesh_ts_utc_ms() {
+    if command -v gdate &>/dev/null; then
+        gdate -u +"%Y-%m-%dT%H:%M:%S.%3NZ"
+        return
+    fi
+    if command -v python3 &>/dev/null; then
+        python3 -c 'from datetime import datetime, timezone; print(datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z")'
+        return
+    fi
+    date -u +"%Y-%m-%dT%H:%M:%SZ"
+}
+
+# Portable monotonic-ish message id suffix for filenames
+_mesh_msg_id() {
+    if command -v python3 &>/dev/null; then
+        python3 -c 'import time; print(time.time_ns())'
+        return
+    fi
+    if command -v perl &>/dev/null; then
+        perl -MTime::HiRes=time -e 'printf "%.0f", time()*1e9'
+        return
+    fi
+    date +%s
+}
+
 # ============================================================================
 # Locking (for concurrent safety)
 # ============================================================================
@@ -373,7 +399,7 @@ mesh_send() {
     mkdir -p "$target_inbox"
 
     local timestamp
-    timestamp=$(date +%s%N)
+    timestamp=$(_mesh_msg_id)
     local msg_file="$target_inbox/${timestamp}-${_MESH_AGENT_ID}.msg"
 
     # Create message envelope
@@ -381,7 +407,7 @@ mesh_send() {
 {
   "from": "$_MESH_AGENT_ID",
   "to": "$target",
-  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "timestamp": "$(_mesh_ts_utc_ms)",
   "priority": "$priority",
   "session": "$_MESH_SESSION_ID",
   "message": $(echo "$message" | jq -Rs .)
@@ -632,7 +658,7 @@ flight_init() {
         --arg type "mission_start" \
         --arg mission_id "$mission_id" \
         --arg description "$description" \
-        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        --arg timestamp "$(_mesh_ts_utc_ms)" \
         --arg agent "$_MESH_AGENT_ID" \
         '{
             type: $type,
@@ -659,7 +685,7 @@ flight_snapshot() {
     local snapshot
     snapshot=$(jq -n \
         --arg type "$event_type" \
-        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        --arg timestamp "$(_mesh_ts_utc_ms)" \
         --arg agent "$_MESH_AGENT_ID" \
         --arg session "$_MESH_SESSION_ID" \
         --argjson data "$data" \
@@ -707,12 +733,20 @@ flight_checkpoint() {
     # Also capture current mesh state
     local mesh_state="{}"
     [[ -f "$MESH_STATE" ]] && mesh_state=$(cat "$MESH_STATE")
+    local provider_state="{}"
+    if declare -F get_provider_state_json >/dev/null 2>&1; then
+        provider_state=$(get_provider_state_json 2>/dev/null || echo "{}")
+    else
+        local sid_file="${EUXIS_HOME}/euxis-runtime/data/provider-usage/${EUXIS_SESSION_ID:-${_MESH_SESSION_ID:-default}}.provider-state.json"
+        [[ -f "${sid_file}" ]] && provider_state=$(cat "${sid_file}")
+    fi
 
     flight_snapshot "checkpoint" "$(jq -n \
         --arg name "$name" \
         --argjson state "$state" \
         --argjson mesh "$mesh_state" \
-        '{name: $name, state: $state, mesh_state: $mesh}')"
+        --argjson provider "$provider_state" \
+        '{name: $name, state: $state, mesh_state: $mesh, provider_state: $provider}')"
 
     echo "[flight] Checkpoint saved: $name" >&2
 }
@@ -730,7 +764,7 @@ flight_complete() {
         --arg type "mission_complete" \
         --arg status "$status" \
         --arg summary "$summary" \
-        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)" \
+        --arg timestamp "$(_mesh_ts_utc_ms)" \
         '{
             type: $type,
             status: $status,
