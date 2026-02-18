@@ -7103,3 +7103,129 @@
   "ms": 98199,
   "status": "concurrent_agents=2"
 }
+{
+  "ts": "2026-02-18T23:42:04Z",
+  "op": "provider_execution",
+  "agent": "maintainer",
+  "ms": 130043,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:42:04Z",
+  "op": "total_agent_run",
+  "agent": "maintainer",
+  "ms": 130577,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:42:04Z",
+  "op": "coordination_overhead",
+  "agent": "maintainer",
+  "ms": 130577,
+  "status": "concurrent_agents=2"
+}
+{
+  "ts": "2026-02-18T23:42:33Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 35,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:42:33Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:42:33Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:42:33Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 145,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:42:34Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 983,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:42:34Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1300,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:42:34Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 1300,
+  "status": "concurrent_agents=2"
+}
+{
+  "ts": "2026-02-18T23:42:35Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 225,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:42:36Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1273,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:42:36Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1685,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:42:36Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 1685,
+  "status": "concurrent_agents=2"
+}
+{
+  "ts": "2026-02-18T23:44:22Z",
+  "op": "provider_execution",
+  "agent": "automator",
+  "ms": 264529,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:44:22Z",
+  "op": "total_agent_run",
+  "agent": "automator",
+  "ms": 265051,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:45:26Z",
+  "op": "provider_execution",
+  "agent": "tester",
+  "ms": 330877,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:45:26Z",
+  "op": "total_agent_run",
+  "agent": "tester",
+  "ms": 331445,
+  "status": "ok"
+}

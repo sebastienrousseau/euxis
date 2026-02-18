@@ -73,3 +73,9 @@
 {"ts":"2026-02-18T23:41:19.316Z","provider":"claude","agent":"maintainer","priority":"P2","prompt_tokens":8755,"output_tokens":851,"duration_ms":86001,"status":"success"}
 {"ts":"2026-02-18T23:41:31.891Z","provider":"claude","agent":"reviewer","priority":"P2","prompt_tokens":10994,"output_tokens":0,"duration_ms":91930,"status":"success"}
 {"ts":"2026-02-18T23:41:34.645Z","provider":"claude","agent":"pentester","priority":"P2","prompt_tokens":9059,"output_tokens":1759,"duration_ms":97281,"status":"success"}
+{"ts":"2026-02-18T23:42:04.453Z","provider":"claude","agent":"maintainer","priority":"P2","prompt_tokens":8759,"output_tokens":1552,"duration_ms":129666,"status":"success"}
+{"ts":"2026-02-18T23:42:34.824Z","provider":"claude","agent":"architect","priority":"P2","prompt_tokens":10224,"output_tokens":891,"duration_ms":2,"status":"vector_cache_hit"}
+{"ts":"2026-02-18T23:42:36.749Z","provider":"gemini","agent":"architect","priority":"P2","prompt_tokens":9833,"output_tokens":31,"duration_ms":2,"status":"vector_cache_hit"}
+{"ts":"2026-02-18T23:44:22.823Z","provider":"claude","agent":"automator","priority":"P2","prompt_tokens":8277,"output_tokens":1515,"duration_ms":264164,"status":"success"}
+{"ts":"2026-02-18T23:44:56.006Z","provider":"claude","agent":"tester","priority":"P2","prompt_tokens":9568,"output_tokens":37,"duration_ms":300064,"status":"error"}
+{"ts":"2026-02-18T23:45:26.619Z","provider":"gemini","agent":"tester","priority":"P2","prompt_tokens":9568,"output_tokens":318,"duration_ms":30254,"status":"success"}
