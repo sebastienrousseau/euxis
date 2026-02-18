@@ -326,5 +326,253 @@ class TestDashboardScreenActionFocusSearch(unittest.TestCase):
         screen.action_focus_search()
 
 
+class TestTipBar(unittest.TestCase):
+    """Tests for the TipBar widget."""
+
+    @patch("tui.screens.dashboard.random")
+    def test_tip_bar_initialization(self, mock_random):
+        """Test TipBar stores tips and selects random initial index."""
+        mock_random.randint.return_value = 2
+        from tui.screens.dashboard import TipBar
+        tips = ["Tip A", "Tip B", "Tip C"]
+        bar = TipBar(tips)
+        assert bar._tips == tips
+        assert bar._index == 2
+
+    def test_tip_bar_empty_tips(self):
+        """Test TipBar handles empty tips list."""
+        from tui.screens.dashboard import TipBar
+        bar = TipBar([])
+        bar.update = Mock()
+        bar._show_tip()
+        bar.update.assert_called_once()
+
+    def test_tip_bar_rotate(self):
+        """Test _rotate advances index cyclically."""
+        from tui.screens.dashboard import TipBar
+        bar = TipBar(["A", "B", "C"])
+        bar._index = 0
+        bar.update = Mock()
+        bar._rotate()
+        assert bar._index == 1
+        bar._index = 2
+        bar._rotate()
+        assert bar._index == 0
+
+    def test_tip_bar_show_tip(self):
+        """Test _show_tip updates content with current tip."""
+        from tui.screens.dashboard import TipBar
+        bar = TipBar(["Hello"])
+        bar._index = 0
+        bar.update = Mock()
+        bar._show_tip()
+        call_content = bar.update.call_args[0][0]
+        assert "Hello" in call_content
+
+    def test_tip_bar_on_click_rotates(self):
+        """Test clicking advances to next tip."""
+        from tui.screens.dashboard import TipBar
+        bar = TipBar(["A", "B"])
+        bar._index = 0
+        bar.update = Mock()
+        bar.on_click()
+        assert bar._index == 1
+
+
+class TestDashboardEventHandlers(unittest.TestCase):
+    """Tests for dashboard event handler methods."""
+
+    def setUp(self):
+        self.mock_app = Mock()
+        self._patcher = None
+
+    def tearDown(self):
+        if self._patcher:
+            self._patcher.stop()
+
+    def _make_screen(self):
+        screen = DashboardScreen()
+        self._patcher = _patch_screen_app(screen, self.mock_app)
+        screen.notify = Mock()
+        screen.query_one = Mock()
+        screen.set_timer = Mock()
+        return screen
+
+    def test_on_agent_selected(self):
+        """Test agent selection from search deploys agent with task."""
+        screen = self._make_screen()
+        event = Mock()
+        event.agent_id = "debugger"
+        event.task = "fix the bug"
+        screen.on_agent_selected(event)
+        self.mock_app.action_deploy_agent.assert_called_once_with("debugger", task="fix the bug")
+
+    def test_on_squad_selected(self):
+        """Test squad selection deploys squad with task."""
+        screen = self._make_screen()
+        event = Mock()
+        event.squad_id = "quality"
+        event.task = "review code"
+        screen.on_squad_selected(event)
+        self.mock_app.action_deploy_squad.assert_called_once_with("quality", task="review code")
+
+    def test_on_combo_selected(self):
+        """Test combo selection deploys combo with task."""
+        screen = self._make_screen()
+        event = Mock()
+        event.combo_id = "review-chain"
+        event.task = "audit module"
+        screen.on_combo_selected(event)
+        self.mock_app.action_deploy_combo.assert_called_once_with("review-chain", task="audit module")
+
+    def test_on_system_command_requested(self):
+        """Test system command dispatched to app."""
+        screen = self._make_screen()
+        event = Mock()
+        event.command = "health"
+        screen.on_system_command_requested(event)
+        self.mock_app.run_system_command.assert_called_once_with("health")
+
+    def test_on_agent_card_restart_requested(self):
+        """Test restart request calls _restart_agent."""
+        screen = self._make_screen()
+        event = Mock()
+        event.agent.id = "coder"
+        mock_card = Mock()
+        screen.query_one.return_value = mock_card
+        screen.on_agent_card_restart_requested(event)
+        screen.notify.assert_called()
+
+    def test_on_agent_card_logs_requested(self):
+        """Test logs request pushes LogViewerScreen."""
+        screen = self._make_screen()
+        event = Mock()
+        event.agent.id = "tester"
+        screen.on_agent_card_logs_requested(event)
+        self.mock_app.push_screen.assert_called_once()
+
+    def test_on_agent_card_error_dismissed(self):
+        """Test error dismissal stores undo state and notifies."""
+        screen = self._make_screen()
+        event = Mock()
+        event.agent.id = "debugger"
+        screen.on_agent_card_error_dismissed(event)
+        assert screen._last_dismissed_agent == "debugger"
+        screen.notify.assert_called_once()
+        screen.set_timer.assert_called_once()
+
+    def test_clear_undo_state(self):
+        """Test _clear_undo_state resets dismissed agent."""
+        screen = self._make_screen()
+        screen._last_dismissed_agent = "debugger"
+        screen._clear_undo_state()
+        assert screen._last_dismissed_agent is None
+
+    def test_action_undo_dismiss_with_agent(self):
+        """Test undo dismiss restores error state."""
+        screen = self._make_screen()
+        screen._last_dismissed_agent = "debugger"
+        mock_card = Mock()
+        screen.query_one.return_value = mock_card
+        screen.action_undo_dismiss()
+        assert mock_card.status == "error"
+        screen.notify.assert_called()
+        assert screen._last_dismissed_agent is None
+
+    def test_action_undo_dismiss_no_agent(self):
+        """Test undo dismiss with no dismissed agent does nothing."""
+        screen = self._make_screen()
+        screen._last_dismissed_agent = None
+        screen.action_undo_dismiss()
+        screen.notify.assert_not_called()
+
+    def test_action_undo_dismiss_agent_not_found(self):
+        """Test undo dismiss handles missing card gracefully."""
+        screen = self._make_screen()
+        screen._last_dismissed_agent = "missing"
+        screen.query_one.side_effect = Exception("not found")
+        screen.action_undo_dismiss()
+        assert screen._last_dismissed_agent is None
+
+    def test_restart_agent(self):
+        """Test _restart_agent sets card status to idle."""
+        screen = self._make_screen()
+        mock_card = Mock()
+        screen.query_one.return_value = mock_card
+        screen._restart_agent("coder")
+        assert mock_card.status == "idle"
+        screen.notify.assert_called()
+
+    def test_restart_agent_card_not_found(self):
+        """Test _restart_agent handles missing card."""
+        screen = self._make_screen()
+        screen.query_one.side_effect = Exception("not found")
+        screen._restart_agent("missing")  # Should not raise
+
+    def test_simulate_agent(self):
+        """Test _simulate_agent sends notification."""
+        screen = self._make_screen()
+        screen._simulate_agent("coder")
+        screen.notify.assert_called()
+        screen.set_timer.assert_called()
+
+    def test_open_agent_logs(self):
+        """Test _open_agent_logs pushes log screen."""
+        screen = self._make_screen()
+        screen._open_agent_logs("coder")
+        self.mock_app.push_screen.assert_called_once()
+
+    @patch("builtins.open", side_effect=FileNotFoundError)
+    def test_get_agent_error_message_file_not_found(self, _):
+        """Test _get_agent_error_message returns empty on missing file."""
+        screen = self._make_screen()
+        assert screen._get_agent_error_message("test") == ""
+
+    @patch("builtins.open")
+    def test_get_agent_error_message_with_state(self, mock_open):
+        """Test _get_agent_error_message returns error from state."""
+        import json
+        mock_open.return_value.__enter__ = lambda s: s
+        mock_open.return_value.__exit__ = Mock(return_value=False)
+        mock_open.return_value.read = Mock(return_value=json.dumps({
+            "agents": {"test": {"last_error": "connection refused"}}
+        }))
+        # Use json.load which calls read()
+        with patch("json.load", return_value={"agents": {"test": {"last_error": "connection refused"}}}):
+            screen = self._make_screen()
+            result = screen._get_agent_error_message("test")
+            assert result == "connection refused"
+
+    def test_on_agent_card_error_details_requested(self):
+        """Test error details request pushes modal."""
+        screen = self._make_screen()
+        screen._get_agent_error_message = Mock(return_value="test error")
+        self.mock_app.track_error = Mock()
+        event = Mock()
+        event.agent = Agent(id="test", tier="core", version="0.1.0", tags=(), activation="default")
+        screen.on_agent_card_error_details_requested(event)
+        self.mock_app.push_screen.assert_called_once()
+
+    def test_on_bulk_restart_no_agents(self):
+        """Test bulk restart with empty list warns."""
+        screen = self._make_screen()
+        event = Mock()
+        event.agent_ids = []
+        screen.on_bulk_restart_requested(event)
+        call_args = screen.notify.call_args
+        assert call_args[1].get("severity") == "warning"
+
+    def test_on_bulk_restart_with_agents(self):
+        """Test bulk restart restarts all failed agents."""
+        screen = self._make_screen()
+        mock_card = Mock()
+        screen.query_one.return_value = mock_card
+        event = Mock()
+        event.agent_ids = ["a1", "a2", "a3"]
+        screen.on_bulk_restart_requested(event)
+        # Should notify for each restart plus one summary
+        assert screen.notify.call_count >= 1
+
+
 if __name__ == "__main__":
     unittest.main()
