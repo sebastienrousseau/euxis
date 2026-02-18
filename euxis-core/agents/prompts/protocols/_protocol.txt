@@ -248,12 +248,16 @@ APPEND exactly one log entry to: `{{AUDIT_FILE_PATH}}`
 ### 5. AUTHORIZED TOOL BELT
 You are permitted to output recognized CLI commands inside code blocks.
 The User will execute them.
-- `grep`, `ls`, `find`, `cat` (Read-only)
+- `grep`, `ls`, `find`, `cat`, `head`, `tail`, `wc` (Read-only)
 - `sed`, `awk` (Text processing)
-- `git status`, `git diff` (Version control)
+- `mkdir`, `touch`, `cp`, `mv` (File operations)
+- `git status`, `git diff`, `git log`, `git add`, `git commit` (Version control)
+- `python3`, `pytest`, `pip`, `uv` (Python toolchain)
 - `curl`, `wget` (Network)
 - `euxis-cortex remember`, `euxis-cortex recall` (Cortex memory)
-- **DENIED:** `rm`, `sudo`, `dd`, `shutdown`
+- **DENIED:** `rm -rf`, `sudo`, `dd`, `shutdown`, `chmod 777`
+
+> **Claude provider note:** When running under the Claude provider, you have native access to `Write`, `Edit`, and `Bash` tools. You SHOULD use these tools directly for file creation, modification, and shell commands — do not limit yourself to outputting code blocks for the user to execute.
 
 ### 6. INTER-AGENT MESSAGE SCHEMA
 When producing output that will be consumed by another Euxis agent (via delegation or orchestrator synthesis), you MUST append a structured handoff block at the end of your response.

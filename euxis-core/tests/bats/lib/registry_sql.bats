@@ -185,6 +185,17 @@ teardown() {
     [[ "${output}" =~ "agents/prompts/core/architect.txt" ]]
 }
 
+@test "resolve_agent_path_sql normalizes legacy prompts/core path" {
+    command -v sqlite3 &>/dev/null || skip "sqlite3 not available"
+
+    sqlite3 "${EUXIS_HOME}/euxis-core/agents/registry.db" \
+        "UPDATE agents SET path='prompts/core/architect.txt' WHERE id='architect';"
+
+    run resolve_agent_path_sql "architect"
+    [[ "${status}" -eq 0 ]]
+    [[ "${output}" == "${EUXIS_HOME}/euxis-core/agents/prompts/core/architect.txt" ]]
+}
+
 @test "resolve_agent_path_sql fails for unknown agent" {
     command -v sqlite3 &>/dev/null || skip "sqlite3 not available"
 
