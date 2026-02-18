@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Euxis Dispatch Module - Command routing and main execution flow
-# Part of the Euxis Multi-Provider AI Agent Framework
+# Part of the Euxis Enterprise Unified eXecution Intelligence System
 #
 [[ -n "${_EUXIS_LIB_DISPATCH:-}" ]] && return; _EUXIS_LIB_DISPATCH=1
 

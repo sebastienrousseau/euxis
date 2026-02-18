@@ -44,10 +44,10 @@ def _make_app():
               description="Sequential review", chain=("architect", "reviewer")),
     ]
 
-    with patch("tui.app.ETXConfig.load", return_value=config), \
-         patch("tui.app.FleetRegistry.load", return_value=registry), \
-         patch("tui.app.get_project_name", return_value="test-project"), \
-         patch("tui.app.get_git_branch", return_value="main"):
+    with patch("tui.core.config.ETXConfig.load", return_value=config), \
+         patch("tui.core.registry.FleetRegistry.load", return_value=registry), \
+         patch("tui.core.runner.get_project_name", return_value="test-project"), \
+         patch("tui.core.runner.get_git_branch", return_value="main"):
         from tui.app import EuxisApp
         app = EuxisApp()
 
@@ -119,13 +119,13 @@ class TestActionToggleTheme(unittest.TestCase):
         assert app.theme == "etx-catppuccin-mocha"
         assert app.config.theme == "etx-catppuccin-mocha"
 
-    def test_ayu_mirage_to_liquid_glass(self):
+    def test_last_theme_wraps_to_first(self):
         """Last theme in cycle wraps to first."""
         app, _, _ = _make_app()
-        app.theme = "etx-ayu-mirage"
+        app.theme = "etx-protanopia"
         app.action_toggle_theme()
-        assert app.theme == "etx-liquid-glass"
-        assert app.config.theme == "etx-liquid-glass"
+        assert app.theme == "etx-focused"
+        assert app.config.theme == "etx-focused"
 
     def test_unknown_theme_falls_to_first(self):
         """Any unrecognised theme should cycle to the first ETX theme."""
@@ -133,7 +133,7 @@ class TestActionToggleTheme(unittest.TestCase):
         # Bypass Textual theme validation by writing directly to reactive storage
         app._reactive_theme = "some-other-theme"
         app.action_toggle_theme()
-        assert app.config.theme == "etx-liquid-glass"
+        assert app.config.theme == "etx-focused"
 
     def test_toggle_saves_config(self):
         app, _, _ = _make_app()
@@ -313,9 +313,9 @@ class TestActionRefresh(unittest.TestCase):
     def test_refresh_reloads_registry(self):
         app, original_reg, _ = _make_app()
         new_reg = FleetRegistry()
-        with patch("tui.app.FleetRegistry.load", return_value=new_reg), \
-             patch("tui.app.get_project_name", return_value="refreshed-proj"), \
-             patch("tui.app.get_git_branch", return_value="develop"):
+        with patch("tui.core.registry.FleetRegistry.load", return_value=new_reg), \
+             patch("tui.core.runner.get_project_name", return_value="refreshed-proj"), \
+             patch("tui.core.runner.get_git_branch", return_value="develop"):
             app.action_refresh()
         assert app.fleet_registry is new_reg
         assert app.project_name == "refreshed-proj"
@@ -323,9 +323,9 @@ class TestActionRefresh(unittest.TestCase):
 
     def test_refresh_notifies(self):
         app, _, _ = _make_app()
-        with patch("tui.app.FleetRegistry.load", return_value=FleetRegistry()), \
-             patch("tui.app.get_project_name", return_value="x"), \
-             patch("tui.app.get_git_branch", return_value=None):
+        with patch("tui.core.registry.FleetRegistry.load", return_value=FleetRegistry()), \
+             patch("tui.core.runner.get_project_name", return_value="x"), \
+             patch("tui.core.runner.get_git_branch", return_value=None):
             app.action_refresh()
         app.notify.assert_called_once()
         assert "refreshed" in app.notify.call_args[0][0].lower()

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# euxis - Multi-Provider AI Agent Framework
+# euxis - Enterprise Unified eXecution Intelligence System
 #
 # USAGE:
 #     euxis <command> [args...]
@@ -8,7 +8,7 @@
 #     euxis --help
 #
 # DESCRIPTION:
-#     Primary entry point for the Euxis Fleet system. Coordinates 42 specialist
+#     Primary entry point for the Euxis Fleet system. Coordinates 53 specialist
 #     AI agents across multiple providers for engineering tasks. Supports single
 #     agent execution, fleet dispatch, squad deployment, and playbook execution.
 #
@@ -29,7 +29,7 @@
 # AGENT MODE:
 #     euxis <agent> <task> [provider]
 #
-#     agent      One of 41 available agents (see: euxis help agents)
+#     agent      One of 53 available agents (see: euxis help agents)
 #     task       Task description in quotes
 #     provider   AI provider: claude, gemini, openai, ollama, qwen,
 #                crush, kiro-cli, goose (auto-selected if omitted)
@@ -70,6 +70,41 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+
+# ============================================================================
+# Fast-path: handle --version and --help before loading any libraries.
+# This brings cold start for info commands to <10ms.
+# ============================================================================
+
+case "${1:-}" in
+  --version)
+    echo "euxis 0.1.0"
+    exit 0
+    ;;
+  -h | --help | help)
+    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
+    usage
+    exit 0
+    ;;
+  agents)
+    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
+    usage_agents
+    exit 0
+    ;;
+  search)
+    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
+    usage_search "${2:-}"
+    exit 0
+    ;;
+  doctor)
+    exec "${EUXIS_HOME}/euxis-cli/bin/euxis-doctor" "${@:2}"
+    ;;
+esac
+
+# ============================================================================
+# Full boot: only reached for agent execution and subcommands.
+# ============================================================================
+
 if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
   source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
@@ -79,12 +114,6 @@ if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   fi
 fi
 
-
-# ============================================================================
-# Configuration & Library Loading
-# ============================================================================
-
-# EUXIS_HOME already set at line 72 with proper fallback
 PROMPTS_DIR="${EUXIS_HOME}/euxis-core/agents/prompts"
 PROJECTS_DIR="${EUXIS_HOME}/euxis-runtime/data/projects"
 source "${EUXIS_HOME}/euxis-core/lib/common.sh"
@@ -107,43 +136,11 @@ show_context
 # Git branch guard (moved to cli.sh)
 git_guard
 
-# Usage function (moved to cli.sh)
-
-# Argument parsing, session setup, and output capture (moved to cli.sh)
-
-# Main execution (moved to dispatch.sh)
-
-# Delegate function (moved to dispatch.sh)
-
 # ============================================================================
 # Entry Point
 # ============================================================================
 
 EUXIS_BIN="${EUXIS_HOME}/euxis-cli/bin"
-
-# Check for help flags and special commands before dispatch
-case "${1:-}" in
-  -h | --help | help)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-    usage
-    ;;
-  --version)
-    echo "euxis 0.1.0"
-    exit 0
-    ;;
-  agents)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-    usage_agents
-    ;;
-  search)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-    usage_search "${2:-}"
-    exit 0
-    ;;
-  doctor)
-    exec "${EUXIS_HOME}/euxis-cli/bin/euxis-doctor" "${@:2}"
-    ;;
-esac
 
 # Dispatch to appropriate handler
 dispatch_command "$@"

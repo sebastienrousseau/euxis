@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[[ -n "${_EUXIS_LIB_TRACE:-}" ]] && return; _EUXIS_LIB_TRACE=1
 #
 # trace.sh - Black Box Recorder for Euxis operations
 #

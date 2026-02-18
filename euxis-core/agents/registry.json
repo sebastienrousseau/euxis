@@ -873,6 +873,45 @@
         "documentation"
       ],
       "activation": "default"
+    },
+    {
+      "id": "automator",
+      "path": "fleet/automator.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "on-demand",
+      "tags": [
+        "automation",
+        "ci-cd",
+        "infrastructure",
+        "devops"
+      ]
+    },
+    {
+      "id": "compliance",
+      "path": "fleet/compliance.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "on-demand",
+      "tags": [
+        "compliance",
+        "legal",
+        "privacy",
+        "regulatory"
+      ]
+    },
+    {
+      "id": "social",
+      "path": "fleet/social.txt",
+      "tier": "fleet",
+      "version": "0.1.0",
+      "activation": "on-demand",
+      "tags": [
+        "social",
+        "content",
+        "brand",
+        "community"
+      ]
     }
   ]
 }

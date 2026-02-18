@@ -5,9 +5,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+  # shellcheck source=euxis-core/lib/ui.sh
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -45,15 +45,23 @@ AGENTS=(
   "architect"
   "auditor"
   "automaton"
+  "automator"
+  "bridge"
   "butler"
+  "compliance"
   "conduit"
   "critic"
   "cryptographer"
   "custodian"
   "debugger"
+  "deep-researcher"
   "designer"
+  "distill"
   "evangelist"
   "gatekeeper"
+  "govern"
+  "guard"
+  "heal"
   "historian"
   "inspector"
   "interactor"
@@ -65,25 +73,29 @@ AGENTS=(
   "marketer"
   "optimizer"
   "orchestrator"
+  "pair"
   "pentester"
   "planner"
   "polyglot"
-  "researcher"
   "repairer"
+  "researcher"
   "responder"
   "reviewer"
+  "route"
   "sentinel"
+  "social"
   "strategist"
   "tactician"
   "telemetrist"
   "tester"
+  "trace"
   "watchdog"
   "writer"
 )
 
 for agent in "${AGENTS[@]}"; do
     FOUND=false
-    for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
+    for dir in "$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-core/agents/prompts/fleet"; do
         if [[ -f "$dir/${agent}.txt" ]]; then
             FOUND=true
             break
@@ -101,7 +113,7 @@ fi
 
 # CHECK 2: Protocol File Exists
 echo "[2/8] Checking Protocol..."
-PROTOCOL_FILE="$EUXIS_HOME/agents/prompts/protocols/_protocol.txt"
+PROTOCOL_FILE="$EUXIS_HOME/euxis-core/agents/prompts/protocols/_protocol.txt"
 if [[ ! -f "$PROTOCOL_FILE" ]]; then
     echo "  MISSING: _protocol.txt"
     ((FAILURES++)) || true
@@ -120,8 +132,8 @@ fi
 
 # CHECK 3: Version Synchronization
 echo "[3/8] Checking Versions..."
-VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/agents/prompts/core/" "$EUXIS_HOME/agents/prompts/fleet/" "$EUXIS_HOME/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
-VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/agents/prompts/core/" "$EUXIS_HOME/agents/prompts/fleet/" "$EUXIS_HOME/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
+VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
+VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
 
 if [[ "$VERSION_COUNT" -ne 1 ]]; then
     echo "  VERSION MISMATCH: Found multiple versions: $VERSIONS"
@@ -132,7 +144,7 @@ fi
 
 # CHECK 4: Permissions
 echo "[4/8] Checking Script Permissions..."
-for script in "$EUXIS_HOME/cli/bin/"*; do
+for script in "$EUXIS_HOME/euxis-cli/bin/"*; do
     # Skip directories (e.g., lib/)
     [[ -f "$script" ]] || continue
     PERMS=$(stat -c "%a" "$script" 2>/dev/null || stat -f "%Lp" "$script" 2>/dev/null)
@@ -149,7 +161,7 @@ HEADER_FAILURES=0
 
 # Pre-build agent file list for fast lookup (avoid repeated filesystem checks)
 declare -A KNOWN_AGENTS
-for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
+for dir in "$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-core/agents/prompts/fleet"; do
     for f in "$dir"/*.txt; do
         [[ -f "$f" ]] || continue
         name=$(basename "$f" .txt)
@@ -157,7 +169,7 @@ for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet";
     done
 done
 
-for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet"; do
+for dir in "$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-core/agents/prompts/fleet"; do
     for prompt_file in "$dir"/*.txt; do
         [[ -f "$prompt_file" ]] || continue
         local_name=$(basename "$prompt_file" .txt)
@@ -214,9 +226,9 @@ for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet";
         # 5. Delegation targets check - only for files with Scope Boundaries
         # Skip expensive regex if no scope boundaries section
         if grep -qi 'scope boundaries' <<< "$file_content"; then
-            # Look for agent references in two formats:
-            # 1. Backtick-wrapped: `agentname` (inline references)
-            # 2. Table "Delegate To" column: | agentname |
+            # Extract Delegate To column from markdown tables:
+            # Look for rows in tables that have a "Delegate" header,
+            # then extract backtick-wrapped agent names from those rows.
             while IFS= read -r target; do
                 [[ -z "$target" ]] && continue
                 # Check against pre-built agent list
@@ -225,11 +237,12 @@ for dir in "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet";
                     ((HEADER_FAILURES++)) || true
                 fi
             done < <({
-                # Extract backtick-wrapped agent names (e.g., `architect`)
-                grep -oE '\`[a-z]+\`' <<< "$file_content" | tr -d '`'
-                # Extract from table Delegate To column (last column before |)
-                awk '/\|.*\|.*\|/{print $NF}' <<< "$file_content" | tr -d '|' | tr -s ' '
-            } | sort -u | grep -vE '^(N/A|None|none|human|user|—|-|or|and|to|the)$' | grep -E '^[a-z]+$')
+                # Extract backtick-wrapped agent names ONLY from lines containing
+                # "delegate" or from the Delegate To table column (case-insensitive).
+                # This avoids false positives from code examples in other sections.
+                grep -i 'delegate\|handoff\|escalat' <<< "$file_content" \
+                    | grep -oE '\`[a-z]+\`' | tr -d '`'
+            } | sort -u | grep -vE '^(N/A|None|none|human|user|—|-|or|and|to|the|delegate|delegates|delegated|handoff|escalate|escalated)$' | grep -E '^[a-z]{3,}$')
         fi
     done
 done
@@ -246,7 +259,7 @@ PATTERN_FAILURES=0
 PATTERN_COUNT=0
 TOTAL_RULES=0
 
-PATTERNS_DIR="$EUXIS_HOME/config/patterns"
+PATTERNS_DIR="$EUXIS_HOME/euxis-core/config/patterns"
 if [[ -d "$PATTERNS_DIR" ]]; then
     for pattern_file in "$PATTERNS_DIR"/*.md; do
         [[ -f "$pattern_file" ]] || continue
@@ -300,7 +313,7 @@ fi
 echo "[7/8] Checking Pattern Compliance..."
 COMPLIANCE_FAILURES=0
 
-PATTERNS_DIR="$EUXIS_HOME/config/patterns"
+PATTERNS_DIR="$EUXIS_HOME/euxis-core/config/patterns"
 if [[ -d "$PATTERNS_DIR" ]]; then
     # Verify every pattern has automated detection rules (not just descriptions)
     for pattern_file in "$PATTERNS_DIR"/*.md; do
@@ -332,7 +345,7 @@ if [[ -d "$PATTERNS_DIR" ]]; then
     done
 
     # Cross-reference: protocol references patterns that exist
-    PROTOCOL_FILE="$EUXIS_HOME/agents/prompts/protocols/_protocol.txt"
+    PROTOCOL_FILE="$EUXIS_HOME/euxis-core/agents/prompts/protocols/_protocol.txt"
     if [[ -f "$PROTOCOL_FILE" ]]; then
         for ref_pattern in $(grep -oE '[A-Z]+-[0-9]{3}' "$PROTOCOL_FILE" | sort -u); do
             if [[ ! -f "$PATTERNS_DIR/${ref_pattern}.md" ]]; then
@@ -356,7 +369,7 @@ echo "[8/8] Checking Module Dependencies..."
 DEP_FAILURES=0
 
 # Verify no circular sourcing in lib files
-LIB_DIR="$EUXIS_HOME/core/lib"
+LIB_DIR="$EUXIS_HOME/euxis-core/lib"
 if [[ -d "$LIB_DIR" ]]; then
     for lib_file in "$LIB_DIR"/*.sh; do
         [[ -f "$lib_file" ]] || continue
