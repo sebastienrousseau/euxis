@@ -11,20 +11,20 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
 
 EUXIS_HOME="${HOME}/.euxis"
 
-source "${EUXIS_HOME}/core/lib/common.sh"
-source "${EUXIS_HOME}/core/lib/providers.sh"
-source "${EUXIS_HOME}/core/lib/agents.sh"
-source "${EUXIS_HOME}/core/lib/template.sh"
-source "${EUXIS_HOME}/core/lib/skill-detector.sh"
+source "${EUXIS_HOME}/euxis-core/lib/common.sh"
+source "${EUXIS_HOME}/euxis-core/lib/providers.sh"
+source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
+source "${EUXIS_HOME}/euxis-core/lib/template.sh"
+source "${EUXIS_HOME}/euxis-core/lib/skill-detector.sh"
 
 # ============================================================================
 # Slash Command Registry

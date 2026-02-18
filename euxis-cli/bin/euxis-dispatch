@@ -272,7 +272,7 @@ fi
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 
 # Validate agent names against registry
-REGISTRY_FILE="$EUXIS_HOME/agents/registry.json"
+REGISTRY_FILE="$EUXIS_HOME/euxis-core/agents/registry.json"
 if [[ -f "$REGISTRY_FILE" ]]; then
     INVALID_AGENTS=()
     for i in $(seq 0 $((DISPATCH_COUNT - 1))); do

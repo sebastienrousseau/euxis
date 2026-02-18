@@ -396,4 +396,5 @@ euxis-combo run envision "Design new onboarding flow"
 
 ---
 
-*Euxis v0.1.0 · Build something that matters.*
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co

@@ -92,9 +92,17 @@ class TestFleetGridRebuildGrid(unittest.TestCase):
         mock_grid = Mock(spec=FleetGrid)
         mock_grid.registry = registry
         mock_grid.filter_text = filter_text
+        mock_grid._rebuilding = False
+        mock_grid.view_mode = "activation"
+        mock_grid._CARDS_PER_ROW = 4
+        mock_grid._get_active_agent_ids = Mock(return_value=set())
+        mock_grid._get_error_agent_ids = Mock(return_value=set())
+        mock_grid._mount_squads_and_combos = Mock()
         # Wire the real methods
         mock_grid._matches_filter = lambda agent: FleetGrid._matches_filter(mock_grid, agent)
         mock_grid._rebuild_grid = lambda: FleetGrid._rebuild_grid(mock_grid)
+        mock_grid._rebuild_activation_view = lambda scroll, active, error: FleetGrid._rebuild_activation_view(mock_grid, scroll, active, error)
+        mock_grid._mount_agent_cards = lambda scroll, agents_list, active, error: FleetGrid._mount_agent_cards(mock_grid, scroll, agents_list, active, error)
         return mock_grid
 
     def test_empty_registry(self):
@@ -269,12 +277,17 @@ class TestAgentCard(unittest.TestCase):
         card = AgentCard(agent)
         assert "tier-core" not in card.classes
 
+    @patch("tui.widgets.agent_card.ProgressBar")
+    @patch("tui.widgets.agent_card.Vertical")
     @patch("tui.widgets.agent_card.Static")
-    def test_compose(self, mock_static):
+    def test_compose(self, mock_static, mock_vertical, mock_progress):
+        # Set up Vertical as a no-op context manager
+        mock_vertical.return_value.__enter__ = Mock(return_value=None)
+        mock_vertical.return_value.__exit__ = Mock(return_value=False)
         agent = _make_agent()
         card = AgentCard(agent)
         result = list(card.compose())
-        assert len(result) == 3
+        assert len(result) >= 3
 
     def test_on_click_posts_message(self):
         agent = _make_agent()

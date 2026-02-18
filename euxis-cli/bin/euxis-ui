@@ -6,9 +6,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -92,10 +92,10 @@ run_agent() {
     echo -e "  ${BOLD}SELECT AGENT TO DEPLOY:${RESET}\n"
 
     # Dynamically list agents from ~/.euxis/agents/prompts/{core,fleet}/
-    agents=($(ls "$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet" 2>/dev/null | grep '\.txt$' | sed 's/\.txt//'))
+    agents=($(ls "$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-core/agents/prompts/fleet" 2>/dev/null | grep '\.txt$' | sed 's/\.txt//'))
 
     if [ ${#agents[@]} -eq 0 ]; then
-        echo -e "  ${RED}No agents found in $EUXIS_HOME/agents/prompts/{core,fleet}/!${RESET}"
+        echo -e "  ${RED}No agents found in $EUXIS_HOME/euxis-core/agents/prompts/{core,fleet}/!${RESET}"
         pause
         return
     fi

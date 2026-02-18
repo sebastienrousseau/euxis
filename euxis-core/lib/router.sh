@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[[ -n "${_EUXIS_LIB_ROUTER:-}" ]] && return; _EUXIS_LIB_ROUTER=1
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2024-2026 Euxis Contributors
 #

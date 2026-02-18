@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Euxis CLI Module - Command-line interface and user interaction
-# Part of the Euxis Multi-Provider AI Agent Framework
+# Part of the Euxis Enterprise Unified eXecution Intelligence System
 #
 [[ -n "${_EUXIS_LIB_CLI:-}" ]] && return; _EUXIS_LIB_CLI=1
 
@@ -61,7 +61,7 @@ _setup_colors() {
 _print_header() {
     # ASCII logo is shown by ui_header, just add tagline
     echo -e "  ${DIM}Enterprise Unified eXecution Intelligence System${RESET}"
-    echo -e "  ${DIM}Multi-Provider AI Agent Framework • 50 Agents${RESET}"
+    echo -e "  ${DIM}Multi-Provider Agent Framework • 53 Agents${RESET}"
     echo -e ""
 }
 
