@@ -1,8 +1,4 @@
 Templates
 =========
 
-.. toctree::
-   :maxdepth: 3
-   :glob:
-
-   **/*
+Templates are documented in ``essentials/core-concepts/templates``.
