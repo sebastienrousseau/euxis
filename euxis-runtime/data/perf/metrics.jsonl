@@ -5871,3 +5871,1235 @@
   "ms": 8,
   "status": "delegated"
 }
+{
+  "ts": "2026-02-18T17:49:15Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 156,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T18:02:34Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 184,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T18:05:11Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 156495,
+  "status": "openai"
+}
+{
+  "ts": "2026-02-18T18:05:11Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 156858,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:37:50Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 248,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:39:23Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 93817,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:39:23Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 94294,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:24Z",
+  "op": "prompt_assembly",
+  "agent": "designer",
+  "ms": 283,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:25Z",
+  "op": "prompt_assembly",
+  "agent": "debugger",
+  "ms": 228,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:26Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 242,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:27Z",
+  "op": "prompt_assembly",
+  "agent": "debugger",
+  "ms": 262,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:29Z",
+  "op": "prompt_assembly",
+  "agent": "automator",
+  "ms": 279,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:30Z",
+  "op": "prompt_assembly",
+  "agent": "deep-researcher",
+  "ms": 302,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:48:32Z",
+  "op": "prompt_assembly",
+  "agent": "debugger",
+  "ms": 280,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:49:19Z",
+  "op": "provider_execution",
+  "agent": "debugger",
+  "ms": 54494,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:49:19Z",
+  "op": "total_agent_run",
+  "agent": "debugger",
+  "ms": 54968,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:49:19Z",
+  "op": "coordination_overhead",
+  "agent": "debugger",
+  "ms": 54968,
+  "status": "concurrent_agents=4"
+}
+{
+  "ts": "2026-02-18T21:49:37Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 71120,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:49:37Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 71599,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:49:37Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 71599,
+  "status": "concurrent_agents=3"
+}
+{
+  "ts": "2026-02-18T21:50:15Z",
+  "op": "provider_execution",
+  "agent": "designer",
+  "ms": 111048,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:50:15Z",
+  "op": "total_agent_run",
+  "agent": "designer",
+  "ms": 111572,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:50:15Z",
+  "op": "coordination_overhead",
+  "agent": "designer",
+  "ms": 111572,
+  "status": "concurrent_agents=2"
+}
+{
+  "ts": "2026-02-18T21:50:17Z",
+  "op": "provider_execution",
+  "agent": "automator",
+  "ms": 108206,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:50:17Z",
+  "op": "total_agent_run",
+  "agent": "automator",
+  "ms": 108742,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:51:06Z",
+  "op": "provider_execution",
+  "agent": "deep-researcher",
+  "ms": 155780,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:51:06Z",
+  "op": "total_agent_run",
+  "agent": "deep-researcher",
+  "ms": 156335,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:51:19Z",
+  "op": "provider_execution",
+  "agent": "debugger",
+  "ms": 171262,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T21:51:19Z",
+  "op": "total_agent_run",
+  "agent": "debugger",
+  "ms": 171750,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:56:06Z",
+  "op": "prompt_assembly",
+  "agent": "debugger",
+  "ms": 230,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T21:57:08Z",
+  "op": "provider_execution",
+  "agent": "debugger",
+  "ms": 61823,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T21:57:08Z",
+  "op": "total_agent_run",
+  "agent": "debugger",
+  "ms": 62251,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:00:11Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 40,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:00:11Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:00:11Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:00:12Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 141,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:02:37Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 39,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:02:37Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:02:37Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 3,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:02:38Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 137,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:03:26Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 48142,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:03:26Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 48442,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:03:27Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 211,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:03:41Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 14164,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:03:41Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 14542,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:12:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 42,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:12:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:12:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:12:44Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 151,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:12:45Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1064,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:12:45Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1384,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:12:46Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 146,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:12:46Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 425,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:12:46Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 745,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:13:30Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 180,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:13:54Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 38,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:13:54Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:13:54Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:13:55Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 143,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:13:56Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1009,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:13:56Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1330,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:13:56Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 210,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:13:57Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 415,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:13:57Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 802,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:03Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 37,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:15:03Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 5,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:15:03Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:15:03Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 140,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:05Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1054,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:15:05Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1361,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:05Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 229,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:06Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 435,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:15:06Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 836,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:24Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 39,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:15:24Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:15:24Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 5,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:15:24Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 155,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:25Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1040,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:15:25Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1366,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:26Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 226,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:15:26Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 417,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:15:26Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 826,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:17:22Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 38,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:17:23Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:17:23Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:17:23Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 138,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:17:24Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1008,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:17:24Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1313,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:17:25Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 226,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:17:25Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 420,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:17:25Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 820,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:17:32Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 241235,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:17:32Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 241626,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:18:39Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 223,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:19:07Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 27719,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:19:07Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 28127,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:19:43Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 40,
+  "status": "unknown_agent:dispatcher"
+}
+{
+  "ts": "2026-02-18T23:20:11Z",
+  "op": "prompt_assembly",
+  "agent": "compliance",
+  "ms": 151,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:20:33Z",
+  "op": "provider_execution",
+  "agent": "compliance",
+  "ms": 21701,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:20:33Z",
+  "op": "total_agent_run",
+  "agent": "compliance",
+  "ms": 22030,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:26:22Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 223,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:26:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 37,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:26:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:26:44Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 3,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:26:45Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 135,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:30:49Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 38,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:30:49Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:30:49Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:30:50Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 136,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:31:23Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 301036,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:31:23Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 301441,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:32:04Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 74055,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:32:04Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 74357,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:32:05Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 211,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:32:05Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 482,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:32:05Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 867,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:32:57Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 220,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:33:21Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 23264,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:33:21Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 23661,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:33:28Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 208,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:33:28Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 551,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:33:28Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 931,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:33:44Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 230,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:35:50Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 38,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:35:50Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:35:50Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:35:50Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 160,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:35:51Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 819,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:35:51Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1154,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:35:52Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 209,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:35:53Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1080,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:35:53Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1461,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:36:27Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 36,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:36:27Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:36:27Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:36:28Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 141,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:36:29Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 811,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:36:29Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1125,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:36:29Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 212,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:36:30Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1104,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:36:30Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1495,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:37:43Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 258,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:38:46Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 302030,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:38:46Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 302450,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:38:59Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 76657,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:38:59Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 77114,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:51Z",
+  "op": "prompt_assembly",
+  "agent": "maintainer",
+  "ms": 217,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:52Z",
+  "op": "prompt_assembly",
+  "agent": "maintainer",
+  "ms": 253,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:54Z",
+  "op": "prompt_assembly",
+  "agent": "maintainer",
+  "ms": 284,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:55Z",
+  "op": "prompt_assembly",
+  "agent": "tester",
+  "ms": 361,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:56Z",
+  "op": "prompt_assembly",
+  "agent": "pentester",
+  "ms": 326,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:58Z",
+  "op": "prompt_assembly",
+  "agent": "automator",
+  "ms": 338,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:39:59Z",
+  "op": "prompt_assembly",
+  "agent": "reviewer",
+  "ms": 403,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:07Z",
+  "op": "provider_execution",
+  "agent": "maintainer",
+  "ms": 75286,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:41:07Z",
+  "op": "total_agent_run",
+  "agent": "maintainer",
+  "ms": 75702,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:07Z",
+  "op": "coordination_overhead",
+  "agent": "maintainer",
+  "ms": 75702,
+  "status": "concurrent_agents=4"
+}
+{
+  "ts": "2026-02-18T23:41:10Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 47,
+  "status": "unknown_agent:nonexistent-agent-xyz"
+}
+{
+  "ts": "2026-02-18T23:41:10Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:41:10Z",
+  "op": "cli_error",
+  "agent": "cli",
+  "ms": 4,
+  "status": "invalid_agent_name"
+}
+{
+  "ts": "2026-02-18T23:41:10Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 155,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:11Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 959,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:41:11Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1303,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:11Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 1303,
+  "status": "concurrent_agents=4"
+}
+{
+  "ts": "2026-02-18T23:41:12Z",
+  "op": "prompt_assembly",
+  "agent": "architect",
+  "ms": 224,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:13Z",
+  "op": "provider_execution",
+  "agent": "architect",
+  "ms": 1172,
+  "status": "gemini"
+}
+{
+  "ts": "2026-02-18T23:41:13Z",
+  "op": "total_agent_run",
+  "agent": "architect",
+  "ms": 1572,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:13Z",
+  "op": "coordination_overhead",
+  "agent": "architect",
+  "ms": 1572,
+  "status": "concurrent_agents=4"
+}
+{
+  "ts": "2026-02-18T23:41:19Z",
+  "op": "provider_execution",
+  "agent": "maintainer",
+  "ms": 86389,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:41:19Z",
+  "op": "total_agent_run",
+  "agent": "maintainer",
+  "ms": 86824,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:19Z",
+  "op": "coordination_overhead",
+  "agent": "maintainer",
+  "ms": 86824,
+  "status": "concurrent_agents=4"
+}
+{
+  "ts": "2026-02-18T23:41:31Z",
+  "op": "provider_execution",
+  "agent": "reviewer",
+  "ms": 92310,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:41:31Z",
+  "op": "total_agent_run",
+  "agent": "reviewer",
+  "ms": 92935,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:31Z",
+  "op": "coordination_overhead",
+  "agent": "reviewer",
+  "ms": 92935,
+  "status": "concurrent_agents=3"
+}
+{
+  "ts": "2026-02-18T23:41:34Z",
+  "op": "provider_execution",
+  "agent": "pentester",
+  "ms": 97654,
+  "status": "claude"
+}
+{
+  "ts": "2026-02-18T23:41:34Z",
+  "op": "total_agent_run",
+  "agent": "pentester",
+  "ms": 98199,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-18T23:41:34Z",
+  "op": "coordination_overhead",
+  "agent": "pentester",
+  "ms": 98199,
+  "status": "concurrent_agents=2"
+}
