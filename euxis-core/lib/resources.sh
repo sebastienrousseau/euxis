@@ -3,6 +3,7 @@
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # resources.sh — System resource detection and throttling for agent dispatch
+[[ -n "${_EUXIS_LIB_RESOURCES:-}" ]] && return; _EUXIS_LIB_RESOURCES=1
 #
 # Provides functions to:
 #   - Detect available CPU, RAM, and current load

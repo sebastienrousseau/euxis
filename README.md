@@ -3,6 +3,9 @@
 **Multi-repo workspace for the Euxis Agent Framework**
 
 [![License][license-badge]][license-url]
+[![Version][version-badge]][releases-url]
+
+Version 0.1.0
 
 ---
 
@@ -94,9 +97,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 MIT License - see [LICENSE](LICENSE)
 
+## Author
+
+**Sebastien Rousseau** — [sebastienrousseau.com](https://sebastienrousseau.com)
+
 ---
 
-*Part of the [Euxis Agent Framework](https://euxis.co)*
+*Euxis v0.1.0 — Part of the [Euxis Agent Framework](https://euxis.co)*
 
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE
+[version-badge]: https://img.shields.io/badge/version-0.1.0-green.svg
+[releases-url]: https://github.com/euxis/euxis/releases

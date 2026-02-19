@@ -3,6 +3,7 @@
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # router.sh — Intelligent model routing for cost optimization
+[[ -n "${_EUXIS_LIB_ROUTER:-}" ]] && return; _EUXIS_LIB_ROUTER=1
 #
 # Implements multi-tier model selection based on:
 #   1. Agent capability tags (from registry)

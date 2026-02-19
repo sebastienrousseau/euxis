@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # trace.sh - Black Box Recorder for Euxis operations
+[[ -n "${_EUXIS_LIB_TRACE:-}" ]] && return; _EUXIS_LIB_TRACE=1
 #
 # Captures all agent interactions, council debates, and system events
 # to .euxis/traces/ for replay and debugging.

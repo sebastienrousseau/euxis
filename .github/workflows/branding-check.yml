@@ -1,0 +1,33 @@
+name: Branding Compliance Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  branding-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR body for branding signature
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            const requiredPatterns = [
+              /Sebastien Rousseau/i,
+              /euxis\.co/i
+            ];
+
+            const missingPatterns = requiredPatterns.filter(
+              pattern => !pattern.test(body)
+            );
+
+            if (missingPatterns.length > 0) {
+              core.setFailed(
+                'PR body is missing required branding signature. ' +
+                'Please include the branding footer from the PR template.'
+              );
+            } else {
+              console.log('Branding signature verified.');
+            }

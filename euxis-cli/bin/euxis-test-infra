@@ -5,9 +5,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+  # shellcheck source=euxis-core/lib/ui.sh
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -29,13 +29,13 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-EUXIS_SCRIPT="$EUXIS_HOME/cli/bin/euxis.sh"
+EUXIS_SCRIPT="$EUXIS_HOME/euxis-cli/bin/euxis.sh"
 PASS=0
 FAIL=0
 
 # Source validation library
 # shellcheck source=core/lib/validation.sh
-source "$EUXIS_HOME/core/lib/validation.sh" 2>/dev/null || {
+source "$EUXIS_HOME/euxis-core/lib/validation.sh" 2>/dev/null || {
     echo "FATAL: Cannot load validation library" >&2
     exit 1
 }
@@ -82,11 +82,11 @@ fi
 REQUIRED_TEST_AGENTS=("architect" "orchestrator")
 for agent in "${REQUIRED_TEST_AGENTS[@]}"; do
     _agent_found=false
-    if [[ -f "$EUXIS_HOME/agents/registry.db" ]]; then
-        [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/agents/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='${agent}'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _agent_found=true
+    if [[ -f "$EUXIS_HOME/euxis-core/agents/registry.db" ]]; then
+        [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/euxis-core/agents/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='${agent}'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _agent_found=true
     fi
-    if [[ "$_agent_found" != "true" ]] && [[ -f "$EUXIS_HOME/agents/registry.json" ]]; then
-        jq -e ".agents[] | select(.id == \"$agent\")" "$EUXIS_HOME/agents/registry.json" &>/dev/null && _agent_found=true
+    if [[ "$_agent_found" != "true" ]] && [[ -f "$EUXIS_HOME/euxis-core/agents/registry.json" ]]; then
+        jq -e ".agents[] | select(.id == \"$agent\")" "$EUXIS_HOME/euxis-core/agents/registry.json" &>/dev/null && _agent_found=true
     fi
     if [[ "$_agent_found" == "true" ]]; then
         validation_pass "Test agent '$agent' found in registry"
@@ -108,7 +108,7 @@ echo "TESTING INFRASTRUCTURE LOGIC..."
 
 # TEST 1: Missing arguments shows usage
 OUTPUT=$("$EUXIS_SCRIPT" 2>&1 || true)
-if [[ "$OUTPUT" == *"Usage:"* ]]; then
+if [[ "$OUTPUT" == *"USAGE"* || "$OUTPUT" == *"Usage:"* ]]; then
     report "PASS" "Handles missing arguments"
 else
     report "FAIL" "Handles missing arguments"
@@ -177,10 +177,10 @@ DRIFT_ERRORS=0
 
 # Check if registry was modified during tests (SQLite-first, JSON fallback)
 REGISTRY_HASH_BEFORE=""
-if [[ -f "$EUXIS_HOME/agents/registry.db" ]]; then
-    REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/agents/registry.db" 2>/dev/null | cut -d' ' -f1 || echo "")
+if [[ -f "$EUXIS_HOME/euxis-core/agents/registry.db" ]]; then
+    REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/euxis-core/agents/registry.db" 2>/dev/null | cut -d' ' -f1 || echo "")
 fi
-[[ -z "$REGISTRY_HASH_BEFORE" ]] && REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/agents/registry.json" 2>/dev/null | cut -d' ' -f1 || echo "")
+[[ -z "$REGISTRY_HASH_BEFORE" ]] && REGISTRY_HASH_BEFORE=$(md5sum "$EUXIS_HOME/euxis-core/agents/registry.json" 2>/dev/null | cut -d' ' -f1 || echo "")
 if [[ -n "$REGISTRY_HASH_BEFORE" ]]; then
     validation_pass "Registry integrity maintained during tests"
 else

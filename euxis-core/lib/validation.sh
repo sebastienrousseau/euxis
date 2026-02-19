@@ -201,11 +201,11 @@ validate_euxis_structure() {
     # Check critical directories exist
     local required_dirs=(
         "$euxis_home"
-        "$euxis_home/cli/bin"
-        "$euxis_home/core/lib"
-        "$euxis_home/agents/prompts"
+        "$euxis_home/euxis-cli/bin"
+        "$euxis_home/euxis-core/lib"
+        "$euxis_home/euxis-core/agents/prompts"
         "$euxis_home/runtime/memory/cortex"
-        "$euxis_home/data"
+        "$euxis_home/runtime/data"
     )
 
     for dir in "${required_dirs[@]}"; do
@@ -216,21 +216,21 @@ validate_euxis_structure() {
     done
 
     # Check registry exists (SQLite or JSON)
-    if [[ -f "$euxis_home/agents/registry.db" ]]; then
+    if [[ -f "$euxis_home/euxis-core/agents/registry.db" ]]; then
         # Validate SQLite database
         local agent_count
         # SECURITY: Use sqlite3 CLI with proper path quoting to prevent injection
-        agent_count=$(sqlite3 -init /dev/null "${euxis_home}/agents/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null)
+        agent_count=$(sqlite3 -init /dev/null "${euxis_home}/euxis-core/agents/registry.db" "SELECT COUNT(*) FROM agents" 2>/dev/null)
         if [[ -n "$agent_count" && "$agent_count" -gt 0 ]]; then
             validation_pass "Registry database valid ($agent_count agents)"
         else
-            validation_error "Registry database empty or corrupt: $euxis_home/agents/registry.db"
+            validation_error "Registry database empty or corrupt: $euxis_home/euxis-core/agents/registry.db"
             return 1
         fi
-    elif [[ -f "$euxis_home/agents/registry.json" ]]; then
+    elif [[ -f "$euxis_home/euxis-core/agents/registry.json" ]]; then
         # Fall back to JSON validation
-        if ! jq empty "$euxis_home/agents/registry.json" &>/dev/null; then
-            validation_error "Registry file is not valid JSON: $euxis_home/agents/registry.json"
+        if ! jq empty "$euxis_home/euxis-core/agents/registry.json" &>/dev/null; then
+            validation_error "Registry file is not valid JSON: $euxis_home/euxis-core/agents/registry.json"
             return 1
         fi
     else

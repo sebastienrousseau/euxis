@@ -3,6 +3,7 @@
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # mesh.sh — Peer-to-peer agent communication protocol
+[[ -n "${_EUXIS_LIB_MESH:-}" ]] && return; _EUXIS_LIB_MESH=1
 #
 # Implements A2A (Agent-to-Agent) communication for mesh dispatch mode:
 #   - Discovery: Agents find peers via capability tags in registry

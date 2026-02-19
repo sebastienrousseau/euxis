@@ -5,9 +5,9 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-if [[ -f "${EUXIS_HOME}/core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
+  # shellcheck source=euxis-core/lib/ui.sh
+  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
   ui_auto_header
 fi
 
@@ -35,12 +35,12 @@ EOF
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }
 
 EUXIS_HOME="$HOME/.euxis"
-BIN_DIR="$EUXIS_HOME/cli/bin"
+BIN_DIR="$EUXIS_HOME/euxis-cli/bin"
 SEMANTIC_TIMEOUT="${EUXIS_SEMANTIC_TIMEOUT:-180}"
 
 # Source validation library for fail-fast gates
-# shellcheck source=core/lib/validation.sh
-source "$EUXIS_HOME/core/lib/validation.sh" 2>/dev/null || {
+# shellcheck source=euxis-core/lib/validation.sh
+source "$EUXIS_HOME/euxis-core/lib/validation.sh" 2>/dev/null || {
     echo "FATAL: Cannot load validation library. Certification cannot proceed." >&2
     exit 1
 }
@@ -103,10 +103,10 @@ done
 
 # Validate critical certification files
 CERT_FILES=(
-    "$EUXIS_HOME/config/branding/signature.txt:Branding signature"
+    "$EUXIS_HOME/euxis-core/config/branding/signature.txt:Branding signature"
     "$EUXIS_HOME/README.md:Main README"
-    "$EUXIS_HOME/docs/user-guide.md:User guide"
-    "$EUXIS_HOME/docs/fleet-guide.md:Fleet guide"
+    "$EUXIS_HOME/euxis-docs/docs/user-guide.md:User guide"
+    "$EUXIS_HOME/euxis-docs/docs/fleet-guide.md:Fleet guide"
 )
 
 for file_entry in "${CERT_FILES[@]}"; do
@@ -131,7 +131,7 @@ fi
 
 # Validate current version consistency (SQLite-first, JSON fallback)
 CURRENT_VERSION=$(jq -r '.protocol_version // .version' "$EUXIS_HOME/euxis-core/agents/registry.json" 2>/dev/null || echo "")
-[[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]] && CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/agents/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
+[[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]] && CURRENT_VERSION=$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/euxis-core/agents/registry.db'); r = conn.execute(\"SELECT value FROM registry_metadata WHERE key='protocol_version'\").fetchone(); print(r[0] if r else '')" 2>/dev/null) || true
 if [[ -z "$CURRENT_VERSION" || "$CURRENT_VERSION" == "null" ]]; then
     validation_error "Cannot determine current version from registry"
     ((CERT_ERRORS++)) || true
@@ -169,7 +169,7 @@ else
 fi
 
 # SEC-2: Model name validation exists in providers.sh
-if grep -q '_validate_model_name' "$EUXIS_HOME/core/lib/providers.sh" 2>/dev/null; then
+if grep -q '_validate_model_name' "$EUXIS_HOME/euxis-core/lib/providers.sh" 2>/dev/null; then
     echo "  PASS: Provider model name validation present"
 else
     echo "  FAIL: providers.sh missing _validate_model_name() (env var injection risk)"
@@ -177,7 +177,7 @@ else
 fi
 
 # SEC-3: Task input sanitization in dispatch.sh
-if grep -q 'sanitize_task_input' "$EUXIS_HOME/core/lib/dispatch.sh" 2>/dev/null; then
+if grep -q 'sanitize_task_input' "$EUXIS_HOME/euxis-core/lib/dispatch.sh" 2>/dev/null; then
     echo "  PASS: Task input sanitization in dispatch pipeline"
 else
     echo "  FAIL: dispatch.sh missing sanitize_task_input (goal hijacking risk)"
@@ -185,7 +185,7 @@ else
 fi
 
 # SEC-4: PII sanitization in logging
-if grep -q '_sanitize_pii' "$EUXIS_HOME/core/lib/common.sh" 2>/dev/null; then
+if grep -q '_sanitize_pii' "$EUXIS_HOME/euxis-core/lib/common.sh" 2>/dev/null; then
     echo "  PASS: PII sanitization in logging functions"
 else
     echo "  FAIL: common.sh logging lacks PII sanitization"
@@ -201,7 +201,7 @@ else
 fi
 
 # SEC-6: Prompt injection detection in validation.sh
-if grep -q 'injection_patterns' "$EUXIS_HOME/core/lib/validation.sh" 2>/dev/null; then
+if grep -q 'injection_patterns' "$EUXIS_HOME/euxis-core/lib/validation.sh" 2>/dev/null; then
     echo "  PASS: Prompt injection detection in task validation"
 else
     echo "  FAIL: validation.sh missing prompt injection detection"
@@ -225,7 +225,7 @@ else
 fi
 
 # SEC-9: TUI deployment confirmation gates
-if grep -q 'ConfirmDeployScreen\|confirm.*deploy' "$EUXIS_HOME/ui/src/tui/app.py" 2>/dev/null; then
+if grep -q 'ConfirmDeployScreen\|confirm.*deploy' "$EUXIS_HOME/euxis-tui/src/tui/app.py" 2>/dev/null; then
     echo "  PASS: TUI deployment confirmation gates present"
 else
     echo "  FAIL: TUI deploys agents without confirmation (governance bypass risk)"
@@ -269,15 +269,15 @@ fi
 echo ""
 echo "[GATE 4] Semantic Verification..."
 echo "--------------------------------------------------"
-GOLDEN_DATASET="$EUXIS_HOME/tests/golden/golden_dataset.json"
+GOLDEN_DATASET="$EUXIS_HOME/euxis-core/tests/golden/golden_dataset.json"
 
 # Pre-check: validate semantic test prerequisites
 SEMANTIC_ERRORS=0
 
 # Check if architect agent exists (SQLite-first, JSON fallback)
 _architect_found=false
-if [[ -f "$EUXIS_HOME/agents/registry.db" ]]; then
-    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/agents/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
+if [[ -f "$EUXIS_HOME/euxis-core/agents/registry.db" ]]; then
+    [[ -n "$(python3 -c "import sqlite3; conn = sqlite3.connect('$EUXIS_HOME/euxis-core/agents/registry.db'); r = conn.execute(\"SELECT 1 FROM agents WHERE id='architect'\").fetchone(); print('1' if r else '')" 2>/dev/null)" ]] && _architect_found=true
 fi
 if [[ "$_architect_found" != "true" ]] && [[ -f "$EUXIS_HOME/euxis-core/agents/registry.json" ]]; then
     jq -e '.agents[] | select(.id == "architect")' "$EUXIS_HOME/euxis-core/agents/registry.json" &>/dev/null && _architect_found=true
@@ -393,13 +393,13 @@ echo "[GATE 5] Branding Compliance..."
 echo "--------------------------------------------------"
 
 BRANDING_FAILURES=0
-SIGNATURE_FILE="$EUXIS_HOME/config/branding/signature.txt"
+SIGNATURE_FILE="$EUXIS_HOME/euxis-core/config/branding/signature.txt"
 
 # Pre-validate branding prerequisites
 echo "  Pre-validating branding requirements..."
 
 # Check branding directory permissions
-BRANDING_DIR="$EUXIS_HOME/config/branding"
+BRANDING_DIR="$EUXIS_HOME/euxis-core/config/branding"
 if [[ ! -d "$BRANDING_DIR" ]]; then
     echo "  FAIL: Branding directory not found at $BRANDING_DIR"
     ((BRANDING_FAILURES++)) || true
@@ -454,7 +454,7 @@ else
 fi
 
 # 5d. Git hook installed and executable
-HOOK_FILE="$EUXIS_HOME/cli/bin/hooks/prepare-commit-msg"
+HOOK_FILE="$EUXIS_HOME/euxis-cli/bin/hooks/prepare-commit-msg"
 if [[ -x "$HOOK_FILE" ]]; then
     echo "  PASS: prepare-commit-msg hook is present and executable."
 else
@@ -573,6 +573,10 @@ if command -v gh &>/dev/null && git -C "$EUXIS_HOME" rev-parse --git-dir &>/dev/
             pr_num=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['number'])")
             pr_title=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['title'])")
             pr_body=$(echo "$PR_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)[$i]['body'])")
+            # Skip Dependabot PRs (automated dependency updates)
+            if echo "$pr_title" | grep -qi "dependabot\|deps\|bump"; then
+                continue
+            fi
             if ! echo "$pr_body" | grep -qF "Sebastien Rousseau" || ! echo "$pr_body" | grep -qF "euxis.co"; then
                 echo "  UNSIGNED PR: #$pr_num $pr_title"
                 ((UNSIGNED_PRS++)) || true
@@ -606,7 +610,7 @@ DOC_FAILURES=0
 echo "  Pre-validating documentation requirements..."
 
 # Check docs directory permissions
-DOCS_DIR="$EUXIS_HOME/docs"
+DOCS_DIR="$EUXIS_HOME/euxis-docs/docs"
 if [[ ! -d "$DOCS_DIR" ]]; then
     echo "  FAIL: Documentation directory not found at $DOCS_DIR"
     ((DOC_FAILURES++)) || true
@@ -643,7 +647,7 @@ else
 fi
 
 # 6b. Core documentation files exist
-REQUIRED_DOCS=("README.md" "docs/user-guide.md" "docs/fleet-guide.md")
+REQUIRED_DOCS=("README.md" "euxis-docs/docs/user-guide.md" "euxis-docs/docs/fleet-guide.md")
 for doc in "${REQUIRED_DOCS[@]}"; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         echo "  PASS: $doc exists."
@@ -696,7 +700,7 @@ if [[ -f "$EUXIS_HOME/README.md" ]]; then
 fi
 
 # 6f. USER_GUIDE and FLEET_GUIDE reference correct version
-for doc in docs/user-guide.md docs/fleet-guide.md; do
+for doc in euxis-docs/docs/user-guide.md euxis-docs/docs/fleet-guide.md; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
         if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
             echo "  PASS: $doc references version $CURRENT_VERSION."
@@ -708,7 +712,7 @@ for doc in docs/user-guide.md docs/fleet-guide.md; do
 done
 
 # 6g. Prompts must match current version (core/fleet/protocols)
-PROMPT_DIRS=("$EUXIS_HOME/agents/prompts/core" "$EUXIS_HOME/agents/prompts/fleet" "$EUXIS_HOME/agents/prompts/protocols")
+PROMPT_DIRS=("$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-core/agents/prompts/fleet" "$EUXIS_HOME/euxis-core/agents/prompts/protocols")
 for dir in "${PROMPT_DIRS[@]}"; do
     if [[ -d "$dir" ]]; then
         while IFS= read -r -d '' prompt; do
@@ -725,7 +729,7 @@ for dir in "${PROMPT_DIRS[@]}"; do
 done
 
 # 6h. Enforce release-version phrases (avoid dependency versions)
-ALLOWLIST_REGEX='(^|/)(CHANGELOG\\.md|docs/guides/migration-guide\\.md|docs/archive/|docs/reports/|docs/benchmarks/|docs/reference/benchmarks/)'
+ALLOWLIST_REGEX='(^|/)(CHANGELOG\\.md|docs/guides/migration-guide\\.md|docs/archive/|docs/reports/|docs/benchmarks/|docs/reference/benchmarks/|_build/)'
 
 check_phrase_versions() {
     local pattern="$1"
@@ -777,7 +781,7 @@ check_phrase_versions 'Version ([0-9]+\.[0-9]+\.[0-9]+)' "Version"
 
 # 6i. JSON protocol/version fields must match current version
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
-    for manifest in euxis-core/agents/registry.json agents/squads.json euxis-core/config/capabilities.json euxis-core/config/codex/codex.json; do
+    for manifest in euxis-core/agents/registry.json euxis-core/agents/squads.json euxis-core/config/capabilities.json euxis-core/config/codex/codex.json; do
         path="$EUXIS_HOME/$manifest"
         if [[ -f "$path" ]]; then
             version_value=$(jq -r '.protocol_version // .version // empty' "$path" 2>/dev/null || echo "")
@@ -790,7 +794,7 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
 fi
 
 # 6j. Registry, squads, and codex manifests are valid JSON
-MANIFESTS=("euxis-core/agents/registry.json" "agents/squads.json" "euxis-core/config/capabilities.json" "euxis-core/config/codex/codex.json")
+MANIFESTS=("euxis-core/agents/registry.json" "euxis-core/agents/squads.json" "euxis-core/config/capabilities.json" "euxis-core/config/codex/codex.json")
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
     echo "  Validating JSON manifest files..."
     for manifest in "${MANIFESTS[@]}"; do
