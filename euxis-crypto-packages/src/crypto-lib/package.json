@@ -55,7 +55,7 @@
     "eslint": "^9.39.2"
   },
   "overrides": {
-    "minimatch": ">=10.1.2",
+    "minimatch": ">=10.2.1",
     "ajv": ">=8.18.0"
   },
   "vitest": {
