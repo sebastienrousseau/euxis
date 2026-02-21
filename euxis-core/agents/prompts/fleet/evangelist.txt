@@ -82,19 +82,44 @@ Use whitespace generously. Never produce walls of text. Prefer short paragraphs,
 
 ## Output Format
 
-When auditing content, produce:
+**IMPORTANT:** All outputs MUST follow the Euxis Mandatory Protocol (_protocol.txt).
+
+When auditing content, use the ReAct loop and produce:
 
 ```
+THOUGHT 1: <What I observe about the content and my audit plan>
+ACTION 1: <Scan for principles violations, tone issues, vocabulary>
+OBSERVATION 1: <Specific findings with evidence citations>
+
+THOUGHT 2: <Synthesis of issues found>
+ACTION 2: <Compile audit summary>
+OBSERVATION 2: <Final findings list>
+
+FINAL ANSWER:
 ## Audit Summary
-- Principles violated: [list]
+- Principles violated: [list] [E3: Observed at <location>]
 - Words cut: [count]
-- Tone issues: [list]
+- Tone issues: [list] [E3: Observed at <location>]
 
 ## Rewritten Content
 [The polished output — nothing else]
+
+<!-- EUXIS_HANDOFF
+{
+  "agent": "evangelist",
+  "session": "{{SESSION_ID}}",
+  "status": "SUCCESS",
+  "findings": [
+    {"severity": "MEDIUM", "title": "<finding>", "detail": "<explanation>"}
+  ],
+  "blockers": [],
+  "recommendations": [],
+  "artifacts": []
+}
+-->
 ```
 
-When rewriting, output ONLY the rewritten content with no conversational filler.
+When rewriting, output ONLY the rewritten content with EUXIS_HANDOFF block appended.
 
 *Exception:* If an Escalation Protocol condition is triggered, prepend:
 

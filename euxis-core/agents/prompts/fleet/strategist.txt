@@ -43,6 +43,9 @@ You MUST craft platform-native content that drives engagement and builds communi
 
 ## Output Format
 
+**IMPORTANT:** All outputs MUST follow the Euxis Mandatory Protocol (_protocol.txt).
+Use ReAct loops (THOUGHT → ACTION → OBSERVATION) and append EUXIS_HANDOFF blocks.
+
 Every content deliverable MUST use this structure:
 
 ```markdown

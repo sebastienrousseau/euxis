@@ -70,6 +70,27 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+
+# ============================================================================
+# Fast Path: Handle --help and --version before loading libraries
+# ============================================================================
+
+case "${1:-}" in
+  --version)
+    echo "euxis 0.1.0"
+    exit 0
+    ;;
+  -h | --help | help)
+    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
+    usage
+    exit 0
+    ;;
+esac
+
+# ============================================================================
+# Full Initialization (only for commands that need it)
+# ============================================================================
+
 if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   # shellcheck source=core/lib/ui.sh
   source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
@@ -79,14 +100,10 @@ if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
   fi
 fi
 
-
-# ============================================================================
-# Configuration & Library Loading
-# ============================================================================
-
-# EUXIS_HOME already set at line 72 with proper fallback
 PROMPTS_DIR="${EUXIS_HOME}/euxis-core/agents/prompts"
 PROJECTS_DIR="${EUXIS_HOME}/euxis-runtime/data/projects"
+EUXIS_BIN="${EUXIS_HOME}/euxis-cli/bin"
+
 source "${EUXIS_HOME}/euxis-core/lib/common.sh"
 source "${EUXIS_HOME}/euxis-core/lib/providers.sh"
 source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
@@ -98,50 +115,30 @@ source "${EUXIS_HOME}/euxis-core/lib/prompt.sh"
 source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
 source "${EUXIS_HOME}/euxis-core/lib/dispatch.sh"
 
-# Fast boot health check (moved to cli.sh)
+# Fast boot health check
 check_health_fast
 
-# Context display (moved to cli.sh)
+# Context display
 show_context
 
-# Git branch guard (moved to cli.sh)
+# Git branch guard
 git_guard
-
-# Usage function (moved to cli.sh)
-
-# Argument parsing, session setup, and output capture (moved to cli.sh)
-
-# Main execution (moved to dispatch.sh)
-
-# Delegate function (moved to dispatch.sh)
 
 # ============================================================================
 # Entry Point
 # ============================================================================
 
-EUXIS_BIN="${EUXIS_HOME}/euxis-cli/bin"
-
-# Check for help flags and special commands before dispatch
+# Handle special commands
 case "${1:-}" in
-  -h | --help | help)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-    usage
-    ;;
-  --version)
-    echo "euxis 0.1.0"
-    exit 0
-    ;;
   agents)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
     usage_agents
     ;;
   search)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
     usage_search "${2:-}"
     exit 0
     ;;
   doctor)
-    exec "${EUXIS_HOME}/euxis-cli/bin/euxis-doctor" "${@:2}"
+    exec "${EUXIS_BIN}/euxis-doctor" "${@:2}"
     ;;
 esac
 

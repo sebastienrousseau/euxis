@@ -412,7 +412,7 @@ run_bench_gate() {
     local details=""
 
     # Threshold constants
-    local COLD_START_THRESHOLD=10000
+    local COLD_START_THRESHOLD=10
     local MEMORY_THRESHOLD=50
     local DISPATCH_THRESHOLD=200
 
