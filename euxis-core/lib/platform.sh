@@ -1,8 +1,24 @@
 #!/usr/bin/env bash
-#
-# Euxis Platform Utilities - Cross-platform compatibility layer
-# Supports: macOS, Linux, WSL
-#
+## ============================================================================
+## Euxis Library: Platform Abstraction Layer
+## ============================================================================
+##
+## Unify terminal operations across macOS, Linux, and WSL environments.
+##
+## DEPENDENCIES: bash 4.0+
+##
+##   | Platform | Clipboard    | Notifications    | Open URLs      |
+##   |----------|--------------|------------------|----------------|
+##   | macOS    | pbcopy       | osascript        | open           |
+##   | Linux    | xclip/wl-copy| notify-send      | xdg-open       |
+##   | WSL      | clip.exe     | wsl-notify-send  | explorer.exe   |
+##
+## ### Platform: macOS — Native Cocoa APIs, Homebrew auto-detected
+## ### Platform: Linux — X11/Wayland support, XDG paths
+## ### Platform: WSL — PowerShell interop, /mnt/c bridging
+##
+## IDEMPOTENCY: Safe to source multiple times
+## ============================================================================
 
 [[ -n "${_EUXIS_LIB_PLATFORM:-}" ]] && return; _EUXIS_LIB_PLATFORM=1
 
@@ -12,6 +28,7 @@ set -euo pipefail
 # Platform Detection
 # ============================================================================
 
+## _platform_detect — Identify runtime environment (macos | linux | wsl).
 _platform_detect() {
     # WSL detection: check multiple indicators
     if [[ -n "${WSL_DISTRO_NAME:-}" ]]; then
