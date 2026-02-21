@@ -348,3 +348,7 @@ git commit -s -m "feat: your commit message"
 ---
 
 Thank you for contributing to Euxis! Your efforts help make this project better for everyone.
+
+---
+Designed by Sebastien Rousseau — https://sebastienrousseau.com
+Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co

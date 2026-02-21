@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Crypto library type definitions
  * Exports standardized Result<T, E> pattern and crypto-specific error types
  */

@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { cpus } from 'os';
 import { CryptoOperationOptions } from '../types.js';

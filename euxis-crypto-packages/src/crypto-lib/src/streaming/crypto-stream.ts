@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
 import { Transform, Readable, Writable } from 'stream';
 import { randomBytes, createCipher, createDecipher } from 'crypto';
 import { CryptoWorkerPool } from '../performance/worker-pool.js';

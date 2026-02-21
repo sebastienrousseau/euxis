@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
 // Dependency injection architecture for crypto services
 import {
   SymmetricKey, PublicKey, PrivateKey, PlainText, CipherText, HashValue, Signature,

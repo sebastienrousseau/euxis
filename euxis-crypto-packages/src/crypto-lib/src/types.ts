@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
 // Branded types for cryptographic operations
 
 // Brand utility type

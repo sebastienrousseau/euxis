@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Pure functional encryption operations
  * No filesystem dependencies - operates only on in-memory data
  */

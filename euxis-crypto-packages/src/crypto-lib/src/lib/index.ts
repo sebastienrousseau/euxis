@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Crypto library implementation using Result<T, E> error handling
  * No exceptions thrown - all errors returned as structured Result types
  */

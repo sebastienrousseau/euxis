@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Plugin Architecture for Extensible Cryptographic Algorithms
  * Core interfaces for runtime plugin loading and algorithm registration
  */

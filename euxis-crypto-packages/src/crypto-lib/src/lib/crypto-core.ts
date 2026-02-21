@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Core crypto operations using Result<T, E> pattern
  * No throwing errors - all failures returned as Result.error
  */

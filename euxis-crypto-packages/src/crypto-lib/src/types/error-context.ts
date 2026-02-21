@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Error Context Preservation Utilities
  * Provides standardized context builders for crypto operations
  * to ensure consistent error reporting across the library

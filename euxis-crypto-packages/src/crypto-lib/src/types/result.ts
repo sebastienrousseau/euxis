@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Result<T, E> type for standardized error handling without exceptions
  * Based on Rust's Result enum pattern for predictable error handling
  */

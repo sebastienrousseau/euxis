@@ -1,3 +1,8 @@
+/**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
 // Crypto operations with proper branded types and worker pool integration
 
 import { randomBytes, createCipheriv, createDecipheriv, createHash, generateKeyPair, sign, verify } from 'crypto';

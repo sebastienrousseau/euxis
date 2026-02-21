@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Security Configuration for Crypto Service
  * Emergency Response: Secure Key Management Architecture
  */

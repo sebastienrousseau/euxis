@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * @euxis/crypto-lib - Main entry point
  * ESM module with dynamic imports for cryptographic algorithms
  */

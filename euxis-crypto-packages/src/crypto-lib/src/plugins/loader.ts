@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Runtime Plugin Loader for Cryptographic Algorithms
  * Handles dynamic loading and registration of crypto plugins
  */

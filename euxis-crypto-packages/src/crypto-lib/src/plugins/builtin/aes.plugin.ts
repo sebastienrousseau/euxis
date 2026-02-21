@@ -1,4 +1,9 @@
 /**
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2024-2026 Euxis Contributors
+ */
+
+/**
  * Built-in AES Encryption Plugin
  * Provides AES-256-GCM, AES-192-GCM, and AES-128-GCM encryption algorithms
  */
