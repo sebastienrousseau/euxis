@@ -1,23 +1,87 @@
 #!/usr/bin/env bash
-#
-# Euxis Library: Common Utilities
-#
-# This library provides core functionality for logging, performance tracking,
-# and UI elements used throughout the Euxis Fleet system.
+## ============================================================================
+## Euxis Library: Common Utilities
+## ============================================================================
+##
+## Provide logging, PII sanitization, and performance tracking for all agents.
+##
+## This is the foundational library sourced by every Euxis component. It
+## establishes consistent logging patterns, security-by-default sanitization,
+## and performance instrumentation across the fleet.
+##
+## ARCHITECTURE:
+##
+##   ┌─────────────────┐
+##   │  Any Euxis      │
+##   │  Component      │
+##   └────────┬────────┘
+##            │ source
+##            ▼
+##   ┌─────────────────┐     ┌─────────────────┐
+##   │   common.sh     │ ──► │     stderr      │  Logs (sanitized)
+##   │   (this lib)    │     └─────────────────┘
+##   └─────────────────┘
+##            │
+##            ▼
+##   ┌─────────────────┐
+##   │  PII Redaction  │  Email, API keys, tokens, IPs
+##   └─────────────────┘
+##
+## LOGGING FUNCTIONS:
+##
+##   | Function    | Prefix           | Visibility | Use Case              |
+##   |-------------|------------------|------------|-----------------------|
+##   | log_info    | [euxis]          | Always     | Standard messages     |
+##   | log_error   | [euxis] ERROR:   | Always     | Recoverable errors    |
+##   | log_debug   | [euxis] DEBUG:   | EUXIS_DEBUG| Development/debug     |
+##   | log_warn    | [euxis] WARN:    | Always     | Non-fatal warnings    |
+##
+## ENVIRONMENT VARIABLES:
+##
+##   | Variable          | Default | Description                         |
+##   |-------------------|---------|-------------------------------------|
+##   | EUXIS_HOME        | ~/.euxis| Installation directory              |
+##   | EUXIS_DEBUG       | 0       | Enable debug logging (0|1)          |
+##   | EUXIS_LOG_SANITIZE| 1       | Enable PII redaction (0|1)          |
+##
+## SECURITY:
+##   - All log output passes through _sanitize_pii() by default
+##   - Redacts: email addresses, API keys (sk-*, AKIA*), bearer tokens, IPs
+##   - Disable sanitization only for debugging: EUXIS_LOG_SANITIZE=0
+##
+## DEPENDENCIES:
+##   - bash 4.0+
+##   - sed (for regex-based redaction)
+##
+## IDEMPOTENCY:
+##   - Safe to source multiple times (include guard protects re-entry)
+##
+## USAGE:
+##   source "${EUXIS_HOME}/euxis-core/lib/common.sh"
+##   log_info "Deploying fleet"
+##   log_error "Agent failed:" "$agent_name"
+##   log_debug "Verbose:" "$detailed_info"
+##
+## ============================================================================
 
-# Include guard
+# Include guard — prevents duplicate sourcing
 [[ -n "${_EUXIS_LIB_COMMON:-}" ]] && return; _EUXIS_LIB_COMMON=1
 
 set -euo pipefail
-
 
 EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
 
 # ============================================================================
 # PII Sanitization (applied to all log output)
 # ============================================================================
+#
+# Patterns redacted:
+#   - Email:  user@domain.com         → [REDACTED_EMAIL]
+#   - API:    sk-*, key-*, AKIA*      → [REDACTED_KEY]
+#   - Token:  Bearer eyJ...           → Bearer [REDACTED_TOKEN]
+#   - IPv4:   192.168.1.1             → [REDACTED_IP] (localhost preserved)
 
-# _sanitize_pii - Redact sensitive patterns from log messages
+## _sanitize_pii — Redact sensitive patterns from log messages.
 #
 # DESCRIPTION:
 #     Strips email addresses, API keys, bearer tokens, IP addresses,

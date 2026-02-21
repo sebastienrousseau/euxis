@@ -1,24 +1,95 @@
 #!/usr/bin/env bash
-# EUXIS DISPATCH: The Fleet Deployment Engine (v0.1.0)
-# Reads an Architect Mission Manifest and fires agent loops.
-#
-# Usage: euxis-dispatch <manifest.json> [--mode hierarchical|mesh|federated]
-#
-# Dispatch Modes:
-#   hierarchical (default) — Central orchestrator coordinates all agents in parallel.
-#   mesh                   — Agents with dispatch authority coordinate sub-workflows
-#                            directly. Parent manifest spawns child manifests.
-#   federated              — Agents operate autonomously on separate project scopes.
-#                            Results aggregate into shared synthesis.
-#
-# The manifest is a JSON file with this structure:
-# {
-#   "project": "name",
-#   "mode": "hierarchical|mesh|federated",
-#   "dispatches": [
-#     { "agent": "debugger", "priority": "P0", "task": "...", "verify_cmd": "..." }
-#   ]
-# }
+## ============================================================================
+## euxis-dispatch — Fleet Deployment Engine
+## ============================================================================
+##
+## Deploy multi-agent workflows from Architect Mission Manifests.
+##
+## This is the orchestration core of Euxis. It reads a JSON manifest describing
+## which agents to invoke, with what tasks, in what order — then executes the
+## fleet in parallel with resource-aware throttling and verification gates.
+##
+## ARCHITECTURE:
+##
+##   ┌──────────────┐     ┌───────────────┐     ┌─────────────────┐
+##   │   Manifest   │ ──► │ euxis-dispatch│ ──► │  Agent Fleet    │
+##   │   (JSON)     │     │  (this tool)  │     │  (parallel)     │
+##   └──────────────┘     └───────────────┘     └─────────────────┘
+##                               │
+##                               ▼
+##                     ┌─────────────────┐
+##                     │  resources.sh   │  CPU/RAM throttling
+##                     │  router.sh      │  Cost-optimized model selection
+##                     │  mesh.sh        │  P2P agent communication
+##                     └─────────────────┘
+##
+## DISPATCH MODES:
+##
+##   | Mode         | Coordination          | Use Case                        |
+##   |--------------|-----------------------|---------------------------------|
+##   | hierarchical | Central orchestrator  | Standard deployments (default)  |
+##   | mesh         | Peer-to-peer agents   | Complex multi-phase workflows   |
+##   | federated    | Autonomous agents     | Multi-project/multi-repo work   |
+##
+## MANIFEST SCHEMA:
+##
+##   {
+##     "project": "myapp",
+##     "mode": "hierarchical|mesh|federated",
+##     "dispatches": [
+##       {
+##         "agent": "debugger",
+##         "priority": "P0|P1|P2|P3",
+##         "task": "Find the memory leak in auth.py",
+##         "provider": "claude",           // optional, auto-routed if omitted
+##         "verify_cmd": "pytest tests/",  // optional verification gate
+##         "timeout": 300                  // optional timeout in seconds
+##       }
+##     ]
+##   }
+##
+## DEPENDENCIES:
+##   - jq (JSON parsing)
+##   - bash 4.0+ (parallel job control)
+##   - At least one AI provider CLI (claude, gemini, openai, ollama)
+##
+## PLATFORM NOTES:
+##
+## ### Platform: macOS
+##   - Uses GNU parallel if available, falls back to bash job control
+##   - Homebrew: `brew install jq parallel`
+##
+## ### Platform: Linux
+##   - Native parallel and jq from package manager
+##   - apt: `sudo apt install jq parallel`
+##
+## ### Platform: WSL
+##   - WSL2 recommended for I/O performance with large manifests
+##   - Same dependencies as Linux
+##
+## SECURITY:
+##   - Manifest paths validated against path traversal
+##   - Task input sanitized before agent invocation
+##   - No secrets in manifest — use environment variables
+##
+## IDEMPOTENCY:
+##   - Safe to re-run failed manifests (completed agents skipped via state)
+##   - State persisted in $EUXIS_HOME/euxis-runtime/data/projects/<project>/
+##
+## USAGE:
+##   euxis-dispatch manifest.json                    # Hierarchical mode
+##   euxis-dispatch manifest.json --mode mesh       # Mesh mode
+##   euxis-dispatch manifest.json --mode federated  # Federated mode
+##   euxis-dispatch --resources                      # Show CPU/RAM status
+##   euxis-dispatch --router                         # Show model routing config
+##
+## EXIT CODES:
+##   0   All agents completed successfully
+##   1   One or more agents failed
+##   2   Manifest parse error
+##   3   Missing dependencies
+##
+## ============================================================================
 
 set -euo pipefail
 
