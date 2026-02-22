@@ -249,3 +249,17 @@ tests/*_report.md
 
 # Shell test generated artifacts
 euxis-core/tests/coverage/shell/*.tap
+
+# Rust / Cargo
+target/
+**/*.rs.bk
+
+# Rust test coverage 
+*.profraw
+*.profdata
+*.gcda
+*.gcno
+
+# Application specific cache 
+euxis-runtime/data/projects/.euxis/
+data/gateway/
