@@ -7544,3 +7544,17 @@
   "ms": 520,
   "status": "ok"
 }
+{
+  "ts": "2026-02-22T19:23:30Z",
+  "op": "prompt_assembly",
+  "agent": "reviewer",
+  "ms": 555,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-22T19:25:00Z",
+  "op": "prompt_assembly",
+  "agent": "polyglot",
+  "ms": 562,
+  "status": "ok"
+}
