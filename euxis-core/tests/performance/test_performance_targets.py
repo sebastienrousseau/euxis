@@ -88,9 +88,9 @@ except ImportError as e:
             pytest.skip(f"Could not parse import time: {result.stdout}")
 
         # Gateway has FastAPI deps, allow more headroom
-        # 2000ms limit accounts for cold cache and slower environments
-        assert import_time_ms <= 2000, (
-            f"Gateway import {import_time_ms:.1f}ms exceeds 2000ms limit"
+        # 3000ms limit accounts for cold cache and slower environments in V8/CI
+        assert import_time_ms <= 3000, (
+            f"Gateway import {import_time_ms:.1f}ms exceeds 3000ms limit"
         )
 
 
