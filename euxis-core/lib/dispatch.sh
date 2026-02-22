@@ -185,6 +185,7 @@ dispatch_command() {
         /*)         exec "${EUXIS_BIN}/euxis-slash" "${command#/}" "$@" ;;
         # Orchestration
         dispatch)   exec "${EUXIS_BIN}/euxis-dispatch" "$@" ;;
+        agent)      exec "${EUXIS_BIN}/euxis-agent" "$@" ;;
         loop)       exec "${EUXIS_BIN}/euxis-loop" "$@" ;;
         council)    exec "${EUXIS_BIN}/euxis-council" "$@" ;;
         replay)     exec "${EUXIS_BIN}/euxis-replay" "$@" ;;

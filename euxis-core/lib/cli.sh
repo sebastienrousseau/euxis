@@ -106,6 +106,7 @@ usage() {
     echo -e ""
 
     _print_section "CORE COMMANDS"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "agent <cmd>" "Manage agent plugins (register, list)"
     printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "squad <cmd>" "Manage agent squads (list, deploy, info)"
     printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "combo <cmd>" "Chain agents sequentially (list, run)"
     printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "playbook <cmd>" "Phased execution with gates (list, run)"

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Euxis Agent Management CLI
+
+set -euo pipefail
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+source "${EUXIS_HOME}/euxis-core/lib/common.sh"
+source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
+
+cmd="${1:-}"
+case "$cmd" in
+    register)
+        manifest="${2:-}"
+        if [[ -z "$manifest" ]]; then
+            log_error "Usage: euxis agent register <path/to/manifest.json>"
+            exit 1
+        fi
+        register_agent_plugin "$manifest"
+        ;;
+    unregister)
+        agent_id="${2:-}"
+        if [[ -z "$agent_id" ]]; then
+            log_error "Usage: euxis agent unregister <agent_id>"
+            exit 1
+        fi
+        unregister_agent_plugin "$agent_id"
+        ;;
+    list)
+        list_plugins
+        ;;
+    *)
+        log_error "Usage: euxis agent {register|unregister|list}"
+        exit 1
+        ;;
+esac

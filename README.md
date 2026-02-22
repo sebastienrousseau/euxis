@@ -52,6 +52,13 @@ Euxis comprises hyper-specialized micro-packages. Use exactly what you need.
 
 <br/>
 
+### What's New in v0.0.2
+- **Extensible Plugin Architecture**: Create and register custom agents with JSON manifests (`euxis agent register`).
+- **Comprehensive Agent Documentation**: Full playbooks for Rust, Python, Go, JS/TS, Swift, and CSS in `docs/agents/`.
+- **Core Agent Orchestration**: Under-the-hood preparation for federated multi-provider communication.
+
+<br/>
+
 ### Immediate Access
 Install the core packages to start your local agent mesh.
 
