@@ -7,7 +7,7 @@ name = "euxis-core"
 version = "0.0.1"
 description = "Shared core logic and shell libraries for the Euxis Agent Framework"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.11"
 authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
 dependencies = [

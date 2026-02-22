@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 [[ -n "${_EUXIS_LIB_RESOURCES:-}" ]] && return; _EUXIS_LIB_RESOURCES=1
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # resources.sh — System resource detection and throttling for agent dispatch

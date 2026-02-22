@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 [[ -n "${_EUXIS_LIB_ROUTER:-}" ]] && return; _EUXIS_LIB_ROUTER=1
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # router.sh — Intelligent model routing for cost optimization

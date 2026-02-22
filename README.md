@@ -68,7 +68,7 @@ euxis ui
 — **Designed by Sebastien Rousseau**  
 [sebastienrousseau.com](https://sebastienrousseau.com) | [euxis.co](https://euxis.co)
 
-[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
 [version-badge]: https://img.shields.io/badge/version-0.0.1-green.svg
 [version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.1

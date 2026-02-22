@@ -7,12 +7,12 @@ name = "euxis-docs"
 version = "0.0.1"
 description = "Documentation and architecture decision records for Euxis"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.11"
 authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
 ]
 dependencies = [
     "sphinx>=7.0.0",

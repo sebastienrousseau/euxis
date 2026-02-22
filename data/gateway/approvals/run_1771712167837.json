@@ -1,0 +1,11 @@
+{
+  "run_id": "run_1771712167837",
+  "session_id": "sess",
+  "agent_id": "a",
+  "requested_at": "2026-02-21T22:16:07+0000",
+  "meta": {
+    "agent": "a"
+  },
+  "content": "needs approval",
+  "approved": false
+}
