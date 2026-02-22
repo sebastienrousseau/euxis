@@ -15,12 +15,12 @@ FINAL ANSWER: Based on my systematic analysis of all 24 prompt files across core
 ### Findings
 
 1. **[MEDIUM]** Version Inconsistency in Protocol File
-   - **Impact:** `/home/seb/.euxis/agents/prompts/protocols/_protocol.txt:7` shows "v4.2" but header shows "v4.5"
+   - **Impact:** `${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt:7` shows "v4.2" but header shows "v4.5"
    - **Recommendation:** Update line 7 to match header version
    - **Rationale:** Version drift creates confusion about which protocol rules are active
 
 2. **[MEDIUM]** Unrealistic Performance Mandate in Architect Prompt  
-   - **Impact:** `/home/seb/.euxis/agents/prompts/core/architect.txt:52-53` mandates "ALWAYS 10/10" scores contradicting directive #4 about balancing pragmatism
+   - **Impact:** `${EUXIS_HOME}/agents/prompts/core/architect.txt:52-53` mandates "ALWAYS 10/10" scores contradicting directive #4 about balancing pragmatism
    - **Recommendation:** Change to "TARGET 10/10" with allowance for documented trade-offs
    - **Rationale:** Absolute mandates conflict with pragmatic architectural decision-making
 
@@ -52,7 +52,7 @@ euxis-cortex remember "Audit found 3 defects in Euxis prompts: version drift in 
     {"action": "Document template resolution strategy", "agent": "writer", "priority": "P3"}
   ],
   "artifacts": [
-    {"path": "/home/seb/.euxis/projects/.euxis/architect/audit.md", "action": "MODIFIED"}
+    {"path": "${EUXIS_HOME}/projects/.euxis/architect/audit.md", "action": "MODIFIED"}
   ]
 }
 -->

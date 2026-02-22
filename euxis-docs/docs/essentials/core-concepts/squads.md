@@ -123,19 +123,19 @@ cat > security-audit-manifest.json <<'EOF'
       "agent": "sentinel",
       "priority": "P0",
       "task": "Lead comprehensive security audit of authentication system",
-      "verify_cmd": "test -f /tmp/security-report.md"
+      "verify_cmd": "test -f ${TMPDIR:-/tmp}/security-report.md"
     },
     {
       "agent": "pentester",
       "priority": "P0",
       "task": "Perform boundary testing and vulnerability assessment",
-      "verify_cmd": "grep -q 'SCAN COMPLETE' /tmp/pentester-log.txt"
+      "verify_cmd": "grep -q 'SCAN COMPLETE' ${TMPDIR:-/tmp}/pentester-log.txt"
     },
     {
       "agent": "cryptographer",
       "priority": "P1",
       "task": "Audit cryptographic implementation and key management",
-      "verify_cmd": "test -f /tmp/crypto-audit.md"
+      "verify_cmd": "test -f ${TMPDIR:-/tmp}/crypto-audit.md"
     }
   ]
 }

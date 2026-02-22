@@ -15,7 +15,7 @@ FINAL ANSWER: Based on my comprehensive analysis of all prompts in ~/.euxis/prom
 ### Findings
 
 **1. [HIGH] Protocol Drift - Template Variable Inconsistency**
-   - **Impact:** The mandatory protocol (_protocol.txt:12-21) defines template variables like `{{AUDIT_FILE_PATH}}`, `{{MEMORY_FILE_PATH}}`, `{{SESSION_ID}}`, and `{{MODEL_NAME}}` but the actual agent prompts (including architect.txt) use hardcoded paths like `/home/seb/.euxis/projects/.euxis/architect/audit.md`.
+   - **Impact:** The mandatory protocol (_protocol.txt:12-21) defines template variables like `{{AUDIT_FILE_PATH}}`, `{{MEMORY_FILE_PATH}}`, `{{SESSION_ID}}`, and `{{MODEL_NAME}}` but the actual agent prompts (including architect.txt) use hardcoded paths like `${EUXIS_HOME}/projects/.euxis/architect/audit.md`.
    - **Recommendation:** Update all agent prompts to use the template variables defined in the protocol, or update the protocol to match current implementation.
    - **Rationale:** Template variables ensure portability and prevent path-related failures across different environments.
 
@@ -54,14 +54,14 @@ euxis-cortex remember "Protocol audit revealed template variable drift and deleg
 **Model:** claude-sonnet-4-20250514
 **Status:** SUCCESS
 **Actions:**
-- [READ] /home/seb/.euxis/agents/prompts/protocols/_common.txt
-- [READ] /home/seb/.euxis/agents/prompts/protocols/_protocol.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/orchestrator.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/architect.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/librarian.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/debugger.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/pentester.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/butler.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/protocols/_common.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/orchestrator.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/architect.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/librarian.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/debugger.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/pentester.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/butler.txt
 - [CORTEX] remember "Protocol audit findings"
 **Outcome:** Identified 5 logical defects in prompt system including protocol drift and delegation loop risks
 **Escalation:** None

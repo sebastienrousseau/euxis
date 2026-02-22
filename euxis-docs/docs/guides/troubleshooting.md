@@ -1178,8 +1178,8 @@ euxis architect "Your task"
 | Agent memory | `~/.euxis/runtime/data/projects/{project}/{agent}/memory.md` |
 | Performance metrics | `~/.euxis/metrics/events.jsonl` |
 | Lifecycle transitions | `~/.euxis/runtime/data/lifecycle/transitions.jsonl` |
-| Dispatch logs | `/tmp/euxis_dispatch_*/*.log` |
-| Certification logs | `/tmp/euxis_cert_*.log` |
+| Dispatch logs | `${TMPDIR:-/tmp}/euxis_dispatch_*/*.log` |
+| Certification logs | `${TMPDIR:-/tmp}/euxis_cert_*.log` |
 | Bus messages | `~/.euxis/runtime/data/bus/pipes/*/*.msg` |
 
 ### Generating a Bug Report

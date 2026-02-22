@@ -1393,7 +1393,7 @@ components:
           enum: [document, code, diagram, data]
         path:
           type: string
-          example: /tmp/architecture_design.md
+          example: ${TMPDIR:-/tmp}/architecture_design.md
         size_bytes:
           type: integer
           example: 8192

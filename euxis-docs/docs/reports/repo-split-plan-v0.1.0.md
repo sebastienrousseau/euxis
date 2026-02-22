@@ -272,53 +272,53 @@ Use `git filter-repo` to preserve history. Example commands:
 
 ```bash
 # Core
-mkdir -p /tmp/euxis-core && cd /tmp/euxis-core
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-core && cd ${TMPDIR:-/tmp}/euxis-core
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path core --path agents --path config --force
 
 # CLI
-mkdir -p /tmp/euxis-cli && cd /tmp/euxis-cli
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-cli && cd ${TMPDIR:-/tmp}/euxis-cli
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path cli --force
 
 # Gateway
-mkdir -p /tmp/euxis-gateway && cd /tmp/euxis-gateway
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-gateway && cd ${TMPDIR:-/tmp}/euxis-gateway
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path gateway --force
 
 # Adapters
-mkdir -p /tmp/euxis-adapters && cd /tmp/euxis-adapters
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-adapters && cd ${TMPDIR:-/tmp}/euxis-adapters
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path adapters --force
 
 # TUI
-mkdir -p /tmp/euxis-tui && cd /tmp/euxis-tui
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-tui && cd ${TMPDIR:-/tmp}/euxis-tui
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path tui --force
 
 # Metrics
-mkdir -p /tmp/euxis-metrics && cd /tmp/euxis-metrics
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-metrics && cd ${TMPDIR:-/tmp}/euxis-metrics
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path metrics --force
 
 # Security
-mkdir -p /tmp/euxis-security && cd /tmp/euxis-security
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-security && cd ${TMPDIR:-/tmp}/euxis-security
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path security --force
 
 # Docs
-mkdir -p /tmp/euxis-docs && cd /tmp/euxis-docs
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-docs && cd ${TMPDIR:-/tmp}/euxis-docs
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path docs --path mkdocs.yml --force
 
 # Crypto (Python)
-mkdir -p /tmp/euxis-crypto-lib && cd /tmp/euxis-crypto-lib
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-lib && cd ${TMPDIR:-/tmp}/euxis-crypto-lib
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path crypto/src/crypto_lib --force
 
 # Crypto packages (TS)
-mkdir -p /tmp/euxis-crypto-packages && cd /tmp/euxis-crypto-packages
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-packages && cd ${TMPDIR:-/tmp}/euxis-crypto-packages
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path packages/crypto-lib --path packages/crypto-server --force
 ```
 

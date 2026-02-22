@@ -271,8 +271,9 @@ class TestGetProjectPath:
 
     def test_non_home_path(self):
         """Directory not under home should return absolute path."""
-        result = get_project_path(working_dir="/tmp/test-project")
-        assert result == "/tmp/test-project"
+        abs_path = os.path.abspath("/test-project")
+        result = get_project_path(working_dir=abs_path)
+        assert result == abs_path
 
     def test_defaults_to_cwd(self):
         """Without args, should use cwd."""

@@ -18,7 +18,7 @@ Dispatch manifests are JSON configuration files that define multi-agent task dep
 euxis-dispatch config/manifests/doc-overhaul.json
 
 # Create a simple manifest
-cat > /tmp/review-manifest.json << 'EOF'
+cat > ${TMPDIR:-/tmp}/review-manifest.json << 'EOF'
 {
   "project": "code-review",
   "dispatches": [
@@ -28,7 +28,7 @@ cat > /tmp/review-manifest.json << 'EOF'
 }
 EOF
 
-euxis-dispatch /tmp/review-manifest.json
+euxis-dispatch ${TMPDIR:-/tmp}/review-manifest.json
 ```
 
 ## Manifest Schema
@@ -123,7 +123,7 @@ The `verify_cmd` field specifies how to verify task completion:
       "agent": "librarian",
       "priority": "P0",
       "task": "Audit all documentation for gaps and inconsistencies",
-      "verify_cmd": "test -f /tmp/doc-audit-report.md"
+      "verify_cmd": "test -f ${TMPDIR:-/tmp}/doc-audit-report.md"
     },
     {
       "agent": "writer",
@@ -198,10 +198,10 @@ euxis-dispatch config/manifests/my-workflow.json
 euxis-dispatch manifest.json
 
 # Check logs
-ls /tmp/euxis_dispatch_*/
+ls ${TMPDIR:-/tmp}/euxis_dispatch_*/
 
 # View specific agent log
-cat /tmp/euxis_dispatch_*/agent-name_*.log
+cat ${TMPDIR:-/tmp}/euxis_dispatch_*/agent-name_*.log
 ```
 
 ## Best Practices

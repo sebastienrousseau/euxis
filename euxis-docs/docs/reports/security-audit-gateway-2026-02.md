@@ -53,7 +53,7 @@ All identified vulnerabilities have been addressed with defense-in-depth control
 **CVSS v3.1 Score:** 9.8 (Critical)
 **CVSS Vector:** `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`
 **CWE:** CWE-287 (Improper Authentication)
-**Location:** `/home/seb/.euxis/euxis-gateway/src/gateway/server.py` lines 926-1002
+**Location:** `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` lines 926-1002
 
 #### Description
 
@@ -137,7 +137,7 @@ assert result == True
 **CVSS v3.1 Score:** 9.1 (Critical)
 **CVSS Vector:** `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`
 **CWE:** CWE-306 (Missing Authentication for Critical Function)
-**Location:** `/home/seb/.euxis/euxis-gateway/src/gateway/server.py` line 714
+**Location:** `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` line 714
 
 #### Description
 
@@ -222,7 +222,7 @@ curl -X POST http://localhost:18789/admin/exec \
 **CVSS v3.1 Score:** 9.8 (Critical)
 **CVSS Vector:** `AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H`
 **CWE:** CWE-78 (Improper Neutralization of Special Elements used in an OS Command)
-**Location:** `/home/seb/.euxis/euxis-gateway/src/gateway/server.py` line 1417
+**Location:** `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` line 1417
 
 #### Description
 
@@ -239,13 +239,13 @@ The `run_voice_command()` function accepted user-controlled input (file paths, s
 
 ```python
 # Malicious audio_path input
-audio_path = "/tmp/audio.wav; rm -rf / #"
+audio_path = "${TMPDIR:-/tmp}/audio.wav; rm -rf / #"
 
 # Vulnerable command template
 command = "whisper {audio_path}"
 
 # Results in shell execution of:
-# whisper /tmp/audio.wav; rm -rf / #
+# whisper ${TMPDIR:-/tmp}/audio.wav; rm -rf / #
 ```
 
 #### Technical Details
@@ -316,14 +316,14 @@ async def run_voice_command(command: str, vars_map: Dict[str, str]) -> str:
 
 ```python
 # Test: Injection attempt
-vars_map = {"audio_path": "/tmp/test.wav; rm -rf /"}
+vars_map = {"audio_path": "${TMPDIR:-/tmp}/test.wav; rm -rf /"}
 sanitized = _sanitize_voice_vars(vars_map)
-assert sanitized["audio_path"] == "'/tmp/test.wav; rm -rf /'"
+assert sanitized["audio_path"] == "'${TMPDIR:-/tmp}/test.wav; rm -rf /'"
 # The entire malicious string is now quoted as a single argument
 
 # Test: Empty allowlist blocks execution
 allowlist = []
-result = await run_voice_command("whisper {audio_path}", {"audio_path": "/tmp/test.wav"})
+result = await run_voice_command("whisper {audio_path}", {"audio_path": "${TMPDIR:-/tmp}/test.wav"})
 assert result == ""
 ```
 
@@ -335,7 +335,7 @@ assert result == ""
 **CVSS v3.1 Score:** 8.8 (High)
 **CVSS Vector:** `AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H`
 **CWE:** CWE-434 (Unrestricted Upload of File with Dangerous Type)
-**Location:** `/home/seb/.euxis/euxis-gateway/src/gateway/server.py` line 511
+**Location:** `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` line 511
 
 #### Description
 
@@ -463,17 +463,17 @@ curl -X POST "http://localhost:18789/voice/upload?session_id=test" \
 # Expected: 400 Bad Request - file_type_not_allowed
 
 # Test: Size limit exceeded (should fail)
-dd if=/dev/zero bs=1M count=15 of=/tmp/large.wav
+dd if=/dev/zero bs=1M count=15 of=${TMPDIR:-/tmp}/large.wav
 curl -X POST "http://localhost:18789/voice/upload?session_id=test" \
   -H "Authorization: Bearer <token>" \
-  -F "file=@/tmp/large.wav"
+  -F "file=@${TMPDIR:-/tmp}/large.wav"
 # Expected: 413 Payload Too Large
 
 # Test: Content mismatch (should fail)
-echo "not audio data" > /tmp/fake.wav
+echo "not audio data" > ${TMPDIR:-/tmp}/fake.wav
 curl -X POST "http://localhost:18789/voice/upload?session_id=test" \
   -H "Authorization: Bearer <token>" \
-  -F "file=@/tmp/fake.wav"
+  -F "file=@${TMPDIR:-/tmp}/fake.wav"
 # Expected: 400 Bad Request - content_type_mismatch
 
 # Test: Valid audio file (should succeed)
@@ -606,7 +606,7 @@ curl -X POST "http://localhost:18789/voice/upload?session_id=test" \
 
 | Component | Path |
 |-----------|------|
-| Gateway Server | `/home/seb/.euxis/euxis-gateway/src/gateway/server.py` |
+| Gateway Server | `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` |
 | Gateway Config | `~/.euxis/security/gateway.json` |
 | Audit Logs | `~/.euxis/data/audit/` |
 

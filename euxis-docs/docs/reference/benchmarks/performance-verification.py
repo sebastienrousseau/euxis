@@ -532,7 +532,7 @@ class PerformanceVerificationSuite:
     def save_results(self, filepath: Optional[str] = None):
         """Save detailed results to JSON."""
         if filepath is None:
-            filepath = f"/tmp/euxis_performance_results_{int(time.time())}.json"
+            filepath = fos.environ.get("TMPDIR", "/tmp") + "/euxis_performance_results_{int(time.time())}.json"
 
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2, default=str)

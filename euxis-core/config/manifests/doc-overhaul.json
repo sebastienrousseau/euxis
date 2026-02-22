@@ -5,8 +5,8 @@
     {
       "agent": "librarian",
       "priority": "P0",
-      "task": "Audit all documentation for accuracy, completeness, and consistency. Flag gaps, errors, and outdated content. Produce /tmp/doc-audit-report.md",
-      "verify_cmd": "test -f /tmp/doc-audit-report.md"
+      "task": "Audit all documentation for accuracy, completeness, and consistency. Flag gaps, errors, and outdated content. Produce ${TMPDIR:-/tmp}/doc-audit-report.md",
+      "verify_cmd": "test -f ${TMPDIR:-/tmp}/doc-audit-report.md"
     },
     {
       "agent": "tech-writer",

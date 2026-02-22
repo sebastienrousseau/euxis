@@ -6,7 +6,7 @@
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-TEST_TEMP_DIR="/tmp/euxis_plugin_test_$$"
+TEST_TEMP_DIR="${TMPDIR:-/tmp}/euxis_plugin_test_$$"
 FAILED_TESTS=0
 TOTAL_TESTS=0
 

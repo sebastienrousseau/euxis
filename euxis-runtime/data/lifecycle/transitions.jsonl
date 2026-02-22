@@ -565,3 +565,16 @@
 {"ts":"2026-02-22T19:21:59Z","agent":"inspector","state":"active","session":"20260222-192159"}
 {"ts":"2026-02-22T19:23:29Z","agent":"reviewer","state":"active","session":"20260222-192329"}
 {"ts":"2026-02-22T19:24:59Z","agent":"polyglot","state":"active","session":"20260222-192459"}
+{"ts":"2026-02-22T19:26:29Z","agent":"maintainer","state":"active","session":"20260222-192629"}
+{"ts":"2026-02-22T19:27:59Z","agent":"reviewer","state":"active","session":"20260222-192759"}
+{"ts":"2026-02-22T19:29:37Z","agent":"tester","state":"active","session":"20260222-192937"}
+{"ts":"2026-02-22T19:31:07Z","agent":"debugger","state":"active","session":"20260222-193107"}
+{"ts":"2026-02-22T19:32:37Z","agent":"inspector","state":"active","session":"20260222-193237"}
+{"ts":"2026-02-22T19:34:07Z","agent":"reviewer","state":"active","session":"20260222-193407"}
+{"ts":"2026-02-22T19:35:38Z","agent":"inspector","state":"active","session":"20260222-193538"}
+{"ts":"2026-02-22T19:37:08Z","agent":"gatekeeper","state":"active","session":"20260222-193708"}
+{"ts":"2026-02-22T19:38:37Z","agent":"writer","state":"active","session":"20260222-193837"}
+{"ts":"2026-02-22T19:40:07Z","agent":"reviewer","state":"active","session":"20260222-194007"}
+{"ts":"2026-02-22T19:41:38Z","agent":"auditor","state":"active","session":"20260222-194138"}
+{"ts":"2026-02-22T19:43:08Z","agent":"inspector","state":"active","session":"20260222-194308"}
+{"ts":"2026-02-22T19:44:37Z","agent":"reviewer","state":"active","session":"20260222-194437"}

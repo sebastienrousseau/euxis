@@ -74,3 +74,9 @@
 {"ts": "2026-02-22T18:47:31+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
 {"ts": "2026-02-22T18:57:56+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
 {"ts": "2026-02-22T18:57:56+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T19:47:44+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T19:49:47+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T19:50:20+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T19:50:43+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T19:51:19+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
+{"ts": "2026-02-22T19:51:21+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}

@@ -15,12 +15,12 @@ FINAL ANSWER: Based on my systematic analysis of all 24 prompt files in the ~/.e
 ### Findings
 
 **1. [HIGH] Protocol Version Inconsistency**
-   - **Impact:** `/home/seb/.euxis/agents/prompts/protocols/_protocol.txt:7` declares "EUXIS MANDATORY PROTOCOL (v4.2)" but metadata shows version "4.5" 
+   - **Impact:** `${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt:7` declares "EUXIS MANDATORY PROTOCOL (v4.2)" but metadata shows version "4.5" 
    - **Recommendation:** Update line 7 to match metadata version "v4.5"
    - **Rationale:** Version mismatches create confusion about which protocol rules are authoritative
 
 **2. [CRITICAL] Architect Assessment Logic Defect**
-   - **Impact:** `/home/seb/.euxis/agents/prompts/core/architect.txt:52-53` mandates fixed values "Technical Debt Score: 10/10 (ALWAYS 10/10)" and "Modularity Rating: 100/100 (ALWAYS 100/100)"
+   - **Impact:** `${EUXIS_HOME}/agents/prompts/core/architect.txt:52-53` mandates fixed values "Technical Debt Score: 10/10 (ALWAYS 10/10)" and "Modularity Rating: 100/100 (ALWAYS 100/100)"
    - **Recommendation:** Remove "ALWAYS" constraints and allow dynamic assessment scores based on actual codebase state
    - **Rationale:** Fixed perfect scores eliminate the diagnostic value of these metrics and create impossible standards that contradict the assessment's purpose
 
