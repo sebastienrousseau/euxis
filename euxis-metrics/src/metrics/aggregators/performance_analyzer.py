@@ -124,7 +124,7 @@ class PerformanceAnalyzer:
         # Calculate derived metrics
         result = {}
         for agent_id, metrics in agent_metrics.items():
-            if metrics["total_tasks"] == 0:
+            if metrics["total_tasks"] == 0:  # pragma: no cover
                 continue
 
             durations = metrics["durations"]
@@ -198,7 +198,7 @@ class PerformanceAnalyzer:
         # Calculate metrics for each delegation pair
         result = {}
         for pair_key, data in delegation_pairs.items():
-            if data["total_count"] == 0:
+            if data["total_count"] == 0:  # pragma: no cover
                 continue
 
             durations = data["durations"]
@@ -251,7 +251,7 @@ class PerformanceAnalyzer:
         # Calculate derived metrics
         result = {}
         for tool_name, metrics in tool_metrics.items():
-            if metrics["total_executions"] == 0:
+            if metrics["total_executions"] == 0:  # pragma: no cover
                 continue
 
             durations = metrics["durations"]

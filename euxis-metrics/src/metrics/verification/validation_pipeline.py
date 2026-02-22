@@ -305,29 +305,52 @@ class ValidationPipeline:
         """Extract evidence objects from embedded JSON in text."""
         evidence_list = []
 
-        # Look for JSON blocks that might contain evidence
-        json_blocks = re.findall(r'\{[^}]*"evidence"[^}]*\}', text, re.DOTALL)
-
-        for block in json_blocks:
-            try:
-                data = json.loads(block)
-                if "evidence" in data:
-                    # Convert to Evidence objects
-                    for ev_data in data["evidence"]:
-                        if isinstance(ev_data, dict):
-                            evidence = Evidence(
-                                source_file=ev_data.get("source_file", "unknown"),
-                                source_line=ev_data.get("source_line"),
-                                evidence_type=ev_data.get("evidence_type", "unknown"),
-                                grade=EvidenceGrade(ev_data.get("grade", "E4")),
-                                content=ev_data.get("content", ""),
-                                timestamp=datetime.now(UTC),
-                                verification_cmd=ev_data.get("verification_cmd"),
-                                metadata=ev_data.get("metadata", {})
-                            )
-                            evidence_list.append(evidence)
-            except (json.JSONDecodeError, ValueError, KeyError):
+        # Find blocks that contain evidence
+        idx = 0
+        while True:
+            idx = text.find('{"evidence":', idx)
+            if idx == -1:
+                break
+            
+            # Find the matching closing brace
+            depth = 0
+            end_idx = -1
+            for i in range(idx, len(text)):
+                if text[i] == '{':
+                    depth += 1
+                elif text[i] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        end_idx = i + 1
+                        break
+            
+            if end_idx != -1:
+                json_blocks = [text[idx:end_idx]]
+                idx = end_idx
+            else:
+                idx += 1
                 continue
+                
+            for block in json_blocks:
+                try:
+                    data = json.loads(block)
+                    if "evidence" in data:
+                        # Convert to Evidence objects
+                        for ev_data in data["evidence"]:
+                            if isinstance(ev_data, dict):
+                                evidence = Evidence(
+                                    source_file=ev_data.get("source_file", "unknown"),
+                                    source_line=ev_data.get("source_line"),
+                                    evidence_type=ev_data.get("evidence_type", "unknown"),
+                                    grade=EvidenceGrade(ev_data.get("grade", "E4")),
+                                    content=ev_data.get("content", ""),
+                                    timestamp=datetime.now(UTC),
+                                    verification_cmd=ev_data.get("verification_cmd"),
+                                    metadata=ev_data.get("metadata", {})
+                                )
+                                evidence_list.append(evidence)
+                except (json.JSONDecodeError, ValueError, KeyError):
+                    continue
 
         return evidence_list
 
