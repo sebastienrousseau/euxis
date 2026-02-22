@@ -69,12 +69,12 @@ case "${1:-}" in
     printf "    Run %beuxis search <keyword>%b to find agents by capability.\n\n" "$CYAN" "$RESET"
 
     printf "  %b%b%s EXAMPLES%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
-    printf "    %b$%b euxis architect %b\"Design a REST API for user auth\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
-    printf "    %b$%b euxis squad deploy quality %b\"Audit the payment module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis ᛞ architect %b\"Design a REST API for user auth\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis ᛞ squad deploy quality %b\"Audit the payment module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
     printf "       %b%s Deploys: reviewer, inspector, sentinel, pentester, auditor%b\n" "$DIM" "$ICON_ARROW" "$RESET"
-    printf "    %b$%b euxis combo run envision %b\"Build a CLI for data pipelines\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis ᛞ combo run envision %b\"Build a CLI for data pipelines\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
     printf "       %b%s Chain: deep-researcher %s planner %s architect %s reviewer%b\n" "$DIM" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$RESET"
-    printf "    %b$%b euxis playbook run python %b\"Refactor the utils module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis ᛞ playbook run python %b\"Refactor the utils module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
     printf "       %b%s Phases: analyze %s implement %s test %s review%b\n\n" "$DIM" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$RESET"
 
     printf "  %b%b%s GLOBAL FLAGS%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"

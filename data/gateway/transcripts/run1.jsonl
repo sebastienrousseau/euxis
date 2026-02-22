@@ -70,3 +70,5 @@
 {"ts": "2026-02-22T09:37:26-0500", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
 {"ts": "2026-02-22T17:47:41+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
 {"ts": "2026-02-22T17:47:42+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
+{"ts": "2026-02-22T18:47:30+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
+{"ts": "2026-02-22T18:47:31+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}

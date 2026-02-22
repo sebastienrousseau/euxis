@@ -110,3 +110,5 @@
 {"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-22T09:37:25-0500", "data": {"run_id": "run", "session_id": "sess", "agent_id": "a", "status": "error", "content": "[Errno 2] No such file or directory: '/home/seb/.euxis/bin/euxis'"}}
 {"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-22T17:47:36+0000", "data": {"run_id": "run", "session_id": "sess", "agent_id": "a", "status": "error", "content": "boom"}}
 {"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-22T17:47:42+0000", "data": {"run_id": "run", "session_id": "sess", "agent_id": "a", "status": "error", "content": "[Errno 2] No such file or directory: '/home/seb/.euxis/bin/euxis'"}}
+{"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-22T18:47:25+0000", "data": {"run_id": "run", "session_id": "sess", "agent_id": "a", "status": "error", "content": "boom"}}
+{"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-22T18:47:31+0000", "data": {"run_id": "run", "session_id": "sess", "agent_id": "a", "status": "error", "content": "[Errno 2] No such file or directory: '/home/seb/.euxis/bin/euxis'"}}

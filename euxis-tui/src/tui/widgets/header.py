@@ -132,7 +132,7 @@ class ETXHeader(Widget):
 
     def _update_display(self) -> None:
         logo = self.query_one("#etx-header-logo", Static)
-        logo.update(f"[bold]⬡ EUXIS[/] [dim]v{self.version}[/]")
+        logo.update(f"[bold]ᛞ EUXIS[/] [dim]v{self.version}[/]")
 
         context = self.query_one("#etx-header-context", Static)
         path_display = self.project_path or self.project
