@@ -217,6 +217,7 @@ dispatch_command() {
         voice)      exec "${EUXIS_BIN}/euxis-voice" "$@" ;;
         gym)        exec "${EUXIS_BIN}/euxis-gym" "$@" ;;
         ui)         exec "${EUXIS_BIN}/euxis-ui" "$@" ;;
+        wasm)       _exec_python "${EUXIS_BIN}/euxis-wasm" "$@" ;;
         # Default: agent mode
         *)          main "${command}" "$@" ;;
     esac

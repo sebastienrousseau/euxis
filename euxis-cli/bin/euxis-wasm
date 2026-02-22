@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2024-2026 Euxis Contributors
+
+"""Euxis Wasm Executable CLI
+
+Routes the execution of WebAssembly binaries using the Extism core capability.
+Expected payload syntax: `{"task": "..."}` or raw JSON dict.
+"""
+
+import argparse
+import json
+import logging
+import sys
+from pathlib import Path
+
+# Fix pythonpath for euxis_core if running directly
+try:
+    from euxis_core.mesh.extism_runner import WasmExecutor
+except ImportError:
+    # Attempt to inject path dynamically
+    root = Path(__file__).resolve().parent.parent.parent.parent
+    sys.path.insert(0, str(root / "euxis-core" / "src"))
+    from euxis_core.mesh.extism_runner import WasmExecutor
+
+logger = logging.getLogger(__name__)
+
+def main():
+    parser = argparse.ArgumentParser(description="Euxis Extism Wasm Runner")
+    parser.add_argument("plugin", help="Path to the WebAssembly (.wasm) file to execute")
+    parser.add_argument("content", help="Input payload/content to feed the Wasm function")
+    parser.add_argument("--func", default="run", help="Target Wasm function to invoke (default: run)")
+    args = parser.parse_args()
+
+    wasm_path = Path(args.plugin)
+    if not wasm_path.exists():
+        # Look in the standard mesh/plugins directory
+        mesh_plugins = Path.home() / ".euxis" / "euxis-runtime" / "mesh" / "plugins"
+        wasm_path = mesh_plugins / args.plugin
+        if not wasm_path.exists():
+            print(f"Error: Wasm binary '{args.plugin}' not found.", file=sys.stderr)
+            sys.exit(1)
+
+    try:
+        # Standardize input to json schema
+        try:
+            input_dict = json.loads(args.content)
+            if not isinstance(input_dict, dict):
+                input_dict = {"payload": input_dict}
+        except json.JSONDecodeError:
+            input_dict = {"content": args.content}
+
+        executor = WasmExecutor(str(wasm_path))
+        result = executor.call(args.func, input_dict)
+        executor.free()
+        
+        # Emit standard CLI format expected by euxis-gateway
+        print(json.dumps(result, indent=2))
+        sys.exit(0)
+    except Exception as e:
+        print(f"Wasm execution error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

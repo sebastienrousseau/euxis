@@ -716,12 +716,15 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         message = payload.get("message", "")
         if not message:
             return JSONResponse({"status": "invalid"}, status_code=400)
-        for conn_id, ws in list(STATE.connections.items()):
-            if STATE.conn_sessions.get(conn_id) != session_id:
-                continue
-            seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
-            await send_agent_event(ws, seq_state, f"run_broadcast_{int(time.time() * 1000)}", session_id, "gateway", "final", message)
-            STATE.conn_seq[conn_id] = seq_state["value"]
+        async with asyncio.TaskGroup() as tg:
+            for conn_id, ws in list(STATE.connections.items()):
+                if STATE.conn_sessions.get(conn_id) != session_id:
+                    continue
+                seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
+                tg.create_task(
+                    send_agent_event(ws, seq_state, f"run_broadcast_{int(time.time() * 1000)}", session_id, "gateway", "final", message)
+                )
+                STATE.conn_seq[conn_id] = seq_state["value"]
         return JSONResponse({"status": "ok"})
 
     @app.get("/sessions/export")
@@ -788,22 +791,24 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
         )
         audit_log({"ts": timestamp(), "event": "approval", "run_id": run_id, "status": "approved"})
         # Dispatch immediately to all active connections.
-        for conn_id, ws in list(STATE.connections.items()):
-            seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
-            task = asyncio.create_task(
-                dispatch_with_lock(
-                    ws,
-                    seq_state,
-                    pending["session_id"],
-                    pending["run_id"],
-                    pending.get("meta", {}),
-                    pending.get("content", ""),
-                    config,
-                )
-            )
-            STATE.running[pending["run_id"]] = task
-            STATE.conn_seq[conn_id] = seq_state["value"]
-            break
+        # Dispatch concurrently to all active connections spanning this session
+        async with asyncio.TaskGroup() as tg:
+            for conn_id, ws in list(STATE.connections.items()):
+                if STATE.conn_sessions.get(conn_id) == pending["session_id"] or not STATE.conn_sessions.get(conn_id):
+                    seq_state = {"value": STATE.conn_seq.get(conn_id, 0)}
+                    task = tg.create_task(
+                        dispatch_with_lock(
+                            ws,
+                            seq_state,
+                            pending["session_id"],
+                            pending["run_id"],
+                            pending.get("meta", {}),
+                            pending.get("content", ""),
+                            config,
+                        )
+                    )
+                    STATE.running[pending["run_id"]] = task
+                    STATE.conn_seq[conn_id] = seq_state["value"]
         return JSONResponse({"status": "approved"})
 
     @app.post("/approvals/{run_id}/reject")
@@ -1306,6 +1311,9 @@ async def dispatch_agent(
     elif mode == "playbook":
         playbook = meta.get("playbook", "zero-to-one")
         cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-playbook"), "run", playbook, content]
+    elif mode == "wasm":
+        wasm_plugin = meta.get("plugin", agent_id)
+        cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-wasm"), wasm_plugin, content]
     else:
         cmd = [str(Path.home() / ".euxis" / "bin" / "euxis"), agent_id, content]
     if provider:
@@ -1341,7 +1349,9 @@ async def dispatch_agent(
             output_lines.append(text)
             await send_agent_event(ws, seq_state, run_id, session_id, agent_id, "stream", text)
 
-    await asyncio.gather(stream_stdout(), stream_stderr())
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(stream_stdout())
+        tg.create_task(stream_stderr())
     await proc.wait()
     status = "final" if proc.returncode == 0 else "error"
     final_content = "\n".join(output_lines[-200:]) if output_lines else f"exit {proc.returncode}"
