@@ -7530,3 +7530,17 @@
   "ms": 669,
   "status": "ok"
 }
+{
+  "ts": "2026-02-22T19:20:30Z",
+  "op": "prompt_assembly",
+  "agent": "auditor",
+  "ms": 621,
+  "status": "ok"
+}
+{
+  "ts": "2026-02-22T19:21:59Z",
+  "op": "prompt_assembly",
+  "agent": "inspector",
+  "ms": 520,
+  "status": "ok"
+}

@@ -10,22 +10,21 @@ cmd="${1:-}"
 
 usage() {
     if type ui_auto_header &>/dev/null; then ui_auto_header; fi
-    cat <<'EOF'
-euxis-agent — Agent management and registry
-
-Usage:
-  euxis-agent list
-  euxis-agent register <path/to/manifest.json>
-  euxis-agent unregister <agent_id>
-
-Commands:
-  list         List all registered agents from the registry
-  register     Register a custom agent using a valid JSON manifest
-  unregister   Remove an agent from the registry by its identifier
-
-Options:
-  -h, --help   Show this help text
-EOF
+    local g=$'\033[38;5;42m'
+    local b=$'\033[1m'
+    local r=$'\033[0m'
+    if type _ui_colors_enabled &>/dev/null && ! _ui_colors_enabled; then g=""; b=""; r=""; fi
+    echo -e "euxis-agent — Agent management and registry\n"
+    echo -e "${g}${b}Usage:${r}"
+    echo -e "  euxis-agent list"
+    echo -e "  euxis-agent register <path/to/manifest.json>"
+    echo -e "  euxis-agent unregister <agent_id>\n"
+    echo -e "${g}${b}Commands:${r}"
+    echo -e "  list         List all registered agents from the registry"
+    echo -e "  register     Register a custom agent using a valid JSON manifest"
+    echo -e "  unregister   Remove an agent from the registry by its identifier\n"
+    echo -e "${g}${b}Options:${r}"
+    echo -e "  -h, --help   Show this help text"
     if type ui_signature &>/dev/null; then ui_signature; fi
 }
 

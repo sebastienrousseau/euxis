@@ -371,24 +371,28 @@ def has_flag(args, flag_name):
 
 def usage():
     """Print usage and exit."""
+    g = "\033[38;5;42m"
+    b = "\033[1m"
+    r = "\033[0m"
+
     print("Euxis Cortex - Cross-Platform Semantic Memory (Vector + Graph Hybrid)")
     print("")
-    print("Usage:")
+    print(f"{g}{b}Usage:{r}")
     print("  euxis-cortex remember 'fact to store' [source_agent] [--type episodic|semantic|procedural]")
     print("  euxis-cortex recall   'query keywords' [n_results] [--type TYPE] [--hybrid]")
     print("  euxis-cortex relate   'memory query' <entity> --relation <type>")
     print("  euxis-cortex stats")
     print("  euxis-cortex forget   'exact document text'")
     print("")
-    print("Memory Types:")
+    print(f"{g}{b}Memory Types:{r}")
     print("  episodic    — Specific events, outcomes, timestamps (default)")
     print("  semantic    — General facts, rules, relationships")
     print("  procedural  — Reusable workflows, patterns, contraindications")
     print("")
-    print("Graph Relations:")
+    print(f"{g}{b}Graph Relations:{r}")
     print("  related_to, produced_by, depends_on, contradicts, references, part_of")
     print("")
-    print("Flags:")
+    print(f"{g}{b}Flags:{r}")
     print("  --hybrid    Combine vector similarity with graph proximity for recall")
     print("")
     print(f"Platform: {PLATFORM_LABEL} | DB: {DB_PATH}")

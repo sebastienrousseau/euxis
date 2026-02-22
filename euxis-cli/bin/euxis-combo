@@ -13,23 +13,22 @@ EUXIS_DIR="$HOME/.euxis"
 SQUADS_FILE="$EUXIS_DIR/euxis-core/agents/squads.json"
 
 usage() {
-  cat <<'EOF'
-euxis-combo — Sequential agent chain execution
-
-Usage:
-  euxis-combo list
-  euxis-combo info <combo-id>
-  euxis-combo run <combo-id> "<task>" [--provider PROVIDER]
-
-Commands:
-  list    Table of combos with chains
-  info    Chain detail with agent roles
-  run     Execute chain sequentially, passing context between agents
-
-Options:
-  --provider  Override provider for all agents in the chain
-  -h, --help  Show this help text
-EOF
+  local g=$'\033[38;5;42m'
+  local b=$'\033[1m'
+  local r=$'\033[0m'
+  if type _ui_colors_enabled &>/dev/null && ! _ui_colors_enabled; then g=""; b=""; r=""; fi
+  echo -e "euxis-combo — Sequential agent chain execution\n"
+  echo -e "${g}${b}Usage:${r}"
+  echo -e "  euxis-combo list"
+  echo -e "  euxis-combo info <combo-id>"
+  echo -e "  euxis-combo run <combo-id> \"<task>\" [--provider PROVIDER]\n"
+  echo -e "${g}${b}Commands:${r}"
+  echo -e "  list    Table of combos with chains"
+  echo -e "  info    Chain detail with agent roles"
+  echo -e "  run     Execute chain sequentially, passing context between agents\n"
+  echo -e "${g}${b}Options:${r}"
+  echo -e "  --provider  Override provider for all agents in the chain"
+  echo -e "  -h, --help  Show this help text"
   if type ui_signature &>/dev/null; then ui_signature; fi
 }
 

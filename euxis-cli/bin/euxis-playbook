@@ -18,29 +18,28 @@ PLAYBOOKS_DIR="$EUXIS_DIR/euxis-core/config/playbooks"
 SESSION_DIR="/tmp/euxis_playbook_sessions"
 
 usage() {
-  cat <<'EOF'
-euxis-playbook — Phased squad and delegate deployment via playbooks
-
-Usage:
-  euxis-playbook list
-  euxis-playbook info <playbook-id>
-  euxis-playbook run <playbook-id> "<goal>" [--project NAME] [--dry-run] [--from-gate N]
-  euxis-playbook run-subgate <playbook-id> <subgate-id> "<goal>" [--dry-run]
-  euxis-playbook status [session-id]
-
-Commands:
-  list         Available playbooks from playbooks/*.json
-  info         Phase breakdown with squads/delegates and checkpoints
-  run          Execute phases sequentially via squad dispatch or delegate loops
-  run-subgate  Execute an optional sub-gate by id
-  status       Show session log
-
-Options:
-  --project     Project name for dispatch manifests (default: playbook-<id>)
-  --dry-run     Print dispatch manifests without executing
-  --from-gate N Resume from gate/phase N (skip earlier phases)
-  -h, --help    Show this help text
-EOF
+  local g=$'\033[38;5;42m'
+  local b=$'\033[1m'
+  local r=$'\033[0m'
+  if type _ui_colors_enabled &>/dev/null && ! _ui_colors_enabled; then g=""; b=""; r=""; fi
+  echo -e "euxis-playbook — Phased squad and delegate deployment via playbooks\n"
+  echo -e "${g}${b}Usage:${r}"
+  echo -e "  euxis-playbook list"
+  echo -e "  euxis-playbook info <playbook-id>"
+  echo -e "  euxis-playbook run <playbook-id> \"<goal>\" [--project NAME] [--dry-run] [--from-gate N]"
+  echo -e "  euxis-playbook run-subgate <playbook-id> <subgate-id> \"<goal>\" [--dry-run]"
+  echo -e "  euxis-playbook status [session-id]\n"
+  echo -e "${g}${b}Commands:${r}"
+  echo -e "  list         Available playbooks from playbooks/*.json"
+  echo -e "  info         Phase breakdown with squads/delegates and checkpoints"
+  echo -e "  run          Execute phases sequentially via squad dispatch or delegate loops"
+  echo -e "  run-subgate  Execute an optional sub-gate by id"
+  echo -e "  status       Show session log\n"
+  echo -e "${g}${b}Options:${r}"
+  echo -e "  --project     Project name for dispatch manifests (default: playbook-<id>)"
+  echo -e "  --dry-run     Print dispatch manifests without executing"
+  echo -e "  --from-gate N Resume from gate/phase N (skip earlier phases)"
+  echo -e "  -h, --help    Show this help text"
   if type ui_signature &>/dev/null; then ui_signature; fi
 }
 
