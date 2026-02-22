@@ -84,7 +84,8 @@ case "${1:-}" in
     printf "    %b%-20s%b %b%s%b\n\n" "$CYAN" "--no-color" "$RESET" "$DIM" "Disable colored output" "$RESET"
 
     printf "  %b────────────────────────────────────────────────────────%b\n" "$DIM" "$RESET"
-    printf "  %bDocs:%b %bhttps://docs.euxis.co%b  %bIssues:%b %bgithub.com/euxis/euxis%b\n\n" "$DIM" "$RESET" "$CYAN" "$RESET" "$DIM" "$RESET" "$CYAN" "$RESET"
+    printf "  %bTHE ARCHITECT%b  %b·%b  %bSebastien Rousseau%b  %b·%b  %bhttps://sebastienrousseau.com%b\n" "$DIM" "$RESET" "$DIM" "$RESET" "$WHITE" "$RESET" "$DIM" "$RESET" "$CYAN" "$RESET"
+    printf "  %bTHE ENGINE%b     %bᛞ%b  %bEUXIS%b               %b·%b  %bEnterprise Unified Execution Intelligence System%b  %b·%b  %bhttps://euxis.co%b\n\n" "$DIM" "$RESET" "$WHITE" "$RESET" "$BOLD" "$RESET" "$DIM" "$RESET" "$WHITE" "$RESET" "$DIM" "$RESET" "$CYAN" "$RESET"
     exit 0
     ;;
 esac

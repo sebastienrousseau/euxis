@@ -1,38 +1,141 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Euxis ᛞ Gateway WebChat</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; display: flex; height: 100vh; }
-    #sidebar { width: 340px; border-right: 1px solid #ddd; padding: 1rem; overflow: auto; }
-    #main { flex: 1; padding: 1rem; display: flex; flex-direction: column; }
-    #log { border: 1px solid #ddd; padding: 1rem; flex: 1; overflow: auto; background: #fff; }
-    .log-item { padding: 0.35rem 0; border-bottom: 1px solid #f0f0f0; }
-    .log-item:last-child { border-bottom: none; }
-    .log-meta { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
-    .log-body { font-size: 0.95rem; color: #111; }
-    .log-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; white-space: pre-wrap; }
-    #controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
-    #canvas { border: 1px dashed #bbb; padding: 0.75rem; margin-top: 1rem; background: #fafafa; }
-    #canvas pre { white-space: pre-wrap; font-size: 0.85rem; }
-    textarea { width: 100%; height: 120px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    input { flex: 1; padding: 0.5rem; }
-    button { padding: 0.5rem 1rem; }
-    h2 { margin-top: 1rem; }
-    .list { font-size: 0.9rem; }
-    .item { padding: 0.25rem 0; border-bottom: 1px solid #f0f0f0; }
-    .item small { color: #666; display: block; }
-    .inline { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    .badge { background: #eef2ff; color: #3730a3; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.75rem; }
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+    }
+
+    #sidebar {
+      width: 340px;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    #main {
+      flex: 1;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #log {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      flex: 1;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .log-item {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-meta {
+      font-size: 0.75rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .log-body {
+      font-size: 0.95rem;
+      color: #111;
+    }
+
+    .log-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+    }
+
+    #controls {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    #canvas {
+      border: 1px dashed #bbb;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      background: #fafafa;
+    }
+
+    #canvas pre {
+      white-space: pre-wrap;
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.5rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+    }
+
+    h2 {
+      margin-top: 1rem;
+    }
+
+    .list {
+      font-size: 0.9rem;
+    }
+
+    .item {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .item small {
+      color: #666;
+      display: block;
+    }
+
+    .inline {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .badge {
+      background: #eef2ff;
+      color: #3730a3;
+      border-radius: 999px;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.75rem;
+    }
   </style>
 </head>
+
 <body>
   <div id="sidebar">
     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
       <svg width="24" height="24" viewBox="0 0 3600 3600" xmlns="http://www.w3.org/2000/svg">
-       <path fill="currentColor" d="m2400 891c0.35156-4.9922 0.35156-10.008 0-15l-6.75-12.75c-2.0508-4.2617-4.5664-8.2891-7.5-12l-11.25-9.75c-2.3125-2.2266-4.8203-4.2344-7.5-6h-4.5l-14.25-5.25h-23.25c-3.2344-0.42578-6.5156-0.42578-9.75 0-4.4727-0.71484-9.0273-0.71484-13.5 0l-14.25 6.75c-3.793 2.0664-7.3164 4.582-10.5 7.5-4.0898 3.4414-7.6328 7.4883-10.5 12-2.3867 1.875-4.418 4.1602-6 6.75l-460.5 786.75-460.5-787.5c-1.582-2.5898-3.6133-4.875-6-6.75-2.8672-4.5117-6.4102-8.5586-10.5-12-3.1836-2.918-6.707-5.4336-10.5-7.5l-13.5-6.75h-14.25c-3.0625-1.8789-6.3359-3.3867-9.75-4.5h-18.75l-14.25 5.25h-4.5c-2.6797 1.7656-5.1875 3.7734-7.5 6l-11.25 9.75c-2.9336 3.7109-5.4492 7.7383-7.5 12l-6.75 12.75c-0.35156 4.9922-0.35156 10.008 0 15l-4.5 14.25v1800 9c-0.35156 4.9922-0.35156 10.008 0 15 1.793 4.4766 4.0547 8.75 6.75 12.75 2.0508 4.2617 4.5664 8.2891 7.5 12l11.25 9.75c2.3125 2.2266 4.8203 4.2344 7.5 6h12c9.1367 5.6016 19.363 9.1836 30 10.5 8.7422-0.25 17.371-2.0273 25.5-5.25h6c7.8203-3.4102 14.941-8.2422 21-14.25 3.9141-4.4297 7.4297-9.1992 10.5-14.25l462-791.25 460.5 787.5c3.0703 5.0508 6.5859 9.8203 10.5 14.25 6.0586 6.0078 13.18 10.84 21 14.25h6c8.3438 4.6953 17.508 7.75 27 9 8.7422-0.25 17.371-2.0273 25.5-5.25h12c2.6797-1.7656 5.1875-3.7734 7.5-6l11.25-9.75c2.9336-3.7109 5.4492-7.7383 7.5-12 2.6953-4 4.957-8.2734 6.75-12.75 0.35156-4.9922 0.35156-10.008 0-15l4.5-14.25v-1800-9zm-1050 1531.5v-1245l363 622.5zm900 0-363-622.5 363-622.5z"/>
+        <path fill="currentColor"
+          d="m2400 891c0.35156-4.9922 0.35156-10.008 0-15l-6.75-12.75c-2.0508-4.2617-4.5664-8.2891-7.5-12l-11.25-9.75c-2.3125-2.2266-4.8203-4.2344-7.5-6h-4.5l-14.25-5.25h-23.25c-3.2344-0.42578-6.5156-0.42578-9.75 0-4.4727-0.71484-9.0273-0.71484-13.5 0l-14.25 6.75c-3.793 2.0664-7.3164 4.582-10.5 7.5-4.0898 3.4414-7.6328 7.4883-10.5 12-2.3867 1.875-4.418 4.1602-6 6.75l-460.5 786.75-460.5-787.5c-1.582-2.5898-3.6133-4.875-6-6.75-2.8672-4.5117-6.4102-8.5586-10.5-12-3.1836-2.918-6.707-5.4336-10.5-7.5l-13.5-6.75h-14.25c-3.0625-1.8789-6.3359-3.3867-9.75-4.5h-18.75l-14.25 5.25h-4.5c-2.6797 1.7656-5.1875 3.7734-7.5 6l-11.25 9.75c-2.9336 3.7109-5.4492 7.7383-7.5 12l-6.75 12.75c-0.35156 4.9922-0.35156 10.008 0 15l-4.5 14.25v1800 9c-0.35156 4.9922-0.35156 10.008 0 15 1.793 4.4766 4.0547 8.75 6.75 12.75 2.0508 4.2617 4.5664 8.2891 7.5 12l11.25 9.75c2.3125 2.2266 4.8203 4.2344 7.5 6h12c9.1367 5.6016 19.363 9.1836 30 10.5 8.7422-0.25 17.371-2.0273 25.5-5.25h6c7.8203-3.4102 14.941-8.2422 21-14.25 3.9141-4.4297 7.4297-9.1992 10.5-14.25l462-791.25 460.5 787.5c3.0703 5.0508 6.5859 9.8203 10.5 14.25 6.0586 6.0078 13.18 10.84 21 14.25h6c8.3438 4.6953 17.508 7.75 27 9 8.7422-0.25 17.371-2.0273 25.5-5.25h12c2.6797-1.7656 5.1875-3.7734 7.5-6l11.25-9.75c2.9336-3.7109 5.4492-7.7383 7.5-12 2.6953-4 4.957-8.2734 6.75-12.75 0.35156-4.9922 0.35156-10.008 0-15l4.5-14.25v-1800-9zm-1050 1531.5v-1245l363 622.5zm900 0-363-622.5 363-622.5z" />
       </svg>
       <h1 style="margin: 0; font-size: 1.25rem;">Gateway WebChat</h1>
     </div>
@@ -69,7 +172,8 @@
     <div id="canvas">
       <h2>Canvas State</h2>
       <pre id="canvas-view">{}</pre>
-      <textarea id="canvas-editor" placeholder='{"view":"dashboard","widgets":[{"type":"card","title":"Status","body":"OK"}]}'></textarea>
+      <textarea id="canvas-editor"
+        placeholder='{"view":"dashboard","widgets":[{"type":"card","title":"Status","body":"OK"}]}'></textarea>
       <button id="canvas-save">Save Canvas</button>
       <button id="canvas-refresh">Refresh Canvas</button>
       <div id="canvas-render"></div>
@@ -79,6 +183,28 @@
       <input id="message" placeholder="Type a message" />
       <button id="send">Send</button>
     </div>
+    <footer
+      style="margin-top: 2rem; font-family: 'Inter', system-ui, sans-serif; letter-spacing: 0.05em; padding-top: 1rem; border-top: 1px solid #ddd; color: #888;">
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.75rem; text-transform: uppercase;">
+        <div>
+          <span style="color: #555; font-weight: 700;">The Architect</span>
+          <span style="margin: 0 10px;">•</span>
+          <span style="color: #888;">Sebastien Rousseau</span>
+          <span style="margin: 0 10px;">•</span>
+          <a href="https://sebastienrousseau.com"
+            style="color: #4a90e2; text-decoration: none;">https://sebastienrousseau.com</a>
+        </div>
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
+          <span style="color: #555; font-weight: 700;">The Engine</span>
+          <span style="margin: 0 10px; color: #111;">ᛞ</span>
+          <span style="color: #111; font-weight: 800;">EUXIS</span>
+          <span style="margin: 0 10px;">•</span>
+          <span style="color: #666;">Enterprise Unified Execution Intelligence System</span>
+          <span style="margin: 0 10px;">•</span>
+          <a href="https://euxis.co" style="color: #4a90e2; text-decoration: none;">https://euxis.co</a>
+        </div>
+      </div>
+    </footer>
   </div>
   <script>
     const log = document.getElementById('log');
@@ -524,4 +650,5 @@
     };
   </script>
 </body>
+
 </html>
