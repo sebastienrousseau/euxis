@@ -551,3 +551,13 @@
 {"ts":"2026-02-19T07:16:34Z","agent":"inspector","state":"active","session":"20260219-071634"}
 {"ts":"2026-02-22T19:03:10Z","agent":"tester","state":"active","session":"20260222-190310"}
 {"ts":"2026-02-22T19:04:39Z","agent":"debugger","state":"active","session":"20260222-190439"}
+{"ts":"2026-02-22T19:06:09Z","agent":"inspector","state":"active","session":"20260222-190609"}
+{"ts":"2026-02-22T19:07:39Z","agent":"reviewer","state":"active","session":"20260222-190739"}
+{"ts":"2026-02-22T19:08:28Z","agent":"optimizer","state":"active","session":"20260222-190828"}
+{"ts":"2026-02-22T19:09:59Z","agent":"watchdog","state":"active","session":"20260222-190959"}
+{"ts":"2026-02-22T19:11:29Z","agent":"reviewer","state":"active","session":"20260222-191129"}
+{"ts":"2026-02-22T19:12:59Z","agent":"evangelist","state":"active","session":"20260222-191259"}
+{"ts":"2026-02-22T19:14:29Z","agent":"strategist","state":"active","session":"20260222-191429"}
+{"ts":"2026-02-22T19:15:59Z","agent":"reviewer","state":"active","session":"20260222-191559"}
+{"ts":"2026-02-22T19:17:29Z","agent":"sentinel","state":"active","session":"20260222-191729"}
+{"ts":"2026-02-22T19:18:59Z","agent":"pentester","state":"active","session":"20260222-191859"}

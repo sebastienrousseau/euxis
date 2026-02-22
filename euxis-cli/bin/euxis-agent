@@ -7,6 +7,33 @@ source "${EUXIS_HOME}/euxis-core/lib/common.sh"
 source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
 
 cmd="${1:-}"
+
+usage() {
+    if type ui_auto_header &>/dev/null; then ui_auto_header; fi
+    cat <<'EOF'
+euxis-agent — Agent management and registry
+
+Usage:
+  euxis-agent list
+  euxis-agent register <path/to/manifest.json>
+  euxis-agent unregister <agent_id>
+
+Commands:
+  list         List all registered agents from the registry
+  register     Register a custom agent using a valid JSON manifest
+  unregister   Remove an agent from the registry by its identifier
+
+Options:
+  -h, --help   Show this help text
+EOF
+    if type ui_signature &>/dev/null; then ui_signature; fi
+}
+
+if [[ "$cmd" == "-h" || "$cmd" == "--help" ]]; then
+    usage
+    exit 0
+fi
+
 case "$cmd" in
     register)
         manifest="${2:-}"
@@ -28,7 +55,7 @@ case "$cmd" in
         list_plugins
         ;;
     *)
-        log_error "Usage: euxis agent {register|unregister|list}"
+        usage >&2
         exit 1
         ;;
 esac

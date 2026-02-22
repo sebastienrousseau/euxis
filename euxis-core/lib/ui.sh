@@ -148,6 +148,27 @@ ui_header() {
   fi
 }
 
+ui_signature() {
+  local grey blue glow white reset
+  if _ui_colors_enabled; then
+    grey='\033[38;2;120;120;120m'
+    blue='\033[38;2;0;122;255m'
+    glow='\033[1;38;2;0;209;255m'
+    white='\033[1;38;2;255;255;255m'
+    reset='\033[0m'
+  else
+    grey=''
+    blue=''
+    glow=''
+    white=''
+    reset=''
+  fi
+
+  printf "\n  %b────────────────────────────────────────────────────────%b\n" "$grey" "$reset"
+  printf "  %bTHE ARCHITECT ᛫ Sebastien Rousseau ᛫ %bhttps://sebastienrousseau.com%b\n" "$grey" "$blue" "$reset"
+  printf "  %bTHE ENGINE %bᛞ %bEUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ %bhttps://euxis.co%b\n\n" "$grey" "$glow" "$white" "$blue" "$reset"
+}
+
 ui_auto_header() {
   ui_enabled || return 0
   local cmd

@@ -30,6 +30,7 @@ Options:
   --provider  Override provider for all agents in the chain
   -h, --help  Show this help text
 EOF
+  if type ui_signature &>/dev/null; then ui_signature; fi
 }
 
 require_jq() {

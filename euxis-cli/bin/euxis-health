@@ -26,6 +26,7 @@ Options:
   --json      JSON output (implies --silent)
   -h, --help  Show this help text
 EOF
+    if type ui_signature &>/dev/null; then ui_signature; fi
 }
 
 [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]] && { usage; exit 0; }

@@ -41,6 +41,7 @@ Options:
   --from-gate N Resume from gate/phase N (skip earlier phases)
   -h, --help    Show this help text
 EOF
+  if type ui_signature &>/dev/null; then ui_signature; fi
 }
 
 require_jq() {

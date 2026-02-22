@@ -392,6 +392,17 @@ def usage():
     print("  --hybrid    Combine vector similarity with graph proximity for recall")
     print("")
     print(f"Platform: {PLATFORM_LABEL} | DB: {DB_PATH}")
+
+    dim = "\033[38;2;120;120;120m"
+    glow = "\033[1;38;2;0;209;255m"
+    white = "\033[1;38;2;255;255;255m"
+    blue = "\033[38;2;0;122;255m"
+    reset = "\033[0m"
+
+    print(f"\n  {dim}────────────────────────────────────────────────────────{reset}")
+    print(f"  {dim}THE ARCHITECT ᛫ Sebastien Rousseau ᛫ {blue}https://sebastienrousseau.com{reset}")
+    print(f"  {dim}THE ENGINE {glow}ᛞ {white}EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ {blue}https://euxis.co{reset}\n")
+
     sys.exit(1)
 
 

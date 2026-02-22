@@ -36,6 +36,7 @@ Options:
   --project   Project name for dispatch manifest (default: squad-<id>)
   -h, --help  Show this help text
 EOF
+  if type ui_signature &>/dev/null; then ui_signature; fi
 }
 
 require_jq() {
