@@ -222,7 +222,7 @@ class TestRegressionBaseline:
             # Create initial baseline
             import json
             baseline = {
-                "version": "0.1.0",
+                "version": "v0.0.2",
                 "targets": {
                     "cold_start_ms": TARGET_COLD_START_MS,
                     "memory_mb": TARGET_MEMORY_MB,

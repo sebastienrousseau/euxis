@@ -328,7 +328,7 @@ Any contract test failure blocks extraction.
 
 | euxis-core | euxis-cli | euxis-ui | euxis-api | euxis-adapters |
 |------------|-----------|----------|-----------|----------------|
-| 0.1.0      | 0.1.0     | 0.1.0    | 0.1.0     | 0.1.0          |
+| v0.0.2      | v0.0.2     | v0.0.2    | v0.0.2     | v0.0.2          |
 
 All modules must maintain compatible versions during initial extraction. After extraction, semantic versioning will govern compatibility.
 

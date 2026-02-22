@@ -53,7 +53,7 @@ class TestMetricsInit:
     def test_version(self):
         """Module version should be set."""
         import metrics
-        assert metrics.__version__ == "0.1.0"
+        assert metrics.__version__ == "v0.0.2"
 
 
 # ============================================================================

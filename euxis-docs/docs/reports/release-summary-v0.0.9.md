@@ -5,7 +5,7 @@ v0.0.1 is a security-focused release that hardens dependencies and aligns all ve
 
 ## Highlights
 - **Security:** Upgraded `cryptography` to 46.0.5 to address CVE-2026-26007, CVE-2024-26130, CVE-2024-0727, CVE-2023-50782.
-- **Version Alignment:** Registry, docs, prompts, and release artifacts updated to `0.1.0`.
+- **Version Alignment:** Registry, docs, prompts, and release artifacts updated to `v0.0.2`.
 - **Governance:** Issue closure report added for gateway epic completion.
 
 ## Merge / Tag

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "v0.0.2",
   "targets": {
     "cold_start_ms": 20,
     "memory_mb": 10,

@@ -74,7 +74,7 @@ EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 # Fast-path: handle --version and --help without sourcing large libraries
 case "${1:-}" in
   --version)
-    echo "euxis 0.1.0"
+    echo "euxis v0.0.2"
     exit 0
     ;;
   "" | -h | --help | help)

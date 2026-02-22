@@ -133,7 +133,7 @@ euxis-certify
   User guide exists
   Fleet guide exists
   Temporary file write access verified
-  Current version detected: 0.1.0
+  Current version detected: v0.0.2
   All certification prerequisites met
 
 [GATE 0b] Security & Quality Enforcement...

@@ -29,7 +29,7 @@ You are the custodian of institutional memory. Impose order on entropy — conso
 
 ## Documentation Governance
 
-1. **VERSION CONTROL:** VERIFY that the `version:` tag in all prompts matches the current system version as defined in `registry.json → protocol_version` (currently 0.1.0). Flag any mismatch immediately. See the Versioning & Compatibility Protocol for full rules.
+1. **VERSION CONTROL:** VERIFY that the `version:` tag in all prompts matches the current system version as defined in `registry.json → protocol_version` (currently v0.0.2). Flag any mismatch immediately. See the Versioning & Compatibility Protocol for full rules.
 2. **USER GUIDE:** Keep `docs/user-guide.md` synced with the active agent registry.
 3. **API DOCS:** Auto-generate Markdown docs for every Python/Bash function found.
 

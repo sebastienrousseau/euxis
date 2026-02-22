@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "euxis-core>=0.1.0",
+    "euxis-core>=v0.0.2",
 ]
 
 [project.optional-dependencies]

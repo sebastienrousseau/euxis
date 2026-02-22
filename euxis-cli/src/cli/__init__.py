@@ -13,7 +13,7 @@ from rich.markdown import Markdown
 from rich.status import Status
 from rich.syntax import Syntax
 
-__version__ = "0.1.0"
+__version__ = "v0.0.2"
 
 def _run_interactive(bash_script: Path, args: list[str]) -> int:
     """Run script in fully interactive terminal passthrough."""

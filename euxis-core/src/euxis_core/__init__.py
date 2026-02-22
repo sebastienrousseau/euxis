@@ -3,5 +3,5 @@
 
 """Euxis Core - Shared core logic and shell libraries."""
 
-__version__ = "0.1.0"
+__version__ = "v0.0.2"
 __all__ = ["__version__"]

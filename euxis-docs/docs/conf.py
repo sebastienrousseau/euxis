@@ -33,7 +33,7 @@ project = "Euxis"
 copyright = f"{datetime.now().year}, Euxis Fleet"
 author = "Euxis Fleet"
 version = "0.0.1"
-release = "0.1.0"
+release = "v0.0.2"
 
 # -- General configuration ---------------------------------------------------
 

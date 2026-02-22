@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "euxis-gateway>=0.1.0",
+    "euxis-gateway>=v0.0.2",
     "slack_sdk>=3.0.0,<4.0.0",
 ]
 

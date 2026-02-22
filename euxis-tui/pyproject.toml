@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "euxis-core>=0.1.0",
+    "euxis-core>=v0.0.2",
     "rich>=14.3.0,<15.0.0",
     "textual>=7.5.0,<8.0.0",
 ]

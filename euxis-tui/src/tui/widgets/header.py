@@ -44,7 +44,7 @@ class ETXHeader(Widget):
     branch: reactive[str] = reactive("")
     provider: reactive[str] = reactive("claude")
     agent_count: reactive[int] = reactive(50)
-    version: reactive[str] = reactive("0.1.0")
+    version: reactive[str] = reactive("v0.0.2")
     model: reactive[str] = reactive("")
     # Cost tracking for burn rate visualization
     total_cost: reactive[float] = reactive(0.0)

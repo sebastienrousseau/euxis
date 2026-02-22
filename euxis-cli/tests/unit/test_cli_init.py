@@ -10,7 +10,7 @@ import pytest
 from cli import _run_interactive, _run_artifact_only, main, __version__
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == "v0.0.2"
 
 @patch("cli.subprocess.run")
 def test_run_interactive(mock_run):

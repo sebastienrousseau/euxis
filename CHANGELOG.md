@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2026-02-17
+## [v0.0.2] - 2026-02-17
 
 ### Added
 - **Multi-Tier Model Routing**: Intelligent cost optimization with capability-to-model mapping (`router.sh`)
@@ -333,7 +333,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version Comparison Links
 
 [Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.1...HEAD
-[0.1.0]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.1
+[v0.0.2]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.1
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5

@@ -4,7 +4,7 @@
 # Fast-path: bypass symlink resolution and subshells for ultra-fast commands (<5ms)
 case "${1:-}" in
   --version|""|-h|--help|help)
-    if [ "$1" = "--version" ]; then echo "euxis 0.1.0"; exit 0; fi
+    if [ "$1" = "--version" ]; then echo "euxis v0.0.2"; exit 0; fi
 
     # Inline ANSI colors for ultra-fast startup (<2ms)
     [ -n "${NO_COLOR:-}" ] || ! [ -t 1 ] && NO_COLOR=1

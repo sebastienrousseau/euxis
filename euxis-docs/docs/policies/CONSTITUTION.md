@@ -1,4 +1,4 @@
-# The Euxis Fleet Constitution (v1.0 — Protocol 0.1.0)
+# The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)
 
 ## Purpose
 

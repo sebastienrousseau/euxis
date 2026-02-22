@@ -70,7 +70,7 @@ def _make_agent(**overrides):
     defaults = {
         "id": "test-agent",
         "tier": "core",
-        "version": "0.1.0",
+        "version": "v0.0.2",
         "tags": [],
         "activation": "default",
     }

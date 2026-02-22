@@ -2,7 +2,7 @@
 
 Comprehensive architectural documentation for the Euxis multi-provider AI agent orchestration framework.
 
-**Version:** 0.1.0
+**Version:** v0.0.2
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 

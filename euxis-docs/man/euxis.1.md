@@ -1,4 +1,4 @@
-% EUXIS(1) Euxis 0.1.0
+% EUXIS(1) Euxis v0.0.2
 % Euxis Team
 % February 2026
 

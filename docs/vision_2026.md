@@ -6,7 +6,7 @@
 In 2026, developer tools must act as extensions of the mind. Shift Euxis from a command-line interface to a kinetic intelligence surface.
 
 ### 1.1 Artifact-Only Mode
-*Status: Planned for $v0.1.0$*
+*Status: Planned for $vv0.0.2$*
 
 Hide terminal complexity completely. Extract and display only the generated artifacts—rendered markdown, live previews, or highlighted code blocks—floating on a blurred backdrop. Use natural language commands to replace the traditional prompt schema.
 
