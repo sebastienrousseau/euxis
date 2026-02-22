@@ -1,17 +1,104 @@
 #!/bin/sh
 # Ultra-fast entry point — /bin/sh for minimal startup overhead
 
-# Fast-path: --version without any library loading
+# Fast-path: bypass symlink resolution and subshells for ultra-fast commands (<5ms)
 case "${1:-}" in
-  --version) echo "euxis 0.1.0"; exit 0 ;;
+  --version|""|-h|--help|help)
+    if [ "$1" = "--version" ]; then echo "euxis 0.1.0"; exit 0; fi
+
+    # Inline ANSI colors for ultra-fast startup (<2ms)
+    [ -n "${NO_COLOR:-}" ] || ! [ -t 1 ] && NO_COLOR=1
+    if [ -z "${NO_COLOR:-}" ]; then
+        RESET=' [0m'; BOLD=' [1m'; DIM=' [2m'; GREEN=' [38;5;42m'; YELLOW=' [38;5;220m'; MAGENTA=' [38;5;211m'; CYAN=' [38;5;87m'; WHITE=' [38;5;255m'
+        ICON_CHECK="✓"; ICON_BULLET="▸"; ICON_ARROW="→"; ICON_BOLT="⚡"
+        printf "\n%b%b    ███████╗██╗   ██╗██╗  ██╗██╗███████╗%b\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%b%b    ██╔════╝██║   ██║╚██╗██╔╝██║██╔════╝%b\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%b%b    █████╗  ██║   ██║ ╚███╔╝ ██║███████╗%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    ██╔══╝  ██║   ██║ ██╔██╗ ██║╚════██║%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    ███████╗╚██████╔╝██╔╝ ██╗██║███████║%b\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%b%b    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝%b\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "    %b%b⚡ v0.0.1%b\n\n" "$BOLD" "$YELLOW" "$RESET"
+    else
+        RESET=''; BOLD=''; DIM=''; GREEN=''; YELLOW=''; MAGENTA=''; CYAN=''; WHITE=''
+        ICON_CHECK="*"; ICON_BULLET=">"; ICON_ARROW="->"; ICON_BOLT="*"
+        printf "\n    EUXIS\n    * v0.0.1\n\n"
+    fi
+
+    dir="$PWD"; repo_root=""
+    while [ "$dir" != "/" ] && [ -n "$dir" ]; do
+        if [ -d "$dir/.git" ] || [ -f "$dir/.git" ]; then repo_root="$dir"; break; fi
+        dir="${dir%/*}"
+    done
+    branch="no-git"
+    if [ -n "$repo_root" ] && [ -f "$repo_root/.git/HEAD" ]; then
+        read -r head_content < "$repo_root/.git/HEAD" || true
+        case "$head_content" in
+            ref:\ refs/heads/*) branch="${head_content#ref: refs/heads/}" ;;
+            *) branch="HEAD" ;;
+        esac
+    fi
+    [ -z "$repo_root" ] && repo_root="$PWD"
+    
+    printf "Scope: %b%s%b/.%s  Branch: %b%s%b\n\n" "$CYAN" "${repo_root##*/}" "$RESET" "${PWD#"$repo_root"}" "$YELLOW" "$branch" "$RESET"
+
+    printf "  %bEnterprise Unified eXecution Intelligence System%b\n" "$DIM" "$RESET"
+    printf "  %bMulti-Provider Agent Framework • 53 Agents%b\n\n" "$DIM" "$RESET"
+    printf "  %b%bUSAGE%b\n" "$BOLD" "$WHITE" "$RESET"
+    printf "    %b$%b euxis %b<command> [options]%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis %b<agent> <task> [--provider <name>]%b\n\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    
+    printf "  %b%b%s CORE COMMANDS%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "agent <cmd>" "$RESET" "$DIM" "Manage agent plugins (register, list)" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "squad <cmd>" "$RESET" "$DIM" "Manage agent squads (list, deploy, info)" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "combo <cmd>" "$RESET" "$DIM" "Chain agents sequentially (list, run)" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "playbook <cmd>" "$RESET" "$DIM" "Phased execution with gates (list, run)" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "dispatch <manifest>" "$RESET" "$DIM" "Deploy fleet from architect manifest" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "cortex <cmd>" "$RESET" "$DIM" "Vector memory interface (ChromaDB)" "$RESET"
+
+    printf "  %b%b%s QUALITY & INFRA%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "verify" "$RESET" "$DIM" "Run pre-commit quality gates" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "health" "$RESET" "$DIM" "Check system probes and connectivity" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "certify" "$RESET" "$DIM" "Full certification pipeline" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "deploy" "$RESET" "$DIM" "Spin up via Docker Compose" "$RESET"
+    printf "    %b%s%b %b%-20s%b %b%s%b\n\n" "$GREEN" "$ICON_CHECK" "$RESET" "$CYAN" "doctor" "$RESET" "$DIM" "Verify installation and environment" "$RESET"
+
+    printf "  %b%b%s AGENT ECOSYSTEM (50 Total)%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
+    printf "    %b%-7s%b %s\n" "$DIM" "Core:" "$RESET" "architect, orchestrator, planner, reviewer, guard, auditor..."
+    printf "    %b%-7s%b %s\n\n" "$DIM" "Fleet:" "$RESET" "debugger, tester, pentester, researcher, designer, writer..."
+    printf "    Run %beuxis agents%b to see the full list with descriptions.\n" "$CYAN" "$RESET"
+    printf "    Run %beuxis search <keyword>%b to find agents by capability.\n\n" "$CYAN" "$RESET"
+
+    printf "  %b%b%s EXAMPLES%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
+    printf "    %b$%b euxis architect %b\"Design a REST API for user auth\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "    %b$%b euxis squad deploy quality %b\"Audit the payment module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "       %b%s Deploys: reviewer, inspector, sentinel, pentester, auditor%b\n" "$DIM" "$ICON_ARROW" "$RESET"
+    printf "    %b$%b euxis combo run envision %b\"Build a CLI for data pipelines\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "       %b%s Chain: deep-researcher %s planner %s architect %s reviewer%b\n" "$DIM" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$RESET"
+    printf "    %b$%b euxis playbook run python %b\"Refactor the utils module\"%b\n" "$CYAN" "$RESET" "$DIM" "$RESET"
+    printf "       %b%s Phases: analyze %s implement %s test %s review%b\n\n" "$DIM" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$ICON_ARROW" "$RESET"
+
+    printf "  %b%b%s GLOBAL FLAGS%b\n" "$BOLD" "$CYAN" "$ICON_BULLET" "$RESET"
+    printf "    %b%-20s%b %b%s%b\n" "$CYAN" "--provider <name>" "$RESET" "$DIM" "Override AI provider (claude, gemini, openai, ollama...)" "$RESET"
+    printf "    %b%-20s%b %b%s%b\n" "$CYAN" "--json" "$RESET" "$DIM" "Output as JSON (for piping to jq)" "$RESET"
+    printf "    %b%-20s%b %b%s%b\n" "$CYAN" "--verbose" "$RESET" "$DIM" "Enable verbose logging" "$RESET"
+    printf "    %b%-20s%b %b%s%b\n\n" "$CYAN" "--no-color" "$RESET" "$DIM" "Disable colored output" "$RESET"
+
+    printf "  %b────────────────────────────────────────────────────────%b\n" "$DIM" "$RESET"
+    printf "  %bDocs:%b %bhttps://docs.euxis.co%b  %bIssues:%b %bgithub.com/euxis/euxis%b\n\n" "$DIM" "$RESET" "$CYAN" "$RESET" "$DIM" "$RESET" "$CYAN" "$RESET"
+    exit 0
+    ;;
 esac
 
-# Resolve symlinks to find the real script directory
+# Resolve symlinks to find the real script directory without 'dirname' subshells
 _self="$0"
 while [ -L "$_self" ]; do
-    _dir="$(cd "$(dirname "$_self")" && pwd)"
+    _dir="${_self%/*}"
+    [ "$_dir" = "$_self" ] && _dir="."
+    _dir="$(cd "$_dir" && pwd)"
     _self="$(readlink "$_self")"
     case "$_self" in /*) ;; *) _self="$_dir/$_self" ;; esac
 done
-SCRIPT_DIR="$(cd "$(dirname "$_self")" && pwd)"
+_dir="${_self%/*}"
+[ "$_dir" = "$_self" ] && _dir="."
+SCRIPT_DIR="$(cd "$_dir" && pwd)"
 exec "$SCRIPT_DIR/euxis.sh" "$@"

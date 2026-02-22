@@ -12,7 +12,7 @@ repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 package_paths = [
     "euxis-core/src",
     "euxis-cli/src",
-    "euxis-cli/bin",  # For euxis_core.py
+    "euxis-cli/bin",  # For euxis_engine.py
     "euxis-metrics/src",
     "euxis-metrics/src/metrics",  # For aggregators, verification submodules
     "euxis-crypto-lib/src",

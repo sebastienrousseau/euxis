@@ -443,6 +443,47 @@ OUTEOF
 # Context Display (PWD Beacon)
 # ============================================================================
 
+show_context_fast() {
+    [[ -t 1 ]] || return 0
+
+    local CYAN='\033[0;36m'
+    local YELLOW='\033[1;33m'
+    local NC='\033[0m'
+    [[ -n "${NO_COLOR:-}" ]] && { CYAN=''; YELLOW=''; NC=''; }
+
+    # Pure bash git repo detection (super fast)
+    local dir="$PWD"
+    local repo_root=""
+    while [[ "$dir" != "/" && "$dir" != "" ]]; do
+        if [[ -d "$dir/.git" ]]; then
+            repo_root="$dir"
+            break
+        elif [[ -f "$dir/.git" ]]; then
+            repo_root="$dir"
+            break
+        fi
+        dir="${dir%/*}"
+    done
+
+    local branch="no-git"
+    if [[ -n "$repo_root" && -f "$repo_root/.git/HEAD" ]]; then
+        read -r head_content < "$repo_root/.git/HEAD" || true
+        if [[ "$head_content" == ref:\ refs/heads/* ]]; then
+            branch="${head_content#ref: refs/heads/}"
+        else
+            branch="HEAD"
+        fi
+    fi
+
+    if [[ -z "$repo_root" ]]; then
+        repo_root="$PWD"
+    fi
+    local relative_path=".${PWD#"$repo_root"}"
+
+    echo -e "Scope: ${CYAN}${repo_root##*/}${NC}/${relative_path}  Branch: ${YELLOW}${branch}${NC}"
+    echo ""
+}
+
 show_context() {
     # Skip context display for non-interactive/piped output
     [[ -t 1 ]] || return 0
