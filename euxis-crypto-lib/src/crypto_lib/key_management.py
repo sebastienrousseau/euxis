@@ -9,9 +9,14 @@ Keys are generated in memory and returned as bytes.
 
 import os
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+try:
+    import crypto_lib_rs
+    HAS_RUST_CORE = True
+except ImportError:
+    HAS_RUST_CORE = False
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from .exceptions import CryptoError, InvalidKeyError
 
@@ -89,16 +94,24 @@ def derive_key(
         raise InvalidKeyError(msg)
 
     try:
-        # Derive key using PBKDF2
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=key_size,
-            salt=salt,
-            iterations=iterations,
-            backend=default_backend()
-        )
-
-        key = kdf.derive(password.encode("utf-8"))
+        if HAS_RUST_CORE:
+            # 2026 Optimization: Native PyO3 Module
+            key = crypto_lib_rs.derive_key_pbkdf2(
+                password.encode("utf-8"),
+                salt,
+                iterations,
+                key_size,
+            )
+        else:
+            # Fallback to pure python cryptography
+            kdf = PBKDF2HMAC(
+                algorithm=hashes.SHA256(),
+                length=key_size,
+                salt=salt,
+                iterations=iterations,
+                backend=default_backend()
+            )
+            key = kdf.derive(password.encode("utf-8"))
 
     except Exception as exc:
         msg = f"Key derivation failed: {exc}"

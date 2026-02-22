@@ -218,8 +218,9 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         """Test DispatchEngine with default EUXIS_HOME."""
         engine = DispatchEngine()
         assert engine.euxis_home == Path.home() / ".euxis"
-        assert engine.registry_path == engine.euxis_home / "agents/registry.json"
-        assert engine.registry_db == engine.euxis_home / "agents/registry.db"
+        base_registry = engine.euxis_home / "euxis-core/agents" if (engine.euxis_home / "euxis-core").exists() else engine.euxis_home / "agents"
+        assert engine.registry_path == base_registry / "registry.json"
+        assert engine.registry_db == base_registry / "registry.db"
         assert engine.log_dir is None
         assert engine._valid_agents is None
 
@@ -228,8 +229,9 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         custom_home = self.temp_path / "custom_euxis"
         engine = DispatchEngine(euxis_home=custom_home)
         assert engine.euxis_home == custom_home
-        assert engine.registry_path == custom_home / "agents/registry.json"
-        assert engine.registry_db == custom_home / "agents/registry.db"
+        base_registry = custom_home / "euxis-core/agents" if (custom_home / "euxis-core").exists() else custom_home / "agents"
+        assert engine.registry_path == base_registry / "registry.json"
+        assert engine.registry_db == base_registry / "registry.db"
 
     def _create_test_db(self, agents):
         """Create a test SQLite registry database."""

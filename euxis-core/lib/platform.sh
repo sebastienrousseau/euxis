@@ -104,8 +104,8 @@ platform_clipboard_copy() {
     local content="$1"
     case "$EUXIS_PLATFORM" in
         wsl)
-            # 2026 Optimization: Detached asynchronous clipboard to eliminate wait
-            echo -n "$content" | powershell.exe -NoProfile -Command "Set-Clipboard -Value ([Console]::In.ReadToEnd())" >/dev/null 2>&1 &
+            # 2026 Optimization: Direct write to clip.exe eliminating PowerShell startup latency
+            echo -n "$content" | clip.exe >/dev/null 2>&1
             ;;
         macos)
             echo -n "$content" | pbcopy
