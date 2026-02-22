@@ -54,6 +54,7 @@ def _make_app():
     # Stub out Textual runtime methods that would fail without a running app
     app.push_screen = MagicMock()
     app.notify = MagicMock()
+    app.call_from_thread = MagicMock(side_effect=lambda func, *args, **kwargs: func(*args, **kwargs))
 
     return app, registry, config
 

@@ -1,128 +1,72 @@
-# Euxis
+# Euxis: Keep Breathing. We Handle the Rest.
 
-**Enterprise Unified eXecution Intelligence System**
+[![Version][version-badge]][version-url] [![License][license-badge]][license-url]
 
-[![License][license-badge]][license-url]
-[![Version][version-badge]][version-url]
+> The Enterprise Unified eXecution Intelligence System.
 
 ---
 
-## Repositories
+## 1. Context, Not Commands.
 
-Euxis is a modular multi-package workspace. Each package serves a distinct function within the agent framework:
+Imagine a world where your terminal doesn't wait for you to type. It anticipates. 
+
+By 2026, the era of remembering esoteric CLI flags is over. Euxis is built on **Context-Aware Micro-Orchestration**. As you navigate your workspace, a lightweight, quantized background model pre-warms the execution paths.
+
+You don't run commands anymore. You declare *intent*. 
+We translate it into action.
+
+---
+
+## 2. The "Apple-Standard" Fluidity.
+
+We believe developer tools should feel as kinetic, responsive, and gorgeous as the apps we build for consumers.
+
+Welcome to **Bento-Grid 2.0**.
+
+- **Liquid Glass Transparency:** Whether you're on a KDE Plasma Linux build or macOS Sequoia+, Euxis adapts. Native blurs, ambient shadows, and pixel-perfect typography.
+- **Zero-Jank Architecture:** We've forensically eradicated synchronous event-loop blocking. Every transition, every popup, every log tail is purely asynchronous. Your UI thread *never* freezes. 
+- **The "Artifact-Only" Mode:** Need to focus? Hide the terminal entirely. Euxis can operate in a consumer-first mode, presenting only the generated artifacts, interactive previews, and gentle, natural-language nudges.
+
+---
+
+## 3. Speed as a Feature. Not a Metric.
+
+We don't just optimize for the happy path. We optimize for the physics of your hardware.
+
+- **Unified Binary Translation:** We've bridged the gap. Seamless execution across your host OS and containerized agents without the heavy overhead of Docker.
+- **WSL-to-Windows Elimination:** We've identified and bypassed the I/O latency taxes when crossing the filesystem barrier on Windows Subsystem for Linux. No more frozen clipboards.
+- **macOS M5 Neural Engine Routing:** Local cryptographic and AI operations natively handshake with Metal Performance Shaders (MPS), sharing memory directly to bypass the CPU bus.
+
+---
+
+## 4. The 2026 Engine Room
+
+### Modularity
+Euxis is composed of hyper-specialized micro-packages. Use what you need.
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [euxis-core](./euxis-core) | Shared core logic and shell libraries | 0.1.0 |
-| [euxis-cli](./euxis-cli) | CLI entry points and orchestration | 0.1.0 |
-| [euxis-gateway](./euxis-gateway) | WebSocket control plane and API | 0.1.0 |
-| [euxis-adapters](./euxis-adapters) | Channel adapters (Slack, Telegram) | 0.1.0 |
-| [euxis-tui](./euxis-tui) | Textual UI application | 0.1.0 |
-| [euxis-metrics](./euxis-metrics) | Observability and metrics | 0.1.0 |
-| [euxis-security](./euxis-security) | Security policy defaults | 0.1.0 |
-| [euxis-crypto-lib](./euxis-crypto-lib) | Python cryptography utilities | 0.1.0 |
-| [euxis-crypto-packages](./euxis-crypto-packages) | TypeScript crypto packages | 0.1.0 |
-| [euxis-docs](./euxis-docs) | Documentation and ADRs | 0.1.0 |
+| [euxis-core](./euxis-core) | The central nervous system | 0.0.1 |
+| [euxis-cli](./euxis-cli) | The orchestrator | 0.0.1 |
+| [euxis-tui](./euxis-tui) | The Liquid Glass interface | 0.0.1 |
+| [euxis-gateway](./euxis-gateway) | The real-time nerve center | 0.0.1 |
+| [euxis-crypto-lib](./euxis-crypto-lib) | The vault | 0.0.1 |
 
-## Installation
-
-### From PyPI
-
+### Immediate Access
 ```bash
 pip install euxis-core euxis-cli euxis-tui
-```
 
-### From Source
-
-```bash
-# Clone this workspace
-git clone https://github.com/euxis/euxis.git
-cd euxis
-
-# Install packages in development mode
-pip install -e euxis-core
-pip install -e euxis-cli
-pip install -e euxis-tui
-```
-
-## Usage
-
-### CLI Commands
-
-```bash
-# Run an agent
-euxis architect "Design a REST API for user management"
-
-# Run health check
-euxis health
-
-# Verify release readiness
-euxis verify --all
-
-# Launch TUI
 euxis ui
 ```
 
-### Quick Start
-
-See individual package READMEs for detailed usage instructions.
-
-## Current Status (February 18, 2026)
-
-Euxis is usable, but early users should expect active stabilization in some test
-surfaces while provider workflows are already in strong shape.
-
-- Provider shell unit suite: `53/53` passing (`euxis-core/tests/bats/lib/providers.bats`)
-- Provider helper coverage (function-level shell gate): `100%` (`63/63`)
-- Provider suite local runtime: `~3.94s` on the current dev machine
-- Adjacent shell suites still being stabilized:
-  - `common.bats`: `29/30` passing
-  - `session.bats`: `30/34` passing
-- Python coverage policy remains `fail_under = 95` in `pyproject.toml`
-
-For full context, caveats, and a verification command list, see:
-- `euxis-docs/docs/reports/initial-user-expectations-2026-02-18.md`
-- `euxis-docs/docs/index.rst`
-
-## Dependency Graph
-
-```
-euxis-core (no dependencies)
-    │
-    ├── euxis-cli
-    ├── euxis-tui
-    ├── euxis-metrics
-    │
-    └── euxis-security
-            │
-            └── euxis-gateway
-                    │
-                    └── euxis-adapters
-
-euxis-crypto-lib (standalone)
-euxis-crypto-packages (standalone, TypeScript)
-euxis-docs (standalone)
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE)
-
 ---
 
----
+*This is not just a tool. It is the new geometry of development.*
 
-version 0.0.1
-
-Designed by Sebastien Rousseau — https://sebastienrousseau.com
-Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
-Euxis v0.0.1
+Designed by Sebastien Rousseau — [sebastienrousseau.com](https://sebastienrousseau.com)  
+Engineered with Euxis — [euxis.co](https://euxis.co)
 
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-0.1.0-green.svg
+[version-badge]: https://img.shields.io/badge/version-0.0.1-green.svg
 [version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.1

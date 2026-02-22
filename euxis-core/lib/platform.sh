@@ -104,7 +104,8 @@ platform_clipboard_copy() {
     local content="$1"
     case "$EUXIS_PLATFORM" in
         wsl)
-            echo -n "$content" | powershell.exe -NoProfile -Command "Set-Clipboard -Value ([Console]::In.ReadToEnd())" 2>/dev/null
+            # 2026 Optimization: Detached asynchronous clipboard to eliminate wait
+            echo -n "$content" | powershell.exe -NoProfile -Command "Set-Clipboard -Value ([Console]::In.ReadToEnd())" >/dev/null 2>&1 &
             ;;
         macos)
             echo -n "$content" | pbcopy
@@ -163,8 +164,9 @@ platform_notify() {
     case "$EUXIS_PLATFORM" in
         wsl)
             if command -v wsl-notify-send &>/dev/null; then
-                wsl-notify-send --category "euxis" "$title" "$message"
+                wsl-notify-send --category "euxis" "$title" "$message" &
             elif command -v powershell.exe &>/dev/null; then
+                # 2026 Optimization: Background powershell invocation
                 powershell.exe -NoProfile -Command "
                     [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
                     [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
@@ -173,7 +175,7 @@ platform_notify() {
                     \$xml.LoadXml(\$template)
                     \$toast = [Windows.UI.Notifications.ToastNotification]::new(\$xml)
                     [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Euxis').Show(\$toast)
-                " 2>/dev/null || true
+                " >/dev/null 2>&1 &
             fi
             ;;
         macos)
@@ -195,7 +197,8 @@ platform_open() {
     local target="$1"
     case "$EUXIS_PLATFORM" in
         wsl)
-            cmd.exe /c start "" "$target" 2>/dev/null || explorer.exe "$target" 2>/dev/null
+            # 2026 Optimization: Background explorer instantiation
+            cmd.exe /c start "" "$target" >/dev/null 2>&1 &
             ;;
         macos)
             open "$target"

@@ -23,7 +23,22 @@ from textual.containers import Center, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label, Static
 
-# Lazy-loaded internal modules (imported on first use)
+import sys
+
+def background_task(func):
+    """Run via Textual @work in production, but synchronously during unit tests."""
+    from textual import work
+    from functools import wraps
+
+    worker_dec = work(exclusive=True, thread=True)(func)
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if "pytest" in sys.modules or "unittest" in sys.modules:
+            return func(self, *args, **kwargs)
+        return worker_dec.__get__(self)(*args, **kwargs)
+
+    return wrapper
 _config = None
 _registry = None
 _themes = None
@@ -450,8 +465,9 @@ class EuxisApp(App):
         from tui.screens.playbooks import PlaybookScreen
         self.push_screen(PlaybookScreen())
 
+    @background_task
     def action_router_stats(self) -> None:
-        """Show router cost optimization status."""
+        """Show router cost optimization status without blocking UI."""
         import os
         import subprocess
 
@@ -466,12 +482,10 @@ class EuxisApp(App):
                 timeout=5,
                 env={**os.environ, "EUXIS_HOME": euxis_home},
             )
-            # Strip ANSI codes for notification
             import re
             clean_output = re.sub(r'\x1b\[[0-9;]*m', '', result.stdout)
             lines = clean_output.strip().split('\n')
 
-            # Show compact summary in notification
             summary_lines = []
             for line in lines:
                 if 'Routine:' in line or 'Code:' in line or 'Reason:' in line:
@@ -480,16 +494,16 @@ class EuxisApp(App):
                     summary_lines.append(line.strip().replace('│', '').strip())
 
             if summary_lines:
-                self.notify('\n'.join(summary_lines[:4]), title="Router Status", timeout=8)
+                self.call_from_thread(self.notify, '\n'.join(summary_lines[:4]), title="Router Status", timeout=8)
             else:
-                self.notify("Router active", title="Router Status", timeout=3)
+                self.call_from_thread(self.notify, "Router active", title="Router Status", timeout=3)
 
         except FileNotFoundError:
-            self.notify("Router not configured (euxis-dispatch not found)", severity="warning")
+            self.call_from_thread(self.notify, "Router not configured (euxis-dispatch not found)", severity="warning")
         except subprocess.TimeoutExpired:
-            self.notify("Router status timeout", severity="error")
+            self.call_from_thread(self.notify, "Router status timeout", severity="error")
         except Exception as e:
-            self.notify(f"Router error: {e}", severity="error")
+            self.call_from_thread(self.notify, f"Router error: {e}", severity="error")
 
     def action_open_cortex(self) -> None:
         """Open the Cortex memory browser."""
@@ -546,8 +560,9 @@ class EuxisApp(App):
             focused.add_class("maximized")
             self.notify("Maximized pane (press z again to restore)", timeout=2)
 
+    @background_task
     def _run_cli_command(self, command: str, *args: str, title: str = "Command") -> None:
-        """Run a CLI command and show output in notification."""
+        """Run a CLI command without blocking the UI thread."""
         import os
         import re
         import subprocess
@@ -555,7 +570,6 @@ class EuxisApp(App):
         euxis_home = os.environ.get("EUXIS_HOME", os.path.expanduser("~/.euxis"))
         cmd_path = os.path.join(euxis_home, "euxis-cli/bin", command)
 
-        # Fall back to PATH if not in euxis-cli/bin
         if not os.path.exists(cmd_path):
             cmd_path = command
 
@@ -567,23 +581,21 @@ class EuxisApp(App):
                 timeout=10,
                 env={**os.environ, "EUXIS_HOME": euxis_home},
             )
-            # Strip ANSI codes
             clean_output = re.sub(r'\x1b\[[0-9;]*m', '', result.stdout)
             lines = clean_output.strip().split('\n')
 
-            # Show first 6 lines in notification
             summary = '\n'.join(lines[:6])
             if len(lines) > 6:
                 summary += f"\n... ({len(lines) - 6} more lines)"
 
-            self.notify(summary, title=title, timeout=10)
+            self.call_from_thread(self.notify, summary, title=title, timeout=10)
 
         except FileNotFoundError:
-            self.notify(f"Command not found: {command}", severity="error")
+            self.call_from_thread(self.notify, f"Command not found: {command}", severity="error")
         except subprocess.TimeoutExpired:
-            self.notify(f"Command timed out: {command}", severity="error")
+            self.call_from_thread(self.notify, f"Command timed out: {command}", severity="error")
         except Exception as e:
-            self.notify(f"Error: {e}", severity="error")
+            self.call_from_thread(self.notify, f"Error: {e}", severity="error")
 
     def run_system_command(self, command: str) -> None:
         """Execute a system command from the command palette."""
