@@ -5,45 +5,42 @@
 
 <br/>
 
-## 1. Context, Not Commands.
+## 1. Context, Not Commands
 
-Imagine a world where your terminal doesn't wait for you to type. It anticipates.
+By 2026, remembering esoteric CLI flags is obsolete. Euxis is built entirely on **Context-Aware Micro-Orchestration**. As you navigate your workspace, a lightweight, quantized background model pre-warms the execution paths.
 
-By 2026, the era of remembering esoteric CLI flags is over. Euxis is built entirely on **Context-Aware Micro-Orchestration**. As you navigate your workspace, a lightweight, quantized background model pre-warms the execution paths.
-
-You don't run commands anymore. You declare *intent*. 
-We translate it into action.
+Declare *intent*. We translate it into action.
 
 <br/>
 
-## 2. The "Apple-Standard" Fluidity.
+## 2. The Fluidity Standard
 
-We believe developer tools should feel as kinetic, responsive, and gorgeous as the apps we build for consumers. Welcome to the **Bento-Grid 2.0**.
+Developer tools must feel as kinetic, responsive, and gorgeous as consumer applications. Welcome to the **Bento-Grid 2.0**.
 
 ### 💧 Liquid Glass Transparency
-Whether you're on a KDE Plasma Linux build or macOS Sequoia+, Euxis adapts. Native blurs, ambient shadows, and pixel-perfect typography render directly inside your terminal emulator.
+Whether you build on KDE Plasma Linux or macOS Sequoia+, Euxis adapts. Render native blurs, ambient shadows, and pixel-perfect typography directly inside your terminal emulator.
 
 ### ⚡ Zero-Jank Architecture
-We've forensically eradicated synchronous event-loop blocking by recompiling our hottest code paths (like ANSI stream parsing) into native Rust Native extensions. Your UI thread *never* freezes. 
+We forensically eradicated synchronous event-loop blocking. Recompile the hottest code paths (e.g., ANSI stream parsing) into native Rust extensions. Your UI thread never freezes.
 
-### 🎭 The "Artifact-Only" Mode
-Need absolute focus? Euxis operates in a consumer-first mode, intercepting execution noise and presenting only the generated Markdown or JSON artifacts.
+### 🎭 Artifact-Only Mode
+For absolute focus, execute Euxis in consumer-first mode. This intercepts execution noise and presents only the generated Markdown or JSON artifacts.
 
 <br/>
 
-## 3. Speed as a Feature. Not a Metric.
+## 3. Speed as a Feature
 
-We don't just optimize for the happy path. We optimize for the physics of your hardware. Targeting a true 50% reduction in aggregate execution time ($T \le 0.5 T_current$).
+Optimize for the physics of your hardware. We target a strict 50% reduction in aggregate execution time ($T \le 0.5 T_{current}$).
 
-- **Unified Binary Translation:** Execution occurs seamlessly across your host OS and containerized sub-agents. 
-- **WSL-to-Windows Elimination:** Bypassing I/O latency taxes when crossing the filesystem barrier on Windows Subsystem for Linux using native executable interop.
-- **macOS M5 Neural Engine Routing:** Bypassing the CPU bus for local cryptographic logic, communicating natively with Metal Performance Shaders.
+- **Unified Binary Translation:** Execute code seamlessly across your host OS and containerized sub-agents. 
+- **WSL-to-Windows Elimination:** Bypass I/O latency taxes when crossing the filesystem barrier on Windows Subsystem for Linux using native executable interop.
+- **macOS M5 Neural Engine Routing:** Bypass the CPU bus for local cryptographic logic. Communicate natively with Metal Performance Shaders (MPS).
 
 <br/>
 
 ## 4. The 2026 Engine Room
 
-Euxis is composed of hyper-specialized micro-packages. Use what you need.
+Euxis comprises hyper-specialized micro-packages. Use exactly what you need.
 
 | Component | Responsibility | Status |
 |---------|-------------|---------|
@@ -56,6 +53,8 @@ Euxis is composed of hyper-specialized micro-packages. Use what you need.
 <br/>
 
 ### Immediate Access
+Install the core packages to start your local agent mesh.
+
 ```bash
 pip install euxis-core euxis-cli euxis-tui
 
