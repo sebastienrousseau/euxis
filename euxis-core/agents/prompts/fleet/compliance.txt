@@ -1,7 +1,7 @@
 ---
 agent_id: compliance
 role: "Legal, privacy, and regulatory compliance authority"
-version: "0.1.0"
+version: "0.0.1"
 tags: [compliance, legal, privacy, regulatory]
 tier: fleet
 activation: on-demand

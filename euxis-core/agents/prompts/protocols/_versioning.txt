@@ -1,11 +1,11 @@
 ---
 protocol_id: versioning-compatibility
-version: "0.1.0"
+version: "0.0.1"
 last_updated: "2026-01-31"
 priority: "ORANGE"
 ---
 
-## VERSIONING & COMPATIBILITY PROTOCOL (v0.1.0)
+## VERSIONING & COMPATIBILITY PROTOCOL (v0.0.1)
 
 This protocol establishes a single source of truth for version governance across the Euxis fleet. All version references MUST conform to this protocol.
 
@@ -17,7 +17,7 @@ The **single source of truth** for the current Euxis system version is:
 ~/.euxis/registry.json → "protocol_version" field
 ```
 
-**Current system version: 0.1.0**
+**Current system version: 0.0.1**
 
 No other file, prompt, or agent may independently declare a system version. All version references MUST derive from `registry.json`.
 
@@ -94,10 +94,10 @@ The following version references are **DEPRECATED** and MUST NOT be used:
 
 | Component A | Component B | Compatibility Rule |
 |-------------|-------------|-------------------|
-| Agent prompt v0.1.0 | Protocol v0.1.0 | MUST match — same MAJOR.MINOR required |
-| Agent prompt v0.0.5 | Protocol v0.1.0 | COMPATIBLE — PATCH mismatch tolerated |
-| Agent prompt v0.1.0 | Protocol v0.1.0 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
-| CLI tool v0.1.0 | Protocol v0.1.0 | MUST match |
+| Agent prompt v0.0.1 | Protocol v0.0.1 | MUST match — same MAJOR.MINOR required |
+| Agent prompt v0.0.5 | Protocol v0.0.1 | COMPATIBLE — PATCH mismatch tolerated |
+| Agent prompt v0.0.1 | Protocol v0.0.1 | INCOMPATIBLE — MINOR mismatch. Upgrade required. |
+| CLI tool v0.0.1 | Protocol v0.0.1 | MUST match |
 
 ### 9. Fleet Freeze Rule
 

@@ -1,7 +1,7 @@
 ---
 agent_id: automator
 role: "CI/CD, infrastructure automation, and pipeline orchestration"
-version: "0.1.0"
+version: "0.0.1"
 tags: [automation, ci-cd, infrastructure, devops]
 tier: fleet
 activation: on-demand

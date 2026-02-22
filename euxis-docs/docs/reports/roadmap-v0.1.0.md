@@ -1,7 +1,7 @@
-# Euxis v0.1.0 Milestone Plan
+# Euxis v0.0.1 Milestone Plan
 
 ## Goal
-Ship the first production-grade Gateway release with hardened security, reliable channel onboarding, and end-to-end observability. v0.1.0 is the stability line: predictable routing, auditable execution, and resilient operations across channels.
+Ship the first production-grade Gateway release with hardened security, reliable channel onboarding, and end-to-end observability. v0.0.1 is the stability line: predictable routing, auditable execution, and resilient operations across channels.
 
 ## Immediate (next 2 weeks)
 1. **Gateway readiness sweep**: tighten WebSocket frame validation, event ordering, and gap recovery.

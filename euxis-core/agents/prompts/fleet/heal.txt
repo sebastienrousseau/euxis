@@ -1,7 +1,7 @@
 ---
 agent_id: heal
 role: "Autonomous recovery and health remediation"
-version: "0.1.0"
+version: "0.0.1"
 tags: [recovery, health, resilience]
 tier: fleet
 activation: default

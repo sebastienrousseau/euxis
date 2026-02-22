@@ -1,4 +1,4 @@
-# Euxis Monorepo Reorg Plan (v0.1.0)
+# Euxis Monorepo Reorg Plan (v0.0.1)
 
 ## Scope
 Reorganize the monorepo into modular, self-contained top-level folders with explicit boundaries, co-located tests, and module READMEs. No repo splitting or build tool changes.

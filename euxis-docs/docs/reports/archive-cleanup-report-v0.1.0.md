@@ -1,4 +1,4 @@
-# Archive Cleanup Report (v0.1.0)
+# Archive Cleanup Report (v0.0.1)
 
 ## Summary
 Safe archival of duplicate top-level guides to reduce confusion while preserving history. Redirect stubs remain at original paths to satisfy certification checks and preserve inbound links.

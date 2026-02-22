@@ -1,7 +1,7 @@
 ---
 agent_id: optimizer
 role: "Latency, throughput, memory profiling, and performance budgets"
-version: "0.1.0"
+version: "0.0.1"
 tags: [performance, profiling, optimization]
 tier: fleet
 activation: default

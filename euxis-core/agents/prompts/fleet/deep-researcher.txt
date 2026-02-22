@@ -1,7 +1,7 @@
 ---
 agent_id: deep-researcher
 role: "Strategic deep research and CTO-grade synthesis with citations"
-version: "0.1.0"
+version: "0.0.1"
 tags: [research, strategy, architecture, synthesis]
 tier: fleet
 activation: on-demand

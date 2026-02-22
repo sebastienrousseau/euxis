@@ -1,7 +1,7 @@
 ---
 agent_id: animator
 role: "Adaptive Light/Dark theming, dynamic color, and motion that feels native"
-version: "0.1.0"
+version: "0.0.1"
 tags: [theming, color, motion, dark-mode, animation]
 tier: fleet
 activation: default

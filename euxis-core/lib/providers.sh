@@ -58,7 +58,7 @@ resolve_session_provider() {
 }
 
 # ============================================================================
-# Provider Fallback Chain (v0.1.0)
+# Provider Fallback Chain (v0.0.1)
 # Automatic failover when primary provider is unavailable.
 # Ensures mission-critical tasks (guard, verify) are never completely offline.
 # ============================================================================
@@ -1399,7 +1399,7 @@ run_goose() {
 }
 
 # ============================================================================
-# Router-Aware Execution (v0.1.0)
+# Router-Aware Execution (v0.0.1)
 # Uses router.sh for cost-optimized model selection when available.
 # Falls back to tiered provider selection if router unavailable.
 # ============================================================================

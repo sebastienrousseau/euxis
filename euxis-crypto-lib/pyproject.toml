@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-crypto-lib"
-version = "0.1.0"
+version = "0.0.1"
 description = "Python cryptography utilities for the Euxis Agent Framework"
 readme = "README.md"
 license = {text = "MIT"}

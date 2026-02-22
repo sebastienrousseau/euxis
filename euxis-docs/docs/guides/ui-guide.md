@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.1.0
+version 0.0.1
 
 ---
 
@@ -368,4 +368,4 @@ The original bash-based menu interface remains available as `euxis-ui` for compa
 
 ---
 
-*Euxis v0.1.0 · Build something that matters.*
+*Euxis v0.0.1 · Build something that matters.*

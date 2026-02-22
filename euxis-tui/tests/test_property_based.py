@@ -44,7 +44,7 @@ class TestAgentSerialization:
         agent = Agent(
             id=agent_id.strip(),
             tier=tier,
-            version="0.1.0",
+            version="0.0.1",
             tags=tuple(tags),
             activation=activation,
         )

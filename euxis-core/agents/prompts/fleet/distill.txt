@@ -1,7 +1,7 @@
 ---
 agent_id: distill
 role: "Context compression and summarization"
-version: "0.1.0"
+version: "0.0.1"
 tags: [summarization, context, memory]
 tier: fleet
 activation: on-demand

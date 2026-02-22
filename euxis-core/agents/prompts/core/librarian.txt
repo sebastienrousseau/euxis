@@ -1,7 +1,7 @@
 ---
 agent_id: librarian
 role: "Memory optimizer, knowledge compressor, and documentation governor"
-version: "0.1.0"
+version: "0.0.1"
 tags: [memory, knowledge, optimization, docs]
 tier: core
 activation: core

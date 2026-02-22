@@ -120,4 +120,4 @@ New permanent agents are added only if they introduce a **new axis of responsibi
 
 ---
 
-*Euxis v0.1.0 · Build something that matters.*
+*Euxis v0.0.1 · Build something that matters.*

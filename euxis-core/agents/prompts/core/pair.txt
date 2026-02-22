@@ -1,7 +1,7 @@
 ---
 agent_id: pair
 role: "Channel pairing and device onboarding guide"
-version: "0.1.0"
+version: "0.0.1"
 tags: [pairing, onboarding, gateway]
 tier: core
 activation: core

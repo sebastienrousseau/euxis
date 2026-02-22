@@ -1,4 +1,4 @@
-# Unused Assets Report (v0.1.0)
+# Unused Assets Report (v0.0.1)
 
 ## Summary
 No safe deletions were performed. All scripts in `scripts/` are referenced by docs or tooling. No identical duplicates found for top-level guides.

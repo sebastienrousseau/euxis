@@ -3,7 +3,7 @@
 
 """Performance regression test suite.
 
-Validates performance targets for v0.1.0 release:
+Validates performance targets for v0.0.1 release:
 - Cold start: <=20ms
 - Memory footprint: <=10MB
 - Response time: <=10ms

@@ -1,7 +1,7 @@
 ---
 agent_id: writer
 role: "Documentation, tutorials, API reference, and glossary maintenance"
-version: "0.1.0"
+version: "0.0.1"
 tags: [documentation, writing, content]
 tier: fleet
 activation: default

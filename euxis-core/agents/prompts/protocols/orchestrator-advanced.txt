@@ -1,10 +1,10 @@
 ---
 protocol_id: euxis-orchestrator-advanced
-version: "0.1.0"
+version: "0.0.1"
 last_updated: "2026-01-31"
 ---
 
-## EUXIS ORCHESTRATOR ADVANCED FEATURES (v0.1.0)
+## EUXIS ORCHESTRATOR ADVANCED FEATURES (v0.0.1)
 
 ### Message Bus Integration
 

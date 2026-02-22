@@ -442,7 +442,7 @@ Mark deprecated features clearly with a deprecation notice. Include:
 ```markdown
 > **Deprecated in 0.1.0**
 >
-> The `--legacy` flag is deprecated and will be removed in version 0.1.0.
+> The `--legacy` flag is deprecated and will be removed in version 0.0.1.
 > Use `--compat-mode` instead.
 ```
 

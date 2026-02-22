@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "id": "pre-release",
-  "name": "Pre-Release Gate v0.1.0",
+  "name": "Pre-Release Gate v0.0.1",
   "description": "Sequential audit of the entire system before release. Seven gates: lint, test, security, branding, bench, platform, docs. All gates must pass before release is authorized.",
   "restart_policy": "from_failed_gate",
   "stop_on_failure": true,

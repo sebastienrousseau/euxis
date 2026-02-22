@@ -407,4 +407,4 @@ euxis-health
 
 ---
 
-*Euxis v0.1.0 · Build something that matters.*
+*Euxis v0.0.1 · Build something that matters.*

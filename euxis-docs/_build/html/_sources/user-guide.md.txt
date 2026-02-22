@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.1.0
+version 0.0.1
 
 For the complete user guide with CLI reference, agent fleet details, and provider matrix, see [guides/user-guide.md](guides/user-guide.md).
 

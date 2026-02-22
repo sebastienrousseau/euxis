@@ -1,4 +1,4 @@
-# Shared Contracts (v0.1.0)
+# Shared Contracts (v0.0.1)
 
 This document defines the interface contracts between Euxis modules. These contracts must be honored during and after the multi-repo extraction to ensure compatibility.
 
@@ -334,4 +334,4 @@ All modules must maintain compatible versions during initial extraction. After e
 
 ---
 
-*Document created: 2026-02-16 as part of v0.1.0 multi-repo preparation*
+*Document created: 2026-02-16 as part of v0.0.1 multi-repo preparation*

@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version 0.1.0
+version 0.0.1
 
 ## CLI Tools
 

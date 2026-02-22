@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-adapters"
-version = "0.1.0"
+version = "0.0.1"
 description = "Channel adapters (Slack, Telegram, etc.) for the Euxis Agent Framework"
 readme = "README.md"
 license = {text = "MIT"}

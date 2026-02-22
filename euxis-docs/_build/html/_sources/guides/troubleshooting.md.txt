@@ -185,7 +185,7 @@ euxis-certify
   PASS: docs/guides/user-guide.md exists.
   PASS: docs/guides/fleet-guide.md exists.
   PASS: All documentation is current (updated within 7 days).
-  PASS: README.md references version 0.1.0.
+  PASS: README.md references version 0.0.1.
   Validating JSON manifest files...
   PASS: agents/registry.json is valid JSON.
   PASS: agents/squads.json is valid JSON.

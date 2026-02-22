@@ -19,7 +19,7 @@ def run_audit() -> None:
     import time
 
     print("╔═══════════════════════════════════════════════════════════════╗")
-    print("║           Euxis TUI Performance Audit v0.1.0                  ║")
+    print("║           Euxis TUI Performance Audit v0.0.1                  ║")
     print("╚═══════════════════════════════════════════════════════════════╝")
     print()
 

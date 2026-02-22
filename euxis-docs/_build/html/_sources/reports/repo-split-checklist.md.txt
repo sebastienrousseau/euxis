@@ -1,7 +1,7 @@
-# Repo Split Checklist (v0.1.0)
+# Repo Split Checklist (v0.0.1)
 
 ## Preparation
-- [x] Freeze releases or use a dedicated split branch (`feat/v0.1.0`)
+- [x] Freeze releases or use a dedicated split branch (`feat/v0.0.1`)
 - [x] Document current CI workflows and release steps (see `docs/reports/ci-workflows-documentation.md`)
 - [x] Run `cli/bin/euxis-certify` (all 6 gates passed)
 - [x] Confirm all module READMEs are current (template-based, extraction-ready)
