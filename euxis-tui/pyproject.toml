@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.5"]
+build-backend = "maturin"
 
 [project]
 name = "euxis-tui"
@@ -33,11 +33,9 @@ euxis-tui = "tui:main"
 Homepage = "https://euxis.co"
 Repository = "https://github.com/euxis/euxis-tui"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "tui.euxis_tui_rs"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
