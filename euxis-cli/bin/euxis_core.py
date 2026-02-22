@@ -178,8 +178,10 @@ class DispatchEngine:
     def __init__(self, euxis_home: Path | None = None) -> None:
         self.euxis_home = Path(euxis_home) if euxis_home else EUXIS_HOME
         self.repo_root = Path(__file__).resolve().parents[2]
-        self.registry_path = self.euxis_home / "euxis-core/agents/registry.json"
-        self.registry_db = self.euxis_home / "euxis-core/agents/registry.db"
+        # In test environments, euxis_home might already point directly to tmp dir
+        base_registry = self.euxis_home / "euxis-core/agents" if (self.euxis_home / "euxis-core").exists() else self.euxis_home / "agents"
+        self.registry_path = base_registry / "registry.json"
+        self.registry_db = base_registry / "registry.db"
         self.log_dir: Path | None = None
         self._valid_agents: set[str] | None = None
 
