@@ -189,6 +189,7 @@ def test_dispatch_agent_modes(monkeypatch):
     asyncio.run(server.dispatch_agent(DummyWS(), {"value": 0}, "sess", "run", {"mode": "squad", "squad": "build"}, "hi", server.load_config(None)))
     asyncio.run(server.dispatch_agent(DummyWS(), {"value": 0}, "sess", "run", {"mode": "combo", "combo": "envision"}, "hi", server.load_config(None)))
     asyncio.run(server.dispatch_agent(DummyWS(), {"value": 0}, "sess", "run", {"mode": "playbook", "playbook": "zero"}, "hi", server.load_config(None)))
+    asyncio.run(server.dispatch_agent(DummyWS(), {"value": 0}, "sess", "run", {"mode": "wasm", "plugin": "p"}, "hi", server.load_config(None)))
     asyncio.run(server.dispatch_agent(DummyWS(), {"value": 0}, "sess", "run", {"agent": "a", "provider": "x"}, "hi", server.load_config(None)))
     assert captured
 

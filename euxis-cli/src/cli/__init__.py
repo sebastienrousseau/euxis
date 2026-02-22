@@ -42,8 +42,7 @@ def _run_artifact_only(bash_script: Path, args: list[str]) -> int:
         
         output_lines = []
         for line in iter(process.stdout.readline, ""):
-            if line:
-                output_lines.append(line)
+            output_lines.append(line)
         
         process.wait()
 
@@ -68,8 +67,7 @@ def _run_artifact_only(bash_script: Path, args: list[str]) -> int:
         if "```markdown" in raw_output:
             # Attempt to extract explicit markdown codeblocks
             parts = raw_output.split("```markdown")
-            if len(parts) > 1:
-               markdown_block = parts[1].split("```")[0].strip()
+            markdown_block = parts[1].split("```")[0].strip()
         
         console.print(Markdown(markdown_block))
 

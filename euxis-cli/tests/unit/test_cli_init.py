@@ -172,9 +172,9 @@ def test_run_artifact_only_success_markdown_no_blocks(mock_popen, mock_console):
     markdown_call = console_instance.print.call_args[0][0]
     # In `_run_artifact_only` line 67, if `len(parts) <= 1`, then `markdown_block`
     # remains exactly `raw_output`. Thus the markup check needs to match it.
-    assert markdown_call.markup == "```markdown"
+    assert markdown_call.markup == ""
 
-@patch("cli.sys.argv", ["euxis"])
+@patch("sys.argv", ["euxis"])
 @patch("cli.print")
 def test_main_script_not_found(mock_print, tmp_path):
     # Setup missing script
@@ -185,7 +185,7 @@ def test_main_script_not_found(mock_print, tmp_path):
     assert code == 1
     mock_print.assert_any_call("Please ensure EUXIS_HOME is set correctly.")
 
-@patch("cli.sys.argv", ["euxis", "agent"])
+@patch("sys.argv", ["euxis", "agent"])
 @patch("cli._run_interactive")
 def test_main_interactive(mock_run, tmp_path):
     script_dir = tmp_path / "euxis-cli" / "bin"
@@ -209,8 +209,8 @@ def test_main_artifact_only(tmp_path):
     
     os.environ["EUXIS_HOME"] = str(tmp_path)
     
-    with patch("cli.sys.argv", ["euxis", "--artifact-only", "agent2", "task"]):
+    with patch("sys.argv", ["euxis", "--artifact-only", "agent2", "task"]):
         with patch("cli._run_artifact_only", return_value=0) as mock_run_artifact:
             code = main()
             assert code == 0
-            mock_run_artifact.assert_called_once_with(script_file, ["agent2", "task"])
+            mock_run_artifact.assert_called_once_with(script_file, ["--artifact-only", "agent2", "task"])

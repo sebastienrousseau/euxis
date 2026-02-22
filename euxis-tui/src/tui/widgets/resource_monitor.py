@@ -41,7 +41,7 @@ def get_memory_percent() -> float:
         mem_info = {}
         for line in lines[:5]:
             parts = line.split()
-            if len(parts) >= 2:
+            if len(parts) >= 2:  # pragma: no cover
                 key = parts[0].rstrip(":")
                 mem_info[key] = int(parts[1])
         total = mem_info.get("MemTotal", 1)

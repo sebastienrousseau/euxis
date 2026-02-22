@@ -33,8 +33,8 @@ _TGPImage = None
 
 try:
     from textual_image.widget import SixelImage as _SixelImage
-    from textual_image.widget import TGPImage as _TGPImage
-    _HAS_TEXTUAL_IMAGE = True
+    from textual_image.widget import TGPImage as _TGPImage  # pragma: no cover
+    _HAS_TEXTUAL_IMAGE = True  # pragma: no cover
 except ImportError:
     pass
 

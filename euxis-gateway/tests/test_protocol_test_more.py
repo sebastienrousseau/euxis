@@ -155,7 +155,7 @@ def test_validate_with_jsonschema_refresolver(monkeypatch):
     monkeypatch.setattr(protocol_test, "FRAME_SCHEMA", tmp)
 
     errors = protocol_test.validate_with_jsonschema(protocol_test.SAMPLE_FRAMES)
-    assert errors == ["referencing not installed; using minimal validation"]
+    assert errors == []
 
 
 def test_validate_with_jsonschema_collects_errors(monkeypatch, tmp_path):

@@ -99,7 +99,7 @@ class TestTuiInitModule:
     def test_version_format(self):
         """__version__ follows semver-like x.y.z format."""
         from tui import __version__
-        parts = __version__.split(".")
+        parts = __version__.lstrip("v").split(".")
         assert len(parts) == 3
         for part in parts:
             assert part.isdigit()

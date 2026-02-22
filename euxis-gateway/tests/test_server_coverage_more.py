@@ -279,6 +279,35 @@ def test_approvals_dispatch(monkeypatch):
     assert "run1" in server.STATE.running
 
 
+def test_approvals_dispatch_different_session(monkeypatch):
+    config = server.load_config(None)
+    config["gateway"]["auth"]["mode"] = "none"
+    app = _build_app(monkeypatch, config)
+    client = TestClient(app)
+
+    server.STATE.pending_approvals["run2"] = {
+        "run_id": "run2",
+        "session_id": "sess2",
+        "meta": {},
+        "content": "hi",
+    }
+
+    class DummyWS:
+        async def send_text(self, _text):
+            return None
+
+    server.STATE.connections["conn2"] = DummyWS()
+    server.STATE.conn_seq["conn2"] = 0
+    server.STATE.conn_sessions["conn2"] = "other_sess"
+
+    async def fake_dispatch(*_args, **_kwargs):
+        raise RuntimeError("should not be called")
+
+    monkeypatch.setattr(server, "dispatch_with_lock", fake_dispatch)
+    resp = client.post("/approvals/run2/approve")
+    assert resp.status_code == 200
+    assert "run2" not in server.STATE.running
+
 def test_admin_exec_success(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"

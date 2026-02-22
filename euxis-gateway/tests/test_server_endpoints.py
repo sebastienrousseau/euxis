@@ -92,6 +92,8 @@ def test_sessions_import_export(monkeypatch, tmp_path):
     resp = client.post("/sessions/import", json=payload)
     assert resp.status_code == 200
     exported = client.get("/sessions/export")
+    assert exported.status_code == 200, exported.text
+    assert "sessions" in exported.json(), exported.json()
     assert "sess_a" in exported.json()["sessions"]
 
 

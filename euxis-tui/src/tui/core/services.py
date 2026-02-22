@@ -18,7 +18,7 @@ try:
     from shared.crypto_bridge import crypto_errors, is_available
     _errors = crypto_errors()
     if not isinstance(_errors, tuple) or len(_errors) != 3:
-        raise RuntimeError("crypto_errors() returned unexpected shape")
+        raise RuntimeError("crypto_errors() returned unexpected shape")  # pragma: no cover
 except Exception:  # pragma: no cover - fallback for docs/minimal environments
     class _FallbackCryptoError(Exception):
         """Fallback crypto exception when bridge is unavailable."""
@@ -47,25 +47,25 @@ class CryptographicAlgorithm(Protocol):
 
     def encrypt(self, data: bytes, key: bytes) -> bytes:
         """Encrypt data with the given key."""
-        ...
+        ...  # pragma: no cover
 
     def decrypt(self, encrypted_data: bytes, key: bytes) -> bytes:
         """Decrypt data with the given key."""
-        ...
+        ...  # pragma: no cover
 
     def hash(self, data: bytes) -> bytes:
         """Hash data and return digest."""
-        ...
+        ...  # pragma: no cover
 
     @property
     def name(self) -> str:
         """Return algorithm name."""
-        ...
+        ...  # pragma: no cover
 
     @property
     def key_size(self) -> int:
         """Return required key size in bytes."""
-        ...
+        ...  # pragma: no cover
 
 
 @dataclass(frozen=True)

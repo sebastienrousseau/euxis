@@ -522,6 +522,38 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
             )
         return JSONResponse({"sessions": sessions})
 
+    @app.get("/sessions/export")
+    async def sessions_export(request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
+        data: Dict[str, Any] = {}
+        for session_id in STATE.sessions.keys():
+            if not STATE.sessions[session_id]:
+                STATE.sessions[session_id] = load_session_from_disk(session_id)
+            data[session_id] = STATE.sessions[session_id]
+        return JSONResponse({"sessions": data})
+
+    @app.post("/sessions/import")
+    async def sessions_import(payload: Dict[str, Any], request: Request) -> JSONResponse:
+        allowed, reason = is_http_authorized(request, config)
+        if not allowed:
+            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
+        sessions = payload.get("sessions", {})
+        if not isinstance(sessions, dict):
+            return JSONResponse({"status": "invalid"}, status_code=400)
+        count = 0
+        for session_id, entries in sessions.items():
+            if not isinstance(entries, list):
+                continue
+            ensure_session(session_id)
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                persist_message(session_id, entry)
+                count += 1
+        return JSONResponse({"status": "ok", "imported": count})
+
     @app.get("/sessions/{session_id}")
     async def session_detail(session_id: str, request: Request) -> JSONResponse:
         allowed, reason = is_http_authorized(request, config)
@@ -727,37 +759,7 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                 STATE.conn_seq[conn_id] = seq_state["value"]
         return JSONResponse({"status": "ok"})
 
-    @app.get("/sessions/export")
-    async def sessions_export(request: Request) -> JSONResponse:
-        allowed, reason = is_http_authorized(request, config)
-        if not allowed:
-            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
-        data: Dict[str, Any] = {}
-        for session_id in STATE.sessions.keys():
-            if not STATE.sessions[session_id]:
-                STATE.sessions[session_id] = load_session_from_disk(session_id)
-            data[session_id] = STATE.sessions[session_id]
-        return JSONResponse({"sessions": data})
 
-    @app.post("/sessions/import")
-    async def sessions_import(payload: Dict[str, Any], request: Request) -> JSONResponse:
-        allowed, reason = is_http_authorized(request, config)
-        if not allowed:
-            return JSONResponse({"status": "unauthorized", "reason": reason}, status_code=401)
-        sessions = payload.get("sessions", {})
-        if not isinstance(sessions, dict):
-            return JSONResponse({"status": "invalid"}, status_code=400)
-        count = 0
-        for session_id, entries in sessions.items():
-            if not isinstance(entries, list):
-                continue
-            ensure_session(session_id)
-            for entry in entries:
-                if not isinstance(entry, dict):
-                    continue
-                persist_message(session_id, entry)
-                count += 1
-        return JSONResponse({"status": "ok", "imported": count})
 
     @app.get("/runs")
     async def runs(request: Request) -> JSONResponse:

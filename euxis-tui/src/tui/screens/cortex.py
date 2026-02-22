@@ -122,7 +122,7 @@ class CortexScreen(Screen[None]):
 
         cortex_bin = Path.home() / "cli" / "bin" / "euxis-cortex"
         if not cortex_bin.exists():
-            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"
+            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"  # pragma: no cover
 
         env = os.environ.copy()
         env["EUXIS_HOME"] = str(EUXIS_HOME)

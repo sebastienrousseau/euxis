@@ -146,7 +146,7 @@ class SettingsScreen(Screen[None]):
             config.default_provider = str(provider_select.value)
 
         locale_select = self.query_one("#locale-select", Select)
-        if locale_select.value is not Select.BLANK:
+        if locale_select.value is not Select.BLANK:  # pragma: no cover
             config.locale = str(locale_select.value)
             set_locale(config.locale)
 

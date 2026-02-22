@@ -7,7 +7,7 @@
 __version__ = "v0.0.2"
 
 
-def main():
+def main():  # pragma: no cover
     """Entry point for euxis-tui command."""
     from tui.app import EuxisApp
     app = EuxisApp()

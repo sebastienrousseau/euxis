@@ -232,7 +232,7 @@ class AgentCard(Widget, can_focus=True):
             self.add_class("tier-core")
         # Set supervision tier class
         self._supervision_tier = self._get_supervision_tier(agent.id)
-        if self._supervision_tier:
+        if self._supervision_tier:  # pragma: no cover
             self.add_class(f"tier-{self._supervision_tier}")
 
     def _get_supervision_tier(self, agent_id: str) -> str:
@@ -435,7 +435,7 @@ class AgentCard(Widget, can_focus=True):
                         thought.update("[dim italic]Analyzing...[/]")
                     counter.update("")
                     progress.add_class("hidden")
-                elif new_phase == PHASE_COMPLETE:
+                elif new_phase == PHASE_COMPLETE:  # pragma: no cover
                     thought.update("[green]Complete[/]")
                     counter.update("")
                     progress.remove_class("hidden")

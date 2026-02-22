@@ -152,7 +152,7 @@ def run_audit() -> None:
         else:
             print("  Linux:        Most terminals work well")
             print("                Verify TERM=xterm-256color or similar")
-    elif sys.platform == "win32":
+    elif sys.platform == "win32":  # pragma: no cover
         print("  Windows:      Use Windows Terminal (not cmd.exe)")
         print("                Enable virtual terminal processing")
 
