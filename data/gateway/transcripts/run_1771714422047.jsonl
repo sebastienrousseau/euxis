@@ -1,1 +1,0 @@
-{"ts": "2026-02-21T22:53:42+0000", "event": "approval", "status": "rejected", "entry": {"run_id": "run_1771714422047", "session_id": "sess_webchat_demo", "agent_id": "architect", "requested_at": "2026-02-21T22:53:42+0000", "meta": {"agent": "architect", "approved": false, "elevated": "full"}, "content": "request approval 1771714422040", "approved": false}}

@@ -1,1 +1,0 @@
-{"type": "event", "event": "agent", "seq": 1, "ts": "2026-02-21T18:18:28+0000", "data": {"run_id": "run_broadcast_1771697908324", "session_id": "sess", "agent_id": "gateway", "status": "final", "content": "hi"}}
