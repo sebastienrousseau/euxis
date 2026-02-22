@@ -1,38 +1,39 @@
 # Euxis Agents: Architectural Overview
 
-Agents are the atomic units of execution within the Euxis autonomous mesh. Unlike traditional scripts or monolithic services, **Euxis Agents** are deterministic, cryptographically signed WebAssembly (Wasm) modules that operate within an ultra-secure, hyper-low latency (v8/Extism) sandbox.
+Agents are the atomic units of execution within the Euxis autonomous mesh. **Euxis Agents** are deterministic, cryptographically signed WebAssembly (Wasm) modules. They operate within an ultra-secure, hyper-low latency (v8/Extism) sandbox.
 
-This documentation serves as the definitive reference for understanding, building, and deploying Euxis Agents, fulfilling [GitHub Issue #22](https://github.com/sebastienrousseau/euxis/issues/22).
-
----
+This documentation is the definitive reference for understanding, building, and deploying Euxis Agents.
 
 ## 🚀 The Agent Architecture
 
-Euxis operates on a decentralized "mesh" paradigm. Agents are not persistently running servers; they are reactive, ephemeral functions invoked on-demand by the `euxis-core` Gateway.
+Euxis operates on a decentralized mesh paradigm. Agents are reactive, ephemeral functions. Invoke them on-demand via the `euxis-core` Gateway.
 
 ### Core Principles
 
-1.  **Language Agnostic Execution:** Write agents in Rust, Go, TypeScript, C++, or any language that compiles down to `wasm32-wasi`. The Euxis gateway executes the standardized binary without requiring the host environment to possess the corresponding toolchain.
-2.  **Zero-Trust Sandbox:** Each agent executes inside a memory-isolated Extism container. Agents *cannot* access the host filesystem, network, or OS environment variables unless explicitly mapped via standard WASI capabilities during invocation.
-3.  **Cryptographic Provenance:** Every agent binary is signed cryptographically upon compilation by the `euxis-cli`. The Gateway verifies this signature via a trusted origin registry before instantiation, preventing supply-chain poisoning.
-4.  **Deterministic Latency:** By utilizing pre-compiled Wasm modules and optimized memory sharing, agent spin-up times are measured in low milliseconds, enabling real-time, event-driven mesh topologies.
+1.  **Language Agnostic Execution:** Write agents in Rust, Go, or TypeScript targeting `wasm32-wasi`. The Euxis gateway executes the standardized binary seamlessly.
+2.  **Zero-Trust Sandbox:** Execute agents inside a memory-isolated Extism container. They lack access to host filesystems, networks, or OS environments. Explicitly grant permissions via WASI (WebAssembly system interface) mapping.
+3.  **Cryptographic Provenance:** Cryptographically sign every agent binary upon compilation via `euxis-cli`. The Gateway verifies this signature via a trusted origin registry before instantiation. This prevents supply-chain poisoning.
+4.  **Deterministic Latency:** Spin up agents in low milliseconds utilizing pre-compiled Wasm modules and optimized memory sharing. This enables real-time, event-driven mesh topologies.
 
 ## 🛠️ Building an Agent
 
-Creating a new Euxis Agent involves utilizing the Euxis CLI scaffolding commands. 
+Create a new Euxis Agent utilizing the CLI scaffolding. First, initialize the boilerplate. Then, implement your execution logic.
 
 ### Step 1: Initialization
 
+Initialize the directory structure before implementing your agent logic.
+
 ```bash
-# Initialize a new Rust-based Wasm agent
 euxis agent create auth_handler --lang rust
 ```
 
-This generates a boilerplate directory containing the source code, a `manifest.toml` for metadata, and a Makefile for generic compilation steps.
+This generates a standard directory containing your source code, a `manifest.toml` for metadata, and a standard Makefile.
 
-### Step 2: Implementation (Rust Example)
+### Step 2: Implementation
 
-The core logic must implement the Extism ExtismPDK interface.
+Your core logic must implement the Extism `ExtismPDK` (plugin development kit). Build your execution handler utilizing the `#[plugin_fn]` macro.
+
+**Gotchas:** Ensure your input payload strictly matches the struct signature. Returns an `ExtismError` string if deserialization fails.
 
 ```rust
 use extism_pdk::*;
@@ -51,7 +52,6 @@ struct OutputPayload {
 
 #[plugin_fn]
 pub fn execute(Json(input): Json<InputPayload>) -> FnResult<Json<OutputPayload>> {
-    // Agent execution logic here
     let authorized = input.user_token == "super-secret-key";
     
     let output = OutputPayload {
@@ -65,40 +65,46 @@ pub fn execute(Json(input): Json<InputPayload>) -> FnResult<Json<OutputPayload>>
 
 ### Step 3: Compilation and Deployment
 
+Compile and package the agent into an `.extism` plugin binary. Deploy the compiled binary to the local Gateway registry.
+
+**Gotchas:** Fails fatally if `wasm32-wasi` is missing from your Rust toolchain.
+
 ```bash
-# Compile and package the agent into an .extism plugin binary
+# Compile the plugin binary
 euxis agent build auth_handler
 
-# Deploy the binary to the local Gateway registry
+# Deploy to the Gateway registry
 euxis agent deploy auth_handler
 ```
 
 ## 🕸️ The Agent Mesh
 
-Agents communicate with each other not via HTTP REST calls, but through **Mesh Channels** managed by the Euxis Gateway. This inter-agent communication utilizes optimized memory sharing when possible, preventing costly serialization overhead.
+Manage inter-agent communication directly through **Mesh Channels** handled by the Euxis Gateway. This eliminates HTTP REST calls. Rely on optimized memory sharing instead to eliminate costly serialization overhead.
 
-### Agent Invocation via CLI
+### Agent Invocation
 
-You can directly interact with deployed agents using the CLI. 
+Invoke deployed agents via the CLI utilizing specific operational modes.
 
 #### Interactive Mode
-When running interactively, the CLI streams the stdout and stderr capabilities directly to your TUI console.
+
+Stream the `stdout` and `stderr` capabilities directly to your TUI console.
 
 ```bash
 euxis auth_handler '{"user_token": "admin_key_123"}'
 ```
 
-#### Artifact Mode (`--artifact-only`)
-When utilized within automation scripts or continuous integration pipelines, Agents should be invoked in Artifact mode. This suppresses extraneous logging and console formatting, yielding only the raw JSON or Markdown output block emitted by the Agent's Extism module.
+#### Artifact Mode
+
+For continuous integration pipelines, invoke Agents exclusively in Artifact mode. Artifact mode suppresses extraneous logging and console formatting. It yields only the raw JSON or Markdown output block.
 
 ```bash
 payload=$(euxis auth_handler --artifact-only '{"user_token": "admin_key_123"}')
 echo $payload | jq '.is_valid'
 ```
 
-## 📜 Agent Manifest Specification
+## 📜 Manifest Specification
 
-Every compiled Agent possesses a cryptographic manifest. Below is an example payload mapped by the Gateway.
+Define your agent capabilities cryptographically via the manifest payload.
 
 ```json
 {
@@ -114,4 +120,6 @@ Every compiled Agent possesses a cryptographic manifest. Below is an example pay
 
 ## 🛡️ Security Posture
 
-Euxis Agents operate strictly on a deny-by-default architecture. Attempting to execute `std::fs::read` from within a Rust Agent will result in an immediate trap error unless the `filesystem` array within the manifest explicitly defines a mapped virtual path allowed by the Host Gateway.
+Euxis Agents operate on a strict deny-by-default architecture. Attempting to execute `std::fs::read` from within a Rust Agent triggers a trap (WebAssembly execution halt).
+
+Define mapped virtual paths within the manifest `filesystem` array here to grant host access explicitly.
