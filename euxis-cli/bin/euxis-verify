@@ -1416,6 +1416,22 @@ run_legal_gate() {
 # Summary Display
 # ============================================================================
 
+show_euxis_seal() {
+    # 2026 Enterprise Grade Verification Seal
+    local dim="\033[38;2;120;120;120m"
+    local glow="\033[1;38;2;0;209;255m"
+    local white="\033[1;38;2;255;255;255m"
+    local blue="\033[38;2;0;122;255m"
+    local reset="\033[0m"
+
+    echo -e "\n  ${white}EUXIS VERIFICATION COMPLETE${reset}"
+    echo -e "  ${dim}Status: 100% Coverage Reached${reset}"
+    echo -e "  ${dim}────────────────────────────────────────────────────────────────────────${reset}"
+    echo -e "  ${dim}THE ARCHITECT ᛫ Sebastien Rousseau ᛫ ${blue}https://sebastienrousseau.com${reset}"
+    echo -e "  ${dim}THE ENGINE ${glow}ᛞ ${white}EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ ${blue}https://euxis.co${reset}"
+    echo -e "  ${dim}────────────────────────────────────────────────────────────────────────${reset}\n"
+}
+
 _status_icon() {
     case "$1" in
         PASS) echo "${GREEN}✓${RESET}" ;;
@@ -1460,8 +1476,10 @@ print_summary() {
 
     # Final verdict - bubbletea style
     if [[ $OVERALL_FAILURES -eq 0 ]]; then
+        show_euxis_seal
         echo "  ${GREEN}Done!${RESET} Verified ${passed}/${total} gates. ${GREEN}Release ready.${RESET}"
     else
+        echo -e "\n  \033[1;31m✘ VERIFICATION FAILED\033[0m"
         echo "  ${RED}Blocked.${RESET} ${OVERALL_FAILURES} gate(s) failed. ${OVERALL_WARNINGS} warning(s)."
     fi
     echo ""

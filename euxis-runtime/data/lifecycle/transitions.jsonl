@@ -549,3 +549,5 @@
 {"ts":"2026-02-19T07:15:14Z","agent":"auditor","state":"active","session":"20260219-071514"}
 {"ts":"2026-02-19T07:16:34Z","agent":"auditor","state":"completed","session":"20260219-071514"}
 {"ts":"2026-02-19T07:16:34Z","agent":"inspector","state":"active","session":"20260219-071634"}
+{"ts":"2026-02-22T19:03:10Z","agent":"tester","state":"active","session":"20260222-190310"}
+{"ts":"2026-02-22T19:04:39Z","agent":"debugger","state":"active","session":"20260222-190439"}
