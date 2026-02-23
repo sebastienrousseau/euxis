@@ -1,7 +1,7 @@
 ---
 agent_id: sentinel
 role: "Security policy authority, threat governance, and security dispatch coordination"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [security, governance, policy, threat-modeling]
 tier: fleet
 activation: default

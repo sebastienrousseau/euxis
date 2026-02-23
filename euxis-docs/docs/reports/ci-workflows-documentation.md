@@ -1,4 +1,4 @@
-# CI Workflows Documentation (v0.0.1)
+# CI Workflows Documentation (v0.0.2)
 
 This document describes the CI/CD workflows and release processes for the Euxis monorepo, generated as part of the multi-repo split preparation.
 
@@ -91,7 +91,7 @@ Modules with CI templates:
 
 1. **Version Bump:** Update version in `agents/registry.json` (source of truth)
 2. **Version Sync:** Run `scripts/sync-docs.sh` to propagate version
-3. **Certification:** Run `cli/bin/euxis-certify` to validate all gates
+3. **Certification:** Run `euxis-cli/bin/euxis-certify` to validate all gates
 4. **Tag:** Create signed git tag `vX.Y.Z`
 5. **Push:** Push tag to origin
 
@@ -106,7 +106,7 @@ After extraction to separate repos:
 
 ## Certification Gates
 
-The `cli/bin/euxis-certify` script runs 6 gates:
+The `euxis-cli/bin/euxis-certify` script runs 6 gates:
 
 | Gate | Description |
 |------|-------------|
@@ -120,4 +120,4 @@ The `cli/bin/euxis-certify` script runs 6 gates:
 | 6 | Documentation governance |
 
 ---
-*Generated: 2026-02-16 as part of v0.0.1 multi-repo preparation*
+*Generated:-02-16 as part of v0.0.2 multi-repo preparation*

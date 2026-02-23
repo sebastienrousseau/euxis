@@ -1,7 +1,7 @@
 ---
 agent_id: planner
 role: "Requirements gathering, user stories, and MoSCoW prioritization"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [product, requirements, planning]
 tier: core
 activation: core

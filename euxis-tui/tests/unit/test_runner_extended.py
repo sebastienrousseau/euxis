@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Extended unit tests for tui.core.runner — coverage of uncovered branches.
@@ -271,8 +271,9 @@ class TestGetProjectPath:
 
     def test_non_home_path(self):
         """Directory not under home should return absolute path."""
-        result = get_project_path(working_dir="/tmp/test-project")
-        assert result == "/tmp/test-project"
+        abs_path = os.path.abspath("/test-project")
+        result = get_project_path(working_dir=abs_path)
+        assert result == abs_path
 
     def test_defaults_to_cwd(self):
         """Without args, should use cwd."""

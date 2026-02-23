@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Euxis Crypto Library - Pure Functional Encryption Operations.
@@ -43,7 +43,7 @@ def async_decrypt_batch(*args, **kwargs):
     """Batch async decryption - see async_core.async_decrypt_batch for details."""
     return _get_async().async_decrypt_batch(*args, **kwargs)
 
-__version__ = "0.1.0"
+__version__ = "v0.0.2"
 __all__ = [
     # Sync API
     "CryptoError",

@@ -1,4 +1,4 @@
-# Initial User Expectations (February 18, 2026)
+# Initial User Expectations (February 18,)
 
 This page captures the latest measured quality and performance snapshot so first-time users can set realistic expectations.
 

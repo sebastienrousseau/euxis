@@ -16,6 +16,22 @@ Primary status page:
 
 ## Building Documentation
 
+## Publishing to GitHub Pages
+
+Docs are built by CI and published to the `gh-pages` branch on pushes to `main` via `.github/workflows/docs-gh-pages.yml`.
+
+To publish locally (manual):
+
+```bash
+make -C euxis-docs html
+```
+
+Then push `_build/html` to `gh-pages` if needed.
+
+
+Docs are published to the `gh-pages` branch by CI on push to `main`.
+
+
 ### Prerequisites
 
 ```bash

@@ -71,19 +71,91 @@ set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 
-# ============================================================================
-# Fast-path: handle --version and --help before loading any libraries.
-# This brings cold start for info commands to <10ms.
-# ============================================================================
-
+# Fast-path: handle --version and --help without sourcing large libraries
 case "${1:-}" in
   --version)
-    echo "euxis 0.1.0"
+    echo "euxis v0.0.2"
     exit 0
     ;;
-  -h | --help | help)
-    source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-    usage
+  "" | -h | --help | help)
+    # Inline ANSI colors for ultra-fast startup (<2ms)
+    [[ -n "${NO_COLOR:-}" || ! -t 1 ]] && NO_COLOR=1
+    if [[ -z "${NO_COLOR:-}" ]]; then
+        RESET=$'\033[0m'; BOLD=$'\033[1m'; DIM=$'\033[2m'; RED=$'\033[38;5;203m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;220m'; BLUE=$'\033[38;5;69m'; MAGENTA=$'\033[38;5;211m'; CYAN=$'\033[38;5;87m'; WHITE=$'\033[38;5;255m'
+        ICON_CHECK="✓"; ICON_BULLET="▸"; ICON_ARROW="→"; ICON_BOLT="⚡"
+        # Banner
+        printf "\n%s%s    ███████╗██╗   ██╗██╗  ██╗██╗███████╗%s\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%s%s    ██╔════╝██║   ██║╚██╗██╔╝██║██╔════╝%s\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%s%s    █████╗  ██║   ██║ ╚███╔╝ ██║███████╗%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    ██╔══╝  ██║   ██║ ██╔██╗ ██║╚════██║%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    ███████╗╚██████╔╝██╔╝ ██╗██║███████║%s\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "%s%s    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝%s\n" "$BOLD" "$MAGENTA" "$RESET"
+        printf "    %s%s⚡ v0.0.2%s\n\n" "$BOLD" "$YELLOW" "$RESET"
+    else
+        RESET=''; BOLD=''; DIM=''; RED=''; GREEN=''; YELLOW=''; BLUE=''; MAGENTA=''; CYAN=''; WHITE=''
+        ICON_CHECK="*"; ICON_BULLET=">"; ICON_ARROW="->"; ICON_BOLT="*"
+        printf "\n    EUXIS\n    * v0.0.2\n\n"
+    fi
+
+    # Fast Context Detector
+    dir="$PWD"; repo_root=""
+    while [[ "$dir" != "/" && "$dir" != "" ]]; do
+        if [[ -d "$dir/.git" || -f "$dir/.git" ]]; then repo_root="$dir"; break; fi
+        dir="${dir%/*}"
+    done
+    branch="no-git"
+    if [[ -n "$repo_root" && -f "$repo_root/.git/HEAD" ]]; then
+        read -r head_content < "$repo_root/.git/HEAD" || true
+        [[ "$head_content" == ref:\ refs/heads/* ]] && branch="${head_content#ref: refs/heads/}" || branch="HEAD"
+    fi
+    [[ -z "$repo_root" ]] && repo_root="$PWD"
+    echo -e "Scope: ${CYAN}${repo_root##*/}${RESET}/.${PWD#"$repo_root"}  Branch: ${YELLOW}${branch}${RESET}\n"
+
+    # Fast Usage Print
+    echo -e "  ${DIM}Enterprise Unified eXecution Intelligence System${RESET}"
+    echo -e "  ${DIM}Multi-Provider Agent Framework • 53 Agents${RESET}\n"
+    echo -e "  ${BOLD}${WHITE}USAGE${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis ${DIM}<command> [options]${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis ${DIM}<agent> <task> [--provider <name>]${RESET}\n"
+    
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} CORE COMMANDS${RESET}"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "agent <cmd>" "Manage agent plugins (register, list)"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "squad <cmd>" "Manage agent squads (list, deploy, info)"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "combo <cmd>" "Chain agents sequentially (list, run)"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "playbook <cmd>" "Phased execution with gates (list, run)"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "dispatch <manifest>" "Deploy fleet from architect manifest"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n\n" "cortex <cmd>" "Vector memory interface (ChromaDB)"
+
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} QUALITY & INFRA${RESET}"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "verify" "Run pre-commit quality gates"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "health" "Check system probes and connectivity"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "certify" "Full certification pipeline"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "deploy" "Spin up via Docker Compose"
+    printf "    ${GREEN}${ICON_CHECK}${RESET} ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n\n" "doctor" "Verify installation and environment"
+
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} AGENT ECOSYSTEM (50 Total)${RESET}"
+    printf "    ${DIM}%-7s${RESET} %s\n" "Core:" "architect, orchestrator, planner, reviewer, guard, auditor..."
+    printf "    ${DIM}%-7s${RESET} %s\n\n" "Fleet:" "debugger, tester, pentester, researcher, designer, writer..."
+    echo -e "    Run ${CYAN}euxis agents${RESET} to see the full list with descriptions."
+    echo -e "    Run ${CYAN}euxis search <keyword>${RESET} to find agents by capability.\n"
+
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} EXAMPLES${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis architect ${DIM}\"Design a REST API for user auth\"${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis squad deploy quality ${DIM}\"Audit the payment module\"${RESET}"
+    echo -e "       ${DIM}${ICON_ARROW} Deploys: reviewer, inspector, sentinel, pentester, auditor${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis combo run envision ${DIM}\"Build a CLI for data pipelines\"${RESET}"
+    echo -e "       ${DIM}${ICON_ARROW} Chain: deep-researcher ${ICON_ARROW} planner ${ICON_ARROW} architect ${ICON_ARROW} reviewer${RESET}"
+    echo -e "    ${CYAN}\$${RESET} euxis playbook run python ${DIM}\"Refactor the utils module\"${RESET}"
+    echo -e "       ${DIM}${ICON_ARROW} Phases: analyze ${ICON_ARROW} implement ${ICON_ARROW} test ${ICON_ARROW} review${RESET}\n"
+
+    echo -e "  ${BOLD}${CYAN}${ICON_BULLET} GLOBAL FLAGS${RESET}"
+    printf "    ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "--provider <name>" "Override AI provider (claude, gemini, openai, ollama...)"
+    printf "    ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "--json" "Output as JSON (for piping to jq)"
+    printf "    ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n" "--verbose" "Enable verbose logging"
+    printf "    ${CYAN}%-20s${RESET} ${DIM}%s${RESET}\n\n" "--no-color" "Disable colored output"
+
+    echo -e "  ${DIM}────────────────────────────────────────────────────────${RESET}"
+    echo -e "  ${DIM}Docs:${RESET} ${CYAN}https://docs.euxis.co${RESET}  ${DIM}Issues:${RESET} ${CYAN}github.com/euxis/euxis${RESET}\n"
     exit 0
     ;;
   agents)

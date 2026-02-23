@@ -34,7 +34,7 @@ This policy defines how we name folders and files so the repo stays predictable 
 Do not use `final`, `latest`, or `updated` in filenames. Prefer versions or dates:
 
 - Versioned: `releaseNotes-v1.2.0.md`
-- Timestamped: `releaseNotes-2026-02-16.md`
+- Timestamped: `releaseNotes-current-02-16.md`
 
 ## README.md Required
 

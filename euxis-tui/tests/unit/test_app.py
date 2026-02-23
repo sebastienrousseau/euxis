@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 #!/usr/bin/env python3
@@ -28,11 +28,11 @@ def _make_app():
     config = ETXConfig()
     registry = FleetRegistry()
     registry.agents = [
-        Agent(id="architect", tier="core", version="0.0.1",
+        Agent(id="architect", tier="core", version="0.0.2",
               tags=("design",), activation="default"),
-        Agent(id="debugger", tier="fleet", version="0.0.1",
+        Agent(id="debugger", tier="fleet", version="0.0.2",
               tags=("debug",), activation="default"),
-        Agent(id="tester", tier="fleet", version="0.0.1",
+        Agent(id="tester", tier="fleet", version="0.0.2",
               tags=("test",), activation="on-demand"),
     ]
     registry.squads = [

@@ -1,4 +1,4 @@
-# Shared Contracts (v0.0.1)
+# Shared Contracts (v0.0.2)
 
 This document defines the interface contracts between Euxis modules. These contracts must be honored during and after the multi-repo extraction to ensure compatibility.
 
@@ -199,7 +199,7 @@ def test_required_events_defined():
 ## 5. CLI ↔ Core Contract
 
 **Producer:** `core/lib/*.sh` (shell libraries)
-**Consumer:** `cli/bin/euxis*` (CLI tools)
+**Consumer:** `euxis-cli/bin/euxis*` (CLI tools)
 
 ### Environment Contract
 
@@ -328,10 +328,10 @@ Any contract test failure blocks extraction.
 
 | euxis-core | euxis-cli | euxis-ui | euxis-api | euxis-adapters |
 |------------|-----------|----------|-----------|----------------|
-| 0.1.0      | 0.1.0     | 0.1.0    | 0.1.0     | 0.1.0          |
+| v0.0.2      | v0.0.2     | v0.0.2    | v0.0.2     | v0.0.2          |
 
 All modules must maintain compatible versions during initial extraction. After extraction, semantic versioning will govern compatibility.
 
 ---
 
-*Document created: 2026-02-16 as part of v0.0.1 multi-repo preparation*
+*Document created:-02-16 as part of v0.0.2 multi-repo preparation*

@@ -20,7 +20,7 @@ set -euo pipefail
 EUXIS_REPO="${EUXIS_REPO:-https://github.com/euxis/euxis.git}"
 EUXIS_BRANCH="${EUXIS_BRANCH:-main}"
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-VERSION="0.0.1"
+VERSION="0.0.2"
 
 # ============================================================================
 # Colors & Output (respects NO_COLOR and pipes)

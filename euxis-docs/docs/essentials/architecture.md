@@ -2,7 +2,7 @@
 
 Comprehensive architectural documentation for the Euxis multi-provider AI agent orchestration framework.
 
-**Version:** 0.1.0
+**Version:** v0.0.2
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 
@@ -12,7 +12,7 @@ Comprehensive architectural documentation for the Euxis multi-provider AI agent 
 
 The Euxis framework is organized into five distinct layers, each with specific responsibilities. The CLI layer provides the user interface, shell libraries handle core logic, the optional Python TUI offers rich visualization, the data layer manages persistence, and the provider layer abstracts AI model interactions.
 
-## Gateway Control Plane (v0.1)
+## Gateway Control Plane (v0.0.2)
 
 Euxis introduces a minimal Gateway control plane to front agent execution with a WebSocket surface and health endpoint. The Gateway is a thin runtime that delegates execution to existing Euxis CLI entry points.
 
@@ -66,12 +66,12 @@ flowchart TB
 
     subgraph Providers["Provider Layer"]
         direction LR
-        claude[Claude<br/>S-Tier Strategic]
-        gemini[Gemini<br/>A-Tier Research]
-        goose[Goose<br/>B-Tier Coding]
-        ollama[Ollama<br/>C-Tier Utility]
-        qwen[Qwen<br/>B-Tier Math]
-        openai[OpenAI<br/>Generalist]
+        claude[Claude<br/>Default Provider]
+        gemini[Gemini<br/>Large Context]
+        goose[Goose<br/>Tool Use]
+        ollama[Ollama<br/>Local]
+        qwen[Qwen<br/>Logic/Coding]
+        openai[OpenAI<br/>Codex CLI]
     end
 
     CLI --> ShellLib
@@ -397,154 +397,15 @@ flowchart TB
 
 ## Provider Routing
 
-Euxis implements intelligent provider routing based on agent role, task priority, and capability requirements.
+Euxis routes providers using a default provider plus a fallback chain. You can override per command or via `EUXIS_SESSION_PROVIDER`.
 
-### Intelligence Tier Routing
+- Default: `EUXIS_DEFAULT_PROVIDER` (defaults to `claude`)
+- Fallback chain: `EUXIS_FALLBACK_CHAIN` (defaults to `claude:gemini:openai:kiro-cli:qwen:crush:goose:ollama`)
 
-```text
-flowchart TB
-    subgraph Input["Routing Input"]
-        agent["Agent Name"]
-        priority["Task Priority<br/>(P0/P1/P2)"]
-    end
-
-    subgraph P0Check["Priority Override"]
-        p0_check{"Priority = P0?"}
-    end
-
-    subgraph TierRouting["Tier-Based Routing"]
-        direction TB
-
-        subgraph STier["S-Tier: Strategic"]
-            s_agents["orchestrator<br/>architect<br/>planner<br/>reviewer"]
-            s_provider["claude"]
-        end
-
-        subgraph ATier["A-Tier: Research/Domain"]
-            a_research["researcher<br/>deep-researcher<br/>auditor"]
-            a_domain["cryptographer<br/>ledger"]
-            a_provider1["gemini"]
-            a_provider2["claude"]
-        end
-
-        subgraph BTier["B-Tier: Coding/Systems"]
-            b_coding["debugger<br/>tester<br/>automaton"]
-            b_systems["conduit<br/>custodian"]
-            b_math["optimizer<br/>telemetrist"]
-            b_provider1["goose"]
-            b_provider2["qwen"]
-        end
-
-        subgraph CTier["C-Tier: Utility"]
-            c_agents["butler<br/>librarian<br/>writer"]
-            c_provider["ollama"]
-        end
-    end
-
-    subgraph Fallback["Default Fallback"]
-        default_provider["claude<br/>(DEFAULT_PROVIDER)"]
-    end
-
-    Input --> P0Check
-    P0Check -->|Yes| s_provider
-    P0Check -->|No| TierRouting
-
-    s_agents --> s_provider
-    a_research --> a_provider1
-    a_domain --> a_provider2
-    b_coding --> b_provider1
-    b_systems --> b_provider1
-    b_math --> b_provider2
-    c_agents --> c_provider
-
-    TierRouting -->|"Unknown Agent"| Fallback
-
-    style STier fill:#e8f5e9,stroke:#2e7d32
-    style ATier fill:#e3f2fd,stroke:#1565c0
-    style BTier fill:#fff3e0,stroke:#e65100
-    style CTier fill:#f5f5f5,stroke:#616161
-```
-
-### Provider Selection Logic
-
-```text
-flowchart TB
-    start([resolve_tiered_provider]) --> check_priority
-
-    check_priority{"Priority = P0?"}
-    check_priority -->|Yes| return_claude["return 'claude'"]
-    check_priority -->|No| match_agent
-
-    match_agent{"Match Agent<br/>to Tier"}
-
-    match_agent -->|"orchestrator, architect,<br/>planner, reviewer"| return_claude
-
-    match_agent -->|"researcher, deep-researcher,<br/>auditor"| return_gemini["return 'gemini'"]
-
-    match_agent -->|"responder"| return_kiro["return 'kiro-cli'"]
-
-    match_agent -->|"debugger, tester,<br/>automaton,<br/>maintainer"| return_goose["return 'goose'"]
-
-    match_agent -->|"crypto-auditor,<br/>payments-steward"| return_claude
-
-    match_agent -->|"optimizer,<br/>telemetrist"| return_qwen["return 'qwen'"]
-
-    match_agent -->|"butler, librarian,<br/>writer"| return_ollama["return 'ollama'"]
-
-    match_agent -->|"No Match"| return_default["return DEFAULT_PROVIDER<br/>('claude')"]
-
-    style return_claude fill:#e8f5e9
-    style return_gemini fill:#e3f2fd
-    style return_goose fill:#fff3e0
-    style return_qwen fill:#fce4ec
-    style return_ollama fill:#f5f5f5
-```
-
-### Provider Fallback Mechanisms
-
-```text
-flowchart TB
-    subgraph Execution["Provider Execution"]
-        execute["execute_provider()"]
-        timeout["run_with_timeout()<br/>EUXIS_API_TIMEOUT (300s)"]
-    end
-
-    subgraph Providers["Provider Commands"]
-        claude_cmd["run_claude()<br/>claude --print --model ..."]
-        gemini_cmd["run_gemini()<br/>gemini --output-format text"]
-        goose_cmd["run_goose()<br/>goose run --model ..."]
-        ollama_cmd["run_ollama()<br/>ollama run model"]
-    end
-
-    subgraph Errors["Error Handling"]
-        timeout_err["Timeout (exit 124)"]
-        missing_cli["CLI Not Found"]
-        api_error["API Error"]
-    end
-
-    subgraph Recovery["Recovery Actions"]
-        log_timeout["Log: 'Consider increasing<br/>EUXIS_API_TIMEOUT'"]
-        log_install["Log: 'Install via: brew/npm...'"]
-        return_error["Return Error to Caller"]
-    end
-
-    execute --> timeout
-    timeout --> Providers
-
-    Providers --> timeout_err
-    Providers --> missing_cli
-    Providers --> api_error
-
-    timeout_err --> log_timeout --> return_error
-    missing_cli --> log_install --> return_error
-    api_error --> return_error
-
-    style timeout_err fill:#ffcdd2
-    style missing_cli fill:#ffcdd2
-    style api_error fill:#ffcdd2
-```
+For details and examples, see `essentials/core-concepts/provider-routing.md`.
 
 ---
+
 
 ## Agent Lifecycle
 
@@ -640,8 +501,8 @@ flowchart LR
 
     subgraph TransitionLog["transitions.jsonl"]
         direction TB
-        entry1["{'ts':'2026-02-14T10:00:00Z',<br/>'agent':'architect',<br/>'state':'active',<br/>'session':'20260214-100000'}"]
-        entry2["{'ts':'2026-02-14T10:05:00Z',<br/>'agent':'architect',<br/>'state':'completed',<br/>'session':'20260214-100000'}"]
+        entry1["{'ts':'current-02-14T10:00:00Z',<br/>'agent':'architect',<br/>'state':'active',<br/>'session':'current0214-100000'}"]
+        entry2["{'ts':'current-02-14T10:05:00Z',<br/>'agent':'architect',<br/>'state':'completed',<br/>'session':'current0214-100000'}"]
     end
 
     subgraph Queries["Query Functions"]
@@ -692,7 +553,7 @@ flowchart TB
     end
 
     subgraph Provider["Provider Execution"]
-        resolve["resolve_tiered_provider()<br/>-> 'claude'"]
+        resolve["resolve_tiered_provider()<br/>-> default provider"]
         config["resolve_provider_config()<br/>model, flags"]
         execute["run_claude()<br/>claude --print ..."]
     end
@@ -721,7 +582,7 @@ flowchart TB
 
 ```
 ~/.euxis/
-├── cli/bin/                          # Executables
+├── euxis-cli/bin/                          # Executables
 │   ├── euxis                    # Main entry point
 │   ├── euxis-dispatch           # Multi-agent dispatch
 │   ├── euxis-squad              # Squad deployment
@@ -765,7 +626,7 @@ flowchart TB
 
 ---
 
-*Euxis v0.0.1 - Build something that matters.*
+*Euxis v0.0.2 - Build something that matters.*
 
 ### Observability (metrics/src/metrics/)
 Euxis records fleet events and performance data in `~/.euxis/metrics/events.jsonl` for analysis and dashboards.

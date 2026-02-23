@@ -37,7 +37,7 @@ class ComprehensivePerformanceVerification:
             # Extract results from the JSON output file
             # The script saves to /tmp/euxis_performance_results_{timestamp}.json
             import glob
-            latest_file = max(glob.glob("/tmp/euxis_performance_results_*.json"), key=os.path.getmtime)
+            latest_file = max(glob.glob(os.environ.get("TMPDIR", "/tmp") + "/euxis_performance_results_*.json"), key=os.path.getmtime)
 
             with open(latest_file, 'r') as f:
                 self.results['general_performance'] = json.load(f)
@@ -60,7 +60,7 @@ class ComprehensivePerformanceVerification:
 
             # Extract results from the JSON output file
             import glob
-            latest_file = max(glob.glob("/tmp/euxis_voice_performance_*.json"), key=os.path.getmtime)
+            latest_file = max(glob.glob(os.environ.get("TMPDIR", "/tmp") + "/euxis_voice_performance_*.json"), key=os.path.getmtime)
 
             with open(latest_file, 'r') as f:
                 voice_data = json.load(f)
@@ -217,7 +217,7 @@ class ComprehensivePerformanceVerification:
     def save_comprehensive_results(self):
         """Save comprehensive results to JSON file."""
         timestamp = int(time.time())
-        filepath = f"/tmp/euxis_comprehensive_performance_{timestamp}.json"
+        filepath = fos.environ.get("TMPDIR", "/tmp") + "/euxis_comprehensive_performance_{timestamp}.json"
 
         with open(filepath, 'w') as f:
             json.dump(self.results, f, indent=2, default=str)

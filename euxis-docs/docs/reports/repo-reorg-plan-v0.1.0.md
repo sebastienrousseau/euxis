@@ -1,4 +1,4 @@
-# Euxis Monorepo Reorg Plan (v0.0.1)
+# Euxis Monorepo Reorg Plan (v0.0.2)
 
 ## Scope
 Reorganize the monorepo into modular, self-contained top-level folders with explicit boundaries, co-located tests, and module READMEs. No repo splitting or build tool changes.
@@ -8,7 +8,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 ## Phase 1 — Current Structure Map
 
 ### Top-level directories and purpose
-- `cli/bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
+- `euxis-cli/bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
 - `config/`: config schemas, templates, branding, playbooks, patterns.
 - `crypto/src/crypto_lib/`: Python crypto library code.
 - `runtime/data/`: runtime data (bus, lifecycle, perf, registry pool).
@@ -24,7 +24,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 
 ### Multipurpose directories
 - `scripts/` mixes Gateway runtime, adapters, demos, and tooling.
-- `cli/bin/` mixes user-facing commands with internal helpers.
+- `euxis-cli/bin/` mixes user-facing commands with internal helpers.
 - `packages/` overlaps with `crypto/src/crypto_lib/` (duplication risk).
 
 ---
@@ -70,7 +70,7 @@ tests/       # Cross-module integration tests only
 
 ### `cli/`
 - **Purpose**: User entrypoints and shell tooling.
-- **Contains**: `cli/bin/euxis*`, `core/lib/`.
+- **Contains**: `euxis-cli/bin/euxis*`, `core/lib/`.
 - **Depends on**: `core/`, `agents/`, `api/src/gateway/`.
 
 ### `ui/src/tui/`
@@ -102,7 +102,7 @@ tests/       # Cross-module integration tests only
 
 ## Phase 4 — Move Manifest (High-Level)
 
-- `cli/bin/*` → `cli/bin/*`
+- `euxis-cli/bin/*` → `euxis-cli/bin/*`
 - `core/lib/*` → `core/lib/*`
 - `prompts/*` → `agents/prompts/*`
 - `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
@@ -122,7 +122,7 @@ tests/       # Cross-module integration tests only
 
 - `api/src/gateway/server.py` → `api/src/gateway/server.py`
   - Update `from gateway_utils import ...` → `from gateway.utils import ...`
-- `cli/bin/euxis-gateway` → `cli/bin/euxis-gateway`
+- `euxis-cli/bin/euxis-gateway` → `euxis-cli/bin/euxis-gateway`
   - Update paths to `api/src/gateway/server.py` and new adapter locations
 - `ui/src/tui/*` imports pointing at `core/lib` → `core/lib`
 

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """About screen with Liquid Glass branding and system information."""

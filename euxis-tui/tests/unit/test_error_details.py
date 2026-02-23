@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Comprehensive unit tests for ErrorDetailsModal (error_details.py).
@@ -70,7 +70,7 @@ def _make_agent(**overrides):
     defaults = {
         "id": "test-agent",
         "tier": "core",
-        "version": "0.1.0",
+        "version": "v0.0.2",
         "tags": [],
         "activation": "default",
     }

@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-version 0.0.1
+version 0.0.2
 
 For the complete user guide with CLI reference, agent fleet details, and provider matrix, see [guides/user-guide.md](guides/user-guide.md).
 
@@ -22,7 +22,7 @@ euxis-certify
 euxis-tui
 
 # Verify release readiness
-euxis verify --all
+euxis-verify-all
 ```
 
 ## Documentation Index

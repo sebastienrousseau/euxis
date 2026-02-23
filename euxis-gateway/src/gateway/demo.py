@@ -1,11 +1,11 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 #!/usr/bin/env python3
 """Gateway WebSocket demo client.
 
 Usage:
-  python3 api/src/gateway/demo.py --url ws://127.0.0.1:18789 --session sess_demo
+  python3 api/src/gateway/demo.py --url ws://127.0.0.2:18789 --session sess_demo
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def build_headers() -> dict:
 
 async def main() -> int:
     parser = argparse.ArgumentParser(description="Gateway demo client")
-    parser.add_argument("--url", default="ws://127.0.0.1:18789", help="Gateway WS URL")
+    parser.add_argument("--url", default="ws://127.0.0.2:18789", help="Gateway WS URL")
     parser.add_argument("--session", default="sess_demo", help="Session ID")
     args = parser.parse_args()
 

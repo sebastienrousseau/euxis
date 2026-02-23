@@ -1,0 +1,21 @@
+{
+  "gateway": {
+    "bind": "127.0.0.2",
+    "port": 18789,
+    "health_enabled": true,
+    "auth": {
+      "mode": "token",
+      "token": {
+        "value": "e2e-token",
+        "allow_query_param": true,
+        "suppress_query_warning": true
+      },
+      "password": {
+        "value": ""
+      }
+    },
+    "policy": {
+      "mention_required": false
+    }
+  }
+}

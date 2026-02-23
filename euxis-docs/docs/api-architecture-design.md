@@ -19,7 +19,7 @@ This document defines a comprehensive API-first architecture for Euxis that expo
 ### Existing Architecture Strengths
 | Component | Current State | API Integration Points |
 |-----------|---------------|----------------------|
-| **Agent System** | 50 agents in 2-tier hierarchy | Agent discovery, execution, lifecycle management |
+| **Agent System** | 53 agents in 2-tier hierarchy | Agent discovery, execution, lifecycle management |
 | **Memory System** | Tiered memory with drift detection | Session persistence, cross-agent context sharing |
 | **Provider Layer** | 8 AI provider integrations | Provider routing, model selection, execution tracking |
 | **CLI Tools** | 13 specialized CLI commands | Command execution bridge, batch operations |
@@ -458,7 +458,7 @@ events:
 {
   "id": "evt_1234567890",
   "type": "agent.execution.completed",
-  "timestamp": "2026-02-14T10:30:00Z",
+  "timestamp": "current-02-14T10:30:00Z",
   "org_id": "org_12345",
   "data": {
     "agent_id": "architect",
@@ -623,7 +623,7 @@ func main() {
 **Installation:**
 ```toml
 [dependencies]
-euxis-sdk = "0.1.0"
+euxis-sdk = "v0.0.2"
 tokio = { version = "1.0", features = ["full"] }
 ```
 
@@ -705,7 +705,7 @@ metrics:
 **Logging (Structured JSON):**
 ```json
 {
-  "timestamp": "2026-02-14T10:30:00Z",
+  "timestamp": "current-02-14T10:30:00Z",
   "level": "INFO",
   "component": "rest-api",
   "org_id": "org_12345",
@@ -920,7 +920,7 @@ class EuxisCLIBridge:
         provider: str = None) -> Dict[str, Any]:
 
         # Build CLI command
-        cmd = ["/opt/euxis/cli/bin/euxis", agent_id, task]
+        cmd = ["/opt/euxis/euxis-cli/bin/euxis", agent_id, task]
         if provider:
             cmd.append(provider)
 
@@ -997,7 +997,7 @@ EUXIS_API_MODE=true euxis architect "Design API"
   "agent": "architect",
   "status": "completed",
   "output": "...",
-  "session_id": "20260214-103000",
+  "session_id": "current0214-103000",
   "execution_time_ms": 15000
 }
 ```
@@ -1080,7 +1080,7 @@ GET /health/deep         # Deep health check with dependencies
 ```json
 {
   "status": "healthy",
-  "timestamp": "2026-02-14T10:30:00Z",
+  "timestamp": "current-02-14T10:30:00Z",
   "version": "1.0.0",
   "checks": {
     "database": {"status": "healthy", "response_time_ms": 15},
@@ -1192,7 +1192,7 @@ info:
   description: |
     Enterprise AI Agent Orchestration API
 
-    The Euxis API provides programmatic access to 50 specialist AI agents
+    The Euxis API provides programmatic access to 53 AI agents
     for complex engineering tasks. Features include real-time execution
     tracking, persistent memory management, and enterprise authentication.
 
@@ -1393,7 +1393,7 @@ components:
           enum: [document, code, diagram, data]
         path:
           type: string
-          example: /tmp/architecture_design.md
+          example: ${TMPDIR:-/tmp}/architecture_design.md
         size_bytes:
           type: integer
           example: 8192

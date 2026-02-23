@@ -176,7 +176,7 @@ setup_icons() {
 
 # Print functions
 print_header() {
-    echo -e "\n${BOLD}${CYAN}Euxis Doctor${RESET} ${DIM}v0.0.1${RESET}"
+    echo -e "\n${BOLD}${CYAN}Euxis Doctor${RESET} ${DIM}v0.0.2${RESET}"
     echo -e "${DIM}Checking your Euxis installation...${RESET}\n"
 }
 
@@ -538,7 +538,7 @@ print_environment_signature() {
     local logo5="    ${CYAN}███████${RESET}"
 
     # Build info lines
-    local info1=$(printf "${CYAN}%-12s${RESET} ${WHITE}%s${RESET}" "Euxis:" "v0.0.1")
+    local info1=$(printf "${CYAN}%-12s${RESET} ${WHITE}%s${RESET}" "Euxis:" "v0.0.2")
     local info2=$(printf "${CYAN}%-12s${RESET} ${WHITE}%s${RESET}" "OS:" "$os_name")
     local info3=$(printf "${CYAN}%-12s${RESET} ${WHITE}%s${RESET}" "Arch:" "$arch_label")
     local info4=$(printf "${CYAN}%-12s${RESET} ${WHITE}%s %s${RESET}" "Shell:" "$shell_name" "$shell_version")

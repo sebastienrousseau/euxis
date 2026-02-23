@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Tests for metrics_cli.py to achieve 95%+ coverage."""
@@ -228,6 +228,15 @@ class TestCmdReport:
         assert "agent_id" in captured.out
         assert "architect" in captured.out
 
+    @patch("metrics_cli.PerformanceAnalyzer")
+    def test_report_unsupported_format(self, MockAnalyzer, capsys):
+        """Test unsupported format does not crash."""
+        from metrics_cli import cmd_report
+        args = argparse.Namespace(format="unknown", hours=24)
+        cmd_report(args)
+        captured = capsys.readouterr()
+        assert captured.out == ""
+
 
 class TestCmdRankings:
     """Test cmd_rankings command."""
@@ -409,6 +418,20 @@ class TestCmdExport:
         assert output_file.exists()
         content = output_file.read_text()
         assert "architect" in content
+
+    @patch("metrics_cli.PerformanceAnalyzer")
+    def test_export_unsupported_format(self, MockAnalyzer, tmp_path):
+        """Test export ignores unsupported formats."""
+        from metrics_cli import cmd_export
+        output_file = tmp_path / "output.txt"
+        args = argparse.Namespace(
+            output=str(output_file),
+            format="unknown",
+            hours=24,
+        )
+        cmd_export(args)
+        assert output_file.exists()
+        assert output_file.read_text() == ""
 
 
 class TestMain:

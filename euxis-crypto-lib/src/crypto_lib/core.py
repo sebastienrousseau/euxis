@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Core cryptographic operations - Pure functional implementation.
@@ -14,8 +14,13 @@ import base64
 import os
 from dataclasses import dataclass
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+try:
+    import crypto_lib_rs
+    HAS_RUST_CORE = True
+except ImportError:
+    HAS_RUST_CORE = False
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from .exceptions import CryptoError, DecryptionError, EncryptionError, InvalidKeyError
 
@@ -107,22 +112,15 @@ def encrypt(
         # Generate random IV (12 bytes for GCM)
         iv = os.urandom(12)
 
-        # Create cipher
-        cipher = Cipher(
-            algorithms.AES(key),
-            modes.GCM(iv),
-            backend=default_backend()
-        )
-
-        # Encrypt
-        encryptor = cipher.encryptor()
-        ciphertext = encryptor.update(plaintext) + encryptor.finalize()
-
-        # Get authentication tag
-        auth_tag = encryptor.tag
-
-        # Combine ciphertext and auth tag
-        final_ciphertext = ciphertext + auth_tag
+        if HAS_RUST_CORE:
+            # 2026 Optimization: Native PyO3 Module
+            final_ciphertext = crypto_lib_rs.aes_gcm_encrypt(plaintext, key, iv)
+        else:
+            # Fallback to pure python cryptography
+            cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+            encryptor = cipher.encryptor()
+            ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+            final_ciphertext = ciphertext + encryptor.tag
 
         return EncryptionResult(
             ciphertext=final_ciphertext,
@@ -180,16 +178,15 @@ def decrypt(
         ciphertext = result.ciphertext[:-GCM_AUTH_TAG_SIZE]
         auth_tag = result.ciphertext[-GCM_AUTH_TAG_SIZE:]
 
-        # Create cipher
-        cipher = Cipher(
-            algorithms.AES(key),
-            modes.GCM(result.iv, auth_tag),
-            backend=default_backend()
-        )
-
-        # Decrypt
-        decryptor = cipher.decryptor()
-        plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+        if HAS_RUST_CORE:
+            # 2026 Optimization: Native PyO3 Module
+            # rust module takes concatenated ciphertext + auth_tag
+            plaintext = crypto_lib_rs.aes_gcm_decrypt(result.ciphertext, key, result.iv)
+        else:
+            # Fallback to pure python cryptography
+            cipher = Cipher(algorithms.AES(key), modes.GCM(result.iv, auth_tag), backend=default_backend())
+            decryptor = cipher.decryptor()
+            plaintext = decryptor.update(ciphertext) + decryptor.finalize()
 
         return DecryptionResult(
             plaintext=plaintext,

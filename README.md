@@ -1,72 +1,61 @@
-# Euxis: Keep Breathing. We Handle the Rest.
+# Euxis
 
-[![Version][version-badge]][version-url] [![License][license-badge]][license-url]
+The Autonomous Agent Framework.
 
-> The Enterprise Unified eXecution Intelligence System.
+[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/) [![Version][version-badge]][version-url] [![License][license-badge]][license-url]
 
----
+Version v0.0.2
 
-## 1. Context, Not Commands.
+Use Euxis to deploy, orchestrate, and observe high-performance AI agents. Euxis eliminates the latency and instability of traditional agent loops by utilizing a decentralized WebAssembly (Wasm) mesh.
 
-Imagine a world where your terminal doesn't wait for you to type. It anticipates. 
+## Architectural Foundation
 
-By 2026, the era of remembering esoteric CLI flags is over. Euxis is built on **Context-Aware Micro-Orchestration**. As you navigate your workspace, a lightweight, quantized background model pre-warms the execution paths.
+Euxis operates on three core principles:
 
-You don't run commands anymore. You declare *intent*. 
-We translate it into action.
+1. **Native Execution**: Agents compile to `wasm32-wasi`. The Euxis Gateway executes them with near-zero cold starts.
+2. **Zero-Trust Memory**: Agents run in isolated Extism sandboxes. You must explicitly grant network and filesystem capabilities.
+3. **Cryptographic Provenance**: Every agent binary is signed cryptographically to prevent supply-chain poisoning.
 
----
+## Component Overview
 
-## 2. The "Apple-Standard" Fluidity.
+Euxis is modular by design. Integrate exactly what your infrastructure requires.
 
-We believe developer tools should feel as kinetic, responsive, and gorgeous as the apps we build for consumers.
+* `euxis-core`: The central execution engine.
+* `euxis-cli`: The command-line orchestrator.
+* `euxis-gateway`: The high-throughput HTTP and WebSockets interface.
+* `euxis-crypto-lib`: The native Rust cryptography library.
+* `euxis-tui`: The terminal user interface for real-time observability.
+* `euxis-metrics`: The telemetry and validation framework.
 
-Welcome to **Bento-Grid 2.0**.
+## Documentation Library
 
-- **Liquid Glass Transparency:** Whether you're on a KDE Plasma Linux build or macOS Sequoia+, Euxis adapts. Native blurs, ambient shadows, and pixel-perfect typography.
-- **Zero-Jank Architecture:** We've forensically eradicated synchronous event-loop blocking. Every transition, every popup, every log tail is purely asynchronous. Your UI thread *never* freezes. 
-- **The "Artifact-Only" Mode:** Need to focus? Hide the terminal entirely. Euxis can operate in a consumer-first mode, presenting only the generated artifacts, interactive previews, and gentle, natural-language nudges.
+Access comprehensive guides to build and scale your agent infrastructure. We maintain 100% documentation coverage across all supported languages.
 
----
+* [Quick Start](euxis-docs/docs/quick-start.md)
+* [User Guide](euxis-docs/docs/guides/user-guide.md)
+* [CLI Reference](euxis-docs/docs/reference/cli-reference.md)
+* [Module Docs](euxis-docs/docs/modules/index.md)
+* [API Reference](euxis-docs/docs/reference/api-reference.md)
 
-## 3. Speed as a Feature. Not a Metric.
+## Installation
 
-We don't just optimize for the happy path. We optimize for the physics of your hardware.
+Instantiate the core packages globally to begin deployment.
 
-- **Unified Binary Translation:** We've bridged the gap. Seamless execution across your host OS and containerized agents without the heavy overhead of Docker.
-- **WSL-to-Windows Elimination:** We've identified and bypassed the I/O latency taxes when crossing the filesystem barrier on Windows Subsystem for Linux. No more frozen clipboards.
-- **macOS M5 Neural Engine Routing:** Local cryptographic and AI operations natively handshake with Metal Performance Shaders (MPS), sharing memory directly to bypass the CPU bus.
-
----
-
-## 4. The 2026 Engine Room
-
-### Modularity
-Euxis is composed of hyper-specialized micro-packages. Use what you need.
-
-| Package | Description | Version |
-|---------|-------------|---------|
-| [euxis-core](./euxis-core) | The central nervous system | 0.0.1 |
-| [euxis-cli](./euxis-cli) | The orchestrator | 0.0.1 |
-| [euxis-tui](./euxis-tui) | The Liquid Glass interface | 0.0.1 |
-| [euxis-gateway](./euxis-gateway) | The real-time nerve center | 0.0.1 |
-| [euxis-crypto-lib](./euxis-crypto-lib) | The vault | 0.0.1 |
-
-### Immediate Access
 ```bash
 pip install euxis-core euxis-cli euxis-tui
-
 euxis ui
 ```
 
+## Licensing
+
+AGPL-3.0 License - see [LICENSE](LICENSE).
+
+Author: Sebastien Rousseau
+
 ---
+*Part of the [Euxis Agent Framework](https://euxis.co) (Euxis v0.0.2)*
 
-*This is not just a tool. It is the new geometry of development.*
-
-Designed by Sebastien Rousseau — [sebastienrousseau.com](https://sebastienrousseau.com)  
-Engineered with Euxis — [euxis.co](https://euxis.co)
-
-[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-0.0.1-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.1
+[version-badge]: https://img.shields.io/badge/version-v0.0.2-green.svg
+[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.2

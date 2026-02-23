@@ -71,7 +71,7 @@ All frames are JSON objects with a top-level `type` field.
   "type": "event",
   "event": "agent",
   "seq": 81,
-  "ts": "2026-02-15T19:45:12.118Z",
+  "ts": "current-02-15T19:45:12.118Z",
   "data": {
     "run_id": "run_01HZX0NAN9ZK4D8FMQ8J8C1K0E",
     "session_id": "sess_webchat_abc123",
@@ -178,7 +178,7 @@ Data fields:
 - `reason`
 - `message`
 
-## Validation Rules (v0.1)
+## Validation Rules (v0.0.2)
 
 - Reject unknown `type` values.
 - Reject unknown `method` values.

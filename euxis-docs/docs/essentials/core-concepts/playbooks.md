@@ -21,7 +21,7 @@ euxis-playbook run zero-to-one "Build SaaS dashboard for project management"
 euxis-playbook run legacy-overhaul "Modernize authentication system" --dry-run
 
 # Check playbook progress
-euxis-playbook status 20260204-143022
+euxis-playbook status current0204-143022
 
 # List available playbooks
 euxis-playbook list
@@ -204,7 +204,7 @@ euxis-playbook run <playbook-id> "<goal>" --dry-run
 euxis-playbook status [session-id]
 
 # View session logs
-euxis-playbook status 20260204-143022
+euxis-playbook status current0204-143022
 ```
 
 ## Quality Gates

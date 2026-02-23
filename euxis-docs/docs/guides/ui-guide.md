@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-version 0.0.1
+version 0.0.2
 
 ---
 
@@ -316,7 +316,7 @@ ETX is the modern TUI built on Python Textual 7.5 with CSS theming. Launch via `
 
 | Feature | Status | Details |
 |---------|--------|---------|
-| Fleet Dashboard | Implemented | Grid of all 50 agents organized by tier |
+| Fleet Dashboard | Implemented | Grid of all 53 agents organized by tier |
 | Command Palette | Implemented | `Ctrl+K` with fuzzy search across agents, squads, tools |
 | Agent Execution | Implemented | Streaming output with elapsed timer |
 | Fleet Monitor | Implemented | Real-time squad/dispatch progress tracking |
@@ -368,4 +368,4 @@ The original bash-based menu interface remains available as `euxis-ui` for compa
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Comprehensive unit tests for DispatchEngine.
@@ -27,7 +27,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "bin"))
-from euxis_core import (
+from euxis_engine import (
     DEFAULT_DISPATCH_MODES,
     DispatchEngine,
     DispatchResult,
@@ -218,8 +218,9 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         """Test DispatchEngine with default EUXIS_HOME."""
         engine = DispatchEngine()
         assert engine.euxis_home == Path.home() / ".euxis"
-        assert engine.registry_path == engine.euxis_home / "agents/registry.json"
-        assert engine.registry_db == engine.euxis_home / "agents/registry.db"
+        base_registry = engine.euxis_home / "euxis-core/agents" if (engine.euxis_home / "euxis-core").exists() else engine.euxis_home / "agents"
+        assert engine.registry_path == base_registry / "registry.json"
+        assert engine.registry_db == base_registry / "registry.db"
         assert engine.log_dir is None
         assert engine._valid_agents is None
 
@@ -228,8 +229,9 @@ class TestDispatchEngineInitialization(unittest.TestCase):
         custom_home = self.temp_path / "custom_euxis"
         engine = DispatchEngine(euxis_home=custom_home)
         assert engine.euxis_home == custom_home
-        assert engine.registry_path == custom_home / "agents/registry.json"
-        assert engine.registry_db == custom_home / "agents/registry.db"
+        base_registry = custom_home / "euxis-core/agents" if (custom_home / "euxis-core").exists() else custom_home / "agents"
+        assert engine.registry_path == base_registry / "registry.json"
+        assert engine.registry_db == base_registry / "registry.db"
 
     def _create_test_db(self, agents):
         """Create a test SQLite registry database."""
@@ -249,13 +251,13 @@ class TestDispatchEngineInitialization(unittest.TestCase):
             )
         """)
         conn.execute(
-            "INSERT INTO registry_metadata VALUES ('protocol_version', '0.1.0')"
+            "INSERT INTO registry_metadata VALUES ('protocol_version', 'v0.0.2')"
         )
         for agent in agents:
             conn.execute(
                 "INSERT INTO agents (id, path, tier, version) VALUES (?, ?, ?, ?)",
                 (agent["id"], agent.get("path", f"agents/prompts/fleet/{agent['id']}.txt"),
-                 agent.get("tier", "fleet"), agent.get("version", "0.1.0"))
+                 agent.get("tier", "fleet"), agent.get("version", "v0.0.2"))
             )
         conn.commit()
         conn.close()
@@ -420,7 +422,7 @@ class TestDispatchEngineValidation(unittest.TestCase):
         # Should not raise exception when no registry exists
         self.engine.validate_manifest(manifest)
 
-    @patch("euxis_core.DispatchEngine._check_command_available")
+    @patch("euxis_engine.DispatchEngine._check_command_available")
     def test_validate_manifest_missing_verify_commands(self, mock_check_cmd):
         """Test validation with missing verify commands."""
         mock_check_cmd.return_value = False  # Command not available
@@ -443,7 +445,7 @@ class TestDispatchEngineValidation(unittest.TestCase):
         assert "missing tools" in str(exc_info.value)
         assert "missing-command" in str(exc_info.value)
 
-    @patch("euxis_core.DispatchEngine._check_command_available")
+    @patch("euxis_engine.DispatchEngine._check_command_available")
     def test_validate_manifest_negated_commands(self, mock_check_cmd):
         """Test validation handles negated verify commands."""
         mock_check_cmd.return_value = True  # Command available
@@ -545,9 +547,9 @@ class TestLogDirectorySetup(unittest.TestCase):
         assert engine.log_dir == log_dir2
 
 
-@patch("euxis_core.subprocess.Popen")
-@patch("euxis_core.DispatchEngine.setup_log_directory")
-@patch("euxis_core.DispatchEngine._resolve_euxis_loop_path", return_value=Path("/usr/bin/euxis-loop"))
+@patch("euxis_engine.subprocess.Popen")
+@patch("euxis_engine.DispatchEngine.setup_log_directory")
+@patch("euxis_engine.DispatchEngine._resolve_euxis_loop_path", return_value=Path("/usr/bin/euxis-loop"))
 class TestSingleAgentDispatch(unittest.TestCase):
     """Test single agent dispatch functionality."""
 
@@ -677,7 +679,7 @@ class TestExecuteDispatches(unittest.TestCase):
         results = self.engine.execute_dispatches(manifest)
         assert results == []
 
-    @patch("euxis_core.DispatchEngine._execute_flat_dispatch")
+    @patch("euxis_engine.DispatchEngine._execute_flat_dispatch")
     def test_execute_dispatches_flat_mode(self, mock_flat):
         """Test execution routes to flat dispatch mode."""
         mock_flat.return_value = []
@@ -693,7 +695,7 @@ class TestExecuteDispatches(unittest.TestCase):
         self.engine.execute_dispatches(manifest)
         mock_flat.assert_called_once_with(manifest, "hierarchical")
 
-    @patch("euxis_core.DispatchEngine._execute_by_stages")
+    @patch("euxis_engine.DispatchEngine._execute_by_stages")
     def test_execute_dispatches_stage_mode(self, mock_stages):
         """Test execution routes to stage mode when stages present."""
         mock_stages.return_value = []
@@ -709,7 +711,7 @@ class TestExecuteDispatches(unittest.TestCase):
         self.engine.execute_dispatches(manifest)
         mock_stages.assert_called_once_with(manifest, "hierarchical")
 
-    @patch("euxis_core.DispatchEngine._execute_phased_rollout")
+    @patch("euxis_engine.DispatchEngine._execute_phased_rollout")
     def test_execute_dispatches_phased_mode(self, mock_phased):
         """Test execution routes to phased mode when phases present."""
         mock_phased.return_value = []
@@ -755,7 +757,7 @@ class TestFlatExecution(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_flat_dispatch_success(self, mock_sleep, mock_dispatch):
         """Test successful flat execution."""
@@ -776,7 +778,7 @@ class TestFlatExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_flat_dispatch(manifest, "hierarchical")
 
         assert len(results) == 2
@@ -786,7 +788,7 @@ class TestFlatExecution(unittest.TestCase):
         assert results[0].duration > 0
         assert results[1].duration > 0
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_flat_dispatch_failure(self, mock_sleep, mock_dispatch):
         """Test flat execution with failures."""
@@ -807,7 +809,7 @@ class TestFlatExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_flat_dispatch(manifest, "hierarchical")
 
         assert len(results) == 2
@@ -831,7 +833,7 @@ class TestStageExecution(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_by_stages_success(self, mock_sleep, mock_dispatch):
         """Test successful stage execution."""
@@ -849,13 +851,13 @@ class TestStageExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_by_stages(manifest, "hierarchical")
 
         assert len(results) == 2
         assert all(r.success for r in results)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_by_stages_with_dependencies(self, mock_sleep, mock_dispatch):
         """Test stage execution with dependencies across stages."""
@@ -878,14 +880,14 @@ class TestStageExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_by_stages(manifest, "hierarchical")
 
         # independent runs in stage 1, dependent runs in stage 2
         assert len(results) == 2
         assert all(r.success for r in results)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_by_stages_failure_aborts(self, mock_sleep, mock_dispatch):
         """Test that stage failure aborts remaining stages."""
@@ -907,7 +909,7 @@ class TestStageExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_by_stages(manifest, "hierarchical")
 
         # Should only have 2 results, third stage should be skipped
@@ -930,7 +932,7 @@ class TestPhasedExecution(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_phased_rollout_success(self, mock_sleep, mock_dispatch):
         """Test successful phased execution."""
@@ -955,13 +957,13 @@ class TestPhasedExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_phased_rollout(manifest, "hierarchical")
 
         assert len(results) == 2
         assert all(r.success for r in results)
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_phased_rollout_invalid_index(self, mock_sleep, mock_dispatch):
         """Test phased execution with invalid dispatch index."""
@@ -985,14 +987,14 @@ class TestPhasedExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_phased_rollout(manifest, "hierarchical")
 
         # Should only process valid index
         assert len(results) == 1
         assert results[0].success is True
 
-    @patch("euxis_core.DispatchEngine.dispatch_single_agent")
+    @patch("euxis_engine.DispatchEngine.dispatch_single_agent")
     @patch("time.sleep")
     def test_execute_phased_rollout_failure_aborts(self, mock_sleep, mock_dispatch):
         """Test that phase failure aborts remaining phases."""
@@ -1028,7 +1030,7 @@ class TestPhasedExecution(unittest.TestCase):
             ]
         )
 
-        with patch("euxis_core.time.time", side_effect=_monotonic_time()):
+        with patch("euxis_engine.time.time", side_effect=_monotonic_time()):
             results = self.engine._execute_phased_rollout(manifest, "hierarchical")
 
         # Should only have 2 results from first phase
@@ -1049,9 +1051,9 @@ class TestMainFunction(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir)
 
-    @patch("sys.argv", ["euxis_core.py", "test.json"])
-    @patch("euxis_core.DispatchEngine")
-    @patch("euxis_core.Manifest")
+    @patch("sys.argv", ["euxis_engine.py", "test.json"])
+    @patch("euxis_engine.DispatchEngine")
+    @patch("euxis_engine.Manifest")
     def test_main_success(self, mock_manifest_class, mock_engine_class):
         """Test successful main execution."""
         # Setup mocks
@@ -1066,7 +1068,7 @@ class TestMainFunction(unittest.TestCase):
         mock_engine_class.return_value = mock_engine
 
         # Import and run main
-        from euxis_core import main
+        from euxis_engine import main
         result = main()
 
         assert result == 0
@@ -1074,9 +1076,9 @@ class TestMainFunction(unittest.TestCase):
         mock_engine.check_branch_protection.assert_called_once()
         mock_engine.execute_dispatches.assert_called_once()
 
-    @patch("sys.argv", ["euxis_core.py", "test.json", "--validate-only"])
-    @patch("euxis_core.DispatchEngine")
-    @patch("euxis_core.Manifest")
+    @patch("sys.argv", ["euxis_engine.py", "test.json", "--validate-only"])
+    @patch("euxis_engine.DispatchEngine")
+    @patch("euxis_engine.Manifest")
     def test_main_validate_only(self, mock_manifest_class, mock_engine_class):
         """Test main with validate-only flag."""
         mock_manifest = Mock()
@@ -1085,16 +1087,16 @@ class TestMainFunction(unittest.TestCase):
         mock_engine = Mock()
         mock_engine_class.return_value = mock_engine
 
-        from euxis_core import main
+        from euxis_engine import main
         result = main()
 
         assert result == 0
         mock_engine.validate_manifest.assert_called_once()
         mock_engine.execute_dispatches.assert_not_called()
 
-    @patch("sys.argv", ["euxis_core.py", "test.json"])
-    @patch("euxis_core.DispatchEngine")
-    @patch("euxis_core.Manifest")
+    @patch("sys.argv", ["euxis_engine.py", "test.json"])
+    @patch("euxis_engine.DispatchEngine")
+    @patch("euxis_engine.Manifest")
     def test_main_with_failures(self, mock_manifest_class, mock_engine_class):
         """Test main execution with failures."""
         mock_manifest = Mock()
@@ -1108,30 +1110,30 @@ class TestMainFunction(unittest.TestCase):
         ]
         mock_engine_class.return_value = mock_engine
 
-        from euxis_core import main
+        from euxis_engine import main
         result = main()
 
         assert result == 1
 
-    @patch("sys.argv", ["euxis_core.py", "nonexistent.json"])
-    @patch("euxis_core.DispatchEngine")
-    @patch("euxis_core.Manifest")
+    @patch("sys.argv", ["euxis_engine.py", "nonexistent.json"])
+    @patch("euxis_engine.DispatchEngine")
+    @patch("euxis_engine.Manifest")
     def test_main_validation_error(self, mock_manifest_class, mock_engine_class):
         """Test main with validation error."""
         mock_manifest_class.from_file.side_effect = ValidationError("Invalid manifest")
 
-        from euxis_core import main
+        from euxis_engine import main
         result = main()
 
         assert result == 1
 
-    @patch("sys.argv", ["euxis_core.py", "test.json"])
-    @patch("euxis_core.DispatchEngine")
+    @patch("sys.argv", ["euxis_engine.py", "test.json"])
+    @patch("euxis_engine.DispatchEngine")
     def test_main_unexpected_error(self, mock_engine_class):
         """Test main with unexpected error."""
         mock_engine_class.side_effect = Exception("Unexpected error")
 
-        from euxis_core import main
+        from euxis_engine import main
         result = main()
 
         assert result == 1

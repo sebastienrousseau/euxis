@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Unit tests for FleetRegistry load/parse methods.
@@ -35,7 +35,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
 
     def test_load_registry_json(self):
         data = {
-            "protocol_version": "0.1.0",
+            "protocol_version": "v0.0.2",
             "agents": [
                 {"id": "architect", "tier": "core", "tags": ["design"], "activation": "default"},
                 {"id": "debugger", "tier": "fleet", "tags": ["fix"], "activation": "on-demand"},
@@ -46,7 +46,7 @@ class TestFleetRegistryLoad(unittest.TestCase):
 
         reg = FleetRegistry.load(euxis_home=self.home)
         assert len(reg.agents) == 2
-        assert reg.version == "0.1.0"
+        assert reg.version == "v0.0.2"
         assert reg.agents[0].id == "architect"
         assert reg.agents[0].tier == "core"
         assert reg.agents[1].activation == "on-demand"

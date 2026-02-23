@@ -1,7 +1,6 @@
-% EUXIS(1) Euxis 0.1.0
+% EUXIS(1) Euxis v0.0.2
 % Euxis Team
-% February 2026
-
+% February 
 # NAME
 
 euxis - Enterprise Unified eXecution Intelligence System
@@ -259,4 +258,4 @@ Report bugs at: https://github.com/euxis/euxis/issues
 
 # COPYRIGHT
 
-Copyright (c) 2026 Euxis. MIT License.
+Copyright (c) Euxis. MIT License.

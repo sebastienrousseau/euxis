@@ -4,13 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-core"
-version = "0.0.1"
+version = "0.0.2"
 description = "Shared core logic and shell libraries for the Euxis Agent Framework"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.11"
 authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
-dependencies = []
+dependencies = [
+    "extism>=1.0.0"
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0", "ruff>=0.5.0", "black>=24.0.0"]

@@ -16,13 +16,13 @@ Complete function reference for all 8 library modules in `core/lib/`.
 | `_perf_start` | `local t; t=$(_perf_start)` | Start a latency timer |
 | `_perf_elapsed_ms` | `_perf_elapsed_ms "$t"` | Returns elapsed milliseconds since timer start |
 | `_perf_check_budget` | `_perf_check_budget "$ms" "$budget" "op"` | Returns 0 if within budget, 1 if exceeded; logs warning on exceed |
-| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/$EUXIS_HOME/metrics/events.jsonl` |
+| `_perf_record` | `_perf_record "op" "$ms" "agent" "ok"` | Append JSONL metric to `$EUXIS_HOME/euxis-runtime/data/perf/metrics.jsonl` |
 | `start_spinner` | `start_spinner "Thinking..."` | Start background spinner for LLM wait |
 | `stop_spinner` | `stop_spinner` | Stop and clear spinner |
 
 **Environment Variables:**
 - `EUXIS_DEBUG` — Set to `1` to enable debug logging
-- `EUXIS_METRICS_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/$EUXIS_HOME/metrics/events.jsonl`)
+- `EUXIS_PERF_LOG` — Path to JSONL performance metrics file (default: `$EUXIS_HOME/euxis-runtime/data/perf/metrics.jsonl`)
 
 ---
 
@@ -44,18 +44,9 @@ Depends on: `common.sh`
 | `run_kiro_cli` | `run_kiro_cli "prompt"` | Execute via Kiro CLI (kiro-cli) |
 | `run_goose` | `run_goose "prompt"` | Execute via Block Goose |
 
-**Intelligence Tiers:**
-| Tier | Provider | Agents |
-|------|----------|--------|
-| S-Tier (Strategic) | `claude` | orchestrator, architect, planner, reviewer, critic, auditor, arbiter, historian |
-| A-Tier (Research) | `gemini` | researcher |
-| A-Tier (Enterprise) | `amazon-q` | responder |
-| A-Tier (Domain) | `claude` | cryptographer, ledger |
-| B-Tier (Coding) | `goose` | debugger, tester, automaton |
-| B-Tier (Systems) | `goose` | conduit, custodian |
-| B-Tier (Math/Logic) | `qwen` | optimizer, telemetrist |
-| B-Tier (Coding) | `goose` | maintainer |
-| C-Tier (Utility) | `ollama` | butler, librarian, writer |
+**Provider Routing:**
+Default provider is `EUXIS_DEFAULT_PROVIDER` (defaults to `claude`). Fallback chain is controlled by `EUXIS_FALLBACK_CHAIN`.
+
 
 ---
 
@@ -200,16 +191,16 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 
 | Tool | Description |
 |------|-------------|
-| `cli/bin/euxis.sh` | Main entry point — agent dispatch with latency budgets |
-| `cli/bin/euxis-lint` | 8-check static analysis (registry, protocol, versions, permissions, headers, patterns, compliance, deps) |
-| `cli/bin/euxis-bench` | 7-benchmark performance suite (health, lint, recall, provider, coordination, assembly, memory) |
-| `cli/bin/euxis-health` | System health check with `--silent` mode |
-| `cli/bin/euxis-dispatch` | Multi-agent pipeline orchestration (mesh/federated/sequential) |
-| `cli/bin/euxis-loop` | Iterative agent execution with convergence |
-| `cli/bin/euxis-council` | Multi-agent deliberation and voting |
-| `cli/bin/euxis-graph` | Knowledge graph operations (add-edge, query) |
-| `cli/bin/euxis-kaizen` | Automated maintenance (memory pruning, stale cleanup) |
+| `euxis-cli/bin/euxis.sh` | Main entry point — agent dispatch with latency budgets |
+| `euxis-cli/bin/euxis-lint` | 8-check static analysis (registry, protocol, versions, permissions, headers, patterns, compliance, deps) |
+| `euxis-cli/bin/euxis-bench` | 7-benchmark performance suite (health, lint, recall, provider, coordination, assembly, memory) |
+| `euxis-cli/bin/euxis-health` | System health check with `--silent` mode |
+| `euxis-cli/bin/euxis-dispatch` | Multi-agent pipeline orchestration (mesh/federated/sequential) |
+| `euxis-cli/bin/euxis-loop` | Iterative agent execution with convergence |
+| `euxis-cli/bin/euxis-council` | Multi-agent deliberation and voting |
+| `euxis-cli/bin/euxis-graph` | Knowledge graph operations (add-edge, query) |
+| `euxis-cli/bin/euxis-kaizen` | Automated maintenance (memory pruning, stale cleanup) |
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

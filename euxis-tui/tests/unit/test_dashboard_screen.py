@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 #!/usr/bin/env python3
@@ -108,7 +108,7 @@ class TestDashboardScreenCompose(unittest.TestCase):
         self.mock_app = Mock()
         self.registry = FleetRegistry()
         self.registry.agents = [
-            Agent(id="architect", tier="core", version="0.0.1", tags=(), activation="default"),
+            Agent(id="architect", tier="core", version="0.0.2", tags=(), activation="default"),
         ]
         self.mock_app.fleet_registry = self.registry
         self._patcher = None
@@ -549,7 +549,7 @@ class TestDashboardEventHandlers(unittest.TestCase):
         screen._get_agent_error_message = Mock(return_value="test error")
         self.mock_app.track_error = Mock()
         event = Mock()
-        event.agent = Agent(id="test", tier="core", version="0.0.1", tags=(), activation="default")
+        event.agent = Agent(id="test", tier="core", version="0.0.2", tags=(), activation="default")
         screen.on_agent_card_error_details_requested(event)
         self.mock_app.push_screen.assert_called_once()
 

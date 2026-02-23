@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Additional tests to achieve 95%+ coverage for crypto_lib.
@@ -363,3 +363,102 @@ class TestGenerateKeyEdgeCases:
         """Test generate_key() with unsupported size (e.g., 20)."""
         with pytest.raises(InvalidKeyError, match="Unsupported key size"):
             generate_key(20)
+
+class TestRustCoreBranches:
+    """Test branches that only execute when HAS_RUST_CORE is True."""
+
+    def test_rust_core_encrypt_decrypt(self):
+        import crypto_lib.core as core
+        from unittest.mock import patch, MagicMock
+        
+        mock_rust = MagicMock()
+        mock_rust.aes_gcm_encrypt.return_value = b"rusty_ciphertext"
+        mock_rust.aes_gcm_decrypt.return_value = b"rusty_plaintext"
+        
+        with patch("crypto_lib.core.HAS_RUST_CORE", True):
+            with patch("crypto_lib.core.crypto_lib_rs", mock_rust, create=True):
+                key = b"A" * 32
+                # Test encrypt
+                res = core.encrypt(b"test", key)
+                assert res.ciphertext == b"rusty_ciphertext"
+                
+                # Test decrypt
+                from crypto_lib.core import EncryptionResult
+                fake_res = EncryptionResult(
+                    ciphertext=b"rusty_ciphertext" + b"X" * 16,
+                    iv=b"iv",
+                    algorithm="AES-256-GCM"
+                )
+                dec = core.decrypt(fake_res, key)
+                assert dec.plaintext == b"rusty_plaintext"
+
+    def test_rust_core_derive_key(self):
+        import crypto_lib.key_management as km
+        from unittest.mock import patch, MagicMock
+        
+        mock_rust = MagicMock()
+        mock_rust.derive_key_pbkdf2.return_value = b"rusty_key"
+        
+        with patch("crypto_lib.key_management.HAS_RUST_CORE", True):
+            with patch("crypto_lib.key_management.crypto_lib_rs", mock_rust, create=True):
+                key, salt = km.derive_key("password")
+                assert key == b"rusty_key"
+
+    def test_import_with_rust_core(self):
+        import sys
+        from unittest.mock import MagicMock
+        
+        # Save original modules
+        orig_core = sys.modules.get("crypto_lib.core")
+        orig_km = sys.modules.get("crypto_lib.key_management")
+        
+        # Force re-execution by temporarily deleting from sys.modules
+        if orig_core: del sys.modules["crypto_lib.core"]
+        if orig_km: del sys.modules["crypto_lib.key_management"]
+        
+        mock_rust = MagicMock()
+        sys.modules["crypto_lib_rs"] = mock_rust
+        
+        try:
+            import crypto_lib.core as temp_core
+            import crypto_lib.key_management as temp_km
+            
+            assert temp_core.HAS_RUST_CORE is True
+            assert temp_km.HAS_RUST_CORE is True
+        finally:
+            # Restore originals
+            del sys.modules["crypto_lib_rs"]
+            if orig_core: sys.modules["crypto_lib.core"] = orig_core
+            if orig_km: sys.modules["crypto_lib.key_management"] = orig_km
+
+class TestAsyncCoreRaceCondition:
+    """Test the race condition branch in _get_executor."""
+    
+    def test_get_executor_race_condition(self):
+        import crypto_lib.async_core as ac
+        import threading
+        import time
+
+        ac.shutdown_executor()
+        
+        # We want to force the condition where `_executor` is None before entering the lock
+        # but becomes not None by the time we get the lock.
+        # We do this by mocking the lock.
+        original_lock = ac._executor_lock
+        class MockLock:
+            def __enter__(self):
+                # Another thread "wins" the lock and initializes the executor
+                original_lock.__enter__()
+                ac._executor = "mocked_by_race"
+                return self
+            def __exit__(self, exc_type, exc_val, exc_tb):
+                return original_lock.__exit__(exc_type, exc_val, exc_tb)
+
+        ac._executor_lock = MockLock()
+        try:
+            exec_obj = ac._get_executor()
+            assert exec_obj == "mocked_by_race"
+        finally:
+            ac._executor_lock = original_lock
+            ac._executor = None
+            ac.shutdown_executor()

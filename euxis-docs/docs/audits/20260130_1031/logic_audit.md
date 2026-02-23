@@ -1,4 +1,4 @@
-# Logic Audit (2026-01-30 10:31)
+# Logic Audit (current-01-30 10:31)
 
 OBSERVATION 8: The butler agent is significantly shorter and simpler than others, which makes sense for its specialized TTS role. Now I have enough information to analyze the entire prompt system for logical defects. Based on my comprehensive review, I can identify several key issues.
 
@@ -15,7 +15,7 @@ FINAL ANSWER: Based on my comprehensive analysis of all prompts in ~/.euxis/prom
 ### Findings
 
 **1. [HIGH] Protocol Drift - Template Variable Inconsistency**
-   - **Impact:** The mandatory protocol (_protocol.txt:12-21) defines template variables like `{{AUDIT_FILE_PATH}}`, `{{MEMORY_FILE_PATH}}`, `{{SESSION_ID}}`, and `{{MODEL_NAME}}` but the actual agent prompts (including architect.txt) use hardcoded paths like `/home/seb/.euxis/projects/.euxis/architect/audit.md`.
+   - **Impact:** The mandatory protocol (_protocol.txt:12-21) defines template variables like `{{AUDIT_FILE_PATH}}`, `{{MEMORY_FILE_PATH}}`, `{{SESSION_ID}}`, and `{{MODEL_NAME}}` but the actual agent prompts (including architect.txt) use hardcoded paths like `${EUXIS_HOME}/projects/.euxis/architect/audit.md`.
    - **Recommendation:** Update all agent prompts to use the template variables defined in the protocol, or update the protocol to match current implementation.
    - **Rationale:** Template variables ensure portability and prevent path-related failures across different environments.
 
@@ -50,18 +50,18 @@ euxis-cortex remember "Protocol audit revealed template variable drift and deleg
 ```
 
 ```markdown
-## [2026-01-30 10:32] Session: 20260130-103225
+## [current-01-30 10:32] Session: current0130-103225
 **Model:** claude-sonnet-4-20250514
 **Status:** SUCCESS
 **Actions:**
-- [READ] /home/seb/.euxis/agents/prompts/protocols/_common.txt
-- [READ] /home/seb/.euxis/agents/prompts/protocols/_protocol.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/orchestrator.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/architect.txt
-- [READ] /home/seb/.euxis/agents/prompts/core/librarian.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/debugger.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/pentester.txt
-- [READ] /home/seb/.euxis/agents/prompts/fleet/butler.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/protocols/_common.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/protocols/_protocol.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/orchestrator.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/architect.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/core/librarian.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/debugger.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/pentester.txt
+- [READ] ${EUXIS_HOME}/agents/prompts/fleet/butler.txt
 - [CORTEX] remember "Protocol audit findings"
 **Outcome:** Identified 5 logical defects in prompt system including protocol drift and delegation loop risks
 **Escalation:** None
@@ -70,7 +70,7 @@ euxis-cortex remember "Protocol audit revealed template variable drift and deleg
 <!-- EUXIS_HANDOFF
 {
   "agent": "architect",
-  "session": "20260130-103225",
+  "session": "current0130-103225",
   "status": "SUCCESS",
   "findings": [
     {"severity": "HIGH", "title": "Protocol Drift - Template Variable Inconsistency", "detail": "Template variables defined in protocol not used in actual agent prompts"},

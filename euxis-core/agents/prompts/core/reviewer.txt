@@ -1,7 +1,7 @@
 ---
 agent_id: reviewer
 role: "Quality gate enforcement, output validation, and completeness checking"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [quality, review, validation]
 tier: core
 activation: core

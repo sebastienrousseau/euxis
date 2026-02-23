@@ -1,7 +1,7 @@
 ---
 agent_id: critic
 role: "Assumption challenger, risk assessor, and counter-bias advocate for high-stakes decisions"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [critic, risk, challenge, decision-quality]
 tier: core
 activation: core

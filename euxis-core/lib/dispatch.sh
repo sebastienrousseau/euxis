@@ -185,6 +185,7 @@ dispatch_command() {
         /*)         exec "${EUXIS_BIN}/euxis-slash" "${command#/}" "$@" ;;
         # Orchestration
         dispatch)   exec "${EUXIS_BIN}/euxis-dispatch" "$@" ;;
+        agent)      exec "${EUXIS_BIN}/euxis-agent" "$@" ;;
         loop)       exec "${EUXIS_BIN}/euxis-loop" "$@" ;;
         council)    exec "${EUXIS_BIN}/euxis-council" "$@" ;;
         replay)     exec "${EUXIS_BIN}/euxis-replay" "$@" ;;
@@ -217,6 +218,7 @@ dispatch_command() {
         voice)      exec "${EUXIS_BIN}/euxis-voice" "$@" ;;
         gym)        exec "${EUXIS_BIN}/euxis-gym" "$@" ;;
         ui)         exec "${EUXIS_BIN}/euxis-ui" "$@" ;;
+        wasm)       _exec_python "${EUXIS_BIN}/euxis-wasm" "$@" ;;
         # Default: agent mode
         *)          main "${command}" "$@" ;;
     esac

@@ -25,8 +25,8 @@ This guide provides step-by-step instructions for upgrading between Euxis versio
 
 | Version | Release Date | Major Changes |
 |---------|--------------|---------------|
-| 0.0.7   | 2026-02-09   | TUI (ETX), SQLite registry, 16 language playbooks, performance optimizations |
-| 0.0.6   | 2026-01-15   | Initial fleet architecture, JSON registry, core agents |
+| 0.0.7   |-02-09   | TUI (ETX), SQLite registry, 16 language playbooks, performance optimizations |
+| 0.0.6   |-01-15   | Initial fleet architecture, JSON registry, core agents |
 
 ---
 
@@ -218,8 +218,8 @@ mv ~/.euxis/capabilities.json ~/.euxis/config/ 2>/dev/null || true
 
 | Feature | Status | Removal Target | Migration Path |
 |---------|--------|----------------|----------------|
-| JSON-only registry | Deprecated | v0.0.1 | Use SQLite registry |
-| Em-dash formatting in prompts | Deprecated | v0.0.1 | Use colons for natural tone |
+| JSON-only registry | Deprecated | v0.0.2 | Use SQLite registry |
+| Em-dash formatting in prompts | Deprecated | v0.0.2 | Use colons for natural tone |
 | Audit files in git tracking | Removed | N/A | Files now in `.gitignore` |
 
 ---

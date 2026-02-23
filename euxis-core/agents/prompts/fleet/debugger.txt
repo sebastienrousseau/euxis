@@ -1,7 +1,7 @@
 ---
 agent_id: debugger
 role: "Debugging, root cause analysis, and surgical code fixes"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [debugging, fixes, engineering]
 tier: fleet
 activation: default

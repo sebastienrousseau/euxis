@@ -10,7 +10,7 @@ The **single source of truth** for the Euxis system version is:
 agents/registry.json → "protocol_version" field
 ```
 
-**Current version: 0.0.1**
+**Current version: 0.0.2**
 
 All other version references MUST derive from this source.
 
@@ -49,7 +49,7 @@ All agent prompts include version in their YAML frontmatter:
 ```yaml
 ---
 agent_id: example
-version: "0.0.1"
+version: "0.0.2"
 ---
 ```
 
@@ -133,7 +133,7 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 - Automatic consistency across all components
 
 ### ✅ Eliminates Hardcoding
-- No more `v0.0.1` scattered across workflow files
+- No more `v0.0.2` scattered across workflow files
 - Dynamic version extraction from authoritative source
 - Workflow flexibility with manual override capability
 
@@ -175,8 +175,8 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 ### Before (Hardcoded)
 ```yaml
 # BAD: Hardcoded version
-echo "Euxis v0.0.1 Platform Report" > report.md
-default: 'v0.0.1'
+echo "Euxis v0.0.2 Platform Report" > report.md
+default: 'v0.0.2'
 ```
 
 ### After (Dynamic)

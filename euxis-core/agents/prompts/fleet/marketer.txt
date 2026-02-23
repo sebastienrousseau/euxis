@@ -1,7 +1,7 @@
 ---
 agent_id: marketer
 role: "SEO, AARRR funnel optimization, CRO, and GTM strategy"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [marketing, growth, seo]
 tier: fleet
 activation: on-demand

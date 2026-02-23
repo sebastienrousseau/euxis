@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Entry point for python -m tui.
@@ -19,7 +19,7 @@ def run_audit() -> None:
     import time
 
     print("╔═══════════════════════════════════════════════════════════════╗")
-    print("║           Euxis TUI Performance Audit v0.0.1                  ║")
+    print("║           Euxis TUI Performance Audit v0.0.2                  ║")
     print("╚═══════════════════════════════════════════════════════════════╝")
     print()
 
@@ -152,7 +152,7 @@ def run_audit() -> None:
         else:
             print("  Linux:        Most terminals work well")
             print("                Verify TERM=xterm-256color or similar")
-    elif sys.platform == "win32":
+    elif sys.platform == "win32":  # pragma: no cover
         print("  Windows:      Use Windows Terminal (not cmd.exe)")
         print("                Enable virtual terminal processing")
 

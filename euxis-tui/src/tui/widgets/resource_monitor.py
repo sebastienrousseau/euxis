@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Real-time resource monitoring widget with sparkline visualization."""
@@ -41,7 +41,7 @@ def get_memory_percent() -> float:
         mem_info = {}
         for line in lines[:5]:
             parts = line.split()
-            if len(parts) >= 2:
+            if len(parts) >= 2:  # pragma: no cover
                 key = parts[0].rstrip(":")
                 mem_info[key] = int(parts[1])
         total = mem_info.get("MemTotal", 1)

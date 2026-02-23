@@ -39,7 +39,7 @@ Contains the standardized signature block appended to:
 - Generated documentation
 
 ### Commit Hooks
-**Location:** `cli/bin/hooks/prepare-commit-msg`
+**Location:** `euxis-cli/bin/hooks/prepare-commit-msg`
 
 Automatically appends branding signature to commit messages when configured.
 
@@ -55,7 +55,7 @@ Automatically appends branding signature to commit messages when configured.
 
 ```bash
 # Install the prepare-commit-msg hook
-cp ~/.euxis/cli/bin/hooks/prepare-commit-msg .git/hooks/
+cp ~/.euxis/euxis-cli/bin/hooks/prepare-commit-msg .git/hooks/
 chmod +x .git/hooks/prepare-commit-msg
 
 # Enable GPG/SSH signing

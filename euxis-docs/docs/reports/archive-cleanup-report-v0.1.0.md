@@ -1,4 +1,4 @@
-# Archive Cleanup Report (v0.0.1)
+# Archive Cleanup Report (v0.0.2)
 
 ## Summary
 Safe archival of duplicate top-level guides to reduce confusion while preserving history. Redirect stubs remain at original paths to satisfy certification checks and preserve inbound links.
@@ -22,4 +22,4 @@ Safe archival of duplicate top-level guides to reduce confusion while preserving
 Updated internal references to point to `docs/guides/*` paths.
 
 ## Certification
-`cli/bin/euxis-certify` passed after archival and redirects.
+`euxis-cli/bin/euxis-certify` passed after archival and redirects.

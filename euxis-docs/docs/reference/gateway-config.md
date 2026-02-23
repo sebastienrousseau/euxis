@@ -20,7 +20,7 @@ Reference for the Gateway configuration file.
       "mode": "token",
       "token": {
         "value": "replace-with-secure-random-value",
-        "allow_query_param": true
+        "allow_query_param": false
       }
     },
     "exec": {
@@ -95,9 +95,9 @@ Reference for the Gateway configuration file.
 
 ## Fields
 
-**File location (proposed):** `~/.euxis/security/gateway.json`
+**File location:** `~/.euxis/security/gateway.json`
 
-## Config Loading Order (v0.1)
+## Config Loading Order
 
 1. `--config <path>` CLI override
 2. `EUXIS_GATEWAY_CONFIG` environment override

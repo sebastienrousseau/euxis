@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "protocol_version": "0.1.0",
+  "protocol_version": "v0.0.2",
   "last_updated": "2026-02-16",
   "capabilities_registry": "capabilities.json",
   "constitution": "CONSTITUTION.md",
@@ -9,7 +9,7 @@
       "id": "accountant",
       "path": "agents/prompts/fleet/accountant.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "cost",
         "budget",
@@ -27,7 +27,7 @@
       "id": "ambassador",
       "path": "agents/prompts/fleet/ambassador.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "devrel",
         "community",
@@ -42,7 +42,7 @@
       "id": "animator",
       "path": "agents/prompts/fleet/animator.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "theming",
         "color",
@@ -60,7 +60,7 @@
       "id": "arbiter",
       "path": "agents/prompts/core/arbiter.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "resolution",
         "decisions",
@@ -77,7 +77,7 @@
       "id": "architect",
       "path": "agents/prompts/core/architect.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "architecture",
         "design",
@@ -94,7 +94,7 @@
       "id": "auditor",
       "path": "agents/prompts/core/auditor.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "compliance",
         "security",
@@ -110,7 +110,7 @@
       "id": "automaton",
       "path": "agents/prompts/fleet/automaton.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "automation",
         "cicd",
@@ -127,7 +127,7 @@
       "id": "bridge",
       "path": "agents/prompts/fleet/bridge.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "default",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -145,7 +145,7 @@
       "id": "butler",
       "path": "agents/prompts/fleet/butler.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "voice",
         "tts",
@@ -161,7 +161,7 @@
       "id": "conduit",
       "path": "agents/prompts/fleet/conduit.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "audio",
         "realtime",
@@ -179,7 +179,7 @@
       "id": "critic",
       "path": "agents/prompts/core/critic.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "critic",
         "risk",
@@ -197,7 +197,7 @@
       "id": "cryptographer",
       "path": "agents/prompts/fleet/cryptographer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "cryptography",
         "security",
@@ -215,7 +215,7 @@
       "id": "custodian",
       "path": "agents/prompts/fleet/custodian.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "rust",
         "crates",
@@ -233,7 +233,7 @@
       "id": "debugger",
       "path": "agents/prompts/fleet/debugger.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "debugging",
         "fixes",
@@ -250,7 +250,7 @@
       "id": "deep-researcher",
       "path": "agents/prompts/fleet/deep-researcher.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "research",
         "strategy",
@@ -268,7 +268,7 @@
       "id": "designer",
       "path": "agents/prompts/fleet/designer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "web",
         "ui",
@@ -290,7 +290,7 @@
       "id": "distill",
       "path": "agents/prompts/fleet/distill.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "on-demand",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -308,7 +308,7 @@
       "id": "evangelist",
       "path": "agents/prompts/fleet/evangelist.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "brand",
         "voice",
@@ -325,7 +325,7 @@
       "id": "gatekeeper",
       "path": "agents/prompts/fleet/gatekeeper.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "releases",
         "versioning",
@@ -341,7 +341,7 @@
       "id": "govern",
       "path": "agents/prompts/fleet/govern.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "on-demand",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -359,7 +359,7 @@
       "id": "guard",
       "path": "agents/prompts/core/guard.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "core",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -378,7 +378,7 @@
       "id": "heal",
       "path": "agents/prompts/fleet/heal.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "default",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -397,7 +397,7 @@
       "id": "historian",
       "path": "agents/prompts/core/historian.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "memory",
         "patterns",
@@ -416,7 +416,7 @@
       "id": "inspector",
       "path": "agents/prompts/fleet/inspector.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "testing",
         "qa",
@@ -433,7 +433,7 @@
       "id": "interactor",
       "path": "agents/prompts/fleet/interactor.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "keyboard",
         "focus",
@@ -451,7 +451,7 @@
       "id": "investigator",
       "path": "agents/prompts/fleet/investigator.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "crash",
         "forensics",
@@ -468,7 +468,7 @@
       "id": "ledger",
       "path": "agents/prompts/fleet/ledger.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "payments",
         "iso20022",
@@ -486,7 +486,7 @@
       "id": "librarian",
       "path": "agents/prompts/core/librarian.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "memory",
         "knowledge",
@@ -503,7 +503,7 @@
       "id": "localizer",
       "path": "agents/prompts/fleet/localizer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "i18n",
         "l10n",
@@ -518,7 +518,7 @@
       "id": "maintainer",
       "path": "agents/prompts/fleet/maintainer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "legacy",
         "maintenance",
@@ -535,7 +535,7 @@
       "id": "marketer",
       "path": "agents/prompts/fleet/marketer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "marketing",
         "growth",
@@ -550,7 +550,7 @@
       "id": "optimizer",
       "path": "agents/prompts/fleet/optimizer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "performance",
         "profiling",
@@ -566,7 +566,7 @@
       "id": "orchestrator",
       "path": "agents/prompts/core/orchestrator.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "orchestration",
         "delegation",
@@ -584,7 +584,7 @@
       "id": "pair",
       "path": "agents/prompts/core/pair.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "core",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -603,7 +603,7 @@
       "id": "pentester",
       "path": "agents/prompts/fleet/pentester.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "security",
         "testing",
@@ -619,7 +619,7 @@
       "id": "planner",
       "path": "agents/prompts/core/planner.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "product",
         "requirements",
@@ -635,7 +635,7 @@
       "id": "polyglot",
       "path": "agents/prompts/fleet/polyglot.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "languages",
         "patterns",
@@ -653,7 +653,7 @@
       "id": "repairer",
       "path": "agents/prompts/fleet/repairer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "repair",
         "healing",
@@ -672,7 +672,7 @@
       "id": "researcher",
       "path": "agents/prompts/fleet/researcher.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "research",
         "analysis",
@@ -688,7 +688,7 @@
       "id": "responder",
       "path": "agents/prompts/fleet/responder.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "incident",
         "response",
@@ -705,7 +705,7 @@
       "id": "reviewer",
       "path": "agents/prompts/core/reviewer.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "quality",
         "review",
@@ -722,7 +722,7 @@
       "id": "route",
       "path": "agents/prompts/core/route.txt",
       "tier": "core",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "core",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -741,7 +741,7 @@
       "id": "sentinel",
       "path": "agents/prompts/fleet/sentinel.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "security",
         "governance",
@@ -759,7 +759,7 @@
       "id": "strategist",
       "path": "agents/prompts/fleet/strategist.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "social",
         "content",
@@ -775,7 +775,7 @@
       "id": "tactician",
       "path": "agents/prompts/fleet/tactician.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "tui",
         "cli",
@@ -794,7 +794,7 @@
       "id": "telemetrist",
       "path": "agents/prompts/fleet/telemetrist.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "observability",
         "telemetry",
@@ -810,7 +810,7 @@
       "id": "tester",
       "path": "agents/prompts/fleet/tester.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "testing",
         "quality",
@@ -826,7 +826,7 @@
       "id": "trace",
       "path": "agents/prompts/fleet/trace.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "default",
       "created_at": "2026-02-16T00:26:09.425730Z",
       "updated_at": "2026-02-16T00:26:09.425730Z",
@@ -845,7 +845,7 @@
       "id": "watchdog",
       "path": "agents/prompts/fleet/watchdog.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "regression",
         "analysis",
@@ -863,7 +863,7 @@
       "id": "writer",
       "path": "agents/prompts/fleet/writer.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "tags": [
         "documentation",
         "writing",
@@ -878,7 +878,7 @@
       "id": "automator",
       "path": "fleet/automator.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "on-demand",
       "tags": [
         "automation",
@@ -891,7 +891,7 @@
       "id": "compliance",
       "path": "fleet/compliance.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "on-demand",
       "tags": [
         "compliance",
@@ -904,7 +904,7 @@
       "id": "social",
       "path": "fleet/social.txt",
       "tier": "fleet",
-      "version": "0.1.0",
+      "version": "v0.0.2",
       "activation": "on-demand",
       "tags": [
         "social",

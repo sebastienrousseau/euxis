@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Welcome splash screen — minimal, spacious, keyboard-first."""
@@ -88,7 +88,7 @@ class WelcomeScreen(Screen[None]):
 
         stats = self.query_one("#welcome-stats", Static)
         stats.update(
-            f"[dim]v{reg.version}  ·  "
+            f"[dim]ᛞ v{reg.version}  ·  "
             f"{len(reg.agents)} {_('agents')}  ·  "
             f"{len(reg.squads)} {_('squads')}  ·  "
             f"{len(reg.combos)} {_('combos')}[/]"

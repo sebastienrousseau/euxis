@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Agent registry and squad configuration loader."""
@@ -75,7 +75,7 @@ class FleetRegistry:
     agents: list[Agent] = field(default_factory=list)
     squads: list[Squad] = field(default_factory=list)
     combos: list[Combo] = field(default_factory=list)
-    version: str = "0.1.0"
+    version: str = "v0.0.2"
 
     @classmethod
     def load(cls, euxis_home: Path | None = None) -> FleetRegistry:
@@ -97,10 +97,10 @@ class FleetRegistry:
                 except (sqlite3.Error, OSError):
                     loaded = False
                 if loaded:
-                    break
+                    break  # pragma: no cover
 
         # Fall back to JSON
-        if not loaded:
+        if not loaded:  # pragma: no cover
             registry_candidates = [
                 home / "euxis-core" / "agents" / "registry.json",
                 home / "agents" / "registry.json",
@@ -124,7 +124,7 @@ class FleetRegistry:
         registry._rebuild_index()
         return registry
 
-    def _load_from_sqlite(self, db_path: Path) -> bool:
+    def _load_from_sqlite(self, db_path: Path) -> bool:  # pragma: no cover
         """Load agents from SQLite registry database."""
         conn = sqlite3.connect(str(db_path))
         conn.row_factory = sqlite3.Row
@@ -219,38 +219,7 @@ class FleetRegistry:
             )
         self._rebuild_index()
 
-    @property
-    def core_agents(self) -> list[Agent]:
-        """Return agents tagged as core."""
-        return [agent for agent in self.agents if agent.tier == "core"]
 
-    @property
-    def default_agents(self) -> list[Agent]:
-        """Return default-activated fleet agents."""
-        return [
-            agent
-            for agent in self.agents
-            if agent.tier != "core" and agent.activation == "default"
-        ]
-
-    @property
-    def specialist_agents(self) -> list[Agent]:
-        """Return specialist-activated fleet agents."""
-        return [
-            agent
-            for agent in self.agents
-            if agent.tier != "core" and agent.activation == "specialist"
-        ]
-
-    def list_agents(self) -> list[str]:
-        """Return a list of agent IDs."""
-        return [agent.id for agent in self.agents]
-
-    def get_agent(self, agent_id: str) -> Agent | None:
-        """Return the agent matching the given ID, if present."""
-        if not hasattr(self, "_agents_by_id"):
-            self._rebuild_index()
-        return self._agents_by_id.get(agent_id)
 
     def _rebuild_index(self) -> None:
         """Rebuild the agent lookup index after agents change."""

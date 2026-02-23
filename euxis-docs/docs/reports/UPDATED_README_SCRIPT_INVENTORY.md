@@ -5,7 +5,7 @@
 ### Primary Entry Points
 - **euxis** - Main CLI entry point (symlink to euxis.sh)
 - **euxis.sh** - Multi-Provider AI Agent Framework dispatcher
-- **setup.sh** - Install and configure the Euxis Fleet system
+- **install.sh** - Install and configure the Euxis Fleet system
 
 ### Fleet Management
 - **euxis-squad** - Squad management and deployment

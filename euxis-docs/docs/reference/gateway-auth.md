@@ -1,6 +1,6 @@
 # Gateway Auth
 
-Guidance for authenticating against the Euxis Gateway in v0.1.
+Guidance for authenticating against the Euxis Gateway in v0.0.2.
 
 ## Default Mode
 
@@ -22,7 +22,7 @@ HTTP endpoints (health, sessions, approvals, automation, canvas, voice) use the 
 
 ### WebChat Usage
 
-If `allow_query_param` is enabled, you can pass the token via query param:
+Query parameter auth is disabled by default. If `allow_query_param` is explicitly enabled, you can pass the token via query param:
 
 ```
 http://127.0.0.1:18789/webchat/?token=<token>

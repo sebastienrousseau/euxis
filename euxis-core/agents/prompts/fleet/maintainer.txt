@@ -1,7 +1,7 @@
 ---
 agent_id: maintainer
 role: "Legacy code documentation, non-breaking upgrades, and migrations"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [legacy, maintenance, migrations]
 tier: fleet
 activation: default

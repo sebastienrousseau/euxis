@@ -95,7 +95,7 @@ euxis-health --json
   "providers": 3,
   "bus_pipes": 3,
   "bus_messages": 45,
-  "timestamp": "2026-02-14T10:30:00Z"
+  "timestamp": "current-02-14T10:30:00Z"
 }
 ```
 
@@ -118,7 +118,7 @@ euxis-certify
 --------------------------------------------------
   Running full validation...
   Running minimal validation...
-  Registry database valid (50 agents)
+  Registry database valid (53 agents)
   Euxis directory structure is valid
   All system dependencies available
   Full validation passed.
@@ -133,7 +133,7 @@ euxis-certify
   User guide exists
   Fleet guide exists
   Temporary file write access verified
-  Current version detected: 0.1.0
+  Current version detected: v0.0.2
   All certification prerequisites met
 
 [GATE 0b] Security & Quality Enforcement...
@@ -185,7 +185,7 @@ euxis-certify
   PASS: docs/guides/user-guide.md exists.
   PASS: docs/guides/fleet-guide.md exists.
   PASS: All documentation is current (updated within 7 days).
-  PASS: README.md references version 0.0.1.
+  PASS: README.md references version 0.0.2.
   Validating JSON manifest files...
   PASS: agents/registry.json is valid JSON.
   PASS: agents/squads.json is valid JSON.
@@ -229,43 +229,43 @@ bash: euxis: command not found
 **Diagnosis:**
 
 ```bash
-# Check if ~/cli/bin is in PATH
+# Check if ~/.euxis/euxis-cli/bin is in PATH
 echo $PATH | tr ':' '\n' | grep -E "(home|~).*bin"
 
 # Check if euxis symlink exists
-ls -la ~/cli/bin/euxis
+ls -la ~/.euxis/euxis-cli/bin/euxis
 ```
 
 **Solution:**
 
-1. **Add ~/cli/bin to PATH** (choose your shell):
+1. **Add ~/.euxis/euxis-cli/bin to PATH** (choose your shell):
 
    **For Bash (~/.bashrc or ~/.bash_profile):**
    ```bash
-   echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc
+   echo 'export PATH="$HOME/.euxis/euxis-cli/bin:$PATH"' >> ~/.bashrc
    source ~/.bashrc
    ```
 
    **For Zsh (~/.zshrc):**
    ```bash
-   echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.zshrc
+   echo 'export PATH="$HOME/.euxis/euxis-cli/bin:$PATH"' >> ~/.zshrc
    source ~/.zshrc
    ```
 
    **For Fish (~/.config/fish/config.fish):**
    ```fish
-   set -Ux fish_user_paths $HOME/cli/bin $fish_user_paths
+   set -Ux fish_user_paths $HOME/.euxis/euxis-cli/bin $fish_user_paths
    ```
 
 2. **Re-run setup if symlinks are missing:**
    ```bash
-   ~/.euxis/setup.sh --force
+   ~/.euxis/install.sh
    ```
 
 3. **Verify installation:**
    ```bash
    which euxis
-   # Expected: /home/username/cli/bin/euxis
+   # Expected: /home/username/.euxis/euxis-cli/bin/euxis
    ```
 
 ### Missing Dependencies
@@ -305,7 +305,7 @@ sudo apt update && sudo apt install python3.12 python3.12-venv
 python3 -m venv ~/.euxis/.venv
 
 # Install dependencies
-~/.euxis/.venv/cli/bin/pip install -r ~/.euxis/requirements.txt
+~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
 ```
 
 **Optional but recommended tools:**
@@ -328,22 +328,22 @@ brew install coreutils  # macOS (provides gtimeout)
 **Symptoms:**
 
 ```
-Permission denied: ~/.euxis/cli/bin/euxis
+Permission denied: ~/.euxis/euxis-cli/bin/euxis
 ```
 
 **Solution:**
 
 ```bash
 # Fix executable permissions on all scripts
-chmod +x ~/.euxis/cli/bin/*
+chmod +x ~/.euxis/euxis-cli/bin/*
 
 # Fix directory permissions
 chmod 755 ~/.euxis
-chmod 755 ~/.euxis/cli/bin
+chmod 755 ~/.euxis/euxis-cli/bin
 chmod 755 ~/.euxis/core/lib
 
 # Verify
-ls -la ~/.euxis/cli/bin/euxis
+ls -la ~/.euxis/euxis-cli/bin/euxis
 # Should show: -rwxr-xr-x
 ```
 
@@ -353,7 +353,7 @@ ls -la ~/.euxis/cli/bin/euxis
 
 ```bash
 # Add to ~/.zshrc
-export PATH="$HOME/cli/bin:$PATH"
+export PATH="$HOME/.euxis/euxis-cli/bin:$PATH"
 export EUXIS_HOME="$HOME/.euxis"
 
 # Reload
@@ -364,7 +364,7 @@ source ~/.zshrc
 
 ```bash
 # Add to ~/.bashrc (or ~/.bash_profile on macOS)
-export PATH="$HOME/cli/bin:$PATH"
+export PATH="$HOME/.euxis/euxis-cli/bin:$PATH"
 export EUXIS_HOME="$HOME/.euxis"
 
 # Reload
@@ -375,7 +375,7 @@ source ~/.bashrc
 
 ```fish
 # Run these commands
-set -Ux PATH $HOME/cli/bin $PATH
+set -Ux PATH $HOME/.euxis/euxis-cli/bin $PATH
 set -Ux EUXIS_HOME $HOME/.euxis
 ```
 
@@ -897,17 +897,17 @@ ModuleNotFoundError: No module named 'textual'
 1. **Create/recreate venv:**
    ```bash
    python3 -m venv ~/.euxis/.venv
-   ~/.euxis/.venv/cli/bin/pip install -r ~/.euxis/requirements.txt
+   ~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
    ```
 
 2. **Install Textual manually:**
    ```bash
-   ~/.euxis/.venv/cli/bin/pip install textual textual-dev
+   ~/.euxis/.venv/bin/pip install textual textual-dev
    ```
 
 3. **Verify installation:**
    ```bash
-   ~/.euxis/.venv/cli/bin/python -c "import textual; print(textual.__version__)"
+   ~/.euxis/.venv/bin/python -c "import textual; print(textual.__version__)"
    ```
 
 ### Display Rendering Issues
@@ -1135,7 +1135,7 @@ System slows down during fleet dispatch.
 | `Provider command timed out` | API too slow / network issue | Increase `EUXIS_API_TIMEOUT` |
 | `Path traversal rejected` | Security: Invalid file path | Use valid paths within `~/.euxis` |
 | `Invalid model name` | Malformed model identifier | Check `EUXIS_*_MODEL` env vars |
-| `Registry not found` | Missing agents/registry.db/json | Run `~/.euxis/setup.sh` |
+| `Registry not found` | Missing agents/registry.db/json | Run `~/.euxis/install.sh` |
 | `FATAL: Cannot load validation library` | Missing lib/validation.sh | Re-clone repository |
 | `Task input rejected: prompt injection` | Security: Dangerous input | Remove injection patterns from task |
 | `chromadb not installed` | Missing Cortex dependencies | Run `pip install chromadb` |
@@ -1178,8 +1178,8 @@ euxis architect "Your task"
 | Agent memory | `~/.euxis/runtime/data/projects/{project}/{agent}/memory.md` |
 | Performance metrics | `~/.euxis/metrics/events.jsonl` |
 | Lifecycle transitions | `~/.euxis/runtime/data/lifecycle/transitions.jsonl` |
-| Dispatch logs | `/tmp/euxis_dispatch_*/*.log` |
-| Certification logs | `/tmp/euxis_cert_*.log` |
+| Dispatch logs | `${TMPDIR:-/tmp}/euxis_dispatch_*/*.log` |
+| Certification logs | `${TMPDIR:-/tmp}/euxis_cert_*.log` |
 | Bus messages | `~/.euxis/runtime/data/bus/pipes/*/*.msg` |
 
 ### Generating a Bug Report

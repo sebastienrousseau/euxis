@@ -1,7 +1,7 @@
 ---
 agent_id: bridge
 role: "Channel format translation and media bridging"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [channels, translation, media]
 tier: fleet
 activation: default

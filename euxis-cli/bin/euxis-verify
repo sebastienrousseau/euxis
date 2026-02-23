@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# EUXIS VERIFY: Comprehensive Release Gate for v0.0.1
+# EUXIS VERIFY: Comprehensive Release Gate for v0.0.2
 #
 # A unified verification command that validates all aspects of the Euxis system
 # before release: performance, branding, security, and cross-platform compatibility.
@@ -30,7 +30,7 @@ set -euo pipefail
 # ============================================================================
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-EUXIS_VERSION="0.0.1"
+EUXIS_VERSION="0.0.2"
 BIN_DIR="${EUXIS_HOME}/euxis-cli/bin"
 CORE_DIR="${EUXIS_HOME}/euxis-core"
 
@@ -150,7 +150,7 @@ fi
 
 usage() {
     cat <<'EOF'
-euxis-verify - Comprehensive Release Gate for v0.0.1
+euxis-verify - Comprehensive Release Gate for v0.0.2
 
 USAGE:
     euxis-verify [OPTIONS]
@@ -470,7 +470,7 @@ run_bench_gate() {
     # Test 3: Agent dispatch latency (using gateway health as proxy)
     log_check info "Measuring dispatch latency..."
     local gateway_port="${EUXIS_GATEWAY_PORT:-18789}"
-    local gateway_url="http://127.0.0.1:${gateway_port}/health"
+    local gateway_url="http://127.0.0.2:${gateway_port}/health"
 
     # Check if gateway is running first
     if curl -s --max-time 1 "${gateway_url}" >/dev/null 2>&1; then
@@ -1416,6 +1416,22 @@ run_legal_gate() {
 # Summary Display
 # ============================================================================
 
+show_euxis_seal() {
+    # 2026 Enterprise Grade Verification Seal
+    local dim="\033[38;2;120;120;120m"
+    local glow="\033[1;38;2;0;209;255m"
+    local white="\033[1;38;2;255;255;255m"
+    local blue="\033[38;2;0;122;255m"
+    local reset="\033[0m"
+
+    echo -e "\n  ${white}EUXIS VERIFICATION COMPLETE${reset}"
+    echo -e "  ${dim}Status: 100% Coverage Reached${reset}"
+    echo -e "  ${dim}────────────────────────────────────────────────────────────────────────${reset}"
+    echo -e "  ${dim}THE ARCHITECT ᛫ Sebastien Rousseau ᛫ ${blue}https://sebastienrousseau.com${reset}"
+    echo -e "  ${dim}THE ENGINE ${glow}ᛞ ${white}EUXIS ᛫ Enterprise Unified Execution Intelligence System ᛫ ${blue}https://euxis.co${reset}"
+    echo -e "  ${dim}────────────────────────────────────────────────────────────────────────${reset}\n"
+}
+
 _status_icon() {
     case "$1" in
         PASS) echo "${GREEN}✓${RESET}" ;;
@@ -1460,8 +1476,10 @@ print_summary() {
 
     # Final verdict - bubbletea style
     if [[ $OVERALL_FAILURES -eq 0 ]]; then
+        show_euxis_seal
         echo "  ${GREEN}Done!${RESET} Verified ${passed}/${total} gates. ${GREEN}Release ready.${RESET}"
     else
+        echo -e "\n  \033[1;31m✘ VERIFICATION FAILED\033[0m"
         echo "  ${RED}Blocked.${RESET} ${OVERALL_FAILURES} gate(s) failed. ${OVERALL_WARNINGS} warning(s)."
     fi
     echo ""

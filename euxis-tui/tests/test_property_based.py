@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Property-based tests for Euxis core components.
@@ -44,7 +44,7 @@ class TestAgentSerialization:
         agent = Agent(
             id=agent_id.strip(),
             tier=tier,
-            version="0.0.1",
+            version="0.0.2",
             tags=tuple(tags),
             activation=activation,
         )

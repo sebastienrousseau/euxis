@@ -37,9 +37,9 @@ cat > ~/my-plugins/code-optimizer.txt <<'EOF'
 ---
 agent_id: code-optimizer
 role: "Performance optimization specialist for code review and refactoring"
-version: "0.0.1"
+version: "0.0.2"
 tags: [performance, optimization, code-review]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: Code Optimizer
@@ -101,7 +101,7 @@ cat > ~/my-plugins/code-optimizer-manifest.json <<'EOF'
 {
   "agent_id": "code-optimizer",
   "role": "Performance optimization specialist for code review and refactoring",
-  "prompt_file": "/home/seb/my-plugins/code-optimizer.txt",
+  "prompt_file": "${HOME}/my-plugins/code-optimizer.txt",
   "tier": "standard",
   "tags": ["performance", "optimization", "code-review"]
 }
@@ -161,7 +161,7 @@ unregister_agent_plugin "code-optimizer"
 {
   "agent_id": "api-documenter",
   "role": "Automated API documentation generator",
-  "prompt_file": "/home/seb/my-plugins/api-documenter.txt",
+  "prompt_file": "${HOME}/my-plugins/api-documenter.txt",
   "tier": "utility",
   "tags": ["documentation", "api", "automation"]
 }
@@ -177,7 +177,7 @@ Your agent prompt file MUST include specific sections to work properly with Euxi
 ---
 agent_id: your-agent-name    # Must match manifest agent_id
 role: "One-line description"
-version: "0.0.1"            # Use current Euxis version
+version: "0.0.2"            # Use current Euxis version
 tags: [category1, category2]
 last_updated: "YYYY-MM-DD"
 ---
@@ -197,9 +197,9 @@ last_updated: "YYYY-MM-DD"
 ---
 agent_id: my-agent
 role: "Brief description of what this agent does"
-version: "0.0.1"
+version: "0.0.2"
 tags: [category]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: My Agent Name
@@ -307,9 +307,9 @@ This example shows a specialized agent for database migrations:
 ---
 agent_id: db-migrator
 role: "Database migration specialist for schema changes and data transformations"
-version: "0.0.1"
+version: "0.0.2"
 tags: [database, migration, schema]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: Database Migrator
@@ -379,7 +379,7 @@ You MUST ensure database migrations are safe, reversible, and maintain data inte
 {
   "agent_id": "db-migrator",
   "role": "Database migration specialist for schema changes and data transformations",
-  "prompt_file": "/home/seb/my-plugins/db-migrator.txt",
+  "prompt_file": "${HOME}/my-plugins/db-migrator.txt",
   "tier": "coding",
   "tags": ["database", "migration", "schema", "data-transformation"]
 }
@@ -394,9 +394,9 @@ This example shows an agent specialized for API testing:
 ---
 agent_id: api-tester
 role: "API testing specialist for endpoint validation and contract testing"
-version: "0.0.1"
+version: "0.0.2"
 tags: [testing, api, validation, contracts]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: API Tester
@@ -471,7 +471,7 @@ describe('[Endpoint]', () => {
 {
   "agent_id": "api-tester",
   "role": "API testing specialist for endpoint validation and contract testing",
-  "prompt_file": "/home/seb/my-plugins/api-tester.txt",
+  "prompt_file": "${HOME}/my-plugins/api-tester.txt",
   "tier": "coding",
   "tags": ["testing", "api", "validation", "contracts", "automation"]
 }
@@ -588,9 +588,9 @@ cat > ~/my-plugins/file-organizer/prompt.txt <<'EOF'
 ---
 agent_id: file-organizer
 role: "File system organization and cleanup specialist"
-version: "0.0.1"
+version: "0.0.2"
 tags: [filesystem, organization, cleanup]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: File Organizer
@@ -639,7 +639,7 @@ cat > ~/my-plugins/file-organizer/manifest.json <<'EOF'
 {
   "agent_id": "file-organizer",
   "role": "File system organization and cleanup specialist",
-  "prompt_file": "/home/seb/my-plugins/file-organizer/prompt.txt",
+  "prompt_file": "${HOME}/my-plugins/file-organizer/prompt.txt",
   "tier": "utility",
   "tags": ["filesystem", "organization", "cleanup", "maintenance"]
 }
@@ -665,9 +665,9 @@ cat > ~/my-plugins/log-analyzer/prompt.txt <<'EOF'
 ---
 agent_id: log-analyzer
 role: "Log file analysis and pattern detection specialist"
-version: "0.0.1"
+version: "0.0.2"
 tags: [logging, analysis, debugging, patterns]
-last_updated: "2026-02-03"
+last_updated: "current-02-03"
 ---
 
 # Euxis Agent: Log Analyzer
@@ -732,7 +732,7 @@ cat > ~/my-plugins/log-analyzer/manifest.json <<'EOF'
 {
   "agent_id": "log-analyzer",
   "role": "Log file analysis and pattern detection specialist",
-  "prompt_file": "/home/seb/my-plugins/log-analyzer/prompt.txt",
+  "prompt_file": "${HOME}/my-plugins/log-analyzer/prompt.txt",
   "tier": "research",
   "tags": ["logging", "analysis", "debugging", "patterns", "monitoring"]
 }
@@ -746,4 +746,4 @@ euxis log-analyzer "Analyze the application logs from the last hour for any erro
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

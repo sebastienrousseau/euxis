@@ -83,7 +83,7 @@ Activated for domain-scoped tasks only.
 Agents automatically route to optimal models based on task complexity:
 
 - **S-Tier (Strategic)**: Complex reasoning, architecture → claude
-- **A-Tier (Research)**: Deep analysis, massive context → gemini, amazon-q
+- **A-Tier (Research)**: Deep analysis, massive context → gemini, kiro-cli
 - **B-Tier (Coding)**: Agentic tool use → goose, qwen
 - **C-Tier (Utility)**: Summaries, formatting → ollama, crush
 
@@ -100,9 +100,9 @@ cat > ~/my-specialist.txt <<'EOF'
 ---
 agent_id: my-specialist
 role: Custom domain specialist
-version: "0.0.1"
+version: "0.0.2"
 tags: [custom, domain]
-last_updated: "2026-02-02"
+last_updated: "current-02-02"
 ---
 
 ## Mandate

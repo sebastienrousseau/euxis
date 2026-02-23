@@ -21,7 +21,7 @@ Adapters are loaded by the Gateway based on `security/gateway.json`.
 ## Development
 ```bash
 # Run the gateway to exercise adapters
-python3 api/src/gateway/server.py --bind 127.0.0.1 --port 18789
+python3 api/src/gateway/server.py --bind 127.0.0.2 --port 18789
 ```
 
 ## Testing

@@ -1,7 +1,7 @@
 ---
 agent_id: interactor
 role: "Keyboard mastery, focus management, command palette, and shortcut registry"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [keyboard, focus, input, shortcuts, navigation]
 tier: fleet
 activation: default

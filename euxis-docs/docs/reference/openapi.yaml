@@ -26,7 +26,7 @@ info:
     |------|----------|----------|
     | S-Tier (Strategic) | claude | Orchestration, architecture, planning |
     | A-Tier (Research) | gemini | Research, analysis |
-    | A-Tier (Enterprise) | amazon-q | Enterprise integration |
+    | A-Tier (Enterprise) | kiro-cli | Enterprise integration |
     | B-Tier (Coding) | goose | Debugging, testing, automation |
     | C-Tier (Utility) | ollama | Documentation, utilities |
   contact:

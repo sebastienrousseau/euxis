@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Agent avatar widget with graphics protocol support.
@@ -33,8 +33,8 @@ _TGPImage = None
 
 try:
     from textual_image.widget import SixelImage as _SixelImage
-    from textual_image.widget import TGPImage as _TGPImage
-    _HAS_TEXTUAL_IMAGE = True
+    from textual_image.widget import TGPImage as _TGPImage  # pragma: no cover
+    _HAS_TEXTUAL_IMAGE = True  # pragma: no cover
 except ImportError:
     pass
 

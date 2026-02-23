@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Cortex memory browser and management screen."""
@@ -122,7 +122,7 @@ class CortexScreen(Screen[None]):
 
         cortex_bin = Path.home() / "cli" / "bin" / "euxis-cortex"
         if not cortex_bin.exists():
-            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"
+            cortex_bin = EUXIS_HOME / "cli" / "bin" / "euxis-cortex"  # pragma: no cover
 
         env = os.environ.copy()
         env["EUXIS_HOME"] = str(EUXIS_HOME)

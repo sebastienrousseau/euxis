@@ -175,7 +175,7 @@ euxis-playbook run verify-everything "Confirm security audit remediation"
 Store findings for future reference.
 
 ```bash
-euxis-cortex remember "Security audit 2026-02: Found and fixed SQL injection in search, XSS in comments, added CSP headers" "pentester" --type episodic
+euxis-cortex remember "Security audit-02: Found and fixed SQL injection in search, XSS in comments, added CSP headers" "pentester" --type episodic
 
 euxis-cortex remember "PROCEDURAL: Before any release touching auth: run euxis-squad deploy quality" "sentinel" --type procedural
 ```
@@ -236,4 +236,4 @@ euxis telemetrist "Add security event logging for failed authentication attempts
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

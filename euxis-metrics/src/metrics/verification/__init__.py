@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Evidence Verification Framework for Euxis Strategic Analysis.
@@ -41,7 +41,7 @@ from .evidence_framework import (
 )
 from .validation_pipeline import ValidationPipeline
 
-__version__ = "0.1.0"
+__version__ = "v0.0.2"
 __all__ = [
     "Claim",
     "Evidence",

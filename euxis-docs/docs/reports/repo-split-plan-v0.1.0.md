@@ -1,4 +1,4 @@
-# Repository Split — Monolith to Modular (v0.0.1)
+# Repository Split — Monolith to Modular (v0.0.2)
 
 ## Executive Summary
 Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.
@@ -10,10 +10,10 @@ Split Euxis into a small set of purpose-built repos that mirror today’s module
 ### Dependency Mapping (evidence-based)
 
 **Core gravity center (shell libs):**
-- `cli/bin/euxis.sh` sources `core/lib/*.sh` (`core/lib/common.sh`, `providers.sh`, `agents.sh`, `memory.sh`, `session.sh`, `template.sh`, `skill-detector.sh`, `prompt.sh`, `cli.sh`, `dispatch.sh`).
-  - Evidence: `cli/bin/euxis.sh:74-100`.
+- `euxis-cli/bin/euxis.sh` sources `core/lib/*.sh` (`core/lib/common.sh`, `providers.sh`, `agents.sh`, `memory.sh`, `session.sh`, `template.sh`, `skill-detector.sh`, `prompt.sh`, `cli.sh`, `dispatch.sh`).
+  - Evidence: `euxis-cli/bin/euxis.sh:74-100`.
 - Nearly every CLI script sources `core/lib/ui.sh`.
-  - Evidence: `cli/bin/euxis-*.sh` list in `rg` results.
+  - Evidence: `euxis-cli/bin/euxis-*.sh` list in `rg` results.
 
 **Gateway depends on adapters and gateway utils:**
 - `api/src/gateway/server.py` imports `adapters.registry` and `gateway.utils`.
@@ -47,7 +47,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 
 ### Data Flow (runtime)
 - Gateway writes session, approvals, audit, transcripts to `~/.euxis/runtime/data/gateway/*` via `api/src/gateway/utils.py`.
-- Cortex memory stored under `~/.euxis/runtime/memory/cortex` and accessed by `cli/bin/euxis-cortex` and `cli/bin/euxis-graph`.
+- Cortex memory stored under `~/.euxis/runtime/memory/cortex` and accessed by `euxis-cli/bin/euxis-cortex` and `euxis-cli/bin/euxis-graph`.
 - Metrics recorded under `~/.euxis/metrics/events.jsonl` and consumed by metrics tooling.
 
 ### Tests & Coverage
@@ -272,53 +272,53 @@ Use `git filter-repo` to preserve history. Example commands:
 
 ```bash
 # Core
-mkdir -p /tmp/euxis-core && cd /tmp/euxis-core
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-core && cd ${TMPDIR:-/tmp}/euxis-core
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path core --path agents --path config --force
 
 # CLI
-mkdir -p /tmp/euxis-cli && cd /tmp/euxis-cli
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-cli && cd ${TMPDIR:-/tmp}/euxis-cli
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path cli --force
 
 # Gateway
-mkdir -p /tmp/euxis-gateway && cd /tmp/euxis-gateway
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-gateway && cd ${TMPDIR:-/tmp}/euxis-gateway
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path gateway --force
 
 # Adapters
-mkdir -p /tmp/euxis-adapters && cd /tmp/euxis-adapters
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-adapters && cd ${TMPDIR:-/tmp}/euxis-adapters
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path adapters --force
 
 # TUI
-mkdir -p /tmp/euxis-tui && cd /tmp/euxis-tui
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-tui && cd ${TMPDIR:-/tmp}/euxis-tui
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path tui --force
 
 # Metrics
-mkdir -p /tmp/euxis-metrics && cd /tmp/euxis-metrics
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-metrics && cd ${TMPDIR:-/tmp}/euxis-metrics
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path metrics --force
 
 # Security
-mkdir -p /tmp/euxis-security && cd /tmp/euxis-security
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-security && cd ${TMPDIR:-/tmp}/euxis-security
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path security --force
 
 # Docs
-mkdir -p /tmp/euxis-docs && cd /tmp/euxis-docs
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-docs && cd ${TMPDIR:-/tmp}/euxis-docs
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path docs --path mkdocs.yml --force
 
 # Crypto (Python)
-mkdir -p /tmp/euxis-crypto-lib && cd /tmp/euxis-crypto-lib
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-lib && cd ${TMPDIR:-/tmp}/euxis-crypto-lib
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path crypto/src/crypto_lib --force
 
 # Crypto packages (TS)
-mkdir -p /tmp/euxis-crypto-packages && cd /tmp/euxis-crypto-packages
-cp -R /home/seb/.euxis/.git .
+mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-packages && cd ${TMPDIR:-/tmp}/euxis-crypto-packages
+cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path packages/crypto-lib --path packages/crypto-server --force
 ```
 

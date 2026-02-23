@@ -35,7 +35,7 @@ Missing standardized function documentation with:
 
 ## Audit Details
 
-### Primary Scripts (cli/bin/euxis-*)
+### Primary Scripts (euxis-cli/bin/euxis-*)
 
 | Script | Usage Header | Help Flag | Exit Codes | Priority |
 |--------|-------------|-----------|------------|----------|

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Euxis v0.0.1 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `core/lib/`. The main script (`cli/bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
+Euxis v0.0.2 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `core/lib/`. The main script (`euxis-cli/bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
 
 ## Modules
 
@@ -21,8 +21,8 @@ Euxis v0.0.1 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused l
 
 The framework core consists of:
 - **8 library modules** in `core/lib/` (~870 LOC)
-- **1 main entry point** `cli/bin/euxis.sh` (~400 LOC)
-- **20+ CLI tools** in `cli/bin/` (dispatch, loop, council, bench, lint, etc.)
+- **1 main entry point** `euxis-cli/bin/euxis.sh` (~400 LOC)
+- **20+ CLI tools** in `euxis-cli/bin/` (dispatch, loop, council, bench, lint, etc.)
 - **6 test files** in `tests/` (E2E, concurrency, integration)
 - **11 validation patterns** in `config/patterns/`
 - **35 agent prompts** in `agents/prompts/core/` and `agents/prompts/fleet/`
@@ -78,7 +78,7 @@ source "${EUXIS_HOME}/euxis-core/lib/providers.sh"
 # ... etc
 ```
 
-All paths are anchored to `EUXIS_HOME` for portability. This works correctly whether `euxis` is invoked via `~/.euxis/cli/bin/euxis.sh`, a hardlink at `~/cli/bin/euxis`, or any other location.
+All paths are anchored to `EUXIS_HOME` for portability. This works correctly whether `euxis` is invoked via `~/.euxis/euxis-cli/bin/euxis.sh`, a hardlink at `~/.euxis/euxis-cli/bin/euxis`, or any other location.
 
 ## Extension Guidelines
 
@@ -96,11 +96,11 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
    source "${EUXIS_HOME}/euxis-core/lib/common.sh"
    ```
 
-3. Add a `source` line in `cli/bin/euxis.sh` (after existing sources).
+3. Add a `source` line in `euxis-cli/bin/euxis.sh` (after existing sources).
 
 4. Set permissions: `chmod 755 core/lib/<name>.sh`
 
-5. Run `bash -n cli/bin/euxis.sh` to verify syntax.
+5. Run `bash -n euxis-cli/bin/euxis.sh` to verify syntax.
 
 ### Rules
 
@@ -112,4 +112,4 @@ All paths are anchored to `EUXIS_HOME` for portability. This works correctly whe
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

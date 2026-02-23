@@ -138,7 +138,7 @@ _lifecycle_init() {
         mkdir -p "${EUXIS_LIFECYCLE_DIR}" 2>/dev/null || true
     fi
     if ! touch "${EUXIS_LIFECYCLE_DIR}/.write-test" 2>/dev/null; then
-        EUXIS_LIFECYCLE_DIR="/tmp/euxis/lifecycle"
+        EUXIS_LIFECYCLE_DIR="${TMPDIR:-/tmp}/euxis/lifecycle"
         mkdir -p "${EUXIS_LIFECYCLE_DIR}" 2>/dev/null || true
     else
         rm -f "${EUXIS_LIFECYCLE_DIR}/.write-test" 2>/dev/null || true

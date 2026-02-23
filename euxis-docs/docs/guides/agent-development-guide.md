@@ -14,9 +14,9 @@ cat > ~/my-agent.txt <<'EOF'
 ---
 agent_id: my-agent
 role: Custom domain specialist
-version: "0.0.1"
+version: "0.0.2"
 tags: [custom, domain]
-last_updated: "2026-02-02"
+last_updated: "current-02-02"
 ---
 
 ## Mandate
@@ -70,7 +70,7 @@ Place the file in `~/.euxis/agents/prompts/fleet/<agent-id>.txt`.
 ---
 agent_id: <must match filename>
 role: <one-line description>
-version: "0.0.1"
+version: "0.0.2"
 tags: [<category tags>]
 last_updated: "<YYYY-MM-DD>"
 ---
@@ -111,7 +111,7 @@ my-agent)
 |-------------|------|----------|
 | Strategic reasoning, architecture, quality | S-Tier | claude |
 | Deep research, massive context | A-Tier | gemini |
-| Enterprise/AWS-native | A-Tier | amazon-q |
+| Enterprise/AWS-native | A-Tier | kiro-cli |
 | Agentic tool use, coding | B-Tier | goose |
 | Math/logic/optimization | B-Tier | qwen |
 | Summaries, formatting, utility | C-Tier | ollama |
@@ -119,7 +119,7 @@ my-agent)
 
 ### Step 4: Add to Lint Registry
 
-Add the agent name to the `AGENTS` array in `cli/bin/euxis-lint`:
+Add the agent name to the `AGENTS` array in `euxis-cli/bin/euxis-lint`:
 
 ```bash
 AGENTS=("architect" ... "my-agent")
@@ -237,8 +237,8 @@ See the ADR documents for rationale behind key design decisions:
 - `docs/adr/001-intelligence-tiering.md` — Why agents map to specific providers
 - `docs/adr/002-tiered-memory-architecture.md` — Why MemGPT-inspired memory
 - `docs/adr/003-dispatch-modes.md` — Why hierarchical/mesh/federated execution
-- `docs/adr/006-agent-fleet-size.md` — Why 50 agents and when to consolidate
+- `docs/adr/006-agent-fleet-size.md` — Why 53 agents and when to consolidate
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

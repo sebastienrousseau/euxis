@@ -472,7 +472,7 @@ def main():
 
     # Save results
     timestamp = int(time.time())
-    results_path = f"/tmp/euxis_voice_performance_{timestamp}.json"
+    results_path = fos.environ.get("TMPDIR", "/tmp") + "/euxis_voice_performance_{timestamp}.json"
     with open(results_path, 'w') as f:
         json.dump(results, f, indent=2, default=str)
     print(f"\n📁 Voice performance results saved to: {results_path}")

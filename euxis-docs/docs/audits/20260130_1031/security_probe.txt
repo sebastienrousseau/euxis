@@ -1,5 +1,4 @@
-# Security Probe Report — Fri 30 Jan 10:34:04 GMT 2026
-
+# Security Probe Report — Fri 30 Jan 10:34:04 GMT 
 ## Probe 1: Shell injection in agent argument
   PASS: Agent argument is not injectable.
 ## Probe 2: Path traversal in agent name

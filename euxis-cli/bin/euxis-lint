@@ -94,8 +94,8 @@ fi
 
 # CHECK 3: Version Synchronization
 echo "[3/8] Checking Versions..."
-VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | wc -l | tr -d ' ')
-VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"[0-9]+\.[0-9]+(\.[0-9]+)?"' | sort -u | tr -d '"')
+VERSION_COUNT=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"v?[0-9]+\.[0-9]+(\.[0-9]+)?"' | tr -d '"' | sed 's/^v//' | sort -u | grep -c .)
+VERSIONS=$(grep -rh 'version:' "$EUXIS_HOME/euxis-core/agents/prompts/core/" "$EUXIS_HOME/euxis-core/agents/prompts/fleet/" "$EUXIS_HOME/euxis-core/agents/prompts/protocols/" | grep -oE '"v?[0-9]+\.[0-9]+(\.[0-9]+)?"' | tr -d '"' | sed 's/^v//' | sort -u)
 
 if [[ "$VERSION_COUNT" -ne 1 ]]; then
     echo "  VERSION MISMATCH: Found multiple versions: $VERSIONS"

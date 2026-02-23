@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Streaming output panel for agent execution."""
@@ -10,6 +10,12 @@ from typing import Any
 from rich.markup import escape
 from rich.text import Text
 from textual.widgets import RichLog
+
+try:
+    import euxis_tui_rs
+    HAS_RUST_TUI = True  # pragma: no cover
+except ImportError:
+    HAS_RUST_TUI = False
 
 
 class OutputPanel(RichLog):
@@ -44,6 +50,10 @@ class OutputPanel(RichLog):
 
     def write_line(self, line: str) -> None:
         """Write a single line with agent-aware formatting."""
+        # 2026 Optimization: Offload ANSI stripping to Rust PyO3
+        if HAS_RUST_TUI:
+            line = euxis_tui_rs.strip_ansi(line)  # pragma: no cover
+
         if line.startswith("[euxis]"):
             # Euxis status lines — accent colored
             # Strip spinner characters

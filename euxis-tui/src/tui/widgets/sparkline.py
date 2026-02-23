@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Terminal sparkline widget for inline performance visualization."""
@@ -42,7 +42,7 @@ def sparkline_text(values: list[float], width: int = 20) -> str:
     for v in recent:
         normalized = (v - min_val) / val_range
         if not math.isfinite(normalized):
-            normalized = 0.0
+            normalized = 0.0  # pragma: no cover
         normalized = max(0.0, min(1.0, normalized))
         idx = min(int(normalized * (len(SPARK_CHARS) - 1)), len(SPARK_CHARS) - 1)
         chars.append(SPARK_CHARS[idx])

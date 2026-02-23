@@ -1,24 +1,24 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1.5"]
+build-backend = "maturin"
 
 [project]
 name = "euxis-tui"
-version = "0.0.1"
+version = "0.0.2"
 description = "Textual UI application for the Euxis Agent Framework"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "AGPL-3.0-or-later"}
 requires-python = ">=3.11"
 authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "euxis-core>=0.1.0",
+    "euxis-core>=v0.0.2",
     "rich>=14.3.0,<15.0.0",
     "textual>=7.5.0,<8.0.0",
 ]
@@ -33,11 +33,9 @@ euxis-tui = "tui:main"
 Homepage = "https://euxis.co"
 Repository = "https://github.com/euxis/euxis-tui"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "tui.euxis_tui_rs"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

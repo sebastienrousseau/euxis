@@ -59,6 +59,7 @@ See ``reports/initial-user-expectations-2026-02-18`` for full details.
 
    api/index
    reference/index
+   modules/index
 
 .. toctree::
    :maxdepth: 2
@@ -90,6 +91,12 @@ See ``reports/initial-user-expectations-2026-02-18`` for full details.
    :caption: Policies
 
    policies/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Legacy Docs
+
+   legacy/index
 
 .. toctree::
    :maxdepth: 1

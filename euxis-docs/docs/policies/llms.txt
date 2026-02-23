@@ -11,7 +11,7 @@
 - `euxis-combo run <name> "<task>"` - Run sequential agent chain
 - `euxis-squad deploy <name> "<task>"` - Deploy parallel agent team
 - `euxis-playbook run <name> "<goal>"` - Execute multi-phase workflow
-- `euxis-health` - Verify fleet health (8 checks)
+- `euxis-health` - Verify fleet health (10 checks)
 - `euxis-tui` - Launch terminal interface
 
 ## Agents (41 total)
@@ -116,4 +116,4 @@ Override: `euxis architect "task" gemini`
 - At least one AI provider (Ollama recommended for local)
 
 ---
-Euxis v0.0.1 | https://euxis.co/
+Euxis v0.0.2 | https://euxis.co/

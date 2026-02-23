@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Extended unit tests for EuxisApp (tui/app.py).
@@ -28,13 +28,13 @@ def _make_app():
     config = ETXConfig()
     registry = FleetRegistry()
     registry.agents = [
-        Agent(id="architect", tier="core", version="0.0.1",
+        Agent(id="architect", tier="core", version="0.0.2",
               tags=["design", "structure"], activation="default",
               capability_tags=["system-design", "architecture", "review"]),
-        Agent(id="debugger", tier="fleet", version="0.0.1",
+        Agent(id="debugger", tier="fleet", version="0.0.2",
               tags=["debug"], activation="default",
               capability_tags=[]),
-        Agent(id="tester", tier="fleet", version="0.0.1",
+        Agent(id="tester", tier="fleet", version="0.0.2",
               tags=[], activation="on-demand",
               capability_tags=[]),
     ]
@@ -227,7 +227,7 @@ class TestFormatAgentReason(unittest.TestCase):
         """Returns 'specialized in ...' when agent has capability_tags."""
         app, _, _ = _make_app()
         agent = Agent(
-            id="a", tier="core", version="0.0.1",
+            id="a", tier="core", version="0.0.2",
             tags=["tag1"], activation="default",
             capability_tags=["design", "review", "testing", "extra"],
         )
@@ -240,7 +240,7 @@ class TestFormatAgentReason(unittest.TestCase):
         """Returns 'strong in ...' when agent has tags but no caps."""
         app, _, _ = _make_app()
         agent = Agent(
-            id="a", tier="fleet", version="0.0.1",
+            id="a", tier="fleet", version="0.0.2",
             tags=["debug", "trace", "log", "extra"],
             activation="default",
             capability_tags=[],
@@ -253,7 +253,7 @@ class TestFormatAgentReason(unittest.TestCase):
         """Returns tier · activation when no caps and no tags."""
         app, _, _ = _make_app()
         agent = Agent(
-            id="a", tier="core", version="0.0.1",
+            id="a", tier="core", version="0.0.2",
             tags=[], activation="default",
             capability_tags=[],
         )

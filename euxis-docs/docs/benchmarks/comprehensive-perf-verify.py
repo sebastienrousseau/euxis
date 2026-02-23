@@ -207,7 +207,7 @@ class ComprehensivePerformanceVerification:
     def save_comprehensive_results(self):
         """Save comprehensive results to JSON file."""
         timestamp = int(time.time())
-        filepath = f"/tmp/euxis_comprehensive_performance_{timestamp}.json"
+        filepath = fos.environ.get("TMPDIR", "/tmp") + "/euxis_comprehensive_performance_{timestamp}.json"
 
         with open(filepath, "w") as f:
             json.dump(self.results, f, indent=2, default=str)

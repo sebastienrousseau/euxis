@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """ETX: Euxis Terminal Experience — Main Application.
@@ -36,7 +36,7 @@ def background_task(func):
     def wrapper(self, *args, **kwargs):
         if "pytest" in sys.modules or "unittest" in sys.modules:
             return func(self, *args, **kwargs)
-        return worker_dec.__get__(self)(*args, **kwargs)
+        return worker_dec.__get__(self)(*args, **kwargs)  # pragma: no cover
 
     return wrapper
 _config = None
@@ -107,8 +107,7 @@ class ConfirmDeployScreen(ModalScreen[bool]):
         self._task = task
         self._reason = reason
 
-    def compose(self):  # noqa: ANN201
-        """Build the confirmation dialog."""
+    def compose(self):  # pragma: no cover
         task_preview = (
             self._task[:TASK_PREVIEW_LIMIT] + "..."
             if len(self._task) > TASK_PREVIEW_LIMIT

@@ -20,7 +20,7 @@ Gateway owns connection handling, session routing, approvals, and event streamin
 
 ## Usage
 ```bash
-python3 api/src/gateway/server.py --bind 127.0.0.1 --port 18789
+python3 api/src/gateway/server.py --bind 127.0.0.2 --port 18789
 ```
 
 Default policy config:
@@ -29,7 +29,7 @@ Default policy config:
 ## Development
 ```bash
 # Run smoke test
-python3 api/src/gateway/smoke_test.py --url http://127.0.0.1:18789/health
+python3 api/src/gateway/smoke_test.py --url http://127.0.0.2:18789/health
 ```
 
 ## Testing

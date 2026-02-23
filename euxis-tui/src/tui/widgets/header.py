@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """ETX header bar widget with Liquid Glass branding and cost tracking."""
@@ -44,7 +44,7 @@ class ETXHeader(Widget):
     branch: reactive[str] = reactive("")
     provider: reactive[str] = reactive("claude")
     agent_count: reactive[int] = reactive(50)
-    version: reactive[str] = reactive("0.1.0")
+    version: reactive[str] = reactive("v0.0.2")
     model: reactive[str] = reactive("")
     # Cost tracking for burn rate visualization
     total_cost: reactive[float] = reactive(0.0)
@@ -132,7 +132,7 @@ class ETXHeader(Widget):
 
     def _update_display(self) -> None:
         logo = self.query_one("#etx-header-logo", Static)
-        logo.update(f"[bold]⬡ EUXIS[/] [dim]v{self.version}[/]")
+        logo.update(f"[bold]ᛞ EUXIS[/] [dim]v{self.version}[/]")
 
         context = self.query_one("#etx-header-context", Static)
         path_display = self.project_path or self.project

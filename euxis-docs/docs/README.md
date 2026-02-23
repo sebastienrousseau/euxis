@@ -13,7 +13,7 @@ Project documentation, architecture notes, guides, and policies.
 Start with `docs/index.rst` and follow the structure from there.
 
 Current quality/performance status:
-- `docs/reports/initial-user-expectations-2026-02-18.md`
+- `docs/reports/initial-user-expectations-current-02-18.md`
 
 ## Dependencies
 

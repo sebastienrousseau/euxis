@@ -58,7 +58,7 @@ resolve_session_provider() {
 }
 
 # ============================================================================
-# Provider Fallback Chain (v0.0.1)
+# Provider Fallback Chain (v0.0.2)
 # Automatic failover when primary provider is unavailable.
 # Ensures mission-critical tasks (guard, verify) are never completely offline.
 # ============================================================================
@@ -94,7 +94,7 @@ EUXIS_VECTOR_THRESHOLD_DEFAULT="${EUXIS_VECTOR_THRESHOLD_DEFAULT:-0.92}"
 EUXIS_VECTOR_THRESHOLD_TECHNICAL="${EUXIS_VECTOR_THRESHOLD_TECHNICAL:-0.95}"
 EUXIS_PLAN_CACHE_ENABLE="${EUXIS_PLAN_CACHE_ENABLE:-1}"
 EUXIS_PLAN_CACHE_THRESHOLD="${EUXIS_PLAN_CACHE_THRESHOLD:-0.96}"
-EUXIS_VALKEY_URL="${EUXIS_VALKEY_URL:-redis://127.0.0.1:6379}"
+EUXIS_VALKEY_URL="${EUXIS_VALKEY_URL:-redis://127.0.0.2:6379}"
 EUXIS_CONTEXT_COMPACTION_ENABLE="${EUXIS_CONTEXT_COMPACTION_ENABLE:-1}"
 EUXIS_CONTEXT_COMPACTION_TRIGGER_PCT="${EUXIS_CONTEXT_COMPACTION_TRIGGER_PCT:-70}"
 EUXIS_CONTEXT_COMPACTION_COOLDOWN_SECONDS="${EUXIS_CONTEXT_COMPACTION_COOLDOWN_SECONDS:-300}"
@@ -1399,7 +1399,7 @@ run_goose() {
 }
 
 # ============================================================================
-# Router-Aware Execution (v0.0.1)
+# Router-Aware Execution (v0.0.2)
 # Uses router.sh for cost-optimized model selection when available.
 # Falls back to tiered provider selection if router unavailable.
 # ============================================================================

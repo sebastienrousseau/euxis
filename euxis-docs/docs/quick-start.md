@@ -12,7 +12,7 @@
 
 By the end of this guide, you'll have:
 
-- **50 AI agents** ready to handle engineering tasks
+- **53 AI agents** ready to handle engineering tasks
 - **Your first completed task** with verified output
 - **Working knowledge** of the three main usage patterns
 
@@ -25,8 +25,8 @@ By the end of this guide, you'll have:
 | Requirement | Minimum Version | Check Command |
 |-------------|-----------------|---------------|
 | Bash | 4.0+ | `bash --version` |
-| Python | 3.8+ | `python3 --version` |
-| AI Provider | Any one | See [Providers](#ai-providers) |
+| Python | 3.10+ | `python3 --version` |
+| AI Provider CLI | Any one | See [Providers](#ai-providers) |
 
 ### AI Providers
 
@@ -43,7 +43,7 @@ Euxis works with 8 providers. You need at least one installed:
 
 **Cloud Providers:**
 - [Claude](https://docs.anthropic.com/en/docs/claude-cli) — Strategic reasoning
-- [Gemini](https://github.com/google-gemini/gemini-cli) — Research with 2M token context
+- [Gemini](https://github.com/google-gemini/gemini-cli) — Research with large context
 - [Kiro CLI](https://kiro.dev) — AI coding assistant
 - [Codex CLI](https://github.com/openai/codex) — OpenAI models
 
@@ -59,22 +59,19 @@ Euxis works with 8 providers. You need at least one installed:
 
 ## Step 1: Install Euxis
 
-Clone the repository and run setup:
+Clone the repository and run the installer:
 
 ```bash
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
-~/.euxis/setup.sh
+cd ~/.euxis
+./install.sh
 ```
 
-**Expected output:**
+**Expected output (abridged):**
 ```
-Installing Euxis Fleet...
-Linking tools to ~/cli/bin...
-  ✓ euxis
-  ✓ euxis-health
-  ✓ euxis-certify
-  [... 35+ tools linked ...]
-Euxis is ready.
+Euxis v0.0.2 Installation
+Adding EUXIS_HOME and PATH to ~/.zshrc
+Installation complete!
 ```
 
 ---
@@ -85,12 +82,12 @@ Make Euxis commands available globally.
 
 **For Zsh (macOS default):**
 ```bash
-echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+source ~/.zshrc
 ```
 
 **For Bash:**
 ```bash
-echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+source ~/.bashrc
 ```
 
 <details>
@@ -98,12 +95,13 @@ echo 'export PATH="$HOME/cli/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 
 **Fish:**
 ```bash
-echo 'set -gx PATH $HOME/cli/bin $PATH' >> ~/.config/fish/config.fish
+source ~/.config/fish/config.fish
 ```
 
 **Generic (add to your shell's config):**
 ```bash
-export PATH="$HOME/cli/bin:$PATH"
+export EUXIS_HOME="$HOME/.euxis"
+export PATH="$EUXIS_HOME/euxis-cli/bin:$PATH"
 ```
 
 </details>
@@ -120,32 +118,34 @@ euxis-health
 
 **Expected output:**
 ```
-✅ Agent Naming Convention
+✅ Naming Consistency
 ✅ Script Hardening
-✅ Orphaned Executables
-✅ Protocol Headers
+✅ Orphan Detection
+✅ Header Schema Validation
 ✅ Documentation Drift
-✅ Certification Status
-✅ Provider Dependencies
-✅ Codex Integration
-
-Fleet Status: HEALTHY (8/8 checks passed)
+✅ Certification Readiness
+✅ Provider Connectivity
+✅ Codex Integrity
+✅ Bus Pipe Activity
+✅ Cortex Connectivity
 ```
 
 **What each check validates:**
 
 | Check | What It Verifies |
 |-------|------------------|
-| Agent Naming | All 50 agents follow naming conventions |
-| Script Hardening | Shell scripts have proper error handling |
-| Orphaned Executables | No broken symlinks in ~/cli/bin |
-| Protocol Headers | Agent prompts include required headers |
-| Documentation Drift | Docs match actual capabilities |
-| Certification Status | System passed quality gates |
-| Provider Dependencies | At least one AI provider available |
-| Codex Integration | Prompt templates are valid |
+| Naming Consistency | Agent filenames match their `agent_id` |
+| Script Hardening | Shell scripts use strict error handling |
+| Orphan Detection | No prompt files missing from registry |
+| Header Schema Validation | Required headers present in scripts and prompts |
+| Documentation Drift | Canonical docs have been updated recently |
+| Certification Readiness | Certification prerequisites are satisfied |
+| Provider Connectivity | At least one provider CLI is available |
+| Codex Integrity | Prompt templates are valid |
+| Bus Pipe Activity | Internal bus pipe is writable |
+| Cortex Connectivity | Cortex backend is reachable (if enabled) |
 
-✅ **Checkpoint:** All 8 checks pass. Your fleet is ready.
+✅ **Checkpoint:** All checks pass. Your fleet is ready.
 
 ---
 
@@ -171,7 +171,7 @@ euxis butler "Introduce yourself briefly"
 
 Hello! I'm your Euxis Butler, optimized for clear communication.
 I translate complex system outputs into natural, spoken English.
-The fleet has 50 agents ready to assist with engineering tasks.
+The fleet has 53 agents ready to assist with engineering tasks.
 ```
 
 **Understanding the output:**
@@ -221,7 +221,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: cli/bin/, config/, security/, runtime/memory/, metrics/src/metrics/, runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
+OBSERVATION 1: Found: euxis-cli/bin/, config/, security/, runtime/memory/, metrics/src/metrics/, runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -324,7 +324,7 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 
 | Guide | What You'll Learn |
 |-------|-------------------|
-| [Fleet Guide](../guides/fleet-guide.md) | All 50 agents in detail |
+| [Fleet Guide](../guides/fleet-guide.md) | All 53 agents in detail |
 | [User Guide](../guides/user-guide.md) | Complete CLI reference |
 | [API Reference](../reference/api-reference.md) | Build custom integrations |
 
@@ -339,8 +339,8 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 
 **Diagnosis:**
 ```bash
-echo $PATH | grep "$HOME/cli/bin"
-ls ~/cli/bin/euxis
+echo $PATH | grep "$HOME/.euxis/euxis-cli/bin"
+ls ~/.euxis/euxis-cli/bin/euxis
 ```
 
 **Solution:**
@@ -407,4 +407,4 @@ euxis-health
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

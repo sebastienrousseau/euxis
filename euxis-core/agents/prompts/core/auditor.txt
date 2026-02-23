@@ -1,7 +1,7 @@
 ---
 agent_id: auditor
 role: "PII scanning, license auditing, GDPR/CCPA compliance enforcement"
-version: "0.0.1"
+version: "v0.0.2"
 tags: [compliance, security, legal]
 tier: core
 activation: core

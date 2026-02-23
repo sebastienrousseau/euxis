@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 #!/usr/bin/env python3
@@ -38,11 +38,11 @@ def _make_registry() -> FleetRegistry:
     """Create a FleetRegistry with a small test dataset."""
     registry = FleetRegistry()
     registry.agents = [
-        Agent(id="architect", tier="core", version="0.0.1",
+        Agent(id="architect", tier="core", version="0.0.2",
               tags=("design", "architecture"), activation="default"),
-        Agent(id="debugger", tier="fleet", version="0.0.1",
+        Agent(id="debugger", tier="fleet", version="0.0.2",
               tags=("debug", "troubleshoot"), activation="default"),
-        Agent(id="tester", tier="fleet", version="0.0.1",
+        Agent(id="tester", tier="fleet", version="0.0.2",
               tags=("test", "quality"), activation="on-demand"),
     ]
     registry.squads = [
@@ -385,7 +385,7 @@ class TestCommandProviderEdgeCases(unittest.TestCase):
         """Agent with empty tags should still be searchable by ID."""
         registry = FleetRegistry()
         registry.agents = [
-            Agent(id="notags", tier="fleet", version="0.0.1",
+            Agent(id="notags", tier="fleet", version="0.0.2",
                   tags=(), activation="default"),
         ]
         mock_app = _make_mock_app(registry)

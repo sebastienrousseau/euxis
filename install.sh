@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 #
 # install.sh — Global CLI installation for Euxis
@@ -26,7 +26,7 @@ NC='\033[0m'
 
 echo ""
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║           Euxis v0.0.1 Installation                   ║${NC}"
+echo -e "${BLUE}║           Euxis v0.0.2 Installation                   ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 

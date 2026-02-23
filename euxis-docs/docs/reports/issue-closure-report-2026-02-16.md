@@ -1,4 +1,4 @@
-# Issue Closure Report — 2026-02-16
+# Issue Closure Report —-02-16
 
 ## Summary
 All open issues were closed after confirming implementation coverage across gateway features, adapters, and operational controls. The repository currently has **0 open issues** and **no milestones**.
@@ -32,4 +32,4 @@ All open issues were closed after confirming implementation coverage across gate
 
 ## Next Actions
 - Merge PR #17 (security: update cryptography) after required review/checks.
-- Cut v0.0.1 release once PR #17 is merged.
+- Cut v0.0.2 release once PR #17 is merged.

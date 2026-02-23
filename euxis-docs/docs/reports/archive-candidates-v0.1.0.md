@@ -1,4 +1,4 @@
-# Archive Candidates Review (v0.0.1)
+# Archive Candidates Review (v0.0.2)
 
 ## Summary
 Reviewed top-level docs for duplicates against `docs/guides/`.

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 """Test suite for ETX: Euxis Terminal Experience.
@@ -331,7 +331,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="core",
-            version="0.0.1",
+            version="0.0.2",
             tags=["test", "debug"],
             activation="default",
         )
@@ -346,7 +346,7 @@ class TestAgentCard:
         agent = Agent(
             id="test",
             tier="fleet",
-            version="0.0.1",
+            version="0.0.2",
             tags=["test"],
             activation="default",
         )

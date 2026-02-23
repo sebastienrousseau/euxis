@@ -2,7 +2,7 @@
 
 ## Overview
 
-Comprehensive automation system ensuring Euxis v0.0.1 build/package/runtime parity across macOS, Linux, and WSL platforms.
+Comprehensive automation system ensuring Euxis v0.0.2 build/package/runtime parity across macOS, Linux, and WSL platforms.
 
 ## Verification Architecture
 
@@ -14,7 +14,7 @@ Comprehensive automation system ensuring Euxis v0.0.1 build/package/runtime pari
 - **Gates:** Environment setup, dependency installation, script verification, runtime testing
 
 ### 2. Local Verification Tool
-**File:** `cli/bin/euxis-cross-platform-verify`
+**File:** `euxis-cli/bin/euxis-cross-platform-verify`
 - **Usage:** `euxis-cross-platform-verify [--local-only] [--version VERSION]`
 - **Capabilities:** Platform detection, dependency validation, script testing
 - **Integration:** Can trigger GitHub Actions workflow for full 3-platform verification
@@ -38,7 +38,7 @@ Comprehensive automation system ensuring Euxis v0.0.1 build/package/runtime pari
 - Automatic installation attempt for missing dependencies
 
 ### Gate 3: Core Scripts ✅
-- Executable permission verification for all `cli/bin/euxis*` scripts
+- Executable permission verification for all `euxis-cli/bin/euxis*` scripts
 - Script count validation (33+ scripts expected)
 - Basic functionality test with timeout protection
 
@@ -57,25 +57,25 @@ Comprehensive automation system ensuring Euxis v0.0.1 build/package/runtime pari
 ### Local Platform Verification
 ```bash
 # Test current platform only
-./cli/bin/euxis-cross-platform-verify --local-only
+./euxis-cli/bin/euxis-cross-platform-verify --local-only
 
 # Test specific version
-./cli/bin/euxis-cross-platform-verify --version v0.0.1 --local-only
+./euxis-cli/bin/euxis-cross-platform-verify --version v0.0.2 --local-only
 ```
 
 ### Full Cross-Platform CI
 ```bash
 # Trigger GitHub Actions workflow (requires gh CLI)
-./cli/bin/euxis-cross-platform-verify --version v0.0.1
+./euxis-cli/bin/euxis-cross-platform-verify --version v0.0.2
 
 # Manual GitHub workflow trigger
-gh workflow run cross-platform-ci.yml --field version=v0.0.1
+gh workflow run cross-platform-ci.yml --field version=v0.0.2
 ```
 
 ### Multi-Platform Container Build
 ```bash
 # Build for AMD64 and ARM64
-./deploy/build-multi-platform.sh --version v0.0.1
+./deploy/build-multi-platform.sh --version v0.0.2
 
 # Build and push to registry
 ./deploy/build-multi-platform.sh --push --registry ghcr.io/euxis
@@ -158,7 +158,7 @@ pip install chromadb sentence-transformers
 **Permission Denied**
 ```bash
 # Fix script permissions
-chmod +x cli/bin/euxis*
+chmod +x euxis-cli/bin/euxis*
 ```
 
 **Container Build Failures**
@@ -173,8 +173,8 @@ docker buildx create --name multi-platform --use
 
 | Euxis Version | Python | Platforms | Docker |
 |---------------|--------|-----------|--------|
-| v0.0.1        | 3.11+  | macOS, Linux, WSL | 20.10+ |
-| v0.0.1+       | 3.11+  | macOS, Linux, WSL, ARM64 | 20.10+ |
+| v0.0.2        | 3.11+  | macOS, Linux, WSL | 20.10+ |
+| v0.0.2+       | 3.11+  | macOS, Linux, WSL, ARM64 | 20.10+ |
 
 ## Future Enhancements
 
@@ -186,8 +186,8 @@ docker buildx create --name multi-platform --use
 
 ---
 
-**Verification Status for v0.0.1:** ✅ IMPLEMENTED
-**Last Updated:** 2026-02-01
+**Verification Status for v0.0.2:** ✅ IMPLEMENTED
+**Last Updated:**-02-01
 **Next Review:** Release candidate testing
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

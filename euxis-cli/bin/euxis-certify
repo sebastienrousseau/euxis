@@ -139,6 +139,8 @@ else
     validation_pass "Current version detected: $CURRENT_VERSION"
 fi
 
+CURRENT_VERSION_STRIPPED="${CURRENT_VERSION#v}"
+
 if [[ $CERT_ERRORS -gt 0 ]]; then
     echo ""
     echo "CERTIFICATION ABORTED: $CERT_ERRORS prerequisite check(s) failed."
@@ -671,7 +673,7 @@ fi
 
 # 6d. README references correct version (euxis-core/agents/registry.json is source of truth)
 if [[ -f "$EUXIS_HOME/README.md" ]]; then
-    if grep -qF "Version $CURRENT_VERSION" "$EUXIS_HOME/README.md"; then
+    if grep -Eq "Version v?${CURRENT_VERSION_STRIPPED}([[:space:]]|$)" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md references version $CURRENT_VERSION."
     else
         echo "  FAIL: README.md does not reference version $CURRENT_VERSION."
@@ -687,7 +689,7 @@ if [[ -f "$EUXIS_HOME/README.md" ]]; then
         echo "  FAIL: README.md badge does not match version $CURRENT_VERSION."
         ((DOC_FAILURES++)) || true
     fi
-    if grep -Eq "Euxis v${CURRENT_VERSION}\\b" "$EUXIS_HOME/README.md"; then
+    if grep -Eq "Euxis v${CURRENT_VERSION_STRIPPED}([[:space:]]|\)|$)" "$EUXIS_HOME/README.md"; then
         echo "  PASS: README.md footer matches version $CURRENT_VERSION."
     else
         echo "  FAIL: README.md footer does not match version $CURRENT_VERSION."
@@ -698,7 +700,7 @@ fi
 # 6f. USER_GUIDE and FLEET_GUIDE reference correct version
 for doc in euxis-docs/docs/user-guide.md euxis-docs/docs/fleet-guide.md; do
     if [[ -f "$EUXIS_HOME/$doc" ]]; then
-        if grep -qF "$CURRENT_VERSION" "$EUXIS_HOME/$doc"; then
+        if grep -Eq "v?${CURRENT_VERSION_STRIPPED}([[:space:]]|$)" "$EUXIS_HOME/$doc"; then
             echo "  PASS: $doc references version $CURRENT_VERSION."
         else
             echo "  FAIL: $doc does not reference version $CURRENT_VERSION."
@@ -712,12 +714,12 @@ PROMPT_DIRS=("$EUXIS_HOME/euxis-core/agents/prompts/core" "$EUXIS_HOME/euxis-cor
 for dir in "${PROMPT_DIRS[@]}"; do
     if [[ -d "$dir" ]]; then
         while IFS= read -r -d '' prompt; do
-            prompt_version=$(grep -m 1 -Eo 'version:[[:space:]]*\"[0-9]+\.[0-9]+\.[0-9]+\"' "$prompt" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
+            prompt_version=$(grep -m 1 -Eo 'version:[[:space:]]*\"v?[0-9]+\.[0-9]+\.[0-9]+\"' "$prompt" | grep -Eo 'v?[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^v//' || true)
             if [[ -z "$prompt_version" ]]; then
                 echo "  FAIL: Missing version in $(basename "$prompt")."
                 ((DOC_FAILURES++)) || true
-            elif [[ "$prompt_version" != "$CURRENT_VERSION" ]]; then
-                echo "  FAIL: $(basename "$prompt") version $prompt_version != $CURRENT_VERSION."
+            elif [[ "$prompt_version" != "$CURRENT_VERSION_STRIPPED" ]]; then
+                echo "  FAIL: $(basename "$prompt") version $prompt_version != $CURRENT_VERSION_STRIPPED."
                 ((DOC_FAILURES++)) || true
             fi
         done < <(find "$dir" -type f -name "*.txt" -print0)
@@ -737,8 +739,8 @@ check_phrase_versions() {
                 continue
             fi
             version=$(printf '%s' "$match" | rg -o '[0-9]+\.[0-9]+\.[0-9]+' || true)
-            if [[ -n "$version" && "$version" != "$CURRENT_VERSION" ]]; then
-                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION)."
+            if [[ -n "$version" && "$version" != "$CURRENT_VERSION_STRIPPED" ]]; then
+                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION_STRIPPED)."
                 ((mismatches++)) || true
             fi
         done < <(rg -n -o "$pattern" "$EUXIS_HOME" \
@@ -755,8 +757,8 @@ check_phrase_versions() {
                 continue
             fi
             version=$(printf '%s' "$match" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
-            if [[ -n "$version" && "$version" != "$CURRENT_VERSION" ]]; then
-                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION)."
+            if [[ -n "$version" && "$version" != "$CURRENT_VERSION_STRIPPED" ]]; then
+                echo "  FAIL: ${label} version $version found in $file:$line (expected $CURRENT_VERSION_STRIPPED)."
                 ((mismatches++)) || true
             fi
         done < <(grep -R -n -E -o "$pattern" "$EUXIS_HOME" \
@@ -773,7 +775,7 @@ check_phrase_versions() {
 }
 
 check_phrase_versions 'Euxis v([0-9]+\.[0-9]+\.[0-9]+)' "Euxis"
-check_phrase_versions 'Version ([0-9]+\.[0-9]+\.[0-9]+)' "Version"
+check_phrase_versions 'Version v?([0-9]+\.[0-9]+\.[0-9]+)' "Version"
 
 # 6i. JSON protocol/version fields must match current version
 if [[ "$JQ_AVAILABLE" == "true" ]]; then
@@ -781,7 +783,8 @@ if [[ "$JQ_AVAILABLE" == "true" ]]; then
         path="$EUXIS_HOME/$manifest"
         if [[ -f "$path" ]]; then
             version_value=$(jq -r '.protocol_version // .version // empty' "$path" 2>/dev/null || echo "")
-            if [[ -n "$version_value" && "$version_value" != "$CURRENT_VERSION" ]]; then
+            version_value_norm="${version_value#v}"
+            if [[ -n "$version_value" && "$version_value_norm" != "$CURRENT_VERSION_STRIPPED" ]]; then
                 echo "  FAIL: $manifest version $version_value != $CURRENT_VERSION."
                 ((DOC_FAILURES++)) || true
             fi

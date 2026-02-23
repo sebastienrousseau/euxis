@@ -7,7 +7,7 @@
 | **Document Title** | SOC 2 Type II Compliance Documentation |
 | **Version** | 1.0.0 |
 | **Classification** | Internal - Confidential |
-| **Last Updated** | 2026-02-14 |
+| **Last Updated** |-02-14 |
 | **Owner** | Security & Compliance Team |
 | **Review Cycle** | Annual |
 
@@ -789,7 +789,7 @@ All audit log entries MUST include the following fields:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0.0 | 2026-02-14 | Security & Compliance Team | Initial document creation |
+| 1.0.0 |-02-14 | Security & Compliance Team | Initial document creation |
 
 ### Review and Approval
 

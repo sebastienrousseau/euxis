@@ -1,11 +1,11 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
 #!/usr/bin/env python3
 """Minimal smoke test for the gateway health endpoint.
 
 Usage:
-  python3 api/src/gateway/smoke_test.py --url http://127.0.0.1:18789/health
+  python3 api/src/gateway/smoke_test.py --url http://127.0.0.2:18789/health
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Gateway smoke test")
     parser.add_argument(
         "--url",
-        default="http://127.0.0.1:18789/health",
+        default="http://127.0.0.2:18789/health",
         help="Health endpoint URL",
     )
     args = parser.parse_args()

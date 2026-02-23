@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-version 0.0.1
+Version v0.0.2
 
 ## CLI Tools
 
@@ -27,7 +27,7 @@ Verify fleet integrity before and after changes.
 | `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
 | `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
 | `euxis-certify` | 6-gate certification: lint, tests, semantic, branding, documentation governance |
-| `euxis-health` | 8-point fleet health check: naming, hardening, orphans, headers, doc drift, certification, providers, codex |
+| `euxis-health` | 10-point fleet health check: naming, hardening, orphans, headers, doc drift, certification, providers, codex |
 | `euxis-git-guard` | Pre-commit safety checks |
 | `euxis-verify` | Output verification |
 | `euxis-polish` | Prompt polishing |
@@ -111,11 +111,11 @@ Store and recall typed memories across sessions.
 
 ## Agent Fleet
 
-Euxis provides 50 specialist agents organized into four tiers with distinct operational rules. Each tier serves a specific purpose in the fleet's hierarchy and authority model.
+Euxis provides 53 agents organized into two tiers with distinct operational rules. The core tier carries authority; the fleet tier is task-triggered.
 
 ### Core (12) — Authority-bearing, always present
 
-Core agents block progress when necessary. System requires all nine.
+Core agents block progress when necessary. System requires all twelve.
 
 | Agent | Owns |
 |-------|------|
@@ -132,75 +132,12 @@ Core agents block progress when necessary. System requires all nine.
 | `pair` | Channel onboarding and authentication |
 | `guard` | Execution approval enforcement |
 
-### Default (24) — Auto-available, task-triggered
+### Fleet (41) — Task-triggered specialists
 
-Execute and advise within scope. Direction comes from core agents.
+Fleet agents execute work within scope. They do not override core authority. For the current list and descriptions, use:
 
-| Agent | Role |
-|-------|------|
-| `accountant` | Cost analysis, budget management, resource efficiency |
-| `animator` | Theming, color systems, dark mode, animation |
-| `automaton` | CI/CD pipelines, IaC, Docker, Terraform |
-| `bridge` | Channel message translation and format preservation |
-| `debugger` | Debugging, root cause analysis, surgical fixes |
-| `designer` | Web UI components, design systems, responsive layouts |
-| `gatekeeper` | Changelogs, semantic versioning, release coordination |
-| `heal` | Automated recovery and resilience |
-| `inspector` | E2E testing coordination, quality gate enforcement |
-| `interactor` | Keyboard navigation, input handling, accessibility |
-| `investigator` | Post-incident crash forensics, stack trace analysis |
-| `maintainer` | Non-breaking upgrades, migrations |
-| `optimizer` | Latency, throughput, memory profiling |
-| `pentester` | Security analysis, boundary testing, vulnerability assessment |
-| `polyglot` | Language-specific pattern detection, idiom enforcement |
-| `repairer` | Automated known-fix application, self-healing infrastructure |
-| `responder` | Incident response, root cause analysis, post-mortems |
-| `sentinel` | Security policy, threat governance |
-| `tactician` | Terminal UI design, keyboard navigation, TUI interaction |
-| `telemetrist` | Observability, telemetry, structured logging |
-| `tester` | Test coverage, reliability, regression prevention |
-| `trace` | End-to-end tracing and decision observability |
-| `watchdog` | Pre-merge exhaustive regression analysis |
-| `writer` | Documentation, tutorials, API reference, glossary |
-
-### On-Demand (10) — Explicit invocation only
-
-Add capability without blocking. Do not override core authority.
-
-| Agent | Role |
-|-------|------|
-| `ambassador` | Developer relations, tutorials, demos, conferences |
-| `butler` | TTS-optimized summarization, spoken English output |
-| `distill` | Context compression without loss of critical decisions |
-| `evangelist` | Brand voice, visual identity, content design |
-| `govern` | Agent capability boundaries and escalation rules |
-| `localizer` | i18n, l10n, RTL support, Unicode validation |
-| `marketer` | SEO, AARRR funnel, CRO, GTM strategy |
-| `deep-researcher` | CTO-grade strategic research briefs with citations |
-| `researcher` | Iterative research with cross-validation |
-| `strategist` | Platform-native content, calendars, community engagement |
-
-### Specialist (4) — Domain-specific expertise
-
-Activated for domain-scoped tasks only.
-
-| Agent | Role |
-|-------|------|
-| `cryptographer` | Cryptographic correctness, PQC, hashing |
-| `ledger` | ISO 20022, payments compliance, financial schemas |
-| `conduit` | Real-time audio, latency, DSP, voice pipelines |
-| `custodian` | Rust crate publishing, MSRV, docs |
-
-### Specialist (4) — Domain-specific expertise
-
-Activated for domain-scoped tasks only. Deep expertise in vertical domains.
-
-| Agent | Role |
-|-------|------|
-| `cryptographer` | Cryptographic correctness, PQC, hashing |
-| `ledger` | ISO 20022, payments compliance, financial schemas |
-| `conduit` | Real-time audio, latency, DSP, voice pipelines |
-| `custodian` | Rust crate publishing, MSRV, docs |
+- `euxis agents`
+- [Fleet Guide](fleet-guide.md)
 
 **For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
 
@@ -212,7 +149,7 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 | **Cortex** | Tri-typed semantic memory (episodic, semantic, procedural) backed by ChromaDB |
 | **Dispatch** | Parallel agent deployment engine for mission manifests |
 | **Kaizen** | Continuous self-improvement loop for fleet auditing and upgrades |
-| **Fleet** | 50 agents: 12 core + 24 default + 10 on-demand + 4 specialist |
+| **Fleet** | 53 agents: 12 core + 41 fleet |
 | **Squad** | Cross-functional agent team with a lead and shared purpose (Vision, Build, Quality, Growth, Experience, Specialist) |
 | **Playbook** | Phased sequence of squad activations for repeatable workflows |
 | **Combo** | Lightweight sequential chain of agents where each receives the previous output as context |
@@ -220,64 +157,34 @@ Activated for domain-scoped tasks only. Deep expertise in vertical domains.
 
 ## AI Provider Matrix
 
-Euxis supports 10 providers, tiered by capability. Choose the right provider for each task, or let automatic routing handle it.
+Euxis supports 8 provider CLIs. Install at least one and set any required API keys for that provider.
 
-### S-Tier: Strategic (High Reasoning)
+| Provider | CLI | Notes |
+|----------|-----|-------|
+| `claude` (Anthropic) | `claude` | Default provider. Strong reasoning and tool use. |
+| `openai` | `codex` | OpenAI models via Codex CLI. |
+| `gemini` (Google) | `gemini` | Large context research. |
+| `kiro-cli` | `kiro-cli` | Provider-specific coding workflows. |
+| `qwen` | `qwen` | Strong coding and logic tasks. |
+| `goose` | `goose` | Agent-native tool use. |
+| `crush` (Charm) | `crush` | Multi-model TUI workflows. |
+| `ollama` | `ollama` | Local inference, zero cost. |
 
-Use for complex planning, difficult refactors, and mission dispatching.
+## Provider Routing
 
-| Provider | CLI | Best For |
-|----------|-----|---------|
-| `claude` (Anthropic) | `claude` | Default brain. Best multi-step reasoning and tool use |
-| `openai` (GPT-4o) | `codex` | Strong structured output (JSON), reliable fallback |
+When no provider is specified, Euxis uses the default provider and a fallback chain:
 
-### A-Tier: Research and Enterprise (High Context)
+- `EUXIS_DEFAULT_PROVIDER` (default: `claude`)
+- `EUXIS_FALLBACK_CHAIN` (default: `claude:gemini:openai:kiro-cli:qwen:crush:goose:ollama`)
 
-Use for ingesting massive files or enterprise-specific queries.
+You can override routing per command by passing a provider as the last argument:
 
-| Provider | CLI | Best For |
-|----------|-----|---------|
-| `gemini` (Google) | `gemini` | 2M+ token context. Use for researcher or massive codebases |
-| `amazon-q` (AWS) | `kiro-cli` | AWS infrastructure, enterprise security contexts |
+```bash
+euxis architect "Review the auth module" ollama
+```
 
-### B-Tier: Specialist (Coding and Logic)
+You can also override for a whole session using `EUXIS_SESSION_PROVIDER`.
 
-Use for specific engineering tasks.
-
-| Provider | CLI | Best For |
-|----------|-----|---------|
-| `goose` (Block) | `goose` | Agent-native tool use for developer workflows |
-| `qwen` (Alibaba) | `qwen` | Mathematical logic and dense algorithmic problems |
-
-### C-Tier: Utility (Speed and Local)
-
-Use for summaries, linting, and formatting to save costs and latency.
-
-| Provider | CLI | Best For |
-|----------|-----|---------|
-| `ollama` | `ollama` | Local standard. Runs Llama 3, Phi, etc. |
-| `crush` (Charm) | `crush` | High-performance multi-model TUI agent |
-
-## Intelligence Tiering
-
-When no provider is specified, Euxis routes agents by task complexity:
-
-| Tier | Agents | Provider | Reason |
-|------|--------|----------|--------|
-| S-Tier: Strategic | orchestrator, architect, planner, reviewer, critic, auditor, arbiter, historian | `claude` | Best reasoning and tool use |
-| A-Tier: Research | researcher | `gemini` | 2M context window for massive analysis |
-| A-Tier: Enterprise | responder | `amazon-q` | AWS-native developer agent |
-| A-Tier: Domain | cryptographer, ledger | `claude` | Deep domain reasoning |
-| B-Tier: Coding | debugger, tester, automaton | `goose` | Agent-native tool use |
-| B-Tier: Systems | conduit, custodian | `goose` | Systems-level tool use |
-| B-Tier: Coding | maintainer | `goose` | Agent-native tool use |
-| B-Tier: Math/Logic | optimizer, telemetrist | `qwen` | Algorithmic optimization |
-| C-Tier: Utility | butler, librarian, writer | `ollama` | Zero latency, no cost |
-| Standard | all others | `claude` | General-purpose fallback |
-
-**P0 Override:** Critical tasks always route to S-Tier (claude).
-
-Explicit provider argument overrides tiering.
 
 ## Hybrid Dispatch Architecture
 

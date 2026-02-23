@@ -1,5 +1,4 @@
-# Security Probe Report — Fri 30 Jan 09:20:13 GMT 2026
-
+# Security Probe Report — Fri 30 Jan 09:20:13 GMT 
 ## Probe 1: Shell injection in agent argument
   FAIL: Shell injection succeeded.
 ## Probe 2: Path traversal in agent name

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Euxis Agent Management CLI
+
+set -euo pipefail
+EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
+source "${EUXIS_HOME}/euxis-core/lib/common.sh"
+source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
+
+cmd="${1:-}"
+
+usage() {
+    if type ui_auto_header &>/dev/null; then ui_auto_header; fi
+    local c_usage=$'\033[1m\033[38;5;255m'
+    local c_group=$'\033[1m\033[38;5;87m'
+    local dim=$'\033[2m'
+    local r=$'\033[0m'
+    local bullet="▸"
+    if type _ui_colors_enabled &>/dev/null && ! _ui_colors_enabled; then c_usage=""; c_group=""; dim=""; r=""; bullet=">"; fi
+    echo -e "  ${dim}Agent management and registry${r}\n"
+    echo -e "  ${c_usage}USAGE${r}"
+    echo -e "    $ euxis-agent list"
+    echo -e "    $ euxis-agent register <path/to/manifest.json>"
+    echo -e "    $ euxis-agent unregister <agent_id>\n"
+    echo -e "  ${c_group}${bullet} COMMANDS${r}"
+    echo -e "    list         List all registered agents from the registry"
+    echo -e "    register     Register a custom agent using a valid JSON manifest"
+    echo -e "    unregister   Remove an agent from the registry by its identifier\n"
+    echo -e "  ${c_group}${bullet} OPTIONS${r}"
+    echo -e "    -h, --help   Show this help text"
+    if type ui_signature &>/dev/null; then ui_signature; fi
+}
+
+if [[ "$cmd" == "-h" || "$cmd" == "--help" ]]; then
+    usage
+    exit 0
+fi
+
+case "$cmd" in
+    register)
+        manifest="${2:-}"
+        if [[ -z "$manifest" ]]; then
+            log_error "Usage: euxis agent register <path/to/manifest.json>"
+            exit 1
+        fi
+        register_agent_plugin "$manifest"
+        ;;
+    unregister)
+        agent_id="${2:-}"
+        if [[ -z "$agent_id" ]]; then
+            log_error "Usage: euxis agent unregister <agent_id>"
+            exit 1
+        fi
+        unregister_agent_plugin "$agent_id"
+        ;;
+    list)
+        list_plugins
+        ;;
+    *)
+        usage >&2
+        exit 1
+        ;;
+esac

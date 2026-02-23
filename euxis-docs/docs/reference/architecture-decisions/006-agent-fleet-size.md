@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Euxis operates a fleet of 50 specialized agents across four tiers (12 core, 24 default, 10 on-demand, 4 specialist). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
+Euxis operates a fleet of 53 agents across two tiers (12 core, 41 fleet). The fleet size has grown organically as new domain capabilities were added. Concern exists about coordination overhead and maintainability at this scale. The review-prompts framework demonstrates that focused single-purpose systems can achieve excellent domain-specific results with minimal infrastructure.
 
 ## Decision
 Maintain the 50-agent architecture with the following constraints:
@@ -18,7 +18,7 @@ Maintain the 50-agent architecture with the following constraints:
    - Its scope overlaps >70% with another agent (measure via tag intersection in agents/registry.json)
    - It cannot pass the gym evaluation with >80% quality score
 
-4. **Maximum fleet size: 50 agents.** Beyond this, coordination complexity exceeds the benefit of specialization. New agents above this threshold must replace an existing agent.
+4. **Maximum fleet size: 53 agents.** Beyond this, coordination complexity exceeds the benefit of specialization. New agents above this threshold must replace an existing agent.
 
 5. **Plugin API for extensibility.** Third-party agents register via manifest files rather than modifying core fleet. Plugins are isolated and can be added/removed without affecting fleet integrity.
 

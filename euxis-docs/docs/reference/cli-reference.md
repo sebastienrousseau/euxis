@@ -81,25 +81,22 @@ euxis help
 
 ### euxis-daemon
 
-**Synopsis:** `euxis-daemon [start|stop|status]`
+**Synopsis:** `euxis-daemon [interval_seconds]`
 
 **Description:**
-Manages the Euxis background daemon process for continuous operation and monitoring.
+Runs `euxis-kaizen` on a timer with smart change detection. Default interval is 1800 seconds (30 minutes).
 
 **Options:**
-- `start` - Start the daemon
-- `stop` - Stop the daemon
-- `status` - Check daemon status
+- `interval_seconds` - Override the default interval (seconds)
+- `-h, --help` - Show help
 
 **Examples:**
 ```bash
-euxis-daemon start
-euxis-daemon status
+euxis-daemon
+euxis-daemon 900
 ```
 
-**See Also:** [euxis-health](#euxis-health)
-
----
+**See Also:** [euxis-kaizen](#euxis-kaizen)
 
 ### euxis-gateway
 
@@ -133,63 +130,72 @@ euxis-gateway config
 ---
 ### euxis-health
 
-**Synopsis:** `euxis-health [check|monitor|report]`
+**Synopsis:** `euxis-health [--silent] [--json]`
 
 **Description:**
-Comprehensive system health monitoring and reporting for Euxis infrastructure.
+Runs a 10-check fleet health probe: naming consistency, script hardening, orphan detection, header schema validation, documentation drift, certification readiness, provider connectivity, codex integrity, bus pipe activity, and cortex connectivity.
 
 **Options:**
-- `check` - Run health checks
-- `monitor` - Continuous monitoring
-- `report` - Generate health report
+- `--silent` - Exit code only, no output
+- `--json` - JSON output (implies `--silent`)
+- `-h, --help` - Show help
 
 **Examples:**
 ```bash
-euxis-health check
-euxis-health monitor --interval 30
+euxis-health
+euxis-health --json
 ```
 
-**See Also:** [euxis-daemon](#euxis-daemon), [euxis-verify](#euxis-verify)
-
----
+**See Also:** [euxis-verify](#euxis-verify)
 
 ### euxis-verify
 
-**Synopsis:** `euxis-verify [target]`
+**Synopsis:** `euxis-verify [OPTIONS]`
 
 **Description:**
-Runs verification checks for specific targets or components.
+Comprehensive release gate runner. Supports running all gates or specific subsets.
+
+**Options:**
+- `--all` - Run all checks (default for release)
+- `--bench` - Performance benchmarks only
+- `--branding` - Branding/persona consistency only
+- `--audit` - Security audit only
+- `--platform-gate` - Cross-platform compatibility only
+- `--tests` - Unit test coverage gate only
+- `--docs` - Documentation quality gate only
+- `--legal` - Legal compliance gate only
+- `--strict` - Exit 1 on any failure
+- `--skip-agents` - Skip agent chain analysis
+- `--json` - JSON output
+- `-h, --help` - Show help
 
 **Examples:**
 ```bash
-euxis-verify security
-euxis-verify performance
+euxis-verify --all
+euxis-verify --docs --json
 ```
 
 **See Also:** [euxis-verify-all](#euxis-verify-all)
 
----
-
 ### euxis-verify-all
 
-**Synopsis:** `euxis-verify-all [--parallel] [--fail-fast]`
+**Synopsis:** `euxis-verify-all "<goal>" [--dry-run] [--from-gate N]`
 
 **Description:**
-Comprehensive verification of all system components and quality gates.
+Canonical sequential verification pipeline. Uses the playbook engine when available and falls back to direct delegation.
 
 **Options:**
-- `--parallel` - Run checks in parallel
-- `--fail-fast` - Stop on first failure
+- `--dry-run` - Preview without executing
+- `--from-gate N` - Start from gate N
+- `-h, --help` - Show help
 
 **Examples:**
 ```bash
-euxis-verify-all
-euxis-verify-all --parallel --fail-fast
+euxis-verify-all "Release readiness for v0.0.2"
+euxis-verify-all "Docs audit" --from-gate 2
 ```
 
-**See Also:** [euxis-verify](#euxis-verify), [euxis-certify](#euxis-certify)
-
----
+**See Also:** [euxis-verify](#euxis-verify)
 
 ## Memory & Knowledge
 
@@ -220,7 +226,7 @@ Cross-platform semantic memory system using vector and graph hybrid storage. Man
 
 **Examples:**
 ```bash
-euxis-cortex remember 'Deployed v0.0.1 to staging, all tests passed' 'gatekeeper' --type episodic
+euxis-cortex remember 'Deployed v0.0.2 to staging, all tests passed' 'gatekeeper' --type episodic
 euxis-cortex recall 'auth token' 5 --hybrid
 euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 ```
@@ -791,7 +797,7 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 | Item | Location |
 |------|----------|
 | Installation | `~/.euxis/` |
-| Executables | `~/cli/bin/` (symlinked from `~/.euxis/cli/bin/`) |
+| Executables | `~/.euxis/euxis-cli/bin/` (optional symlinks in `~/.local/bin/`) |
 | Configuration | `~/.euxis/config/` |
 | Cortex Database | `~/.euxis/runtime/memory/cortex/db/` |
 | Agent Outputs | `~/.euxis/runtime/data/projects/` |
@@ -807,7 +813,7 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 
 ---
 
-*Euxis v0.0.1 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*
 
 ---
 
