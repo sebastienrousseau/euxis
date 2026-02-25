@@ -131,8 +131,8 @@ get_package_name() {
 }
 
 # Source UI library
-if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
-    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/core.sh" ]]; then
+    source "${EUXIS_HOME}/euxis-core/lib/core.sh"
 fi
 
 # Source platform library

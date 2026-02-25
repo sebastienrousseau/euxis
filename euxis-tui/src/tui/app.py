@@ -603,126 +603,85 @@ class EuxisApp(App):
             self.call_from_thread(self.notify, f"Error: {e}", severity="error")
 
     def run_system_command(self, command: str) -> None:
-        """Execute a system command from the command palette."""
+        """Execute a system command from the command palette optimized for low cognitive load."""
         from tui.screens.tool_runner import ToolRunnerScreen
 
+        # 1. Tool Runners (Shared Screen Logic)
         tool_map = {
             "health": ("euxis-health", "Fleet Health Check"),
             "certify": ("euxis-certify", "Certification Pipeline"),
             "lint": ("euxis-lint", "Fleet Lint"),
-            "cortex_status": ("euxis-cortex", "Cortex Status"),
             "sync_docs": ("euxis-sync-docs", "Documentation Sync"),
+            "dispatch_mission": ("euxis-dispatch", "Dispatch Mission"),
         }
-
-        if command == "cortex_status":
-            self.action_open_cortex()
-            return
-
         if command in tool_map:
             tool_name, label = tool_map[command]
             self.push_screen(ToolRunnerScreen(tool_name, label))
+            return
 
-        elif command == "toggle_theme":
-            self.action_toggle_theme()
+        # 2. Action Mappings (Direct method calls)
+        action_map = {
+            "toggle_theme": self.action_toggle_theme,
+            "settings": self.action_open_settings,
+            "fleet_monitor": self.action_fleet_monitor_screen,
+            "view_logs": self.action_open_logs,
+            "help": self.action_help,
+            "about": self.action_about,
+            "playbooks": self.action_open_playbooks,
+            "metrics": self.action_open_metrics,
+            "cortex": self.action_open_cortex,
+            "cortex_status": self.action_open_cortex,
+            "squad_detail": self.action_open_squad_detail,
+            "refresh": self.action_refresh,
+            "router_stats": self.action_router_stats,
+            "dispatch_playbook": self.action_open_playbooks,
+            "maximize_pane": self.action_maximize_pane,
+            "focus_next": self.screen.focus_next,
+            "focus_prev": self.screen.focus_previous,
+            "time_travel": self.action_time_travel,
+            "mission_history": self.action_time_travel,
+            "omnigraph": self.action_open_omnigraph,
+        }
+        if command in action_map:
+            action_map[command]()
+            return
 
-        elif command == "settings":
-            self.action_open_settings()
+        # 3. CLI One-liners (Subprocess Logic)
+        cli_commands = {
+            "router_benchmark": ("euxis-bench", "--estimate", "Router Benchmark"),
+            "mesh_status": ("euxis-dispatch", "--router", "Mesh Status"),
+            "resource_status": ("euxis-dispatch", "--resources", "Resource Status"),
+        }
+        if command in cli_commands:
+            bin_name, args, title = cli_commands[command]
+            self._run_cli_command(bin_name, args, title=title)
+            return
 
-        elif command == "fleet_monitor":
-            self.action_fleet_monitor_screen()
+        # 4. State Previews (JSON/Internal)
+        json_previews = {
+            "router_config": ("euxis-core/config/router.json", "Router Config"),
+            "mesh_state": ("euxis-runtime/mesh/state.json", "Mesh State"),
+        }
+        if command in json_previews:
+            path, title = json_previews[command]
+            self._show_json_file(path, title)
+            return
 
-        elif command == "view_logs":
-            self.action_open_logs()
-
-        elif command == "help":
-            self.action_help()
-
-        elif command == "about":
-            self.action_about()
-
-        elif command == "playbooks":
-            self.action_open_playbooks()
-
-        elif command == "metrics":
-            self.action_open_metrics()
-
-        elif command == "cortex":
-            self.action_open_cortex()
-
-        elif command == "squad_detail":
-            self.action_open_squad_detail()
-
-        elif command == "refresh":
-            self.action_refresh()
-
-        # Router commands
-        elif command == "router_stats":
-            self.action_router_stats()
-
-        elif command == "router_benchmark":
-            self._run_cli_command("euxis-bench", "--estimate", "Router Benchmark")
-
-        # Router config
-        elif command == "router_config":
-            self._show_json_file("euxis-core/config/router.json", "Router Config")
-
-        # Mesh commands (A2A communication primitives)
-        elif command == "mesh_status":
-            self._run_cli_command("euxis-dispatch", "--router", title="Mesh Status")
-
+        # 5. Specialized Primitives
+        if command == "mesh_list_online":
+            self._show_mesh_state(".agents | to_entries[] | select(.value.status == \"online\") | .key", "Online Agents")
         elif command == "mesh_discover":
             self.notify("Use mesh_discover_runtime in agent tasks", title="Mesh Discover")
-
-        elif command == "mesh_list_online":
-            self._show_mesh_state(".agents | to_entries[] | select(.value.status == \"online\") | .key", "Online Agents")
-
         elif command == "mesh_inbox":
             self._show_mesh_inbox()
-
         elif command == "mesh_heartbeat":
             self.notify("Heartbeat updated via agent context only", title="Mesh Heartbeat")
-
         elif command == "mesh_cleanup":
             self._run_mesh_cleanup()
-
-        elif command == "mesh_state":
-            self._show_json_file("euxis-runtime/mesh/state.json", "Mesh State")
-
         elif command == "mesh_deadlock":
             self._check_mesh_deadlock()
-
-        # Dispatch commands
-        elif command == "dispatch_mission":
-            from tui.screens.tool_runner import ToolRunnerScreen
-            self.push_screen(ToolRunnerScreen("euxis-dispatch", "Dispatch Mission"))
-
-        elif command == "dispatch_playbook":
-            self.action_open_playbooks()
-
-        # Resource commands
-        elif command == "resource_status":
-            self._run_cli_command("euxis-dispatch", "--resources", title="Resource Status")
-
         elif command == "resource_throttle":
             self._show_thermal_status()
-
-        # Focus/Zoom commands
-        elif command == "maximize_pane":
-            self.action_maximize_pane()
-
-        elif command == "focus_next":
-            self.screen.focus_next()
-
-        elif command == "focus_prev":
-            self.screen.focus_previous()
-
-        # Durable execution commands
-        elif command == "time_travel":
-            self.action_time_travel()
-
-        elif command == "mission_history":
-            self.action_time_travel()  # Same screen, shows list
-
     def action_time_travel(self) -> None:
         """Open the Time-Travel Debugger screen."""
         from tui.screens.time_travel import TimeTravelScreen

@@ -35,9 +35,9 @@ BIN_DIR="${EUXIS_HOME}/euxis-cli/bin"
 CORE_DIR="${EUXIS_HOME}/euxis-core"
 
 # Source UI library if available
-if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
-    # shellcheck source=euxis-core/lib/ui.sh
-    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/core.sh" ]]; then
+    # shellcheck source=euxis-core/lib/core.sh
+    source "${EUXIS_HOME}/euxis-core/lib/core.sh"
 fi
 
 # Source platform library if available
@@ -560,10 +560,10 @@ run_branding_gate() {
     log_check info "Checking ASCII banner integrity..."
     local banner_ok=true
 
-    if [[ -f "${CORE_DIR}/lib/ui.sh" ]]; then
+    if [[ -f "${CORE_DIR}/lib/core.sh" ]]; then
         # Extract banner lines and check width
         local max_width
-        max_width=$(grep -E '^\s+printf.*█|╗|╔|═' "${CORE_DIR}/lib/ui.sh" 2>/dev/null | \
+        max_width=$(grep -E '^\s+printf.*█|╗|╔|═' "${CORE_DIR}/lib/core.sh" 2>/dev/null | \
             sed 's/.*printf[[:space:]]*"//' | sed 's/".*//' | \
             while read -r line; do
                 # Remove ANSI codes for measurement
@@ -578,7 +578,7 @@ run_branding_gate() {
             ((warnings++)) || true
         fi
     else
-        log_check warn "ASCII banner: ui.sh not found"
+        log_check warn "ASCII banner: core.sh not found"
         ((warnings++)) || true
     fi
 
@@ -605,11 +605,11 @@ run_branding_gate() {
         versions_found="${versions_found}euxis --version: ${cli_version}\n"
     fi
 
-    # Check ui.sh for version string
+    # Check core.sh for version string
     local ui_version=""
-    if [[ -f "${CORE_DIR}/lib/ui.sh" ]]; then
-        ui_version=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "${CORE_DIR}/lib/ui.sh" | head -1 | sed 's/^v//')
-        versions_found="${versions_found}ui.sh: ${ui_version}\n"
+    if [[ -f "${CORE_DIR}/lib/core.sh" ]]; then
+        ui_version=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "${CORE_DIR}/lib/core.sh" | head -1 | sed 's/^v//')
+        versions_found="${versions_found}core.sh: ${ui_version}\n"
     fi
 
     # Compare versions

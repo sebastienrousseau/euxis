@@ -33,7 +33,7 @@ setup() {
     source "${EUXIS_HOME}/euxis-core/lib/agents.sh"
     source "${EUXIS_HOME}/euxis-core/lib/session.sh"
     source "${EUXIS_HOME}/euxis-core/lib/providers.sh"
-    source "${EUXIS_HOME}/euxis-core/lib/dispatch.sh"
+    source "${EUXIS_HOME}/euxis-cli/bin/euxis-dispatch"
 }
 
 teardown() {

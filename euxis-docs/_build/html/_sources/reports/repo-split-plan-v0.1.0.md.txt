@@ -12,7 +12,7 @@ Split Euxis into a small set of purpose-built repos that mirror today’s module
 **Core gravity center (shell libs):**
 - `cli/bin/euxis.sh` sources `core/lib/*.sh` (`core/lib/common.sh`, `providers.sh`, `agents.sh`, `memory.sh`, `session.sh`, `template.sh`, `skill-detector.sh`, `prompt.sh`, `cli.sh`, `dispatch.sh`).
   - Evidence: `cli/bin/euxis.sh:74-100`.
-- Nearly every CLI script sources `core/lib/ui.sh`.
+- Nearly every CLI script sources `core/lib/core.sh`.
   - Evidence: `cli/bin/euxis-*.sh` list in `rg` results.
 
 **Gateway depends on adapters and gateway utils:**

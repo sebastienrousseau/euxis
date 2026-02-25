@@ -177,9 +177,9 @@ esac
 # Full boot: only reached for agent execution and subcommands.
 # ============================================================================
 
-if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
-  # shellcheck source=core/lib/ui.sh
-  source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/core.sh" ]]; then
+  # shellcheck source=core/lib/core.sh
+  source "${EUXIS_HOME}/euxis-core/lib/core.sh"
   ui_auto_header_args "${1:-}"
   if ui_is_subcommand "${1:-}"; then
     export EUXIS_UI_SUPPRESS=1
@@ -197,7 +197,6 @@ source "${EUXIS_HOME}/euxis-core/lib/template.sh"
 source "${EUXIS_HOME}/euxis-core/lib/skill-detector.sh"
 source "${EUXIS_HOME}/euxis-core/lib/prompt.sh"
 source "${EUXIS_HOME}/euxis-core/lib/cli.sh"
-source "${EUXIS_HOME}/euxis-core/lib/dispatch.sh"
 
 # Fast boot health check (moved to cli.sh)
 check_health_fast
@@ -215,4 +214,4 @@ git_guard
 EUXIS_BIN="${EUXIS_HOME}/euxis-cli/bin"
 
 # Dispatch to appropriate handler
-dispatch_command "$@"
+exec "${EUXIS_BIN}/euxis-dispatch" "$@"

@@ -880,8 +880,8 @@ run_with_fallback() {
     _persist_provider_state
 
     # Source UI for status display if available
-    if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
-        source "${EUXIS_HOME}/euxis-core/lib/ui.sh" 2>/dev/null || true
+    if [[ -f "${EUXIS_HOME}/euxis-core/lib/core.sh" ]]; then
+        source "${EUXIS_HOME}/euxis-core/lib/core.sh" 2>/dev/null || true
     fi
 
     while true; do

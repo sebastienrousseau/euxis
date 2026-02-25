@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Lightweight UI helpers inspired by Bubble Tea package-manager example.
 
-[[ -n "${_EUXIS_LIB_UI:-}" ]] && return; _EUXIS_LIB_UI=1
+[[ -n "${_EUXIS_LIB_CORE:-}" ]] && return; _EUXIS_LIB_CORE=1
 
 set -euo pipefail
 

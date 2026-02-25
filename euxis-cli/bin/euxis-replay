@@ -12,8 +12,8 @@ EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 TRACES_DIR="${EUXIS_HOME}/traces"
 
 # Source libraries
-if [[ -f "${EUXIS_HOME}/euxis-core/lib/ui.sh" ]]; then
-    source "${EUXIS_HOME}/euxis-core/lib/ui.sh"
+if [[ -f "${EUXIS_HOME}/euxis-core/lib/core.sh" ]]; then
+    source "${EUXIS_HOME}/euxis-core/lib/core.sh"
 fi
 
 # Colors (256-color, consistent with main CLI)
