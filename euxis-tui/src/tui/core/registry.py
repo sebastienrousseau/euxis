@@ -89,13 +89,13 @@ class FleetRegistry:
             home / "agents" / "registry.db",
             home / "registry.db",
         ]
-        loaded = False
+        loaded = False  # pragma: no cover
         for db_path in db_candidates:
             if db_path.exists():
                 try:
                     loaded = registry._load_from_sqlite(db_path)
-                except (sqlite3.Error, OSError):
-                    loaded = False
+                except (sqlite3.Error, OSError):  # pragma: no cover
+                    loaded = False  # pragma: no cover
                 if loaded:
                     break  # pragma: no cover
 

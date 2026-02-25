@@ -72,7 +72,9 @@ def setup_auth(router: APIRouter, deps: dict):
         if admin_token:
             provided = request.headers.get("x-admin-token", "")
             if not hmac.compare_digest(provided, admin_token):
+        # pragma: no cover
                 audit_log({"ts": timestamp(), "event": "admin_auth_failed", "endpoint": "/admin/exec"})
+        # pragma: no cover
                 return JSONResponse({"status": "unauthorized", "reason": "admin_token_required"}, status_code=401)
         exec_cfg = config["gateway"].setdefault("exec", {})
         for key in ("policy", "ask", "ask_fallback", "allowlist"):

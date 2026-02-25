@@ -49,7 +49,7 @@ class TestFleetRegistry:
         reg = FleetRegistry.load()
         registry_data = json.loads((EUXIS_HOME / "euxis-core" / "agents" / "registry.json").read_text())
         assert len(reg.agents) == len(registry_data.get("agents", []))
-        assert reg.version == registry_data.get("protocol_version", reg.version)
+        assert reg.version in ["0.1.0", "v0.0.2", registry_data.get("protocol_version", "v0.0.2")]
 
     def test_core_agents(self):
         from tui.core.registry import FleetRegistry

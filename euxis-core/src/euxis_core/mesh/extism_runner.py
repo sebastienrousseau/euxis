@@ -14,20 +14,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional, List
 from collections import defaultdict
 
-try:
-    import msgpack
-    HAS_MSGPACK = True
-except ImportError:
-    import json
-    HAS_MSGPACK = False
-
-try:
-    import extism
-    HAS_EXTISM = True
-except ImportError:
-    extism = None
-    HAS_EXTISM = False
-
 logger = logging.getLogger(__name__)
 
 class AgentSerializer:
@@ -35,21 +21,25 @@ class AgentSerializer:
     
     @staticmethod
     def serialize(data: Dict[str, Any]) -> bytes:
-        if HAS_MSGPACK:
+        try:
+            import msgpack
             return msgpack.packb(data, use_bin_type=True)
-        return json.dumps(data).encode("utf-8")
+        except ImportError:
+            return json.dumps(data).encode("utf-8")
     
     @staticmethod
     def deserialize(data: bytes) -> Dict[str, Any]:
         if not data:
             return {}
-        if HAS_MSGPACK:
+        try:
+            import msgpack
             try:
                 return msgpack.unpackb(data, raw=False)
             except Exception:
                 # Fallback if somehow it is JSON from an older agent
                 return json.loads(data.decode("utf-8"))
-        return json.loads(data.decode("utf-8"))
+        except ImportError:
+            return json.loads(data.decode("utf-8"))
 
 class PluginPool:
     """Global pool for warming and reusing Extism plugins."""
@@ -66,6 +56,11 @@ class PluginPool:
         return cls._instance
 
     def acquire(self, plugin_path: str, wasi: bool) -> Any:
+        try:
+            import extism
+        except ImportError:
+            raise RuntimeError("Extism is not installed.")
+
         with self._pool_lock:
             if self._pool[plugin_path]:
                 return self._pool[plugin_path].pop()
@@ -89,7 +84,9 @@ class WasmExecutor:
         self.pool = PluginPool()
 
     def call(self, function_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        if not HAS_EXTISM:
+        try:
+            import extism
+        except ImportError:
             raise RuntimeError("Extism is not installed.")
             
         plugin = self.pool.acquire(self.plugin_path, self.wasi)

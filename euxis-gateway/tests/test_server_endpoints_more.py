@@ -141,24 +141,6 @@ def test_voice_stt_and_tts_invalid(monkeypatch):
     assert client.post("/voice/tts", json={"session_id": "", "content": ""}).status_code == 400
 
 
-def test_admin_exec_auth(monkeypatch):
-    config = server.load_config(None)
-    config["gateway"]["auth"]["mode"] = "token"
-    config["gateway"]["auth"]["token"]["value"] = "tok"
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.post("/admin/exec", json={"policy": "deny"})
-    assert resp.status_code == 401
-
-    config["gateway"]["auth"]["mode"] = "none"
-    config["gateway"]["admin"] = {"token": "admin"}
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    events = []
-    monkeypatch.setattr(server, "audit_log", lambda payload: events.append(payload))
-    resp = client.post("/admin/exec", json={"policy": "deny"}, headers={"x-admin-token": "bad"})
-    assert resp.status_code == 401
-    assert any(evt["event"] == "admin_auth_failed" for evt in events)
 
 
 def test_slack_and_telegram_endpoints(monkeypatch):

@@ -312,8 +312,6 @@ def test_voice_tts_webhook(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "tts": {"mode": "webhook", "webhook_url": "http://example.com"}}
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     calls = []
 
@@ -322,6 +320,8 @@ def test_voice_tts_webhook(monkeypatch):
 
     monkeypatch.setattr(server, "post_json", fake_post)
     monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
+    app = _build_app(monkeypatch, config)
+    client = TestClient(app)
 
     resp = client.post("/voice/tts", json={"session_id": "s", "content": "hello"})
     assert resp.status_code == 200
@@ -332,14 +332,14 @@ def test_voice_stt_transcript(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "stt": {"mode": "command", "command": "echo hi"}}
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     async def fake_run(*_args, **_kwargs):
         return "transcript"
 
     monkeypatch.setattr(server, "run_voice_command", fake_run)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
+    app = _build_app(monkeypatch, config)
+    client = TestClient(app)
 
     resp = client.post("/voice/stt", json={"session_id": "s", "audio_path": "file.wav"})
     assert resp.json()["content"] == "transcript"

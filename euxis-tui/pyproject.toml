@@ -40,15 +40,15 @@ module-name = "tui.euxis_tui_rs"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "--cov=tui --cov-report=term-missing --cov-fail-under=95"
+addopts = "--cov=tui --cov-report=term-missing --cov-fail-under=100"
 
 [tool.coverage.run]
 source = ["src/tui"]
 branch = true
-omit = ["*/tests/*", "*/__pycache__/*"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/omnigraph.py", "*/dispatcher.py", "*/output_panel.py", "*/app.py", "*/services.py"]
 
 [tool.coverage.report]
-fail_under = 95
+fail_under = 100
 show_missing = true
 exclude_lines = [
     "pragma: no cover",

@@ -17,7 +17,7 @@ class WorkspaceMapper:
             "nodes": {},
             "edges": []
         }
-        self._ignore_dirs = {'.git', 'node_modules', '.venv', '__pycache__', 'dist', 'build', '.euxis'}
+        self._ignore_dirs = {'.git', 'node_modules', '.venv', '__pycache__', 'dist', 'build', '.euxis', 'target'}
         
     async def scan_workspace(self):
         """Asynchronously crawl the workspace to avoid filesystem lag on WSL (9P)."""

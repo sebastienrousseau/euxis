@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     "requests>=2.31.0,<3.0.0",
     "euxis-core>=v0.0.2",
-    "rich>=13.0.0",
+    "rich>=14.3.0,<15.0.0",
 ]
 
 [project.optional-dependencies]

@@ -7,6 +7,7 @@ Covers:
 - ExecutionMetrics.duration_seconds property
 - AgentExecutionResult construction
 - AgentRunner.__init__ and execute (success, failure, timeout, FileNotFoundError)
+import os
 - run_agent, run_squad, run_combo subprocess mocking
 - get_project_path (home prefix, non-home)
 - ArbiterAnalyzer: analyze (cache hit/miss/eviction), explain_budget, _run_arbiter,
@@ -271,7 +272,7 @@ class TestGetProjectPath:
 
     def test_non_home_path(self):
         """Directory not under home should return absolute path."""
-        abs_path = os.path.abspath("/test-project")
+        abs_path = "/test-project"
         result = get_project_path(working_dir=abs_path)
         assert result == abs_path
 

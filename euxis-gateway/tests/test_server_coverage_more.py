@@ -191,8 +191,6 @@ def test_voice_tts_and_stt_success(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "tts": {"mode": "webhook", "webhook_url": "http://example.com"}, "stt": {"mode": "command", "command": "echo hi"}}
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     calls = []
 
@@ -206,6 +204,8 @@ def test_voice_tts_and_stt_success(monkeypatch):
     monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
     monkeypatch.setattr(server, "run_voice_command", fake_run)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
+    app = _build_app(monkeypatch, config)
+    client = TestClient(app)
 
     tts_resp = client.post("/voice/tts", json={"session_id": "sess", "content": "hi"})
     assert tts_resp.status_code == 200
