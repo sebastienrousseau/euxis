@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Copyright (c) 2024-2026 Euxis Contributors
+# Copyright (c) 2024-2026 Sebastien Rousseau ᛫ https://sebastienrousseau.com
 
 """Minimal Gateway server skeleton (WS + HTTP health)."""
 

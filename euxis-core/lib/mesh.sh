@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 [[ -n "${_EUXIS_LIB_MESH:-}" ]] && return; _EUXIS_LIB_MESH=1
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Copyright (c) 2024-2026 Euxis Contributors
+# Copyright (c) 2024-2026 Sebastien Rousseau ᛫ https://sebastienrousseau.com
 #
 # mesh.sh — Peer-to-peer agent communication protocol
 #

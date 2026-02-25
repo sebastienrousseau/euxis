@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Copyright (c) 2024-2026 Euxis Contributors
+# Copyright (c) 2024-2026 Sebastien Rousseau ᛫ https://sebastienrousseau.com
 
 """Dynamic crypto bridge to avoid hard module coupling."""
 from __future__ import annotations
