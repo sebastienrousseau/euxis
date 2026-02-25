@@ -4,7 +4,7 @@
 """Extism Host Layer for WebAssembly Execution with Plugin Pooling.
 
 Optimized for high-concurrency agent loops with support for warm plugin
-reuse and abstracted serialization.
+reuse and abstracted serialization (Zero-Copy MessagePack).
 """
 
 import json
@@ -13,6 +13,13 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, Optional, List
 from collections import defaultdict
+
+try:
+    import msgpack
+    HAS_MSGPACK = True
+except ImportError:
+    import json
+    HAS_MSGPACK = False
 
 try:
     import extism
@@ -28,13 +35,20 @@ class AgentSerializer:
     
     @staticmethod
     def serialize(data: Dict[str, Any]) -> bytes:
-        # Optimization: In Phase 2c, swap this for msgpack or flatbuffers
+        if HAS_MSGPACK:
+            return msgpack.packb(data, use_bin_type=True)
         return json.dumps(data).encode("utf-8")
     
     @staticmethod
     def deserialize(data: bytes) -> Dict[str, Any]:
         if not data:
             return {}
+        if HAS_MSGPACK:
+            try:
+                return msgpack.unpackb(data, raw=False)
+            except Exception:
+                # Fallback if somehow it is JSON from an older agent
+                return json.loads(data.decode("utf-8"))
         return json.loads(data.decode("utf-8"))
 
 class PluginPool:
@@ -54,16 +68,13 @@ class PluginPool:
     def acquire(self, plugin_path: str, wasi: bool) -> Any:
         with self._pool_lock:
             if self._pool[plugin_path]:
-                logger.debug(f"Acquired warm plugin for {plugin_path}")
                 return self._pool[plugin_path].pop()
         
-        # Create new if pool is empty
         manifest = {"wasm": [{"path": plugin_path}]}
         return extism.Plugin(manifest, wasi=wasi)
 
     def release(self, plugin_path: str, plugin: Any):
         with self._pool_lock:
-            # Simple limit to prevent memory leaks (max 5 warm instances per path)
             if len(self._pool[plugin_path]) < 5:
                 self._pool[plugin_path].append(plugin)
             else:
@@ -81,20 +92,15 @@ class WasmExecutor:
         if not HAS_EXTISM:
             raise RuntimeError("Extism is not installed.")
             
-        # Acquire from pool instead of instantiating
         plugin = self.pool.acquire(self.plugin_path, self.wasi)
-        
         input_bytes = AgentSerializer.serialize(input_data)
         
         try:
             output_bytes = plugin.call(function_name, input_bytes)
             result = AgentSerializer.deserialize(output_bytes)
-            
-            # Release back to pool after successful execution
             self.pool.release(self.plugin_path, plugin)
             return result
         except Exception as e:
             logger.error(f"Wasm Execution Alert in [{self.plugin_path}]::{function_name}: {e}")
-            # Don't return faulty plugins to the pool
             del plugin
             raise RuntimeError(f"Wasm execution failed: {e}") from e

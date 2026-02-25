@@ -139,3 +139,43 @@ fn crypto_lib_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(derive_key_pbkdf2, m)?)?;
     Ok(())
 }
+
+use ed25519_dalek::{SigningKey, VerifyingKey, Signature, Signer, Verifier};
+use rand::rngs::OsRng;
+
+#[pyfunction]
+pub fn generate_ed25519_keypair() -> PyResult<(Vec<u8>, Vec<u8>)> {
+    let mut csprng = OsRng;
+    let signing_key: SigningKey = SigningKey::generate(&mut csprng);
+    let verifying_key = signing_key.verifying_key();
+    Ok((signing_key.to_bytes().to_vec(), verifying_key.to_bytes().to_vec()))
+}
+
+#[pyfunction]
+pub fn ed25519_sign(secret_key: &[u8], message: &[u8]) -> PyResult<Vec<u8>> {
+    if secret_key.len() != 32 {
+        return Err(PyValueError::new_err("Secret key must be 32 bytes"));
+    }
+    let secret_key_bytes: [u8; 32] = secret_key.try_into().unwrap();
+    let signing_key = SigningKey::from_bytes(&secret_key_bytes);
+    let signature = signing_key.sign(message);
+    Ok(signature.to_bytes().to_vec())
+}
+
+#[pyfunction]
+pub fn ed25519_verify(public_key: &[u8], message: &[u8], signature: &[u8]) -> PyResult<bool> {
+    if public_key.len() != 32 {
+        return Err(PyValueError::new_err("Public key must be 32 bytes"));
+    }
+    if signature.len() != 64 {
+        return Err(PyValueError::new_err("Signature must be 64 bytes"));
+    }
+    let public_key_bytes: [u8; 32] = public_key.try_into().unwrap();
+    let signature_bytes: [u8; 64] = signature.try_into().unwrap();
+    
+    let verifying_key = VerifyingKey::from_bytes(&public_key_bytes)
+        .map_err(|e| PyValueError::new_err(format!("Invalid public key: {}", e)))?;
+    let sig = Signature::from_bytes(&signature_bytes);
+    
+    Ok(verifying_key.verify(message, &sig).is_ok())
+}

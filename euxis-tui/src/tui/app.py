@@ -163,6 +163,7 @@ class EuxisApp(App):
         Binding("f3", "toggle_theme", "Theme", show=True),  # Was Ctrl+T
         Binding("f4", "open_settings", "Settings"),          # Was Ctrl+S
         Binding("ctrl+m", "fleet_monitor_screen", "Monitor"),
+        Binding("f5", "open_omnigraph", "OmniGraph", show=True),
         Binding("f6", "open_logs", "Logs"),                  # Was Ctrl+O
         Binding("ctrl+b", "open_playbooks", "Playbooks"),
         Binding("f7", "router_stats", "Router"),             # Was Ctrl+R
@@ -503,6 +504,11 @@ class EuxisApp(App):
             self.call_from_thread(self.notify, "Router status timeout", severity="error")
         except Exception as e:
             self.call_from_thread(self.notify, f"Router error: {e}", severity="error")
+
+    def action_open_omnigraph(self) -> None:
+        """Open the OmniGraph workspace mapper screen."""
+        from tui.screens.omnigraph import OmniGraphScreen
+        self.push_screen(OmniGraphScreen())
 
     def action_open_cortex(self) -> None:
         """Open the Cortex memory browser."""

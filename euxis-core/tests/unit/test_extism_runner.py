@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from pathlib import Path
 import importlib
 
+import msgpack
 from euxis_core.mesh.extism_runner import WasmExecutor, PluginPool, AgentSerializer
 
 @pytest.fixture(autouse=True)
@@ -27,7 +28,7 @@ def mock_no_extism():
 
 # --- AgentSerializer Tests ---
 
-def test_serializer_json():
+def test_serializer_msgpack():
     data = {"key": "value"}
     serialized = AgentSerializer.serialize(data)
     assert isinstance(serialized, bytes)
@@ -35,6 +36,12 @@ def test_serializer_json():
 
 def test_serializer_empty():
     assert AgentSerializer.deserialize(b"") == {}
+
+def test_serializer_fallback():
+    # Test JSON fallback when msgpack unpacking fails
+    data = {"key": "value"}
+    json_bytes = json.dumps(data).encode("utf-8")
+    assert AgentSerializer.deserialize(json_bytes) == data
 
 # --- PluginPool Tests ---
 
@@ -79,7 +86,7 @@ def test_wasm_executor_init():
 def test_call_success(mock_extism):
     executor = WasmExecutor("plugin.wasm")
     mock_plugin = MagicMock()
-    mock_plugin.call.return_value = json.dumps({"result": "success"}).encode("utf-8")
+    mock_plugin.call.return_value = msgpack.packb({"result": "success"}, use_bin_type=True)
     
     with patch.object(PluginPool, "acquire", return_value=mock_plugin):
         with patch.object(PluginPool, "release") as mock_release:
@@ -117,5 +124,25 @@ def test_extism_import_error():
         importlib.reload(euxis_core.mesh.extism_runner)
         assert euxis_core.mesh.extism_runner.HAS_EXTISM is False
         assert euxis_core.mesh.extism_runner.extism is None
-    # Cleanup to restore state for other tests
+    # Cleanup
     importlib.reload(euxis_core.mesh.extism_runner)
+
+def test_msgpack_import_error():
+    """Test msgpack ImportError fallback."""
+    with patch.dict(sys.modules, {"msgpack": None}):
+        import euxis_core.mesh.extism_runner
+        importlib.reload(euxis_core.mesh.extism_runner)
+        assert euxis_core.mesh.extism_runner.HAS_MSGPACK is False
+    # Cleanup
+    importlib.reload(euxis_core.mesh.extism_runner)
+
+@pytest.fixture
+def mock_no_msgpack():
+    with patch("euxis_core.mesh.extism_runner.HAS_MSGPACK", False):
+        yield
+
+def test_serializer_no_msgpack(mock_no_msgpack):
+    data = {"key": "value"}
+    serialized = AgentSerializer.serialize(data)
+    assert isinstance(serialized, bytes)
+    assert AgentSerializer.deserialize(serialized) == data
