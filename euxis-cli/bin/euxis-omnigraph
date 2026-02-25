@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2024-2026 Euxis Contributors
+
+"""
+Euxis OmniGraph — Multi-provider code visualization and context-injection.
+
+Usage:
+    euxis-omnigraph <path> [--provider <name>] [--max-tokens <int>]
+"""
+
+import sys
+import os
+import argparse
+import asyncio
+import logging
+from pathlib import Path
+
+# Add cli src to path so we can import omnigraph
+repo_root = Path(__file__).resolve().parents[1]
+cli_src = repo_root / "src"
+sys.path.insert(0, str(cli_src))
+
+from cli.omnigraph.mapper import WorkspaceMapper
+from cli.omnigraph.budgeter import TokenBudgeter
+from cli.omnigraph.adapter import GraphAdapter
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+async def main():
+    parser = argparse.ArgumentParser(description="Euxis OmniGraph Mapper")
+    parser.add_argument("path", help="Path to the workspace to map")
+    parser.add_argument("--provider", default="claude", help="Target AI Provider (claude, openai, ollama)")
+    parser.add_argument("--max-tokens", type=int, default=100000, help="Maximum token budget for the graph")
+    
+    args = parser.parse_args()
+    
+    target_path = Path(args.path).resolve()
+    if not target_path.exists():
+        logging.error(f"Path does not exist: {target_path}")
+        sys.exit(1)
+
+    logging.info(f"Scanning workspace: {target_path}")
+    
+    # 1. Scan and Map
+    mapper = WorkspaceMapper(str(target_path))
+    graph = await mapper.scan_workspace()
+    
+    # 2. Budget and Optimize
+    budgeter = TokenBudgeter(max_tokens=args.max_tokens)
+    optimized_graph = budgeter.optimize_graph(graph, args.provider)
+    
+    # 3. Format for Provider
+    output = GraphAdapter.format_for_provider(optimized_graph, args.provider)
+    
+    print("\n--- OMNIGRAPH START ---\n")
+    print(output)
+    print("\n--- OMNIGRAPH END ---\n")
+    
+if __name__ == "__main__":
+    asyncio.run(main())
