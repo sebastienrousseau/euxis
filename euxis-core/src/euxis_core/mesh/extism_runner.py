@@ -1,16 +1,18 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (c) 2024-2026 Euxis Contributors
 
-"""Extism Host Layer for WebAssembly Execution.
+"""Extism Host Layer for WebAssembly Execution with Plugin Pooling.
 
-This module provides a memory-safe execution environment for agent
-business logic wrapped inside specialized WebAssembly (Wasm) plugins.
+Optimized for high-concurrency agent loops with support for warm plugin
+reuse and abstracted serialization.
 """
 
 import json
 import logging
+import threading
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
+from collections import defaultdict
 
 try:
     import extism
@@ -21,51 +23,78 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+class AgentSerializer:
+    """Abstracted serialization layer for Host/Guest boundary."""
+    
+    @staticmethod
+    def serialize(data: Dict[str, Any]) -> bytes:
+        # Optimization: In Phase 2c, swap this for msgpack or flatbuffers
+        return json.dumps(data).encode("utf-8")
+    
+    @staticmethod
+    def deserialize(data: bytes) -> Dict[str, Any]:
+        if not data:
+            return {}
+        return json.loads(data.decode("utf-8"))
+
+class PluginPool:
+    """Global pool for warming and reusing Extism plugins."""
+    
+    _instance = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(PluginPool, cls).__new__(cls)
+                cls._instance._pool = defaultdict(list)
+                cls._instance._pool_lock = threading.Lock()
+        return cls._instance
+
+    def acquire(self, plugin_path: str, wasi: bool) -> Any:
+        with self._pool_lock:
+            if self._pool[plugin_path]:
+                logger.debug(f"Acquired warm plugin for {plugin_path}")
+                return self._pool[plugin_path].pop()
+        
+        # Create new if pool is empty
+        manifest = {"wasm": [{"path": plugin_path}]}
+        return extism.Plugin(manifest, wasi=wasi)
+
+    def release(self, plugin_path: str, plugin: Any):
+        with self._pool_lock:
+            # Simple limit to prevent memory leaks (max 5 warm instances per path)
+            if len(self._pool[plugin_path]) < 5:
+                self._pool[plugin_path].append(plugin)
+            else:
+                del plugin
+
 class WasmExecutor:
-    """Hyper-concurrent Extism Host Layer for executing WebAssembly plugins."""
+    """Hyper-concurrent Extism Host Layer with Warm Pooling."""
 
     def __init__(self, plugin_path: str | Path, wasi: bool = True):
         self.plugin_path = str(plugin_path)
         self.wasi = wasi
-        self._plugin: Optional[Any] = None
+        self.pool = PluginPool()
 
-    def _get_plugin(self) -> Any:
+    def call(self, function_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
         if not HAS_EXTISM:
             raise RuntimeError("Extism is not installed.")
             
-        if self._plugin is None:
-            # Resolves the Wasm binary directly from disk.
-            # In Phase 2b we will expand this to support URL/Registry pulls.
-            manifest = {"wasm": [{"path": self.plugin_path}]}
-            self._plugin = extism.Plugin(manifest, wasi=self.wasi)
-        return self._plugin
-
-    def call(self, function_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a function inside the Wasm sandbox deterministically.
+        # Acquire from pool instead of instantiating
+        plugin = self.pool.acquire(self.plugin_path, self.wasi)
         
-        Args:
-            function_name: The exported Wasm function to invoke.
-            input_data: A JSON-serializable dictionary to pass as input.
-            
-        Returns:
-            The output JSON payload parsed back into a dictionary.
-        """
-        plugin = self._get_plugin()
-        
-        # Serialize python primitives crossing the Extism Host/Guest boundary
-        input_bytes = json.dumps(input_data).encode("utf-8")
+        input_bytes = AgentSerializer.serialize(input_data)
         
         try:
             output_bytes = plugin.call(function_name, input_bytes)
-            if not output_bytes:
-                return {}
-            return json.loads(output_bytes.decode("utf-8"))
+            result = AgentSerializer.deserialize(output_bytes)
+            
+            # Release back to pool after successful execution
+            self.pool.release(self.plugin_path, plugin)
+            return result
         except Exception as e:
             logger.error(f"Wasm Execution Alert in [{self.plugin_path}]::{function_name}: {e}")
+            # Don't return faulty plugins to the pool
+            del plugin
             raise RuntimeError(f"Wasm execution failed: {e}") from e
-
-    def free(self):
-        """Releases the WebAssembly linear memory cleanly."""
-        if self._plugin is not None:
-            del self._plugin
-            self._plugin = None
