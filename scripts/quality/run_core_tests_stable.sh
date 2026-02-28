@@ -18,11 +18,10 @@ fi
 status=0
 while IFS= read -r test_file; do
   echo "== ${test_file} =="
-  if [[ "${test_file}" == "euxis-core/tests/performance/test_performance_targets.py" ]]; then
-    echo "SKIP-PERFILE: ${test_file} (validated in consolidated coverage gate)"
-    continue
-  fi
   timeout_seconds=60
+  if [[ "${test_file}" == "euxis-core/tests/performance/test_performance_targets.py" ]]; then
+    timeout_seconds=180
+  fi
   if "${TIMEOUT_BIN}" -k 10 "${timeout_seconds}" "${PYTEST}" -q -c /dev/null -p no:cacheprovider "${test_file}"; then
     :
   else
@@ -48,7 +47,6 @@ if [[ ${status} -eq 0 ]]; then
     "${TIMEOUT_BIN}" -k 20 180 "${PYTEST_LOCAL}" -q \
     -c pyproject.toml \
     -p no:cacheprovider \
-    --ignore=tests/performance/test_performance_targets.py \
     tests; then
     gate_rc=0
   else

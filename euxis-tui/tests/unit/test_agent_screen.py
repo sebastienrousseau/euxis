@@ -210,8 +210,18 @@ class TestAgentScreenInputSubmitted(unittest.TestCase):
 
         self.screen.query_one = Mock(side_effect=query_one_side_effect)
         self.screen.run_worker = Mock()
+        self._create_task_patcher = patch("tui.screens.agent.asyncio.create_task")
+        self.mock_create_task = self._create_task_patcher.start()
+        mock_timer_task = Mock()
+        mock_timer_task.done.return_value = False
+        def _fake_create_task(coro):
+            # Prevent un-awaited coroutine warnings in unit tests.
+            coro.close()
+            return mock_timer_task
+        self.mock_create_task.side_effect = _fake_create_task
 
     def tearDown(self):
+        self._create_task_patcher.stop()
         self._patcher.stop()
 
     def test_ignores_other_inputs(self):
@@ -370,13 +380,15 @@ class TestAgentScreenExecuteAgent(unittest.TestCase):
             yield "ok"
 
         mock_run.return_value = fake_stream()
-        self.screen._timer_task = Mock()
+        timer_task = Mock()
+        self.screen._timer_task = timer_task
         self._run_execute()
 
         assert self.mock_input.disabled is False
         assert self.mock_input.value == ""
         self.mock_input.focus.assert_called()
-        self.screen._timer_task.cancel.assert_called_once()
+        timer_task.cancel.assert_called_once()
+        assert self.screen._timer_task is None
 
     @patch("tui.screens.agent.run_agent")
     def test_finally_on_error(self, mock_run):
@@ -405,9 +417,7 @@ class TestAgentScreenUpdateElapsed(unittest.TestCase):
         run.return_code = 0  # not running
         screen._run = run
 
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(screen._update_elapsed())
-        loop.close()
+        asyncio.run(screen._update_elapsed())
 
         # Should update with final green display
         call_args = mock_display.update.call_args[0][0]
@@ -434,6 +444,14 @@ class TestAgentScreenActions(unittest.TestCase):
         self.screen.query_one = Mock(return_value=mock_output)
         self.screen.action_clear_output()
         mock_output.clear.assert_called_once()
+
+    def test_on_unmount_cancels_timer_task(self):
+        task = Mock()
+        task.done.return_value = False
+        self.screen._timer_task = task
+        self.screen.on_unmount()
+        task.cancel.assert_called_once()
+        assert self.screen._timer_task is None
 
 
 class TestAgentScreenPropertyBased(unittest.TestCase):

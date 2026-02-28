@@ -32,11 +32,10 @@ fi
 status=0
 while IFS= read -r test_file; do
   echo "== ${test_file} =="
-  if [[ "${test_file}" == "euxis-crypto-lib/tests/test_async_core.py" ]]; then
-    echo "SKIP-PERFILE: ${test_file} (validated in consolidated coverage gate)"
-    continue
-  fi
   timeout_seconds=60
+  if [[ "${test_file}" == "euxis-crypto-lib/tests/test_async_core.py" ]]; then
+    timeout_seconds=180
+  fi
   if PYTHONPATH="euxis-crypto-lib/src:euxis-tui/src${PYTHONPATH:+:${PYTHONPATH}}" \
     "${TIMEOUT_BIN}" -k 10 "${timeout_seconds}" "${PYTEST}" -q -c /dev/null -p no:cacheprovider "${test_file}"; then
     :
@@ -63,7 +62,6 @@ if [[ ${status} -eq 0 ]]; then
     "${TIMEOUT_BIN}" -k 20 240 "${PYTEST_LOCAL}" -q \
     -c pyproject.toml \
     -p no:cacheprovider \
-    --ignore=tests/test_async_core.py \
     tests; then
     gate_rc=0
   else

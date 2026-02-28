@@ -144,6 +144,8 @@ class AgentScreen(Screen[None]):
         output.write_separator()
 
         # Start elapsed timer
+        if self._timer_task and not self._timer_task.done():
+            self._timer_task.cancel()
         self._timer_task = asyncio.create_task(self._update_elapsed())
 
         # Run agent in background
@@ -187,15 +189,25 @@ class AgentScreen(Screen[None]):
             # Stop timer
             if self._timer_task:
                 self._timer_task.cancel()
+                self._timer_task = None
 
     async def _update_elapsed(self) -> None:
         """Update the elapsed time display every second."""
         elapsed_display = self.query_one("#agent-elapsed-display", Static)
-        while self._run and self._run.is_running:
-            elapsed_display.update(f"[bold cyan]{self._run.elapsed_display}[/]")
-            await asyncio.sleep(1)
-        if self._run:  # pragma: no cover
-            elapsed_display.update(f"[green]{self._run.elapsed_display}[/]")
+        try:
+            while self._run and self._run.is_running:
+                elapsed_display.update(f"[bold cyan]{self._run.elapsed_display}[/]")
+                await asyncio.sleep(1)
+            if self._run:  # pragma: no cover
+                elapsed_display.update(f"[green]{self._run.elapsed_display}[/]")
+        except asyncio.CancelledError:
+            return
+
+    def on_unmount(self) -> None:
+        """Cancel background timer tasks during screen teardown."""
+        if self._timer_task and not self._timer_task.done():
+            self._timer_task.cancel()
+        self._timer_task = None
 
     def action_go_back(self) -> None:
         """Return to the previous screen."""

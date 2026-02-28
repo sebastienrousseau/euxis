@@ -176,14 +176,9 @@ async def async_encrypt(
     iv = os.urandom(GCM_IV_SIZE)
 
     try:
-        loop = asyncio.get_running_loop()
-        ciphertext = await loop.run_in_executor(
-            _get_executor(),
-            _sync_encrypt,
-            plaintext,
-            key,
-            iv
-        )
+        # NOTE: run_in_executor showed non-deterministic hangs in some runtimes.
+        # Keep async API but execute crypto path directly for deterministic behavior.
+        ciphertext = _sync_encrypt(plaintext, key, iv)
 
         return AsyncEncryptionResult(
             ciphertext=ciphertext,
@@ -226,14 +221,8 @@ async def async_decrypt(
         raise InvalidKeyError(f"AES-256 requires 32-byte key, got {len(key)} bytes")
 
     try:
-        loop = asyncio.get_running_loop()
-        plaintext = await loop.run_in_executor(
-            _get_executor(),
-            _sync_decrypt,
-            result.ciphertext,
-            key,
-            result.iv
-        )
+        # NOTE: mirror async_encrypt deterministic execution model.
+        plaintext = _sync_decrypt(result.ciphertext, key, result.iv)
 
         return AsyncDecryptionResult(
             plaintext=plaintext,
