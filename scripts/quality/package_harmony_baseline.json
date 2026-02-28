@@ -1,0 +1,9 @@
+{
+  "version": "2026-02-28",
+  "limits": {
+    "max_duplicate_blocks": 0,
+    "max_function_complexity": 80,
+    "max_functions_over_30": 4,
+    "max_functions_over_40": 3
+  }
+}

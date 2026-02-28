@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 package-resource-governance-check package-excellence-check package-excellence-scorecard package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
+.PHONY: all test lint format clean install dev architecture-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
 
 all: install test
 
@@ -115,6 +115,13 @@ package-excellence-scorecard:
 		--resource-policy scripts/perf/package_resource_policy.json \
 		--output data/scorecard/package-excellence.json
 
+package-harmony-check:
+	python3 scripts/quality/validate_package_harmony.py \
+		--repo-root . \
+		--standards scripts/quality/package_standards.json \
+		--baseline scripts/quality/package_harmony_baseline.json \
+		--json-output data/release/package-harmony.json
+
 package-structure-matrix:
 	python3 scripts/quality/render_package_structure_matrix.py \
 		--repo-root . \
@@ -179,7 +186,7 @@ package-bench-baseline-governance-check:
 		--review data/perf/package-benchmark-baseline-review.json \
 		--json-output data/perf/package-benchmark-baseline-governance.json
 
-gate-all: architecture-check perf-governance-check perf-gate scorecard release-checklist propose-release-baseline baseline-proposal-review release-evidence validate-release-evidence phase-completion-check code-coverage-100 docs-coverage-100 package-resource-governance-check package-excellence-check package-excellence-scorecard package-structure-matrix-check package-bench-collect package-bench-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check
+gate-all: architecture-check perf-governance-check perf-gate scorecard release-checklist propose-release-baseline baseline-proposal-review release-evidence validate-release-evidence phase-completion-check code-coverage-100 docs-coverage-100 package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-structure-matrix-check package-bench-collect package-bench-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check
 
 gateway-tests-stable:
 	bash scripts/quality/run_gateway_tests_stable.sh

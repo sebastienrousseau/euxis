@@ -36,6 +36,8 @@ All workspace packages are covered:
 - Package benchmark baseline governance validator: `scripts/perf/validate_package_benchmark_baseline_governance.py`
 - Benchmark baseline dataset: `scripts/perf/package_benchmarks_baseline.json`
 - Package structure matrix generator/checker: `scripts/quality/render_package_structure_matrix.py`
+- Package harmony validator (duplicates + complexity + structure): `scripts/quality/validate_package_harmony.py`
+- Package harmony baseline limits: `scripts/quality/package_harmony_baseline.json`
 - Generated matrix doc: `euxis-docs/docs/architecture/package-structure-matrix.md`
 
 ## Resource Governance
@@ -56,6 +58,7 @@ Ratchet policy is enforced as:
 make package-resource-governance-check
 make package-excellence-check
 make package-excellence-scorecard
+make package-harmony-check
 make package-structure-matrix
 make package-structure-matrix-check
 make package-structure-matrix-report
@@ -77,3 +80,4 @@ CI now also produces package benchmark baseline proposal/review artifacts and a 
 Baseline review artifacts are cryptographically linked to proposals via canonical `proposal_sha256`, and governance validation fails on hash mismatch.
 Package structural consistency is also enforced through a deterministic generated matrix and stale-doc check in `gate-all`.
 PR CI additionally publishes a matrix staleness summary and unified diff artifact for fast review when docs drift.
+Package harmony is additionally enforced through strict source-structure checks, exact duplicate-block detection, and Python complexity non-regression limits.
