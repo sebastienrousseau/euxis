@@ -39,6 +39,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=metrics --cov-report=term-missing --cov-fail-under=95"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["src/metrics"]

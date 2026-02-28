@@ -160,6 +160,7 @@ class EuxisApp(App):
         # Core navigation - Using F-keys to avoid terminal emulator conflicts
         # (Ctrl+T = new tab in Ghostty/iTerm2, Ctrl+W = close tab, etc.)
         Binding("ctrl+q", "quit", "Quit", show=True),
+        Binding("ctrl+a", "open_approvals", "Approvals"),
         Binding("f3", "toggle_theme", "Theme", show=True),  # Was Ctrl+T
         Binding("f4", "open_settings", "Settings"),          # Was Ctrl+S
         Binding("ctrl+m", "fleet_monitor_screen", "Monitor"),
@@ -443,6 +444,11 @@ class EuxisApp(App):
         """Open the settings screen."""
         from tui.screens.settings import SettingsScreen
         self.push_screen(SettingsScreen())
+
+    def action_open_approvals(self) -> None:
+        """Open the pending approvals screen."""
+        from tui.screens.approvals import ApprovalsScreen
+        self.push_screen(ApprovalsScreen())
 
     def action_fleet_monitor_screen(self) -> None:
         """Open fleet monitor for active operations."""

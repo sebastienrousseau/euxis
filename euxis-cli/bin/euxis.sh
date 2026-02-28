@@ -213,5 +213,16 @@ git_guard
 
 EUXIS_BIN="${EUXIS_HOME}/euxis-cli/bin"
 
-# Dispatch to appropriate handler
+# Dispatch to a concrete subcommand binary when available.
+# Example: `euxis verify --all --strict` -> `euxis-verify --all --strict`.
+if [[ $# -gt 0 ]]; then
+  subcmd="${1:-}"
+  subcmd_bin="${EUXIS_BIN}/euxis-${subcmd}"
+  if [[ -x "${subcmd_bin}" ]]; then
+    shift
+    exec "${subcmd_bin}" "$@"
+  fi
+fi
+
+# Fallback to dispatch handler for legacy/default behavior.
 exec "${EUXIS_BIN}/euxis-dispatch" "$@"

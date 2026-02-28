@@ -5,9 +5,11 @@
 
 export type Result<T, E = Error> = {
   readonly success: true;
+  readonly isOk: true;
   readonly data: T;
 } | {
   readonly success: false;
+  readonly isOk: false;
   readonly error: E;
 };
 
@@ -81,11 +83,13 @@ export type CryptoResult<T> = Result<T, CryptoError>;
  */
 export const Ok = <T>(data: T): Result<T, never> => ({
   success: true,
+  isOk: true,
   data
 });
 
 export const Err = <E>(error: E): Result<never, E> => ({
   success: false,
+  isOk: false,
   error
 });
 
@@ -100,6 +104,7 @@ export const CryptoErr = (
   cause?: Error
 ): Result<never, CryptoError> => ({
   success: false,
+  isOk: false,
   error: { type, message, operation, context, cause }
 });
 

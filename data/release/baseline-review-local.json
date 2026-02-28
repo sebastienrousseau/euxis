@@ -1,0 +1,8 @@
+{
+  "baseline_p95_ms": 131643.0,
+  "proposed_p95_ms": 131643.0,
+  "delta_ms": 0.0,
+  "delta_percent": 0.0,
+  "threshold_percent": 20.0,
+  "flagged_for_manual_review": false
+}

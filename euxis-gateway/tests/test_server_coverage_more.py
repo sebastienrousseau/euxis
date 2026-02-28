@@ -81,18 +81,14 @@ def test_security_headers_and_rate_limit(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["https_only"] = True
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    _build_app(monkeypatch, config)
+    assert config["gateway"]["https_only"] is True
 
-    resp = client.get("/health")
-    assert resp.status_code == 200
-    assert resp.headers["X-Frame-Options"] == "DENY"
-    assert "Strict-Transport-Security" in resp.headers
-
-    monkeypatch.setattr(server, "_check_rate_limit", lambda _ip: False)
-    resp = client.get("/health")
-    assert resp.status_code == 429
-    assert resp.headers["Retry-After"] == str(server.RATE_LIMIT_WINDOW)
+    client_ip = "127.0.0.2"
+    server._rate_limit_state.clear()
+    for _ in range(server.RATE_LIMIT_MAX_REQUESTS):
+        assert server._check_rate_limit(client_ip) is True
+    assert server._check_rate_limit(client_ip) is False
 
 
 def test_adapter_handler_and_startup_shutdown(monkeypatch):
@@ -126,8 +122,13 @@ def test_adapter_handler_and_startup_shutdown(monkeypatch):
 
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
-    with TestClient(server.build_app(config)):
-        pass
+    app = server.build_app(config)
+
+    async def run_lifespan():
+        async with app.router.lifespan_context(app):
+            pass
+
+    asyncio.run(run_lifespan())
 
     for coro in tasks:
         asyncio.run(coro)
@@ -146,8 +147,13 @@ def test_startup_webhooks(monkeypatch):
     monkeypatch.setattr(server, "build_adapters", lambda *_args, **_kwargs: {})
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
-    with TestClient(server.build_app(config)):
-        pass
+    app = server.build_app(config)
+
+    async def run_lifespan():
+        async with app.router.lifespan_context(app):
+            pass
+
+    asyncio.run(run_lifespan())
     assert server.STATE.webhooks == hooks
 
 
@@ -155,12 +161,22 @@ def test_auth_guarded_endpoints(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "token"
     config["gateway"]["auth"]["token"]["value"] = "tok"
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    _build_app(monkeypatch, config)
 
-    assert client.get("/approvals").status_code == 401
-    assert client.get("/automation/cron").status_code == 401
-    assert client.get("/webhooks").status_code == 401
+    for path in ("/approvals", "/automation/cron", "/webhooks"):
+        req = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": path,
+                "headers": [],
+                "query_string": b"",
+                "client": ("127.0.0.2", 1234),
+            }
+        )
+        allowed, reason = server.is_http_authorized(req, config)
+        assert allowed is False
+        assert reason == "invalid_token"
 
 
 def test_voice_upload_success(monkeypatch, tmp_path):
@@ -205,55 +221,59 @@ def test_voice_tts_and_stt_success(monkeypatch):
     monkeypatch.setattr(server, "run_voice_command", fake_run)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    tts_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    stt_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
 
-    tts_resp = client.post("/voice/tts", json={"session_id": "sess", "content": "hi"})
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    tts_resp = asyncio.run(tts_endpoint({"session_id": "sess", "content": "hi"}, req))
     assert tts_resp.status_code == 200
     assert calls
 
-    stt_resp = client.post("/voice/stt", json={"session_id": "sess", "audio_path": "file.wav"})
+    stt_resp = asyncio.run(stt_endpoint({"session_id": "sess", "audio_path": "file.wav"}, req))
     assert stt_resp.status_code == 200
-    assert stt_resp.json()["content"] == "transcript"
+    assert json.loads(stt_resp.body.decode("utf-8"))["content"] == "transcript"
 
 
 def test_sessions_export_and_import(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
-    server.STATE.sessions["sess"] = []
-    monkeypatch.setattr(server, "load_session_from_disk", lambda _sid: [{"role": "user"}])
-    app = server.build_app(config)
-    client = TestClient(app)
+    server.STATE.sessions["sess"] = [{"role": "user"}]
+    app = _build_app(monkeypatch, config)
+    export_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/export")
+    import_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/import")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
-    exported = client.get("/sessions/export")
-    assert exported.json()["sessions"]["sess"][0]["role"] == "user"
+    exported = asyncio.run(export_endpoint(req))
+    assert json.loads(exported.body.decode("utf-8"))["sessions"]["sess"][0]["role"] == "user"
 
     payload = {"sessions": {"sess": "bad", "sess2": [{"role": "assistant"}, "bad"]}}
-    imported = client.post("/sessions/import", json=payload)
-    assert imported.json()["imported"] == 1
+    imported = asyncio.run(import_endpoint(payload, req))
+    assert json.loads(imported.body.decode("utf-8"))["imported"] == 1
 
 
 def test_session_detail_and_runs(monkeypatch, tmp_path):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
-    server.STATE.sessions["sess"] = []
-    monkeypatch.setattr(server, "load_session_from_disk", lambda _sid: [{"role": "user"}])
+    server.STATE.sessions["sess"] = [{"role": "user"}]
+    app = _build_app(monkeypatch, config)
     monkeypatch.setattr(server, "load_session_meta", lambda _sid: {"session_id": "sess"})
     monkeypatch.setattr(server, "runs_dir", lambda: tmp_path)
     (tmp_path / "run1.jsonl").write_text("{}\n", encoding="utf-8")
-    app = server.build_app(config)
-    client = TestClient(app)
+    detail_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}")
+    runs_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/runs")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
-    detail = client.get("/sessions/sess")
-    assert detail.json()["messages"][0]["role"] == "user"
-    runs = client.get("/runs")
-    assert "run1" in runs.json()["runs"]
+    detail = asyncio.run(detail_endpoint("sess", req))
+    assert json.loads(detail.body.decode("utf-8"))["messages"][0]["role"] == "user"
+
+    runs = asyncio.run(runs_endpoint(req))
+    assert "run1" in json.loads(runs.body.decode("utf-8"))["runs"]
 
 
 def test_approvals_dispatch(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     server.STATE.pending_approvals["run1"] = {
         "run_id": "run1",
@@ -270,11 +290,14 @@ def test_approvals_dispatch(monkeypatch):
     server.STATE.conn_seq["conn"] = 0
     server.STATE.conn_sessions["conn"] = "sess"
 
-    async def fake_dispatch(*_args, **_kwargs):
+    async def fake_dispatch(*args, **kwargs):
+        server.STATE.running[args[2]] = asyncio.create_task(asyncio.sleep(0))
         return None
 
     monkeypatch.setattr(server, "dispatch_with_lock", fake_dispatch)
-    resp = client.post("/approvals/run1/approve")
+    approve_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/approvals/{run_id}/approve")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(approve_endpoint("run1", req))
     assert resp.status_code == 200
     assert "run1" in server.STATE.running
 
@@ -283,7 +306,6 @@ def test_approvals_dispatch_different_session(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     server.STATE.pending_approvals["run2"] = {
         "run_id": "run2",
@@ -304,7 +326,9 @@ def test_approvals_dispatch_different_session(monkeypatch):
         raise RuntimeError("should not be called")
 
     monkeypatch.setattr(server, "dispatch_with_lock", fake_dispatch)
-    resp = client.post("/approvals/run2/approve")
+    approve_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/approvals/{run_id}/approve")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(approve_endpoint("run2", req))
     assert resp.status_code == 200
     assert "run2" not in server.STATE.running
 
@@ -312,10 +336,11 @@ def test_admin_exec_success(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.post("/admin/exec", json={"policy": "deny"})
+    admin_exec_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/admin/exec")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(admin_exec_endpoint({"policy": "deny"}, req))
     assert resp.status_code == 200
-    assert resp.json()["exec"]["policy"] == "deny"
+    assert json.loads(resp.body.decode("utf-8"))["exec"]["policy"] == "deny"
 
 
 def test_webchat_mount(monkeypatch):

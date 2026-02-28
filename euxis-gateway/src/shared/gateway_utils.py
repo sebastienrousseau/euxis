@@ -98,6 +98,12 @@ def cron_dir() -> Path:
     return base
 
 
+def identities_dir() -> Path:
+    base = gateway_data_dir() / "identities"
+    base.mkdir(parents=True, exist_ok=True)
+    return base
+
+
 def cron_path() -> Path:
     return cron_dir() / "jobs.json"
 

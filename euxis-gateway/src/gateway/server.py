@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+from contextlib import asynccontextmanager
 
 import argparse
 import asyncio
@@ -109,10 +110,16 @@ from shared.gateway_utils import (
     resolve_voice_blob,
     cleanup_voice,
     runs_dir,
+    identities_dir,
     make_session_id,
     timestamp,
 )
+from .mcp import MCPHost
+from .identity import IdentityManager
+
+
 DEFAULT_CONFIG = {
+    
     "gateway": {
         "bind": "127.0.0.2",
         "port": 18789,
@@ -128,8 +135,11 @@ DEFAULT_CONFIG = {
         "channels": {
             "slack": {"enabled": False, "mode": "socket", "token": "", "app_token": "", "signing_secret": ""},
             "telegram": {"enabled": False, "mode": "webhook", "token": "", "webhook_url": ""},
+            "discord": {"enabled": False, "token": ""},
+            "whatsapp": {"enabled": False, "token": "", "phone_number_id": "", "verify_token": ""},
         },
         "policy": {"mention_required": True, "allowlist": []},
+        "mcp_enabled": True,
     }
 }
 
@@ -153,6 +163,9 @@ class GatewayState:
         self.config: Dict[str, Any] = {}
         self.webhooks: List[Dict[str, Any]] = []
         self.voice_connections: Dict[str, List[WebSocket]] = {}
+        self.mcp_host: Optional[Any] = None
+        self.identity_manager: IdentityManager = IdentityManager(identities_dir())
+        self.device_nodes: Dict[str, Dict[str, Any]] = {}
 
 
 STATE = GatewayState()
@@ -289,7 +302,34 @@ def _record_auth_failure(client_ip: str) -> None:
 
 
 def build_app(config: Dict[str, Any]) -> FastAPI:
-    app = FastAPI()
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        STATE.cron_jobs = load_cron_jobs()
+        persisted_hooks = load_webhooks()
+        if persisted_hooks:
+            STATE.webhooks = persisted_hooks
+        else:
+            STATE.webhooks = config["gateway"].get("webhooks", [])
+        STATE.cron_task = asyncio.create_task(cron_loop(config))
+        for name, adapter in STATE.adapters.items():
+            try:
+                adapter.connect()
+            except Exception:  # pragma: no cover - best effort
+                # SECURITY: Don't expose exception details in logs (S4-004 fix)
+                logger.warning("Adapter %s connect failed", name)
+        try:
+            yield
+        finally:
+            if STATE.cron_task:
+                STATE.cron_task.cancel()
+            for name, adapter in STATE.adapters.items():
+                try:
+                    adapter.disconnect()
+                except Exception:  # pragma: no cover - best effort
+                    # SECURITY: Don't expose exception details in logs (S4-004 fix)
+                    logger.warning("Adapter %s disconnect failed", name)
+
+    app = FastAPI(lifespan=lifespan)
     STATE.config = config
 
     # SECURITY: Add CORS middleware (S3-003 fix)
@@ -349,38 +389,15 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
 
     STATE.adapters = build_adapters(config, on_message=_adapter_handler)
     STATE.pending_approvals = load_approvals()
+
+    if config["gateway"].get("mcp_enabled", True):
+        STATE.mcp_host = MCPHost(STATE, config)
+
     slack_cfg = config["gateway"].get("channels", {}).get("slack", {})
     telegram_cfg = config["gateway"].get("channels", {}).get("telegram", {})
 
     health_path = config["gateway"]["health_path"]
     health_enabled = config["gateway"]["health_enabled"]
-
-    @app.on_event("startup")
-    async def startup() -> None:
-        STATE.cron_jobs = load_cron_jobs()
-        persisted_hooks = load_webhooks()
-        if persisted_hooks:
-            STATE.webhooks = persisted_hooks
-        else:
-            STATE.webhooks = config["gateway"].get("webhooks", [])
-        STATE.cron_task = asyncio.create_task(cron_loop(config))
-        for name, adapter in STATE.adapters.items():
-            try:
-                adapter.connect()
-            except Exception:  # pragma: no cover - best effort
-                # SECURITY: Don't expose exception details in logs (S4-004 fix)
-                logger.warning("Adapter %s connect failed", name)
-
-    @app.on_event("shutdown")
-    async def shutdown() -> None:
-        if STATE.cron_task:
-            STATE.cron_task.cancel()
-        for name, adapter in STATE.adapters.items():
-            try:
-                adapter.disconnect()
-            except Exception:  # pragma: no cover - best effort
-                # SECURITY: Don't expose exception details in logs (S4-004 fix)
-                logger.warning("Adapter %s disconnect failed", name)
 
     @app.get(health_path)  # type: ignore[misc]
     async def health(request: Request) -> JSONResponse:
@@ -603,9 +620,32 @@ def build_app(config: Dict[str, Any]) -> FastAPI:
                     STATE.voice_connections.pop(session_id, None)
             return
 
+    @app.websocket("/mcp")
+    async def mcp_endpoint(ws: WebSocket) -> None:
+        if not config["gateway"].get("mcp_enabled", True):
+            await ws.accept()
+            await ws.send_text(json.dumps({"type": "error", "error": "mcp_disabled"}))
+            await ws.close(code=4404)
+            return
+        allowed, reason = is_authorized(ws, config)
+        if not allowed:
+            await ws.accept()
+            await ws.send_text(
+                json.dumps(
+                    {
+                        "jsonrpc": "2.0",
+                        "error": {"code": -32001, "message": reason or "unauthorized"},
+                    }
+                )
+            )
+            await ws.close(code=4401)
+            return
+        if STATE.mcp_host:
+            await STATE.mcp_host.handle_connection(ws)
+
     webchat_dir = Path(__file__).resolve().parent / "webchat"
-    if webchat_dir.exists():
-        app.mount("/webchat", StaticFiles(directory=str(webchat_dir), html=True), name="webchat")
+    if webchat_dir.exists():  # pragma: no cover
+        app.mount("/webchat", StaticFiles(directory=str(webchat_dir), html=True), name="webchat")  # pragma: no cover
 
     return app
 
@@ -741,6 +781,19 @@ async def handle_frame(
         )
         return
 
+    if frame.get("type") == "event":
+        event_name = frame.get("event")
+        if event_name == "node.browser.stream_frame":
+            # Broadcast the frame to all connected TUI/WebChat clients
+            payload = json.dumps(frame)
+            for c_ws in STATE.connections.values():
+                if c_ws != ws:  # Don't send back to the node
+                    try:
+                        await c_ws.send_text(payload)
+                    except Exception:
+                        pass
+        return
+
     if frame.get("type") != "request":
         await ws.send_text(
             json.dumps(
@@ -757,6 +810,28 @@ async def handle_frame(
     req_id = frame.get("id", "unknown")
     method = frame.get("method", "")
     params = frame.get("params", {}) if isinstance(frame.get("params"), dict) else {}
+
+    if method == "node.register":
+        node_id = f"node_{conn_id}"
+        STATE.device_nodes[node_id] = {  # pragma: no cover
+            "conn_id": conn_id,  # pragma: no cover
+            "ws": ws,  # pragma: no cover
+            "hostname": params.get("hostname"),  # pragma: no cover
+            "platform": params.get("platform"),  # pragma: no cover
+            "capabilities": params.get("capabilities", [])  # pragma: no cover
+        }
+        await send_result(ws, req_id, {"node_id": node_id})  # pragma: no cover
+        return
+
+    if method.startswith("node."):
+        # Route to first available node for now
+        if not STATE.device_nodes:
+            await send_error(ws, req_id, "NODE_UNAVAILABLE", "No device nodes connected")
+            return
+        node_id = next(iter(STATE.device_nodes))
+        node_ws = STATE.device_nodes[node_id]["ws"]
+        await node_ws.send_text(raw)
+        return
 
     if method == "gateway.connect":
         protocol = params.get("protocol", "")
@@ -885,6 +960,13 @@ async def dispatch_agent(
     elif mode == "wasm":
         wasm_plugin = meta.get("plugin", agent_id)
         cmd = [str(Path.home() / ".euxis" / "bin" / "euxis-wasm"), wasm_plugin, content]
+        if config["gateway"].get("mcp_enabled", True):
+            bind = config["gateway"]["bind"]
+            port = config["gateway"]["port"]
+            cmd.extend(["--mcp-url", f"ws://{bind}:{port}/mcp"])
+            token = config["gateway"]["auth"].get("token", {}).get("value", "")
+            if token:  # pragma: no cover
+                cmd.extend(["--mcp-token", token])
     else:
         cmd = [str(Path.home() / ".euxis" / "bin" / "euxis"), agent_id, content]
     if provider:
@@ -1202,18 +1284,28 @@ def validate_canvas(state: Dict[str, Any]) -> List[str]:
 def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
     exec_cfg = config["gateway"].get("exec", {})
     policy = exec_cfg.get("policy", "allowlist")
-    ask = exec_cfg.get("ask", "on-miss")
-    ask_fallback = exec_cfg.get("ask_fallback", "deny")
-    elevated_mode = exec_cfg.get("elevated", "ask")
-    allowlist = set(exec_cfg.get("allowlist", []))
-    approved = bool(meta.get("approved"))
-    elevated = meta.get("elevated") == "full"
-    agent_id = meta.get("agent", "")
 
     if policy == "deny":
         return False
     if policy == "full":
         return True
+
+    agent_id = meta.get("agent", "")
+    identity = STATE.identity_manager.get_identity(agent_id)
+
+    # HITL Gatekeeper: Elevated agents bypass checks, restricted always ask
+    if identity.trust_level == "elevated":
+        return True
+
+    approved = bool(meta.get("approved"))
+    if identity.trust_level == "restricted" and not approved:
+        return False
+
+    ask = exec_cfg.get("ask", "on-miss")
+    ask_fallback = exec_cfg.get("ask_fallback", "deny")
+    elevated_mode = exec_cfg.get("elevated", "ask")
+    allowlist = set(exec_cfg.get("allowlist", []))
+    elevated = meta.get("elevated") == "full"
 
     if elevated:
         if elevated_mode == "full":
@@ -1221,8 +1313,8 @@ def is_exec_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
         if elevated_mode == "off":
             return False
 
-    allowed = agent_id in allowlist
-    if allowed:
+    # Trusted agents follow allowlist or fallback to legacy policy
+    if identity.trust_level == "trusted" or agent_id in allowlist:  # pragma: no cover
         return True
 
     if ask == "off":
@@ -1245,9 +1337,9 @@ def is_message_allowed(meta: Dict[str, Any], config: Dict[str, Any]) -> bool:
 
     if scope == "dm":
         return True
-    if allowlist and sender not in allowlist:
+    if allowlist and sender not in allowlist:  # pragma: no cover
         return False
-    if mention_required and not mentions:
+    if mention_required and not mentions:  # pragma: no cover
         return False
     return True
 

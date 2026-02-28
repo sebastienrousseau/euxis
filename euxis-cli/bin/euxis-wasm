@@ -30,6 +30,8 @@ def main():
     parser.add_argument("plugin", help="Path to the WebAssembly (.wasm) file to execute")
     parser.add_argument("content", help="Input payload/content to feed the Wasm function")
     parser.add_argument("--func", default="run", help="Target Wasm function to invoke (default: run)")
+    parser.add_argument("--mcp-url", help="URL of the MCP server (e.g., ws://localhost:18789/mcp)")
+    parser.add_argument("--mcp-token", help="Bearer token for MCP authentication")
     args = parser.parse_args()
 
     wasm_path = Path(args.plugin)
@@ -41,6 +43,48 @@ def main():
             print(f"Error: Wasm binary '{args.plugin}' not found.", file=sys.stderr)
             sys.exit(1)
 
+    # MCP Handler for Wasm Host Functions
+    mcp_handler = None
+    if args.mcp_url:
+        def sync_mcp_handler(input_data):
+            import asyncio
+            import websockets
+            import json
+            import uuid
+
+            async def call_mcp():
+                headers = {}
+                if args.mcp_token:
+                    headers["Authorization"] = f"Bearer {args.mcp_token}"
+                
+                try:
+                    async with websockets.connect(args.mcp_url, extra_headers=headers) as ws:
+                        # 1. Initialize
+                        init_id = str(uuid.uuid4())
+                        await ws.send(json.dumps({
+                            "jsonrpc": "2.0", "id": init_id, "method": "initialize",
+                            "params": {"protocolVersion": "2024-11-05", "clientInfo": {"name": "euxis-wasm-client", "version": "0.1.0"}}
+                        }))
+                        await ws.recv() # Wait for init response
+                        await ws.send(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}))
+
+                        # 2. Call Tool
+                        call_id = str(uuid.uuid4())
+                        # input_data is expected to be {"name": "tool_name", "arguments": {...}}
+                        await ws.send(json.dumps({
+                            "jsonrpc": "2.0", "id": call_id, "method": "tools/call",
+                            "params": input_data
+                        }))
+                        resp_raw = await ws.recv()
+                        resp = json.loads(resp_raw)
+                        return resp.get("result", {"error": resp.get("error")})
+                except Exception as e:
+                    return {"error": str(e)}
+
+            return asyncio.run(call_mcp())
+        
+        mcp_handler = sync_mcp_handler
+
     try:
         # Standardize input to json schema
         try:
@@ -50,9 +94,8 @@ def main():
         except json.JSONDecodeError:
             input_dict = {"content": args.content}
 
-        executor = WasmExecutor(str(wasm_path))
+        executor = WasmExecutor(str(wasm_path), mcp_handler=mcp_handler)
         result = executor.call(args.func, input_dict)
-        executor.free()
         
         # Emit standard CLI format expected by euxis-gateway
         print(json.dumps(result, indent=2))

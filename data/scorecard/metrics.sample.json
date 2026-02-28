@@ -1,0 +1,10 @@
+{
+  "availability": 99.95,
+  "p95_latency_ms": 420,
+  "security_findings_high": 0,
+  "platform_parity_pass_rate": 100,
+  "task_success_rate": 95,
+  "ux_sus_score": 85,
+  "cost_per_task_usd": 0.01,
+  "design_consistency_score": 90
+}

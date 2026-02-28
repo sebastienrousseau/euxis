@@ -1,0 +1,50 @@
+{
+  "scorecard": {
+    "categories": {
+      "portability": 10.0,
+      "usability": 8.5,
+      "functionality": 9.5,
+      "security": 10.0,
+      "speed": 8.6,
+      "cost": 9.0,
+      "design": 9.0,
+      "accuracy": 9.698
+    },
+    "overall": 9.29,
+    "release_gate_pass": true,
+    "thresholds": {
+      "min_category": 8.0,
+      "overall": 9.0
+    }
+  },
+  "release_checklist": {
+    "current_p95_ms": 131643.0,
+    "budget_ms": 150000.0,
+    "baseline_p95_ms": 131643.0,
+    "delta_ms": 0.0,
+    "delta_percent": 0.0,
+    "threshold_percent": 10.0,
+    "budget_ok": true,
+    "regression_ok": true,
+    "release_ok": true,
+    "stage": "current"
+  },
+  "baseline_proposal": {
+    "previous_release": "v0.0.2",
+    "next_release": "v0.0.3",
+    "proposed_previous_release_p95_ms": 131643.0,
+    "generated_at_utc": "2026-02-28T16:48:26.164896+00:00"
+  },
+  "baseline_review": {
+    "baseline_p95_ms": 131643.0,
+    "proposed_p95_ms": 131643.0,
+    "delta_ms": 0.0,
+    "delta_percent": 0.0,
+    "threshold_percent": 20.0,
+    "flagged_for_manual_review": false
+  },
+  "signature_verification": {
+    "status": "unknown",
+    "reason": "signature status artifact not provided"
+  }
+}

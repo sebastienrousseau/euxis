@@ -163,7 +163,9 @@ def test_is_authorized_none_mode():
     assert allowed is True
 
 
-def test_is_exec_allowed_variants():
+def test_is_exec_allowed_variants(monkeypatch):
+    from gateway.identity import AgentIdentity
+    monkeypatch.setattr(server.STATE.identity_manager, "get_identity", lambda *args: AgentIdentity(agent_id="x", name="x", trust_level="trusted"))
     cfg = server.load_config(None)
     cfg["gateway"]["exec"]["policy"] = "deny"
     assert server.is_exec_allowed({}, cfg) is False

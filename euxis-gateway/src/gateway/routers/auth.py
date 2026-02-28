@@ -25,6 +25,32 @@ def setup_auth(router: APIRouter, deps: dict):
 
     slack_events_path = slack_cfg.get("events_path", "/channels/slack/events")
     telegram_webhook_path = telegram_cfg.get("webhook_path", "/channels/telegram/webhook")
+    whatsapp_cfg = config["gateway"].get("channels", {}).get("whatsapp", {})
+    whatsapp_webhook_path = whatsapp_cfg.get("webhook_path", "/channels/whatsapp/webhook")
+
+    @router.get(whatsapp_webhook_path)
+    async def whatsapp_verify(request: Request) -> JSONResponse:
+        verify_token = whatsapp_cfg.get("verify_token", "")
+        if not verify_token:
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        mode = request.query_params.get("hub.mode")
+        token = request.query_params.get("hub.verify_token")
+        challenge = request.query_params.get("hub.challenge")
+        if mode == "subscribe" and token == verify_token:
+            try:
+                return JSONResponse(int(challenge))
+            except (ValueError, TypeError):
+                from fastapi.responses import PlainTextResponse
+                return PlainTextResponse(str(challenge))
+        return JSONResponse({"status": "forbidden"}, status_code=403)
+
+    @router.post(whatsapp_webhook_path)
+    async def whatsapp_webhook(payload: Dict[str, Any], request: Request) -> JSONResponse:
+        adapter = STATE.adapters.get("whatsapp")
+        if not adapter:
+            return JSONResponse({"status": "disabled"}, status_code=404)
+        adapter.receive(payload)
+        return JSONResponse({"status": "ok"})
 
     @router.post(slack_events_path)
     async def slack_events(request: Request) -> JSONResponse:

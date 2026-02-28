@@ -1,0 +1,18 @@
+{
+  "categories": {
+    "portability": 10.0,
+    "usability": 8.5,
+    "functionality": 9.5,
+    "security": 10.0,
+    "speed": 8.6,
+    "cost": 9.0,
+    "design": 9.0,
+    "accuracy": 9.698
+  },
+  "overall": 9.29,
+  "release_gate_pass": true,
+  "thresholds": {
+    "min_category": 8.0,
+    "overall": 9.0
+  }
+}

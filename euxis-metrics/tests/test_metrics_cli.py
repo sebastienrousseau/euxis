@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add the source to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "metrics"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
 class TestOutputHelpers:
@@ -21,7 +21,7 @@ class TestOutputHelpers:
 
     def test_out_basic(self):
         """Test _out function basic usage."""
-        from metrics_cli import _out
+        from metrics.metrics_cli import _out
 
         stream = io.StringIO()
         _out("hello", "world", stream=stream)
@@ -29,7 +29,7 @@ class TestOutputHelpers:
 
     def test_out_custom_sep(self):
         """Test _out with custom separator."""
-        from metrics_cli import _out
+        from metrics.metrics_cli import _out
 
         stream = io.StringIO()
         _out("a", "b", "c", sep=",", stream=stream)
@@ -37,7 +37,7 @@ class TestOutputHelpers:
 
     def test_out_custom_end(self):
         """Test _out with custom end."""
-        from metrics_cli import _out
+        from metrics.metrics_cli import _out
 
         stream = io.StringIO()
         _out("test", end="", stream=stream)
@@ -49,7 +49,7 @@ class TestPrintFleetOverview:
 
     def test_empty_report(self, capsys):
         """Test with empty report."""
-        from metrics_cli import _print_fleet_overview
+        from metrics.metrics_cli import _print_fleet_overview
 
         _print_fleet_overview({})
         captured = capsys.readouterr()
@@ -57,7 +57,7 @@ class TestPrintFleetOverview:
 
     def test_with_fleet_metrics(self, capsys):
         """Test with fleet metrics data."""
-        from metrics_cli import _print_fleet_overview
+        from metrics.metrics_cli import _print_fleet_overview
 
         report = {
             "fleet_metrics": {
@@ -81,7 +81,7 @@ class TestPrintTopPerformers:
 
     def test_empty_report(self, capsys):
         """Test with empty report."""
-        from metrics_cli import _print_top_performers
+        from metrics.metrics_cli import _print_top_performers
 
         _print_top_performers({})
         captured = capsys.readouterr()
@@ -89,7 +89,7 @@ class TestPrintTopPerformers:
 
     def test_with_agent_performance(self, capsys):
         """Test with agent performance data."""
-        from metrics_cli import _print_top_performers
+        from metrics.metrics_cli import _print_top_performers
 
         report = {
             "agent_performance": {
@@ -116,7 +116,7 @@ class TestPrintDelegationPatterns:
 
     def test_empty_report(self, capsys):
         """Test with empty report."""
-        from metrics_cli import _print_delegation_patterns
+        from metrics.metrics_cli import _print_delegation_patterns
 
         _print_delegation_patterns({})
         captured = capsys.readouterr()
@@ -124,7 +124,7 @@ class TestPrintDelegationPatterns:
 
     def test_with_delegation_data(self, capsys):
         """Test with delegation data."""
-        from metrics_cli import _print_delegation_patterns
+        from metrics.metrics_cli import _print_delegation_patterns
 
         report = {
             "delegation_patterns": {
@@ -145,7 +145,7 @@ class TestPrintToolUsage:
 
     def test_empty_report(self, capsys):
         """Test with empty report."""
-        from metrics_cli import _print_tool_usage
+        from metrics.metrics_cli import _print_tool_usage
 
         _print_tool_usage({})
         captured = capsys.readouterr()
@@ -153,7 +153,7 @@ class TestPrintToolUsage:
 
     def test_with_tool_data(self, capsys):
         """Test with tool usage data."""
-        from metrics_cli import _print_tool_usage
+        from metrics.metrics_cli import _print_tool_usage
 
         report = {
             "tool_usage_patterns": {
@@ -172,10 +172,10 @@ class TestPrintToolUsage:
 class TestCmdReport:
     """Test cmd_report command."""
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_report_summary(self, MockAnalyzer, capsys):
         """Test summary report format."""
-        from metrics_cli import cmd_report
+        from metrics.metrics_cli import cmd_report
 
         mock_analyzer = MagicMock()
         mock_analyzer.generate_performance_report.return_value = {
@@ -191,10 +191,10 @@ class TestCmdReport:
         captured = capsys.readouterr()
         assert "PERFORMANCE REPORT" in captured.out
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_report_json(self, MockAnalyzer, capsys):
         """Test JSON report format."""
-        from metrics_cli import cmd_report
+        from metrics.metrics_cli import cmd_report
 
         mock_analyzer = MagicMock()
         mock_analyzer.generate_performance_report.return_value = {"test": "data"}
@@ -206,10 +206,10 @@ class TestCmdReport:
         data = json.loads(captured.out)
         assert data == {"test": "data"}
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_report_csv(self, MockAnalyzer, capsys):
         """Test CSV report format."""
-        from metrics_cli import cmd_report
+        from metrics.metrics_cli import cmd_report
 
         mock_analyzer = MagicMock()
         mock_analyzer.analyze_agent_performance.return_value = {
@@ -228,10 +228,10 @@ class TestCmdReport:
         assert "agent_id" in captured.out
         assert "architect" in captured.out
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_report_unsupported_format(self, MockAnalyzer, capsys):
         """Test unsupported format does not crash."""
-        from metrics_cli import cmd_report
+        from metrics.metrics_cli import cmd_report
         args = argparse.Namespace(format="unknown", hours=24)
         cmd_report(args)
         captured = capsys.readouterr()
@@ -241,10 +241,10 @@ class TestCmdReport:
 class TestCmdRankings:
     """Test cmd_rankings command."""
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_rankings_success_rate(self, MockAnalyzer, capsys):
         """Test rankings by success rate."""
-        from metrics_cli import cmd_rankings
+        from metrics.metrics_cli import cmd_rankings
 
         mock_analyzer = MagicMock()
         mock_analyzer.get_agent_rankings.return_value = [
@@ -259,10 +259,10 @@ class TestCmdRankings:
         assert "RANKINGS" in captured.out
         assert "architect" in captured.out
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_rankings_duration_ms(self, MockAnalyzer, capsys):
         """Test rankings by duration."""
-        from metrics_cli import cmd_rankings
+        from metrics.metrics_cli import cmd_rankings
 
         mock_analyzer = MagicMock()
         mock_analyzer.get_agent_rankings.return_value = [
@@ -276,10 +276,10 @@ class TestCmdRankings:
         captured = capsys.readouterr()
         assert "500ms" in captured.out
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_rankings_other_metric(self, MockAnalyzer, capsys):
         """Test rankings with other metric type."""
-        from metrics_cli import cmd_rankings
+        from metrics.metrics_cli import cmd_rankings
 
         mock_analyzer = MagicMock()
         mock_analyzer.get_agent_rankings.return_value = [
@@ -296,11 +296,11 @@ class TestCmdRankings:
 class TestCmdMonitor:
     """Test cmd_monitor command."""
 
-    @patch("metrics_cli.PerformanceAnalyzer")
-    @patch("metrics_cli.time.sleep")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.time.sleep")
     def test_monitor_single_iteration(self, mock_sleep, MockAnalyzer, capsys):
         """Test monitor runs and can be interrupted."""
-        from metrics_cli import cmd_monitor
+        from metrics.metrics_cli import cmd_monitor
 
         mock_analyzer = MagicMock()
         mock_analyzer.generate_performance_report.return_value = {
@@ -327,7 +327,7 @@ class TestCmdCleanup:
 
     def test_cleanup_no_files(self, tmp_path, capsys):
         """Test cleanup when files don't exist."""
-        from metrics_cli import cmd_cleanup
+        from metrics.metrics_cli import cmd_cleanup
 
         args = argparse.Namespace(max_size_mb=100)
 
@@ -338,7 +338,7 @@ class TestCmdCleanup:
 
     def test_cleanup_with_large_files(self, tmp_path, capsys):
         """Test cleanup with files exceeding max size."""
-        from metrics_cli import cmd_cleanup
+        from metrics.metrics_cli import cmd_cleanup
 
         # Create metrics directory and large file (new structure)
         metrics_dir = tmp_path / "euxis-runtime" / "metrics"
@@ -362,10 +362,10 @@ class TestCmdCleanup:
 class TestCmdExport:
     """Test cmd_export command."""
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_export_json(self, MockAnalyzer, tmp_path, capsys):
         """Test export to JSON file."""
-        from metrics_cli import cmd_export
+        from metrics.metrics_cli import cmd_export
 
         mock_analyzer = MagicMock()
         mock_analyzer.generate_performance_report.return_value = {"test": "data"}
@@ -385,10 +385,10 @@ class TestCmdExport:
         data = json.loads(output_file.read_text())
         assert data == {"test": "data"}
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_export_csv(self, MockAnalyzer, tmp_path, capsys):
         """Test export to CSV file."""
-        from metrics_cli import cmd_export
+        from metrics.metrics_cli import cmd_export
 
         mock_analyzer = MagicMock()
         # CSV export uses the full report's agent_performance key
@@ -419,10 +419,10 @@ class TestCmdExport:
         content = output_file.read_text()
         assert "architect" in content
 
-    @patch("metrics_cli.PerformanceAnalyzer")
+    @patch("metrics.metrics_cli.PerformanceAnalyzer")
     def test_export_unsupported_format(self, MockAnalyzer, tmp_path):
         """Test export ignores unsupported formats."""
-        from metrics_cli import cmd_export
+        from metrics.metrics_cli import cmd_export
         output_file = tmp_path / "output.txt"
         args = argparse.Namespace(
             output=str(output_file),
@@ -437,46 +437,46 @@ class TestCmdExport:
 class TestMain:
     """Test main entry point."""
 
-    @patch("metrics_cli.cmd_report")
+    @patch("metrics.metrics_cli.cmd_report")
     def test_main_report(self, mock_cmd):
         """Test main with report command."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py", "report"]):
             main()
             mock_cmd.assert_called_once()
 
-    @patch("metrics_cli.cmd_rankings")
+    @patch("metrics.metrics_cli.cmd_rankings")
     def test_main_rankings(self, mock_cmd):
         """Test main with rankings command."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py", "rankings"]):
             main()
             mock_cmd.assert_called_once()
 
-    @patch("metrics_cli.cmd_monitor")
+    @patch("metrics.metrics_cli.cmd_monitor")
     def test_main_monitor(self, mock_cmd):
         """Test main with monitor command."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py", "monitor"]):
             main()
             mock_cmd.assert_called_once()
 
-    @patch("metrics_cli.cmd_cleanup")
+    @patch("metrics.metrics_cli.cmd_cleanup")
     def test_main_cleanup(self, mock_cmd):
         """Test main with cleanup command."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py", "cleanup"]):
             main()
             mock_cmd.assert_called_once()
 
-    @patch("metrics_cli.cmd_export")
+    @patch("metrics.metrics_cli.cmd_export")
     def test_main_export(self, mock_cmd):
         """Test main with export command."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py", "export", "--output", "test.json"]):
             main()
@@ -484,7 +484,7 @@ class TestMain:
 
     def test_main_no_command(self, capsys):
         """Test main with no command shows help."""
-        from metrics_cli import main
+        from metrics.metrics_cli import main
 
         with patch.object(sys, "argv", ["metrics_cli.py"]):
             main()

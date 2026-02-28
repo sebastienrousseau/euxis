@@ -2,17 +2,19 @@
 
 Documentation for the Euxis Fleet framework, built with Sphinx.
 
-## Current Verification Snapshot (February 18, 2026)
+## Verification
 
-This docs set now tracks current verification reality for early adopters:
+Run the strict package gate:
 
-- Provider suite: `53/53` passing (`euxis-core/tests/bats/lib/providers.bats`)
-- Provider function-level shell coverage: `100%` (`63/63`)
-- Provider suite runtime: `~3.94s` on the active development machine
-- Known stabilization work remains in some non-provider shell suites
+```bash
+bash ../scripts/quality/run_docs_tests_stable.sh
+```
 
-Primary status page:
-- `docs/reports/initial-user-expectations-2026-02-18.md`
+Run tests directly from package root:
+
+```bash
+pytest -q -c pyproject.toml tests
+```
 
 ## Building Documentation
 
@@ -70,7 +72,7 @@ Each package has its own API page in `docs/api/`.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
+AGPL-3.0-or-later - see [LICENSE](LICENSE)
 
 ---
 *Part of the [Euxis Agent Framework](https://euxis.co)*

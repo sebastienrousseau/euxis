@@ -276,6 +276,22 @@ if $RUN_ALL; then
     RUN_LEGAL=true
 fi
 
+# Strict all-mode: use the canonical repository gate as the source of truth.
+# This enforces real package tests and quality gates instead of heuristic checks.
+if $RUN_ALL && $STRICT_MODE; then
+    echo ""
+    echo "[STRICT] Running canonical verification pipeline..."
+    echo "─────────────────────────────────────────────────────────"
+    if make -C "${EUXIS_HOME}" verify-all-packages REQUIRE_DEPS=1; then
+        echo ""
+        echo "Strict verification passed via make verify-all-packages."
+        exit 0
+    fi
+    echo ""
+    echo "Strict verification failed via make verify-all-packages." >&2
+    exit 1
+fi
+
 # ============================================================================
 # Agent Chain Helper
 # ============================================================================

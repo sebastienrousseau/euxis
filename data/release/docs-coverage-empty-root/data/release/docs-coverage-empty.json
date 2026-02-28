@@ -1,0 +1,28 @@
+{
+  "artifacts_total": 20,
+  "covered": 0,
+  "missing": [
+    "scripts/architecture/check_boundaries.py",
+    "euxis-core/src/euxis_core/contracts/ports.py",
+    "euxis-core/src/euxis_core/platform/adapters.py",
+    "euxis-core/src/euxis_core/runtime/gateway_ws.py",
+    ".github/workflows/cross-platform-ci.yml",
+    "euxis-core/tests/unit/test_platform_adapter.py",
+    "euxis-core/tests/unit/test_contracts.py",
+    ".github/workflows/supply-chain.yml",
+    "scripts/supply_chain/verify_signed_artifacts.sh",
+    "euxis-core/src/euxis_core/resilience.py",
+    "euxis-core/src/euxis_core/runtime/concurrency.py",
+    "scripts/perf/check_perf_budget.py",
+    "scripts/perf/validate_perf_governance.py",
+    "scripts/eval/scorecard.py",
+    "scripts/release/generate_checklist.py",
+    "scripts/release/aggregate_release_evidence.py",
+    "scripts/release/validate_release_evidence.py",
+    "scripts/release/validate_phase_completion.py",
+    "scripts/quality/enforce_phase_code_coverage.py",
+    "scripts/quality/validate_phase_docs_coverage.py"
+  ],
+  "coverage_percent": 0.0,
+  "status": "failed"
+}

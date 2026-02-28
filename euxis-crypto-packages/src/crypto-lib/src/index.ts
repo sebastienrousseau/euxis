@@ -13,7 +13,7 @@ export * from './config/security.js';
 export { CryptoOperations } from './crypto-operations.js';
 
 // Version and metadata
-export const CRYPTO_LIB_VERSION = '0.0.2';
+export const CRYPTO_LIB_VERSION = 'v0.0.2';
 export const SUPPORTED_ALGORITHMS = {
   encryption: ['AES-256-GCM', 'AES-192-GCM', 'AES-128-GCM', 'ChaCha20-Poly1305'],
   hash: ['SHA-256', 'SHA-384', 'SHA-512', 'BLAKE2b'],

@@ -8,8 +8,7 @@ fastapi = pytest.importorskip("fastapi")
 if not hasattr(fastapi, "__path__"):
     pytest.skip("fastapi test client unavailable in stubbed runtime", allow_module_level=True)
 
-from fastapi.testclient import TestClient
-
+from starlette.requests import Request
 from gateway import server
 
 
@@ -48,42 +47,54 @@ def test_health_disabled_and_unauthorized(monkeypatch):
     config["gateway"]["health_enabled"] = False
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.get("/health")
+    health = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/health")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(health(req))
     assert resp.status_code == 404
-    assert resp.json()["status"] == "disabled"
+    assert json.loads(resp.body.decode("utf-8"))["status"] == "disabled"
 
     config = server.load_config(None)
     config["gateway"]["health_enabled"] = True
     config["gateway"]["auth"]["mode"] = "token"
     config["gateway"]["auth"]["token"]["value"] = "tok"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.get("/health")
+    health = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/health")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(health(req))
     assert resp.status_code == 401
-    assert resp.json()["status"] == "unauthorized"
+    assert json.loads(resp.body.decode("utf-8"))["status"] == "unauthorized"
 
 
 def test_cron_invalid_and_delete_not_found(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-
-    resp = client.post("/automation/cron", json={"job_id": "job"})
-    assert resp.status_code == 400
-
-    delete = client.delete("/automation/cron/missing")
-    assert delete.status_code == 404
+    cron_create = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/automation/cron" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    cron_delete = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/automation/cron/{job_id}" and "DELETE" in (getattr(route, "methods", set()) or set())
+    )
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(cron_create({"job_id": "job"}, req)).status_code == 400
+    assert asyncio.run(cron_delete("missing", req)).status_code == 404
 
 
 def test_webhooks_invalid_payload(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-
-    resp = client.post("/webhooks", json={"webhooks": "bad"})
+    webhooks_set = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/webhooks" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(webhooks_set({"webhooks": "bad"}, req))
     assert resp.status_code == 400
 
 
@@ -92,17 +103,30 @@ def test_canvas_disabled_and_invalid(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["canvas"] = {"enabled": False}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.get("/canvas/sess")
+    canvas_get = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/canvas/{session_id}" and "GET" in (getattr(route, "methods", set()) or set())
+    )
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(canvas_get("sess", req))
     assert resp.status_code == 404
 
     config["gateway"]["canvas"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.post("/canvas/sess", json={"state": "bad"})
-    assert resp.status_code == 400
-    resp = client.post("/canvas/sess/validate", json={"state": "bad"})
-    assert resp.status_code == 400
+    canvas_set = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/canvas/{session_id}" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    canvas_validate = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/canvas/{session_id}/validate" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(canvas_set("sess", {"state": "bad"}, req)).status_code == 400
+    assert asyncio.run(canvas_validate("sess", {"state": "bad"}, req)).status_code == 400
 
 
 def test_voice_disabled_and_invalid(monkeypatch):
@@ -110,15 +134,19 @@ def test_voice_disabled_and_invalid(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": False}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/wake", json={"session_id": "s", "content": "x"}).status_code == 404
-    assert client.post("/voice/talk", json={"session_id": "s", "content": "x"}).status_code == 404
+    wake = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/wake")
+    talk = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/talk")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(wake({"session_id": "s", "content": "x"}, req)).status_code == 404
+    assert asyncio.run(talk({"session_id": "s", "content": "x"}, req)).status_code == 404
 
     config["gateway"]["voice"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/wake", json={"session_id": "", "content": ""}).status_code == 400
-    assert client.post("/voice/talk", json={"session_id": "", "content": ""}).status_code == 400
+    wake = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/wake")
+    talk = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/talk")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(wake({"session_id": "", "content": ""}, req)).status_code == 400
+    assert asyncio.run(talk({"session_id": "", "content": ""}, req)).status_code == 400
 
 
 def test_voice_stt_and_tts_invalid(monkeypatch):
@@ -126,19 +154,22 @@ def test_voice_stt_and_tts_invalid(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "stt": {"mode": "off"}}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/stt", json={"session_id": "s"}).status_code == 404
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(stt({"session_id": "s"}, req)).status_code == 404
 
     config["gateway"]["voice"] = {"enabled": True, "stt": {"mode": "command", "command": "echo hi", "command_allowlist": ["echo"]}}
     monkeypatch.setattr(server, "resolve_voice_blob", lambda *_args, **_kwargs: None)
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/stt", json={"session_id": "s"}).status_code == 400
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(stt({"session_id": "s"}, req)).status_code == 400
 
     config["gateway"]["voice"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/tts", json={"session_id": "", "content": ""}).status_code == 400
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(tts({"session_id": "", "content": ""}, req)).status_code == 400
 
 
 
@@ -158,52 +189,96 @@ def test_slack_and_telegram_endpoints(monkeypatch):
 
     adapter = DummyAdapter()
     app = _build_app(monkeypatch, config, {"slack": adapter, "telegram": adapter})
-    client = TestClient(app)
+    slack = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/slack/events")
+    telegram = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/telegram/webhook")
 
-    resp = client.post("/channels/slack/events", content="{")
-    assert resp.status_code == 400
+    first = True
+    async def receive_invalid():
+        nonlocal first
+        if first:
+            first = False
+            return {"type": "http.request", "body": b"{", "more_body": False}
+        return {"type": "http.disconnect"}
+    req = Request({"type": "http", "method": "POST", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)}, receive=receive_invalid)
+    assert asyncio.run(slack(req)).status_code == 400
 
-    resp = client.post("/channels/slack/events", json={"type": "url_verification", "challenge": "abc"})
+    body = json.dumps({"type": "url_verification", "challenge": "abc"}).encode("utf-8")
+    first = True
+    async def receive_challenge():
+        nonlocal first
+        if first:
+            first = False
+            return {"type": "http.request", "body": body, "more_body": False}
+        return {"type": "http.disconnect"}
+    req = Request({"type": "http", "method": "POST", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)}, receive=receive_challenge)
+    resp = asyncio.run(slack(req))
     assert resp.status_code == 200
-    assert resp.json()["challenge"] == "abc"
+    assert json.loads(resp.body.decode("utf-8"))["challenge"] == "abc"
 
     ts = str(int(server.time.time()))
     body = json.dumps({"type": "event_callback"}).encode("utf-8")
-    resp = client.post(
-        "/channels/slack/events",
-        content=body,
-        headers={"X-Slack-Request-Timestamp": ts, "X-Slack-Signature": "v0=bad"},
+    first = True
+    async def receive_signed():
+        nonlocal first
+        if first:
+            first = False
+            return {"type": "http.request", "body": body, "more_body": False}
+        return {"type": "http.disconnect"}
+    req = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "headers": [
+                (b"x-slack-request-timestamp", ts.encode("utf-8")),
+                (b"x-slack-signature", b"v0=bad"),
+            ],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        },
+        receive=receive_signed,
     )
-    assert resp.status_code == 401
+    assert asyncio.run(slack(req)).status_code == 401
 
-    resp = client.post(
-        "/channels/telegram/webhook",
-        json={"update_id": 1},
-        headers={"x-telegram-bot-api-secret-token": "bad"},
+    req = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "headers": [(b"x-telegram-bot-api-secret-token", b"bad")],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        }
     )
-    assert resp.status_code == 401
+    assert asyncio.run(telegram({"update_id": 1}, req)).status_code == 401
 
 
 def test_slack_and_telegram_disabled(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/channels/slack/events", json={}).status_code == 404
-    assert client.post("/channels/telegram/webhook", json={}).status_code == 404
+    slack = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/slack/events")
+    telegram = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/telegram/webhook")
+    first = True
+    async def receive_empty():
+        nonlocal first
+        if first:
+            first = False
+            return {"type": "http.request", "body": b"{}", "more_body": False}
+        return {"type": "http.disconnect"}
+    req = Request({"type": "http", "method": "POST", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)}, receive=receive_empty)
+    assert asyncio.run(slack(req)).status_code == 404
+    req = Request({"type": "http", "method": "POST", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(telegram({}, req)).status_code == 404
 
 
 def test_sessions_import_invalid_payload_and_broadcast(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-
-    resp = client.post("/sessions/import", json={"sessions": "bad"})
-    assert resp.status_code == 400
-
-    resp = client.post("/sessions/sess_a/broadcast", json={"message": ""})
-    assert resp.status_code == 400
+    sessions_import = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/import")
+    broadcast = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}/broadcast")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(sessions_import({"sessions": "bad"}, req)).status_code == 400
+    assert asyncio.run(broadcast("sess_a", {"message": ""}, req)).status_code == 400
 
     sent = []
 
@@ -215,6 +290,6 @@ def test_sessions_import_invalid_payload_and_broadcast(monkeypatch):
     server.STATE.conn_seq["conn"] = 0
     server.STATE.conn_sessions["conn"] = "sess_a"
 
-    resp = client.post("/sessions/sess_a/broadcast", json={"message": "hi"})
+    resp = asyncio.run(broadcast("sess_a", {"message": "hi"}, req))
     assert resp.status_code == 200
     assert sent

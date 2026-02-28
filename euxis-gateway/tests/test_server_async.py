@@ -237,7 +237,12 @@ def test_notify_webhooks(monkeypatch):
     def fake_urlopen(_req, timeout=None):
         return DummyResp()
 
+    async def fake_to_thread(func, *args, **kwargs):
+        func(*args, **kwargs)
+        return None
+
     monkeypatch.setattr(server.urlrequest, "urlopen", fake_urlopen)
+    monkeypatch.setattr(server.asyncio, "to_thread", fake_to_thread)
     asyncio.run(server.notify_webhooks({"event": "agent", "data": {"status": "final"}}))
 
 
@@ -245,7 +250,12 @@ def test_post_json_error(monkeypatch):
     def boom(*_args, **_kwargs):
         raise server.urlerror.URLError("bad")
 
+    async def fake_to_thread(func, *args, **kwargs):
+        func(*args, **kwargs)
+        return None
+
     monkeypatch.setattr(server.urlrequest, "urlopen", boom)
+    monkeypatch.setattr(server.asyncio, "to_thread", fake_to_thread)
     asyncio.run(server.post_json("http://example.com", {"ok": True}))
 
 def test_handle_frame_chat_send_success(monkeypatch):
@@ -280,7 +290,7 @@ def test_handle_frame_chat_send_success(monkeypatch):
             "session_id": "sess",
             "role": "user",
             "content": "ok",
-            "meta": {"agent": "a"},
+            "meta": {"agent": "a", "approved": True},
         },
     }), seq, config, "conn"))
 

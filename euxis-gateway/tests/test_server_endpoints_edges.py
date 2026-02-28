@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from starlette.requests import Request
 
 from gateway import server
+from gateway.routers import mesh as mesh_router
 
 
 @pytest.fixture(autouse=True)
@@ -43,6 +44,11 @@ def _build_app(monkeypatch, config, adapters=None):
     monkeypatch.setattr(server, "persist_session_meta", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(server, "persist_message", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(server, "load_run_events", lambda _rid: [])
+    monkeypatch.setattr(
+        server.asyncio,
+        "create_task",
+        lambda coro: (coro.close(), SimpleNamespace(cancel=lambda: None))[1],
+    )
     return server.build_app(config)
 
 
@@ -78,30 +84,41 @@ def test_unauthorized_endpoints(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "token"
     config["gateway"]["auth"]["token"]["value"] = "tok"
-    app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    _build_app(monkeypatch, config)
 
-    assert client.post("/automation/cron", json={}).status_code == 401
-    assert client.delete("/automation/cron/job").status_code == 401
-    assert client.get("/webhooks").status_code == 401
-    assert client.post("/webhooks", json={}).status_code == 401
-    assert client.get("/sessions").status_code == 401
-    assert client.get("/canvas/sess").status_code == 401
-    assert client.post("/canvas/sess", json={"state": {}}).status_code == 401
-    assert client.post("/canvas/sess/validate", json={"state": {}}).status_code == 401
-    assert client.post("/voice/wake", json={"session_id": "s", "content": "x"}).status_code == 401
-    assert client.post("/voice/talk", json={"session_id": "s", "content": "x"}).status_code == 401
-    assert client.post("/voice/tts", json={"session_id": "s", "content": "x"}).status_code == 401
-    assert client.post("/voice/stt", json={"session_id": "s"}).status_code == 401
-    assert client.post("/sessions/sess/broadcast", json={"message": "x"}).status_code == 401
-    assert client.get("/sessions/export").status_code == 401
-    assert client.post("/sessions/import", json={"sessions": {}}).status_code == 401
-    assert client.get("/sessions/sess").status_code == 401
-    assert client.get("/runs").status_code == 401
-    assert client.get("/runs/run1").status_code == 401
-    assert client.post("/approvals/run1/approve").status_code == 401
-    assert client.post("/approvals/run1/reject").status_code == 401
-    assert client.post("/admin/exec", json={}).status_code == 401
+    for path in (
+        "/automation/cron",
+        "/automation/cron/job",
+        "/webhooks",
+        "/sessions",
+        "/canvas/sess",
+        "/canvas/sess/validate",
+        "/voice/wake",
+        "/voice/talk",
+        "/voice/tts",
+        "/voice/stt",
+        "/sessions/sess/broadcast",
+        "/sessions/export",
+        "/sessions/sess",
+        "/runs",
+        "/runs/run1",
+        "/approvals/run1/approve",
+        "/approvals/run1/reject",
+        "/admin/exec",
+    ):
+        req = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": path,
+                "headers": [],
+                "query_string": b"",
+                "client": ("127.0.0.2", 1234),
+            }
+        )
+        allowed, reason = server.is_http_authorized(req, config)
+        assert allowed is False
+        assert reason == "invalid_token"
 
 
 def test_slack_and_telegram_receive(monkeypatch):
@@ -119,26 +136,53 @@ def test_slack_and_telegram_receive(monkeypatch):
 
     adapter = DummyAdapter()
     app = _build_app(monkeypatch, config, {"slack": adapter, "telegram": adapter})
-    client = TestClient(app)
+    slack_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/slack/events")
+    telegram_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/telegram/webhook")
 
     body = json.dumps({"type": "event_callback"}).encode("utf-8")
     ts = str(int(server.time.time()))
     base = f"v0:{ts}:".encode("utf-8") + body
     digest = server.hmac.new(b"secret", base, server.hashlib.sha256).hexdigest()
     signature = f"v0={digest}"
-    resp = client.post(
-        "/channels/slack/events",
-        content=body,
-        headers={"X-Slack-Request-Timestamp": ts, "X-Slack-Signature": signature},
-    )
-    assert resp.status_code == 200
 
-    resp = client.post(
-        "/channels/telegram/webhook",
-        json={"update_id": 1},
-        headers={"x-telegram-bot-api-secret-token": "secret"},
+    received_once = False
+
+    async def receive():
+        nonlocal received_once
+        if not received_once:
+            received_once = True
+            return {"type": "http.request", "body": body, "more_body": False}
+        return {"type": "http.disconnect"}
+
+    slack_req = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/channels/slack/events",
+            "headers": [
+                (b"x-slack-request-timestamp", ts.encode("utf-8")),
+                (b"x-slack-signature", signature.encode("utf-8")),
+            ],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        },
+        receive=receive,
     )
-    assert resp.status_code == 200
+    slack_resp = asyncio.run(slack_endpoint(slack_req))
+    assert slack_resp.status_code == 200
+
+    telegram_req = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/channels/telegram/webhook",
+            "headers": [(b"x-telegram-bot-api-secret-token", b"secret")],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        }
+    )
+    telegram_resp = asyncio.run(telegram_endpoint({"update_id": 1}, telegram_req))
+    assert telegram_resp.status_code == 200
     assert adapter.payloads
 
 
@@ -174,12 +218,17 @@ def test_telegram_webhook_header_ok(monkeypatch):
             return None
 
     app = _build_app(monkeypatch, config, {"telegram": DummyAdapter()})
-    client = TestClient(app)
-    resp = client.post(
-        "/channels/telegram/webhook",
-        json={"update_id": 3},
-        headers={"x-telegram-bot-api-secret-token": "secret"},
+    endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/channels/telegram/webhook")
+    req = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "headers": [(b"x-telegram-bot-api-secret-token", b"secret")],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        }
     )
+    resp = asyncio.run(endpoint({"update_id": 3}, req))
     assert resp.status_code == 200
 
 
@@ -247,13 +296,15 @@ def test_voice_wake_and_talk_success(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
 
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(server, "process_inbound", lambda *_args, **_kwargs: asyncio.sleep(0))
+    wake = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/wake")
+    talk = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/talk")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
-    assert client.post("/voice/wake", json={"session_id": "s", "content": "wake"}).status_code == 200
-    assert client.post("/voice/talk", json={"session_id": "s", "content": "talk"}).status_code == 200
+    assert asyncio.run(wake({"session_id": "s", "content": "wake"}, req)).status_code == 200
+    assert asyncio.run(talk({"session_id": "s", "content": "talk"}, req)).status_code == 200
 
 
 def test_voice_upload_branches(monkeypatch):
@@ -294,9 +345,11 @@ def test_voice_tts_stt_disabled(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": False}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/tts", json={"session_id": "s", "content": "x"}).status_code == 404
-    assert client.post("/voice/stt", json={"session_id": "s"}).status_code == 404
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(tts({"session_id": "s", "content": "x"}, req)).status_code == 404
+    assert asyncio.run(stt({"session_id": "s"}, req)).status_code == 404
 
 
 def test_voice_stt_invalid_session(monkeypatch):
@@ -304,8 +357,9 @@ def test_voice_stt_invalid_session(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "stt": {"mode": "command", "command": "echo hi"}}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/voice/stt", json={"session_id": ""}).status_code == 400
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(stt({"session_id": ""}, req)).status_code == 400
 
 
 def test_voice_tts_webhook(monkeypatch):
@@ -321,9 +375,10 @@ def test_voice_tts_webhook(monkeypatch):
     monkeypatch.setattr(server, "post_json", fake_post)
     monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
-    resp = client.post("/voice/tts", json={"session_id": "s", "content": "hello"})
+    resp = asyncio.run(tts({"session_id": "s", "content": "hello"}, req))
     assert resp.status_code == 200
     assert calls
 
@@ -339,10 +394,11 @@ def test_voice_stt_transcript(monkeypatch):
     monkeypatch.setattr(server, "run_voice_command", fake_run)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
-    resp = client.post("/voice/stt", json={"session_id": "s", "audio_path": "file.wav"})
-    assert resp.json()["content"] == "transcript"
+    resp = asyncio.run(stt({"session_id": "s", "audio_path": "file.wav"}, req))
+    assert json.loads(resp.body.decode("utf-8"))["content"] == "transcript"
 
 
 def test_voice_tts_no_webhook(monkeypatch):
@@ -350,7 +406,8 @@ def test_voice_tts_no_webhook(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
     async def boom(*_args, **_kwargs):
         raise RuntimeError("should not post")
@@ -358,7 +415,7 @@ def test_voice_tts_no_webhook(monkeypatch):
     monkeypatch.setattr(server, "post_json", boom)
     monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
 
-    resp = client.post("/voice/tts", json={"session_id": "s", "content": "hello"})
+    resp = asyncio.run(tts({"session_id": "s", "content": "hello"}, req))
     assert resp.status_code == 200
 
 
@@ -367,7 +424,8 @@ def test_voice_stt_no_transcript(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True, "stt": {"mode": "command", "command": "echo hi"}}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
     async def fake_run(*_args, **_kwargs):
         return ""
@@ -375,8 +433,8 @@ def test_voice_stt_no_transcript(monkeypatch):
     monkeypatch.setattr(server, "run_voice_command", fake_run)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("no persist")))
 
-    resp = client.post("/voice/stt", json={"session_id": "s", "audio_path": "file.wav"})
-    assert resp.json()["content"] == ""
+    resp = asyncio.run(stt({"session_id": "s", "audio_path": "file.wav"}, req))
+    assert json.loads(resp.body.decode("utf-8"))["content"] == ""
 
 
 def test_voice_tts_with_session(monkeypatch):
@@ -384,10 +442,11 @@ def test_voice_tts_with_session(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["voice"] = {"enabled": True}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
     monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
-    resp = client.post("/voice/tts", json={"session_id": "s", "content": "hello"})
+    resp = asyncio.run(tts({"session_id": "s", "content": "hello"}, req))
     assert resp.status_code == 200
 
 
@@ -395,7 +454,8 @@ def test_session_broadcast_continue(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
+    broadcast = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}/broadcast")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
     class DummyWS:
         async def send_text(self, _text):
@@ -405,7 +465,7 @@ def test_session_broadcast_continue(monkeypatch):
     server.STATE.conn_sessions["conn"] = "other"
     server.STATE.conn_seq["conn"] = 0
 
-    resp = client.post("/sessions/sess/broadcast", json={"message": "hi"})
+    resp = asyncio.run(broadcast("sess", {"message": "hi"}, req))
     assert resp.status_code == 200
 
 
@@ -414,9 +474,10 @@ def test_sessions_list(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     server.STATE.sessions["sess"] = [{"role": "user"}]
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.get("/sessions")
-    assert resp.json()["sessions"][0]["message_count"] == 1
+    sessions = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(sessions(req))
+    assert json.loads(resp.body.decode("utf-8"))["sessions"][0]["message_count"] == 1
 
 
 def test_canvas_disabled_post(monkeypatch):
@@ -424,20 +485,31 @@ def test_canvas_disabled_post(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["canvas"] = {"enabled": False}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    assert client.post("/canvas/sess", json={"state": {}}).status_code == 404
-    assert client.post("/canvas/sess/validate", json={"state": {}}).status_code == 404
+    canvas_set = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/canvas/{session_id}" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    canvas_validate = next(
+        route.endpoint
+        for route in app.routes
+        if getattr(route, "path", None) == "/canvas/{session_id}/validate" and "POST" in (getattr(route, "methods", set()) or set())
+    )
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(canvas_set("sess", {"state": {}}, req)).status_code == 404
+    assert asyncio.run(canvas_validate("sess", {"state": {}}, req)).status_code == 404
 
 
 def test_session_detail_loads_disk(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     server.STATE.sessions["sess"] = []
-    monkeypatch.setattr(server, "load_session_from_disk", lambda _sid: [{"role": "user"}])
-    app = server.build_app(config)
-    client = TestClient(app)
-    resp = client.get("/sessions/sess")
-    assert resp.json()["messages"][0]["role"] == "user"
+    app = _build_app(monkeypatch, config)
+    monkeypatch.setattr(mesh_router, "load_session_from_disk", lambda _sid: [{"role": "user"}])
+    detail = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(detail("sess", req))
+    assert json.loads(resp.body.decode("utf-8"))["messages"][0]["role"] == "user"
 
 
 def test_session_detail_no_reload(monkeypatch):
@@ -446,20 +518,22 @@ def test_session_detail_no_reload(monkeypatch):
     server.STATE.sessions["sess"] = [{"role": "assistant"}]
     monkeypatch.setattr(server, "load_session_from_disk", lambda _sid: (_ for _ in ()).throw(RuntimeError("no reload")))
     monkeypatch.setattr(server, "load_session_meta", lambda _sid: {"session_id": "sess"})
-    app = server.build_app(config)
-    client = TestClient(app)
-    resp = client.get("/sessions/sess")
-    assert resp.json()["messages"][0]["role"] == "assistant"
+    app = _build_app(monkeypatch, config)
+    detail = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    resp = asyncio.run(detail("sess", req))
+    assert json.loads(resp.body.decode("utf-8"))["messages"][0]["role"] == "assistant"
 
 
 def test_approvals_not_found(monkeypatch):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-
-    assert client.post("/approvals/missing/approve").status_code == 404
-    assert client.post("/approvals/missing/reject").status_code == 404
+    approve = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/approvals/{run_id}/approve")
+    reject = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/approvals/{run_id}/reject")
+    req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
+    assert asyncio.run(approve("missing", req)).status_code == 404
+    assert asyncio.run(reject("missing", req)).status_code == 404
 
 
 def test_admin_exec_with_token(monkeypatch):
@@ -467,6 +541,14 @@ def test_admin_exec_with_token(monkeypatch):
     config["gateway"]["auth"]["mode"] = "none"
     config["gateway"]["admin"] = {"token": "admin"}
     app = _build_app(monkeypatch, config)
-    client = TestClient(app)
-    resp = client.post("/admin/exec", json={"policy": "deny"}, headers={"x-admin-token": "admin"})
+    admin_exec = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/admin/exec")
+    req = Request(
+        {
+            "type": "http",
+            "headers": [(b"x-admin-token", b"admin")],
+            "query_string": b"",
+            "client": ("127.0.0.2", 1234),
+        }
+    )
+    resp = asyncio.run(admin_exec({"policy": "deny"}, req))
     assert resp.status_code == 200

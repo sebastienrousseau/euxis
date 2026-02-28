@@ -68,18 +68,21 @@ def test_voice_tts_and_stt(monkeypatch):
         "stt": {"mode": "command", "command": "echo hi"},
         "command_allowlist": ["echo"],
     }
-    app = server.build_app(config)
 
-    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
-    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
-
-    monkeypatch.setattr(server, "post_json", lambda *_args, **_kwargs: asyncio.sleep(0))
+    async def fake_post_json(*_args, **_kwargs):
+        return None
 
     async def fake_run_voice(*_args, **_kwargs):
         return "hello"
 
+    monkeypatch.setattr(server, "post_json", fake_post_json)
+    monkeypatch.setattr(server, "push_voice_tts", lambda *_args, **_kwargs: asyncio.sleep(0))
     monkeypatch.setattr(server, "run_voice_command", fake_run_voice)
     monkeypatch.setattr(server, "persist_voice_text", lambda *_args, **_kwargs: None)
+
+    app = server.build_app(config)
+    tts = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/tts")
+    stt = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/voice/stt")
 
     scope = {"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)}
     req = Request(scope)

@@ -661,21 +661,9 @@ class TestFastMetricsCollector:
         collector = FastMetricsCollector(str(tmp_path / "metrics"))
         collector.record("e1", {"k": "v1"})
         collector.record("e2", {"k": "v2"})
-        # Mock _write_file to avoid the msgpack mode bug in source
-        written = []
-        original_write = collector._write_file
-        def mock_write(data, mode):
-            written.append((data, mode))
-            # Fix the mode for binary: strip duplicate 'b'
-            if isinstance(data, bytes) and mode == "ab":
-                with open(collector._events_file, "ab") as f:
-                    f.write(data)
-            else:
-                original_write(data, mode)
-        with patch.object(collector, "_write_file", side_effect=mock_write):
-            count = await collector.flush()
+        count = await collector.flush()
         assert count == 2
-        assert len(written) == 1
+        assert collector._events_file.exists()
 
     def test_sync_flush_empty(self, tmp_path):
         """sync_flush with no events should return 0."""
@@ -700,16 +688,7 @@ class TestFastMetricsCollector:
         collector.record("e1", {"k": "v1"})
         await collector.start_background_flush()
         assert collector._flush_task is not None
-        # Mock _write_file to fix the mode bug
-        def mock_write(data, mode):
-            if isinstance(data, bytes):
-                with open(collector._events_file, "ab") as f:
-                    f.write(data)
-            else:
-                with open(collector._events_file, mode, encoding="utf-8") as f:
-                    f.write(data)
-        with patch.object(collector, "_write_file", side_effect=mock_write):
-            await collector.shutdown()
+        await collector.shutdown()
         assert collector._shutdown is True
         # Final flush should have written the event
         assert collector._events_file.exists()
@@ -720,15 +699,7 @@ class TestFastMetricsCollector:
         from metrics.collectors.fast_collector import FastMetricsCollector
         collector = FastMetricsCollector(str(tmp_path / "metrics"))
         collector.record("e1")
-        def mock_write(data, mode):
-            if isinstance(data, bytes):
-                with open(collector._events_file, "ab") as f:
-                    f.write(data)
-            else:
-                with open(collector._events_file, mode, encoding="utf-8") as f:
-                    f.write(data)
-        with patch.object(collector, "_write_file", side_effect=mock_write):
-            await collector.shutdown()
+        await collector.shutdown()
         assert collector._shutdown is True
 
     @pytest.mark.asyncio
@@ -925,5 +896,4 @@ class TestFastCollectorEdgeCases:
 # ============================================================================
 # PerformanceAnalyzer
 # ============================================================================
-
 

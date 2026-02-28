@@ -9,6 +9,8 @@ from typing import Any, Dict, Optional
 
 from adapters.slack_adapter import SlackAdapter, SlackAdapterConfig
 from adapters.telegram_adapter import TelegramAdapter, TelegramAdapterConfig
+from adapters.discord_adapter import DiscordAdapter, DiscordAdapterConfig
+from adapters.whatsapp_adapter import WhatsAppAdapter, WhatsAppAdapterConfig
 from adapters.sdk import MessageHandler
 
 def build_adapters(config: Dict[str, Any], on_message: Optional[MessageHandler] = None) -> Dict[str, Any]:
@@ -35,6 +37,28 @@ def build_adapters(config: Dict[str, Any], on_message: Optional[MessageHandler] 
                 webhook_url=telegram_cfg.get("webhook_url", ""),
                 poll_timeout=telegram_cfg.get("poll_timeout", 20),
                 poll_interval=telegram_cfg.get("poll_interval", 1.5),
+            ),
+            on_message=on_message,
+        )
+
+    discord_cfg = channels.get("discord", {})
+    if discord_cfg.get("enabled"):
+        adapters["discord"] = DiscordAdapter(
+            DiscordAdapterConfig(
+                token=discord_cfg.get("token", ""),
+                enabled=True,
+            ),
+            on_message=on_message,
+        )
+
+    whatsapp_cfg = channels.get("whatsapp", {})
+    if whatsapp_cfg.get("enabled"):
+        adapters["whatsapp"] = WhatsAppAdapter(
+            WhatsAppAdapterConfig(
+                token=whatsapp_cfg.get("token", ""),
+                phone_number_id=whatsapp_cfg.get("phone_number_id", ""),
+                verify_token=whatsapp_cfg.get("verify_token", ""),
+                enabled=True,
             ),
             on_message=on_message,
         )

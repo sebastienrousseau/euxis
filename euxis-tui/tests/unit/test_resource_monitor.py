@@ -389,7 +389,7 @@ class TestResourceMonitorPollResources(unittest.TestCase):
              patch("tui.widgets.resource_monitor.get_thermal_celsius", return_value=65.0), \
              patch.object(widget, "_update_display"), \
              patch("asyncio.sleep", side_effect=fake_sleep):
-            asyncio.get_event_loop().run_until_complete(widget._poll_resources())
+            asyncio.run(widget._poll_resources())
 
         assert len(widget._cpu_history) == 2
         assert widget._cpu_history == [42.0, 42.0]
@@ -416,7 +416,7 @@ class TestResourceMonitorPollResources(unittest.TestCase):
              patch("tui.widgets.resource_monitor.get_thermal_celsius", return_value=None), \
              patch.object(widget, "_update_display", mock_update), \
              patch("asyncio.sleep", side_effect=fake_sleep):
-            asyncio.get_event_loop().run_until_complete(widget._poll_resources())
+            asyncio.run(widget._poll_resources())
 
         mock_update.assert_called_with(10.0, 20.0, None)
 
@@ -441,7 +441,7 @@ class TestResourceMonitorPollResources(unittest.TestCase):
              patch("tui.widgets.resource_monitor.get_thermal_celsius", return_value=50.0), \
              patch.object(widget, "_update_display"), \
              patch("asyncio.sleep", side_effect=fake_sleep):
-            asyncio.get_event_loop().run_until_complete(widget._poll_resources())
+            asyncio.run(widget._poll_resources())
 
         # 29 + 3 = 32, trimmed to 30
         assert len(widget._cpu_history) == 30

@@ -383,7 +383,7 @@ class TestRunAgentAsync(unittest.TestCase):
             with pytest.raises(ValueError, match="Invalid agent_id"):
                 await gen.__anext__()
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_rejects_unknown_provider(self):
         """Unknown provider should raise ValueError."""
@@ -392,7 +392,7 @@ class TestRunAgentAsync(unittest.TestCase):
             with pytest.raises(ValueError, match="Unknown provider"):
                 await gen.__anext__()
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_yields_output_lines(self):
         """Should yield decoded lines from subprocess stdout."""
@@ -418,7 +418,7 @@ class TestRunAgentAsync(unittest.TestCase):
 
             assert lines == ["line one", "line two"]
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_handles_no_stdout(self):
         """Should return cleanly when stdout is None."""
@@ -436,7 +436,7 @@ class TestRunAgentAsync(unittest.TestCase):
 
             assert lines == []
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
 
 class TestRunSquadAsync(unittest.TestCase):
@@ -449,7 +449,7 @@ class TestRunSquadAsync(unittest.TestCase):
             with pytest.raises(ValueError, match="Invalid squad_id"):
                 await gen.__anext__()
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_yields_output_lines(self):
         """Should yield decoded lines from subprocess."""
@@ -474,7 +474,7 @@ class TestRunSquadAsync(unittest.TestCase):
 
             assert lines == ["squad output 1"]
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
 
 class TestRunComboAsync(unittest.TestCase):
@@ -487,7 +487,7 @@ class TestRunComboAsync(unittest.TestCase):
             with pytest.raises(ValueError, match="Invalid combo_id"):
                 await gen.__anext__()
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_yields_output_lines(self):
         """Should yield decoded lines from subprocess."""
@@ -513,7 +513,7 @@ class TestRunComboAsync(unittest.TestCase):
 
             assert lines == ["combo step 1", "combo step 2"]
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
     def test_handles_no_stdout(self):
         """Should return cleanly when stdout is None."""
@@ -531,7 +531,7 @@ class TestRunComboAsync(unittest.TestCase):
 
             assert lines == []
 
-        asyncio.get_event_loop().run_until_complete(_run())
+        asyncio.run(_run())
 
 
 if __name__ == "__main__":

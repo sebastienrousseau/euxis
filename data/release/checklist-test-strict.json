@@ -1,0 +1,12 @@
+{
+  "current_p95_ms": 131643.0,
+  "budget_ms": 45000.0,
+  "baseline_p95_ms": 131643.0,
+  "delta_ms": 0.0,
+  "delta_percent": 0.0,
+  "threshold_percent": 10.0,
+  "budget_ok": false,
+  "regression_ok": true,
+  "release_ok": false,
+  "stage": "target_q4_2026"
+}

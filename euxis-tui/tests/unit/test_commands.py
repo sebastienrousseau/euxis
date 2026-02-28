@@ -120,7 +120,7 @@ def _collect_hits(provider, query: str) -> list:
             async for hit in provider.search(query):
                 hits.append(hit)
         return hits
-    return asyncio.get_event_loop().run_until_complete(_run())
+    return asyncio.run(_run())
 
 
 # ============================================================================

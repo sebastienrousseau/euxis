@@ -162,9 +162,8 @@ class FastMetricsCollector:
             ) + "\n"
             mode = "a"
 
-        # Write to file (async-friendly with thread pool)
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, self._write_file, data, mode)
+        # Write to file off the event loop thread.
+        await asyncio.to_thread(self._write_file, data, mode)
 
         return len(events)
 
@@ -174,7 +173,8 @@ class FastMetricsCollector:
             with open(self._events_file, mode, encoding="utf-8") as f:
                 f.write(data)
         else:
-            with open(self._events_file, mode + "b") as f:
+            binary_mode = mode if "b" in mode else mode + "b"
+            with open(self._events_file, binary_mode) as f:
                 f.write(data)
 
     async def start_background_flush(self) -> None:

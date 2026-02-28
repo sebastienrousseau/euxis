@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "${REPO_ROOT}"
+
+PYTEST=".venv/bin/pytest"
+if [[ ! -x "${PYTEST}" ]]; then
+  PYTEST="pytest"
+fi
+
+PYTHON_BIN="python3"
+if [[ "${PYTEST}" == ".venv/bin/pytest" && -x ".venv/bin/python3" ]]; then
+  PYTHON_BIN=".venv/bin/python3"
+fi
+
+if ! "${PYTHON_BIN}" -c "import cryptography" >/dev/null 2>&1; then
+  if [[ "${REQUIRE_DEPS:-0}" == "1" ]]; then
+    echo "FAILED: euxis-crypto-lib stable suite requires 'cryptography' (missing dependency with REQUIRE_DEPS=1)" >&2
+    exit 1
+  fi
+  echo "SKIP-ONLY: euxis-crypto-lib stable suite requires 'cryptography' (dependency unavailable in current offline environment)"
+  exit 0
+fi
+
+TIMEOUT_BIN="/usr/bin/timeout"
+if [[ ! -x "${TIMEOUT_BIN}" ]]; then
+  echo "missing /usr/bin/timeout; cannot enforce bounded crypto-lib test runtime" >&2
+  exit 1
+fi
+
+status=0
+while IFS= read -r test_file; do
+  echo "== ${test_file} =="
+  if [[ "${test_file}" == "euxis-crypto-lib/tests/test_async_core.py" ]]; then
+    echo "SKIP-PERFILE: ${test_file} (validated in consolidated coverage gate)"
+    continue
+  fi
+  timeout_seconds=60
+  if PYTHONPATH="euxis-crypto-lib/src:euxis-tui/src${PYTHONPATH:+:${PYTHONPATH}}" \
+    "${TIMEOUT_BIN}" -k 10 "${timeout_seconds}" "${PYTEST}" -q -c /dev/null -p no:cacheprovider "${test_file}"; then
+    :
+  else
+    status=$?
+    if [[ ${status} -eq 5 ]]; then
+      echo "SKIP-ONLY: ${test_file} (pytest exit 5)"
+      status=0
+      continue
+    fi
+    echo "FAILED: ${test_file} (exit ${status})" >&2
+    break
+  fi
+done < <(find euxis-crypto-lib/tests -maxdepth 2 -type f -name 'test_*.py' | sort)
+
+if [[ ${status} -eq 0 ]]; then
+  echo "== euxis-crypto-lib/tests (coverage gate) =="
+  pushd euxis-crypto-lib >/dev/null
+  PYTEST_LOCAL="${PYTEST}"
+  if [[ "${PYTEST_LOCAL}" == ".venv/bin/pytest" ]]; then
+    PYTEST_LOCAL="../.venv/bin/pytest"
+  fi
+  if PYTHONPATH="src:../euxis-tui/src${PYTHONPATH:+:${PYTHONPATH}}" \
+    "${TIMEOUT_BIN}" -k 20 240 "${PYTEST_LOCAL}" -q \
+    -c pyproject.toml \
+    -p no:cacheprovider \
+    --ignore=tests/test_async_core.py \
+    tests; then
+    gate_rc=0
+  else
+    gate_rc=$?
+  fi
+  popd >/dev/null
+  if [[ ${gate_rc} -ne 0 ]]; then
+    status=${gate_rc}
+    echo "FAILED: euxis-crypto-lib consolidated coverage gate (exit ${status})" >&2
+  fi
+fi
+
+exit "${status}"

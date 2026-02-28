@@ -28,7 +28,7 @@ def test_handle_frame_non_request(monkeypatch):
             sent.append(json.loads(text))
 
     ws = DummyWS()
-    asyncio.run(server.handle_frame(ws, json.dumps({"type": "event"}), {"value": 0}, server.load_config(None), "conn"))
+    asyncio.run(server.handle_frame(ws, json.dumps({"type": "not_request"}), {"value": 0}, server.load_config(None), "conn"))
     assert sent[0]["error"]["message"] == "Expected request frame"
 
 

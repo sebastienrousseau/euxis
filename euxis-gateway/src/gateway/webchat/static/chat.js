@@ -143,6 +143,23 @@
         renderLogItem('raw', evt.data, '', 'raw');
         return;
       }
+      if (parsed.type === 'event' && parsed.event === 'node.browser.stream_frame') {
+        const payload = parsed.data || {};
+        if (payload.screenshot) {
+          let img = canvasRender.querySelector('img.live-stream');
+          if (!img) {
+            img = document.createElement('img');
+            img.className = 'live-stream';
+            img.style.maxWidth = '100%';
+            img.style.borderRadius = '8px';
+            img.style.border = '1px solid #333';
+            canvasRender.innerHTML = '<h3>Live Browser Stream</h3>';
+            canvasRender.appendChild(img);
+          }
+          img.src = `data:image/png;base64,${payload.screenshot}`;
+          return; // Do not clutter log
+        }
+      }
       if (parsed.type === 'event' && parsed.event === 'agent') {
         const payload = parsed.data || {};
         const runId = payload.run_id || 'unknown';

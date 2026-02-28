@@ -1,0 +1,202 @@
+{
+  "stage": "current",
+  "packages": {
+    "euxis-core": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-cli": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-gateway": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-tui": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-metrics": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-adapters": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-security": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-crypto-lib": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-runtime": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-scripts": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-sdk-rust": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-crypto-packages": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    },
+    "euxis-docs": {
+      "overall": 9.66,
+      "categories": {
+        "speed": 10.0,
+        "memory_efficiency": 10.0,
+        "cpu_efficiency": 10.0,
+        "performance": 10.0,
+        "portability": 10.0,
+        "security": 9.5,
+        "usability": 9.2,
+        "ux_design": 9.0,
+        "quality": 9.5,
+        "functionality": 9.4
+      }
+    }
+  },
+  "overall": 9.66,
+  "release_gate_pass": true
+}

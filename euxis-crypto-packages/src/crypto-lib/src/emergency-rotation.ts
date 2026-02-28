@@ -16,6 +16,7 @@ export interface RotationResult {
 export class EmergencyKeyRotation {
   private config: SecurityConfig;
   private auditLog: string[] = [];
+  private static rotationCounter = 0;
 
   constructor(config: SecurityConfig) {
     this.config = config;
@@ -53,8 +54,9 @@ export class EmergencyKeyRotation {
       };
 
     } catch (error) {
-      this.auditLog.push(`Emergency rotation failed: ${error.message}`);
-      throw new Error(`Emergency key rotation failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.auditLog.push(`Emergency rotation failed: ${message}`);
+      throw new Error(`Emergency key rotation failed: ${message}`);
     }
   }
 
@@ -77,7 +79,8 @@ export class EmergencyKeyRotation {
   private async generateSecureKey(): Promise<string> {
     // Implementation would call actual HSM/KMS APIs
     // This is a secure key generation placeholder
-    const keyId = `emergency-key-${Date.now()}`;
+    EmergencyKeyRotation.rotationCounter += 1;
+    const keyId = `emergency-key-${Date.now()}-${EmergencyKeyRotation.rotationCounter}`;
     this.auditLog.push(`New key generated: ${keyId} via ${this.config.keyManagement.provider}`);
     return keyId;
   }

@@ -1,0 +1,25 @@
+# Package Structure Matrix
+
+Generated from `scripts/quality/package_standards.json`.
+
+| Package | Kind | Path | Required Files | Tests | Docs | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| `euxis-core` | `python` | `euxis-core` | `pyproject.toml, README.md` (yes) | `euxis-core/tests` (yes) | `euxis-docs/docs/modules/euxis-core.md` (yes) | `ok` |
+| `euxis-cli` | `python` | `euxis-cli` | `pyproject.toml, README.md` (yes) | `euxis-cli/tests` (yes) | `euxis-docs/docs/modules/euxis-cli.md` (yes) | `ok` |
+| `euxis-gateway` | `python` | `euxis-gateway` | `pyproject.toml, README.md` (yes) | `euxis-gateway/tests` (yes) | `euxis-docs/docs/modules/euxis-gateway.md` (yes) | `ok` |
+| `euxis-tui` | `python-rust` | `euxis-tui` | `pyproject.toml, Cargo.toml, README.md` (yes) | `euxis-tui/tests` (yes) | `euxis-docs/docs/modules/euxis-tui.md` (yes) | `ok` |
+| `euxis-metrics` | `python` | `euxis-metrics` | `pyproject.toml, README.md` (yes) | `euxis-metrics/tests` (yes) | `euxis-docs/docs/modules/euxis-metrics.md` (yes) | `ok` |
+| `euxis-adapters` | `python` | `euxis-adapters` | `pyproject.toml, README.md` (yes) | `euxis-adapters/tests` (yes) | `euxis-docs/docs/modules/euxis-adapters.md` (yes) | `ok` |
+| `euxis-security` | `python` | `euxis-security` | `pyproject.toml, README.md` (yes) | `euxis-security/tests` (yes) | `euxis-docs/docs/modules/euxis-security.md` (yes) | `ok` |
+| `euxis-crypto-lib` | `python-rust` | `euxis-crypto-lib` | `pyproject.toml, Cargo.toml, README.md` (yes) | `euxis-crypto-lib/tests` (yes) | `euxis-docs/docs/modules/euxis-crypto-lib.md` (yes) | `ok` |
+| `euxis-runtime` | `runtime-data` | `euxis-runtime` | `README.md, data/perf/metrics.jsonl` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-runtime.md` (yes) | `ok` |
+| `euxis-scripts` | `ops` | `euxis-scripts` | `README.md` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-scripts.md` (yes) | `ok` |
+| `euxis-sdk-rust` | `rust` | `euxis-sdk-rust` | `Cargo.toml, README.md` (yes) | `euxis-sdk-rust/tests` (yes) | `euxis-docs/docs/modules/euxis-sdk-rust.md` (yes) | `ok` |
+| `euxis-crypto-packages` | `node` | `euxis-crypto-packages` | `package.json, README.md` (yes) | `euxis-crypto-packages/src/crypto-lib/tests` (yes) | `euxis-docs/docs/modules/euxis-crypto-packages.md` (yes) | `ok` |
+| `euxis-docs` | `docs` | `euxis-docs` | `README.md, pyproject.toml` (yes) | `euxis-docs/tests` (yes) | `euxis-docs/docs/modules/euxis-docs.md` (yes) | `ok` |
+
+## Enforcement
+
+- Local generate: `make package-structure-matrix`
+- Local check: `make package-structure-matrix-check`
+- CI: enforced via `make gate-all`.

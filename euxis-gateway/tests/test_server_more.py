@@ -482,8 +482,13 @@ def test_notify_webhooks_retry(monkeypatch):
     async def fake_sleep(_):
         return None
 
+    async def fake_to_thread(func, *args, **kwargs):
+        func(*args, **kwargs)
+        return None
+
     monkeypatch.setattr(server.urlrequest, "urlopen", boom)
     monkeypatch.setattr(server.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(server.asyncio, "to_thread", fake_to_thread)
     asyncio.run(server.notify_webhooks({"event": "agent", "data": {"status": "final"}}))
 
 
@@ -506,7 +511,12 @@ def test_post_json_success(monkeypatch):
     def fake_urlopen(_req, timeout=None):
         return DummyResp()
 
+    async def fake_to_thread(func, *args, **kwargs):
+        func(*args, **kwargs)
+        return None
+
     monkeypatch.setattr(server.urlrequest, "urlopen", fake_urlopen)
+    monkeypatch.setattr(server.asyncio, "to_thread", fake_to_thread)
     asyncio.run(server.post_json("http://example.com", {"ok": True}))
 
 
@@ -550,11 +560,17 @@ def test_process_inbound_with_connection(monkeypatch):
         return None
 
     monkeypatch.setattr(server, "dispatch_with_lock", fake_dispatch)
+    monkeypatch.setattr(server, "is_exec_allowed", lambda *args: True)
     asyncio.run(server.process_inbound("sess", "hi", {"agent": "a"}, cfg))
     assert server.STATE.running
 
 
-def test_is_exec_allowed_elevated_modes():
+def test_is_exec_allowed_elevated_modes(monkeypatch):
+    from gateway.identity import AgentIdentity
+    def mock_get_identity(agent_id):
+        trust = "trusted" if agent_id == "" else "restricted"
+        return AgentIdentity(agent_id=agent_id, name=agent_id, trust_level=trust)
+    monkeypatch.setattr(server.STATE.identity_manager, "get_identity", mock_get_identity)
     cfg = server.load_config(None)
     cfg["gateway"]["exec"]["policy"] = "allowlist"
     cfg["gateway"]["exec"]["allowlist"] = []
@@ -668,7 +684,9 @@ def test_is_exec_allowed_approved():
     assert server.is_exec_allowed({"approved": True}, cfg) is True
 
 
-def test_is_exec_allowed_elevated_ask_mode():
+def test_is_exec_allowed_elevated_ask_mode(monkeypatch):
+    from gateway.identity import AgentIdentity
+    monkeypatch.setattr(server.STATE.identity_manager, "get_identity", lambda *args: AgentIdentity(agent_id="x", name="x", trust_level="trusted"))
     cfg = server.load_config(None)
     cfg["gateway"]["exec"]["policy"] = "allowlist"
     cfg["gateway"]["exec"]["allowlist"] = []

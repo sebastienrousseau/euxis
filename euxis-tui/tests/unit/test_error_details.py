@@ -338,7 +338,7 @@ class TestRunAnalysis(unittest.TestCase):
 
         import asyncio
 
-        result = asyncio.get_event_loop().run_until_complete(modal._run_analysis())
+        result = asyncio.run(modal._run_analysis())
 
         MockAnalyzer.assert_called_once_with(timeout=15.0)
         mock_analyzer_instance.analyze.assert_called_once_with(

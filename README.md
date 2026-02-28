@@ -16,6 +16,16 @@ Euxis operates on three core principles:
 2. **Zero-Trust Memory**: Agents run in isolated Extism sandboxes. You must explicitly grant network and filesystem capabilities.
 3. **Cryptographic Provenance**: Every agent binary is signed cryptographically to prevent supply-chain poisoning.
 
+## 2026 Evolution
+
+Euxis has evolved into a fully interoperable and omnichannel framework:
+
+- **Model Context Protocol (MCP)**: Native host support for universal tool and context sharing.
+- **Agent Swarms**: Declarative playbook orchestration for multi-agent collaboration.
+- **FinOps Router**: Score-based model provider selection to balance cost, speed, and reliability.
+- **Device Nodes**: Control local hardware and browsers securely from sandboxed agents.
+- **Omnichannel Presence**: Integrated adapters for WhatsApp, Discord, Slack, and Telegram.
+
 ## Component Overview
 
 Euxis is modular by design. Integrate exactly what your infrastructure requires.

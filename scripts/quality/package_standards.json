@@ -1,0 +1,109 @@
+{
+  "version": "2026-02-28",
+  "packages": [
+    {
+      "name": "euxis-core",
+      "path": "euxis-core",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-core/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-core.md"
+    },
+    {
+      "name": "euxis-cli",
+      "path": "euxis-cli",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-cli/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-cli.md"
+    },
+    {
+      "name": "euxis-gateway",
+      "path": "euxis-gateway",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-gateway/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-gateway.md"
+    },
+    {
+      "name": "euxis-tui",
+      "path": "euxis-tui",
+      "kind": "python-rust",
+      "required_files": ["pyproject.toml", "Cargo.toml", "README.md"],
+      "test_paths": ["euxis-tui/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-tui.md"
+    },
+    {
+      "name": "euxis-metrics",
+      "path": "euxis-metrics",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-metrics/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-metrics.md"
+    },
+    {
+      "name": "euxis-adapters",
+      "path": "euxis-adapters",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-adapters/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-adapters.md"
+    },
+    {
+      "name": "euxis-security",
+      "path": "euxis-security",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-security/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-security.md"
+    },
+    {
+      "name": "euxis-crypto-lib",
+      "path": "euxis-crypto-lib",
+      "kind": "python-rust",
+      "required_files": ["pyproject.toml", "Cargo.toml", "README.md"],
+      "test_paths": ["euxis-crypto-lib/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-crypto-lib.md"
+    },
+    {
+      "name": "euxis-runtime",
+      "path": "euxis-runtime",
+      "kind": "runtime-data",
+      "required_files": ["README.md", "data/perf/metrics.jsonl"],
+      "test_paths": [],
+      "docs_path": "euxis-docs/docs/modules/euxis-runtime.md"
+    },
+    {
+      "name": "euxis-scripts",
+      "path": "euxis-scripts",
+      "kind": "ops",
+      "required_files": ["README.md"],
+      "test_paths": [],
+      "docs_path": "euxis-docs/docs/modules/euxis-scripts.md"
+    },
+    {
+      "name": "euxis-sdk-rust",
+      "path": "euxis-sdk-rust",
+      "kind": "rust",
+      "required_files": ["Cargo.toml", "README.md"],
+      "test_paths": ["euxis-sdk-rust/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-sdk-rust.md"
+    },
+    {
+      "name": "euxis-crypto-packages",
+      "path": "euxis-crypto-packages",
+      "kind": "node",
+      "required_files": ["package.json", "README.md"],
+      "test_paths": ["euxis-crypto-packages/src/crypto-lib/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-crypto-packages.md"
+    },
+    {
+      "name": "euxis-docs",
+      "path": "euxis-docs",
+      "kind": "docs",
+      "required_files": ["README.md", "pyproject.toml"],
+      "test_paths": ["euxis-docs/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-docs.md"
+    }
+  ]
+}

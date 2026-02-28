@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import gc
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -105,9 +106,13 @@ class TestMemoryFootprint:
         if not cli_path.exists():
             pytest.skip(f"CLI not found at {cli_path}")
 
-        # Use /usr/bin/time for memory measurement
+        time_bin = shutil.which("time")
+        if not time_bin:
+            pytest.skip("`time` command is not available in this environment")
+
+        # Use time(1) for max RSS measurement.
         result = subprocess.run(
-            ["/usr/bin/time", "-f", "%M", str(cli_path), "--help"],
+            [time_bin, "-f", "%M", str(cli_path), "--help"],
             capture_output=True,
             timeout=10
         )

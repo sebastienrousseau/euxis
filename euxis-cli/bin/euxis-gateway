@@ -2,4 +2,5 @@
 set -euo pipefail
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-exec python3 "${EUXIS_HOME}/api/src/gateway/server.py" "$@"
+export PYTHONPATH="${EUXIS_HOME}/euxis-gateway/src:${PYTHONPATH:-}"
+exec python3 -m gateway.server "$@"
