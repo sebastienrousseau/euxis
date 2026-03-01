@@ -1,0 +1,71 @@
+{
+  "status": "ok",
+  "packages": [
+    {
+      "name": "euxis-core",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-cli",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-gateway",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-tui",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-metrics",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-adapters",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-security",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-crypto",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-runtime",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-scripts",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-sdk",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-web",
+      "status": "ok",
+      "missing": []
+    },
+    {
+      "name": "euxis-docs",
+      "status": "ok",
+      "missing": []
+    }
+  ],
+  "failures": []
+}

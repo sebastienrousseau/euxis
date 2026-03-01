@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
+.PHONY: all test lint format clean install dev architecture-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
 
 all: install test
 
@@ -149,6 +149,17 @@ package-structure-matrix-report:
 		--summary-output euxis-data/release/package-structure-matrix-staleness.md \
 		--diff-output euxis-data/release/package-structure-matrix-staleness.diff \
 		--warn-only
+
+template-overlay-apply:
+	python3 euxis-ops/templates/apply_template_overlay.py \
+		--repo-root . \
+		--standards euxis-ops/quality/package_standards.json
+
+template-conformance-check:
+	python3 euxis-ops/quality/validate_template_conformance.py \
+		--repo-root . \
+		--standards euxis-ops/quality/package_standards.json \
+		--json-output euxis-data/release/template-conformance.json
 
 package-bench-collect:
 	python3 euxis-ops/perf/collect_package_benchmarks.py \

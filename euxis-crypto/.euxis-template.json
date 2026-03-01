@@ -1,0 +1,40 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-crypto",
+  "kind": "python-rust",
+  "module": "euxis_crypto",
+  "required_files": [
+    "pyproject.toml",
+    "Cargo.toml",
+    "README.md"
+  ],
+  "test_paths": [
+    "euxis-crypto/tests"
+  ],
+  "docs_path": "euxis-docs/docs/modules/euxis-crypto.md",
+  "platform_support": [
+    "macos",
+    "linux",
+    "wsl"
+  ],
+  "core_platform_separation": {
+    "required": true,
+    "core_paths": [
+      "src/euxis_crypto/core"
+    ],
+    "platform_paths": [
+      "src/euxis_crypto/platform"
+    ],
+    "platform_targets": [
+      "macos",
+      "linux",
+      "wsl"
+    ],
+    "notes": "Core logic should depend only on platform contracts/interfaces."
+  },
+  "consistency_contract": {
+    "docs_required": true,
+    "tests_required": true,
+    "strict_naming": true
+  }
+}
