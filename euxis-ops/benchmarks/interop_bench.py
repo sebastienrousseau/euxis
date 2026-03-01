@@ -7,7 +7,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from euxis_ops.benchmarks.runner import BenchmarkResult, BenchmarkRunner
+from runner import BenchmarkResult, BenchmarkRunner
 
 
 def _bench_openclaw_roundtrip() -> BenchmarkResult:

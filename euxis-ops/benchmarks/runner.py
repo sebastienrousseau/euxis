@@ -4,10 +4,26 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable
+
+# Ensure the benchmarks directory and source packages are importable.
+_BENCH_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _BENCH_DIR.parent.parent
+for _p in [
+    str(_BENCH_DIR),
+    str(_REPO_ROOT / "euxis-bridge" / "src"),
+    str(_REPO_ROOT / "euxis-core" / "src"),
+    str(_REPO_ROOT / "euxis-crypto" / "src"),
+    str(_REPO_ROOT / "euxis-identity" / "src"),
+    str(_REPO_ROOT / "euxis-inference" / "src"),
+    str(_REPO_ROOT / "euxis-a2a" / "src"),
+]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,31 +117,31 @@ def build_runner() -> BenchmarkRunner:
     runner = BenchmarkRunner()
 
     try:
-        from euxis_ops.benchmarks.security_bench import register_benchmarks
+        from security_bench import register_benchmarks
         register_benchmarks(runner)
     except ImportError:
         pass
 
     try:
-        from euxis_ops.benchmarks.performance_bench import register_benchmarks
+        from performance_bench import register_benchmarks
         register_benchmarks(runner)
     except ImportError:
         pass
 
     try:
-        from euxis_ops.benchmarks.autonomy_bench import register_benchmarks
+        from autonomy_bench import register_benchmarks
         register_benchmarks(runner)
     except ImportError:
         pass
 
     try:
-        from euxis_ops.benchmarks.portability_bench import register_benchmarks
+        from portability_bench import register_benchmarks
         register_benchmarks(runner)
     except ImportError:
         pass
 
     try:
-        from euxis_ops.benchmarks.interop_bench import register_benchmarks
+        from interop_bench import register_benchmarks
         register_benchmarks(runner)
     except ImportError:
         pass

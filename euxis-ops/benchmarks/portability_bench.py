@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from euxis_ops.benchmarks.runner import BenchmarkResult, BenchmarkRunner
+from runner import BenchmarkResult, BenchmarkRunner
 
 
 def _bench_platform_detection() -> BenchmarkResult:

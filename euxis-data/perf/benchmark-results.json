@@ -1,0 +1,234 @@
+{
+  "reports": [
+    {
+      "suite": "autonomy",
+      "passed": true,
+      "pass_count": 2,
+      "fail_count": 0,
+      "total_duration_ms": 14.84,
+      "results": [
+        {
+          "name": "task_lifecycle",
+          "suite": "autonomy",
+          "passed": true,
+          "duration_ms": 0.48610199883114547,
+          "metrics": {
+            "iterations": 100,
+            "avg_ms": 0.0049
+          },
+          "error": null
+        },
+        {
+          "name": "error_recovery",
+          "suite": "autonomy",
+          "passed": true,
+          "duration_ms": 0.2100730052916333,
+          "metrics": {
+            "recovered": 50,
+            "total": 50
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "suite": "interop",
+      "passed": true,
+      "pass_count": 3,
+      "fail_count": 0,
+      "total_duration_ms": 25.84,
+      "results": [
+        {
+          "name": "openclaw_roundtrip",
+          "suite": "interop",
+          "passed": true,
+          "duration_ms": 1.3717759866267443,
+          "metrics": {
+            "skills_imported": 2,
+            "registry_valid": true
+          },
+          "error": null
+        },
+        {
+          "name": "a2a_card_generation",
+          "suite": "interop",
+          "passed": true,
+          "duration_ms": 0.24315000337082893,
+          "metrics": {
+            "iterations": 100,
+            "avg_ms": 0.0024
+          },
+          "error": null
+        },
+        {
+          "name": "bridged_skill_serialization",
+          "suite": "interop",
+          "passed": true,
+          "duration_ms": 0.013284996384754777,
+          "metrics": {
+            "fields_preserved": true
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "suite": "performance",
+      "passed": true,
+      "pass_count": 5,
+      "fail_count": 0,
+      "total_duration_ms": 83.85,
+      "results": [
+        {
+          "name": "crypto_throughput",
+          "suite": "performance",
+          "passed": true,
+          "duration_ms": 21.41348300210666,
+          "metrics": {
+            "iterations": 200,
+            "ops_per_sec": 9339.9,
+            "avg_ms": 0.107
+          },
+          "error": null
+        },
+        {
+          "name": "crypto_aad_throughput",
+          "suite": "performance",
+          "passed": true,
+          "duration_ms": 3.8728759973309934,
+          "metrics": {
+            "iterations": 200,
+            "ops_per_sec": 51641.2
+          },
+          "error": null
+        },
+        {
+          "name": "key_derivation",
+          "suite": "performance",
+          "passed": true,
+          "duration_ms": 11.005917986040004,
+          "metrics": {
+            "p50_ms": 2.2,
+            "p95_ms": 2.25,
+            "iterations": 5
+          },
+          "error": null
+        },
+        {
+          "name": "skill_import_throughput",
+          "suite": "performance",
+          "passed": true,
+          "duration_ms": 3.2669060019543394,
+          "metrics": {
+            "skills_imported": 20,
+            "throughput_per_sec": 6122.0
+          },
+          "error": null
+        },
+        {
+          "name": "serialization_speed",
+          "suite": "performance",
+          "passed": true,
+          "duration_ms": 5.396651002229191,
+          "metrics": {
+            "iterations": 1000,
+            "avg_us": 5.4
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "suite": "portability",
+      "passed": true,
+      "pass_count": 3,
+      "fail_count": 0,
+      "total_duration_ms": 89.18,
+      "results": [
+        {
+          "name": "platform_detection_consistency",
+          "suite": "portability",
+          "passed": true,
+          "duration_ms": 0.25105800887104124,
+          "metrics": {
+            "platforms_detected": [
+              "linux"
+            ],
+            "consistent": true
+          },
+          "error": null
+        },
+        {
+          "name": "path_normalization",
+          "suite": "portability",
+          "passed": true,
+          "duration_ms": 0.11318500037305057,
+          "metrics": {
+            "paths_tested": 3,
+            "all_valid": true
+          },
+          "error": null
+        },
+        {
+          "name": "env_allowlist_portability",
+          "suite": "portability",
+          "passed": true,
+          "duration_ms": 85.69610299309716,
+          "metrics": {
+            "allowed_keys": [
+              "PATH",
+              "HOME"
+            ],
+            "no_secrets_leaked": true
+          },
+          "error": null
+        }
+      ]
+    },
+    {
+      "suite": "security",
+      "passed": true,
+      "pass_count": 3,
+      "fail_count": 0,
+      "total_duration_ms": 4.11,
+      "results": [
+        {
+          "name": "malicious_detection",
+          "suite": "security",
+          "passed": true,
+          "duration_ms": 1.2646910035982728,
+          "metrics": {
+            "detection_rate": 0.8,
+            "detected": 4,
+            "total_malicious": 5,
+            "false_positives": 0
+          },
+          "error": null
+        },
+        {
+          "name": "tampered_skill_rejection",
+          "suite": "security",
+          "passed": true,
+          "duration_ms": 0.032014999305829406,
+          "metrics": {
+            "rejected": true
+          },
+          "error": null
+        },
+        {
+          "name": "admission_pipeline_throughput",
+          "suite": "security",
+          "passed": true,
+          "duration_ms": 2.332800009753555,
+          "metrics": {
+            "iterations": 10,
+            "avg_ms": 0.23,
+            "admitted": true
+          },
+          "error": null
+        }
+      ]
+    }
+  ],
+  "all_passed": true
+}
