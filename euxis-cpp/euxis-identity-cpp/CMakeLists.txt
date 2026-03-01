@@ -1,0 +1,18 @@
+euxis_add_library(euxis-identity-cpp
+  SOURCES
+    src/did.cpp
+    src/credentials.cpp
+    src/attestation.cpp
+    src/registry.cpp
+    src/erc8004.cpp
+  DEPS
+    unofficial-sodium::sodium
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_did.cpp
+    tests/test_credentials.cpp
+    tests/test_attestation.cpp
+    tests/test_registry.cpp
+    tests/test_erc8004.cpp
+)

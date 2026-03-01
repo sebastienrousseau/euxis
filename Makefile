@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
 
 all: install test
 
@@ -303,3 +303,22 @@ verify-all-packages: gate-all bridge-tests-stable bridge-package-tests-stable ga
 
 verify-signed-artifacts:
 	bash euxis-ops/supply_chain/verify_signed_artifacts.sh release-artifacts
+
+# C++23 targets
+cpp-configure:
+	cmake -B euxis-cpp/build -S euxis-cpp \
+		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
+		-DCMAKE_BUILD_TYPE=Release
+
+cpp-build: cpp-configure
+	cmake --build euxis-cpp/build --parallel
+
+cpp-test: cpp-build
+	ctest --test-dir euxis-cpp/build --output-on-failure
+
+cpp-bench: cpp-build
+	euxis-cpp/build/euxis-bench-cpp/euxis_bench --suite all \
+		--output euxis-data/perf/cpp-benchmark-results.json
+
+cpp-clean:
+	rm -rf euxis-cpp/build

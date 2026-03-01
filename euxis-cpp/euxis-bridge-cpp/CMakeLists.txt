@@ -1,0 +1,32 @@
+euxis_add_library(euxis-bridge-cpp
+  SOURCES
+    src/skill.cpp
+    src/policy.cpp
+    src/importer.cpp
+    src/parser.cpp
+    src/verification.cpp
+    src/static_analysis.cpp
+    src/admission.cpp
+    src/reputation.cpp
+    src/provenance.cpp
+    src/audit.cpp
+    src/executor.cpp
+    src/platform_linux.cpp
+  DEPS
+    euxis-crypto-cpp
+    unofficial-sodium::sodium
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_skill.cpp
+    tests/test_policy.cpp
+    tests/test_importer.cpp
+    tests/test_parser.cpp
+    tests/test_verification.cpp
+    tests/test_static_analysis.cpp
+    tests/test_admission.cpp
+    tests/test_reputation.cpp
+    tests/test_provenance.cpp
+    tests/test_audit.cpp
+    tests/test_executor.cpp
+)

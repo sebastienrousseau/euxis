@@ -1,0 +1,13 @@
+{
+  "name": "euxis",
+  "version": "0.0.3",
+  "dependencies": [
+    "libsodium",
+    "nlohmann-json",
+    "spdlog",
+    "fmt",
+    "gtest",
+    "cpp-httplib",
+    "toml11"
+  ]
+}

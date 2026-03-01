@@ -1,0 +1,18 @@
+euxis_add_library(euxis-a2a-cpp
+  SOURCES
+    src/agent_card.cpp
+    src/task.cpp
+    src/message.cpp
+    src/server.cpp
+    src/http_transport.cpp
+  DEPS
+    euxis-identity-cpp
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_agent_card.cpp
+    tests/test_task.cpp
+    tests/test_message.cpp
+    tests/test_server.cpp
+    tests/test_http_transport.cpp
+)

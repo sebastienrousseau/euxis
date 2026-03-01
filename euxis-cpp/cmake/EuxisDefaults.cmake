@@ -1,0 +1,5 @@
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  add_compile_options(-fsanitize=address,undefined)
+  add_link_options(-fsanitize=address,undefined)
+endif()

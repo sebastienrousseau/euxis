@@ -136,6 +136,70 @@
       "required_files": ["pyproject.toml", "README.md"],
       "test_paths": ["euxis-a2a/tests"],
       "docs_path": "euxis-docs/docs/modules/euxis-a2a.md"
+    },
+    {
+      "name": "euxis-crypto-cpp",
+      "path": "euxis-cpp/euxis-crypto-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-crypto-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-crypto-cpp.md"
+    },
+    {
+      "name": "euxis-bridge-cpp",
+      "path": "euxis-cpp/euxis-bridge-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-bridge-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-bridge-cpp.md"
+    },
+    {
+      "name": "euxis-memory-cpp",
+      "path": "euxis-cpp/euxis-memory-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-memory-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-memory-cpp.md"
+    },
+    {
+      "name": "euxis-identity-cpp",
+      "path": "euxis-cpp/euxis-identity-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-identity-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-identity-cpp.md"
+    },
+    {
+      "name": "euxis-inference-cpp",
+      "path": "euxis-cpp/euxis-inference-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-inference-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-inference-cpp.md"
+    },
+    {
+      "name": "euxis-a2a-cpp",
+      "path": "euxis-cpp/euxis-a2a-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-a2a-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-a2a-cpp.md"
+    },
+    {
+      "name": "euxis-bench-cpp",
+      "path": "euxis-cpp/euxis-bench-cpp",
+      "kind": "cpp-library",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": ["euxis-cpp/euxis-bench-cpp/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-bench-cpp.md"
+    },
+    {
+      "name": "euxis-etx",
+      "path": "euxis-cpp/euxis-etx",
+      "kind": "cpp-application",
+      "required_files": ["CMakeLists.txt"],
+      "test_paths": [],
+      "docs_path": "euxis-docs/docs/modules/euxis-etx.md"
     }
   ]
 }

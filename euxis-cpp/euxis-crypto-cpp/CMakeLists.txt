@@ -1,0 +1,14 @@
+euxis_add_library(euxis-crypto-cpp
+  SOURCES
+    src/aes_gcm.cpp
+    src/key_derivation.cpp
+    src/ed25519.cpp
+  DEPS
+    unofficial-sodium::sodium
+    nlohmann_json::nlohmann_json
+  TEST_SOURCES
+    tests/test_aes_gcm.cpp
+    tests/test_aes_gcm_aad.cpp
+    tests/test_key_derivation.cpp
+    tests/test_ed25519.cpp
+)

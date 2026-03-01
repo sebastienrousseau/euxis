@@ -1,0 +1,18 @@
+euxis_add_library(euxis-inference-cpp
+  SOURCES
+    src/config.cpp
+    src/model_registry.cpp
+    src/quality_gate.cpp
+    src/llama_engine.cpp
+    src/ollama_engine.cpp
+  DEPS
+    unofficial-sodium::sodium
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_config.cpp
+    tests/test_model_registry.cpp
+    tests/test_quality_gate.cpp
+    tests/test_llama_engine.cpp
+    tests/test_ollama_engine.cpp
+)

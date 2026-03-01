@@ -1,0 +1,13 @@
+euxis_add_library(euxis-memory-cpp
+  SOURCES
+    src/store.cpp
+    src/entry.cpp
+  DEPS
+    euxis-crypto-cpp
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_store.cpp
+    tests/test_tier_isolation.cpp
+    tests/test_destroy_keys.cpp
+)
