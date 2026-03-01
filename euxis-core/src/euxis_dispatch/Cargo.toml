@@ -1,6 +1,6 @@
 [package]
 name = "euxis_dispatch"
-version = "v0.0.2"
+version = "v0.0.3"
 edition = "2021"
 description = "High-performance Rust dispatch engine replacing the euxis_core.py GIL bottleneck."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]

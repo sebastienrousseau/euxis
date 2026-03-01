@@ -203,7 +203,7 @@ class TestCheckMaintenanceStatus(unittest.TestCase):
     @patch("check_package_maintenance.parse_requirements_file")
     def test_unmaintained_package(self, mock_parse, mock_get_info):
         """Test package not updated in over a year is marked unmaintained."""
-        mock_parse.return_value = [("ancient-package", "v0.0.2")]
+        mock_parse.return_value = [("ancient-package", "v0.0.3")]
         mock_get_info.return_value = {
             "releases": self._make_release_data(400)  # 400 days ago
         }

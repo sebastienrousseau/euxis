@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "euxis-tui"
-version = "0.0.2"
+version = "0.0.3"
 description = "Textual UI application for the Euxis Agent Framework"
 readme = "README.md"
 license = {text = "AGPL-3.0-or-later"}
@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "euxis-core>=v0.0.2",
+    "euxis-core>=v0.0.3",
     "rich>=14.3.0,<15.0.0",
     "textual>=7.5.0,<8.0.0",
 ]

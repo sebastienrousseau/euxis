@@ -1,7 +1,7 @@
 ---
 agent_id: ledger
 role: "ISO 20022 correctness authority, payments schema validator, and financial integration guardian"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [payments, iso20022, finance, schema, compliance]
 tier: fleet
 activation: specialist

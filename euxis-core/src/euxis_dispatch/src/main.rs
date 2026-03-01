@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     let command = &args[1];
     match command.as_str() {
         "version" | "--version" => {
-            println!("euxis v0.0.2 (native-dispatch)");
+            println!("euxis v0.0.3 (native-dispatch)");
         }
         "health" => {
             run_health_check().await?;

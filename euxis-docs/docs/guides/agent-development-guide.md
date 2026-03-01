@@ -14,7 +14,7 @@ cat > ~/my-agent.txt <<'EOF'
 ---
 agent_id: my-agent
 role: Custom domain specialist
-version: "0.0.2"
+version: "0.0.3"
 tags: [custom, domain]
 last_updated: "current-02-02"
 ---
@@ -70,7 +70,7 @@ Place the file in `~/.euxis/agents/prompts/fleet/<agent-id>.txt`.
 ---
 agent_id: <must match filename>
 role: <one-line description>
-version: "0.0.2"
+version: "0.0.3"
 tags: [<category tags>]
 last_updated: "<YYYY-MM-DD>"
 ---
@@ -241,4 +241,4 @@ See the ADR documents for rationale behind key design decisions:
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*

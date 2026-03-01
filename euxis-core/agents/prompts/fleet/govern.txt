@@ -1,7 +1,7 @@
 ---
 agent_id: govern
 role: "Agent capability governance and escalation policy"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [governance, policy, escalation]
 tier: fleet
 activation: on-demand

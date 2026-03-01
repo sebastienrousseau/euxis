@@ -1,6 +1,6 @@
 [package]
 name = "euxis-crypto-rs"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 description = "Native Rust cryptography for Euxis"
 license = "MIT"

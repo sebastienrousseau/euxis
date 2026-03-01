@@ -30,7 +30,7 @@
     "stage": "current"
   },
   "baseline_proposal": {
-    "previous_release": "v0.0.2",
+    "previous_release": "v0.0.3",
     "next_release": "v0.0.3",
     "proposed_previous_release_p95_ms": 131643.0,
     "generated_at_utc": "2026-02-28T16:48:26.164896+00:00"

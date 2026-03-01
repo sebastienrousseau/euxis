@@ -3,7 +3,7 @@
 
 """Performance regression test suite.
 
-Validates performance targets for v0.0.2 release:
+Validates performance targets for v0.0.3 release:
 - Cold start: <=20ms
 - Memory footprint: <=10MB
 - Response time: <=10ms
@@ -227,7 +227,7 @@ class TestRegressionBaseline:
             # Create initial baseline
             import json
             baseline = {
-                "version": "v0.0.2",
+                "version": "v0.0.3",
                 "targets": {
                     "cold_start_ms": TARGET_COLD_START_MS,
                     "memory_mb": TARGET_MEMORY_MB,

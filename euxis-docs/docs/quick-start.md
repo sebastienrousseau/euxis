@@ -69,7 +69,7 @@ cd ~/.euxis
 
 **Expected output (abridged):**
 ```
-Euxis v0.0.2 Installation
+Euxis v0.0.3 Installation
 Adding EUXIS_HOME and PATH to ~/.zshrc
 Installation complete!
 ```
@@ -407,4 +407,4 @@ euxis-health
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*

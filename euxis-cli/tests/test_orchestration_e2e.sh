@@ -96,7 +96,7 @@ cat > "${PLUGIN_DIR}/test-plugin.txt" <<'PROMPT'
 ---
 agent_id: test-plugin
 role: test
-version: "0.0.2"
+version: "0.0.3"
 tags: [test]
 last_updated: "2026-02-02"
 ---

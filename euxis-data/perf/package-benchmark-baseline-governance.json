@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "previous_release": "v0.0.2",
+  "previous_release": "v0.0.3",
   "next_release": "v0.0.3",
   "threshold_percent": 25.0,
   "package_count": 14,

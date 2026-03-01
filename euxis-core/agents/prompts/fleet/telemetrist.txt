@@ -1,7 +1,7 @@
 ---
 agent_id: telemetrist
 role: "Observability, telemetry, structured logging, and data governance"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [observability, telemetry, data]
 tier: fleet
 activation: default

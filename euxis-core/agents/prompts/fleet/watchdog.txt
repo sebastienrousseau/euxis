@@ -1,7 +1,7 @@
 ---
 agent_id: watchdog
 role: "Pre-merge exhaustive regression analysis of commits and pull requests"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [regression, analysis, review, prevention]
 tier: fleet
 activation: default

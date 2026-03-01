@@ -20,7 +20,7 @@ set -euo pipefail
 EUXIS_REPO="${EUXIS_REPO:-https://github.com/euxis/euxis.git}"
 EUXIS_BRANCH="${EUXIS_BRANCH:-main}"
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-VERSION="0.0.2"
+VERSION="0.0.3"
 
 # ============================================================================
 # Colors & Output (respects NO_COLOR and pipes)
@@ -62,12 +62,11 @@ setup_icons() {
 
 print_logo() {
     echo -e ""
-    echo -e "${BOLD}${MAGENTA}    ███████╗██╗   ██╗██╗  ██╗██╗███████╗${RESET}"
-    echo -e "${BOLD}${MAGENTA}    ██╔════╝██║   ██║╚██╗██╔╝██║██╔════╝${RESET}"
-    echo -e "${BOLD}${CYAN}    █████╗  ██║   ██║ ╚███╔╝ ██║███████╗${RESET}"
-    echo -e "${BOLD}${CYAN}    ██╔══╝  ██║   ██║ ██╔██╗ ██║╚════██║${RESET}"
-    echo -e "${BOLD}${MAGENTA}    ███████╗╚██████╔╝██╔╝ ██╗██║███████║${RESET}"
-    echo -e "${BOLD}${MAGENTA}    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝${RESET}"
+    echo -e "${BOLD}${CYAN}    ███████${RESET}"
+    echo -e "${BOLD}${CYAN}    ██${RESET}"
+    echo -e "${BOLD}${CYAN}    █████${RESET}"
+    echo -e "${BOLD}${CYAN}    ██${RESET}"
+    echo -e "${BOLD}${CYAN}    ███████${RESET}"
     echo -e "${BOLD}${YELLOW}    ${ICON_BOLT} v${VERSION}${RESET}"
     echo -e ""
 }

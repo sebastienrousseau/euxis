@@ -43,7 +43,7 @@ trace_start() {
   "ended_at": null,
   "status": "running",
   "environment": {
-    "euxis_version": "v0.0.2",
+    "euxis_version": "v0.0.3",
     "os": "$(uname -s)",
     "arch": "$(uname -m)",
     "shell": "$(basename "${SHELL:-unknown}")",

@@ -32,8 +32,8 @@ for pkg_path in package_paths:
 project = "Euxis"
 copyright = f"{datetime.now().year}, Euxis Fleet"
 author = "Euxis Fleet"
-version = "0.0.2"
-release = "v0.0.2"
+version = "0.0.3"
+release = "v0.0.3"
 
 # -- General configuration ---------------------------------------------------
 

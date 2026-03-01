@@ -53,7 +53,7 @@ set -euo pipefail
 
 # Script metadata
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly SCRIPT_VERSION="0.0.2"
+readonly SCRIPT_VERSION="0.0.3"
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Default configuration

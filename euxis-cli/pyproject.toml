@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-cli"
-version = "0.0.2"
+version = "0.0.3"
 description = "CLI entry points and orchestration commands for the Euxis Agent Framework"
 readme = "README.md"
 license = {text = "AGPL-3.0-or-later"}
@@ -22,7 +22,7 @@ classifiers = [
 ]
 dependencies = [
     "requests>=2.31.0,<3.0.0",
-    "euxis-core>=v0.0.2",
+    "euxis-core>=v0.0.3",
     "rich>=14.3.0,<15.0.0",
 ]
 

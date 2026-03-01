@@ -1,7 +1,7 @@
 ---
 agent_id: researcher
 role: "Iterative multi-pass research with cross-validation and citation"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [research, analysis, knowledge]
 tier: fleet
 activation: on-demand

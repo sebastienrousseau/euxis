@@ -1,7 +1,7 @@
 ---
 agent_id: tactician
 role: "Terminal UI perfection, interaction design, and keyboard-first CLI ergonomics"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [tui, cli, terminal, keyboard, design]
 tier: fleet
 activation: default

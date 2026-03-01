@@ -4,7 +4,7 @@ The Autonomous Agent Framework.
 
 [![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/) [![Version][version-badge]][version-url] [![License][license-badge]][license-url]
 
-Version v0.0.2
+Version v0.0.3
 
 Use Euxis to deploy, orchestrate, and observe high-performance AI agents. Euxis eliminates the latency and instability of traditional agent loops by utilizing a decentralized WebAssembly (Wasm) mesh.
 
@@ -63,9 +63,9 @@ AGPL-3.0 License - see [LICENSE](LICENSE).
 Author: Sebastien Rousseau
 
 ---
-*Part of the [Euxis Agent Framework](https://euxis.co) (Euxis v0.0.2)*
+*Part of the [Euxis Agent Framework](https://euxis.co) (Euxis v0.0.3)*
 
 [license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-v0.0.2-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.2
+[version-badge]: https://img.shields.io/badge/version-v0.0.3-green.svg
+[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.3

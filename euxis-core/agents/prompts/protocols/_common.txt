@@ -1,6 +1,6 @@
 ---
 partial_id: common-instructions
-version: "v0.0.2"
+version: "v0.0.3"
 last_updated: "2026-01-31"
 ---
 

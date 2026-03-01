@@ -191,7 +191,7 @@ jobs:
             --json-output euxis-data/release/checklist.json
           python3 euxis-ops/perf/propose_release_baseline.py \
             --metrics euxis-runtime/data/perf/metrics.jsonl \
-            --previous-release v0.0.2 \
+            --previous-release v0.0.3 \
             --next-release v0.0.3 \
             --output euxis-data/release/proposed-baseline.json
           python3 euxis-ops/release/review_baseline_proposal.py \

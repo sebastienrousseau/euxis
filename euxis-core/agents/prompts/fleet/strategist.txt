@@ -1,7 +1,7 @@
 ---
 agent_id: strategist
 role: "Platform-native social content, content calendars, and community engagement"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [social, content, community]
 tier: fleet
 activation: on-demand

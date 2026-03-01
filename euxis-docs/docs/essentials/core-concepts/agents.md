@@ -100,7 +100,7 @@ cat > ~/my-specialist.txt <<'EOF'
 ---
 agent_id: my-specialist
 role: Custom domain specialist
-version: "0.0.2"
+version: "0.0.3"
 tags: [custom, domain]
 last_updated: "current-02-02"
 ---

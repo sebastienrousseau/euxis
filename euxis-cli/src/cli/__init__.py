@@ -13,7 +13,7 @@ from rich.markdown import Markdown
 from rich.status import Status
 from rich.syntax import Syntax
 
-__version__ = "v0.0.2"
+__version__ = "v0.0.3"
 
 
 def _run_bridge_tool(euxis_home: str, args: list[str]) -> int:

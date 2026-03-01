@@ -74,7 +74,7 @@ EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
 # Fast-path: handle --version and --help without sourcing large libraries
 case "${1:-}" in
   --version)
-    echo "euxis v0.0.2"
+    echo "euxis v0.0.3"
     exit 0
     ;;
   "" | -h | --help | help)
@@ -84,17 +84,16 @@ case "${1:-}" in
         RESET=$'\033[0m'; BOLD=$'\033[1m'; DIM=$'\033[2m'; RED=$'\033[38;5;203m'; GREEN=$'\033[38;5;42m'; YELLOW=$'\033[38;5;220m'; BLUE=$'\033[38;5;69m'; MAGENTA=$'\033[38;5;211m'; CYAN=$'\033[38;5;87m'; WHITE=$'\033[38;5;255m'
         ICON_CHECK="✓"; ICON_BULLET="▸"; ICON_ARROW="→"; ICON_BOLT="⚡"
         # Banner
-        printf "\n%s%s    ███████╗██╗   ██╗██╗  ██╗██╗███████╗%s\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%s%s    ██╔════╝██║   ██║╚██╗██╔╝██║██╔════╝%s\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%s%s    █████╗  ██║   ██║ ╚███╔╝ ██║███████╗%s\n" "$BOLD" "$CYAN" "$RESET"
-        printf "%s%s    ██╔══╝  ██║   ██║ ██╔██╗ ██║╚════██║%s\n" "$BOLD" "$CYAN" "$RESET"
-        printf "%s%s    ███████╗╚██████╔╝██╔╝ ██╗██║███████║%s\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%s%s    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝%s\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "    %s%s⚡ v0.0.2%s\n\n" "$BOLD" "$YELLOW" "$RESET"
+        printf "\n%s%s    ███████%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    ██%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    █████%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    ██%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%s%s    ███████%s\n" "$BOLD" "$CYAN" "$RESET"
+        printf "    %s%s⚡ v0.0.3%s\n\n" "$BOLD" "$YELLOW" "$RESET"
     else
         RESET=''; BOLD=''; DIM=''; RED=''; GREEN=''; YELLOW=''; BLUE=''; MAGENTA=''; CYAN=''; WHITE=''
         ICON_CHECK="*"; ICON_BULLET=">"; ICON_ARROW="->"; ICON_BOLT="*"
-        printf "\n    EUXIS\n    * v0.0.2\n\n"
+        printf "\n    EUXIS\n    * v0.0.3\n\n"
     fi
 
     # Fast Context Detector

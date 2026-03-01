@@ -191,7 +191,7 @@ Canonical sequential verification pipeline. Uses the playbook engine when availa
 
 **Examples:**
 ```bash
-euxis-verify-all "Release readiness for v0.0.2"
+euxis-verify-all "Release readiness for v0.0.3"
 euxis-verify-all "Docs audit" --from-gate 2
 ```
 
@@ -226,7 +226,7 @@ Cross-platform semantic memory system using vector and graph hybrid storage. Man
 
 **Examples:**
 ```bash
-euxis-cortex remember 'Deployed v0.0.2 to staging, all tests passed' 'gatekeeper' --type episodic
+euxis-cortex remember 'Deployed v0.0.3 to staging, all tests passed' 'gatekeeper' --type episodic
 euxis-cortex recall 'auth token' 5 --hybrid
 euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 ```
@@ -813,7 +813,7 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*
 
 ---
 

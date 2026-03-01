@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /home/seb/.euxis/euxis-security/src -type f -name \"*.py\" 2>/dev/null | head -10)",
+      "Bash(grep -r \"memory\\\\|state\\\\|cortex\" /home/seb/.euxis/euxis-core/lib/*.sh 2>/dev/null | head -20)",
+      "WebSearch",
+      "Bash(grep -r \"OpenClaw\\\\|openclaw\\\\|ClawHub\" /home/seb/.euxis --include=\"*.py\" --include=\"*.md\" 2>/dev/null | head -30)",
+      "Bash(find /home/seb/.euxis/euxis-crypto/tests -type f -name \"test_*.py\" 2>/dev/null | head -5)",
+      "Bash(find /home/seb/.euxis/euxis-crypto/ -type f -name \"*.py\" 2>/dev/null | sort)",
+      "Bash(bash euxis-ops/templates/create_euxis_package.sh euxis-identity && bash euxis-ops/templates/create_euxis_package.sh euxis-inference && bash euxis-ops/templates/create_euxis_package.sh euxis-a2a)",
+      "Bash(which pytest && pytest --version 2>/dev/null; ls .venv/bin/pytest 2>/dev/null; pip3 show pytest 2>/dev/null | head -3)",
+      "Bash(.venv/bin/pytest euxis-bridge/tests/ -v --tb=short 2>&1)",
+      "Bash(.venv/bin/pytest euxis-bridge/tests/ -v --tb=short --cov=euxis_bridge --cov-report=term-missing 2>&1 | tail -80)",
+      "Bash(.venv/bin/pytest -v --tb=short 2>&1)",
+      "Bash(find /home/seb/.euxis -path \"*/tests/__init__.py\" -o -path \"*/tests/unit/__init__.py\" -o -path \"*/tests/platform/__init__.py\" 2>/dev/null | sort)",
+      "Bash(find /home/seb/.euxis -path \"*euxis-*/tests*/__pycache__\" -not -path \"*/.venv/*\" -type d -exec rm -rf {} + 2>/dev/null; echo \"pycache cleared\")",
+      "Bash(find /home/seb/.euxis -path \"*euxis-*/tests*/__pycache__\" -not -path \"*/.venv/*\" -type d -exec rm -rf {} + 2>/dev/null; .venv/bin/pytest --tb=short --no-header -q 2>&1 | tail -40)",
+      "Bash(make bench-all 2>&1)",
+      "Bash(git add \\\\\n  euxis-ops/benchmarks/runner.py \\\\\n  euxis-ops/benchmarks/autonomy_bench.py \\\\\n  euxis-ops/benchmarks/interop_bench.py \\\\\n  euxis-ops/benchmarks/performance_bench.py \\\\\n  euxis-ops/benchmarks/portability_bench.py \\\\\n  euxis-ops/benchmarks/security_bench.py \\\\\n  euxis-data/perf/benchmark-results.json)",
+      "Bash(script -qc \"/home/seb/.euxis/euxis-cli/bin/euxis --help 2>&1 | head -8\" /dev/null 2>/dev/null | cat -v | head -8)",
+      "Bash(script -qc \"/home/seb/.euxis/euxis-cli/bin/euxis --help\" /dev/null 2>/dev/null | cat -v | head -10)",
+      "Bash(git grep -l 'v0\\\\.0\\\\.2' | xargs sed -i 's/v0\\\\.0\\\\.2/v0.0.3/g')",
+      "Bash(git grep -n '0\\\\.0\\\\.2' -- ':!*.lock' 2>/dev/null | grep -v '0\\\\.0\\\\.3' | head -20)",
+      "Bash(git add -A && git commit -S -m \"$\\(cat <<'EOF'\nchore: bump version to v0.0.3 and replace ASCII logo with compact E\n\n- Replace large EUXIS ASCII banner with compact E logo across 6 files\n- Fix broken ANSI escape codes in euxis entrypoint \\(space 0x20 -> \\\\033\\)\n- Bump version from v0.0.2 to v0.0.3 across all 200+ files\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

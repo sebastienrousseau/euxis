@@ -24,7 +24,7 @@ describe('Crypto Library Index', () => {
     });
 
     it('should export version constant', () => {
-      expect(CRYPTO_LIB_VERSION).toBe('v0.0.2');
+      expect(CRYPTO_LIB_VERSION).toBe('v0.0.3');
     });
 
     it('should export supported algorithms', () => {

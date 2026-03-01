@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.0.2] - 2026-02-17
+## [v0.0.3] - 2026-02-17
 
 ### Added
 - **Multi-Tier Model Routing**: Intelligent cost optimization with capability-to-model mapping (`router.sh`)
@@ -129,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed Providers**: OpenCode and Kilo Code removed from supported providers
 
 ### Deprecated
-- **JSON Registry Format**: SQLite is now the primary storage; JSON support will be removed in v0.0.2
+- **JSON Registry Format**: SQLite is now the primary storage; JSON support will be removed in v0.0.3
 
 ### Removed
 - **OpenCode Provider**: Discontinued due to lack of active development
@@ -332,12 +332,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Comparison Links
 
-[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.2...HEAD
-[v0.0.2]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.2
+[Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.3...HEAD
+[v0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.3
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/sebastienrousseau/euxis/compare/v0.0.3...v0.0.4
-[0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/sebastienrousseau/euxis/compare/v0.0.2...v0.0.2
-[0.0.2]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.2
+[0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.3...v0.0.3
+[0.0.2]: https://github.com/sebastienrousseau/euxis/compare/v0.0.3...v0.0.3
+[0.0.2]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.3

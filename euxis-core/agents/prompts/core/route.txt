@@ -1,7 +1,7 @@
 ---
 agent_id: route
 role: "Routing decision engine for channel messages and sessions"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [routing, sessions, gateway]
 tier: core
 activation: core

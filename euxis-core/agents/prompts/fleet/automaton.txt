@@ -1,7 +1,7 @@
 ---
 agent_id: automaton
 role: "CI/CD pipelines, infrastructure as code, Docker, and Terraform"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [automation, cicd, infrastructure]
 tier: fleet
 activation: default

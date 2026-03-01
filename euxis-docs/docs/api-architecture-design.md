@@ -623,7 +623,7 @@ func main() {
 **Installation:**
 ```toml
 [dependencies]
-euxis-sdk = "v0.0.2"
+euxis-sdk = "v0.0.3"
 tokio = { version = "1.0", features = ["full"] }
 ```
 

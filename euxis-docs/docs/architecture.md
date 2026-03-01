@@ -4,7 +4,7 @@
 
 Euxis is a multi-provider AI agent orchestration framework with a two-tier agent hierarchy, tiered memory system, and capability-based task routing.
 
-**Version:** v0.0.2
+**Version:** v0.0.3
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 
@@ -226,4 +226,4 @@ Enables agents to share context and avoid redundant work:
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*

@@ -17,7 +17,7 @@ Usage:
     record_timing("api_response", 5.2)
 """
 
-__version__ = "v0.0.2"
+__version__ = "v0.0.3"
 
 # Lazy imports to minimize cold start overhead
 _perf_collector = None

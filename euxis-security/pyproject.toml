@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-security"
-version = "0.0.2"
+version = "0.0.3"
 description = "Security policy defaults and tooling for the Euxis Agent Framework"
 readme = "README.md"
 license = {text = "AGPL-3.0-or-later"}

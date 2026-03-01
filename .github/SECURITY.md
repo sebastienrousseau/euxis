@@ -7,7 +7,7 @@ We actively support security updates for the following versions:
 | Version | Supported          |
 | ------- | ------------------ |
 | 0.1.x   | :white_check_mark: |
-| < v0.0.2 | :x:                |
+| < v0.0.3 | :x:                |
 
 ## Dependency Security
 

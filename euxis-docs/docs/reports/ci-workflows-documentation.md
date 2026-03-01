@@ -1,4 +1,4 @@
-# CI Workflows Documentation (v0.0.2)
+# CI Workflows Documentation (v0.0.3)
 
 This document describes the CI/CD workflows and release processes for the Euxis monorepo, generated as part of the multi-repo split preparation.
 
@@ -120,4 +120,4 @@ The `euxis-cli/bin/euxis-certify` script runs 6 gates:
 | 6 | Documentation governance |
 
 ---
-*Generated:-02-16 as part of v0.0.2 multi-repo preparation*
+*Generated:-02-16 as part of v0.0.3 multi-repo preparation*

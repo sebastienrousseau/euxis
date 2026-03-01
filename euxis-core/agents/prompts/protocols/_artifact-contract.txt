@@ -1,11 +1,11 @@
 ---
 protocol_id: artifact-output-contract
-version: "v0.0.2"
+version: "v0.0.3"
 last_updated: "2026-01-31"
 priority: "RED"
 ---
 
-## ARTIFACT & OUTPUT CONTRACT PROTOCOL (v0.0.2)
+## ARTIFACT & OUTPUT CONTRACT PROTOCOL (v0.0.3)
 
 Every Euxis agent MUST produce deliverables that conform to a canonical artifact type. Unstructured output is forbidden in orchestrated workflows.
 

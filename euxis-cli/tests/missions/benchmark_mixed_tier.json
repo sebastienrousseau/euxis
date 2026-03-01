@@ -1,6 +1,6 @@
 {
   "project": "euxis-router-benchmark",
-  "version": "v0.0.2",
+  "version": "v0.0.3",
   "mode": "hierarchical",
   "description": "Multi-Tier Research Loop benchmark to validate router cost optimization",
   "routing": {

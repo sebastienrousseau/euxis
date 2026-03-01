@@ -1,4 +1,4 @@
-# Unused Assets Report (v0.0.2)
+# Unused Assets Report (v0.0.3)
 
 ## Summary
 No safe deletions were performed. All scripts in `euxis-ops/` are referenced by docs or tooling. No identical duplicates found for top-level guides.

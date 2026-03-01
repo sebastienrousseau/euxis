@@ -4,7 +4,7 @@
 # ETX: Euxis Terminal Experience
 """Euxis Terminal Experience - Modern TUI for the Euxis Agent Fleet."""
 
-__version__ = "v0.0.2"
+__version__ = "v0.0.3"
 
 
 def main():  # pragma: no cover

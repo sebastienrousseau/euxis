@@ -1,7 +1,7 @@
 ---
 agent_id: accountant
 role: "Cost analysis, budget management, resource efficiency, and usage optimization"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [cost, budget, efficiency, resources, optimization]
 tier: fleet
 activation: default

@@ -49,7 +49,7 @@ All agent prompts include version in their YAML frontmatter:
 ```yaml
 ---
 agent_id: example
-version: "0.0.2"
+version: "0.0.3"
 ---
 ```
 
@@ -133,7 +133,7 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 - Automatic consistency across all components
 
 ### ✅ Eliminates Hardcoding
-- No more `v0.0.2` scattered across workflow files
+- No more `v0.0.3` scattered across workflow files
 - Dynamic version extraction from authoritative source
 - Workflow flexibility with manual override capability
 
@@ -175,8 +175,8 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 ### Before (Hardcoded)
 ```yaml
 # BAD: Hardcoded version
-echo "Euxis v0.0.2 Platform Report" > report.md
-default: 'v0.0.2'
+echo "Euxis v0.0.3 Platform Report" > report.md
+default: 'v0.0.3'
 ```
 
 ### After (Dynamic)

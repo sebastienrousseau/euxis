@@ -1,7 +1,7 @@
 ---
 agent_id: social
 role: "Social content creation, brand presence, and community engagement"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [social, content, brand, community]
 tier: fleet
 activation: on-demand

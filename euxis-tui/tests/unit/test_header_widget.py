@@ -133,7 +133,7 @@ class TestETXHeaderReactiveDefaults(unittest.TestCase):
 
     def test_default_version(self):
         descriptor = ETXHeader.__dict__["version"]
-        assert descriptor._default == "v0.0.2"
+        assert descriptor._default == "v0.0.3"
 
     def test_default_model(self):
         descriptor = ETXHeader.__dict__["model"]
@@ -242,7 +242,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         assert mock_logo.update.called
         text = mock_logo.update.call_args[0][0]
         assert "EUXIS" in text
-        assert "v0.0.2" in text
+        assert "v0.0.3" in text
 
     def test_update_display_context_contains_project(self):
         header, _, mock_context, _, _ = self._create_header_with_mocks()
@@ -284,7 +284,7 @@ class TestETXHeaderUpdateDisplay(unittest.TestCase):
         header, mock_logo, _, _, _ = self._create_header_with_mocks()
         header._update_display()
         text = mock_logo.update.call_args[0][0]
-        assert "v0.0.2" in text
+        assert "v0.0.3" in text
 
     def test_update_display_status_contains_agent_count(self):
         header, _, _, _, mock_status = self._create_header_with_mocks()

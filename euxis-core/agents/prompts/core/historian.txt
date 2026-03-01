@@ -1,7 +1,7 @@
 ---
 agent_id: historian
 role: "Long-term system memory, temporal patterns, and institutional knowledge"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [memory, patterns, evolution, temporal, narrative]
 tier: core
 activation: core

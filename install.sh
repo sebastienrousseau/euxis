@@ -26,7 +26,7 @@ NC='\033[0m'
 
 echo ""
 echo -e "${BLUE}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║           Euxis v0.0.2 Installation                   ║${NC}"
+echo -e "${BLUE}║           Euxis v0.0.3 Installation                   ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 

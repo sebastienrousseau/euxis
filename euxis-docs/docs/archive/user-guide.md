@@ -379,4 +379,4 @@ euxis-combo run envision "Design new onboarding flow"
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*

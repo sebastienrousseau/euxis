@@ -36,19 +36,19 @@ class TestSquadDetailScreen(unittest.TestCase):
         self.registry = FleetRegistry()
         self.registry.agents = [
             Agent(
-                id="architect", tier="core", version="0.0.2",
+                id="architect", tier="core", version="0.0.3",
                 tags=("design",), activation="default",
             ),
             Agent(
-                id="debugger", tier="fleet", version="0.0.2",
+                id="debugger", tier="fleet", version="0.0.3",
                 tags=("fix",), activation="default",
             ),
             Agent(
-                id="tester", tier="fleet", version="0.0.2",
+                id="tester", tier="fleet", version="0.0.3",
                 tags=("qa",), activation="default",
             ),
             Agent(
-                id="reviewer", tier="core", version="0.0.2",
+                id="reviewer", tier="core", version="0.0.3",
                 tags=("qa",), activation="specialist",
             ),
         ]
@@ -186,8 +186,8 @@ class TestSquadDetailScreenMounting(unittest.TestCase):
     def test_on_mount_with_squads(self):
         """Test on_mount creates squad cards."""
         self.registry.agents = [
-            Agent(id="architect", tier="core", version="0.0.2", tags=(), activation="default"),
-            Agent(id="debugger", tier="fleet", version="0.0.2", tags=(), activation="default"),
+            Agent(id="architect", tier="core", version="0.0.3", tags=(), activation="default"),
+            Agent(id="debugger", tier="fleet", version="0.0.3", tags=(), activation="default"),
         ]
         self.registry.squads = [
             Squad(id="test-squad", name="Test Squad", purpose="Testing", lead="architect",
@@ -220,8 +220,8 @@ class TestSquadDetailScreenMounting(unittest.TestCase):
     def test_core_agent_highlighting(self):
         """Test core agents are highlighted differently in squads."""
         self.registry.agents = [
-            Agent(id="core-agent", tier="core", version="0.0.2", tags=(), activation="default"),
-            Agent(id="fleet-agent", tier="fleet", version="0.0.2", tags=(), activation="default"),
+            Agent(id="core-agent", tier="core", version="0.0.3", tags=(), activation="default"),
+            Agent(id="fleet-agent", tier="fleet", version="0.0.3", tags=(), activation="default"),
         ]
         self.registry.squads = [
             Squad(id="mixed-squad", name="Mixed Squad", purpose="Mixed team", lead="core-agent",
@@ -267,7 +267,7 @@ class TestSquadDetailScreenPropertyBased(unittest.TestCase):
         """Property: Registry handles arbitrary agent ID lists."""
         registry = FleetRegistry()
         registry.agents = [
-            Agent(id=aid, tier="fleet", version="0.0.2", tags=(), activation="default")
+            Agent(id=aid, tier="fleet", version="0.0.3", tags=(), activation="default")
             for aid in agent_ids
         ]
         # Verify registry construction doesn't crash

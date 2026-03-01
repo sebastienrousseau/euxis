@@ -6,9 +6,9 @@ We adhere strictly to Semantic Versioning (`MAJOR.MINOR.PATCH`).
 
 ---
 
-## [v0.0.2] - The Core API Evolution
+## [v0.0.3] - The Core API Evolution
 
-*Currently in active development via `feat/v0.0.2`.*
+*Currently in active development via `feat/v0.0.3`.*
 
 ### Added
 * **Plugin Architecture:** Official support for compiling and registering custom Rust Extism WebAssembly modules (`euxis agent build`).
@@ -20,7 +20,7 @@ We adhere strictly to Semantic Versioning (`MAJOR.MINOR.PATCH`).
 
 ---
 
-## [v0.0.2] - The Genesis Mesh
+## [v0.0.3] - The Genesis Mesh
 
 *Initial Release*
 

@@ -115,7 +115,7 @@ def test_propose_release_baseline_generates_expected_value() -> None:
             "--metrics",
             "euxis-runtime/data/perf/metrics.jsonl",
             "--previous-release",
-            "v0.0.2",
+            "v0.0.3",
             "--next-release",
             "v0.0.3",
             "--output",
@@ -198,7 +198,7 @@ def test_perf_governance_validator_fails_non_monotonic_policy() -> None:
 def test_perf_governance_validator_fails_invalid_baseline_tag() -> None:
     tmp_baseline = REPO_ROOT / "euxis-data" / "release" / "tmp-bad-baseline.json"
     tmp_baseline.parent.mkdir(parents=True, exist_ok=True)
-    bad_baseline = {"previous_release": "0.0.2", "previous_release_p95_ms": 1000}
+    bad_baseline = {"previous_release": "0.0.3", "previous_release_p95_ms": 1000}
     tmp_baseline.write_text(json.dumps(bad_baseline), encoding="utf-8")
     result = _run(
         [
@@ -219,13 +219,13 @@ def test_baseline_proposal_review_flags_large_delta() -> None:
     proposal = REPO_ROOT / "euxis-data" / "release" / "tmp-baseline-review-proposal.json"
     baseline.parent.mkdir(parents=True, exist_ok=True)
     baseline.write_text(
-        json.dumps({"previous_release": "v0.0.2", "previous_release_p95_ms": 100000}),
+        json.dumps({"previous_release": "v0.0.3", "previous_release_p95_ms": 100000}),
         encoding="utf-8",
     )
     proposal.write_text(
         json.dumps(
             {
-                "previous_release": "v0.0.2",
+                "previous_release": "v0.0.3",
                 "next_release": "v0.0.3",
                 "proposed_previous_release_p95_ms": 140000,
             }
@@ -608,7 +608,7 @@ def test_package_benchmark_baseline_proposal_generates_output() -> None:
             "--baseline",
             "euxis-ops/perf/package_benchmarks_baseline.json",
             "--previous-release",
-            "v0.0.2",
+            "v0.0.3",
             "--next-release",
             "v0.0.3",
             "--output",
@@ -619,7 +619,7 @@ def test_package_benchmark_baseline_proposal_generates_output() -> None:
     payload = json.loads(
         (REPO_ROOT / "euxis-data/perf/proposed-package-benchmarks-baseline-test.json").read_text()
     )
-    assert payload["previous_release"] == "v0.0.2"
+    assert payload["previous_release"] == "v0.0.3"
     assert "deltas_vs_current_baseline" in payload
 
 

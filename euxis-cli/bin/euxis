@@ -4,26 +4,25 @@
 # Fast-path: bypass symlink resolution and subshells for ultra-fast commands (<5ms)
 case "${1:-}" in
   --version|""|-h|--help|help)
-    if [ "$1" = "--version" ]; then echo "euxis v0.0.2"; exit 0; fi
+    if [ "$1" = "--version" ]; then echo "euxis v0.0.3"; exit 0; fi
 
     # Inline ANSI colors for ultra-fast startup (<2ms)
     [ -n "${NO_COLOR:-}" ] || ! [ -t 1 ] && NO_COLOR=1
     if [ -z "${NO_COLOR:-}" ]; then
-        RESET=' [0m'; BOLD=' [1m'; DIM=' [2m'; GREEN=' [38;5;42m'; YELLOW=' [38;5;220m'; MAGENTA=' [38;5;211m'; CYAN=' [38;5;87m'; WHITE=' [38;5;255m'
+        RESET='\033[0m'; BOLD='\033[1m'; DIM='\033[2m'; GREEN='\033[38;5;42m'; YELLOW='\033[38;5;220m'; MAGENTA='\033[38;5;211m'; CYAN='\033[38;5;87m'; WHITE='\033[38;5;255m'
         TC_GREY='\033[38;2;120;120;120m'; TC_GLOW='\033[1;38;2;0;209;255m'; TC_WHITE='\033[1;38;2;255;255;255m'; TC_BLUE='\033[38;2;0;122;255m'
         ICON_CHECK="✓"; ICON_BULLET="▸"; ICON_ARROW="→"; ICON_BOLT="⚡"
-        printf "\n%b%b    ███████╗██╗   ██╗██╗  ██╗██╗███████╗%b\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%b%b    ██╔════╝██║   ██║╚██╗██╔╝██║██╔════╝%b\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%b%b    █████╗  ██║   ██║ ╚███╔╝ ██║███████╗%b\n" "$BOLD" "$CYAN" "$RESET"
-        printf "%b%b    ██╔══╝  ██║   ██║ ██╔██╗ ██║╚════██║%b\n" "$BOLD" "$CYAN" "$RESET"
-        printf "%b%b    ███████╗╚██████╔╝██╔╝ ██╗██║███████║%b\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "%b%b    ╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝%b\n" "$BOLD" "$MAGENTA" "$RESET"
-        printf "    %b%b⚡ v0.0.2%b\n\n" "$BOLD" "$YELLOW" "$RESET"
+        printf "\n%b%b    ███████%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    ██%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    █████%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    ██%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "%b%b    ███████%b\n" "$BOLD" "$CYAN" "$RESET"
+        printf "    %b%b⚡ v0.0.3%b\n\n" "$BOLD" "$YELLOW" "$RESET"
     else
         RESET=''; BOLD=''; DIM=''; GREEN=''; YELLOW=''; MAGENTA=''; CYAN=''; WHITE=''
         TC_GREY=''; TC_GLOW=''; TC_WHITE=''; TC_BLUE=''
         ICON_CHECK="*"; ICON_BULLET=">"; ICON_ARROW="->"; ICON_BOLT="*"
-        printf "\n    EUXIS\n    * v0.0.2\n\n"
+        printf "\n    EUXIS\n    * v0.0.3\n\n"
     fi
 
     dir="$PWD"; repo_root=""

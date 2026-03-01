@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# EUXIS VERIFY: Comprehensive Release Gate for v0.0.2
+# EUXIS VERIFY: Comprehensive Release Gate for v0.0.3
 #
 # A unified verification command that validates all aspects of the Euxis system
 # before release: performance, branding, security, and cross-platform compatibility.
@@ -30,7 +30,7 @@ set -euo pipefail
 # ============================================================================
 
 EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-EUXIS_VERSION="0.0.2"
+EUXIS_VERSION="0.0.3"
 BIN_DIR="${EUXIS_HOME}/euxis-cli/bin"
 CORE_DIR="${EUXIS_HOME}/euxis-core"
 
@@ -150,7 +150,7 @@ fi
 
 usage() {
     cat <<'EOF'
-euxis-verify - Comprehensive Release Gate for v0.0.2
+euxis-verify - Comprehensive Release Gate for v0.0.3
 
 USAGE:
     euxis-verify [OPTIONS]

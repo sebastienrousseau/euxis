@@ -1,4 +1,4 @@
-% EUXIS(1) Euxis v0.0.2
+% EUXIS(1) Euxis v0.0.3
 % Euxis Team
 % February 
 # NAME

@@ -202,7 +202,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-adapters",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -212,7 +212,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-cli",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -222,7 +222,7 @@
   {
     "License": "MIT",
     "Name": "euxis-core",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT",
@@ -232,7 +232,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-crypto",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -247,7 +247,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-gateway",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -257,7 +257,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-metrics",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -267,7 +267,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-security",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -277,7 +277,7 @@
   {
     "License": "MIT License",
     "Name": "euxis-tui",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "MIT License",
@@ -722,7 +722,7 @@
   {
     "License": "MIT OR Apache-2.0",
     "Name": "pulse",
-    "Version": "0.0.2"
+    "Version": "0.0.3"
   },
   {
     "License": "BSD-2-Clause",

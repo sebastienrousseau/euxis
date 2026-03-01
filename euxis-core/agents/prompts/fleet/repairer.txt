@@ -1,7 +1,7 @@
 ---
 agent_id: repairer
 role: "Automated application of known fixes and self-healing infrastructure"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [repair, healing, automation, fixes, recovery]
 tier: fleet
 activation: default

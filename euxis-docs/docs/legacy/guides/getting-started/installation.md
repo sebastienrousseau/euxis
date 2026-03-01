@@ -52,4 +52,4 @@ After installation is complete, verify the CLI executable is correctly exposed i
 euxis --version
 ```
 
-If the system returns `Euxis CLI v0.0.2 (Gateway Operational)`, the installation succeeded. Proceed to the [Quick Start Guide](quick-start.md).
+If the system returns `Euxis CLI v0.0.3 (Gateway Operational)`, the installation succeeded. Proceed to the [Quick Start Guide](quick-start.md).

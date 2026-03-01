@@ -5,5 +5,5 @@
 
 from euxis_core.encrypted_memory import EncryptedMemoryEntry, EncryptedMemoryStore
 
-__version__ = "v0.0.2"
+__version__ = "v0.0.3"
 __all__ = ["EncryptedMemoryEntry", "EncryptedMemoryStore", "__version__"]

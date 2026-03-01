@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euxis-runtime"
-version = "0.0.2"
+version = "0.0.3"
 description = "Runtime data integrity validation for Euxis"
 readme = "README.md"
 license = {text = "AGPL-3.0-or-later"}

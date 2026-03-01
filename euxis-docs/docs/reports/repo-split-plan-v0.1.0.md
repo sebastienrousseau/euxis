@@ -1,4 +1,4 @@
-# Repository Split — Monolith to Modular (v0.0.2)
+# Repository Split — Monolith to Modular (v0.0.3)
 
 ## Executive Summary
 Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, euxis-runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.

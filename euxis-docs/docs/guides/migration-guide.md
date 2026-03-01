@@ -218,8 +218,8 @@ mv ~/.euxis/capabilities.json ~/.euxis/config/ 2>/dev/null || true
 
 | Feature | Status | Removal Target | Migration Path |
 |---------|--------|----------------|----------------|
-| JSON-only registry | Deprecated | v0.0.2 | Use SQLite registry |
-| Em-dash formatting in prompts | Deprecated | v0.0.2 | Use colons for natural tone |
+| JSON-only registry | Deprecated | v0.0.3 | Use SQLite registry |
+| Em-dash formatting in prompts | Deprecated | v0.0.3 | Use colons for natural tone |
 | Audit files in git tracking | Removed | N/A | Files now in `.gitignore` |
 
 ---

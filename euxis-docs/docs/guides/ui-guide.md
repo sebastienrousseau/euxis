@@ -368,4 +368,4 @@ The original bash-based menu interface remains available as `euxis-ui` for compa
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.0.3 · Build something that matters.*

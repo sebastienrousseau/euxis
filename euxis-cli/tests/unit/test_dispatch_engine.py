@@ -251,13 +251,13 @@ class TestDispatchEngineInitialization(unittest.TestCase):
             )
         """)
         conn.execute(
-            "INSERT INTO registry_metadata VALUES ('protocol_version', 'v0.0.2')"
+            "INSERT INTO registry_metadata VALUES ('protocol_version', 'v0.0.3')"
         )
         for agent in agents:
             conn.execute(
                 "INSERT INTO agents (id, path, tier, version) VALUES (?, ?, ?, ?)",
                 (agent["id"], agent.get("path", f"agents/prompts/fleet/{agent['id']}.txt"),
-                 agent.get("tier", "fleet"), agent.get("version", "v0.0.2"))
+                 agent.get("tier", "fleet"), agent.get("version", "v0.0.3"))
             )
         conn.commit()
         conn.close()

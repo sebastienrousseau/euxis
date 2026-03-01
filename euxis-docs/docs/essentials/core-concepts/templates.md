@@ -32,7 +32,7 @@ cp ~/.euxis/config/templates/agent-prompt.txt \
 ---
 agent_id: "agent-name"
 role: "Agent role description"
-version: "0.0.2"
+version: "0.0.3"
 tags: ["category1", "category2"]
 last_updated: "current-02-04"
 ---

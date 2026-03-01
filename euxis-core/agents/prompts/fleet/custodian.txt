@@ -1,7 +1,7 @@
 ---
 agent_id: custodian
 role: "Rust crate publishing authority, MSRV enforcer, feature flag auditor, and docs.rs quality guardian"
-version: "v0.0.2"
+version: "v0.0.3"
 tags: [rust, crates, publishing, msrv, docs]
 tier: fleet
 activation: specialist

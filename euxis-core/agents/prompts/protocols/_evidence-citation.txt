@@ -1,11 +1,11 @@
 ---
 protocol_id: evidence-citation
-version: "v0.0.2"
+version: "v0.0.3"
 last_updated: "2026-01-31"
 priority: "YELLOW"
 ---
 
-## EVIDENCE & CITATION PROTOCOL (v0.0.2)
+## EVIDENCE & CITATION PROTOCOL (v0.0.3)
 
 Every claim, finding, and recommendation produced by an Euxis agent MUST be grounded in evidence. Unsupported assertions are protocol violations.
 
