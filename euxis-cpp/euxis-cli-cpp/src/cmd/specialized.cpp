@@ -145,14 +145,39 @@ int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
 // --- tui ---
 
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
-    (void)args;
+    // Try to launch the full Qt GUI (euxis-etx)
+    // Search order: build dir, installed binary, PATH
+    std::vector<fs::path> search_paths = {
+        fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
+        fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
+    };
+
+    for (const auto& etx_path : search_paths) {
+        if (fs::exists(etx_path)) {
+            std::cout << term::icon_info() << " Launching ETX GUI...\n";
+            // Forward any args to the GUI
+            std::vector<std::string> etx_args = args;
+            auto result = Process::run(etx_path.string(), etx_args);
+            return result.exit_code;
+        }
+    }
+
+    // Also check if euxis-etx is on PATH
+    if (Process::available("euxis-etx")) {
+        std::cout << term::icon_info() << " Launching ETX GUI...\n";
+        auto result = Process::run("euxis-etx", args);
+        return result.exit_code;
+    }
+
+    // Fallback: text-based dashboard when GUI binary not available
+    std::cout << term::yellow("ETX GUI not found, showing text dashboard") << "\n";
+    std::cout << term::dim("(build euxis-etx or add it to PATH for the full GUI)") << "\n\n";
 
     std::cout << term::bold("Terminal Dashboard") << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
 
-    // Simple text dashboard
     std::cout << "  Agents:    " << registry.agent_count() << "\n"
               << "  Squads:    " << registry.list_squads().size() << "\n"
               << "  Provider:  " << router.detect_provider() << "\n"
@@ -167,7 +192,6 @@ int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
     }
     std::cout << "\n";
 
-    // Status of runtime dirs
     std::cout << "\n  " << term::bold("Runtime:") << "\n";
     for (const auto& dir : {"euxis-data", "euxis-runtime", "euxis-core"}) {
         auto path = fs::path(ctx.euxis_home) / dir;
