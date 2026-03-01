@@ -9,6 +9,7 @@ euxis_add_library(euxis-inference-cpp
     unofficial-sodium::sodium
     nlohmann_json::nlohmann_json
     spdlog::spdlog
+    httplib::httplib
   TEST_SOURCES
     tests/test_config.cpp
     tests/test_model_registry.cpp

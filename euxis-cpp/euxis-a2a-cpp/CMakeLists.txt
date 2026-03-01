@@ -7,8 +7,10 @@ euxis_add_library(euxis-a2a-cpp
     src/http_transport.cpp
   DEPS
     euxis-identity-cpp
+    unofficial-sodium::sodium
     nlohmann_json::nlohmann_json
     spdlog::spdlog
+    httplib::httplib
   TEST_SOURCES
     tests/test_agent_card.cpp
     tests/test_task.cpp

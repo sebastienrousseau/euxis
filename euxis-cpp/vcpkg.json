@@ -7,7 +7,6 @@
     "spdlog",
     "fmt",
     "gtest",
-    "cpp-httplib",
-    "toml11"
+    "cpp-httplib"
   ]
 }
