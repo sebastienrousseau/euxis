@@ -22,6 +22,15 @@ Generated from `euxis-ops/quality/package_standards.json`.
 | `euxis-inference` | `python` | `euxis-inference` | `pyproject.toml, README.md` (yes) | `euxis-inference/tests` (yes) | `euxis-docs/docs/modules/euxis-inference.md` (yes) | `ok` |
 | `euxis-a2a` | `python` | `euxis-a2a` | `pyproject.toml, README.md` (yes) | `euxis-a2a/tests` (yes) | `euxis-docs/docs/modules/euxis-a2a.md` (yes) | `ok` |
 
+| `euxis-crypto-cpp` | `cpp-library` | `euxis-cpp/euxis-crypto-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-crypto-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-crypto-cpp.md` (yes) | `ok` |
+| `euxis-bridge-cpp` | `cpp-library` | `euxis-cpp/euxis-bridge-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-bridge-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-bridge-cpp.md` (yes) | `ok` |
+| `euxis-memory-cpp` | `cpp-library` | `euxis-cpp/euxis-memory-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-memory-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-memory-cpp.md` (yes) | `ok` |
+| `euxis-identity-cpp` | `cpp-library` | `euxis-cpp/euxis-identity-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-identity-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-identity-cpp.md` (yes) | `ok` |
+| `euxis-inference-cpp` | `cpp-library` | `euxis-cpp/euxis-inference-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-inference-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-inference-cpp.md` (yes) | `ok` |
+| `euxis-a2a-cpp` | `cpp-library` | `euxis-cpp/euxis-a2a-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-a2a-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-a2a-cpp.md` (yes) | `ok` |
+| `euxis-bench-cpp` | `cpp-library` | `euxis-cpp/euxis-bench-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-bench-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-bench-cpp.md` (yes) | `ok` |
+| `euxis-etx` | `cpp-application` | `euxis-cpp/euxis-etx` | `CMakeLists.txt, README.md` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-etx.md` (yes) | `ok` |
+
 ## Enforcement
 
 - Local generate: `make package-structure-matrix`

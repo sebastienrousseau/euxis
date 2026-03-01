@@ -299,7 +299,7 @@ bench-interop:
 bench-all:
 	python3 euxis-ops/benchmarks/runner.py --suite all --output euxis-data/perf/benchmark-results.json
 
-verify-all-packages: gate-all bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable
+verify-all-packages: gate-all bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable cpp-test
 
 verify-signed-artifacts:
 	bash euxis-ops/supply_chain/verify_signed_artifacts.sh release-artifacts

@@ -37,6 +37,17 @@ Euxis is modular by design. Integrate exactly what your infrastructure requires.
 * `euxis-tui`: The terminal user interface for real-time observability.
 * `euxis-metrics`: The telemetry and validation framework.
 
+### C++23 High-Performance Modules
+
+* `euxis-crypto-cpp`: AES-256-GCM, Ed25519, Argon2id key derivation via libsodium.
+* `euxis-bridge-cpp`: Skill import, static analysis, admission pipeline, sandbox execution.
+* `euxis-memory-cpp`: Tier-bound encrypted memory with AAD isolation.
+* `euxis-identity-cpp`: W3C DID, Verifiable Credentials, ERC-8004 agent cards.
+* `euxis-inference-cpp`: llama.cpp + Ollama inference, model registry, quality gate.
+* `euxis-a2a-cpp`: A2A v0.2 protocol, JSON-RPC server, HTTP transport.
+* `euxis-bench-cpp`: Security, autonomy, performance, portability, interop benchmarks.
+* `euxis-etx`: Qt6 desktop GUI with 17 screens, 3 themes, and command palette.
+
 ## Documentation Library
 
 Access comprehensive guides to build and scale your agent infrastructure. We maintain 100% documentation coverage across all supported languages.
