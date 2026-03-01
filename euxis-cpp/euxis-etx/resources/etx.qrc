@@ -1,8 +1,0 @@
-<RCC>
-  <qresource prefix="/">
-    <file>resources/styles/liquid-glass.qss</file>
-    <file>resources/styles/calm.qss</file>
-    <file>resources/styles/focused.qss</file>
-    <file>resources/icons/euxis-logo.svg</file>
-  </qresource>
-</RCC>
