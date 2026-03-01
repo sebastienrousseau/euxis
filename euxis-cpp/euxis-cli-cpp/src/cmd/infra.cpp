@@ -8,14 +8,17 @@
 
 #include "euxis/gateway/server.hpp"
 
+#include <atomic>
 #include <cerrno>
 #include <csignal>
 #include <cstring>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
+#include <thread>
 #include <unistd.h>
 
 namespace euxis::cli::cmd {
@@ -23,6 +26,113 @@ namespace {
 
 namespace fs = std::filesystem;
 namespace term = terminal;
+
+// Daemon shutdown flag — set by SIGTERM/SIGINT handler in the child process.
+std::atomic<bool> g_daemon_stop{false};
+
+void daemon_signal_handler(int /*sig*/) {
+    g_daemon_stop.store(true, std::memory_order_relaxed);
+}
+
+// Periodic daemon tasks: health checks, stale bus cleanup, context refresh.
+void daemon_main_loop(const std::string& euxis_home, const std::string& data_dir) {
+    using clock = std::chrono::steady_clock;
+    constexpr auto health_interval  = std::chrono::minutes(5);
+    constexpr auto cleanup_interval = std::chrono::hours(1);
+    constexpr auto tick_interval    = std::chrono::seconds(10);
+
+    auto last_health  = clock::now();
+    auto last_cleanup = clock::now();
+
+    auto log_dir = fs::path(euxis_home) / "euxis-runtime" / "logs";
+    fs::create_directories(log_dir);
+
+    auto write_log = [&](const std::string& msg) {
+        std::ofstream log(log_dir / "daemon.log", std::ios::app);
+        auto now = std::chrono::system_clock::now();
+        auto tt  = std::chrono::system_clock::to_time_t(now);
+        log << std::put_time(std::localtime(&tt), "%Y-%m-%d %H:%M:%S")
+            << " " << msg << "\n";
+    };
+
+    write_log("daemon started");
+
+    while (!g_daemon_stop.load(std::memory_order_relaxed)) {
+        auto now = clock::now();
+
+        // --- Periodic health check ---
+        if (now - last_health >= health_interval) {
+            last_health = now;
+
+            // Check critical directories exist
+            bool data_ok = fs::is_directory(data_dir);
+            bool agents_ok = fs::is_directory(fs::path(data_dir) / "agents");
+
+            // Check disk space
+            std::error_code ec;
+            auto space = fs::space(euxis_home, ec);
+            bool disk_ok = !ec && space.available > 100ULL * 1024 * 1024; // >100MB
+
+            if (!data_ok || !agents_ok) {
+                write_log("WARN: missing data directories");
+            }
+            if (!disk_ok) {
+                write_log("WARN: low disk space (<100MB available)");
+            }
+
+            write_log("health check: data=" + std::string(data_ok ? "ok" : "FAIL")
+                       + " agents=" + std::string(agents_ok ? "ok" : "FAIL")
+                       + " disk=" + std::string(disk_ok ? "ok" : "LOW"));
+        }
+
+        // --- Periodic stale bus pipe cleanup ---
+        if (now - last_cleanup >= cleanup_interval) {
+            last_cleanup = now;
+
+            auto bus_dir = fs::path(euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+            if (fs::is_directory(bus_dir)) {
+                int removed = 0;
+                auto fs_now = fs::file_time_type::clock::now();
+                for (const auto& entry : fs::directory_iterator(bus_dir)) {
+                    if (!entry.is_regular_file()) continue;
+                    auto age = fs_now - entry.last_write_time();
+                    auto days = std::chrono::duration_cast<std::chrono::hours>(age).count() / 24;
+                    if (days > 7) {
+                        fs::remove(entry.path());
+                        ++removed;
+                    }
+                }
+                if (removed > 0) {
+                    write_log("cleanup: removed " + std::to_string(removed) + " stale bus pipe(s)");
+                }
+            }
+
+            // Clean stale context files
+            auto ctx_dir = fs::path(euxis_home) / "euxis-runtime" / "context";
+            if (fs::is_directory(ctx_dir)) {
+                int ctx_removed = 0;
+                auto fs_now = fs::file_time_type::clock::now();
+                for (const auto& entry : fs::directory_iterator(ctx_dir)) {
+                    if (!entry.is_regular_file()) continue;
+                    auto age = fs_now - entry.last_write_time();
+                    auto days = std::chrono::duration_cast<std::chrono::hours>(age).count() / 24;
+                    if (days > 30) {
+                        fs::remove(entry.path());
+                        ++ctx_removed;
+                    }
+                }
+                if (ctx_removed > 0) {
+                    write_log("cleanup: removed " + std::to_string(ctx_removed) + " stale context file(s)");
+                }
+            }
+        }
+
+        // Sleep in short ticks so we respond promptly to shutdown signal
+        std::this_thread::sleep_for(tick_interval);
+    }
+
+    write_log("daemon stopped (signal received)");
+}
 
 } // namespace
 
@@ -200,11 +310,13 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
             f << getpid();
             f.close();
 
-            // TODO: daemon main loop goes here (e.g. event loop, health checks)
-            // For now, sleep indefinitely until signaled.
-            while (true) {
-                pause();
-            }
+            // Install signal handlers for graceful shutdown
+            std::signal(SIGTERM, daemon_signal_handler);
+            std::signal(SIGINT, daemon_signal_handler);
+
+            // Run the daemon main loop (health checks, cleanup, etc.)
+            daemon_main_loop(ctx.euxis_home, ctx.data_dir);
+            _exit(0);
         }
 
         // --- Parent process ---

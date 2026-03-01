@@ -10,9 +10,9 @@ namespace euxis::inference {
 
 /// llama.cpp-backed inference engine (PIMPL).
 ///
-/// The current implementation is a **stub** that compiles without the llama.cpp
-/// library linked.  `generate()` returns an error string `"llama.cpp not linked"`.
-/// When the real llama.cpp dependency is available, swap in the concrete Impl.
+/// Connects to llama-server's OpenAI-compatible HTTP API at /v1/chat/completions.
+/// Configure host/port via LLAMA_SERVER_HOST and LLAMA_SERVER_PORT env vars
+/// (defaults to 127.0.0.1:8080).
 class LlamaEngine final : public InferenceEngine {
 public:
     explicit LlamaEngine(const LocalModelConfig& config);

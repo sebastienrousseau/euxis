@@ -1,5 +1,8 @@
 #include "euxis/adapters/telegram.hpp"
 
+#include <chrono>
+#include <thread>
+
 #include <spdlog/spdlog.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -25,8 +28,28 @@ void TelegramAdapter::connect() {
         api_call("setWebhook", {{"url", config_.webhook_url}});
         return;
     }
-    // Polling mode not implemented in C++ MVP (requires background HTTP loop)
-    spdlog::info("Telegram adapter ready (webhook mode only in C++)");
+    // Long-polling mode: spawn a background thread calling getUpdates
+    spdlog::info("Telegram adapter starting long-poll loop");
+    poll_thread_ = std::jthread([this](std::stop_token stoken) {
+        while (!stoken.stop_requested() && !stop_.load(std::memory_order_relaxed)) {
+            auto resp = api_call("getUpdates",
+                                 {{"offset", offset_},
+                                  {"timeout", config_.poll_timeout}});
+            if (resp.contains("result") && resp["result"].is_array()) {
+                for (const auto& update : resp["result"]) {
+                    int64_t update_id = update.value("update_id", int64_t{0});
+                    if (update_id >= offset_) {
+                        offset_ = static_cast<int>(update_id + 1);
+                    }
+                    receive(update);
+                }
+            }
+            // Brief sleep between poll cycles
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(
+                    static_cast<int>(config_.poll_interval * 1000)));
+        }
+    });
 }
 
 void TelegramAdapter::receive(const nlohmann::json& message) {
@@ -65,7 +88,11 @@ void TelegramAdapter::send(const std::string& text,
 void TelegramAdapter::ack(const std::string& /*message_id*/) {}
 
 void TelegramAdapter::disconnect() {
-    stop_.store(true);
+    stop_.store(true, std::memory_order_relaxed);
+    if (poll_thread_.joinable()) {
+        poll_thread_.request_stop();
+        poll_thread_.join();
+    }
     if (config_.mode == "webhook" && !config_.token.empty()) {
         api_call("deleteWebhook", {});
     }

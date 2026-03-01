@@ -9,6 +9,7 @@
 #include <QStackedWidget>
 #include <QShortcut>
 #include <QDateTime>
+#include <QProcess>
 
 namespace euxis::etx {
 
@@ -129,12 +130,47 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
     // Clear action
     QObject::connect(clear_btn, &QPushButton::clicked, output, &QPlainTextEdit::clear);
 
-    // Run action (placeholder: append simulated output)
+    // Run action: execute tool via QProcess
     QObject::connect(run_btn, &QPushButton::clicked, widget, [output, tool_name]() {
         auto ts = QDateTime::currentDateTime().toString("[hh:mm:ss]");
+        QString cmd = tool_name->text().mid(6).trimmed(); // Strip "Tool: " prefix
+
         output->appendPlainText("");
-        output->appendPlainText(ts + " Re-running: " + tool_name->text().mid(6));
-        output->appendPlainText(ts + " Executing...");
+        output->appendPlainText(ts + " Running: " + cmd);
+
+        // Parse command into program and arguments
+        QStringList parts = cmd.split(' ', Qt::SkipEmptyParts);
+        if (parts.isEmpty()) {
+            output->appendPlainText(ts + " Error: no command specified");
+            return;
+        }
+
+        QString program = parts.takeFirst();
+
+        auto* process = new QProcess(output->parentWidget());
+        process->setProgram(program);
+        process->setArguments(parts);
+        process->setProcessChannelMode(QProcess::MergedChannels);
+
+        QObject::connect(process, &QProcess::readyReadStandardOutput,
+            output, [output, process]() {
+                QString data = process->readAllStandardOutput();
+                if (!data.isEmpty()) {
+                    output->appendPlainText(data.trimmed());
+                }
+            });
+
+        QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            output, [output, process](int exitCode, QProcess::ExitStatus) {
+                auto ts = QDateTime::currentDateTime().toString("[hh:mm:ss]");
+                output->appendPlainText(ts + QString(" Process exited with code %1").arg(exitCode));
+                process->deleteLater();
+            });
+
+        process->start();
+        if (!process->waitForStarted(3000)) {
+            output->appendPlainText(ts + " Error: Failed to start " + program);
+        }
     });
 
     // Ctrl+L to clear

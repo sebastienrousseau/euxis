@@ -3,10 +3,13 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QPlainTextEdit>
 #include <QFont>
 #include <QFrame>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QProcess>
+#include <QDateTime>
 
 namespace euxis::etx {
 
@@ -105,14 +108,52 @@ QWidget* create_agent_screen(QWidget* parent) {
 
     layout->addLayout(task_layout);
 
-    QObject::connect(deploy_btn, &QPushButton::clicked, widget, [task_input, name_label]() {
-        // Deploy action placeholder
-        QString task = task_input->text();
-        if (!task.isEmpty()) {
+    // Deploy output area
+    auto* deploy_output = new QPlainTextEdit(widget);
+    deploy_output->setObjectName("deploy_output");
+    deploy_output->setReadOnly(true);
+    QFont deploy_mono;
+    deploy_mono.setFamily("monospace");
+    deploy_mono.setPointSize(11);
+    deploy_output->setFont(deploy_mono);
+    deploy_output->setStyleSheet(
+        "QPlainTextEdit { background: rgba(0,0,0,0.3); color: #c8c8c8; "
+        "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; "
+        "padding: 12px; }");
+    deploy_output->setMaximumHeight(200);
+    layout->addWidget(deploy_output);
+
+    QObject::connect(deploy_btn, &QPushButton::clicked, widget,
+        [task_input, name_label, deploy_output, status_label]() {
+            QString task = task_input->text().trimmed();
+            if (task.isEmpty()) return;
+
+            QString agent_name = name_label->text();
+            deploy_output->appendPlainText(
+                QDateTime::currentDateTime().toString("[hh:mm:ss]") +
+                " Deploying " + agent_name + " with task: " + task);
+
+            auto* process = new QProcess(deploy_output);
+            process->setProgram("euxis-cli");
+            process->setArguments({"agent", "run", agent_name, "--task", task});
+
+            QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                deploy_output, [deploy_output, process](int exitCode, QProcess::ExitStatus) {
+                    QString out = process->readAllStandardOutput();
+                    QString err = process->readAllStandardError();
+                    if (!out.isEmpty()) deploy_output->appendPlainText(out.trimmed());
+                    if (!err.isEmpty()) deploy_output->appendPlainText("Error: " + err.trimmed());
+                    deploy_output->appendPlainText(
+                        QDateTime::currentDateTime().toString("[hh:mm:ss]") +
+                        QString(" Exit code: %1").arg(exitCode));
+                    process->deleteLater();
+                });
+
+            process->start();
             task_input->clear();
-            task_input->setPlaceholderText("Task submitted: " + task);
-        }
-    });
+
+            status_label->setText("Status: deploying...");
+        });
 
     layout->addStretch();
 

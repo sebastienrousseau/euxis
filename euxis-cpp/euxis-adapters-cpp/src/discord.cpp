@@ -1,5 +1,10 @@
 #include "euxis/adapters/discord.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#include <httplib.h>
+#pragma GCC diagnostic pop
+
 #include <spdlog/spdlog.h>
 
 namespace euxis::adapters {
@@ -41,11 +46,51 @@ void DiscordAdapter::receive(const nlohmann::json& message) {
 
 void DiscordAdapter::send(const std::string& text,
                           const std::string& session_id) {
-    (void)text;
-    (void)session_id;
-    // Requires Discord bot WebSocket or REST API with bot token.
-    // Not implemented in C++ MVP.
-    spdlog::warn("Discord send not implemented in C++ adapter");
+    if (config_.token.empty()) {
+        spdlog::warn("Discord adapter: cannot send without token");
+        return;
+    }
+
+    // Resolve channel_id from session metadata
+    std::string channel_id;
+    {
+        std::lock_guard lock(mutex_);
+        auto it = session_meta_.find(session_id);
+        if (it != session_meta_.end() && it->second.contains("channel_id")) {
+            channel_id = it->second["channel_id"].get<std::string>();
+        }
+    }
+
+    if (channel_id.empty()) {
+        // Try extracting from session_id format "discord_{channel_id}"
+        if (session_id.starts_with("discord_")) {
+            channel_id = session_id.substr(8);
+        }
+    }
+
+    if (channel_id.empty()) {
+        spdlog::warn("Discord adapter: no channel_id for session '{}'", session_id);
+        return;
+    }
+
+    // POST to Discord REST API
+    httplib::SSLClient cli("discord.com");
+    cli.set_connection_timeout(10);
+
+    httplib::Headers headers = {
+        {"Authorization", "Bot " + config_.token},
+    };
+
+    nlohmann::json body = {{"content", text}};
+    auto path = "/api/v10/channels/" + channel_id + "/messages";
+    auto res = cli.Post(path, headers, body.dump(), "application/json");
+
+    if (!res) {
+        spdlog::warn("Discord API request failed for channel {}", channel_id);
+    } else if (res->status != 200) {
+        spdlog::warn("Discord API returned HTTP {} for channel {}",
+                      res->status, channel_id);
+    }
 }
 
 void DiscordAdapter::ack(const std::string& /*message_id*/) {}

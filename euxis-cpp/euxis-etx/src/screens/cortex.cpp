@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QShortcut>
 #include <QDateTime>
+#include <QProcess>
 
 namespace euxis::etx {
 
@@ -114,17 +115,36 @@ QWidget* create_cortex_screen(QWidget* parent) {
         output->appendPlainText("\n" + ts + " Query: " + query);
         output->appendPlainText(QString(60, '-'));
 
-        // Placeholder results (subprocess integration point)
-        output->appendPlainText("  [0.94] security-agent/audit-2026-02 :");
-        output->appendPlainText("         \"Supply chain verification passed for 184 dependencies.\"");
-        output->appendPlainText("  [0.87] bridge-agent/import-log :");
-        output->appendPlainText("         \"ClawHub skill 'data-parser' imported with WASM sandbox.\"");
-        output->appendPlainText("  [0.81] research-agent/findings :");
-        output->appendPlainText("         \"OpenClaw ClawHavoc: 20% malicious skill rate confirmed.\"");
-        output->appendPlainText(QString("\n  3 results (%.1fms)").arg(12.4));
+        // Run cortex recall via subprocess
+        auto* process = new QProcess(query_input->parentWidget());
+        process->setProgram("euxis-cli");
+        process->setArguments({"cortex", "recall", query});
+        auto start_time = QDateTime::currentDateTime();
 
-        status_label->setText("Cortex: 1,247 embeddings | 42 namespaces | Last query: "
-                              + QDateTime::currentDateTime().toString("hh:mm:ss"));
+        QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            query_input->parentWidget(), [output, status_label, start_time, process](int exitCode, QProcess::ExitStatus) {
+                QString result_text = process->readAllStandardOutput();
+                QString error_text = process->readAllStandardError();
+                auto elapsed = start_time.msecsTo(QDateTime::currentDateTime());
+
+                if (exitCode == 0 && !result_text.isEmpty()) {
+                    output->appendPlainText(result_text.trimmed());
+                } else if (!error_text.isEmpty()) {
+                    output->appendPlainText("  Error: " + error_text.trimmed());
+                } else {
+                    output->appendPlainText("  No results found.");
+                }
+                output->appendPlainText(QString("\n  (completed in %1ms)").arg(elapsed));
+
+                status_label->setText("Cortex: Last query: "
+                                      + QDateTime::currentDateTime().toString("hh:mm:ss"));
+                process->deleteLater();
+            });
+
+        process->start();
+        if (!process->waitForStarted(3000)) {
+            output->appendPlainText("  Error: Could not start euxis-cli");
+        }
         query_input->clear();
     };
 

@@ -18,9 +18,9 @@ TEST(LlamaEngineTest, ConstructorWorks) {
 }
 
 // ---------------------------------------------------------------------------
-// Generate returns stub error
+// Generate returns error when llama-server is unavailable
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, GenerateReturnsStubError) {
+TEST(LlamaEngineTest, GenerateReturnsErrorWhenServerUnavailable) {
     LocalModelConfig cfg;
     cfg.model_name = "stub-model";
 
@@ -28,11 +28,11 @@ TEST(LlamaEngineTest, GenerateReturnsStubError) {
     auto result = engine.generate("Hello, world!", 64);
 
     ASSERT_FALSE(result.has_value());
-    EXPECT_EQ(result.error(), "llama.cpp not linked");
+    EXPECT_TRUE(result.error().find("not reachable") != std::string::npos);
 }
 
 // ---------------------------------------------------------------------------
-// supports_model matches config
+// supports_model matches config when server is unavailable
 // ---------------------------------------------------------------------------
 TEST(LlamaEngineTest, SupportsModelMatchesConfig) {
     LocalModelConfig cfg;
@@ -58,10 +58,25 @@ TEST(LlamaEngineTest, HealthReturnsJson) {
 
     EXPECT_TRUE(h.is_object());
     EXPECT_EQ(h["engine"], "llama.cpp");
-    EXPECT_EQ(h["status"], "stub");
-    EXPECT_EQ(h["loaded"], false);
+    EXPECT_EQ(h["status"], "unreachable");
     EXPECT_EQ(h["model"], "health-test");
     EXPECT_EQ(h["context_size"], 4096u);
+}
+
+// ---------------------------------------------------------------------------
+// health() contains connection info (host and port)
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, HealthContainsConnectionInfo) {
+    LocalModelConfig cfg;
+    cfg.model_name = "conn-test";
+
+    LlamaEngine engine(cfg);
+    auto h = engine.health();
+
+    EXPECT_TRUE(h.contains("host"));
+    EXPECT_TRUE(h.contains("port"));
+    EXPECT_EQ(h["host"], "127.0.0.1");
+    EXPECT_EQ(h["port"], 8080);
 }
 
 // ---------------------------------------------------------------------------
