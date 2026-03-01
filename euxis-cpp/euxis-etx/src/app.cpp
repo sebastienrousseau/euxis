@@ -29,6 +29,14 @@ namespace euxis::etx {
     QWidget* create_help_screen(QWidget* parent);
     QWidget* create_logs_screen(QWidget* parent);
     QWidget* create_playbooks_screen(QWidget* parent);
+    QWidget* create_approvals_screen(QWidget* parent);
+    QWidget* create_cortex_screen(QWidget* parent);
+    QWidget* create_error_details_screen(QWidget* parent);
+    QWidget* create_metrics_screen(QWidget* parent);
+    QWidget* create_omnigraph_screen(QWidget* parent);
+    QWidget* create_squad_detail_screen(QWidget* parent);
+    QWidget* create_time_travel_screen(QWidget* parent);
+    QWidget* create_tool_runner_screen(QWidget* parent);
 }
 
 namespace euxis::etx {
@@ -64,6 +72,22 @@ EuxisApp::EuxisApp(QWidget* parent)
     screen_stack_->addWidget(create_logs_screen(screen_stack_));
     // Index 8: Playbooks
     screen_stack_->addWidget(create_playbooks_screen(screen_stack_));
+    // Index 9: Approvals
+    screen_stack_->addWidget(create_approvals_screen(screen_stack_));
+    // Index 10: Cortex
+    screen_stack_->addWidget(create_cortex_screen(screen_stack_));
+    // Index 11: Error Details
+    screen_stack_->addWidget(create_error_details_screen(screen_stack_));
+    // Index 12: Metrics
+    screen_stack_->addWidget(create_metrics_screen(screen_stack_));
+    // Index 13: OmniGraph
+    screen_stack_->addWidget(create_omnigraph_screen(screen_stack_));
+    // Index 14: Squad Detail
+    screen_stack_->addWidget(create_squad_detail_screen(screen_stack_));
+    // Index 15: Time Travel
+    screen_stack_->addWidget(create_time_travel_screen(screen_stack_));
+    // Index 16: Tool Runner
+    screen_stack_->addWidget(create_tool_runner_screen(screen_stack_));
 
     setup_shortcuts();
 
@@ -192,6 +216,14 @@ void EuxisApp::on_command_palette() {
         "Go to Help",
         "Go to Logs",
         "Go to Playbooks",
+        "Go to Approvals",
+        "Go to Cortex",
+        "Go to Error Details",
+        "Go to Metrics",
+        "Go to OmniGraph",
+        "Go to Squad Detail",
+        "Go to Time Travel",
+        "Go to Tool Runner",
         "Toggle Theme",
         "Refresh Fleet",
         "Quit"
@@ -219,6 +251,14 @@ void EuxisApp::on_command_palette() {
         else if (cmd == "Go to Help") screen_stack_->setCurrentIndex(6);
         else if (cmd == "Go to Logs") screen_stack_->setCurrentIndex(7);
         else if (cmd == "Go to Playbooks") screen_stack_->setCurrentIndex(8);
+        else if (cmd == "Go to Approvals") screen_stack_->setCurrentIndex(9);
+        else if (cmd == "Go to Cortex") screen_stack_->setCurrentIndex(10);
+        else if (cmd == "Go to Error Details") screen_stack_->setCurrentIndex(11);
+        else if (cmd == "Go to Metrics") screen_stack_->setCurrentIndex(12);
+        else if (cmd == "Go to OmniGraph") screen_stack_->setCurrentIndex(13);
+        else if (cmd == "Go to Squad Detail") screen_stack_->setCurrentIndex(14);
+        else if (cmd == "Go to Time Travel") screen_stack_->setCurrentIndex(15);
+        else if (cmd == "Go to Tool Runner") screen_stack_->setCurrentIndex(16);
         else if (cmd == "Toggle Theme") on_toggle_theme();
         else if (cmd == "Refresh Fleet") on_refresh();
         else if (cmd == "Quit") close();
