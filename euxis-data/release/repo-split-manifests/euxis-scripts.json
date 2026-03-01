@@ -1,0 +1,23 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-scripts",
+  "repo_name": "euxis-scripts",
+  "include_paths": [
+    "euxis-scripts"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-scripts.md",
+  "required_files": [
+    "euxis-scripts/README.md"
+  ],
+  "tests": [],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-runtime",
+  "repo_name": "euxis-runtime",
+  "include_paths": [
+    "euxis-runtime"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-runtime.md",
+  "required_files": [
+    "euxis-runtime/README.md",
+    "euxis-runtime/data/perf/metrics.jsonl"
+  ],
+  "tests": [],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-adapters",
+  "repo_name": "euxis-adapters",
+  "include_paths": [
+    "euxis-adapters"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-adapters.md",
+  "required_files": [
+    "euxis-adapters/pyproject.toml",
+    "euxis-adapters/README.md"
+  ],
+  "tests": [
+    "euxis-adapters/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

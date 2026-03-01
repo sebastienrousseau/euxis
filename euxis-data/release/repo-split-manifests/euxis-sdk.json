@@ -1,0 +1,26 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-sdk",
+  "repo_name": "euxis-sdk",
+  "include_paths": [
+    "euxis-sdk"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-sdk.md",
+  "required_files": [
+    "euxis-sdk/Cargo.toml",
+    "euxis-sdk/README.md"
+  ],
+  "tests": [
+    "euxis-sdk/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

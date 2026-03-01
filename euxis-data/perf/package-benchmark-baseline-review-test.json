@@ -2,45 +2,41 @@
   "review_schema_version": "2026.1",
   "previous_release": "v0.0.2",
   "next_release": "v0.0.3",
-  "proposal_sha256": "e0c9a062eda0b4551367a23e539c8d8624e6b151825d2baa406c15ba76d8b3e7",
+  "proposal_sha256": "56ce10b69f59a63e487ae09e3d5cb8c765da3ed766de7a2f27d971c38d99c6eb",
   "threshold_percent": 25.0,
   "flagged_for_manual_review": true,
   "flagged_packages": {
-    "euxis-cli": [
-      "wall_p95_delta_percent=-26.079%",
-      "cpu_ms_p95_delta_percent=-25.978%"
+    "euxis-adapters": [
+      "wall_p95_delta_percent=57.556%",
+      "cpu_ms_p95_delta_percent=57.687%"
     ],
     "euxis-core": [
-      "wall_p95_delta_percent=-47.736%",
-      "cpu_ms_p95_delta_percent=-47.097%"
+      "wall_p95_delta_percent=-31.412%",
+      "cpu_ms_p95_delta_percent=-30.839%"
     ],
     "euxis-crypto": [
-      "wall_p95_delta_percent=146.101%",
-      "cpu_ms_p95_delta_percent=149.298%"
+      "wall_p95_delta_percent=150.052%",
+      "cpu_ms_p95_delta_percent=147.544%"
     ],
     "euxis-docs": [
-      "wall_p95_delta_percent=-26.783%",
-      "cpu_ms_p95_delta_percent=-27.128%"
+      "wall_p95_delta_percent=-28.451%",
+      "cpu_ms_p95_delta_percent=-27.833%"
     ],
     "euxis-gateway": [
-      "wall_p95_delta_percent=-31.592%",
-      "cpu_ms_p95_delta_percent=-31.183%"
-    ],
-    "euxis-metrics": [
-      "wall_p95_delta_percent=-28.584%",
-      "cpu_ms_p95_delta_percent=-27.865%"
+      "wall_p95_delta_percent=-25.727%",
+      "cpu_ms_p95_delta_percent=-25.932%"
     ],
     "euxis-runtime": [
-      "wall_p95_delta_percent=-31.829%",
-      "cpu_ms_p95_delta_percent=-32.282%"
+      "wall_p95_delta_percent=-28.979%",
+      "cpu_ms_p95_delta_percent=-29.126%"
     ],
     "euxis-scripts": [
-      "wall_p95_delta_percent=-46.136%",
-      "cpu_ms_p95_delta_percent=-45.417%"
+      "wall_p95_delta_percent=-34.464%",
+      "cpu_ms_p95_delta_percent=-33.224%"
     ],
     "euxis-sdk": [
-      "wall_p95_delta_percent=236.552%",
-      "cpu_ms_p95_delta_percent=243.363%"
+      "wall_p95_delta_percent=337.672%",
+      "cpu_ms_p95_delta_percent=346.106%"
     ]
   }
 }

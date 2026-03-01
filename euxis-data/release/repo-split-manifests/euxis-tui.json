@@ -1,0 +1,27 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-tui",
+  "repo_name": "euxis-tui",
+  "include_paths": [
+    "euxis-tui"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-tui.md",
+  "required_files": [
+    "euxis-tui/pyproject.toml",
+    "euxis-tui/Cargo.toml",
+    "euxis-tui/README.md"
+  ],
+  "tests": [
+    "euxis-tui/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

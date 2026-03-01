@@ -1,0 +1,26 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-core",
+  "repo_name": "euxis-core",
+  "include_paths": [
+    "euxis-core"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-core.md",
+  "required_files": [
+    "euxis-core/pyproject.toml",
+    "euxis-core/README.md"
+  ],
+  "tests": [
+    "euxis-core/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

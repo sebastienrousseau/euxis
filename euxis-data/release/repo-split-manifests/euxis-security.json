@@ -1,0 +1,26 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-security",
+  "repo_name": "euxis-security",
+  "include_paths": [
+    "euxis-security"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-security.md",
+  "required_files": [
+    "euxis-security/pyproject.toml",
+    "euxis-security/README.md"
+  ],
+  "tests": [
+    "euxis-security/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

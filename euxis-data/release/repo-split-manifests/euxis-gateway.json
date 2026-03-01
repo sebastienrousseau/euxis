@@ -1,0 +1,26 @@
+{
+  "schema_version": "2026.1",
+  "package": "euxis-gateway",
+  "repo_name": "euxis-gateway",
+  "include_paths": [
+    "euxis-gateway"
+  ],
+  "shared_paths": [
+    ".github/workflows",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "docs_module_page": "euxis-docs/docs/modules/euxis-gateway.md",
+  "required_files": [
+    "euxis-gateway/pyproject.toml",
+    "euxis-gateway/README.md"
+  ],
+  "tests": [
+    "euxis-gateway/tests"
+  ],
+  "release_checks": [
+    "template-conformance-check",
+    "core-platform-boundary-check",
+    "package-resource-governance-check"
+  ]
+}

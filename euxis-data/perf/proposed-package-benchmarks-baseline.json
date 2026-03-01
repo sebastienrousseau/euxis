@@ -1,245 +1,245 @@
 {
   "previous_release": "v0.0.2",
   "next_release": "v0.0.3",
-  "generated_at_utc": "2026-03-01T00:09:49.263241+00:00",
+  "generated_at_utc": "2026-03-01T00:58:07.746239+00:00",
   "packages": {
     "euxis-core": {
       "samples": 3,
       "wall_ms": {
-        "p50": 2.975,
-        "p95": 3.252,
-        "max": 3.252
+        "p50": 3.437,
+        "p95": 3.501,
+        "max": 3.501
       },
       "cpu_pct": {
-        "p50": 99.278,
-        "p95": 99.34,
-        "max": 99.34
+        "p50": 98.795,
+        "p95": 99.01,
+        "max": 99.01
       },
       "cpu_ms": {
-        "p50": 2.95,
-        "p95": 3.228,
-        "max": 3.228
+        "p50": 3.319,
+        "p95": 3.403,
+        "max": 3.403
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.738,
+        "p95": 17.738,
+        "max": 17.738
       },
       "probe": {
-        "python_lines": 3253,
+        "python_lines": 3302,
         "pyproject_bytes": 1124
       }
     },
     "euxis-cli": {
       "samples": 3,
       "wall_ms": {
-        "p50": 2.222,
-        "p95": 2.79,
-        "max": 2.79
+        "p50": 2.827,
+        "p95": 2.9,
+        "max": 2.9
       },
       "cpu_pct": {
-        "p50": 98.849,
-        "p95": 99.251,
-        "max": 99.251
+        "p50": 98.472,
+        "p95": 98.803,
+        "max": 98.803
       },
       "cpu_ms": {
-        "p50": 2.205,
-        "p95": 2.74,
-        "max": 2.74
+        "p50": 2.793,
+        "p95": 2.855,
+        "max": 2.855
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 4803,
+        "python_lines": 4851,
         "pyproject_bytes": 1786
       }
     },
     "euxis-gateway": {
       "samples": 3,
       "wall_ms": {
-        "p50": 3.357,
-        "p95": 3.874,
-        "max": 3.874
+        "p50": 3.239,
+        "p95": 3.302,
+        "max": 3.302
       },
       "cpu_pct": {
-        "p50": 99.262,
-        "p95": 99.378,
-        "max": 99.378
+        "p50": 98.731,
+        "p95": 99.517,
+        "max": 99.517
       },
       "cpu_ms": {
-        "p50": 3.336,
-        "p95": 3.822,
-        "max": 3.822
+        "p50": 3.196,
+        "p95": 3.198,
+        "max": 3.198
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 8661,
+        "python_lines": 8709,
         "pyproject_bytes": 1451
       }
     },
     "euxis-tui": {
       "samples": 3,
       "wall_ms": {
-        "p50": 17.476,
-        "p95": 17.977,
-        "max": 17.977
+        "p50": 14.85,
+        "p95": 16.581,
+        "max": 16.581
       },
       "cpu_pct": {
-        "p50": 99.24,
-        "p95": 99.278,
-        "max": 99.278
+        "p50": 99.223,
+        "p95": 99.251,
+        "max": 99.251
       },
       "cpu_ms": {
-        "p50": 17.343,
-        "p95": 17.77,
-        "max": 17.77
+        "p50": 14.739,
+        "p95": 16.452,
+        "max": 16.452
       },
       "memory_mb": {
-        "p50": 17.594,
-        "p95": 17.637,
-        "max": 17.637
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 36884,
+        "python_lines": 36931,
         "pyproject_bytes": 1584
       }
     },
     "euxis-metrics": {
       "samples": 3,
       "wall_ms": {
-        "p50": 2.99,
-        "p95": 3.053,
-        "max": 3.053
+        "p50": 3.2,
+        "p95": 3.363,
+        "max": 3.363
       },
       "cpu_pct": {
-        "p50": 98.925,
-        "p95": 99.251,
-        "max": 99.251
+        "p50": 99.13,
+        "p95": 99.195,
+        "max": 99.195
       },
       "cpu_ms": {
-        "p50": 2.967,
-        "p95": 2.999,
-        "max": 2.999
+        "p50": 3.167,
+        "p95": 3.334,
+        "max": 3.334
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 6429,
+        "python_lines": 6477,
         "pyproject_bytes": 1465
       }
     },
     "euxis-adapters": {
       "samples": 3,
       "wall_ms": {
-        "p50": 1.158,
-        "p95": 1.687,
-        "max": 1.687
+        "p50": 1.996,
+        "p95": 2.068,
+        "max": 2.068
       },
       "cpu_pct": {
-        "p50": 98.996,
-        "p95": 99.08,
-        "max": 99.08
+        "p50": 98.74,
+        "p95": 98.872,
+        "max": 98.872
       },
       "cpu_ms": {
-        "p50": 1.148,
-        "p95": 1.662,
-        "max": 1.662
+        "p50": 1.965,
+        "p95": 2.042,
+        "max": 2.042
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 1332,
+        "python_lines": 1380,
         "pyproject_bytes": 1467
       }
     },
     "euxis-security": {
       "samples": 3,
       "wall_ms": {
-        "p50": 0.874,
-        "p95": 0.97,
-        "max": 0.97
+        "p50": 0.965,
+        "p95": 1.04,
+        "max": 1.04
       },
       "cpu_pct": {
-        "p50": 98.667,
-        "p95": 98.794,
-        "max": 98.794
+        "p50": 98.821,
+        "p95": 98.829,
+        "max": 98.829
       },
       "cpu_ms": {
-        "p50": 0.858,
-        "p95": 0.957,
-        "max": 0.957
+        "p50": 0.952,
+        "p95": 1.028,
+        "max": 1.028
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 112,
+        "python_lines": 160,
         "pyproject_bytes": 1361
       }
     },
     "euxis-crypto": {
       "samples": 3,
       "wall_ms": {
-        "p50": 5.918,
-        "p95": 6.334,
-        "max": 6.334
+        "p50": 6.697,
+        "p95": 7.16,
+        "max": 7.16
       },
       "cpu_pct": {
-        "p50": 98.985,
-        "p95": 99.318,
-        "max": 99.318
+        "p50": 98.862,
+        "p95": 99.409,
+        "max": 99.409
       },
       "cpu_ms": {
-        "p50": 5.878,
-        "p95": 6.269,
-        "max": 6.269
+        "p50": 6.621,
+        "p95": 7.076,
+        "max": 7.076
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "python_lines": 3411,
+        "python_lines": 3458,
         "pyproject_bytes": 1410
       }
     },
     "euxis-runtime": {
       "samples": 3,
       "wall_ms": {
-        "p50": 0.312,
-        "p95": 0.315,
-        "max": 0.315
+        "p50": 0.27,
+        "p95": 0.31,
+        "max": 0.31
       },
       "cpu_pct": {
-        "p50": 97.434,
-        "p95": 97.558,
-        "max": 97.558
+        "p50": 97.301,
+        "p95": 97.524,
+        "max": 97.524
       },
       "cpu_ms": {
-        "p50": 0.3,
-        "p95": 0.304,
-        "max": 0.304
+        "p50": 0.262,
+        "p95": 0.292,
+        "max": 0.292
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
         "metrics_samples_read": 500,
@@ -249,24 +249,24 @@
     "euxis-scripts": {
       "samples": 3,
       "wall_ms": {
-        "p50": 0.653,
-        "p95": 0.666,
-        "max": 0.666
+        "p50": 0.747,
+        "p95": 0.769,
+        "max": 0.769
       },
       "cpu_pct": {
-        "p50": 98.109,
-        "p95": 100.102,
-        "max": 100.102
+        "p50": 99.152,
+        "p95": 99.169,
+        "max": 99.169
       },
       "cpu_ms": {
-        "p50": 0.64,
-        "p95": 0.667,
-        "max": 0.667
+        "p50": 0.741,
+        "p95": 0.756,
+        "max": 0.756
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
         "shell_files": 1,
@@ -276,24 +276,24 @@
     "euxis-sdk": {
       "samples": 3,
       "wall_ms": {
-        "p50": 4.391,
-        "p95": 4.567,
-        "max": 4.567
+        "p50": 4.349,
+        "p95": 4.548,
+        "max": 4.548
       },
       "cpu_pct": {
-        "p50": 98.28,
-        "p95": 98.966,
-        "max": 98.966
+        "p50": 99.048,
+        "p95": 99.265,
+        "max": 99.265
       },
       "cpu_ms": {
-        "p50": 4.346,
-        "p95": 4.489,
-        "max": 4.489
+        "p50": 4.317,
+        "p95": 4.475,
+        "max": 4.475
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
         "rust_lines": 195,
@@ -303,24 +303,24 @@
     "euxis-web": {
       "samples": 3,
       "wall_ms": {
-        "p50": 0.195,
-        "p95": 0.242,
-        "max": 0.242
+        "p50": 0.185,
+        "p95": 0.277,
+        "max": 0.277
       },
       "cpu_pct": {
-        "p50": 89.544,
-        "p95": 93.649,
-        "max": 93.649
+        "p50": 90.044,
+        "p95": 92.336,
+        "max": 92.336
       },
       "cpu_ms": {
-        "p50": 0.174,
-        "p95": 0.227,
-        "max": 0.227
+        "p50": 0.156,
+        "p95": 0.249,
+        "max": 0.249
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
         "package_json_keys": 11,
@@ -330,96 +330,96 @@
     "euxis-docs": {
       "samples": 3,
       "wall_ms": {
-        "p50": 4.823,
-        "p95": 5.027,
-        "max": 5.027
+        "p50": 4.778,
+        "p95": 4.865,
+        "max": 4.865
       },
       "cpu_pct": {
-        "p50": 99.064,
-        "p95": 99.447,
-        "max": 99.447
+        "p50": 99.288,
+        "p95": 99.306,
+        "max": 99.306
       },
       "cpu_ms": {
-        "p50": 4.778,
-        "p95": 4.971,
-        "max": 4.971
+        "p50": 4.725,
+        "p95": 4.83,
+        "max": 4.83
       },
       "memory_mb": {
-        "p50": 17.562,
-        "p95": 17.562,
-        "max": 17.562
+        "p50": 17.863,
+        "p95": 17.863,
+        "max": 17.863
       },
       "probe": {
-        "markdown_files": 183,
+        "markdown_files": 185,
         "rst_files": 27
       }
     }
   },
   "deltas_vs_current_baseline": {
     "euxis-adapters": {
-      "wall_p95_delta_percent": 19.138,
-      "cpu_ms_p95_delta_percent": 19.397,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": 46.045,
+      "cpu_ms_p95_delta_percent": 46.695,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-cli": {
-      "wall_p95_delta_percent": -33.126,
-      "cpu_ms_p95_delta_percent": -33.414,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -30.489,
+      "cpu_ms_p95_delta_percent": -30.62,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-core": {
-      "wall_p95_delta_percent": -48.512,
-      "cpu_ms_p95_delta_percent": -47.935,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -44.569,
+      "cpu_ms_p95_delta_percent": -45.113,
+      "memory_p95_delta_percent": -0.113
     },
     "euxis-crypto": {
-      "wall_p95_delta_percent": 117.588,
-      "cpu_ms_p95_delta_percent": 119.965,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": 145.964,
+      "cpu_ms_p95_delta_percent": 148.281,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-docs": {
-      "wall_p95_delta_percent": -25.779,
-      "cpu_ms_p95_delta_percent": -25.495,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -28.171,
+      "cpu_ms_p95_delta_percent": -27.608,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-gateway": {
-      "wall_p95_delta_percent": -38.095,
-      "cpu_ms_p95_delta_percent": -38.055,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -47.236,
+      "cpu_ms_p95_delta_percent": -48.169,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-metrics": {
-      "wall_p95_delta_percent": -33.486,
-      "cpu_ms_p95_delta_percent": -33.518,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -26.732,
+      "cpu_ms_p95_delta_percent": -26.092,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-runtime": {
-      "wall_p95_delta_percent": -25.178,
-      "cpu_ms_p95_delta_percent": -26.214,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -26.366,
+      "cpu_ms_p95_delta_percent": -29.126,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-scripts": {
-      "wall_p95_delta_percent": -47.476,
-      "cpu_ms_p95_delta_percent": -45.417,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": -39.353,
+      "cpu_ms_p95_delta_percent": -38.134,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-sdk": {
-      "wall_p95_delta_percent": 293.707,
-      "cpu_ms_p95_delta_percent": 297.257,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": 292.069,
+      "cpu_ms_p95_delta_percent": 296.018,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-security": {
-      "wall_p95_delta_percent": 5.092,
-      "cpu_ms_p95_delta_percent": 6.215,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": 12.676,
+      "cpu_ms_p95_delta_percent": 14.095,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-tui": {
-      "wall_p95_delta_percent": 0.195,
-      "cpu_ms_p95_delta_percent": 0.634,
-      "memory_p95_delta_percent": -0.681
+      "wall_p95_delta_percent": -7.586,
+      "cpu_ms_p95_delta_percent": -6.83,
+      "memory_p95_delta_percent": 0.591
     },
     "euxis-web": {
-      "wall_p95_delta_percent": 15.789,
-      "cpu_ms_p95_delta_percent": 18.848,
-      "memory_p95_delta_percent": -1.104
+      "wall_p95_delta_percent": 32.536,
+      "cpu_ms_p95_delta_percent": 30.366,
+      "memory_p95_delta_percent": 0.591
     }
   }
 }
