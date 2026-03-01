@@ -1,6 +1,8 @@
 find_package(Qt6 COMPONENTS Widgets Network QUIET)
 
 if(Qt6_FOUND)
+  set(CMAKE_AUTOMOC ON)
+
   qt_add_executable(euxis-etx
     src/main.cpp
     src/app.cpp
