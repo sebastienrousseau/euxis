@@ -1,7 +1,7 @@
 # Repository Split — Monolith to Modular (v0.0.2)
 
 ## Executive Summary
-Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.
+Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, euxis-runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.
 
 ---
 
@@ -46,8 +46,8 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 - `agents/registry.json` and `agents/squads.json` provide agent metadata (consumed by CLI and TUI).
 
 ### Data Flow (runtime)
-- Gateway writes session, approvals, audit, transcripts to `~/.euxis/runtime/data/gateway/*` via `api/src/gateway/utils.py`.
-- Cortex memory stored under `~/.euxis/runtime/memory/cortex` and accessed by `euxis-cli/bin/euxis-cortex` and `euxis-cli/bin/euxis-graph`.
+- Gateway writes session, approvals, audit, transcripts to `~/.euxis/euxis-runtime/data/gateway/*` via `api/src/gateway/utils.py`.
+- Cortex memory stored under `~/.euxis/euxis-runtime/memory/cortex` and accessed by `euxis-cli/bin/euxis-cortex` and `euxis-cli/bin/euxis-graph`.
 - Metrics recorded under `~/.euxis/metrics/events.jsonl` and consumed by metrics tooling.
 
 ### Tests & Coverage
@@ -174,8 +174,8 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 - `euxis-core` exports agent registry and shell libs (public API is filesystem-based entrypoints).
 
 ### Data Ownership
-- Gateway owns `~/.euxis/runtime/data/gateway/*`.
-- Memory owns `~/.euxis/runtime/memory/cortex/*`.
+- Gateway owns `~/.euxis/euxis-runtime/data/gateway/*`.
+- Memory owns `~/.euxis/euxis-runtime/memory/cortex/*`.
 - Metrics owns `~/.euxis/metrics/events.jsonl`.
 
 ---

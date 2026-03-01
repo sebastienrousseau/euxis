@@ -147,7 +147,7 @@ debugging ←→ performance-profiling ←→ test-analysis
 ├── config/                 # Configuration
 │   ├── patterns/          # Validation patterns
 │   └── templates/         # Prompt templates
-├── runtime/data/                   # Runtime data
+├── euxis-runtime/data/                   # Runtime data
 │   └── projects/          # Project-specific sessions
 ├── docs/                   # Documentation
 │   └── adr/               # Architecture Decision Records

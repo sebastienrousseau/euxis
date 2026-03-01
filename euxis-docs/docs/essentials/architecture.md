@@ -607,8 +607,8 @@ flowchart TB
 │   ├── patterns/                # Validation patterns
 │   ├── playbooks/               # Playbook definitions
 │   └── templates/               # Prompt templates
-├── runtime/data/                         # Runtime data (bus, lifecycle, projects)
-├── runtime/memory/                       # Cortex storage
+├── euxis-runtime/data/                         # Runtime data (bus, lifecycle, projects)
+├── euxis-runtime/memory/                       # Cortex storage
 ├── metrics/src/metrics/                      # Fleet metrics
 ├── euxis-policy/                     # Approval policies
 │   ├── lifecycle/               # Agent state files

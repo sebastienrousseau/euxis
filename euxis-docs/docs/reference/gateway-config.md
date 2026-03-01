@@ -164,7 +164,7 @@ Reference for the Gateway configuration file.
 ### `gateway.webhooks`
 
 - List of webhook targets (objects with `url` and `events` array).
-- Runtime updates are persisted to `~/.euxis/runtime/data/gateway/webhooks.json`.
+- Runtime updates are persisted to `~/.euxis/euxis-runtime/data/gateway/webhooks.json`.
 
 ### `gateway.canvas`
 

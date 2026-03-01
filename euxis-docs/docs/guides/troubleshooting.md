@@ -611,17 +611,17 @@ Agent appears to be running but never completes.
 
 ```bash
 # Check lifecycle state
-cat ~/.euxis/runtime/data/lifecycle/*.state
+cat ~/.euxis/euxis-runtime/data/lifecycle/*.state
 
 # List active agents
-for f in ~/.euxis/runtime/data/lifecycle/*.state; do
+for f in ~/.euxis/euxis-runtime/data/lifecycle/*.state; do
     agent=$(basename "$f" .state)
     state=$(cat "$f")
     [[ "$state" == "active" ]] && echo "$agent: $state"
 done
 
 # Check transition log
-tail -20 ~/.euxis/runtime/data/lifecycle/transitions.jsonl
+tail -20 ~/.euxis/euxis-runtime/data/lifecycle/transitions.jsonl
 ```
 
 **Solutions:**
@@ -636,10 +636,10 @@ tail -20 ~/.euxis/runtime/data/lifecycle/transitions.jsonl
 2. **Force state reset:**
    ```bash
    # Reset specific agent
-   echo "idle" > ~/.euxis/runtime/data/lifecycle/architect.state
+   echo "idle" > ~/.euxis/euxis-runtime/data/lifecycle/architect.state
 
    # Reset all agents
-   for f in ~/.euxis/runtime/data/lifecycle/*.state; do
+   for f in ~/.euxis/euxis-runtime/data/lifecycle/*.state; do
        echo "idle" > "$f"
    done
    ```
@@ -713,13 +713,13 @@ echo "Hello" | claude --print --model claude-sonnet-4-20250514
 
 ```bash
 # Ensure lifecycle directory exists
-mkdir -p ~/.euxis/runtime/data/lifecycle
+mkdir -p ~/.euxis/euxis-runtime/data/lifecycle
 
 # Check permissions
-chmod 755 ~/.euxis/runtime/data/lifecycle
+chmod 755 ~/.euxis/euxis-runtime/data/lifecycle
 
 # Clear corrupted state files
-rm ~/.euxis/runtime/data/lifecycle/*.state
+rm ~/.euxis/euxis-runtime/data/lifecycle/*.state
 ```
 
 ---
@@ -739,10 +739,10 @@ or garbled content in memory.md files.
 
 ```bash
 # Check memory file validity
-cat ~/.euxis/runtime/data/projects/*/*/memory.md | head -20
+cat ~/.euxis/euxis-runtime/data/projects/*/*/memory.md | head -20
 
 # Look for binary or corrupted content
-file ~/.euxis/runtime/data/projects/*/*/memory.md
+file ~/.euxis/euxis-runtime/data/projects/*/*/memory.md
 ```
 
 **Solutions:**
@@ -753,16 +753,16 @@ file ~/.euxis/runtime/data/projects/*/*/memory.md
    AGENT="architect"
 
    # Backup
-   cp ~/.euxis/runtime/data/projects/$PROJECT/$AGENT/memory.md{,.bak}
+   cp ~/.euxis/euxis-runtime/data/projects/$PROJECT/$AGENT/memory.md{,.bak}
 
    # Reset
-   echo "# Memory: $AGENT" > ~/.euxis/runtime/data/projects/$PROJECT/$AGENT/memory.md
+   echo "# Memory: $AGENT" > ~/.euxis/euxis-runtime/data/projects/$PROJECT/$AGENT/memory.md
    ```
 
 2. **Restore from backup:**
    ```bash
-   cp ~/.euxis/runtime/data/projects/$PROJECT/$AGENT/memory.md.bak \
-      ~/.euxis/runtime/data/projects/$PROJECT/$AGENT/memory.md
+   cp ~/.euxis/euxis-runtime/data/projects/$PROJECT/$AGENT/memory.md.bak \
+      ~/.euxis/euxis-runtime/data/projects/$PROJECT/$AGENT/memory.md
    ```
 
 ### Memory Pruning Not Working
@@ -775,7 +775,7 @@ Memory files grow unbounded (>500 lines).
 
 ```bash
 # Check memory file sizes
-wc -l ~/.euxis/runtime/data/projects/*/*/memory.md
+wc -l ~/.euxis/euxis-runtime/data/projects/*/*/memory.md
 ```
 
 **Solutions:**
@@ -785,10 +785,10 @@ wc -l ~/.euxis/runtime/data/projects/*/*/memory.md
    source ~/.euxis/core/lib/memory.sh
 
    # Prune specific memory file
-   prune_memory ~/.euxis/runtime/data/projects/myproject/architect/memory.md
+   prune_memory ~/.euxis/euxis-runtime/data/projects/myproject/architect/memory.md
 
    # Prune all memory in a project
-   prune_project_memory ~/.euxis/runtime/data/projects/myproject
+   prune_project_memory ~/.euxis/euxis-runtime/data/projects/myproject
    ```
 
 2. **Configure pruning thresholds:**
@@ -821,7 +821,7 @@ Semantic drift occurs when new memories contradict existing knowledge. This is a
 1. **Review and resolve contradictions:**
    ```bash
    # View drift warnings
-   grep -r "\[DRIFT\]" ~/.euxis/runtime/data/projects/*/*/memory.md
+   grep -r "\[DRIFT\]" ~/.euxis/euxis-runtime/data/projects/*/*/memory.md
    ```
 
 2. **Manually resolve:**
@@ -830,7 +830,7 @@ Semantic drift occurs when new memories contradict existing knowledge. This is a
 
    # Supersede old knowledge with new
    resolve_memory_contradiction \
-       ~/.euxis/runtime/data/projects/myproject/architect/memory.md \
+       ~/.euxis/euxis-runtime/data/projects/myproject/architect/memory.md \
        "Project uses OAuth 2.0 for authentication" \
        "architect" \
        "supersede"
@@ -839,7 +839,7 @@ Semantic drift occurs when new memories contradict existing knowledge. This is a
 3. **Keep both versions:**
    ```bash
    resolve_memory_contradiction \
-       ~/.euxis/runtime/data/projects/myproject/architect/memory.md \
+       ~/.euxis/euxis-runtime/data/projects/myproject/architect/memory.md \
        "New authentication approach" \
        "architect" \
        "keep_both"
@@ -855,10 +855,10 @@ Agents cannot access sibling agent memories.
 
 ```bash
 # Check project structure
-ls -la ~/.euxis/runtime/data/projects/myproject/
+ls -la ~/.euxis/euxis-runtime/data/projects/myproject/
 
 # Verify memory files exist for other agents
-ls ~/.euxis/runtime/data/projects/myproject/*/memory.md
+ls ~/.euxis/euxis-runtime/data/projects/myproject/*/memory.md
 ```
 
 **Solutions:**
@@ -871,9 +871,9 @@ ls ~/.euxis/runtime/data/projects/myproject/*/memory.md
 
 2. **Check directory structure:**
    ```bash
-   # Memories should be at: ~/.euxis/runtime/data/projects/{project}/{agent}/memory.md
-   mkdir -p ~/.euxis/runtime/data/projects/myproject/architect
-   touch ~/.euxis/runtime/data/projects/myproject/architect/memory.md
+   # Memories should be at: ~/.euxis/euxis-runtime/data/projects/{project}/{agent}/memory.md
+   mkdir -p ~/.euxis/euxis-runtime/data/projects/myproject/architect
+   touch ~/.euxis/euxis-runtime/data/projects/myproject/architect/memory.md
    ```
 
 ---
@@ -1173,14 +1173,14 @@ euxis architect "Your task"
 
 | Log Type | Location |
 |----------|----------|
-| Agent output | `~/.euxis/runtime/data/projects/{project}/{agent}/output/*.md` |
-| Agent audit | `~/.euxis/runtime/data/projects/{project}/{agent}/audit.md` |
-| Agent memory | `~/.euxis/runtime/data/projects/{project}/{agent}/memory.md` |
+| Agent output | `~/.euxis/euxis-runtime/data/projects/{project}/{agent}/output/*.md` |
+| Agent audit | `~/.euxis/euxis-runtime/data/projects/{project}/{agent}/audit.md` |
+| Agent memory | `~/.euxis/euxis-runtime/data/projects/{project}/{agent}/memory.md` |
 | Performance metrics | `~/.euxis/metrics/events.jsonl` |
-| Lifecycle transitions | `~/.euxis/runtime/data/lifecycle/transitions.jsonl` |
+| Lifecycle transitions | `~/.euxis/euxis-runtime/data/lifecycle/transitions.jsonl` |
 | Dispatch logs | `${TMPDIR:-/tmp}/euxis_dispatch_*/*.log` |
 | Certification logs | `${TMPDIR:-/tmp}/euxis_cert_*.log` |
-| Bus messages | `~/.euxis/runtime/data/bus/pipes/*/*.msg` |
+| Bus messages | `~/.euxis/euxis-runtime/data/bus/pipes/*/*.msg` |
 
 ### Generating a Bug Report
 
@@ -1202,7 +1202,7 @@ euxis architect "Your task"
     echo ""
 
     echo "=== Recent Errors ==="
-    grep -r "ERROR" ~/.euxis/runtime/data/lifecycle/transitions.jsonl 2>/dev/null | tail -20
+    grep -r "ERROR" ~/.euxis/euxis-runtime/data/lifecycle/transitions.jsonl 2>/dev/null | tail -20
     echo ""
 
     echo "=== Provider Status ==="

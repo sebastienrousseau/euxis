@@ -221,7 +221,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: euxis-cli/bin/, config/, euxis-policy/, runtime/memory/, metrics/src/metrics/, runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
+OBSERVATION 1: Found: euxis-cli/bin/, config/, euxis-policy/, euxis-runtime/memory/, metrics/src/metrics/, euxis-runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -241,7 +241,7 @@ FINAL ANSWER:
 - Playbook definitions for workflows
 - Provider routing rules
 
-### 3. Knowledge Storage (runtime/memory/ + metrics/src/metrics/ + runtime/data/)
+### 3. Knowledge Storage (euxis-runtime/memory/ + metrics/src/metrics/ + euxis-runtime/data/)
 - Metrics live in `metrics/src/metrics/` (runtime data in `~/.euxis/metrics/`)
 - Cortex: Semantic memory with vector search
 - Project-specific agent outputs

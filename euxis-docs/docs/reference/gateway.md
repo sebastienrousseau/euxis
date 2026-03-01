@@ -349,7 +349,7 @@ POST /voice/stt
 
 ## Webhook APIs
 
-Webhook updates are persisted to `~/.euxis/runtime/data/gateway/webhooks.json`.
+Webhook updates are persisted to `~/.euxis/euxis-runtime/data/gateway/webhooks.json`.
 
 List webhooks:
 

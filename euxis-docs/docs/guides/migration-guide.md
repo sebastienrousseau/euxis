@@ -389,7 +389,7 @@ Use this checklist template for any version migration:
 - [ ] Compare agent count with expected
 - [ ] Verify squad configurations
 - [ ] Test playbook execution
-- [ ] Confirm runtime/memory/cortex functionality
+- [ ] Confirm euxis-runtime/memory/cortex functionality
 - [ ] Performance benchmark (optional)
 
 ### Documentation
