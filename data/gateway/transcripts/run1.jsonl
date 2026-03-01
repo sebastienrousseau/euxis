@@ -1,6 +1,0 @@
-{"ts": "2026-03-01T00:09:54+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "s1", "meta": {}, "content": "hello", "approved": true}}
-{"ts": "2026-03-01T00:10:06+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
-{"ts": "2026-03-01T00:10:14+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}
-{"ts": "2026-03-01T00:10:32+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "s1", "meta": {}, "content": "hello", "approved": true}}
-{"ts": "2026-03-01T00:10:33+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "session_id": "sess", "meta": {}, "content": "hi", "approved": true}}
-{"ts": "2026-03-01T00:10:34+0000", "event": "approval", "status": "approved", "entry": {"run_id": "run1", "approved": true}}

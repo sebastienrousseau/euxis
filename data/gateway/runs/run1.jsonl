@@ -1,2 +1,0 @@
-{"type": "event", "event": "agent", "seq": 1, "ts": "2026-03-01T00:10:06+0000", "data": {"run_id": "run1", "session_id": "sess", "agent_id": "architect", "status": "error", "content": "[Errno 2] No such file or directory: '/home/seb/.euxis/bin/euxis'"}}
-{"type": "event", "event": "agent", "seq": 1, "ts": "2026-03-01T00:10:33+0000", "data": {"run_id": "run1", "session_id": "sess", "agent_id": "architect", "status": "error", "content": "[Errno 2] No such file or directory: '/home/seb/.euxis/bin/euxis'"}}

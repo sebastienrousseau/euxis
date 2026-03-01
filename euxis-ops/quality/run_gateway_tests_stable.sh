@@ -4,6 +4,14 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${REPO_ROOT}"
 
+cleanup_gateway_test_artifacts() {
+  rm -rf "${REPO_ROOT}/data/gateway"
+  rmdir "${REPO_ROOT}/data" 2>/dev/null || true
+}
+
+cleanup_gateway_test_artifacts
+trap cleanup_gateway_test_artifacts EXIT
+
 PYTEST=".venv/bin/pytest"
 if [[ ! -x "${PYTEST}" ]]; then
   PYTEST="pytest"

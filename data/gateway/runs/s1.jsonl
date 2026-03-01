@@ -1,2 +1,0 @@
-{"type": "event", "event": "agent", "seq": 1, "ts": "2026-03-01T00:09:51+0000", "data": {"run_id": "s1", "session_id": "r1", "agent_id": "a", "status": "final", "content": "exit 0"}}
-{"type": "event", "event": "agent", "seq": 1, "ts": "2026-03-01T00:10:32+0000", "data": {"run_id": "s1", "session_id": "r1", "agent_id": "a", "status": "final", "content": "exit 0"}}
