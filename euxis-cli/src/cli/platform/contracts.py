@@ -13,6 +13,6 @@ class PlatformInfo:
     platform: str
     runtime: str
 
-class PlatformOps(Protocol):
+class PlatformOps(Protocol):  # pragma: no cover - structural typing contract only
     def platform_info(self) -> PlatformInfo: ...
     def path_separator(self) -> str: ...

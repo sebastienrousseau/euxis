@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable verify-all-packages
 
 all: install test
 
@@ -24,6 +24,12 @@ install:
 
 architecture-check:
 	python3 euxis-ops/architecture/check_boundaries.py
+
+core-platform-boundary-check:
+	python3 euxis-ops/quality/validate_core_platform_boundaries.py \
+		--repo-root . \
+		--standards euxis-ops/quality/package_standards.json \
+		--json-output euxis-data/release/core-platform-boundaries.json
 
 perf-gate:
 	python3 euxis-ops/perf/check_perf_budget.py euxis-runtime/data/perf/metrics.jsonl euxis-ops/perf/perf_policy.json current
@@ -216,7 +222,7 @@ package-bench-baseline-governance-check:
 		--review euxis-data/perf/package-benchmark-baseline-review.json \
 		--json-output euxis-data/perf/package-benchmark-baseline-governance.json
 
-gate-all: architecture-check perf-governance-check perf-gate scorecard release-checklist propose-release-baseline baseline-proposal-review release-evidence validate-release-evidence phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check template-conformance-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-structure-matrix-check package-bench-collect package-bench-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check
+gate-all: architecture-check core-platform-boundary-check perf-governance-check perf-gate scorecard release-checklist propose-release-baseline baseline-proposal-review release-evidence validate-release-evidence phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check template-conformance-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-structure-matrix-check package-bench-collect package-bench-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check
 
 workspace-bootstrap:
 	bash euxis-ops/bootstrap/verify_workspace.sh

@@ -57,7 +57,7 @@ def make_session_id(
 
 def gateway_data_dir() -> Path:
     home = os.environ.get("EUXIS_HOME", str(Path.home() / ".euxis"))
-    base = Path(home) / "data" / "gateway"
+    base = Path(home) / "euxis-data" / "gateway"
     base.mkdir(parents=True, exist_ok=True)
     return base
 

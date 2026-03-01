@@ -76,9 +76,11 @@ def main() -> int:
         module_name = module_dir.name
         files_created: list[str] = []
 
-        core_init = module_dir / "core" / "__init__.py"
-        if _write_if_missing(core_init, '"""Core domain logic for this package."""\n'):
-            files_created.append(str(core_init.relative_to(root)))
+        # Avoid namespace collisions when a module already uses `core.py`.
+        if not (module_dir / "core.py").exists():
+            core_init = module_dir / "core" / "__init__.py"
+            if _write_if_missing(core_init, '"""Core domain logic for this package."""\n'):
+                files_created.append(str(core_init.relative_to(root)))
 
         platform_init = module_dir / "platform" / "__init__.py"
         if _write_if_missing(platform_init, '"""Platform adapter layer for this package."""\n'):
