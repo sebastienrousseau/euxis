@@ -56,6 +56,17 @@ flowchart TB
         ui[euxis-ui<br/>Textual Dashboard]
     end
 
+    subgraph CppLayer["C++23 Runtime (euxis-cpp/)"]
+        direction LR
+        crypto_cpp[euxis-crypto-cpp<br/>AES-256-GCM, Ed25519]
+        bridge_cpp[euxis-bridge-cpp<br/>Skill Import, Sandbox]
+        memory_cpp[euxis-memory-cpp<br/>Encrypted Memory]
+        identity_cpp[euxis-identity-cpp<br/>DID, Credentials]
+        inference_cpp[euxis-inference-cpp<br/>llama.cpp, Ollama]
+        a2a_cpp[euxis-a2a-cpp<br/>A2A v0.2 Protocol]
+        etx[euxis-etx<br/>Qt6 Desktop GUI]
+    end
+
     subgraph Data["Data Layer"]
         direction LR
         registry[(agents/registry.db<br/>SQLite Agent Registry)]
@@ -76,13 +87,17 @@ flowchart TB
 
     CLI --> ShellLib
     CLI --> TUI
+    CLI --> CppLayer
     ShellLib --> Data
     ShellLib --> Providers
     TUI --> Data
+    CppLayer --> Data
+    CppLayer --> Providers
 
     style CLI fill:#e1f5fe,stroke:#01579b
     style ShellLib fill:#fff3e0,stroke:#e65100
     style TUI fill:#f3e5f5,stroke:#7b1fa2
+    style CppLayer fill:#e0f2f1,stroke:#00695c
     style Data fill:#e8f5e9,stroke:#2e7d32
     style Providers fill:#fce4ec,stroke:#c2185b
 ```
@@ -95,6 +110,7 @@ flowchart TB
 | **Shell Libraries** | `cli.sh`, `dispatch.sh`, `agents.sh`, `providers.sh`, `memory.sh` | Core framework logic implemented in pure Bash |
 | **Python TUI** | `euxis-cortex`, `euxis-synthesize`, `euxis-ui` | Optional rich interfaces requiring Python venv |
 | **Data Layer** | `agents/registry.db`, `memory.md`, `lifecycle/`, `projects/` | Persistent storage for agents, memory, and sessions |
+| **C++23 Runtime** | `euxis-crypto-cpp`, `euxis-bridge-cpp`, `euxis-memory-cpp`, `euxis-identity-cpp`, `euxis-inference-cpp`, `euxis-a2a-cpp`, `euxis-etx` | High-performance native modules for crypto, skill sandboxing, encrypted memory, identity, local inference, A2A protocol, and Qt6 desktop GUI |
 | **Provider Layer** | Claude, Gemini, Goose, Ollama, Qwen, OpenAI | External AI model backends |
 
 ---
@@ -578,6 +594,74 @@ flowchart TB
 
 ---
 
+## C++23 Runtime Architecture
+
+The C++23 runtime layer provides high-performance native implementations that complement the Python/Shell stack. All modules are built with CMake 3.28, use vcpkg for dependency management, and target C++23 with `std::expected`, `std::span`, and `[[nodiscard]]` throughout.
+
+### Module Dependency Graph
+
+```text
+flowchart TB
+    subgraph Foundation["Foundation (No Dependencies)"]
+        crypto[euxis-crypto-cpp<br/>AES-256-GCM, Ed25519<br/>Argon2id KDF]
+        identity[euxis-identity-cpp<br/>W3C DID, VCs<br/>ERC-8004]
+        inference[euxis-inference-cpp<br/>llama.cpp, Ollama<br/>Quality Gate]
+    end
+
+    subgraph Middle["Dependent Modules"]
+        bridge[euxis-bridge-cpp<br/>Skill Import, Static Analysis<br/>Admission, Sandbox]
+        memory[euxis-memory-cpp<br/>Tier-Bound Encrypted<br/>Memory with AAD]
+        a2a[euxis-a2a-cpp<br/>A2A v0.2 Protocol<br/>JSON-RPC, HTTP+SSE]
+    end
+
+    subgraph Top["Integration"]
+        bench[euxis-bench-cpp<br/>5 Benchmark Suites]
+        etx[euxis-etx<br/>Qt6 Desktop GUI<br/>17 Screens, 3 Themes]
+    end
+
+    crypto --> bridge
+    crypto --> memory
+    identity --> a2a
+    crypto --> bench
+    bridge --> bench
+    memory --> bench
+    identity --> bench
+    inference --> bench
+    a2a --> bench
+    crypto --> etx
+    bridge --> etx
+    memory --> etx
+    identity --> etx
+    inference --> etx
+    a2a --> etx
+
+    style Foundation fill:#e8f5e9,stroke:#2e7d32
+    style Middle fill:#fff3e0,stroke:#e65100
+    style Top fill:#e3f2fd,stroke:#1565c0
+```
+
+### Key Design Decisions
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Crypto backend | libsodium | Hardware-accelerated AES-NI, battle-tested, constant-time operations |
+| Error handling | `std::expected<T, E>` | Zero-cost error propagation, no exceptions |
+| Key sizes | `std::span<const std::byte, 32>` | Compile-time size enforcement |
+| Memory AAD | Tier label as AAD | Prevents cross-tier decryption attacks |
+| Inference | PIMPL for llama.cpp | Isolates C API from public headers |
+| Sandbox | nsjail (Linux) / sandbox-exec (macOS) | Platform-native process isolation |
+| GUI toolkit | Qt6 with QSS theming | Cross-platform, adaptive themes, command palette |
+
+### Build and Test
+
+```bash
+make cpp-build    # CMake configure + build (vcpkg dependencies)
+make cpp-test     # Run all Google Test suites (ASan + UBSan enabled)
+make cpp-bench    # Run benchmark suites against performance targets
+```
+
+---
+
 ## Directory Structure
 
 ```
@@ -621,7 +705,19 @@ flowchart TB
 │   └── protocols/               # Shared protocol fragments
 ├── agents/registry.db                   # SQLite agent registry
 ├── agents/registry.json                 # JSON registry (fallback)
-└── agents/squads.json                   # Squad/combo definitions
+├── agents/squads.json                   # Squad/combo definitions
+└── euxis-cpp/                           # C++23 Runtime
+    ├── CMakeLists.txt               # Top-level CMake project
+    ├── vcpkg.json                   # Dependency manifest
+    ├── cmake/                       # Shared CMake modules
+    ├── euxis-crypto-cpp/            # AES-256-GCM, Ed25519, Argon2id
+    ├── euxis-bridge-cpp/            # Skill import, sandbox execution
+    ├── euxis-memory-cpp/            # Tier-bound encrypted memory
+    ├── euxis-identity-cpp/          # W3C DID, Verifiable Credentials
+    ├── euxis-inference-cpp/         # llama.cpp + Ollama inference
+    ├── euxis-a2a-cpp/               # A2A v0.2 protocol
+    ├── euxis-bench-cpp/             # Benchmark suites
+    └── euxis-etx/                   # Qt6 desktop GUI
 ```
 
 ---
