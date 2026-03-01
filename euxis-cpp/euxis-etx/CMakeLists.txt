@@ -18,12 +18,25 @@ if(Qt6_FOUND)
     src/screens/help.cpp
     src/screens/logs.cpp
     src/screens/playbooks.cpp
+    src/screens/approvals.cpp
+    src/screens/cortex.cpp
+    src/screens/error_details.cpp
+    src/screens/metrics.cpp
+    src/screens/omnigraph.cpp
+    src/screens/squad_detail.cpp
+    src/screens/time_travel.cpp
+    src/screens/tool_runner.cpp
     src/widgets/header.cpp
     src/widgets/shortcut_bar.cpp
     src/widgets/fleet_grid.cpp
     src/widgets/agent_card.cpp
     src/widgets/search_bar.cpp
     src/widgets/tip_bar.cpp
+    src/widgets/output_panel.cpp
+    src/widgets/provider_select.cpp
+    src/widgets/resource_monitor.cpp
+    src/widgets/scroll_minimap.cpp
+    src/widgets/sparkline.cpp
   )
   target_include_directories(euxis-etx PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
