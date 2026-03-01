@@ -1,0 +1,703 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Euxis API Reference" href="api-reference.html"><link rel="prev" title="euxis-security" href="../api/euxis-security.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Reference - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.0.2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/architecture.html">Euxis Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/security.html">Security Essentials</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/agent-development-guide.html">Agent Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/concurrency-testing.html">Deterministic Concurrency Test Suite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/cross-platform.html">Euxis Cross-Platform Verification System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/migration-guide.html">Migration Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/ui-guide.html">Euxis UI &amp; Interaction Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/multi-repo-workflow.html">Multi-Repo Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-crypto.html">euxis-crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-tui.html">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Reference</a><input aria-label="Toggle navigation of Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html">Euxis API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html">Euxis CLI Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html">Gateway Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html">Gateway Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html">Gateway Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-canvas.html">Gateway Canvas Schema (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-cli.html">Gateway CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html">Gateway Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html">Gateway Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Module Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/MODULE_BOUNDARIES.html">Module Boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/SHARED_CONTRACTS.html">Shared Contracts (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/core-platform-separation-2026.html">Core/Platform Separation Plan (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-excellence-enforcement-2026.html">Package Excellence Enforcement (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-structure-matrix.html">Package Structure Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/repoStructure.html">Repository Structure Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decisions/index.html">Decisions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/crypto-patterns-report.html">Language Analysis: Crypto-Service TypeScript Codebase</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reports/index.html">Reports</a><input aria-label="Toggle navigation of Reports" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reports/CI-ENFORCEMENT-MANIFEST.html">Euxis CI Enforcement Manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/SHELL_SCRIPT_DOCUMENTATION_AUDIT.html">Shell Script Documentation Audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/UPDATED_README_SCRIPT_INVENTORY.html">Script Inventory for README.md</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-candidates-v0.1.0.html">Archive Candidates Review (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-cleanup-report-v0.1.0.html">Archive Cleanup Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ci-workflows-documentation.html">CI Workflows Documentation (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/dependency-leaks.html">Cross-Module Dependency Leak Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/documentation-review-2026.html">Euxis Documentation Review Against Industry Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/initial-user-expectations-2026-02-18.html">Initial User Expectations (February 18,)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/issue-closure-report-2026-02-16.html">Issue Closure Report —-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-diff.html">Module Dependency Diffs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-suggested.html">Module Dependency Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-lockfile-suggestions.html">Lockfile Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/release-summary-v0.0.9.html">Release Summary — v0.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-reorg-plan-v0.1.0.html">Euxis Monorepo Reorg Plan (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-checklist.html">Repo Split Checklist (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-plan-v0.1.0.html">Repository Split — Monolith to Modular (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/roadmap-v0.1.0.html">Euxis v0.0.2 Milestone Plan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/security-audit-gateway-2026-02.html">Euxis Gateway Security Audit Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/unused-assets-report-v0.1.0.html">Unused Assets Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ux-moonshots.html">Euxis UX Moonshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/v4.5-readiness-report.html">Euxis v4.5 Readiness Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html">SOC 2 Compliance Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../templates/index.html">Templates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../policies/index.html">Policies</a><input aria-label="Toggle navigation of Policies" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../policies/CONSTITUTION.html">The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/STYLE_GUIDE.html">Documentation Style Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/namingConventions.html">Naming Conventions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Legacy Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../legacy/index.html">Legacy Documentation (Archived)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../archive/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/reference/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="reference">
+<h1>Reference<a class="headerlink" href="#reference" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">Euxis API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#common-sh-logging-ui-performance"><code class="docutils literal notranslate"><span class="pre">common.sh</span></code> — Logging, UI &amp; Performance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#providers-sh-provider-routing-execution"><code class="docutils literal notranslate"><span class="pre">providers.sh</span></code> — Provider Routing &amp; Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#agents-sh-agent-discovery-lifecycle-plugins"><code class="docutils literal notranslate"><span class="pre">agents.sh</span></code> — Agent Discovery, Lifecycle &amp; Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#memory-sh-tiered-memory-pruning-drift-detection"><code class="docutils literal notranslate"><span class="pre">memory.sh</span></code> — Tiered Memory, Pruning &amp; Drift Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#session-sh-project-session-management"><code class="docutils literal notranslate"><span class="pre">session.sh</span></code> — Project &amp; Session Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#template-sh-variable-substitution"><code class="docutils literal notranslate"><span class="pre">template.sh</span></code> — Variable Substitution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#skill-detector-sh-project-auto-detection"><code class="docutils literal notranslate"><span class="pre">skill-detector.sh</span></code> — Project Auto-Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#prompt-sh-prompt-assembly-caching"><code class="docutils literal notranslate"><span class="pre">prompt.sh</span></code> — Prompt Assembly &amp; Caching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-reference.html#cli-tools">CLI Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">Euxis CLI Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#table-of-contents">Table of Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#core-system">Core System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#memory-knowledge">Memory &amp; Knowledge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#agent-orchestration">Agent Orchestration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#development-quality">Development &amp; Quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#automation-optimization">Automation &amp; Optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#communication-integration">Communication &amp; Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#user-interface">User Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id1">Core System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis">euxis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-daemon">euxis-daemon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-gateway">euxis-gateway</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-health">euxis-health</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-verify">euxis-verify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-verify-all">euxis-verify-all</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id2">Memory &amp; Knowledge</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-cortex">euxis-cortex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-graph">euxis-graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-codex">euxis-codex</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id3">Agent Orchestration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-dispatch">euxis-dispatch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-council">euxis-council</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-synthesize">euxis-synthesize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-squad">euxis-squad</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id4">Development &amp; Quality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-lint">euxis-lint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-certify">euxis-certify</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-audit-run">euxis-audit-run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-license-check">euxis-license-check</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-test-infra">euxis-test-infra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-cross-platform-verify">euxis-cross-platform-verify</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id5">Automation &amp; Optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-bench">euxis-bench</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-optimize">euxis-optimize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-kaizen">euxis-kaizen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-polish">euxis-polish</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-combo">euxis-combo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id6">Communication &amp; Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-bus">euxis-bus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-playbook">euxis-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-loop">euxis-loop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-hooks">euxis-hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-git-guard">euxis-git-guard</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id7">User Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-ui">euxis-ui</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-voice">euxis-voice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-slash">euxis-slash</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#id8">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-deploy">euxis-deploy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-sync-docs">euxis-sync-docs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli-reference.html#euxis-gym">euxis-gym</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli-reference.html#platform-information">Platform Information</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway.html">Gateway Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#schemas">Schemas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#frame-envelopes">Frame Envelopes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#request">Request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#response">Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#error-response">Error Response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#event">Event</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#auth">Auth</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#gateway-connect">gateway.connect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#chat-history">chat.history</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#chat-send">chat.send</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#chat-abort">chat.abort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#chat-inject">chat.inject</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#agent">agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#presence">presence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#tick">tick</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway.html#shutdown">shutdown</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#validation-rules-v0-0-2">Validation Rules (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#test-harness">Test Harness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#smoke-test">Smoke Test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#demo-client">Demo Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#webchat-ui">WebChat UI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#session-apis">Session APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#automation-apis">Automation APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#canvas-apis">Canvas APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#voice-apis">Voice APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#stt-tts-command-hooks">STT/TTS Command Hooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#stt-endpoint">STT Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#webhook-apis">Webhook APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#run-apis">Run APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#approvals-apis">Approvals APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#session-broadcast">Session Broadcast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway.html#elevated-mode">Elevated Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-adapters.html">Gateway Adapters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#goals">Goals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#common-adapter-contract">Common Adapter Contract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#slack-adapter">Slack Adapter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#auth">Auth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#flow-mermaid">Flow (Mermaid)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#inbound-mapping">Inbound Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#outbound-mapping">Outbound Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#limits">Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#telegram-adapter">Telegram Adapter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#id1">Auth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#id2">Flow (Mermaid)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#id3">Inbound Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#id4">Outbound Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-adapters.html#id5">Limits</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#config-sketch">Config Sketch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-adapters.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-auth.html">Gateway Auth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#default-mode">Default Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#token-auth">Token Auth</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-auth.html#client-usage">Client Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-auth.html#webchat-usage">WebChat Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-auth.html#example-python">Example (Python)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-auth.html#example-wscat">Example (wscat)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#password-auth">Password Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#failure-modes">Failure Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#rotation-guidance">Rotation Guidance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#storage-guidance">Storage Guidance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#config-example">Config Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#token-generation">Token Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-auth.html#minimum-requirements">Minimum Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-canvas.html">Gateway Canvas Schema (v0.0.2)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-canvas.html#shape">Shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-canvas.html#widget-types">Widget Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-canvas.html#validation">Validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-cli.html">Gateway CLI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-cli.html#synopsis">Synopsis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-cli.html#commands">Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-cli.html#run">run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-cli.html#status">status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-cli.html#config">config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-cli.html#sessions">sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-cli.html#config-loading-order">Config Loading Order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-cli.html#related">Related</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-config.html">Gateway Config</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html#security-policy-defaults">Security Policy Defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html#fields">Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html#config-loading-order">Config Loading Order</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway"><code class="docutils literal notranslate"><span class="pre">gateway</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-auth"><code class="docutils literal notranslate"><span class="pre">gateway.auth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-auth-token"><code class="docutils literal notranslate"><span class="pre">gateway.auth.token</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-auth-password"><code class="docutils literal notranslate"><span class="pre">gateway.auth.password</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-exec"><code class="docutils literal notranslate"><span class="pre">gateway.exec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-channels"><code class="docutils literal notranslate"><span class="pre">gateway.channels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-policy"><code class="docutils literal notranslate"><span class="pre">gateway.policy</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-session"><code class="docutils literal notranslate"><span class="pre">gateway.session</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-webhooks"><code class="docutils literal notranslate"><span class="pre">gateway.webhooks</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-canvas"><code class="docutils literal notranslate"><span class="pre">gateway.canvas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-config.html#gateway-voice"><code class="docutils literal notranslate"><span class="pre">gateway.voice</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-config.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gateway-quickstart.html">Gateway Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#connect">1) Connect</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="gateway-quickstart.html#client-example-python">Client Example (Python)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-quickstart.html#client-example-wscat">Client Example (wscat)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gateway-quickstart.html#client-example-websocat">Client Example (websocat)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#send-a-message">2) Send a Message</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#health-check-optional">Health Check (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#fetch-history">3) Fetch History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#abort-a-run">4) Abort a Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#inject-a-note">5) Inject a Note</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gateway-quickstart.html#related">Related</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#code-metrics">Code Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#include-guard-pattern">Include Guard Pattern</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#dependency-graph">Dependency Graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#how-euxis-sh-sources-libraries">How euxis.sh Sources Libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lib-architecture.html#extension-guidelines">Extension Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lib-architecture.html#adding-a-new-library-module">Adding a New Library Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lib-architecture.html#rules">Rules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="api-reference.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Euxis API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../api/euxis-security.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">euxis-security</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b52b19ee"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

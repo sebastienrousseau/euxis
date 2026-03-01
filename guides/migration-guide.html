@@ -1,0 +1,1368 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Troubleshooting Guide" href="troubleshooting.html"><link rel="prev" title="Euxis Fleet Guide" href="fleet-guide.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Migration Guide - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.0.2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/architecture.html">Euxis Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/security.html">Security Essentials</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Guides</a><input aria-label="Toggle navigation of Guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="agent-development-guide.html">Agent Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concurrency-testing.html">Deterministic Concurrency Test Suite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-platform.html">Euxis Cross-Platform Verification System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Migration Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui-guide.html">Euxis UI &amp; Interaction Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/multi-repo-workflow.html">Multi-Repo Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-crypto.html">euxis-crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-tui.html">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-reference.html">Euxis API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cli-reference.html">Euxis CLI Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway.html">Gateway Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-adapters.html">Gateway Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-auth.html">Gateway Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-canvas.html">Gateway Canvas Schema (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-cli.html">Gateway CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-config.html">Gateway Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-quickstart.html">Gateway Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Module Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/MODULE_BOUNDARIES.html">Module Boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/SHARED_CONTRACTS.html">Shared Contracts (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/core-platform-separation-2026.html">Core/Platform Separation Plan (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-excellence-enforcement-2026.html">Package Excellence Enforcement (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-structure-matrix.html">Package Structure Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/repoStructure.html">Repository Structure Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decisions/index.html">Decisions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/crypto-patterns-report.html">Language Analysis: Crypto-Service TypeScript Codebase</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reports/index.html">Reports</a><input aria-label="Toggle navigation of Reports" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reports/CI-ENFORCEMENT-MANIFEST.html">Euxis CI Enforcement Manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/SHELL_SCRIPT_DOCUMENTATION_AUDIT.html">Shell Script Documentation Audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/UPDATED_README_SCRIPT_INVENTORY.html">Script Inventory for README.md</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-candidates-v0.1.0.html">Archive Candidates Review (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-cleanup-report-v0.1.0.html">Archive Cleanup Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ci-workflows-documentation.html">CI Workflows Documentation (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/dependency-leaks.html">Cross-Module Dependency Leak Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/documentation-review-2026.html">Euxis Documentation Review Against Industry Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/initial-user-expectations-2026-02-18.html">Initial User Expectations (February 18,)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/issue-closure-report-2026-02-16.html">Issue Closure Report —-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-diff.html">Module Dependency Diffs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-suggested.html">Module Dependency Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-lockfile-suggestions.html">Lockfile Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/release-summary-v0.0.9.html">Release Summary — v0.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-reorg-plan-v0.1.0.html">Euxis Monorepo Reorg Plan (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-checklist.html">Repo Split Checklist (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-plan-v0.1.0.html">Repository Split — Monolith to Modular (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/roadmap-v0.1.0.html">Euxis v0.0.2 Milestone Plan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/security-audit-gateway-2026-02.html">Euxis Gateway Security Audit Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/unused-assets-report-v0.1.0.html">Unused Assets Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ux-moonshots.html">Euxis UX Moonshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/v4.5-readiness-report.html">Euxis v4.5 Readiness Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html">SOC 2 Compliance Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../templates/index.html">Templates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../policies/index.html">Policies</a><input aria-label="Toggle navigation of Policies" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../policies/CONSTITUTION.html">The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/STYLE_GUIDE.html">Documentation Style Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/namingConventions.html">Naming Conventions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Legacy Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../legacy/index.html">Legacy Documentation (Archived)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../archive/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/guides/migration-guide.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="migration-guide">
+<h1>Migration Guide<a class="headerlink" href="#migration-guide" title="Link to this heading">¶</a></h1>
+<p>This guide provides step-by-step instructions for upgrading between Euxis versions. Each migration section includes breaking changes, new features, configuration updates, and rollback procedures.</p>
+<hr class="docutils" />
+<section id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#version-history">Version History</a></p></li>
+<li><p><a class="reference internal" href="#migrating-from-v0-0-6-to-v0-0-7">Migrating from v0.0.6 to v0.0.7</a></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#new-features">New Features</a></p></li>
+<li><p><a class="reference internal" href="#breaking-changes">Breaking Changes</a></p></li>
+<li><p><a class="reference internal" href="#deprecated-features">Deprecated Features</a></p></li>
+<li><p><a class="reference internal" href="#step-by-step-upgrade-instructions">Step-by-Step Upgrade Instructions</a></p></li>
+<li><p><a class="reference internal" href="#configuration-changes">Configuration Changes</a></p></li>
+<li><p><a class="reference internal" href="#backward-compatibility-notes">Backward Compatibility Notes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#general-migration-checklist">General Migration Checklist</a></p></li>
+<li><p><a class="reference internal" href="#troubleshooting-common-migration-issues">Troubleshooting Common Migration Issues</a></p></li>
+<li><p><a class="reference internal" href="#rollback-procedures">Rollback Procedures</a></p></li>
+<li><p><a class="reference internal" href="#testing-your-migration">Testing Your Migration</a></p></li>
+</ol>
+</section>
+<hr class="docutils" />
+<section id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Version</p></th>
+<th class="head"><p>Release Date</p></th>
+<th class="head"><p>Major Changes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.0.7</p></td>
+<td><p>-02-09</p></td>
+<td><p>TUI (ETX), SQLite registry, 16 language playbooks, performance optimizations</p></td>
+</tr>
+<tr class="row-odd"><td><p>0.0.6</p></td>
+<td><p>-01-15</p></td>
+<td><p>Initial fleet architecture, JSON registry, core agents</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="migrating-from-v0-0-6-to-v0-0-7">
+<h2>Migrating from v0.0.6 to v0.0.7<a class="headerlink" href="#migrating-from-v0-0-6-to-v0-0-7" title="Link to this heading">¶</a></h2>
+<section id="new-features">
+<h3>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h3>
+<section id="etx-terminal-user-interface-tui">
+<h4>1. ETX Terminal User Interface (TUI)<a class="headerlink" href="#etx-terminal-user-interface-tui" title="Link to this heading">¶</a></h4>
+<p>The ETX (Euxis Terminal eXperience) is a full-featured terminal UI built on the Textual framework.</p>
+<p><strong>New screens and capabilities:</strong></p>
+<ul class="simple">
+<li><p>Metrics dashboard with real-time sparklines</p></li>
+<li><p>Squad detail view and fleet monitor</p></li>
+<li><p>Playbook browser and cortex screen</p></li>
+<li><p>Provider modal for AI provider selection</p></li>
+<li><p>Welcome, help, and about screens</p></li>
+<li><p>Tool runner for direct agent invocation</p></li>
+</ul>
+<p><strong>Launch the TUI:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>tui
+</pre></div>
+</div>
+<p><strong>New configuration options in <code class="docutils literal notranslate"><span class="pre">~/.euxis/config/etx-settings.json</span></code>:</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;theme&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;etx-liquid-glass&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;default_provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;claude&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;show_agent_tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reduced_motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;accessible_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;grid_columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;recent_agents&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">&quot;recent_commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="sqlite-registry">
+<h4>2. SQLite Registry<a class="headerlink" href="#sqlite-registry" title="Link to this heading">¶</a></h4>
+<p>The fleet registry now uses SQLite as the primary storage format with JSON fallback.</p>
+<p><strong>Registry location:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span><span class="n">registry</span><span class="o">.</span><span class="n">db</span>      <span class="c1"># Primary (SQLite)</span>
+<span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span><span class="n">registry</span><span class="o">.</span><span class="n">json</span>    <span class="c1"># Fallback (JSON)</span>
+</pre></div>
+</div>
+<p><strong>Query agents directly:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sqlite3<span class="w"> </span>~/.euxis/agents/registry.db<span class="w"> </span><span class="s2">&quot;SELECT id, tier, activation FROM agents_complete;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">accountant</span><span class="o">|</span><span class="n">fleet</span><span class="o">|</span><span class="n">default</span>
+<span class="n">ambassador</span><span class="o">|</span><span class="n">fleet</span><span class="o">|</span><span class="n">on</span><span class="o">-</span><span class="n">demand</span>
+<span class="n">animator</span><span class="o">|</span><span class="n">fleet</span><span class="o">|</span><span class="n">default</span>
+<span class="n">arbiter</span><span class="o">|</span><span class="n">core</span><span class="o">|</span><span class="n">core</span>
+<span class="n">architect</span><span class="o">|</span><span class="n">core</span><span class="o">|</span><span class="n">core</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="new-agents">
+<h4>3. New Agents<a class="headerlink" href="#new-agents" title="Link to this heading">¶</a></h4>
+<p>v0.0.7 introduces enhanced agent capabilities and new specialist agents:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Agent</p></th>
+<th class="head"><p>Tier</p></th>
+<th class="head"><p>Activation</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>tactician</p></td>
+<td><p>fleet</p></td>
+<td><p>default</p></td>
+<td><p>TUI/CLI terminal design specialist</p></td>
+</tr>
+<tr class="row-odd"><td><p>conduit</p></td>
+<td><p>fleet</p></td>
+<td><p>specialist</p></td>
+<td><p>Real-time audio and voice pipeline</p></td>
+</tr>
+<tr class="row-even"><td><p>cryptographer</p></td>
+<td><p>fleet</p></td>
+<td><p>specialist</p></td>
+<td><p>Cryptographic implementation and PQC</p></td>
+</tr>
+<tr class="row-odd"><td><p>ledger</p></td>
+<td><p>fleet</p></td>
+<td><p>specialist</p></td>
+<td><p>Payments and ISO 20022 compliance</p></td>
+</tr>
+<tr class="row-even"><td><p>custodian</p></td>
+<td><p>fleet</p></td>
+<td><p>specialist</p></td>
+<td><p>Rust crate publishing and maintenance</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="language-playbooks">
+<h4>4. Language Playbooks<a class="headerlink" href="#language-playbooks" title="Link to this heading">¶</a></h4>
+<p>16 language-specific playbooks with 10-gate enforcement:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>~/.euxis/playbooks/
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bash</span><span class="o">.</span><span class="n">yaml</span>       <span class="n">go</span><span class="o">.</span><span class="n">yaml</span>         <span class="n">python</span><span class="o">.</span><span class="n">yaml</span>     <span class="n">swift</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">c</span><span class="o">.</span><span class="n">yaml</span>          <span class="n">java</span><span class="o">.</span><span class="n">yaml</span>       <span class="n">ruby</span><span class="o">.</span><span class="n">yaml</span>       <span class="n">typescript</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">cpp</span><span class="o">.</span><span class="n">yaml</span>        <span class="n">javascript</span><span class="o">.</span><span class="n">yaml</span> <span class="n">rust</span><span class="o">.</span><span class="n">yaml</span>       <span class="n">zig</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">csharp</span><span class="o">.</span><span class="n">yaml</span>     <span class="n">kotlin</span><span class="o">.</span><span class="n">yaml</span>     <span class="n">scala</span><span class="o">.</span><span class="n">yaml</span>      <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="voice-pipeline-optimizations">
+<h4>5. Voice Pipeline Optimizations<a class="headerlink" href="#voice-pipeline-optimizations" title="Link to this heading">¶</a></h4>
+<p>Significant performance improvements for voice/audio features:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>v0.0.6</p></th>
+<th class="head"><p>v0.0.7</p></th>
+<th class="head"><p>Improvement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Cold Start</p></td>
+<td><p>7,764ms</p></td>
+<td><p>2,463ms</p></td>
+<td><p>68% faster</p></td>
+</tr>
+<tr class="row-odd"><td><p>Whisper Load</p></td>
+<td><p>10,216ms</p></td>
+<td><p>1,408ms</p></td>
+<td><p>86% faster</p></td>
+</tr>
+<tr class="row-even"><td><p>Piper Load</p></td>
+<td><p>6,755ms</p></td>
+<td><p>1,466ms</p></td>
+<td><p>78% faster</p></td>
+</tr>
+<tr class="row-odd"><td><p>Short TTS</p></td>
+<td><p>489ms</p></td>
+<td><p>70ms</p></td>
+<td><p>86% faster</p></td>
+</tr>
+<tr class="row-even"><td><p>Medium TTS</p></td>
+<td><p>3,614ms</p></td>
+<td><p>420ms</p></td>
+<td><p>88% faster</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="breaking-changes">
+<h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Link to this heading">¶</a></h3>
+<section id="registry-format-migration">
+<h4>1. Registry Format Migration<a class="headerlink" href="#registry-format-migration" title="Link to this heading">¶</a></h4>
+<p><strong>Impact:</strong> Scripts that directly parse <code class="docutils literal notranslate"><span class="pre">agents/registry.json</span></code> may need updates.</p>
+<p><strong>Before (v0.0.6):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;~/.euxis/agents/registry.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">agents</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)[</span><span class="s2">&quot;agents&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>After (v0.0.7):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tui.core.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">FleetRegistry</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">FleetRegistry</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="n">agents</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">agents</span>
+</pre></div>
+</div>
+<p><strong>Migration path:</strong> The system automatically falls back to JSON if SQLite is unavailable. Update scripts to use the registry module for future compatibility.</p>
+</section>
+<section id="provider-command-syntax">
+<h4>2. Provider Command Syntax<a class="headerlink" href="#provider-command-syntax" title="Link to this heading">¶</a></h4>
+<p><strong>Impact:</strong> Provider invocation now requires explicit syntax.</p>
+<p><strong>Before (v0.0.6):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Review this code&quot;</span><span class="w">  </span><span class="c1"># Used default provider</span>
+</pre></div>
+</div>
+<p><strong>After (v0.0.7):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Review this code&quot;</span><span class="w"> </span>claude<span class="w">    </span><span class="c1"># Explicit provider</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Review this code&quot;</span><span class="w"> </span>gemini<span class="w">    </span><span class="c1"># Alternative provider</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Review this code&quot;</span><span class="w"> </span>ollama<span class="w">    </span><span class="c1"># Local provider</span>
+</pre></div>
+</div>
+</section>
+<section id="removed-providers">
+<h4>3. Removed Providers<a class="headerlink" href="#removed-providers" title="Link to this heading">¶</a></h4>
+<p>The following providers have been removed:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Removed Provider</p></th>
+<th class="head"><p>Replacement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>OpenCode</p></td>
+<td><p>Claude CLI or Gemini</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kilo Code</p></td>
+<td><p>Claude CLI or Gemini</p></td>
+</tr>
+<tr class="row-even"><td><p>Amazon Q</p></td>
+<td><p>Kiro CLI</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Update your scripts:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w"> </span>opencode
+
+<span class="c1"># After</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w"> </span>claude
+</pre></div>
+</div>
+</section>
+<section id="configuration-file-location">
+<h4>4. Configuration File Location<a class="headerlink" href="#configuration-file-location" title="Link to this heading">¶</a></h4>
+<p><strong>Impact:</strong> Configuration moved from root to dedicated directory.</p>
+<p><strong>Before (v0.0.6):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">capabilities</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p><strong>After (v0.0.7):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="n">capabilities</span><span class="o">.</span><span class="n">json</span>
+<span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="n">etx</span><span class="o">-</span><span class="n">settings</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p><strong>Migration command:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.euxis/config
+mv<span class="w"> </span>~/.euxis/capabilities.json<span class="w"> </span>~/.euxis/config/<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="deprecated-features">
+<h3>Deprecated Features<a class="headerlink" href="#deprecated-features" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>Status</p></th>
+<th class="head"><p>Removal Target</p></th>
+<th class="head"><p>Migration Path</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>JSON-only registry</p></td>
+<td><p>Deprecated</p></td>
+<td><p>v0.0.2</p></td>
+<td><p>Use SQLite registry</p></td>
+</tr>
+<tr class="row-odd"><td><p>Em-dash formatting in prompts</p></td>
+<td><p>Deprecated</p></td>
+<td><p>v0.0.2</p></td>
+<td><p>Use colons for natural tone</p></td>
+</tr>
+<tr class="row-even"><td><p>Audit files in git tracking</p></td>
+<td><p>Removed</p></td>
+<td><p>N/A</p></td>
+<td><p>Files now in <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="step-by-step-upgrade-instructions">
+<h3>Step-by-Step Upgrade Instructions<a class="headerlink" href="#step-by-step-upgrade-instructions" title="Link to this heading">¶</a></h3>
+<section id="pre-migration-checklist">
+<h4>Pre-Migration Checklist<a class="headerlink" href="#pre-migration-checklist" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Backup current installation</span>
+cp<span class="w"> </span>-r<span class="w"> </span>~/.euxis<span class="w"> </span>~/.euxis.backup.<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d<span class="k">)</span>
+
+<span class="c1"># 2. Check current version</span>
+cat<span class="w"> </span>~/.euxis/agents/registry.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.protocol_version&#39;</span>
+<span class="c1"># Expected: 0.0.6</span>
+
+<span class="c1"># 3. Verify git status</span>
+<span class="nb">cd</span><span class="w"> </span>~/.euxis<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>status
+<span class="c1"># Ensure working directory is clean</span>
+</pre></div>
+</div>
+</section>
+<section id="migration-steps">
+<h4>Migration Steps<a class="headerlink" href="#migration-steps" title="Link to this heading">¶</a></h4>
+<p><strong>Step 1: Update the repository</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/.euxis
+git<span class="w"> </span>fetch<span class="w"> </span>origin
+git<span class="w"> </span>checkout<span class="w"> </span>feat/v0.0.7-release<span class="w">  </span><span class="c1"># Or: git pull origin main</span>
+</pre></div>
+</div>
+<p><strong>Step 2: Install TUI dependencies</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>textual<span class="o">[</span>all<span class="o">]</span><span class="w"> </span>--upgrade
+</pre></div>
+</div>
+<p><strong>Step 3: Migrate configuration</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create config directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/.euxis/config
+
+<span class="c1"># Move capabilities file</span>
+mv<span class="w"> </span>~/.euxis/capabilities.json<span class="w"> </span>~/.euxis/config/<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Initialize ETX settings</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from tui.core.config import ETXConfig; ETXConfig().save()&quot;</span>
+</pre></div>
+</div>
+<p><strong>Step 4: Initialize SQLite registry</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># The registry auto-migrates on first load</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from tui.core.registry import FleetRegistry; r = FleetRegistry.load(); print(f&#39;Loaded {len(r.agents)} agents&#39;)&quot;</span>
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Loaded</span> <span class="mi">40</span> <span class="n">agents</span>
+</pre></div>
+</div>
+<p><strong>Step 5: Verify installation</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-health<span class="w"> </span>--verbose
+euxis-certify
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Euxis Health Check
+==================
+✓ Registry: 40 agents loaded
+✓ Configuration: etx-settings.json valid
+✓ Playbooks: 16 language playbooks found
+✓ TUI: Textual 0.89+ installed
+
+All checks passed.
+</pre></div>
+</div>
+<p><strong>Step 6: Run test suite</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/.euxis
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-v
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="configuration-changes">
+<h3>Configuration Changes<a class="headerlink" href="#configuration-changes" title="Link to this heading">¶</a></h3>
+<section id="new-environment-variables">
+<h4>New Environment Variables<a class="headerlink" href="#new-environment-variables" title="Link to this heading">¶</a></h4>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EUXIS_REGISTRY_TYPE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sqlite</span></code></p></td>
+<td><p>Registry storage type (<code class="docutils literal notranslate"><span class="pre">sqlite</span></code>, <code class="docutils literal notranslate"><span class="pre">json</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">EUXIS_TUI_THEME</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">etx-liquid-glass</span></code></p></td>
+<td><p>Default TUI theme</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">EUXIS_DEFAULT_PROVIDER</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">claude</span></code></p></td>
+<td><p>Default AI provider</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="etx-configuration-schema">
+<h4>ETX Configuration Schema<a class="headerlink" href="#etx-configuration-schema" title="Link to this heading">¶</a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;theme&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w">           </span><span class="c1">// TUI color theme</span>
+<span class="w">  </span><span class="nt">&quot;default_provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// claude, gemini, ollama, etc.</span>
+<span class="w">  </span><span class="nt">&quot;show_agent_tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Display capability tags</span>
+<span class="w">  </span><span class="nt">&quot;reduced_motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Accessibility: reduce animations</span>
+<span class="w">  </span><span class="nt">&quot;accessible_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;boolean&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Full accessibility mode</span>
+<span class="w">  </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// Localization (en, es, fr, etc.)</span>
+<span class="w">  </span><span class="nt">&quot;grid_columns&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integer&quot;</span><span class="p">,</span><span class="w">   </span><span class="c1">// Fleet grid column count (1-8)</span>
+<span class="w">  </span><span class="nt">&quot;recent_agents&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span><span class="p">,</span><span class="w">    </span><span class="c1">// Recently used agent IDs</span>
+<span class="w">  </span><span class="nt">&quot;recent_commands&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span><span class="w">   </span><span class="c1">// Recent command history</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="registry-schema-changes">
+<h4>Registry Schema Changes<a class="headerlink" href="#registry-schema-changes" title="Link to this heading">¶</a></h4>
+<p><strong>New fields in agent records:</strong></p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">capability_tags</span></code></p></td>
+<td><p>array</p></td>
+<td><p>Standardized capability identifiers</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">activation</span></code></p></td>
+<td><p>string</p></td>
+<td><p>Activation mode: <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">on-demand</span></code>, <code class="docutils literal notranslate"><span class="pre">specialist</span></code>, <code class="docutils literal notranslate"><span class="pre">core</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="backward-compatibility-notes">
+<h3>Backward Compatibility Notes<a class="headerlink" href="#backward-compatibility-notes" title="Link to this heading">¶</a></h3>
+<ol class="arabic">
+<li><p><strong>JSON Registry Fallback:</strong> If <code class="docutils literal notranslate"><span class="pre">agents/registry.db</span></code> is missing or corrupted, the system automatically loads from <code class="docutils literal notranslate"><span class="pre">agents/registry.json</span></code>.</p></li>
+<li><p><strong>Provider Fallback:</strong> If the specified provider is unavailable, the system attempts providers in this order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">claude</span> <span class="o">-&gt;</span> <span class="n">gemini</span> <span class="o">-&gt;</span> <span class="n">ollama</span> <span class="o">-&gt;</span> <span class="n">aider</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Configuration Defaults:</strong> Missing configuration keys use built-in defaults. No manual configuration required for basic usage.</p></li>
+<li><p><strong>API Compatibility:</strong> All v0.0.6 agent commands work unchanged. Provider must now be specified explicitly.</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="general-migration-checklist">
+<h2>General Migration Checklist<a class="headerlink" href="#general-migration-checklist" title="Link to this heading">¶</a></h2>
+<p>Use this checklist template for any version migration:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">## Migration Checklist: v{OLD} to v{NEW}</span>
+
+<span class="gu">### Pre-Migration</span>
+<span class="k">- [ ]</span> Read changelog for breaking changes
+<span class="k">- [ ]</span> Backup current installation: <span class="sb">`cp -r ~/.euxis ~/.euxis.backup.$(date +%Y%m%d)`</span>
+<span class="k">- [ ]</span> Document current configuration
+<span class="k">- [ ]</span> Check disk space: minimum 500MB free
+<span class="k">- [ ]</span> Notify team of planned migration
+
+<span class="gu">### Migration</span>
+<span class="k">- [ ]</span> Pull latest code from repository
+<span class="k">- [ ]</span> Install new dependencies
+<span class="k">- [ ]</span> Run migration scripts (if any)
+<span class="k">- [ ]</span> Update configuration files
+<span class="k">- [ ]</span> Initialize new components
+
+<span class="gu">### Post-Migration</span>
+<span class="k">- [ ]</span> Run health check: <span class="sb">`euxis-health`</span>
+<span class="k">- [ ]</span> Run certification: <span class="sb">`euxis-certify`</span>
+<span class="k">- [ ]</span> Execute test suite: <span class="sb">`pytest tests/`</span>
+<span class="k">- [ ]</span> Test core agent functionality
+<span class="k">- [ ]</span> Verify TUI launches correctly
+<span class="k">- [ ]</span> Check provider connectivity
+
+<span class="gu">### Validation</span>
+<span class="k">- [ ]</span> Compare agent count with expected
+<span class="k">- [ ]</span> Verify squad configurations
+<span class="k">- [ ]</span> Test playbook execution
+<span class="k">- [ ]</span> Confirm runtime/memory/cortex functionality
+<span class="k">- [ ]</span> Performance benchmark (optional)
+
+<span class="gu">### Documentation</span>
+<span class="k">- [ ]</span> Update internal documentation
+<span class="k">- [ ]</span> Document any custom configurations
+<span class="k">- [ ]</span> Record migration date and issues encountered
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="troubleshooting-common-migration-issues">
+<h2>Troubleshooting Common Migration Issues<a class="headerlink" href="#troubleshooting-common-migration-issues" title="Link to this heading">¶</a></h2>
+<section id="issue-sqlite-registry-not-found">
+<h3>Issue: SQLite Registry Not Found<a class="headerlink" href="#issue-sqlite-registry-not-found" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Warning</span><span class="p">:</span> <span class="n">agents</span><span class="o">/</span><span class="n">registry</span><span class="o">.</span><span class="n">db</span> <span class="ow">not</span> <span class="n">found</span><span class="p">,</span> <span class="n">falling</span> <span class="n">back</span> <span class="n">to</span> <span class="n">JSON</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate SQLite registry from JSON</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">from tui.core.registry import FleetRegistry</span>
+<span class="s2">import sqlite3</span>
+<span class="s2">import json</span>
+
+<span class="s2"># Load JSON registry</span>
+<span class="s2">with open(&#39;~/.euxis/agents/registry.json&#39;.replace(&#39;~&#39;, &#39;</span><span class="nv">$HOME</span><span class="s2">&#39;)) as f:</span>
+<span class="s2">    data = json.load(f)</span>
+
+<span class="s2"># The registry module handles creation automatically</span>
+<span class="s2">registry = FleetRegistry.load()</span>
+<span class="s2">print(f&#39;Registry loaded with {len(registry.agents)} agents&#39;)</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="issue-tui-dependencies-missing">
+<h3>Issue: TUI Dependencies Missing<a class="headerlink" href="#issue-tui-dependencies-missing" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">ModuleNotFoundError</span><span class="p">:</span> <span class="n">No</span> <span class="n">module</span> <span class="n">named</span> <span class="s1">&#39;textual&#39;</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>textual<span class="o">[</span>all<span class="o">]</span><span class="w"> </span>rich
+</pre></div>
+</div>
+</section>
+<section id="issue-configuration-not-loading">
+<h3>Issue: Configuration Not Loading<a class="headerlink" href="#issue-configuration-not-loading" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">TypeError</span><span class="p">:</span> <span class="n">Expected</span> <span class="nb">dict</span> <span class="ow">in</span> <span class="n">config</span> <span class="n">file</span><span class="p">,</span> <span class="n">got</span> <span class="nb">str</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reset configuration to defaults</span>
+rm<span class="w"> </span>~/.euxis/config/etx-settings.json
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from tui.core.config import ETXConfig; ETXConfig().save()&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="issue-provider-command-fails">
+<h3>Issue: Provider Command Fails<a class="headerlink" href="#issue-provider-command-fails" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Provider</span> <span class="s1">&#39;opencode&#39;</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use supported provider</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>claude
+
+<span class="c1"># Or check available providers</span>
+which<span class="w"> </span>claude<span class="w"> </span>gemini<span class="w"> </span>ollama
+</pre></div>
+</div>
+</section>
+<section id="issue-agent-count-mismatch">
+<h3>Issue: Agent Count Mismatch<a class="headerlink" href="#issue-agent-count-mismatch" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Expected</span> <span class="mi">40</span> <span class="n">agents</span><span class="p">,</span> <span class="n">found</span> <span class="mi">35</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify registry files</span>
+jq<span class="w"> </span><span class="s1">&#39;.agents | length&#39;</span><span class="w"> </span>~/.euxis/agents/registry.json
+sqlite3<span class="w"> </span>~/.euxis/agents/registry.db<span class="w"> </span><span class="s2">&quot;SELECT COUNT(*) FROM agents_complete;&quot;</span>
+
+<span class="c1"># If mismatch, re-sync from JSON</span>
+rm<span class="w"> </span>~/.euxis/agents/registry.db
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from tui.core.registry import FleetRegistry; FleetRegistry.load()&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="issue-playbooks-not-found">
+<h3>Issue: Playbooks Not Found<a class="headerlink" href="#issue-playbooks-not-found" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Playbook</span> <span class="s1">&#39;python&#39;</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify playbook directory</span>
+ls<span class="w"> </span>~/.euxis/playbooks/
+
+<span class="c1"># Re-download if missing</span>
+git<span class="w"> </span>checkout<span class="w"> </span>--<span class="w"> </span>playbooks/
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="rollback-procedures">
+<h2>Rollback Procedures<a class="headerlink" href="#rollback-procedures" title="Link to this heading">¶</a></h2>
+<section id="quick-rollback-24-hours-since-migration">
+<h3>Quick Rollback (&lt; 24 hours since migration)<a class="headerlink" href="#quick-rollback-24-hours-since-migration" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Stop any running Euxis processes</span>
+pkill<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;python.*tui&quot;</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># 2. Restore from backup</span>
+rm<span class="w"> </span>-rf<span class="w"> </span>~/.euxis
+mv<span class="w"> </span>~/.euxis.backup.YYYYMMDD<span class="w"> </span>~/.euxis
+
+<span class="c1"># 3. Verify restoration</span>
+cat<span class="w"> </span>~/.euxis/agents/registry.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.protocol_version&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="git-based-rollback">
+<h3>Git-Based Rollback<a class="headerlink" href="#git-based-rollback" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/.euxis
+
+<span class="c1"># 1. Check available versions</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l
+
+<span class="c1"># 2. Checkout previous version</span>
+git<span class="w"> </span>checkout<span class="w"> </span>v0.0.6
+
+<span class="c1"># 3. Remove v0.0.7 artifacts</span>
+rm<span class="w"> </span>-f<span class="w"> </span>~/.euxis/agents/registry.db
+rm<span class="w"> </span>-rf<span class="w"> </span>~/.euxis/config/etx-settings.json
+
+<span class="c1"># 4. Verify rollback</span>
+euxis-health
+</pre></div>
+</div>
+</section>
+<section id="selective-rollback">
+<h3>Selective Rollback<a class="headerlink" href="#selective-rollback" title="Link to this heading">¶</a></h3>
+<p>If only specific components need rollback:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rollback registry only</span>
+git<span class="w"> </span>checkout<span class="w"> </span>v0.0.6<span class="w"> </span>--<span class="w"> </span>agents/registry.json
+rm<span class="w"> </span>~/.euxis/agents/registry.db
+
+<span class="c1"># Rollback playbooks only</span>
+git<span class="w"> </span>checkout<span class="w"> </span>v0.0.6<span class="w"> </span>--<span class="w"> </span>playbooks/
+
+<span class="c1"># Rollback TUI only (disable without removing)</span>
+mv<span class="w"> </span>~/.euxis/tui<span class="w"> </span>~/.euxis/tui.disabled
+</pre></div>
+</div>
+</section>
+<section id="post-rollback-verification">
+<h3>Post-Rollback Verification<a class="headerlink" href="#post-rollback-verification" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Verify version</span>
+cat<span class="w"> </span>~/.euxis/agents/registry.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.protocol_version&#39;</span>
+<span class="c1"># Expected: 0.0.6</span>
+
+<span class="c1"># 2. Run health check</span>
+euxis-health
+
+<span class="c1"># 3. Test agent execution</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Test query&quot;</span><span class="w"> </span>claude
+
+<span class="c1"># 4. Document rollback</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Rolled back to v0.0.6 on </span><span class="k">$(</span>date<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.euxis/migration.log
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="testing-your-migration">
+<h2>Testing Your Migration<a class="headerlink" href="#testing-your-migration" title="Link to this heading">¶</a></h2>
+<section id="automated-test-suite">
+<h3>Automated Test Suite<a class="headerlink" href="#automated-test-suite" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>~/.euxis
+
+<span class="c1"># Run full test suite</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-v<span class="w"> </span>--tb<span class="o">=</span>short
+
+<span class="c1"># Run TUI-specific tests</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/test_tui*.py<span class="w"> </span>-v
+
+<span class="c1"># Run registry tests</span>
+python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/test_registry*.py<span class="w"> </span>-v
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">=========================</span> <span class="n">test</span> <span class="n">session</span> <span class="n">starts</span> <span class="o">==========================</span>
+<span class="n">collected</span> <span class="mi">447</span> <span class="n">items</span>
+
+<span class="n">tests</span><span class="o">/</span><span class="n">test_registry</span><span class="o">.</span><span class="n">py</span><span class="p">::</span><span class="n">test_load_from_sqlite</span> <span class="n">PASSED</span>
+<span class="n">tests</span><span class="o">/</span><span class="n">test_registry</span><span class="o">.</span><span class="n">py</span><span class="p">::</span><span class="n">test_json_fallback</span> <span class="n">PASSED</span>
+<span class="n">tests</span><span class="o">/</span><span class="n">test_tui_config</span><span class="o">.</span><span class="n">py</span><span class="p">::</span><span class="n">test_config_load</span> <span class="n">PASSED</span>
+<span class="n">tests</span><span class="o">/</span><span class="n">test_tui_config</span><span class="o">.</span><span class="n">py</span><span class="p">::</span><span class="n">test_config_save</span> <span class="n">PASSED</span>
+<span class="o">...</span>
+
+<span class="o">=========================</span> <span class="mi">447</span> <span class="n">passed</span> <span class="ow">in</span> <span class="mf">45.23</span><span class="n">s</span> <span class="o">=========================</span>
+</pre></div>
+</div>
+</section>
+<section id="manual-verification-tests">
+<h3>Manual Verification Tests<a class="headerlink" href="#manual-verification-tests" title="Link to this heading">¶</a></h3>
+<section id="test-1-registry-load">
+<h4>Test 1: Registry Load<a class="headerlink" href="#test-1-registry-load" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">from tui.core.registry import FleetRegistry</span>
+<span class="s2">r = FleetRegistry.load()</span>
+<span class="s2">print(f&#39;Agents: {len(r.agents)}&#39;)</span>
+<span class="s2">print(f&#39;Squads: {len(r.squads)}&#39;)</span>
+<span class="s2">print(f&#39;Combos: {len(r.combos)}&#39;)</span>
+<span class="s2">print(f&#39;Version: {r.version}&#39;)</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Agents</span><span class="p">:</span> <span class="mi">40</span>
+<span class="n">Squads</span><span class="p">:</span> <span class="mi">6</span>
+<span class="n">Combos</span><span class="p">:</span> <span class="mi">8</span>
+<span class="n">Version</span><span class="p">:</span> <span class="mf">0.0.7</span>
+</pre></div>
+</div>
+</section>
+<section id="test-2-tui-launch">
+<h4>Test 2: TUI Launch<a class="headerlink" href="#test-2-tui-launch" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Launch TUI in test mode</span>
+timeout<span class="w"> </span><span class="m">5</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>tui<span class="w"> </span>--help<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;TUI module accessible&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="test-3-agent-execution">
+<h4>Test 3: Agent Execution<a class="headerlink" href="#test-3-agent-execution" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test core agent</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;List 3 design patterns&quot;</span><span class="w"> </span>claude
+
+<span class="c1"># Test fleet agent</span>
+euxis<span class="w"> </span>debugger<span class="w"> </span><span class="s2">&quot;Explain null pointer exceptions&quot;</span><span class="w"> </span>claude
+
+<span class="c1"># Test specialist agent</span>
+euxis<span class="w"> </span>cryptographer<span class="w"> </span><span class="s2">&quot;Explain ECDSA&quot;</span><span class="w"> </span>claude
+</pre></div>
+</div>
+</section>
+<section id="test-4-configuration-persistence">
+<h4>Test 4: Configuration Persistence<a class="headerlink" href="#test-4-configuration-persistence" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">from tui.core.config import ETXConfig</span>
+
+<span class="s2"># Load, modify, save</span>
+<span class="s2">config = ETXConfig.load()</span>
+<span class="s2">config.grid_columns = 3</span>
+<span class="s2">config.save()</span>
+
+<span class="s2"># Reload and verify</span>
+<span class="s2">config2 = ETXConfig.load()</span>
+<span class="s2">assert config2.grid_columns == 3</span>
+<span class="s2">print(&#39;Configuration persistence: OK&#39;)</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="test-5-playbook-execution">
+<h4>Test 5: Playbook Execution<a class="headerlink" href="#test-5-playbook-execution" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dry run a playbook</span>
+euxis-playbook<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span><span class="s2">&quot;Create a hello world script&quot;</span><span class="w"> </span>--dry-run
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-benchmarks">
+<h3>Performance Benchmarks<a class="headerlink" href="#performance-benchmarks" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run performance verification</span>
+python<span class="w"> </span>docs/benchmarks/performance-verification.py
+
+<span class="c1"># Run voice pipeline benchmark (if voice enabled)</span>
+python<span class="w"> </span>docs/benchmarks/voice-perf-benchmark.py
+</pre></div>
+</div>
+<p><strong>Expected output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PASS</span> <span class="n">Thread</span> <span class="n">Creation</span><span class="p">:</span> <span class="mf">0.20</span><span class="n">ms</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="n">ms</span> <span class="n">budget</span>
+<span class="n">PASS</span> <span class="n">Lock</span> <span class="n">Contention</span><span class="p">:</span> <span class="mf">5.22</span><span class="n">ms</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="n">ms</span> <span class="n">budget</span>
+<span class="n">PASS</span> <span class="n">Health</span> <span class="n">Check</span><span class="p">:</span> <span class="mf">100.01</span><span class="n">ms</span> <span class="o">&lt;=</span> <span class="mi">500</span><span class="n">ms</span> <span class="n">budget</span>
+<span class="o">...</span>
+<span class="n">All</span> <span class="n">metrics</span> <span class="n">passing</span><span class="p">:</span> <span class="mi">13</span><span class="o">/</span><span class="mi">13</span> <span class="p">(</span><span class="mi">100</span><span class="o">%</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="integration-test">
+<h3>Integration Test<a class="headerlink" href="#integration-test" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Full integration test</span>
+euxis-certify
+
+<span class="c1"># Expected output</span>
+<span class="c1"># Gate 1: ✓ STRUCTURE</span>
+<span class="c1"># Gate 2: ✓ SECURITY</span>
+<span class="c1"># Gate 3: ✓ INFRASTRUCTURE</span>
+<span class="c1"># Gate 4: ✓ DOCUMENTATION</span>
+<span class="c1"># Gate 5: ✓ BRANDING</span>
+<span class="c1"># ...</span>
+<span class="c1"># CERTIFICATION: PASSED</span>
+</pre></div>
+</div>
+<hr class="docutils" />
+<p><strong>Migration support:</strong> If you encounter issues not covered in this guide, check the <a class="reference internal" href="troubleshooting.html"><span class="std std-doc">Troubleshooting Guide</span></a> or open an issue at <a class="reference external" href="https://github.com/sebastienrousseau/euxis/issues">github.com/sebastienrousseau/euxis/issues</a>.</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="troubleshooting.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Troubleshooting Guide</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="fleet-guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Euxis Fleet Guide</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Migration Guide</a><ul>
+<li><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+<li><a class="reference internal" href="#version-history">Version History</a></li>
+<li><a class="reference internal" href="#migrating-from-v0-0-6-to-v0-0-7">Migrating from v0.0.6 to v0.0.7</a><ul>
+<li><a class="reference internal" href="#new-features">New Features</a><ul>
+<li><a class="reference internal" href="#etx-terminal-user-interface-tui">1. ETX Terminal User Interface (TUI)</a></li>
+<li><a class="reference internal" href="#sqlite-registry">2. SQLite Registry</a></li>
+<li><a class="reference internal" href="#new-agents">3. New Agents</a></li>
+<li><a class="reference internal" href="#language-playbooks">4. Language Playbooks</a></li>
+<li><a class="reference internal" href="#voice-pipeline-optimizations">5. Voice Pipeline Optimizations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#breaking-changes">Breaking Changes</a><ul>
+<li><a class="reference internal" href="#registry-format-migration">1. Registry Format Migration</a></li>
+<li><a class="reference internal" href="#provider-command-syntax">2. Provider Command Syntax</a></li>
+<li><a class="reference internal" href="#removed-providers">3. Removed Providers</a></li>
+<li><a class="reference internal" href="#configuration-file-location">4. Configuration File Location</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deprecated-features">Deprecated Features</a></li>
+<li><a class="reference internal" href="#step-by-step-upgrade-instructions">Step-by-Step Upgrade Instructions</a><ul>
+<li><a class="reference internal" href="#pre-migration-checklist">Pre-Migration Checklist</a></li>
+<li><a class="reference internal" href="#migration-steps">Migration Steps</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-changes">Configuration Changes</a><ul>
+<li><a class="reference internal" href="#new-environment-variables">New Environment Variables</a></li>
+<li><a class="reference internal" href="#etx-configuration-schema">ETX Configuration Schema</a></li>
+<li><a class="reference internal" href="#registry-schema-changes">Registry Schema Changes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backward-compatibility-notes">Backward Compatibility Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#general-migration-checklist">General Migration Checklist</a></li>
+<li><a class="reference internal" href="#troubleshooting-common-migration-issues">Troubleshooting Common Migration Issues</a><ul>
+<li><a class="reference internal" href="#issue-sqlite-registry-not-found">Issue: SQLite Registry Not Found</a></li>
+<li><a class="reference internal" href="#issue-tui-dependencies-missing">Issue: TUI Dependencies Missing</a></li>
+<li><a class="reference internal" href="#issue-configuration-not-loading">Issue: Configuration Not Loading</a></li>
+<li><a class="reference internal" href="#issue-provider-command-fails">Issue: Provider Command Fails</a></li>
+<li><a class="reference internal" href="#issue-agent-count-mismatch">Issue: Agent Count Mismatch</a></li>
+<li><a class="reference internal" href="#issue-playbooks-not-found">Issue: Playbooks Not Found</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rollback-procedures">Rollback Procedures</a><ul>
+<li><a class="reference internal" href="#quick-rollback-24-hours-since-migration">Quick Rollback (&lt; 24 hours since migration)</a></li>
+<li><a class="reference internal" href="#git-based-rollback">Git-Based Rollback</a></li>
+<li><a class="reference internal" href="#selective-rollback">Selective Rollback</a></li>
+<li><a class="reference internal" href="#post-rollback-verification">Post-Rollback Verification</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing-your-migration">Testing Your Migration</a><ul>
+<li><a class="reference internal" href="#automated-test-suite">Automated Test Suite</a></li>
+<li><a class="reference internal" href="#manual-verification-tests">Manual Verification Tests</a><ul>
+<li><a class="reference internal" href="#test-1-registry-load">Test 1: Registry Load</a></li>
+<li><a class="reference internal" href="#test-2-tui-launch">Test 2: TUI Launch</a></li>
+<li><a class="reference internal" href="#test-3-agent-execution">Test 3: Agent Execution</a></li>
+<li><a class="reference internal" href="#test-4-configuration-persistence">Test 4: Configuration Persistence</a></li>
+<li><a class="reference internal" href="#test-5-playbook-execution">Test 5: Playbook Execution</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performance-benchmarks">Performance Benchmarks</a></li>
+<li><a class="reference internal" href="#integration-test">Integration Test</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b52b19ee"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

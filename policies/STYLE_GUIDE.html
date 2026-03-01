@@ -1,0 +1,1079 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Naming Conventions" href="namingConventions.html"><link rel="prev" title="The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)" href="CONSTITUTION.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Documentation Style Guide - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.0.2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/architecture.html">Euxis Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/security.html">Security Essentials</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html">Guides</a><input aria-label="Toggle navigation of Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/agent-development-guide.html">Agent Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/concurrency-testing.html">Deterministic Concurrency Test Suite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/cross-platform.html">Euxis Cross-Platform Verification System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/migration-guide.html">Migration Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/ui-guide.html">Euxis UI &amp; Interaction Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/multi-repo-workflow.html">Multi-Repo Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-crypto.html">euxis-crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-tui.html">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-reference.html">Euxis API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cli-reference.html">Euxis CLI Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway.html">Gateway Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-adapters.html">Gateway Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-auth.html">Gateway Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-canvas.html">Gateway Canvas Schema (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-cli.html">Gateway CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-config.html">Gateway Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-quickstart.html">Gateway Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Module Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/MODULE_BOUNDARIES.html">Module Boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/SHARED_CONTRACTS.html">Shared Contracts (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/core-platform-separation-2026.html">Core/Platform Separation Plan (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-excellence-enforcement-2026.html">Package Excellence Enforcement (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-structure-matrix.html">Package Structure Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/repoStructure.html">Repository Structure Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decisions/index.html">Decisions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/crypto-patterns-report.html">Language Analysis: Crypto-Service TypeScript Codebase</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reports/index.html">Reports</a><input aria-label="Toggle navigation of Reports" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reports/CI-ENFORCEMENT-MANIFEST.html">Euxis CI Enforcement Manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/SHELL_SCRIPT_DOCUMENTATION_AUDIT.html">Shell Script Documentation Audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/UPDATED_README_SCRIPT_INVENTORY.html">Script Inventory for README.md</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-candidates-v0.1.0.html">Archive Candidates Review (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-cleanup-report-v0.1.0.html">Archive Cleanup Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ci-workflows-documentation.html">CI Workflows Documentation (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/dependency-leaks.html">Cross-Module Dependency Leak Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/documentation-review-2026.html">Euxis Documentation Review Against Industry Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/initial-user-expectations-2026-02-18.html">Initial User Expectations (February 18,)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/issue-closure-report-2026-02-16.html">Issue Closure Report —-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-diff.html">Module Dependency Diffs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-suggested.html">Module Dependency Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-lockfile-suggestions.html">Lockfile Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/release-summary-v0.0.9.html">Release Summary — v0.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-reorg-plan-v0.1.0.html">Euxis Monorepo Reorg Plan (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-checklist.html">Repo Split Checklist (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-plan-v0.1.0.html">Repository Split — Monolith to Modular (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/roadmap-v0.1.0.html">Euxis v0.0.2 Milestone Plan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/security-audit-gateway-2026-02.html">Euxis Gateway Security Audit Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/unused-assets-report-v0.1.0.html">Unused Assets Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ux-moonshots.html">Euxis UX Moonshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/v4.5-readiness-report.html">Euxis v4.5 Readiness Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html">SOC 2 Compliance Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../templates/index.html">Templates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Policies</a><input aria-label="Toggle navigation of Policies" checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="CONSTITUTION.html">The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Documentation Style Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="namingConventions.html">Naming Conventions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Legacy Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../legacy/index.html">Legacy Documentation (Archived)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../archive/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/policies/STYLE_GUIDE.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="documentation-style-guide">
+<h1>Documentation Style Guide<a class="headerlink" href="#documentation-style-guide" title="Link to this heading">¶</a></h1>
+<p>This guide establishes standards for all Euxis documentation. Follow these conventions to ensure consistency, clarity, and accessibility across all documentation.</p>
+<section id="voice-and-tone">
+<h2>Voice and Tone<a class="headerlink" href="#voice-and-tone" title="Link to this heading">¶</a></h2>
+<section id="be-direct-and-professional">
+<h3>Be Direct and Professional<a class="headerlink" href="#be-direct-and-professional" title="Link to this heading">¶</a></h3>
+<p>Write in a direct, professional, action-oriented voice. Get to the point quickly and avoid unnecessary preamble.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Run</span> <span class="n">the</span> <span class="n">health</span> <span class="n">check</span> <span class="n">to</span> <span class="n">verify</span> <span class="n">your</span> <span class="n">installation</span><span class="p">:</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Before</span> <span class="n">we</span> <span class="n">begin</span><span class="p">,</span> <span class="n">it</span><span class="s1">&#39;s important to understand that running health checks is a great way to ensure everything is working properly in your environment.</span>
+</pre></div>
+</div>
+</section>
+<section id="use-second-person">
+<h3>Use Second Person<a class="headerlink" href="#use-second-person" title="Link to this heading">¶</a></h3>
+<p>Address the reader as “you” when providing instructions. This creates clear, actionable guidance.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">You</span> <span class="n">can</span> <span class="n">configure</span> <span class="n">the</span> <span class="n">orchestrator</span> <span class="n">by</span> <span class="n">editing</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span><span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Users</span> <span class="n">can</span> <span class="n">configure</span> <span class="n">the</span> <span class="n">orchestrator</span> <span class="n">by</span> <span class="n">editing</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span><span class="o">.</span>
+<span class="n">The</span> <span class="n">developer</span> <span class="n">should</span> <span class="n">edit</span> <span class="n">the</span> <span class="n">config</span> <span class="n">file</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="prefer-active-voice">
+<h3>Prefer Active Voice<a class="headerlink" href="#prefer-active-voice" title="Link to this heading">¶</a></h3>
+<p>Use active voice to make instructions clear and direct. Passive voice obscures who performs the action.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The orchestrator routes requests to the appropriate agent.
+Run `euxis-health` to check system status.
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Requests are routed to the appropriate agent by the orchestrator.
+System status can be checked by running `euxis-health`.
+</pre></div>
+</div>
+</section>
+<section id="avoid-marketing-language">
+<h3>Avoid Marketing Language<a class="headerlink" href="#avoid-marketing-language" title="Link to this heading">¶</a></h3>
+<p>Do not use superlatives, marketing speak, or promotional language. State facts without embellishment.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Euxis</span> <span class="n">supports</span> <span class="n">parallel</span> <span class="n">agent</span> <span class="n">execution</span><span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Euxis</span> <span class="n">provides</span> <span class="n">best</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">class</span><span class="p">,</span> <span class="n">blazingly</span> <span class="n">fast</span> <span class="n">parallel</span> <span class="n">agent</span> <span class="n">execution</span><span class="o">.</span>
+<span class="n">Experience</span> <span class="n">the</span> <span class="n">power</span> <span class="n">of</span> <span class="n">revolutionary</span> <span class="n">agent</span> <span class="n">orchestration</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="emoji-usage">
+<h3>Emoji Usage<a class="headerlink" href="#emoji-usage" title="Link to this heading">¶</a></h3>
+<p>Do not use emojis in technical documentation. The only exception is user-facing CLI feedback where emojis improve readability (success indicators, warnings).</p>
+<p><strong>Acceptable in CLI output:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[OK] Health check passed
+[!] Configuration warning
+</pre></div>
+</div>
+<p><strong>Not acceptable in documentation:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Run the installer to get started!
+</pre></div>
+</div>
+</section>
+</section>
+<section id="formatting-standards">
+<h2>Formatting Standards<a class="headerlink" href="#formatting-standards" title="Link to this heading">¶</a></h2>
+<section id="heading-hierarchy">
+<h3>Heading Hierarchy<a class="headerlink" href="#heading-hierarchy" title="Link to this heading">¶</a></h3>
+<p>Use a consistent heading structure throughout all documents.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Level</p></th>
+<th class="head"><p>Usage</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H1 (<code class="docutils literal notranslate"><span class="pre">#</span></code>)</p></td>
+<td><p>Document title only. One per file.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Installation</span> <span class="pre">Guide</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>H2 (<code class="docutils literal notranslate"><span class="pre">##</span></code>)</p></td>
+<td><p>Major sections</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">##</span> <span class="pre">Prerequisites</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>H3 (<code class="docutils literal notranslate"><span class="pre">###</span></code>)</p></td>
+<td><p>Subsections</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">###</span> <span class="pre">System</span> <span class="pre">Requirements</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>H4 (<code class="docutils literal notranslate"><span class="pre">####</span></code>)</p></td>
+<td><p>Nested topics (use sparingly)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">####</span> <span class="pre">Memory</span> <span class="pre">Configuration</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Never skip heading levels. An H3 must follow an H2, not an H1.</p>
+</section>
+<section id="code-blocks">
+<h3>Code Blocks<a class="headerlink" href="#code-blocks" title="Link to this heading">¶</a></h3>
+<p>Always specify the language for syntax highlighting. Use the most specific language identifier available.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="sb">```bash</span>
+euxis-health<span class="w"> </span>--verbose
+<span class="sb">```</span>
+
+<span class="sb">```python</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_status</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">orchestrator</span><span class="o">.</span><span class="n">health</span><span class="p">()</span>
+<span class="sb">```</span>
+
+<span class="sb">```json</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v0.0.2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span>
+<span class="p">}</span>
+<span class="sb">```</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="sb">```</span>
+<span class="sb">euxis-health --verbose</span>
+<span class="sb">```</span>
+</pre></div>
+</div>
+<p>For shell sessions showing both commands and output, use <code class="docutils literal notranslate"><span class="pre">console</span></code> or <code class="docutils literal notranslate"><span class="pre">bash</span></code> with clear visual separation:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="sb">```console</span>
+<span class="gp">$ </span>euxis-health
+<span class="go">Status: healthy</span>
+<span class="go">Agents: 3 active</span>
+<span class="go">Uptime: 2h 34m</span>
+<span class="sb">```</span>
+</pre></div>
+</div>
+</section>
+<section id="inline-code">
+<h3>Inline Code<a class="headerlink" href="#inline-code" title="Link to this heading">¶</a></h3>
+<p>Use backticks for:</p>
+<ul class="simple">
+<li><p>Command names: <code class="docutils literal notranslate"><span class="pre">euxis-health</span></code></p></li>
+<li><p>File paths: <code class="docutils literal notranslate"><span class="pre">/etc/euxis/config.yaml</span></code></p></li>
+<li><p>Configuration keys: <code class="docutils literal notranslate"><span class="pre">max_retries</span></code></p></li>
+<li><p>Variable names: <code class="docutils literal notranslate"><span class="pre">EUXIS_HOME</span></code></p></li>
+<li><p>Short code references: <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">None</span></code></p></li>
+</ul>
+<p>Do not use backticks for:</p>
+<ul class="simple">
+<li><p>Product names (Euxis, not <code class="docutils literal notranslate"><span class="pre">Euxis</span></code>)</p></li>
+<li><p>General technical terms (API, CLI, JSON)</p></li>
+</ul>
+</section>
+<section id="tables">
+<h3>Tables<a class="headerlink" href="#tables" title="Link to this heading">¶</a></h3>
+<p>Use tables for structured reference information. Align columns for readability in source.</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>| Parameter     | Type    | Default | Description                    |
+|---------------|---------|---------|--------------------------------|
+| <span class="sb">`timeout`</span>     | integer | 30      | Request timeout in seconds     |
+| <span class="sb">`retries`</span>     | integer | 3       | Number of retry attempts       |
+| <span class="sb">`verbose`</span>     | boolean | false   | Enable detailed logging        |
+</pre></div>
+</div>
+<p>Keep tables simple. If a table exceeds 4-5 columns or requires complex formatting, consider using a definition list or subsections instead.</p>
+</section>
+<section id="lists">
+<h3>Lists<a class="headerlink" href="#lists" title="Link to this heading">¶</a></h3>
+<p><strong>Use numbered lists for:</strong></p>
+<ul class="simple">
+<li><p>Sequential steps that must be followed in order</p></li>
+<li><p>Ranked items</p></li>
+<li><p>Items you will reference by number</p></li>
+</ul>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="k">1.</span> Install dependencies.
+<span class="k">2.</span> Configure the environment.
+<span class="k">3.</span> Run the initialization script.
+</pre></div>
+</div>
+<p><strong>Use bullet lists for:</strong></p>
+<ul class="simple">
+<li><p>Unordered collections of items</p></li>
+<li><p>Feature lists</p></li>
+<li><p>Requirements where order does not matter</p></li>
+</ul>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="k">-</span><span class="w"> </span>Python 3.10 or higher
+<span class="k">-</span><span class="w"> </span>4 GB available memory
+<span class="k">-</span><span class="w"> </span>Network access to the API endpoint
+</pre></div>
+</div>
+<p><strong>List formatting rules:</strong></p>
+<ul class="simple">
+<li><p>End each list item with a period if it is a complete sentence</p></li>
+<li><p>Use consistent capitalization (sentence case)</p></li>
+<li><p>Keep parallel structure across items</p></li>
+</ul>
+</section>
+</section>
+<section id="code-examples">
+<h2>Code Examples<a class="headerlink" href="#code-examples" title="Link to this heading">¶</a></h2>
+<section id="show-command-and-output">
+<h3>Show Command and Output<a class="headerlink" href="#show-command-and-output" title="Link to this heading">¶</a></h3>
+<p>When demonstrating commands, show both the command and its expected output. This helps users verify they are on the right track.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>euxis-health<span class="w"> </span>--json
+<span class="go">{</span>
+<span class="go">  &quot;status&quot;: &quot;healthy&quot;,</span>
+<span class="go">  &quot;version&quot;: &quot;v0.0.2&quot;,</span>
+<span class="go">  &quot;agents&quot;: {</span>
+<span class="go">    &quot;orchestrator&quot;: &quot;running&quot;,</span>
+<span class="go">    &quot;analyzer&quot;: &quot;running&quot;,</span>
+<span class="go">    &quot;executor&quot;: &quot;idle&quot;</span>
+<span class="go">  },</span>
+<span class="go">  &quot;uptime_seconds&quot;: 9240</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</section>
+<section id="use-realistic-but-anonymized-data">
+<h3>Use Realistic but Anonymized Data<a class="headerlink" href="#use-realistic-but-anonymized-data" title="Link to this heading">¶</a></h3>
+<p>Use plausible example data, but avoid real names, emails, or identifiable information.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jsmith&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jsmith@example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;project&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acme-backend&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test@test.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;project&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;asdf&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="include-error-handling">
+<h3>Include Error Handling<a class="headerlink" href="#include-error-handling" title="Link to this heading">¶</a></h3>
+<p>Show what happens when things go wrong. Users need to recognize and handle errors.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">euxis</span><span class="w"> </span><span class="kn">import</span> <span class="n">Orchestrator</span><span class="p">,</span> <span class="ne">ConnectionError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">orch</span> <span class="o">=</span> <span class="n">Orchestrator</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">ConnectionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to connect: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Check that the daemon is running</span>
+    <span class="c1"># Verify EUXIS_HOST and EUXIS_PORT environment variables</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>euxis-health
+<span class="go">Error: Could not connect to orchestrator</span>
+<span class="go">Hint: Ensure the daemon is running with `euxis-daemon start`</span>
+</pre></div>
+</div>
+</section>
+<section id="comment-complex-logic">
+<h3>Comment Complex Logic<a class="headerlink" href="#comment-complex-logic" title="Link to this heading">¶</a></h3>
+<p>Add comments to explain non-obvious code. Focus on why, not what.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retry with exponential backoff to handle transient network issues</span>
+<span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+        <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span>  <span class="c1"># 1s, 2s, 4s, 8s...</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span>
+
+<span class="c1"># All retries exhausted; surface the error to the caller</span>
+<span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Failed after </span><span class="si">{max_retries}</span><span class="s2"> attempts&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">¶</a></h2>
+<section id="product-and-component-names">
+<h3>Product and Component Names<a class="headerlink" href="#product-and-component-names" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Term</p></th>
+<th class="head"><p>Correct</p></th>
+<th class="head"><p>Incorrect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Product name</p></td>
+<td><p>Euxis</p></td>
+<td><p>EUXIS, euxis, EuXis</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent names</p></td>
+<td><p>orchestrator, analyzer, executor</p></td>
+<td><p>Orchestrator, ANALYZER</p></td>
+</tr>
+<tr class="row-even"><td><p>Command names</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">euxis-health</span></code>, <code class="docutils literal notranslate"><span class="pre">euxis-daemon</span></code></p></td>
+<td><p>euxis-health (without backticks)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="capitalization-rules">
+<h3>Capitalization Rules<a class="headerlink" href="#capitalization-rules" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Euxis</strong>: Always capitalize the product name</p></li>
+<li><p><strong>Agent names</strong>: Always lowercase when referring to specific agents (orchestrator, analyzer)</p></li>
+<li><p><strong>Configuration keys</strong>: Always lowercase as they appear in config files</p></li>
+<li><p><strong>Environment variables</strong>: Always uppercase (<code class="docutils literal notranslate"><span class="pre">EUXIS_HOME</span></code>)</p></li>
+</ul>
+</section>
+<section id="technical-terms">
+<h3>Technical Terms<a class="headerlink" href="#technical-terms" title="Link to this heading">¶</a></h3>
+<p>Use consistent terminology throughout documentation.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Preferred</p></th>
+<th class="head"><p>Avoid</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>configuration file</p></td>
+<td><p>config file, conf file</p></td>
+</tr>
+<tr class="row-odd"><td><p>command-line interface</p></td>
+<td><p>CLI (acceptable after first use)</p></td>
+</tr>
+<tr class="row-even"><td><p>environment variable</p></td>
+<td><p>env var</p></td>
+</tr>
+<tr class="row-odd"><td><p>API endpoint</p></td>
+<td><p>API URL, endpoint URL</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Spell out acronyms on first use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">interface</span> <span class="p">(</span><span class="n">CLI</span><span class="p">)</span> <span class="n">provides</span> <span class="n">several</span> <span class="n">subcommands</span><span class="o">.</span> <span class="n">Use</span> <span class="n">the</span> <span class="n">CLI</span> <span class="n">to</span><span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="file-naming">
+<h2>File Naming<a class="headerlink" href="#file-naming" title="Link to this heading">¶</a></h2>
+<section id="documentation-files">
+<h3>Documentation Files<a class="headerlink" href="#documentation-files" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Use lowercase letters</p></li>
+<li><p>Separate words with hyphens</p></li>
+<li><p>Use descriptive names</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">.md</span></code> extension for Markdown</p></li>
+</ul>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">installation</span><span class="o">-</span><span class="n">guide</span><span class="o">.</span><span class="n">md</span>
+<span class="n">api</span><span class="o">-</span><span class="n">reference</span><span class="o">.</span><span class="n">md</span>
+<span class="n">troubleshooting</span><span class="o">-</span><span class="n">network</span><span class="o">-</span><span class="n">issues</span><span class="o">.</span><span class="n">md</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">InstallationGuide</span><span class="o">.</span><span class="n">md</span>
+<span class="n">API_Reference</span><span class="o">.</span><span class="n">md</span>
+<span class="n">troubleshooting</span><span class="o">.</span><span class="n">md</span>  <span class="p">(</span><span class="n">too</span> <span class="n">vague</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="directories">
+<h3>Directories<a class="headerlink" href="#directories" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Use lowercase letters</p></li>
+<li><p>Separate words with hyphens</p></li>
+<li><p>Use plural names for collections</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docs</span><span class="o">/</span>
+  <span class="n">guides</span><span class="o">/</span>
+  <span class="n">api</span><span class="o">-</span><span class="n">reference</span><span class="o">/</span>
+  <span class="n">euxis</span><span class="o">-</span><span class="n">examples</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="accessibility">
+<h2>Accessibility<a class="headerlink" href="#accessibility" title="Link to this heading">¶</a></h2>
+<section id="alternative-text-for-images">
+<h3>Alternative Text for Images<a class="headerlink" href="#alternative-text-for-images" title="Link to this heading">¶</a></h3>
+<p>Every image must have descriptive alt text that conveys the same information as the image.</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>![<span class="nt">System architecture diagram showing the orchestrator connected to three agent processes</span>](<span class="na">./images/architecture.png</span>)
+</pre></div>
+</div>
+<p>For decorative images that add no information, use empty alt text:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>![](./images/divider.png)
+</pre></div>
+</div>
+</section>
+<section id="heading-structure">
+<h3>Heading Structure<a class="headerlink" href="#heading-structure" title="Link to this heading">¶</a></h3>
+<p>Maintain proper heading hierarchy to support screen readers and navigation.</p>
+<ul class="simple">
+<li><p>Never skip heading levels</p></li>
+<li><p>Use headings to create a logical document outline</p></li>
+<li><p>Do not use headings for visual styling</p></li>
+</ul>
+<p>You can validate heading structure by extracting headings from a document. They should form a logical outline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Installation Guide</span>
+<span class="c1">## Prerequisites</span>
+<span class="c1">### System Requirements</span>
+<span class="c1">### Network Requirements</span>
+<span class="c1">## Installation Steps</span>
+<span class="c1">### Download</span>
+<span class="c1">### Configure</span>
+<span class="c1">### Verify</span>
+</pre></div>
+</div>
+</section>
+<section id="color-and-contrast">
+<h3>Color and Contrast<a class="headerlink" href="#color-and-contrast" title="Link to this heading">¶</a></h3>
+<p>When creating diagrams or visual content:</p>
+<ul class="simple">
+<li><p>Do not rely on color alone to convey information</p></li>
+<li><p>Use labels, patterns, or icons in addition to color</p></li>
+<li><p>Ensure sufficient contrast between text and background</p></li>
+<li><p>Test with colorblind simulation tools</p></li>
+</ul>
+<p><strong>Do:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">SUCCESS</span> <span class="o">-</span> <span class="n">green</span><span class="p">]</span> <span class="n">Operation</span> <span class="n">completed</span>
+<span class="p">[</span><span class="n">FAILED</span> <span class="o">-</span> <span class="n">red</span><span class="p">]</span> <span class="n">Operation</span> <span class="n">failed</span>
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">green</span> <span class="n">circle</span><span class="p">]</span> <span class="n">Operation</span> <span class="n">completed</span>
+<span class="p">[</span><span class="n">red</span> <span class="n">circle</span><span class="p">]</span> <span class="n">Operation</span> <span class="n">failed</span>
+</pre></div>
+</div>
+</section>
+<section id="link-text">
+<h3>Link Text<a class="headerlink" href="#link-text" title="Link to this heading">¶</a></h3>
+<p>Use descriptive link text that makes sense out of context.</p>
+<p><strong>Do:</strong></p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>See the [<span class="nt">installation guide</span>](<span class="na">./installation.md</span>) for setup instructions.
+</pre></div>
+</div>
+<p><strong>Do not:</strong></p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>For setup instructions, [<span class="nt">click here</span>](<span class="na">./installation.md</span>).
+</pre></div>
+</div>
+</section>
+</section>
+<section id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Link to this heading">¶</a></h2>
+<section id="version-specific-documentation">
+<h3>Version-Specific Documentation<a class="headerlink" href="#version-specific-documentation" title="Link to this heading">¶</a></h3>
+<p>When documenting version-specific features, clearly indicate the version requirement.</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">## Parallel Execution</span>
+
+<span class="ge">*Available in Euxis 0.0.6 and later.*</span>
+
+The orchestrator supports parallel agent execution...
+</pre></div>
+</div>
+<p>For configuration options:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>| Parameter | Type | Default | Since |
+|-----------|------|---------|-------|
+| <span class="sb">`parallel`</span> | boolean | false | 0.0.6 |
+</pre></div>
+</div>
+</section>
+<section id="deprecation-notices">
+<h3>Deprecation Notices<a class="headerlink" href="#deprecation-notices" title="Link to this heading">¶</a></h3>
+<p>Mark deprecated features clearly with a deprecation notice. Include:</p>
+<ul class="simple">
+<li><p>The version when deprecation occurred</p></li>
+<li><p>The recommended alternative</p></li>
+<li><p>The version when removal is planned (if known)</p></li>
+</ul>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="k">&gt; </span><span class="ge">**Deprecated in v0.0.2**</span>
+<span class="k">&gt;</span>
+<span class="ge">&gt; The `--legacy` flag is deprecated and will be removed in version 0.0.2.</span>
+<span class="k">&gt; </span><span class="ge">Use `--compat-mode` instead.</span>
+</pre></div>
+</div>
+<p>For deprecated configuration:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gu">### `legacy_mode`</span>
+
+<span class="gs">**Deprecated:**</span> Use <span class="sb">`compat_mode`</span> instead. Will be removed in v0.0.2.
+</pre></div>
+</div>
+</section>
+<section id="changelog-references">
+<h3>Changelog References<a class="headerlink" href="#changelog-references" title="Link to this heading">¶</a></h3>
+<p>When documenting changes, reference the changelog for complete details:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>See the [<span class="nt">changelog</span>](<span class="na">./CHANGELOG.md</span>) for a complete list of changes in this version.
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quick-reference">
+<h2>Quick Reference<a class="headerlink" href="#quick-reference" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Convention</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Product name</p></td>
+<td><p>Capitalized</p></td>
+<td><p>Euxis</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent names</p></td>
+<td><p>Lowercase</p></td>
+<td><p>orchestrator</p></td>
+</tr>
+<tr class="row-even"><td><p>Commands</p></td>
+<td><p>Backticks</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">euxis-health</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>File paths</p></td>
+<td><p>Backticks</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/etc/euxis/config.yaml</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Config keys</p></td>
+<td><p>Backticks, lowercase</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">max_retries</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Env variables</p></td>
+<td><p>Backticks, uppercase</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">EUXIS_HOME</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Code blocks</p></td>
+<td><p>Language specified</p></td>
+<td><p>````bash`</p></td>
+</tr>
+<tr class="row-odd"><td><p>Headings</p></td>
+<td><p>H1 title only</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Title</span></code> for doc title</p></td>
+</tr>
+<tr class="row-even"><td><p>Lists</p></td>
+<td><p>Periods for sentences</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">Install</span> <span class="pre">the</span> <span class="pre">package.</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>File names</p></td>
+<td><p>Lowercase, hyphens</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">api-reference.md</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="namingConventions.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Naming Conventions</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="CONSTITUTION.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Documentation Style Guide</a><ul>
+<li><a class="reference internal" href="#voice-and-tone">Voice and Tone</a><ul>
+<li><a class="reference internal" href="#be-direct-and-professional">Be Direct and Professional</a></li>
+<li><a class="reference internal" href="#use-second-person">Use Second Person</a></li>
+<li><a class="reference internal" href="#prefer-active-voice">Prefer Active Voice</a></li>
+<li><a class="reference internal" href="#avoid-marketing-language">Avoid Marketing Language</a></li>
+<li><a class="reference internal" href="#emoji-usage">Emoji Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#formatting-standards">Formatting Standards</a><ul>
+<li><a class="reference internal" href="#heading-hierarchy">Heading Hierarchy</a></li>
+<li><a class="reference internal" href="#code-blocks">Code Blocks</a></li>
+<li><a class="reference internal" href="#inline-code">Inline Code</a></li>
+<li><a class="reference internal" href="#tables">Tables</a></li>
+<li><a class="reference internal" href="#lists">Lists</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#code-examples">Code Examples</a><ul>
+<li><a class="reference internal" href="#show-command-and-output">Show Command and Output</a></li>
+<li><a class="reference internal" href="#use-realistic-but-anonymized-data">Use Realistic but Anonymized Data</a></li>
+<li><a class="reference internal" href="#include-error-handling">Include Error Handling</a></li>
+<li><a class="reference internal" href="#comment-complex-logic">Comment Complex Logic</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#terminology">Terminology</a><ul>
+<li><a class="reference internal" href="#product-and-component-names">Product and Component Names</a></li>
+<li><a class="reference internal" href="#capitalization-rules">Capitalization Rules</a></li>
+<li><a class="reference internal" href="#technical-terms">Technical Terms</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-naming">File Naming</a><ul>
+<li><a class="reference internal" href="#documentation-files">Documentation Files</a></li>
+<li><a class="reference internal" href="#directories">Directories</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#accessibility">Accessibility</a><ul>
+<li><a class="reference internal" href="#alternative-text-for-images">Alternative Text for Images</a></li>
+<li><a class="reference internal" href="#heading-structure">Heading Structure</a></li>
+<li><a class="reference internal" href="#color-and-contrast">Color and Contrast</a></li>
+<li><a class="reference internal" href="#link-text">Link Text</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#versioning">Versioning</a><ul>
+<li><a class="reference internal" href="#version-specific-documentation">Version-Specific Documentation</a></li>
+<li><a class="reference internal" href="#deprecation-notices">Deprecation Notices</a></li>
+<li><a class="reference internal" href="#changelog-references">Changelog References</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-reference">Quick Reference</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b52b19ee"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

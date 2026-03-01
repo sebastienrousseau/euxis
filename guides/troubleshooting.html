@@ -1,0 +1,1866 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Euxis UI &amp; Interaction Guide" href="ui-guide.html"><link rel="prev" title="Migration Guide" href="migration-guide.html">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Troubleshooting Guide - Euxis Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Euxis Documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Euxis Documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concepts.html">Core Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Euxis Architecture</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">Euxis User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fleet-guide.html">Fleet Guide (v0.0.2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ui-guide.html">UI Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../versioning-system.html">Euxis Centralized Versioning System</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Essentials</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../essentials/index.html">Essentials</a><input aria-label="Toggle navigation of Essentials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/architecture.html">Euxis Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/quick-start.html">Euxis Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../essentials/security.html">Security Essentials</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Guides</a><input aria-label="Toggle navigation of Guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="agent-development-guide.html">Agent Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concurrency-testing.html">Deterministic Concurrency Test Suite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-platform.html">Euxis Cross-Platform Verification System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migration-guide.html">Migration Guide</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Troubleshooting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ui-guide.html">Euxis UI &amp; Interaction Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html">Plugin Registration API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#create-manifest">Create manifest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#id4">Register the plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#test-it">Test it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin-api.html#register-and-test">Register and test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../concurrency-testing.html">Concurrency Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross-platform.html">Cross-Platform Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../workflows/index.html">Workflows</a><input aria-label="Toggle navigation of Workflows" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/debugging-workflow.html">Debugging Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/feature-development-workflow.html">Feature Development Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/multi-repo-workflow.html">Multi-Repo Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../workflows/security-audit-workflow.html">Security Audit Workflow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-core.html">euxis-core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-cli.html">euxis-cli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-metrics.html">euxis-metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-crypto.html">euxis-crypto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-tui.html">euxis-tui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-gateway.html">euxis-gateway</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-adapters.html">euxis-adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/euxis-security.html">euxis-security</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference</a><input aria-label="Toggle navigation of Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/api-reference.html">Euxis API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cli-reference.html">Euxis CLI Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway.html">Gateway Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-adapters.html">Gateway Adapters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-auth.html">Gateway Auth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-canvas.html">Gateway Canvas Schema (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-cli.html">Gateway CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-config.html">Gateway Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/gateway-quickstart.html">Gateway Quickstart</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/lib-architecture.html">Euxis Library Architecture (<code class="docutils literal notranslate"><span class="pre">core/lib/</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Module Documentation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../adr/index.html">Adr</a><input aria-label="Toggle navigation of Adr" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../adr/001-intelligence-tiering.html">ADR-001: Intelligence Tiering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/002-tiered-memory-architecture.html">ADR-002: Tiered Memory Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/003-dispatch-modes.html">ADR-003: Dispatch Execution Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/004-ai-agent-patterns.html">ADR-004: AI Agent Architecture Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/005-specialist-agents.html">ADR-005: Specialist Agents for Domain-Specific Expertise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adr/006-agent-fleet-size.html">ADR-006: Agent Fleet Size Justification</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">Architecture</a><input aria-label="Toggle navigation of Architecture" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/MODULE_BOUNDARIES.html">Module Boundaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/SHARED_CONTRACTS.html">Shared Contracts (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/core-platform-separation-2026.html">Core/Platform Separation Plan (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-excellence-enforcement-2026.html">Package Excellence Enforcement (2026)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/package-structure-matrix.html">Package Structure Matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/repoStructure.html">Repository Structure Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../decisions/index.html">Decisions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../analysis/index.html">Analysis</a><input aria-label="Toggle navigation of Analysis" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/crypto-patterns-report.html">Language Analysis: Crypto-Service TypeScript Codebase</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reports &amp; Audits</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reports/index.html">Reports</a><input aria-label="Toggle navigation of Reports" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reports/CI-ENFORCEMENT-MANIFEST.html">Euxis CI Enforcement Manifest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/SHELL_SCRIPT_DOCUMENTATION_AUDIT.html">Shell Script Documentation Audit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/UPDATED_README_SCRIPT_INVENTORY.html">Script Inventory for README.md</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-candidates-v0.1.0.html">Archive Candidates Review (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/archive-cleanup-report-v0.1.0.html">Archive Cleanup Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ci-workflows-documentation.html">CI Workflows Documentation (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/dependency-leaks.html">Cross-Module Dependency Leak Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/documentation-review-2026.html">Euxis Documentation Review Against Industry Standards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/initial-user-expectations-2026-02-18.html">Initial User Expectations (February 18,)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/issue-closure-report-2026-02-16.html">Issue Closure Report —-02-16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-diff.html">Module Dependency Diffs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-deps-suggested.html">Module Dependency Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/module-lockfile-suggestions.html">Lockfile Suggestions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/release-summary-v0.0.9.html">Release Summary — v0.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-reorg-plan-v0.1.0.html">Euxis Monorepo Reorg Plan (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-checklist.html">Repo Split Checklist (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/repo-split-plan-v0.1.0.html">Repository Split — Monolith to Modular (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/roadmap-v0.1.0.html">Euxis v0.0.2 Milestone Plan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/security-audit-gateway-2026-02.html">Euxis Gateway Security Audit Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/unused-assets-report-v0.1.0.html">Unused Assets Report (v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reports/ux-moonshots.html">Euxis UX Moonshots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../audits/index.html">Audits</a><input aria-label="Toggle navigation of Audits" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../audits/v4.5-readiness-report.html">Euxis v4.5 Readiness Report</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../benchmarks/index.html">Benchmarks</a><input aria-label="Toggle navigation of Benchmarks" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../benchmarks/modular-vs-monolithic.html">Benchmark: Modular vs Monolithic euxis.sh</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../compliance/index.html">Compliance</a><input aria-label="Toggle navigation of Compliance" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../compliance/SOC2-COMPLIANCE.html">SOC 2 Compliance Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples &amp; Templates</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../templates/index.html">Templates</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Policies</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../policies/index.html">Policies</a><input aria-label="Toggle navigation of Policies" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../policies/CONSTITUTION.html">The Euxis Fleet Constitution (v1.0 — Protocol v0.0.2)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/STYLE_GUIDE.html">Documentation Style Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/namingConventions.html">Naming Conventions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Legacy Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../legacy/index.html">Legacy Documentation (Archived)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../archive/index.html">Archive</a><input aria-label="Toggle navigation of Archive" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../archive/fleet-guide.html">Euxis Fleet Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../archive/user-guide.html">Euxis User Guide</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/guides/troubleshooting.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="troubleshooting-guide">
+<h1>Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Link to this heading">¶</a></h1>
+<p>This comprehensive troubleshooting guide covers common issues, diagnostic commands, and solutions for the Euxis Fleet system.</p>
+<hr class="docutils" />
+<section id="quick-diagnostics">
+<h2>Quick Diagnostics<a class="headerlink" href="#quick-diagnostics" title="Link to this heading">¶</a></h2>
+<p>Before diving into specific issues, run these diagnostic commands to assess your system state.</p>
+<section id="euxis-health-command">
+<h3>euxis-health Command<a class="headerlink" href="#euxis-health-command" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">euxis-health</span></code> command performs 10 automated checks on your fleet:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-health
+</pre></div>
+</div>
+<p><strong>Expected output (healthy system):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==================================================</span>
+  <span class="n">EUXIS</span> <span class="n">HEALTH</span> <span class="n">CHECK</span>
+<span class="o">==================================================</span>
+
+<span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Naming</span> <span class="n">Consistency</span><span class="o">...</span>
+  <span class="n">All</span> <span class="n">agent</span> <span class="n">filenames</span> <span class="n">match</span> <span class="n">their</span> <span class="n">agent_id</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">2</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Script</span> <span class="n">Hardening</span><span class="o">...</span>
+  <span class="n">All</span> <span class="n">bash</span> <span class="n">scripts</span> <span class="n">have</span> <span class="n">hardening</span> <span class="n">flags</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">3</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Orphan</span> <span class="n">Detection</span><span class="o">...</span>
+  <span class="n">All</span> <span class="n">agents</span> <span class="n">are</span> <span class="n">registered</span><span class="o">.</span> <span class="n">No</span> <span class="n">orphans</span> <span class="ow">or</span> <span class="n">ghosts</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">4</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Header</span> <span class="n">Schema</span> <span class="n">Validation</span><span class="o">...</span>
+  <span class="n">All</span> <span class="n">agents</span> <span class="n">have</span> <span class="n">complete</span> <span class="n">headers</span> <span class="p">(</span><span class="n">agent_id</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">last_updated</span><span class="p">)</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">5</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Documentation</span> <span class="n">Drift</span><span class="o">...</span>
+  <span class="n">docs</span><span class="o">/</span><span class="n">guides</span><span class="o">/</span><span class="n">user</span><span class="o">-</span><span class="n">guide</span><span class="o">.</span><span class="n">md</span> <span class="ow">is</span> <span class="n">current</span> <span class="p">(</span><span class="n">updated</span> <span class="n">within</span> <span class="mi">24</span><span class="n">h</span><span class="p">)</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">6</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Certification</span> <span class="n">Readiness</span><span class="o">...</span>
+  <span class="n">euxis</span><span class="o">-</span><span class="n">certify</span> <span class="ow">is</span> <span class="n">present</span> <span class="ow">and</span> <span class="n">executable</span><span class="o">.</span>
+  <span class="n">euxis</span><span class="o">-</span><span class="n">lint</span> <span class="ow">is</span> <span class="n">present</span> <span class="ow">and</span> <span class="n">executable</span><span class="o">.</span>
+  <span class="n">euxis</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="n">infra</span> <span class="ow">is</span> <span class="n">present</span> <span class="ow">and</span> <span class="n">executable</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">7</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Provider</span> <span class="n">Connectivity</span><span class="o">...</span>
+  <span class="n">FOUND</span><span class="p">:</span> <span class="n">claude</span>
+  <span class="n">FOUND</span><span class="p">:</span> <span class="n">gemini</span>
+  <span class="n">NOT</span> <span class="n">FOUND</span><span class="p">:</span> <span class="n">ollama</span> <span class="p">(</span><span class="n">optional</span> <span class="o">--</span> <span class="n">install</span> <span class="n">to</span> <span class="n">enable</span> <span class="n">this</span> <span class="n">provider</span><span class="p">)</span>
+  <span class="mi">3</span> <span class="n">of</span> <span class="mi">9</span> <span class="n">provider</span> <span class="n">CLIs</span> <span class="n">available</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">8</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Codex</span> <span class="n">Integrity</span><span class="o">...</span>
+  <span class="n">Codex</span> <span class="n">manifest</span> <span class="n">valid</span><span class="o">.</span> <span class="mi">12</span> <span class="n">templates</span> <span class="n">verified</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">9</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Bus</span> <span class="n">Pipe</span> <span class="n">Activity</span><span class="o">...</span>
+  <span class="mi">3</span> <span class="n">pipe</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="mi">45</span> <span class="n">message</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">total</span><span class="o">.</span>
+  <span class="n">All</span> <span class="n">pipes</span> <span class="n">active</span><span class="o">.</span>
+
+<span class="p">[</span><span class="mi">10</span><span class="o">/</span><span class="mi">10</span><span class="p">]</span> <span class="n">Cortex</span> <span class="n">Connectivity</span><span class="o">...</span>
+  <span class="n">Cortex</span> <span class="ow">is</span> <span class="n">reachable</span><span class="o">.</span>
+  <span class="mi">128</span> <span class="n">memories</span> <span class="n">stored</span><span class="o">.</span>
+
+<span class="o">==================================================</span>
+  <span class="n">HEALTH</span> <span class="n">CHECK</span> <span class="n">PASSED</span> <span class="k">with</span> <span class="mi">2</span> <span class="n">warning</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+<span class="o">==================================================</span>
+</pre></div>
+</div>
+<p><strong>Interpreting Health Check Output:</strong></p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Status</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HEALTH</span> <span class="pre">CHECK</span> <span class="pre">PASSED</span></code></p></td>
+<td><p>All critical checks passed</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PASSED</span> <span class="pre">with</span> <span class="pre">N</span> <span class="pre">warning(s)</span></code></p></td>
+<td><p>Functional but some optional features degraded</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HEALTH</span> <span class="pre">CHECK</span> <span class="pre">FAILED</span></code></p></td>
+<td><p>Critical issues require attention</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Command Options:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exit code only (for euxis-ops/CI)</span>
+euxis-health<span class="w"> </span>--silent
+
+<span class="c1"># JSON output for programmatic parsing</span>
+euxis-health<span class="w"> </span>--json
+</pre></div>
+</div>
+<p><strong>JSON output example:</strong></p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;failures&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;warnings&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;agents&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">41</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;providers&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bus_pipes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;bus_messages&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">45</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;current-02-14T10:30:00Z&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="euxis-certify-command">
+<h3>euxis-certify Command<a class="headerlink" href="#euxis-certify-command" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">euxis-certify</span></code> command runs the complete 6-gate certification pipeline:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-certify
+</pre></div>
+</div>
+<p><strong>Expected output (certified system):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==================================================</span>
+  <span class="n">EUXIS</span> <span class="n">CERTIFICATION</span> <span class="n">PIPELINE</span>
+<span class="o">==================================================</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">0</span><span class="p">]</span> <span class="n">Environment</span> <span class="n">Pre</span><span class="o">-</span><span class="n">Validation</span> <span class="p">(</span><span class="n">Fail</span><span class="o">-</span><span class="n">Fast</span><span class="p">)</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">Running</span> <span class="n">full</span> <span class="n">validation</span><span class="o">...</span>
+  <span class="n">Running</span> <span class="n">minimal</span> <span class="n">validation</span><span class="o">...</span>
+  <span class="n">Registry</span> <span class="n">database</span> <span class="n">valid</span> <span class="p">(</span><span class="mi">53</span> <span class="n">agents</span><span class="p">)</span>
+  <span class="n">Euxis</span> <span class="n">directory</span> <span class="n">structure</span> <span class="ow">is</span> <span class="n">valid</span>
+  <span class="n">All</span> <span class="n">system</span> <span class="n">dependencies</span> <span class="n">available</span>
+  <span class="n">Full</span> <span class="n">validation</span> <span class="n">passed</span><span class="o">.</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">0</span><span class="n">a</span><span class="p">]</span> <span class="n">Certification</span> <span class="n">Prerequisites</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">Static</span> <span class="n">analysis</span> <span class="n">tool</span> <span class="ow">is</span> <span class="n">accessible</span>
+  <span class="n">Infrastructure</span> <span class="n">testing</span> <span class="ow">is</span> <span class="n">accessible</span>
+  <span class="n">Main</span> <span class="n">Euxis</span> <span class="n">script</span> <span class="ow">is</span> <span class="n">accessible</span>
+  <span class="n">Branding</span> <span class="n">signature</span> <span class="n">exists</span>
+  <span class="n">Main</span> <span class="n">README</span> <span class="n">exists</span>
+  <span class="n">User</span> <span class="n">guide</span> <span class="n">exists</span>
+  <span class="n">Fleet</span> <span class="n">guide</span> <span class="n">exists</span>
+  <span class="n">Temporary</span> <span class="n">file</span> <span class="n">write</span> <span class="n">access</span> <span class="n">verified</span>
+  <span class="n">Current</span> <span class="n">version</span> <span class="n">detected</span><span class="p">:</span> <span class="n">v0</span><span class="mf">.0.2</span>
+  <span class="n">All</span> <span class="n">certification</span> <span class="n">prerequisites</span> <span class="n">met</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">0</span><span class="n">b</span><span class="p">]</span> <span class="n">Security</span> <span class="o">&amp;</span> <span class="n">Quality</span> <span class="n">Enforcement</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">euxis</span><span class="o">-</span><span class="n">bus</span> <span class="n">uses</span> <span class="n">jq</span> <span class="k">for</span> <span class="n">safe</span> <span class="n">JSON</span> <span class="n">generation</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Provider</span> <span class="n">model</span> <span class="n">name</span> <span class="n">validation</span> <span class="n">present</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Task</span> <span class="nb">input</span> <span class="n">sanitization</span> <span class="ow">in</span> <span class="n">dispatch</span> <span class="n">pipeline</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">PII</span> <span class="n">sanitization</span> <span class="ow">in</span> <span class="n">logging</span> <span class="n">functions</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Project</span> <span class="n">license</span> <span class="n">declared</span> <span class="ow">in</span> <span class="n">pyproject</span><span class="o">.</span><span class="n">toml</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Prompt</span> <span class="n">injection</span> <span class="n">detection</span> <span class="ow">in</span> <span class="n">task</span> <span class="n">validation</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Message</span> <span class="n">bus</span> <span class="n">sender</span> <span class="n">validation</span> <span class="n">present</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Message</span> <span class="n">bus</span> <span class="n">retention</span> <span class="n">policy</span> <span class="p">(</span><span class="n">cleanup</span><span class="p">)</span> <span class="n">present</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">TUI</span> <span class="n">deployment</span> <span class="n">confirmation</span> <span class="n">gates</span> <span class="n">present</span>
+  <span class="n">All</span> <span class="n">mandatory</span> <span class="n">security</span> <span class="n">controls</span> <span class="n">verified</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="n">Static</span> <span class="n">Analysis</span> <span class="p">(</span><span class="n">Lint</span><span class="p">)</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">All</span> <span class="n">agents</span> <span class="n">passed</span> <span class="n">lint</span> <span class="n">checks</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">3</span><span class="p">]</span> <span class="n">Infrastructure</span> <span class="n">Tests</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">All</span> <span class="n">infrastructure</span> <span class="n">tests</span> <span class="n">passed</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">4</span><span class="p">]</span> <span class="n">Semantic</span> <span class="n">Verification</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">Golden</span> <span class="n">dataset</span> <span class="n">found</span><span class="o">.</span> <span class="n">Running</span> <span class="n">sample</span> <span class="nb">eval</span><span class="o">...</span>
+  <span class="n">Testing</span> <span class="n">architect</span> <span class="n">agent</span> <span class="p">(</span><span class="n">timeout</span><span class="p">:</span> <span class="mi">180</span><span class="n">s</span><span class="p">)</span><span class="o">...</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Architect</span> <span class="n">produced</span> <span class="n">output</span> <span class="p">(</span><span class="mi">2847</span> <span class="n">chars</span><span class="p">)</span><span class="o">.</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">5</span><span class="p">]</span> <span class="n">Branding</span> <span class="n">Compliance</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">config</span><span class="o">/</span><span class="n">branding</span><span class="o">/</span><span class="n">signature</span><span class="o">.</span><span class="n">txt</span> <span class="n">exists</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">PR</span> <span class="n">template</span> <span class="n">carries</span> <span class="n">branding</span> <span class="n">signature</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">README</span><span class="o">.</span><span class="n">md</span> <span class="n">carries</span> <span class="n">author</span> <span class="n">attribution</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">prepare</span><span class="o">-</span><span class="n">commit</span><span class="o">-</span><span class="n">msg</span> <span class="n">hook</span> <span class="ow">is</span> <span class="n">present</span> <span class="ow">and</span> <span class="n">executable</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">commit</span><span class="o">.</span><span class="n">gpgsign</span> <span class="ow">is</span> <span class="n">globally</span> <span class="n">enabled</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Signing</span> <span class="n">key</span> <span class="ow">is</span> <span class="n">configured</span> <span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="n">ssh</span><span class="p">)</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Last</span> <span class="mi">5</span> <span class="n">commits</span> <span class="n">carry</span> <span class="n">branding</span> <span class="n">signature</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Last</span> <span class="mi">5</span> <span class="n">commits</span> <span class="n">are</span> <span class="n">cryptographically</span> <span class="n">signed</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">Signature</span> <span class="n">URL</span> <span class="n">points</span> <span class="n">to</span> <span class="n">euxis</span><span class="o">.</span><span class="n">co</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">GitHub</span> <span class="n">Actions</span> <span class="n">branding</span><span class="o">-</span><span class="n">check</span> <span class="n">workflow</span> <span class="n">exists</span><span class="o">.</span>
+
+<span class="p">[</span><span class="n">GATE</span> <span class="mi">6</span><span class="p">]</span> <span class="n">Documentation</span> <span class="n">Governance</span><span class="o">...</span>
+<span class="o">--------------------------------------------------</span>
+  <span class="n">Documentation</span> <span class="n">directory</span> <span class="n">accessible</span>
+  <span class="n">jq</span> <span class="n">available</span> <span class="k">for</span> <span class="n">JSON</span> <span class="n">validation</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">euxis</span><span class="o">-</span><span class="n">sync</span><span class="o">-</span><span class="n">docs</span> <span class="ow">is</span> <span class="n">present</span> <span class="ow">and</span> <span class="n">executable</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">README</span><span class="o">.</span><span class="n">md</span> <span class="n">exists</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">docs</span><span class="o">/</span><span class="n">guides</span><span class="o">/</span><span class="n">user</span><span class="o">-</span><span class="n">guide</span><span class="o">.</span><span class="n">md</span> <span class="n">exists</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">docs</span><span class="o">/</span><span class="n">guides</span><span class="o">/</span><span class="n">fleet</span><span class="o">-</span><span class="n">guide</span><span class="o">.</span><span class="n">md</span> <span class="n">exists</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">All</span> <span class="n">documentation</span> <span class="ow">is</span> <span class="n">current</span> <span class="p">(</span><span class="n">updated</span> <span class="n">within</span> <span class="mi">7</span> <span class="n">days</span><span class="p">)</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">README</span><span class="o">.</span><span class="n">md</span> <span class="n">references</span> <span class="n">version</span> <span class="mf">0.0.2</span><span class="o">.</span>
+  <span class="n">Validating</span> <span class="n">JSON</span> <span class="n">manifest</span> <span class="n">files</span><span class="o">...</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">agents</span><span class="o">/</span><span class="n">registry</span><span class="o">.</span><span class="n">json</span> <span class="ow">is</span> <span class="n">valid</span> <span class="n">JSON</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">agents</span><span class="o">/</span><span class="n">squads</span><span class="o">.</span><span class="n">json</span> <span class="ow">is</span> <span class="n">valid</span> <span class="n">JSON</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">config</span><span class="o">/</span><span class="n">capabilities</span><span class="o">.</span><span class="n">json</span> <span class="ow">is</span> <span class="n">valid</span> <span class="n">JSON</span><span class="o">.</span>
+  <span class="n">PASS</span><span class="p">:</span> <span class="n">config</span><span class="o">/</span><span class="n">codex</span><span class="o">/</span><span class="n">codex</span><span class="o">.</span><span class="n">json</span> <span class="ow">is</span> <span class="n">valid</span> <span class="n">JSON</span><span class="o">.</span>
+
+<span class="o">==================================================</span>
+  <span class="n">EUXIS</span> <span class="n">IS</span> <span class="n">CERTIFIED</span><span class="o">.</span>
+  <span class="n">All</span> <span class="n">toll</span> <span class="n">gates</span> <span class="n">passed</span><span class="o">.</span>
+<span class="o">==================================================</span>
+</pre></div>
+</div>
+</section>
+<section id="common-health-check-failures">
+<h3>Common Health Check Failures<a class="headerlink" href="#common-health-check-failures" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Check</p></th>
+<th class="head"><p>Failure Message</p></th>
+<th class="head"><p>Quick Fix</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Naming Consistency</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MISMATCH:</span> <span class="pre">agent.txt</span></code></p></td>
+<td><p>Rename file to match <code class="docutils literal notranslate"><span class="pre">agent_id</span></code> in header</p></td>
+</tr>
+<tr class="row-odd"><td><p>Script Hardening</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MISSING</span> <span class="pre">HARDENING</span></code></p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">set</span> <span class="pre">-euo</span> <span class="pre">pipefail</span></code> to script</p></td>
+</tr>
+<tr class="row-even"><td><p>Orphan Detection</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ORPHAN</span> <span class="pre">AGENTS</span></code></p></td>
+<td><p>Add agent to registry or remove file</p></td>
+</tr>
+<tr class="row-odd"><td><p>Orphan Detection</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GHOST</span> <span class="pre">ENTRIES</span></code></p></td>
+<td><p>Remove registry entry or create prompt file</p></td>
+</tr>
+<tr class="row-even"><td><p>Header Schema</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MISSING</span> <span class="pre">FIELD</span></code></p></td>
+<td><p>Add required field to agent frontmatter</p></td>
+</tr>
+<tr class="row-odd"><td><p>Documentation Drift</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">STALE</span></code></p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">euxis-sync-docs</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Provider Connectivity</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NOT</span> <span class="pre">FOUND</span></code></p></td>
+<td><p>Install provider CLI or use available provider</p></td>
+</tr>
+<tr class="row-odd"><td><p>Codex Integrity</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MISSING</span> <span class="pre">TEMPLATE</span></code></p></td>
+<td><p>Add template file or update codex.json</p></td>
+</tr>
+<tr class="row-even"><td><p>Bus Pipe Activity</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">stale</span> <span class="pre">pipes</span></code></p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">euxis-bus</span> <span class="pre">cleanup</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Cortex Connectivity</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unreachable</span></code></p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">euxis-cortex</span> <span class="pre">init</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="installation-issues">
+<h2>Installation Issues<a class="headerlink" href="#installation-issues" title="Link to this heading">¶</a></h2>
+<section id="path-not-configured-correctly">
+<h3>PATH Not Configured Correctly<a class="headerlink" href="#path-not-configured-correctly" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>euxis
+bash:<span class="w"> </span>euxis:<span class="w"> </span><span class="nb">command</span><span class="w"> </span>not<span class="w"> </span>found
+</pre></div>
+</div>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if ~/.euxis/euxis-cli/bin is in PATH</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$PATH</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;:&#39;</span><span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;(home|~).*bin&quot;</span>
+
+<span class="c1"># Check if euxis symlink exists</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.euxis/euxis-cli/bin/euxis
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<ol class="arabic">
+<li><p><strong>Add ~/.euxis/euxis-cli/bin to PATH</strong> (choose your shell):</p>
+<p><strong>For Bash (~/.bashrc or ~/.bash_profile):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.euxis/euxis-cli/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p><strong>For Zsh (~/.zshrc):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export PATH=&quot;$HOME/.euxis/euxis-cli/bin:$PATH&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.zshrc
+<span class="nb">source</span><span class="w"> </span>~/.zshrc
+</pre></div>
+</div>
+<p><strong>For Fish (~/.config/fish/config.fish):</strong></p>
+<div class="highlight-fish notranslate"><div class="highlight"><pre><span></span><span class="k">set</span> -Ux fish_user_paths <span class="nv">$HOME</span>/.euxis/euxis-cli/bin <span class="nv">$fish_user_paths</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Re-run setup if symlinks are missing:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>~/.euxis/install.sh
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify installation:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which<span class="w"> </span>euxis
+<span class="c1"># Expected: /home/username/.euxis/euxis-cli/bin/euxis</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="missing-dependencies">
+<h3>Missing Dependencies<a class="headerlink" href="#missing-dependencies" title="Link to this heading">¶</a></h3>
+<p><strong>Bash 4.0+ Required:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check Bash version</span>
+bash<span class="w"> </span>--version
+
+<span class="c1"># If version &lt; 4.0, install newer Bash</span>
+<span class="c1"># macOS:</span>
+brew<span class="w"> </span>install<span class="w"> </span>bash
+
+<span class="c1"># Ubuntu/Debian:</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>bash
+</pre></div>
+</div>
+<p><strong>Python 3.8+ Required:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check Python version</span>
+python3<span class="w"> </span>--version
+
+<span class="c1"># If version &lt; 3.8, install Python 3.12+</span>
+<span class="c1"># macOS:</span>
+brew<span class="w"> </span>install<span class="w"> </span>python@3.12
+
+<span class="c1"># Ubuntu/Debian:</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3.12<span class="w"> </span>python3.12-venv
+</pre></div>
+</div>
+<p><strong>Required Python venv:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># If venv doesn&#39;t exist, create it</span>
+python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/.euxis/.venv
+
+<span class="c1"># Install dependencies</span>
+~/.euxis/.venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>~/.euxis/requirements.txt
+</pre></div>
+</div>
+<p><strong>Optional but recommended tools:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># jq - JSON processing (highly recommended)</span>
+brew<span class="w"> </span>install<span class="w"> </span>jq<span class="w">      </span><span class="c1"># macOS</span>
+apt<span class="w"> </span>install<span class="w"> </span>jq<span class="w">       </span><span class="c1"># Ubuntu/Debian</span>
+
+<span class="c1"># gh - GitHub CLI (for PR operations)</span>
+brew<span class="w"> </span>install<span class="w"> </span>gh<span class="w">      </span><span class="c1"># macOS</span>
+apt<span class="w"> </span>install<span class="w"> </span>gh<span class="w">       </span><span class="c1"># Ubuntu/Debian</span>
+
+<span class="c1"># timeout/gtimeout - Command timeouts</span>
+brew<span class="w"> </span>install<span class="w"> </span>coreutils<span class="w">  </span><span class="c1"># macOS (provides gtimeout)</span>
+</pre></div>
+</div>
+</section>
+<section id="permission-issues">
+<h3>Permission Issues<a class="headerlink" href="#permission-issues" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Permission</span> <span class="n">denied</span><span class="p">:</span> <span class="o">~/.</span><span class="n">euxis</span><span class="o">/</span><span class="n">euxis</span><span class="o">-</span><span class="n">cli</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">euxis</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fix executable permissions on all scripts</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>~/.euxis/euxis-cli/bin/*
+
+<span class="c1"># Fix directory permissions</span>
+chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>~/.euxis
+chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>~/.euxis/euxis-cli/bin
+chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>~/.euxis/core/lib
+
+<span class="c1"># Verify</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.euxis/euxis-cli/bin/euxis
+<span class="c1"># Should show: -rwxr-xr-x</span>
+</pre></div>
+</div>
+</section>
+<section id="shell-compatibility">
+<h3>Shell Compatibility<a class="headerlink" href="#shell-compatibility" title="Link to this heading">¶</a></h3>
+<p><strong>Zsh Users:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add to ~/.zshrc</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.euxis/euxis-cli/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_HOME</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.euxis&quot;</span>
+
+<span class="c1"># Reload</span>
+<span class="nb">source</span><span class="w"> </span>~/.zshrc
+</pre></div>
+</div>
+<p><strong>Bash Users:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add to ~/.bashrc (or ~/.bash_profile on macOS)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.euxis/euxis-cli/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_HOME</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.euxis&quot;</span>
+
+<span class="c1"># Reload</span>
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p><strong>Fish Users:</strong></p>
+<div class="highlight-fish notranslate"><div class="highlight"><pre><span></span><span class="c"># Run these commands</span>
+<span class="k">set</span> -Ux PATH <span class="nv">$HOME</span>/.euxis/euxis-cli/bin <span class="nv">$PATH</span>
+<span class="k">set</span> -Ux EUXIS_HOME <span class="nv">$HOME</span>/.euxis
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="provider-issues">
+<h2>Provider Issues<a class="headerlink" href="#provider-issues" title="Link to this heading">¶</a></h2>
+<section id="provider-not-responding">
+<h3>Provider Not Responding<a class="headerlink" href="#provider-not-responding" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Provider</span> <span class="n">command</span> <span class="n">timed</span> <span class="n">out</span> <span class="n">after</span> <span class="mi">300</span><span class="n">s</span>
+</pre></div>
+</div>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test provider directly</span>
+which<span class="w"> </span>claude<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>claude<span class="w"> </span>--version
+which<span class="w"> </span>gemini<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>gemini<span class="w"> </span>--version
+which<span class="w"> </span>ollama<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>ollama<span class="w"> </span>--version
+
+<span class="c1"># Check if API key is set (example for Claude)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$ANTHROPIC_API_KEY</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-c<span class="w"> </span><span class="m">10</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Increase timeout:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_API_TIMEOUT</span><span class="o">=</span><span class="m">600</span><span class="w">  </span><span class="c1"># 10 minutes</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use a different provider:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use local provider (faster, no API calls)</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>ollama
+
+<span class="c1"># Use Gemini instead</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>gemini
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check provider service status:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For Ollama (local)</span>
+ollama<span class="w"> </span>list
+
+<span class="c1"># For Claude</span>
+claude<span class="w"> </span>doctor
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="api-key-configuration">
+<h3>API Key Configuration<a class="headerlink" href="#api-key-configuration" title="Link to this heading">¶</a></h3>
+<p><strong>Claude (Anthropic):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set API key</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span><span class="s2">&quot;sk-ant-...&quot;</span>
+
+<span class="c1"># Add to shell profile for persistence</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export ANTHROPIC_API_KEY=&quot;sk-ant-...&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p><strong>Gemini (Google):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set API key</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GOOGLE_API_KEY</span><span class="o">=</span><span class="s2">&quot;AIza...&quot;</span>
+
+<span class="c1"># Or use gcloud authentication</span>
+gcloud<span class="w"> </span>auth<span class="w"> </span>application-default<span class="w"> </span>login
+</pre></div>
+</div>
+<p><strong>OpenAI:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set API key</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span><span class="s2">&quot;sk-...&quot;</span>
+</pre></div>
+</div>
+<p><strong>Ollama (Local):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># No API key needed - ensure service is running</span>
+ollama<span class="w"> </span>serve<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="c1"># Pull required model</span>
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.2
+</pre></div>
+</div>
+</section>
+<section id="rate-limiting">
+<h3>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Rate</span> <span class="n">limit</span> <span class="n">exceeded</span>
+<span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="mi">429</span> <span class="n">Too</span> <span class="n">Many</span> <span class="n">Requests</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Wait and retry:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sleep<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use a different provider:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fall back to local provider</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>ollama
+</pre></div>
+</div>
+</li>
+<li><p><strong>Reduce concurrent agents:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_MAX_PARALLEL</span><span class="o">=</span><span class="m">2</span>
+euxis-dispatch<span class="w"> </span>manifest.json
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="timeout-errors">
+<h3>Timeout Errors<a class="headerlink" href="#timeout-errors" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Provider</span> <span class="n">command</span> <span class="n">timed</span> <span class="n">out</span> <span class="n">after</span> <span class="mi">300</span><span class="n">s</span><span class="p">:</span> <span class="n">claude</span> <span class="n">API</span>
+<span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">Consider</span> <span class="n">increasing</span> <span class="n">EUXIS_API_TIMEOUT</span> <span class="ow">or</span> <span class="n">using</span> <span class="n">a</span> <span class="n">different</span> <span class="n">provider</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Increase timeout</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_API_TIMEOUT</span><span class="o">=</span><span class="m">600</span><span class="w">  </span><span class="c1"># 10 minutes</span>
+
+<span class="c1"># Use faster provider for simple tasks</span>
+euxis<span class="w"> </span>butler<span class="w"> </span><span class="s2">&quot;Quick question&quot;</span><span class="w"> </span>ollama
+
+<span class="c1"># Check if timeout command is available</span>
+which<span class="w"> </span>timeout<span class="w"> </span>gtimeout
+
+<span class="c1"># Install if missing (macOS)</span>
+brew<span class="w"> </span>install<span class="w"> </span>coreutils
+</pre></div>
+</div>
+</section>
+<section id="provider-fallback-not-working">
+<h3>Provider Fallback Not Working<a class="headerlink" href="#provider-fallback-not-working" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Agent fails instead of falling back to alternate provider.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List available providers</span>
+euxis-health<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">15</span><span class="w"> </span><span class="s2">&quot;Provider Connectivity&quot;</span>
+</pre></div>
+</div>
+<p><strong>Solution:</strong></p>
+<p>Provider fallback is automatic via the tiering system. Manually specify a provider:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Force specific provider</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>claude
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>gemini
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span><span class="w"> </span>ollama
+</pre></div>
+</div>
+<p><strong>Tiering map (default providers by agent):</strong></p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Agent Type</p></th>
+<th class="head"><p>Default Provider</p></th>
+<th class="head"><p>Fallback</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>orchestrator, architect</p></td>
+<td><p>claude</p></td>
+<td><p>gemini</p></td>
+</tr>
+<tr class="row-odd"><td><p>researcher, deep-researcher</p></td>
+<td><p>gemini</p></td>
+<td><p>claude</p></td>
+</tr>
+<tr class="row-even"><td><p>debugger, tester</p></td>
+<td><p>goose</p></td>
+<td><p>claude</p></td>
+</tr>
+<tr class="row-odd"><td><p>butler, librarian</p></td>
+<td><p>ollama</p></td>
+<td><p>claude</p></td>
+</tr>
+<tr class="row-even"><td><p>optimizer</p></td>
+<td><p>qwen</p></td>
+<td><p>claude</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="agent-issues">
+<h2>Agent Issues<a class="headerlink" href="#agent-issues" title="Link to this heading">¶</a></h2>
+<section id="agent-not-found">
+<h3>Agent Not Found<a class="headerlink" href="#agent-not-found" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Unknown</span> <span class="n">agent</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">agent</span>
+</pre></div>
+</div>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List all registered agents</span>
+euxis<span class="w"> </span>--help<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="s2">&quot;Available Agents&quot;</span>
+
+<span class="c1"># Check registry (SQLite)</span>
+python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import sqlite3; conn = sqlite3.connect(&#39;</span><span class="nv">$HOME</span><span class="s2">/.euxis/agents/registry.db&#39;); print(&#39;\n&#39;.join([r[0] for r in conn.execute(&#39;SELECT id FROM agents ORDER BY id&#39;)]))&quot;</span>
+
+<span class="c1"># Check registry (JSON fallback)</span>
+jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.agents[].id&#39;</span><span class="w"> </span>~/.euxis/agents/registry.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Verify agent name spelling:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Common agents</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w">     </span><span class="c1"># Not &#39;architekt&#39;</span>
+euxis<span class="w"> </span>debugger<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w">     </span><span class="c1"># Not &#39;bugfixer&#39;</span>
+euxis<span class="w"> </span>tester<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w">   </span><span class="c1"># Not &#39;unittester&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check if prompt file exists:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>~/.euxis/agents/prompts/core/*.txt
+ls<span class="w"> </span>~/.euxis/agents/prompts/fleet/*.txt
+</pre></div>
+</div>
+</li>
+<li><p><strong>Re-sync registry:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-health<span class="w">  </span><span class="c1"># Will report orphans/ghosts</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="agent-stuck-in-active-state">
+<h3>Agent Stuck in Active State<a class="headerlink" href="#agent-stuck-in-active-state" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Agent appears to be running but never completes.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check lifecycle state</span>
+cat<span class="w"> </span>~/.euxis/runtime/data/lifecycle/*.state
+
+<span class="c1"># List active agents</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>~/.euxis/runtime/data/lifecycle/*.state<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nv">agent</span><span class="o">=</span><span class="k">$(</span>basename<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span>.state<span class="k">)</span>
+<span class="w">    </span><span class="nv">state</span><span class="o">=</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="k">)</span>
+<span class="w">    </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$state</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;active&quot;</span><span class="w"> </span><span class="o">]]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$agent</span><span class="s2">: </span><span class="nv">$state</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+
+<span class="c1"># Check transition log</span>
+tail<span class="w"> </span>-20<span class="w"> </span>~/.euxis/runtime/data/lifecycle/transitions.jsonl
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Clean stale agents (30 minute timeout):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Manual cleanup via the agents library</span>
+<span class="nb">source</span><span class="w"> </span>~/.euxis/core/lib/agents.sh
+cleanup_stale_agents<span class="w"> </span><span class="m">1800</span><span class="w">  </span><span class="c1"># 30 minutes</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Force state reset:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reset specific agent</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;idle&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>~/.euxis/runtime/data/lifecycle/architect.state
+
+<span class="c1"># Reset all agents</span>
+<span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span>~/.euxis/runtime/data/lifecycle/*.state<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;idle&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check for hung processes:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;(claude|gemini|ollama)&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>grep
+<span class="c1"># Kill if necessary</span>
+pkill<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;claude.*--print&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="agent-returning-empty-response">
+<h3>Agent Returning Empty Response<a class="headerlink" href="#agent-returning-empty-response" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Architect</span> <span class="n">returned</span> <span class="n">empty</span> <span class="n">output</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CERTIFICATION</span> <span class="n">FAILED</span> <span class="n">at</span> <span class="n">Gate</span> <span class="mi">4</span> <span class="p">(</span><span class="n">Semantic</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable debug mode</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_DEBUG</span><span class="o">=</span><span class="m">1</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Test task&quot;</span>
+
+<span class="c1"># Check provider directly</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>claude<span class="w"> </span>--print<span class="w"> </span>--model<span class="w"> </span>claude-sonnet-4-20250514
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check API key validity:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test provider directly</span>
+claude<span class="w"> </span>--version
+claude<span class="w"> </span><span class="s2">&quot;Say hello&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check prompt file integrity:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Validate prompt has required sections</span>
+head<span class="w"> </span>-50<span class="w"> </span>~/.euxis/agents/prompts/core/architect.txt
+
+<span class="c1"># Check frontmatter</span>
+grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;^(agent_id|role|version):&quot;</span><span class="w"> </span>~/.euxis/agents/prompts/core/architect.txt
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check model availability:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For Ollama, verify model is pulled</span>
+ollama<span class="w"> </span>list
+
+<span class="c1"># Pull if missing</span>
+ollama<span class="w"> </span>pull<span class="w"> </span>llama3.2
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="agent-lifecycle-errors">
+<h3>Agent Lifecycle Errors<a class="headerlink" href="#agent-lifecycle-errors" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Agent</span> <span class="n">lifecycle</span> <span class="n">transition</span> <span class="n">failed</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ensure lifecycle directory exists</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/.euxis/runtime/data/lifecycle
+
+<span class="c1"># Check permissions</span>
+chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>~/.euxis/runtime/data/lifecycle
+
+<span class="c1"># Clear corrupted state files</span>
+rm<span class="w"> </span>~/.euxis/runtime/data/lifecycle/*.state
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="memory-issues">
+<h2>Memory Issues<a class="headerlink" href="#memory-issues" title="Link to this heading">¶</a></h2>
+<section id="memory-file-corruption">
+<h3>Memory File Corruption<a class="headerlink" href="#memory-file-corruption" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Path</span> <span class="n">traversal</span> <span class="n">rejected</span>
+</pre></div>
+</div>
+<p>or garbled content in memory.md files.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check memory file validity</span>
+cat<span class="w"> </span>~/.euxis/runtime/data/projects/*/*/memory.md<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># Look for binary or corrupted content</span>
+file<span class="w"> </span>~/.euxis/runtime/data/projects/*/*/memory.md
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Reset memory for specific agent:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;your-project&quot;</span>
+<span class="nv">AGENT</span><span class="o">=</span><span class="s2">&quot;architect&quot;</span>
+
+<span class="c1"># Backup</span>
+cp<span class="w"> </span>~/.euxis/runtime/data/projects/<span class="nv">$PROJECT</span>/<span class="nv">$AGENT</span>/memory.md<span class="o">{</span>,.bak<span class="o">}</span>
+
+<span class="c1"># Reset</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;# Memory: </span><span class="nv">$AGENT</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>~/.euxis/runtime/data/projects/<span class="nv">$PROJECT</span>/<span class="nv">$AGENT</span>/memory.md
+</pre></div>
+</div>
+</li>
+<li><p><strong>Restore from backup:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>~/.euxis/runtime/data/projects/<span class="nv">$PROJECT</span>/<span class="nv">$AGENT</span>/memory.md.bak<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>~/.euxis/runtime/data/projects/<span class="nv">$PROJECT</span>/<span class="nv">$AGENT</span>/memory.md
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="memory-pruning-not-working">
+<h3>Memory Pruning Not Working<a class="headerlink" href="#memory-pruning-not-working" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Memory files grow unbounded (&gt;500 lines).</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check memory file sizes</span>
+wc<span class="w"> </span>-l<span class="w"> </span>~/.euxis/runtime/data/projects/*/*/memory.md
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Run manual pruning:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/.euxis/core/lib/memory.sh
+
+<span class="c1"># Prune specific memory file</span>
+prune_memory<span class="w"> </span>~/.euxis/runtime/data/projects/myproject/architect/memory.md
+
+<span class="c1"># Prune all memory in a project</span>
+prune_project_memory<span class="w"> </span>~/.euxis/runtime/data/projects/myproject
+</pre></div>
+</div>
+</li>
+<li><p><strong>Configure pruning thresholds:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># In your shell profile</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_MEMORY_MAX_LINES</span><span class="o">=</span><span class="m">500</span><span class="w">      </span><span class="c1"># Trigger pruning above this</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_MEMORY_RECENT_KEEP</span><span class="o">=</span><span class="m">100</span><span class="w">    </span><span class="c1"># Keep this many recent entries</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Run Kaizen maintenance:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-kaizen<span class="w"> </span>prune
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="semantic-drift-warnings">
+<h3>Semantic Drift Warnings<a class="headerlink" href="#semantic-drift-warnings" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">DRIFT</span><span class="p">]</span> <span class="n">New</span> <span class="n">fact</span> <span class="n">negates</span> <span class="n">existing</span><span class="p">:</span> <span class="n">Uses</span> <span class="n">JWT</span> <span class="n">authentication</span>
+<span class="p">[</span><span class="n">DRIFT</span><span class="p">]</span> <span class="n">Value</span> <span class="n">change</span> <span class="n">detected</span> <span class="o">--</span> <span class="n">old</span><span class="p">:</span> <span class="s1">&#39;jwt&#39;</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="s1">&#39;oauth&#39;</span>
+</pre></div>
+</div>
+<p><strong>Understanding Drift:</strong></p>
+<p>Semantic drift occurs when new memories contradict existing knowledge. This is a feature, not a bug – it helps maintain knowledge consistency.</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Review and resolve contradictions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View drift warnings</span>
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;\[DRIFT\]&quot;</span><span class="w"> </span>~/.euxis/runtime/data/projects/*/*/memory.md
+</pre></div>
+</div>
+</li>
+<li><p><strong>Manually resolve:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>~/.euxis/core/lib/memory.sh
+
+<span class="c1"># Supersede old knowledge with new</span>
+resolve_memory_contradiction<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>~/.euxis/runtime/data/projects/myproject/architect/memory.md<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;Project uses OAuth 2.0 for authentication&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;architect&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;supersede&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Keep both versions:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>resolve_memory_contradiction<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>~/.euxis/runtime/data/projects/myproject/architect/memory.md<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;New authentication approach&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;architect&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;keep_both&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="cross-agent-memory-not-accessible">
+<h3>Cross-Agent Memory Not Accessible<a class="headerlink" href="#cross-agent-memory-not-accessible" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Agents cannot access sibling agent memories.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check project structure</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.euxis/runtime/data/projects/myproject/
+
+<span class="c1"># Verify memory files exist for other agents</span>
+ls<span class="w"> </span>~/.euxis/runtime/data/projects/myproject/*/memory.md
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Ensure correct project context:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_PROJECT</span><span class="o">=</span><span class="s2">&quot;myproject&quot;</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check directory structure:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Memories should be at: ~/.euxis/runtime/data/projects/{project}/{agent}/memory.md</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/.euxis/runtime/data/projects/myproject/architect
+touch<span class="w"> </span>~/.euxis/runtime/data/projects/myproject/architect/memory.md
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="tui-issues">
+<h2>TUI Issues<a class="headerlink" href="#tui-issues" title="Link to this heading">¶</a></h2>
+<section id="tui-not-launching">
+<h3>TUI Not Launching<a class="headerlink" href="#tui-not-launching" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Python</span> <span class="n">venv</span> <span class="ow">not</span> <span class="n">found</span> <span class="n">at</span> <span class="o">~/.</span><span class="n">euxis</span><span class="o">/.</span><span class="n">venv</span>
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">ModuleNotFoundError</span><span class="p">:</span> <span class="n">No</span> <span class="n">module</span> <span class="n">named</span> <span class="s1">&#39;textual&#39;</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Create/recreate venv:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/.euxis/.venv
+~/.euxis/.venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>~/.euxis/requirements.txt
+</pre></div>
+</div>
+</li>
+<li><p><strong>Install Textual manually:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>~/.euxis/.venv/bin/pip<span class="w"> </span>install<span class="w"> </span>textual<span class="w"> </span>textual-dev
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify installation:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>~/.euxis/.venv/bin/python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import textual; print(textual.__version__)&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="display-rendering-issues">
+<h3>Display Rendering Issues<a class="headerlink" href="#display-rendering-issues" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<ul class="simple">
+<li><p>Garbled characters</p></li>
+<li><p>Missing borders</p></li>
+<li><p>Overlapping text</p></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check terminal compatibility:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify terminal supports 256 colors</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$TERM</span>
+<span class="c1"># Should be: xterm-256color, screen-256color, etc.</span>
+
+<span class="c1"># Set if missing</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TERM</span><span class="o">=</span>xterm-256color
+</pre></div>
+</div>
+</li>
+<li><p><strong>Check terminal size:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Minimum recommended: 80x24</span>
+tput<span class="w"> </span>cols
+tput<span class="w"> </span>lines
+
+<span class="c1"># Resize terminal window if needed</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Try different terminal emulator:</strong></p>
+<ul class="simple">
+<li><p><strong>Recommended:</strong> iTerm2 (macOS), Alacritty, Kitty, WezTerm</p></li>
+<li><p><strong>Avoid:</strong> Basic Terminal.app (limited Unicode support)</p></li>
+</ul>
+</li>
+<li><p><strong>Reset terminal:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>reset
+euxis-tui
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="keyboard-shortcuts-not-working">
+<h3>Keyboard Shortcuts Not Working<a class="headerlink" href="#keyboard-shortcuts-not-working" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Ctrl+K, Ctrl+T, etc. don’t respond.</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Check for conflicting terminal shortcuts:</strong></p>
+<ul class="simple">
+<li><p>macOS Terminal: Preferences &gt; Keyboard</p></li>
+<li><p>iTerm2: Preferences &gt; Keys</p></li>
+<li><p>Disable any Ctrl+ shortcuts that conflict</p></li>
+</ul>
+</li>
+<li><p><strong>Try alternative shortcuts:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>F1          - Help
+F2          - Welcome screen
+F5          - Refresh
+?           - Keyboard reference
+Escape      - Go back
+</pre></div>
+</div>
+</li>
+<li><p><strong>List all bindings:</strong>
+Press <code class="docutils literal notranslate"><span class="pre">F1</span></code> or <code class="docutils literal notranslate"><span class="pre">?</span></code> in the TUI to see the full keyboard reference.</p></li>
+</ol>
+</section>
+<section id="theme-not-applying">
+<h3>Theme Not Applying<a class="headerlink" href="#theme-not-applying" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>TUI starts with wrong colors or default theme.</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Cycle themes manually:</strong>
+Press <code class="docutils literal notranslate"><span class="pre">Ctrl+T</span></code> in the TUI to cycle through themes.</p></li>
+<li><p><strong>Reset theme config:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check current config</span>
+cat<span class="w"> </span>~/.euxis/config/etx.json
+
+<span class="c1"># Reset to default</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;{&quot;theme&quot;: &quot;etx-liquid-glass&quot;, &quot;locale&quot;: &quot;en&quot;}&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>~/.euxis/config/etx.json
+</pre></div>
+</div>
+</li>
+<li><p><strong>Available themes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">etx-liquid-glass</span></code> (default)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">etx-midnight</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">etx-sunrise</span></code></p></li>
+<li><p>Custom themes via CSS</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="performance-issues">
+<h2>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading">¶</a></h2>
+<section id="slow-agent-dispatch">
+<h3>Slow Agent Dispatch<a class="headerlink" href="#slow-agent-dispatch" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>Agent takes &gt;5 seconds just to start.</p>
+<p><strong>Diagnosis:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable performance logging</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_DEBUG</span><span class="o">=</span><span class="m">1</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Test&quot;</span>
+
+<span class="c1">## Metrics Location</span>
+
+Performance<span class="w"> </span>metrics<span class="w"> </span>are<span class="w"> </span>stored<span class="w"> </span>at<span class="w"> </span><span class="sb">`</span>~/.euxis/metrics/events.jsonl<span class="sb">`</span>.
+
+<span class="c1"># Check performance metrics</span>
+tail<span class="w"> </span>-20<span class="w"> </span>~/.euxis/metrics/events.jsonl
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Use SQLite registry (faster):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if using SQLite</span>
+ls<span class="w"> </span>~/.euxis/agents/registry.db
+
+<span class="c1"># If not, migrate</span>
+python3<span class="w"> </span>~/.euxis/euxis-ops/migrate-registry-to-sqlite.py
+</pre></div>
+</div>
+</li>
+<li><p><strong>Disable performance tracking (if not needed):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_PERF_DISABLE</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use local provider for speed:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Quick task&quot;</span><span class="w"> </span>ollama
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="high-latency">
+<h3>High Latency<a class="headerlink" href="#high-latency" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">WARN</span><span class="p">:</span> <span class="n">LATENCY</span> <span class="n">BUDGET</span> <span class="n">EXCEEDED</span><span class="p">:</span> <span class="n">provider_execution</span> <span class="n">took</span> <span class="mi">8500</span><span class="n">ms</span> <span class="p">(</span><span class="n">budget</span><span class="p">:</span> <span class="mi">5000</span><span class="n">ms</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Adjust performance budgets:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_PROMPT_BUDGET_MS</span><span class="o">=</span><span class="m">1000</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_API_TIMEOUT</span><span class="o">=</span><span class="m">600</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use tiered providers:</strong></p>
+<ul class="simple">
+<li><p>Complex tasks: claude (slower, higher quality)</p></li>
+<li><p>Simple tasks: ollama (faster, local)</p></li>
+</ul>
+</li>
+<li><p><strong>Check network:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test API latency</span>
+<span class="nb">time</span><span class="w"> </span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.anthropic.com/v1/health
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="memory-usage">
+<h3>Memory Usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<p>System slows down during fleet dispatch.</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Limit parallel agents:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_MAX_PARALLEL</span><span class="o">=</span><span class="m">3</span>
+euxis-dispatch<span class="w"> </span>manifest.json
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use hierarchical mode:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis-squad<span class="w"> </span>deploy<span class="w"> </span>build<span class="w"> </span><span class="s2">&quot;Task&quot;</span><span class="w"> </span>--mode<span class="w"> </span>hierarchical
+</pre></div>
+</div>
+</li>
+<li><p><strong>Monitor resource usage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Watch memory during dispatch</span>
+watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="s1">&#39;ps aux | grep -E &quot;(python|claude|ollama)&quot; | awk &quot;{sum+=\$4} END {print sum\&quot;%\&quot;}&quot;&#39;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="token-budget-exceeded">
+<h3>Token Budget Exceeded<a class="headerlink" href="#token-budget-exceeded" title="Link to this heading">¶</a></h3>
+<p><strong>Symptoms:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">ERROR</span><span class="p">:</span> <span class="n">Token</span> <span class="n">budget</span> <span class="n">exceeded</span>
+<span class="p">[</span><span class="n">euxis</span><span class="p">]</span> <span class="n">WARN</span><span class="p">:</span> <span class="n">Response</span> <span class="n">truncated</span>
+</pre></div>
+</div>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p><strong>Reduce task complexity:</strong>
+Break large tasks into smaller subtasks.</p></li>
+<li><p><strong>Use summarization:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>euxis<span class="w"> </span>librarian<span class="w"> </span><span class="s2">&quot;Summarize the following: [long text]&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Increase max turns:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_MAX_TURNS</span><span class="o">=</span><span class="m">50</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Complex task&quot;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="common-error-messages">
+<h2>Common Error Messages<a class="headerlink" href="#common-error-messages" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Error Message</p></th>
+<th class="head"><p>Cause</p></th>
+<th class="head"><p>Solution</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Unknown</span> <span class="pre">agent:</span> <span class="pre">X</span></code></p></td>
+<td><p>Agent ID doesn’t exist in registry</p></td>
+<td><p>Check spelling, run <code class="docutils literal notranslate"><span class="pre">euxis</span> <span class="pre">--help</span></code> for list</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Provider</span> <span class="pre">'X'</span> <span class="pre">not</span> <span class="pre">configured</span></code></p></td>
+<td><p>Provider CLI not installed</p></td>
+<td><p>Install provider: <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">X</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">venv</span> <span class="pre">not</span> <span class="pre">found</span></code></p></td>
+<td><p>Venv not created</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">~/.euxis/.venv</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Rate</span> <span class="pre">limit</span> <span class="pre">exceeded</span></code></p></td>
+<td><p>API rate limiting</p></td>
+<td><p>Wait 60s or use different provider</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Provider</span> <span class="pre">command</span> <span class="pre">timed</span> <span class="pre">out</span></code></p></td>
+<td><p>API too slow / network issue</p></td>
+<td><p>Increase <code class="docutils literal notranslate"><span class="pre">EUXIS_API_TIMEOUT</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Path</span> <span class="pre">traversal</span> <span class="pre">rejected</span></code></p></td>
+<td><p>Security: Invalid file path</p></td>
+<td><p>Use valid paths within <code class="docutils literal notranslate"><span class="pre">~/.euxis</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Invalid</span> <span class="pre">model</span> <span class="pre">name</span></code></p></td>
+<td><p>Malformed model identifier</p></td>
+<td><p>Check <code class="docutils literal notranslate"><span class="pre">EUXIS_*_MODEL</span></code> env vars</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Registry</span> <span class="pre">not</span> <span class="pre">found</span></code></p></td>
+<td><p>Missing agents/registry.db/json</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">~/.euxis/install.sh</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">FATAL:</span> <span class="pre">Cannot</span> <span class="pre">load</span> <span class="pre">validation</span> <span class="pre">library</span></code></p></td>
+<td><p>Missing lib/validation.sh</p></td>
+<td><p>Re-clone repository</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Task</span> <span class="pre">input</span> <span class="pre">rejected:</span> <span class="pre">prompt</span> <span class="pre">injection</span></code></p></td>
+<td><p>Security: Dangerous input</p></td>
+<td><p>Remove injection patterns from task</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chromadb</span> <span class="pre">not</span> <span class="pre">installed</span></code></p></td>
+<td><p>Missing Cortex dependencies</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">chromadb</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">jq</span> <span class="pre">not</span> <span class="pre">installed</span></code></p></td>
+<td><p>Missing JSON processor</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">jq</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">command</span> <span class="pre">not</span> <span class="pre">available</span></code></p></td>
+<td><p>Missing coreutils</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">coreutils</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Module</span> <span class="pre">not</span> <span class="pre">found:</span> <span class="pre">textual</span></code></p></td>
+<td><p>TUI dependencies missing</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">textual</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CERTIFICATION</span> <span class="pre">FAILED</span> <span class="pre">at</span> <span class="pre">Gate</span> <span class="pre">X</span></code></p></td>
+<td><p>Certification check failed</p></td>
+<td><p>See gate output for specific issue</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MISMATCH:</span> <span class="pre">filename</span> <span class="pre">vs</span> <span class="pre">agent_id</span></code></p></td>
+<td><p>Prompt file name != agent_id</p></td>
+<td><p>Rename file to match agent_id</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ORPHAN</span> <span class="pre">AGENTS</span></code></p></td>
+<td><p>Agent file not in registry</p></td>
+<td><p>Add to registry or remove file</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GHOST</span> <span class="pre">ENTRIES</span></code></p></td>
+<td><p>Registry entry has no file</p></td>
+<td><p>Create prompt file or remove entry</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading">¶</a></h2>
+<section id="debug-mode">
+<h3>Debug Mode<a class="headerlink" href="#debug-mode" title="Link to this heading">¶</a></h3>
+<p>Enable comprehensive debug logging:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable debug mode</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">EUXIS_DEBUG</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Run command</span>
+euxis<span class="w"> </span>architect<span class="w"> </span><span class="s2">&quot;Your task&quot;</span>
+
+<span class="c1"># Debug output shows:</span>
+<span class="c1"># - Prompt assembly timing</span>
+<span class="c1"># - Provider selection</span>
+<span class="c1"># - Memory retrieval</span>
+<span class="c1"># - Performance metrics</span>
+</pre></div>
+</div>
+</section>
+<section id="log-locations">
+<h3>Log Locations<a class="headerlink" href="#log-locations" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Log Type</p></th>
+<th class="head"><p>Location</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Agent output</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/runtime/data/projects/{project}/{agent}/output/*.md</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Agent audit</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/runtime/data/projects/{project}/{agent}/audit.md</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Agent memory</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/runtime/data/projects/{project}/{agent}/memory.md</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Performance metrics</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/metrics/events.jsonl</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Lifecycle transitions</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/runtime/data/lifecycle/transitions.jsonl</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Dispatch logs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">${TMPDIR:-/tmp}/euxis_dispatch_*/*.log</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Certification logs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">${TMPDIR:-/tmp}/euxis_cert_*.log</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Bus messages</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">~/.euxis/runtime/data/bus/pipes/*/*.msg</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="generating-a-bug-report">
+<h3>Generating a Bug Report<a class="headerlink" href="#generating-a-bug-report" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate comprehensive system report</span>
+<span class="o">{</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Euxis Bug Report ===&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Date: </span><span class="k">$(</span>date<span class="k">)</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== System Info ===&quot;</span>
+<span class="w">    </span>uname<span class="w"> </span>-a
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Bash: </span><span class="k">$(</span>bash<span class="w"> </span>--version<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1<span class="k">)</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Python: </span><span class="k">$(</span>python3<span class="w"> </span>--version<span class="k">)</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Health Check ===&quot;</span>
+<span class="w">    </span>euxis-health<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Recent Errors ===&quot;</span>
+<span class="w">    </span>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="w"> </span>~/.euxis/runtime/data/lifecycle/transitions.jsonl<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-20
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Provider Status ===&quot;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>p<span class="w"> </span><span class="k">in</span><span class="w"> </span>claude<span class="w"> </span>gemini<span class="w"> </span>ollama<span class="w"> </span>goose<span class="w"> </span>qwen<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span>which<span class="w"> </span><span class="nv">$p</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$p</span><span class="s2">: </span><span class="k">$(</span>which<span class="w"> </span><span class="nv">$p</span><span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$p</span><span class="s2">: not found&quot;</span>
+<span class="w">    </span><span class="k">done</span>
+<span class="o">}</span><span class="w"> </span>&gt;<span class="w"> </span>~/euxis-bug-report.txt
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Report saved to ~/euxis-bug-report.txt&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="reporting-issues">
+<h3>Reporting Issues<a class="headerlink" href="#reporting-issues" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><strong>GitHub Issues:</strong> <a class="reference external" href="https://github.com/sebastienrousseau/euxis/issues">github.com/sebastienrousseau/euxis/issues</a></p></li>
+<li><p><strong>Include in your report:</strong></p>
+<ul class="simple">
+<li><p>Bug report output (see above)</p></li>
+<li><p>Steps to reproduce</p></li>
+<li><p>Expected vs actual behavior</p></li>
+<li><p>Relevant log snippets</p></li>
+</ul>
+</li>
+<li><p><strong>Security issues:</strong> Email security&#64;euxis.co (do not post publicly)</p></li>
+</ol>
+<hr class="docutils" />
+<p><strong>Still stuck?</strong> Run <code class="docutils literal notranslate"><span class="pre">euxis-health</span> <span class="pre">--json</span></code> and open an issue with the output attached.</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ui-guide.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Euxis UI &amp; Interaction Guide</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="migration-guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Migration Guide</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Euxis Fleet
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Troubleshooting Guide</a><ul>
+<li><a class="reference internal" href="#quick-diagnostics">Quick Diagnostics</a><ul>
+<li><a class="reference internal" href="#euxis-health-command">euxis-health Command</a></li>
+<li><a class="reference internal" href="#euxis-certify-command">euxis-certify Command</a></li>
+<li><a class="reference internal" href="#common-health-check-failures">Common Health Check Failures</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation-issues">Installation Issues</a><ul>
+<li><a class="reference internal" href="#path-not-configured-correctly">PATH Not Configured Correctly</a></li>
+<li><a class="reference internal" href="#missing-dependencies">Missing Dependencies</a></li>
+<li><a class="reference internal" href="#permission-issues">Permission Issues</a></li>
+<li><a class="reference internal" href="#shell-compatibility">Shell Compatibility</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#provider-issues">Provider Issues</a><ul>
+<li><a class="reference internal" href="#provider-not-responding">Provider Not Responding</a></li>
+<li><a class="reference internal" href="#api-key-configuration">API Key Configuration</a></li>
+<li><a class="reference internal" href="#rate-limiting">Rate Limiting</a></li>
+<li><a class="reference internal" href="#timeout-errors">Timeout Errors</a></li>
+<li><a class="reference internal" href="#provider-fallback-not-working">Provider Fallback Not Working</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#agent-issues">Agent Issues</a><ul>
+<li><a class="reference internal" href="#agent-not-found">Agent Not Found</a></li>
+<li><a class="reference internal" href="#agent-stuck-in-active-state">Agent Stuck in Active State</a></li>
+<li><a class="reference internal" href="#agent-returning-empty-response">Agent Returning Empty Response</a></li>
+<li><a class="reference internal" href="#agent-lifecycle-errors">Agent Lifecycle Errors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#memory-issues">Memory Issues</a><ul>
+<li><a class="reference internal" href="#memory-file-corruption">Memory File Corruption</a></li>
+<li><a class="reference internal" href="#memory-pruning-not-working">Memory Pruning Not Working</a></li>
+<li><a class="reference internal" href="#semantic-drift-warnings">Semantic Drift Warnings</a></li>
+<li><a class="reference internal" href="#cross-agent-memory-not-accessible">Cross-Agent Memory Not Accessible</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tui-issues">TUI Issues</a><ul>
+<li><a class="reference internal" href="#tui-not-launching">TUI Not Launching</a></li>
+<li><a class="reference internal" href="#display-rendering-issues">Display Rendering Issues</a></li>
+<li><a class="reference internal" href="#keyboard-shortcuts-not-working">Keyboard Shortcuts Not Working</a></li>
+<li><a class="reference internal" href="#theme-not-applying">Theme Not Applying</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performance-issues">Performance Issues</a><ul>
+<li><a class="reference internal" href="#slow-agent-dispatch">Slow Agent Dispatch</a></li>
+<li><a class="reference internal" href="#high-latency">High Latency</a></li>
+<li><a class="reference internal" href="#memory-usage">Memory Usage</a></li>
+<li><a class="reference internal" href="#token-budget-exceeded">Token Budget Exceeded</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#common-error-messages">Common Error Messages</a></li>
+<li><a class="reference internal" href="#getting-help">Getting Help</a><ul>
+<li><a class="reference internal" href="#debug-mode">Debug Mode</a></li>
+<li><a class="reference internal" href="#log-locations">Log Locations</a></li>
+<li><a class="reference internal" href="#generating-a-bug-report">Generating a Bug Report</a></li>
+<li><a class="reference internal" href="#reporting-issues">Reporting Issues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b52b19ee"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
