@@ -3,5 +3,7 @@
 
 """Euxis Core - Shared core logic and shell libraries."""
 
+from euxis_core.encrypted_memory import EncryptedMemoryEntry, EncryptedMemoryStore
+
 __version__ = "v0.0.2"
-__all__ = ["__version__"]
+__all__ = ["EncryptedMemoryEntry", "EncryptedMemoryStore", "__version__"]

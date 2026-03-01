@@ -112,6 +112,30 @@
       "required_files": ["README.md", "pyproject.toml"],
       "test_paths": ["euxis-docs/tests"],
       "docs_path": "euxis-docs/docs/modules/euxis-docs.md"
+    },
+    {
+      "name": "euxis-identity",
+      "path": "euxis-identity",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-identity/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-identity.md"
+    },
+    {
+      "name": "euxis-inference",
+      "path": "euxis-inference",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-inference/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-inference.md"
+    },
+    {
+      "name": "euxis-a2a",
+      "path": "euxis-a2a",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-a2a/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-a2a.md"
     }
   ]
 }

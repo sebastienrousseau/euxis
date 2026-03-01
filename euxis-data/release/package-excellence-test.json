@@ -1,7 +1,7 @@
 {
   "status": "ok",
-  "packages_checked": 14,
-  "packages_passed": 14,
+  "packages_checked": 17,
+  "packages_passed": 17,
   "packages_failed": 0,
   "errors": [],
   "packages": {
@@ -168,6 +168,42 @@
       "required_files": [
         "README.md",
         "pyproject.toml"
+      ]
+    },
+    "euxis-identity": {
+      "status": "ok",
+      "kind": "python",
+      "docs_path": "euxis-docs/docs/modules/euxis-identity.md",
+      "test_paths": [
+        "euxis-identity/tests"
+      ],
+      "required_files": [
+        "pyproject.toml",
+        "README.md"
+      ]
+    },
+    "euxis-inference": {
+      "status": "ok",
+      "kind": "python",
+      "docs_path": "euxis-docs/docs/modules/euxis-inference.md",
+      "test_paths": [
+        "euxis-inference/tests"
+      ],
+      "required_files": [
+        "pyproject.toml",
+        "README.md"
+      ]
+    },
+    "euxis-a2a": {
+      "status": "ok",
+      "kind": "python",
+      "docs_path": "euxis-docs/docs/modules/euxis-a2a.md",
+      "test_paths": [
+        "euxis-a2a/tests"
+      ],
+      "required_files": [
+        "pyproject.toml",
+        "README.md"
       ]
     }
   }

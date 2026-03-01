@@ -20,6 +20,8 @@ class BridgedSkill:
     command: list[str] = field(default_factory=list)
     tags: tuple[str, ...] = field(default_factory=tuple)
     metadata: dict[str, Any] = field(default_factory=dict)
+    signature_path: str | None = field(default=None)
+    output_schema: dict[str, Any] | None = field(default=None)
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)

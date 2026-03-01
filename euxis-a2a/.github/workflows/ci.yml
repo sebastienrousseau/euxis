@@ -1,0 +1,44 @@
+name: package-ci-template
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Run tests
+        run: |
+          pytest -q -p no:cacheprovider
+
+  # WSL is validated on Linux runner via env simulation + factory tests.
+  wsl-simulation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Run WSL adapter tests
+        env:
+          WSL_DISTRO_NAME: Ubuntu
+        run: |
+          pytest -q -p no:cacheprovider tests/unit/test_factory.py::test_resolve_wsl tests/platform/test_platform_adapters.py::test_wsl_adapter_contract

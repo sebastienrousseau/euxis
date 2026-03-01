@@ -13,7 +13,7 @@ Performance features:
 - Target: response time <=10ms
 """
 
-from .core import DecryptionResult, EncryptionResult, decrypt, encrypt
+from .core import DecryptionResult, EncryptionResult, decrypt, decrypt_aad, encrypt, encrypt_aad
 from .exceptions import CryptoError, DecryptionError, InvalidKeyError
 from .key_management import derive_key, generate_key
 
@@ -52,8 +52,10 @@ __all__ = [
     "EncryptionResult",
     "InvalidKeyError",
     "decrypt",
+    "decrypt_aad",
     "derive_key",
     "encrypt",
+    "encrypt_aad",
     "generate_key",
     # Async API (high-performance)
     "async_encrypt",

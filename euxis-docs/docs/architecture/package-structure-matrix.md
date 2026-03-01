@@ -18,6 +18,9 @@ Generated from `euxis-ops/quality/package_standards.json`.
 | `euxis-web` | `node` | `euxis-web` | `package.json, README.md` (yes) | `euxis-web/src/crypto-lib/tests` (yes) | `euxis-docs/docs/modules/euxis-web.md` (yes) | `ok` |
 | `euxis-bridge` | `python` | `euxis-bridge` | `pyproject.toml, README.md` (yes) | `euxis-bridge/tests` (yes) | `euxis-docs/docs/modules/euxis-bridge.md` (yes) | `ok` |
 | `euxis-docs` | `docs` | `euxis-docs` | `README.md, pyproject.toml` (yes) | `euxis-docs/tests` (yes) | `euxis-docs/docs/modules/euxis-docs.md` (yes) | `ok` |
+| `euxis-identity` | `python` | `euxis-identity` | `pyproject.toml, README.md` (yes) | `euxis-identity/tests` (yes) | `euxis-docs/docs/modules/euxis-identity.md` (yes) | `ok` |
+| `euxis-inference` | `python` | `euxis-inference` | `pyproject.toml, README.md` (yes) | `euxis-inference/tests` (yes) | `euxis-docs/docs/modules/euxis-inference.md` (yes) | `ok` |
+| `euxis-a2a` | `python` | `euxis-a2a` | `pyproject.toml, README.md` (yes) | `euxis-a2a/tests` (yes) | `euxis-docs/docs/modules/euxis-a2a.md` (yes) | `ok` |
 
 ## Enforcement
 

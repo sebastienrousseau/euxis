@@ -3,7 +3,7 @@
   "previous_release": "v0.0.2",
   "next_release": "v0.0.3",
   "threshold_percent": 25.0,
-  "package_count": 14,
-  "flagged_packages_count": 9,
-  "proposal_sha256": "5a6bdf3e19ead7739d1928efe3817fba207126dd7f66503145fafedf6a0a01d1"
+  "package_count": 17,
+  "flagged_packages_count": 12,
+  "proposal_sha256": "92e1a9565ccb95fa40e5b5aee8dd29a47bfb04a876289ed1bb8edc88b6f2fa05"
 }

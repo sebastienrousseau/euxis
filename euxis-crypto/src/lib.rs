@@ -129,6 +129,80 @@ fn derive_key_pbkdf2<'py>(
     Ok(PyBytes::new_bound(py, &key))
 }
 
+/// Encrypt binary payloads using `AES-256-GCM` with Additional Authenticated Data (AAD).
+///
+/// AAD is authenticated but not encrypted, binding context (e.g. tier labels) to ciphertext.
+///
+/// # Parameters
+/// * `data` - The raw plaintext `&[u8]` bytes.
+/// * `key` - A strict 32-byte cryptographic key.
+/// * `iv` - A strict 12-byte initialization vector (nonce).
+/// * `aad` - Additional authenticated data bytes.
+///
+/// # Returns
+/// Returns a `PyBytes` object containing the authenticated ciphertext.
+#[pyfunction]
+fn aes_gcm_encrypt_aad<'py>(
+    py: Python<'py>,
+    data: &[u8],
+    key: &[u8],
+    iv: &[u8],
+    aad: &[u8]
+) -> PyResult<Bound<'py, PyBytes>> {
+    if key.len() != 32 {
+        return Err(PyValueError::new_err("AES-256 requires exactly a 32-byte key"));
+    }
+    if iv.len() != 12 {
+        return Err(PyValueError::new_err("GCM mode requires exactly a 12-byte IV"));
+    }
+
+    let cipher = Aes256Gcm::new_from_slice(key)
+        .map_err(|e| PyValueError::new_err(format!("Cipher init failed: {}", e)))?;
+    let nonce = Nonce::from_slice(iv);
+
+    let ciphertext = cipher.encrypt(nonce, Payload { msg: data, aad })
+        .map_err(|e| PyValueError::new_err(format!("Encryption failed: {}", e)))?;
+
+    Ok(PyBytes::new_bound(py, &ciphertext))
+}
+
+/// Decrypt authenticated ciphertext using `AES-256-GCM` with Additional Authenticated Data (AAD).
+///
+/// The AAD must match the value used during encryption, or decryption will fail.
+///
+/// # Parameters
+/// * `ciphertext` - The encrypted `&[u8]` bytes.
+/// * `key` - A strict 32-byte cryptographic key.
+/// * `iv` - A strict 12-byte initialization vector (nonce).
+/// * `aad` - Additional authenticated data bytes (must match encryption AAD).
+///
+/// # Returns
+/// Returns a `PyBytes` object containing the verified plaintext.
+#[pyfunction]
+fn aes_gcm_decrypt_aad<'py>(
+    py: Python<'py>,
+    ciphertext: &[u8],
+    key: &[u8],
+    iv: &[u8],
+    aad: &[u8]
+) -> PyResult<Bound<'py, PyBytes>> {
+    if key.len() != 32 {
+        return Err(PyValueError::new_err("AES-256 requires exactly a 32-byte key"));
+    }
+    if iv.len() != 12 {
+        return Err(PyValueError::new_err("GCM mode requires exactly a 12-byte IV"));
+    }
+
+    let cipher = Aes256Gcm::new_from_slice(key)
+        .map_err(|e| PyValueError::new_err(format!("Cipher init failed: {}", e)))?;
+    let nonce = Nonce::from_slice(iv);
+
+    let plaintext = cipher.decrypt(nonce, Payload { msg: ciphertext, aad })
+        .map_err(|e| PyValueError::new_err(format!("Decryption failed: {}", e)))?;
+
+    Ok(PyBytes::new_bound(py, &plaintext))
+}
+
 /// Register the native Rust cryptographic primitives into the Python runtime.
 ///
 /// Initialize the module context to expose standard encryption routes.
@@ -136,6 +210,8 @@ fn derive_key_pbkdf2<'py>(
 fn crypto_lib_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(aes_gcm_encrypt, m)?)?;
     m.add_function(wrap_pyfunction!(aes_gcm_decrypt, m)?)?;
+    m.add_function(wrap_pyfunction!(aes_gcm_encrypt_aad, m)?)?;
+    m.add_function(wrap_pyfunction!(aes_gcm_decrypt_aad, m)?)?;
     m.add_function(wrap_pyfunction!(derive_key_pbkdf2, m)?)?;
     Ok(())
 }

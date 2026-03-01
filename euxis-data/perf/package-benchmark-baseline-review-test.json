@@ -2,45 +2,57 @@
   "review_schema_version": "2026.1",
   "previous_release": "v0.0.2",
   "next_release": "v0.0.3",
-  "proposal_sha256": "5a6bdf3e19ead7739d1928efe3817fba207126dd7f66503145fafedf6a0a01d1",
+  "proposal_sha256": "92e1a9565ccb95fa40e5b5aee8dd29a47bfb04a876289ed1bb8edc88b6f2fa05",
   "threshold_percent": 25.0,
   "flagged_for_manual_review": true,
   "flagged_packages": {
     "euxis-bridge": [
-      "wall_p95_delta_percent=167.375%",
-      "cpu_ms_p95_delta_percent=171.795%"
+      "wall_p95_delta_percent=106.125%",
+      "cpu_ms_p95_delta_percent=109.615%"
     ],
     "euxis-cli": [
-      "wall_p95_delta_percent=-44.847%",
-      "cpu_ms_p95_delta_percent=-43.937%"
+      "wall_p95_delta_percent=-36.146%",
+      "cpu_ms_p95_delta_percent=-36.112%"
     ],
     "euxis-core": [
-      "wall_p95_delta_percent=-40.089%",
-      "cpu_ms_p95_delta_percent=-39.565%"
+      "wall_p95_delta_percent=-49.018%",
+      "cpu_ms_p95_delta_percent=-49.048%"
     ],
     "euxis-crypto": [
-      "wall_p95_delta_percent=74.167%",
-      "cpu_ms_p95_delta_percent=76.842%"
+      "wall_p95_delta_percent=62.556%",
+      "cpu_ms_p95_delta_percent=63.649%"
+    ],
+    "euxis-docs": [
+      "wall_p95_delta_percent=-30.607%",
+      "cpu_ms_p95_delta_percent=-29.991%"
     ],
     "euxis-gateway": [
-      "wall_p95_delta_percent=-38.335%",
-      "cpu_ms_p95_delta_percent=-38.023%"
+      "wall_p95_delta_percent=-46.069%",
+      "cpu_ms_p95_delta_percent=-45.608%"
     ],
     "euxis-metrics": [
-      "wall_p95_delta_percent=-31.569%",
-      "cpu_ms_p95_delta_percent=-30.947%"
+      "wall_p95_delta_percent=-56.340%",
+      "cpu_ms_p95_delta_percent=-56.240%"
     ],
     "euxis-runtime": [
-      "wall_p95_delta_percent=-32.542%",
-      "cpu_ms_p95_delta_percent=-33.738%"
+      "wall_p95_delta_percent=-56.057%",
+      "cpu_ms_p95_delta_percent=-55.340%"
     ],
     "euxis-scripts": [
-      "wall_p95_delta_percent=-47.082%",
-      "cpu_ms_p95_delta_percent=-45.581%"
+      "wall_p95_delta_percent=-63.722%",
+      "cpu_ms_p95_delta_percent=-62.439%"
     ],
     "euxis-sdk": [
-      "wall_p95_delta_percent=279.828%",
-      "cpu_ms_p95_delta_percent=286.018%"
+      "wall_p95_delta_percent=179.310%",
+      "cpu_ms_p95_delta_percent=185.664%"
+    ],
+    "euxis-tui": [
+      "wall_p95_delta_percent=-40.012%",
+      "cpu_ms_p95_delta_percent=-39.529%"
+    ],
+    "euxis-web": [
+      "wall_p95_delta_percent=-63.636%",
+      "cpu_ms_p95_delta_percent=-60.733%"
     ]
   }
 }

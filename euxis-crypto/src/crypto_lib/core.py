@@ -200,6 +200,120 @@ def decrypt(
         raise DecryptionError(msg) from exc
 
 
+def encrypt_aad(
+    data: str | bytes,
+    key: bytes,
+    aad: bytes,
+    algorithm: str = "AES-256-GCM",
+) -> EncryptionResult:
+    """Encrypt data with Additional Authenticated Data (AAD).
+
+    AAD is authenticated but not encrypted, binding context like tier labels
+    to the ciphertext so that decryption with a different AAD will fail.
+
+    Args:
+        data: Data to encrypt (string or bytes)
+        key: Encryption key (must be 32 bytes for AES-256)
+        aad: Additional authenticated data (e.g. tier name as bytes)
+        algorithm: Encryption algorithm (default: AES-256-GCM)
+
+    Returns:
+        EncryptionResult object containing ciphertext, IV, and metadata
+
+    """
+    if algorithm != "AES-256-GCM":
+        msg = f"Unsupported algorithm: {algorithm}"
+        raise EncryptionError(msg, algorithm=algorithm)
+
+    if len(key) != AES_256_KEY_SIZE:
+        msg = f"AES-256 requires 32-byte key, got {len(key)} bytes"
+        raise InvalidKeyError(
+            msg, key_type="AES-256", expected_size=32, actual_size=len(key),
+        )
+
+    plaintext = data.encode("utf-8") if isinstance(data, str) else data
+
+    try:
+        iv = os.urandom(12)
+
+        if HAS_RUST_CORE:
+            final_ciphertext = crypto_lib_rs.aes_gcm_encrypt_aad(plaintext, key, iv, aad)
+        else:
+            cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+            encryptor = cipher.encryptor()
+            encryptor.authenticate_additional_data(aad)
+            ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+            final_ciphertext = ciphertext + encryptor.tag
+
+        return EncryptionResult(ciphertext=final_ciphertext, iv=iv, algorithm=algorithm)
+
+    except Exception as exc:
+        msg = f"Encryption failed: {exc}"
+        raise EncryptionError(msg, algorithm=algorithm) from exc
+
+
+def decrypt_aad(
+    encrypted_data: EncryptionResult | str,
+    key: bytes,
+    aad: bytes,
+) -> DecryptionResult:
+    """Decrypt data with Additional Authenticated Data (AAD).
+
+    The AAD must match the value used during encryption. If it doesn't,
+    decryption will fail with a DecryptionError.
+
+    Args:
+        encrypted_data: EncryptionResult object or base64 encoded string
+        key: Decryption key
+        aad: Additional authenticated data (must match encryption AAD)
+
+    Returns:
+        DecryptionResult object containing plaintext and metadata
+
+    """
+    if isinstance(encrypted_data, str):
+        result = _parse_encrypted_string(encrypted_data)
+    elif isinstance(encrypted_data, EncryptionResult):
+        result = encrypted_data
+    else:
+        msg = "encrypted_data must be EncryptionResult or base64 string"
+        raise CryptoError(msg)
+
+    if result.algorithm != "AES-256-GCM":
+        msg = f"Unsupported algorithm: {result.algorithm}"
+        raise CryptoError(msg)
+
+    if len(key) != AES_256_KEY_SIZE:
+        msg = f"AES-256 requires 32-byte key, got {len(key)} bytes"
+        raise InvalidKeyError(msg)
+
+    if len(result.ciphertext) < GCM_AUTH_TAG_SIZE:
+        msg = "Ciphertext too short to contain auth tag"
+        raise DecryptionError(msg)
+
+    try:
+        ciphertext = result.ciphertext[:-GCM_AUTH_TAG_SIZE]
+        auth_tag = result.ciphertext[-GCM_AUTH_TAG_SIZE:]
+
+        if HAS_RUST_CORE:
+            plaintext = crypto_lib_rs.aes_gcm_decrypt_aad(result.ciphertext, key, result.iv, aad)
+        else:
+            cipher = Cipher(
+                algorithms.AES(key), modes.GCM(result.iv, auth_tag), backend=default_backend(),
+            )
+            decryptor = cipher.decryptor()
+            decryptor.authenticate_additional_data(aad)
+            plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+
+        return DecryptionResult(
+            plaintext=plaintext, algorithm=result.algorithm, iv=result.iv, salt=result.salt,
+        )
+
+    except Exception as exc:
+        msg = f"Decryption failed: {exc}"
+        raise DecryptionError(msg) from exc
+
+
 def _parse_encrypted_string(encoded: str) -> EncryptionResult:
     """Parse base64 encoded encryption result string."""
     parts = encoded.split(":")

@@ -46,6 +46,9 @@ pythonpath = [
     "euxis-cli/src",
     "euxis-security/src",
     "euxis-bridge/src",
+    "euxis-identity/src",
+    "euxis-inference/src",
+    "euxis-a2a/src",
 ]
 testpaths = [
     "euxis-core/tests",
@@ -54,6 +57,9 @@ testpaths = [
     "euxis-gateway/tests",
     "euxis-metrics/tests",
     "euxis-bridge/tests",
+    "euxis-identity/tests",
+    "euxis-inference/tests",
+    "euxis-a2a/tests",
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -62,6 +68,7 @@ addopts = [
     "-v",
     "--tb=short",
     "--strict-markers",
+    "--import-mode=importlib",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -85,6 +92,9 @@ source = [
     "euxis-gateway/src",
     "euxis-metrics/src",
     "euxis-bridge/src",
+    "euxis-identity/src",
+    "euxis-inference/src",
+    "euxis-a2a/src",
 ]
 branch = true
 parallel = true
