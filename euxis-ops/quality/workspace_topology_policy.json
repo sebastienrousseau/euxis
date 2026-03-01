@@ -6,34 +6,28 @@
     "euxis-adapters",
     "euxis-cli",
     "euxis-core",
-    "euxis-crypto",
     "euxis-web",
-    "euxis-bridge",
     "euxis-docs",
     "euxis-gateway",
     "euxis-metrics",
     "euxis-runtime",
     "euxis-scripts",
     "euxis-sdk",
-    "euxis-security",
-    "euxis-tui"
+    "euxis-security"
   ],
   "legacy_package_aliases": {},
   "required_package_dirs": [
     "euxis-adapters",
     "euxis-cli",
     "euxis-core",
-    "euxis-crypto",
     "euxis-web",
-    "euxis-bridge",
     "euxis-docs",
     "euxis-gateway",
     "euxis-metrics",
     "euxis-runtime",
     "euxis-scripts",
     "euxis-sdk",
-    "euxis-security",
-    "euxis-tui"
+    "euxis-security"
   ],
   "allowed_workspace_dirs": [
     ".git",

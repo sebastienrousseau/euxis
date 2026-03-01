@@ -9,16 +9,15 @@ All workspace packages are covered:
 - `euxis-core`
 - `euxis-cli`
 - `euxis-gateway`
-- `euxis-tui`
 - `euxis-metrics`
 - `euxis-adapters`
 - `euxis-security`
-- `euxis-crypto`
 - `euxis-runtime`
 - `euxis-scripts`
 - `euxis-sdk`
 - `euxis-web`
 - `euxis-docs`
+- `euxis-cpp/*` (C++23 modules)
 
 ## Enforcement Artifacts
 

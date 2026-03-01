@@ -231,16 +231,6 @@
   },
   {
     "License": "MIT License",
-    "Name": "euxis-crypto",
-    "Version": "0.0.3"
-  },
-  {
-    "License": "MIT License",
-    "Name": "euxis-crypto",
-    "Version": "0.0.8"
-  },
-  {
-    "License": "MIT License",
     "Name": "euxis-docs",
     "Version": "0.0.8"
   },
@@ -272,16 +262,6 @@
   {
     "License": "MIT License",
     "Name": "euxis-security",
-    "Version": "0.0.8"
-  },
-  {
-    "License": "MIT License",
-    "Name": "euxis-tui",
-    "Version": "0.0.3"
-  },
-  {
-    "License": "MIT License",
-    "Name": "euxis-tui",
     "Version": "0.0.8"
   },
   {

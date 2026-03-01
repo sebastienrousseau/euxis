@@ -16,12 +16,11 @@ Recommended local layout (one folder per repo):
   euxis-cli/
   euxis-gateway/
   euxis-adapters/
-  euxis-tui/
   euxis-security/
   euxis-metrics/
   euxis-docs/
-  euxis-crypto/
   euxis-web/
+  euxis-cpp/
 ```
 
 ## Setup

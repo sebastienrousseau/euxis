@@ -7,20 +7,14 @@ Generated from `euxis-ops/quality/package_standards.json`.
 | `euxis-core` | `python` | `euxis-core` | `pyproject.toml, README.md` (yes) | `euxis-core/tests` (yes) | `euxis-docs/docs/modules/euxis-core.md` (yes) | `ok` |
 | `euxis-cli` | `python` | `euxis-cli` | `pyproject.toml, README.md` (yes) | `euxis-cli/tests` (yes) | `euxis-docs/docs/modules/euxis-cli.md` (yes) | `ok` |
 | `euxis-gateway` | `python` | `euxis-gateway` | `pyproject.toml, README.md` (yes) | `euxis-gateway/tests` (yes) | `euxis-docs/docs/modules/euxis-gateway.md` (yes) | `ok` |
-| `euxis-tui` | `python-rust` | `euxis-tui` | `pyproject.toml, Cargo.toml, README.md` (yes) | `euxis-tui/tests` (yes) | `euxis-docs/docs/modules/euxis-tui.md` (yes) | `ok` |
 | `euxis-metrics` | `python` | `euxis-metrics` | `pyproject.toml, README.md` (yes) | `euxis-metrics/tests` (yes) | `euxis-docs/docs/modules/euxis-metrics.md` (yes) | `ok` |
 | `euxis-adapters` | `python` | `euxis-adapters` | `pyproject.toml, README.md` (yes) | `euxis-adapters/tests` (yes) | `euxis-docs/docs/modules/euxis-adapters.md` (yes) | `ok` |
 | `euxis-security` | `python` | `euxis-security` | `pyproject.toml, README.md` (yes) | `euxis-security/tests` (yes) | `euxis-docs/docs/modules/euxis-security.md` (yes) | `ok` |
-| `euxis-crypto` | `python-rust` | `euxis-crypto` | `pyproject.toml, Cargo.toml, README.md` (yes) | `euxis-crypto/tests` (yes) | `euxis-docs/docs/modules/euxis-crypto.md` (yes) | `ok` |
 | `euxis-runtime` | `runtime-data` | `euxis-runtime` | `README.md, data/perf/metrics.jsonl` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-runtime.md` (yes) | `ok` |
 | `euxis-scripts` | `ops` | `euxis-scripts` | `README.md` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-scripts.md` (yes) | `ok` |
 | `euxis-sdk` | `rust` | `euxis-sdk` | `Cargo.toml, README.md` (yes) | `euxis-sdk/tests` (yes) | `euxis-docs/docs/modules/euxis-sdk.md` (yes) | `ok` |
 | `euxis-web` | `node` | `euxis-web` | `package.json, README.md` (yes) | `euxis-web/src/crypto-lib/tests` (yes) | `euxis-docs/docs/modules/euxis-web.md` (yes) | `ok` |
-| `euxis-bridge` | `python` | `euxis-bridge` | `pyproject.toml, README.md` (yes) | `euxis-bridge/tests` (yes) | `euxis-docs/docs/modules/euxis-bridge.md` (yes) | `ok` |
 | `euxis-docs` | `docs` | `euxis-docs` | `README.md, pyproject.toml` (yes) | `euxis-docs/tests` (yes) | `euxis-docs/docs/modules/euxis-docs.md` (yes) | `ok` |
-| `euxis-identity` | `python` | `euxis-identity` | `pyproject.toml, README.md` (yes) | `euxis-identity/tests` (yes) | `euxis-docs/docs/modules/euxis-identity.md` (yes) | `ok` |
-| `euxis-inference` | `python` | `euxis-inference` | `pyproject.toml, README.md` (yes) | `euxis-inference/tests` (yes) | `euxis-docs/docs/modules/euxis-inference.md` (yes) | `ok` |
-| `euxis-a2a` | `python` | `euxis-a2a` | `pyproject.toml, README.md` (yes) | `euxis-a2a/tests` (yes) | `euxis-docs/docs/modules/euxis-a2a.md` (yes) | `ok` |
 
 | `euxis-crypto-cpp` | `cpp-library` | `euxis-cpp/euxis-crypto-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-crypto-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-crypto-cpp.md` (yes) | `ok` |
 | `euxis-bridge-cpp` | `cpp-library` | `euxis-cpp/euxis-bridge-cpp` | `CMakeLists.txt, README.md` (yes) | `euxis-cpp/euxis-bridge-cpp/tests` (yes) | `euxis-docs/docs/modules/euxis-bridge-cpp.md` (yes) | `ok` |

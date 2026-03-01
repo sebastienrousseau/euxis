@@ -37,7 +37,7 @@
       "agent": "polyglot",
       "priority": "P1",
       "task": "Analyze import dependencies across all packages, identify and eliminate circular dependencies causing initialization delays",
-      "verify_cmd": "python3 -c 'import ast, os; files = []; [files.extend([os.path.join(r,f) for f in fs if f.endswith(\".py\")]) for r,ds,fs in os.walk(\".\")]; circles = sum(1 for f in files if \"import\" in open(f).read() and any(pkg in open(f).read() for pkg in [\"euxis-core\", \"euxis-tui\", \"euxis-gateway\"])); exit(0 if circles == 0 else 1)'"
+      "verify_cmd": "python3 -c 'import ast, os; files = []; [files.extend([os.path.join(r,f) for f in fs if f.endswith(\".py\")]) for r,ds,fs in os.walk(\".\")]; circles = sum(1 for f in files if \"import\" in open(f).read() and any(pkg in open(f).read() for pkg in [\"euxis-core\", \"euxis-gateway\"])); exit(0 if circles == 0 else 1)'"
     },
     {
       "agent": "watchdog",

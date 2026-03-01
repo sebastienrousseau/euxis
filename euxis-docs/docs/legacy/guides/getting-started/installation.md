@@ -26,9 +26,8 @@ To orchestrate agents system-wide, use the `uv` package manager or `pipX` to iso
 2. Install the Euxis core toolchain in milliseconds:
 
 ```bash
-uv tool install euxis-cli 
-uv tool install euxis-core 
-uv tool install euxis-tui
+uv tool install euxis-cli
+uv tool install euxis-core
 ```
 
 ### Using Standard `pip` (Development)
@@ -41,7 +40,7 @@ cd euxis
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e ./euxis-core -e ./euxis-cli -e ./euxis-tui
+pip install -e ./euxis-core -e ./euxis-cli
 ```
 
 ## Verifying the Installation 

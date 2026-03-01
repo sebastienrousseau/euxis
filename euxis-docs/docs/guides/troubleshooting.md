@@ -946,7 +946,7 @@ ModuleNotFoundError: No module named 'textual'
 4. **Reset terminal:**
    ```bash
    reset
-   euxis-tui
+   euxis-etx
    ```
 
 ### Keyboard Shortcuts Not Working

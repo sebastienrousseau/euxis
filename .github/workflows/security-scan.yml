@@ -24,11 +24,9 @@ jobs:
       matrix:
         module:
           - euxis-core
-          - euxis-tui
           - euxis-cli
           - euxis-docs
           - euxis-gateway
-          - euxis-crypto
           - euxis-metrics
           - euxis-adapters
           - euxis-security

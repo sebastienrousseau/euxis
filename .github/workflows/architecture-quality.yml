@@ -108,36 +108,6 @@ jobs:
       - name: Run bounded security package tests
         run: make security-tests-stable
 
-  tui-stability:
-    name: TUI Stability Suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install tui test dependencies
-        run: |
-          pip install -e euxis-tui[dev]
-          pip install pytest
-      - name: Run bounded tui package tests
-        run: REQUIRE_DEPS=1 make tui-tests-stable
-
-  crypto-lib-stability:
-    name: Crypto Lib Stability Suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install crypto-lib test dependencies
-        run: |
-          pip install -e euxis-crypto[dev]
-          pip install pytest
-      - name: Run bounded crypto-lib package tests
-        run: REQUIRE_DEPS=1 make crypto-lib-tests-stable
-
   resilience-tests:
     name: Resilience and Contract Tests
     runs-on: ubuntu-latest

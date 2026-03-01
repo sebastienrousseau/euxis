@@ -11,12 +11,12 @@ Build a security-first, local-first, OpenClaw-compatible agent platform that is 
 - `euxis-core`: Agent orchestration, task graph, retries, bounded execution primitives.
 - `euxis-runtime`: Runtime state, memory snapshots, performance/event manifests.
 - `euxis-gateway`: External ingress/egress, protocol translation, session routing.
-- `euxis-tui`: Operator-first terminal surface and secure human approval checkpoints.
-- `euxis-bridge`: OpenClaw/ClawHub interoperability layer and Node skill bridge.
+- `euxis-etx` (C++23/Qt6): Desktop GUI with 17 screens, 3 themes, and command palette.
+- `euxis-bridge-cpp` (C++23): Skill import, static analysis, admission pipeline, sandbox execution.
 
 ### 1.2 Security and Trust Packages
 
-- `euxis-crypto`: Crypto primitives, identity key material, encryption/signature APIs.
+- `euxis-crypto-cpp` (C++23): AES-256-GCM, Ed25519, Argon2id key derivation via libsodium.
 - `euxis-security`: Policy engine, command allowlists, verification and enforcement.
 - `euxis-policy`: Policy bundles and policy distribution artifacts.
 
@@ -120,7 +120,7 @@ All protocol messages include:
 
 ## 6. Euxis-Bridge Implementation Contract
 
-`euxis-bridge` must provide:
+`euxis-bridge-cpp` must provide:
 
 1. `ClawHubImporter` to parse/import OpenClaw skills.
 2. `NodeSkillBridge` to run JavaScript handlers with strict bounds.
@@ -133,7 +133,7 @@ All protocol messages include:
 ### Milestone 1 (Now)
 
 - Deliver `EUXIS_V2_ARCH.md`.
-- Ship runnable `euxis-bridge` scaffolding.
+- Ship runnable `euxis-bridge-cpp` scaffolding.
 - Add tests and docs for import + wrapper flows.
 
 ### Milestone 2

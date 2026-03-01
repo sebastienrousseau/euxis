@@ -18,8 +18,8 @@ euxis-health
 # Full certification
 euxis-certify
 
-# Launch the TUI
-euxis-tui
+# Launch the desktop GUI
+euxis-etx
 
 # Verify release readiness
 euxis-verify-all

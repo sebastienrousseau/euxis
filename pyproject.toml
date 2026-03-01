@@ -38,28 +38,16 @@ build-backend = "setuptools.build_meta"
 minversion = "7.0"
 pythonpath = [
     "euxis-core/src",
-    "euxis-tui/src",
-    "euxis-crypto/src",
     "euxis-gateway/src",
     "euxis-metrics/src",
     "euxis-adapters/src",
     "euxis-cli/src",
     "euxis-security/src",
-    "euxis-bridge/src",
-    "euxis-identity/src",
-    "euxis-inference/src",
-    "euxis-a2a/src",
 ]
 testpaths = [
     "euxis-core/tests",
-    "euxis-tui/tests",
-    "euxis-crypto/tests",
     "euxis-gateway/tests",
     "euxis-metrics/tests",
-    "euxis-bridge/tests",
-    "euxis-identity/tests",
-    "euxis-inference/tests",
-    "euxis-a2a/tests",
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -87,14 +75,8 @@ filterwarnings = [
 [tool.coverage.run]
 source = [
     "euxis-core/lib",
-    "euxis-tui/src",
-    "euxis-crypto/src",
     "euxis-gateway/src",
     "euxis-metrics/src",
-    "euxis-bridge/src",
-    "euxis-identity/src",
-    "euxis-inference/src",
-    "euxis-a2a/src",
 ]
 branch = true
 parallel = true

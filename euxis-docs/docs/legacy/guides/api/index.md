@@ -16,7 +16,7 @@ Euxis operates primarily through specialized gateways and native library binding
 For maximum throughput and 0-copy serialization, embed Euxis directly into your runtime via our supported package libraries.
 
 * **[Python (`euxis-core`)](python/index.md):** The native Python orchestrator and dependency manager bindings.
-* **[Rust (`crypto-lib`)](../euxis-crypto/docs/index.md):** Highly deterministic, memory-safe cryptographic primitives embedded via `PyO3`.
+* **C++23 (`euxis-crypto-cpp`):** AES-256-GCM, Ed25519, Argon2id key derivation via libsodium.
 
 ## Rate Limiting & Authentication
 

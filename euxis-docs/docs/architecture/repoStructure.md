@@ -13,15 +13,14 @@ This document captures the target split for functional repositories to reduce co
 - `euxis-core`
 - `euxis-cli`
 - `euxis-gateway`
-- `euxis-tui`
 - `euxis-metrics`
 - `euxis-adapters`
 - `euxis-security`
-- `euxis-crypto`
 - `euxis-runtime`
 - `euxis-scripts`
 - `euxis-sdk`
 - `euxis-docs`
+- `euxis-cpp` (contains crypto, bridge, memory, identity, inference, a2a, bench, etx)
 
 ## Migration Notes
 
@@ -30,6 +29,4 @@ This document captures the target split for functional repositories to reduce co
 - Publish versioned release notes for each repo as the split progresses.
 - Keep workspace-level policy assets (e.g. `euxis-policy/gateway.json`) in a dedicated policy repo or bundled release asset set during split.
 - Canonical migration mapping:
-  - `euxis-crypto` -> `euxis-crypto`
-  - `euxis-web` -> `euxis-crypto`
   - `euxis-sdk` -> `euxis-sdk`

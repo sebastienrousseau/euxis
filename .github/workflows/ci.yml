@@ -18,9 +18,7 @@ jobs:
           - euxis-security
           - euxis-gateway
           - euxis-adapters
-          - euxis-tui
           - euxis-metrics
-          - euxis-crypto
 
     steps:
       - uses: actions/checkout@v4

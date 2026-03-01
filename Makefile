@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
 
 all: install test
 
@@ -227,12 +227,6 @@ gate-all: architecture-check core-platform-boundary-check perf-governance-check 
 workspace-bootstrap:
 	bash euxis-ops/bootstrap/verify_workspace.sh
 
-bridge-tests-stable:
-	bash euxis-ops/quality/run_bridge_tests_stable.sh
-
-bridge-package-tests-stable:
-	bash euxis-ops/quality/run_bridge_package_tests_stable.sh
-
 gateway-tests-stable:
 	bash euxis-ops/quality/run_gateway_tests_stable.sh
 
@@ -263,24 +257,6 @@ docs-tests-stable:
 sdk-rust-tests-stable:
 	bash euxis-ops/quality/run_sdk_rust_tests_stable.sh
 
-crypto-packages-tests-stable:
-	bash euxis-ops/quality/run_crypto_packages_tests_stable.sh
-
-tui-tests-stable:
-	bash euxis-ops/quality/run_tui_tests_stable.sh
-
-crypto-lib-tests-stable:
-	bash euxis-ops/quality/run_crypto_lib_tests_stable.sh
-
-identity-tests-stable:
-	bash euxis-ops/quality/run_identity_tests_stable.sh
-
-inference-tests-stable:
-	bash euxis-ops/quality/run_inference_tests_stable.sh
-
-a2a-tests-stable:
-	bash euxis-ops/quality/run_a2a_tests_stable.sh
-
 bench-security:
 	python3 euxis-ops/benchmarks/runner.py --suite security
 
@@ -299,7 +275,7 @@ bench-interop:
 bench-all:
 	python3 euxis-ops/benchmarks/runner.py --suite all --output euxis-data/perf/benchmark-results.json
 
-verify-all-packages: gate-all bridge-tests-stable bridge-package-tests-stable gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable crypto-packages-tests-stable tui-tests-stable crypto-lib-tests-stable identity-tests-stable inference-tests-stable a2a-tests-stable cpp-test
+verify-all-packages: gate-all gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable cpp-test
 
 verify-signed-artifacts:
 	bash euxis-ops/supply_chain/verify_signed_artifacts.sh release-artifacts

@@ -310,7 +310,7 @@ All interactive elements MUST have visible focus indicators meeting:
 
 ### ETX (Euxis Terminal Experience) — Implemented
 
-ETX is the modern TUI built on Python Textual 7.5 with CSS theming. Launch via `euxis-tui`.
+ETX is the Qt6 desktop GUI with 17 screens and 3 themes. Launch via `euxis-etx`.
 
 **Implemented Features:**
 

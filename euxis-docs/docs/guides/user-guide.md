@@ -13,7 +13,7 @@ Complete command-line toolkit. Each tool serves one function.
 | Command | Function |
 |---------|----------|
 | `euxis <agent> <task> [provider]` | Deploy agent with automatic intelligence routing |
-| `euxis-tui` | Modern Terminal UI for fleet management (Python Textual) |
+| `euxis-etx` | Qt6 desktop GUI for fleet management |
 | `euxis-ui` | Legacy menu-based interface (Bash) |
 
 **See also**: [UI Guide](ui-guide.md)

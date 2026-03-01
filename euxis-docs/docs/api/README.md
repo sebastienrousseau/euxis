@@ -189,7 +189,7 @@ All screens inherit the global bindings from `EuxisApp`.
 ## CLI Usage
 
 ```bash
-euxis-tui                                  # Launch the TUI
+euxis-etx                                  # Launch the desktop GUI
 euxis <agent> "<task>" [provider]          # Single agent
 euxis-squad deploy <squad> "<task>"        # Squad deployment
 euxis-combo run <combo> "<task>"           # Combo chain

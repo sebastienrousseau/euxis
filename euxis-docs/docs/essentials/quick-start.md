@@ -338,13 +338,13 @@ euxis-combo run envision "Design a user notification system"
 euxis-squad deploy quality "Audit the authentication module"
 ```
 
-### Launch the Terminal Interface
+### Launch the Desktop Interface
 
 ```bash
-euxis-tui
+euxis-etx
 ```
 
-Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, performance metrics.
+Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, performance metrics, 17 screens, 3 themes.
 
 ### Learn the Concepts
 

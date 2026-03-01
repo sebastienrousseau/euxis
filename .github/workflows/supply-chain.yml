@@ -86,8 +86,6 @@ jobs:
             euxis-adapters
             euxis-metrics
             euxis-security
-            euxis-tui
-            euxis-crypto
           )
           for module in "${modules[@]}"; do
             if [[ -f "${module}/pyproject.toml" ]]; then
