@@ -1,0 +1,624 @@
+#include "euxis/cli/cmd/system.hpp"
+#include "euxis/cli/config_loader.hpp"
+#include "euxis/cli/process.hpp"
+#include "euxis/cli/registry_client.hpp"
+#include "euxis/cli/terminal.hpp"
+
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <regex>
+#include <sstream>
+
+namespace euxis::cli::cmd {
+namespace {
+
+namespace fs = std::filesystem;
+namespace term = terminal;
+
+struct CheckResult {
+    std::string name;
+    bool passed{false};
+    std::string detail;
+};
+
+void print_check(const CheckResult& r) {
+    std::cout << "  " << (r.passed ? term::icon_ok() : term::icon_fail())
+              << " " << r.name;
+    if (!r.detail.empty()) std::cout << " " << term::dim("(" + r.detail + ")");
+    std::cout << "\n";
+}
+
+} // namespace
+
+// --- doctor ---
+
+int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
+    bool fix_mode = false;
+    for (const auto& a : args) {
+        if (a == "--fix") fix_mode = true;
+    }
+
+    std::cout << term::bold("Euxis Doctor") << "\n\n";
+
+    // System info header
+    {
+        auto hostname = Process::run("uname", {"-n"});
+        auto kernel   = Process::run("uname", {"-r"});
+        auto arch     = Process::run("uname", {"-m"});
+
+        auto trim = [](std::string s) {
+            while (!s.empty() && (s.back() == '\n' || s.back() == '\r'))
+                s.pop_back();
+            return s;
+        };
+
+        std::cout << term::bold("System:") << "\n";
+        std::cout << "  Hostname:     " << trim(hostname.stdout_output) << "\n";
+        std::cout << "  Kernel:       " << trim(kernel.stdout_output) << "\n";
+        std::cout << "  Architecture: " << trim(arch.stdout_output) << "\n\n";
+    }
+
+    std::vector<CheckResult> checks;
+    std::vector<std::string> fixable;
+    int failures = 0;
+
+    // 1. Platform
+    {
+        CheckResult r{"Platform", true, ""};
+#ifdef __linux__
+        r.detail = "Linux";
+#elif defined(__APPLE__)
+        r.detail = "macOS";
+#else
+        r.detail = "Unknown";
+#endif
+        checks.push_back(r);
+    }
+
+    // 2. Shell
+    {
+        const char* shell = std::getenv("SHELL");
+        checks.push_back({"Shell", shell != nullptr, shell ? shell : "not set"});
+    }
+
+    // 3. Required dependencies
+    static const std::vector<std::pair<std::string, bool>> deps = {
+        {"git", true}, {"sqlite3", true}, {"jq", false}, {"python3", false},
+        {"pandoc", false}, {"docker", false}
+    };
+    for (const auto& [name, required] : deps) {
+        bool found = Process::available(name);
+        CheckResult r{name, found || !required, found ? "found" : "not found"};
+        if (!found && required) {
+            ++failures;
+            fixable.push_back(name);
+        }
+        checks.push_back(r);
+    }
+
+    // 4. EUXIS_HOME
+    {
+        bool exists = fs::is_directory(ctx.euxis_home);
+        checks.push_back({"EUXIS_HOME", exists, ctx.euxis_home});
+        if (!exists) ++failures;
+    }
+
+    // 5. Core directories
+    for (const auto& dir : {"euxis-data", "euxis-data/agents", "euxis-data/config"}) {
+        auto path = fs::path(ctx.euxis_home) / dir;
+        bool exists = fs::is_directory(path);
+        checks.push_back({std::string("dir: ") + dir, exists, exists ? "ok" : "missing"});
+        if (!exists) {
+            ++failures;
+            fixable.push_back(std::string("mkdir -p ") + path.string());
+        }
+    }
+
+    // 6. Registry
+    {
+        auto json_path = fs::path(ctx.data_dir) / "agents" / "registry.json";
+        auto db_path = fs::path(ctx.data_dir) / "agents" / "registry.db";
+        bool has_json = fs::exists(json_path);
+        bool has_db = fs::exists(db_path);
+        checks.push_back({"registry.json", has_json, has_json ? "ok" : "missing"});
+        checks.push_back({"registry.db", has_db, has_db ? "ok" : "optional, missing"});
+        if (!has_json) ++failures;
+    }
+
+    // 7. Providers
+    static const std::vector<std::string> providers = {
+        "claude", "gemini", "openai", "ollama", "goose"
+    };
+    int provider_count = 0;
+    for (const auto& p : providers) {
+        bool found = Process::available(p);
+        if (found) ++provider_count;
+        checks.push_back({"provider: " + p, found, found ? "available" : "not found"});
+    }
+    if (provider_count == 0) {
+        checks.push_back({"providers", false, "no providers available"});
+        ++failures;
+    }
+
+    // 8. Terminal
+    {
+        const char* term_env = std::getenv("TERM");
+        checks.push_back({"TERM", term_env != nullptr, term_env ? term_env : "not set"});
+        checks.push_back({"Colors", term::colors_enabled(), term::colors_enabled() ? "yes" : "no"});
+        checks.push_back({"CI mode", true, term::is_ci() ? "yes" : "no"});
+    }
+
+    // 9. Disk space
+    {
+        std::error_code ec;
+        auto space_info = fs::space(ctx.euxis_home, ec);
+        if (!ec) {
+            auto avail_mb = space_info.available / (1024 * 1024);
+            bool ok = avail_mb >= 100;
+            checks.push_back({"Disk space", ok,
+                               std::to_string(avail_mb) + " MB available"});
+            if (!ok) {
+                ++failures;
+                std::cout << term::yellow("  Warning: less than 100 MB free on EUXIS_HOME") << "\n";
+            }
+        } else {
+            checks.push_back({"Disk space", false, "unable to query"});
+            ++failures;
+        }
+    }
+
+    // Print results
+    std::cout << term::bold("Checks:") << "\n";
+    for (const auto& c : checks) print_check(c);
+
+    std::cout << "\n" << term::bold("Summary: ");
+    if (failures == 0) {
+        std::cout << term::green("All checks passed") << "\n";
+    } else {
+        std::cout << term::red(std::to_string(failures) + " issue(s) found") << "\n";
+    }
+
+    // Fix mode
+    if (fix_mode && !fixable.empty()) {
+        std::cout << "\n" << term::bold("Auto-fix:") << "\n";
+        for (const auto& cmd : fixable) {
+            if (cmd.starts_with("mkdir")) {
+                std::cout << "  Running: " << cmd << "\n";
+                Process::shell(cmd);
+            } else {
+                std::cout << "  Install: " << cmd << " (manual)\n";
+            }
+        }
+    } else if (!fixable.empty()) {
+        std::cout << "  Run with --fix to attempt auto-repair.\n";
+    }
+
+    if (ctx.json_output) {
+        nlohmann::json j;
+        j["status"] = failures == 0 ? "healthy" : "degraded";
+        j["failures"] = failures;
+        j["checks"] = nlohmann::json::array();
+        for (const auto& c : checks) {
+            j["checks"].push_back({{"name", c.name}, {"passed", c.passed}, {"detail", c.detail}});
+        }
+        std::cout << j.dump(2) << "\n";
+    }
+
+    return failures > 0 ? 1 : 0;
+}
+
+// --- health ---
+
+int cmd_health(Context& ctx, const std::vector<std::string>& args) {
+    bool silent = false;
+    for (const auto& a : args) {
+        if (a == "--silent") silent = true;
+    }
+
+    if (!silent) std::cout << term::bold("Fleet Health Check") << "\n\n";
+
+    int failures = 0;
+    int warnings = 0;
+
+    RegistryClient registry(ctx.data_dir);
+
+    // 1. Registry available
+    {
+        bool ok = registry.has_json() || registry.has_sqlite();
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
+                      << " Registry available"
+                      << " (SQLite: " << (registry.has_sqlite() ? "yes" : "no")
+                      << ", JSON: " << (registry.has_json() ? "yes" : "no") << ")\n";
+        }
+        if (!ok) ++failures;
+    }
+
+    // 2. Agent count
+    {
+        int count = registry.agent_count();
+        if (!silent) {
+            std::cout << "  " << (count > 0 ? term::icon_ok() : term::icon_warn())
+                      << " Agents registered: " << count << "\n";
+        }
+        if (count == 0) ++warnings;
+    }
+
+    // 3. Prompt files exist
+    {
+        auto agents = registry.list_agents();
+        int missing = 0;
+        for (const auto& a : agents) {
+            if (!a.prompt_path.empty()) {
+                auto full_path = fs::path(ctx.euxis_home) / a.prompt_path;
+                if (!fs::exists(full_path)) ++missing;
+            }
+        }
+        bool ok = missing == 0;
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
+                      << " Prompt files" << (ok ? " all present" : " " + std::to_string(missing) + " missing") << "\n";
+        }
+        if (!ok) ++warnings;
+    }
+
+    // 4. Provider connectivity
+    {
+        int found = 0;
+        static const std::vector<std::string> providers = {"claude", "gemini", "openai", "ollama", "goose"};
+        for (const auto& p : providers) {
+            if (Process::available(p)) ++found;
+        }
+        if (!silent) {
+            std::cout << "  " << (found > 0 ? term::icon_ok() : term::icon_fail())
+                      << " Providers available: " << found << "/" << providers.size() << "\n";
+        }
+        if (found == 0) ++failures;
+    }
+
+    // 5. Core directories
+    {
+        bool ok = fs::is_directory(fs::path(ctx.euxis_home) / "euxis-data");
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
+                      << " Data directory\n";
+        }
+        if (!ok) ++failures;
+    }
+
+    // 6. Config integrity
+    {
+        ConfigLoader loader(ctx.data_dir);
+        bool ok = loader.exists("config/router.json") || loader.exists("agents/registry.json");
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
+                      << " Config files\n";
+        }
+        if (!ok) ++warnings;
+    }
+
+    // 7. Squads defined
+    {
+        auto squads = registry.list_squads();
+        if (!silent) {
+            std::cout << "  " << (!squads.empty() ? term::icon_ok() : term::icon_warn())
+                      << " Squads defined: " << squads.size() << "\n";
+        }
+    }
+
+    // 8. Bus pipes
+    {
+        auto bus_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+        int pipe_count = 0;
+        if (fs::is_directory(bus_dir)) {
+            for (const auto& entry : fs::directory_iterator(bus_dir)) {
+                if (entry.is_regular_file()) ++pipe_count;
+            }
+        }
+        if (!silent) {
+            std::cout << "  " << term::icon_info()
+                      << " Bus pipes: " << pipe_count << "\n";
+        }
+    }
+
+    // 9. Cortex check
+    {
+        auto cortex_db = fs::path(ctx.euxis_home) / "euxis-runtime" / "memory" / "cortex" / "db";
+        bool ok = fs::is_directory(cortex_db);
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
+                      << " Cortex DB" << (ok ? " present" : " not found") << "\n";
+        }
+    }
+
+    // 10. Certification tools
+    {
+        bool has_lint = Process::available("shellcheck");
+        if (!silent) {
+            std::cout << "  " << (has_lint ? term::icon_ok() : term::icon_warn())
+                      << " shellcheck" << (has_lint ? " available" : " not found") << "\n";
+        }
+    }
+
+    // 11. Orphan agent detection
+    {
+        auto agents = registry.list_agents();
+        int orphans = 0;
+        for (const auto& a : agents) {
+            if (a.prompt_path.empty()) {
+                ++orphans;
+            } else {
+                auto full_path = fs::path(ctx.euxis_home) / a.prompt_path;
+                if (!fs::exists(full_path)) ++orphans;
+            }
+        }
+        bool ok = orphans == 0;
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
+                      << " Orphan agents: " << orphans;
+            if (!ok) std::cout << " (prompt file missing)";
+            std::cout << "\n";
+        }
+        if (!ok) ++warnings;
+    }
+
+    // 12. Agent naming convention
+    {
+        auto agents = registry.list_agents();
+        const std::regex id_pattern("^[a-z][a-z0-9-]*$");
+        int bad_names = 0;
+        for (const auto& a : agents) {
+            if (!std::regex_match(a.id, id_pattern)) {
+                ++bad_names;
+                if (!silent && ctx.verbose) {
+                    std::cout << "    " << term::icon_warn()
+                              << " bad ID: " << term::dim(a.id) << "\n";
+                }
+            }
+        }
+        bool ok = bad_names == 0;
+        if (!silent) {
+            std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
+                      << " Agent naming convention"
+                      << (ok ? "" : " (" + std::to_string(bad_names) + " non-conforming)")
+                      << "\n";
+        }
+        if (!ok) ++warnings;
+    }
+
+    // Summary
+    if (!silent) {
+        std::cout << "\n";
+        if (failures == 0 && warnings == 0) {
+            std::cout << term::green("Fleet healthy") << "\n";
+        } else if (failures == 0) {
+            std::cout << term::yellow(std::to_string(warnings) + " warning(s)") << "\n";
+        } else {
+            std::cout << term::red(std::to_string(failures) + " failure(s), " +
+                                   std::to_string(warnings) + " warning(s)") << "\n";
+        }
+    }
+
+    if (ctx.json_output) {
+        nlohmann::json j;
+        j["status"] = failures == 0 ? "healthy" : "degraded";
+        j["failures"] = failures;
+        j["warnings"] = warnings;
+        j["agents"] = registry.agent_count();
+        j["squads"] = registry.list_squads().size();
+        std::cout << j.dump(2) << "\n";
+    }
+
+    return failures > 0 ? 1 : 0;
+}
+
+// --- verify ---
+
+int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
+    std::cout << term::bold("Verify Agent Prompts") << "\n\n";
+
+    RegistryClient registry(ctx.data_dir);
+    auto agents = registry.list_agents();
+    int issues = 0;
+
+    for (const auto& agent : agents) {
+        bool ok = true;
+        std::string detail;
+
+        // Check prompt file exists
+        if (!agent.prompt_path.empty()) {
+            auto full = fs::path(ctx.euxis_home) / agent.prompt_path;
+            if (!fs::exists(full)) {
+                ok = false;
+                detail = "prompt file missing";
+            } else {
+                // Check for required frontmatter fields
+                std::ifstream f(full);
+                std::string content((std::istreambuf_iterator<char>(f)),
+                                    std::istreambuf_iterator<char>());
+                for (const auto& field : {"agent_id", "role", "version"}) {
+                    if (content.find(field) == std::string::npos) {
+                        ok = false;
+                        detail += std::string(detail.empty() ? "" : ", ") +
+                                  "missing " + field;
+                    }
+                }
+            }
+        } else {
+            ok = false;
+            detail = "no prompt path";
+        }
+
+        std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
+                  << " " << agent.id;
+        if (!detail.empty()) std::cout << " " << term::dim("(" + detail + ")");
+        std::cout << "\n";
+        if (!ok) ++issues;
+    }
+
+    std::cout << "\n" << (issues == 0 ? term::green("All verified") :
+                          term::red(std::to_string(issues) + " issue(s)")) << "\n";
+    return issues > 0 ? 1 : 0;
+}
+
+// --- lint ---
+
+int cmd_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
+    std::cout << term::bold("Lint Agent Configs") << "\n\n";
+
+    ConfigLoader loader(ctx.data_dir);
+    int issues = 0;
+
+    // Lint registry.json
+    auto reg = loader.load("agents/registry.json");
+    if (reg) {
+        if (!reg->contains("agents") || !(*reg)["agents"].is_array()) {
+            std::cout << "  " << term::icon_fail() << " registry.json: missing 'agents' array\n";
+            ++issues;
+        } else {
+            std::cout << "  " << term::icon_ok() << " registry.json: valid ("
+                      << (*reg)["agents"].size() << " agents)\n";
+        }
+    } else {
+        std::cout << "  " << term::icon_warn() << " registry.json: not found\n";
+    }
+
+    // Lint router.json
+    auto router = loader.load("config/router.json");
+    if (router) {
+        std::cout << "  " << term::icon_ok() << " router.json: present\n";
+    } else {
+        std::cout << "  " << term::icon_warn() << " router.json: not found (using defaults)\n";
+    }
+
+    // Lint codex.json
+    auto codex = loader.load("config/codex.json");
+    if (codex) {
+        std::cout << "  " << term::icon_ok() << " codex.json: present\n";
+    }
+
+    std::cout << "\n" << (issues == 0 ? term::green("Lint passed") :
+                          term::red(std::to_string(issues) + " issue(s)")) << "\n";
+    return issues > 0 ? 1 : 0;
+}
+
+// --- shell-lint ---
+
+int cmd_shell_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
+    std::cout << term::bold("Shell Lint") << "\n\n";
+
+    if (!Process::available("shellcheck")) {
+        std::cerr << term::icon_fail() << " shellcheck not found. Install it first.\n";
+        return 1;
+    }
+
+    auto bin_dir = fs::path(ctx.euxis_home) / "euxis-bin";
+    if (!fs::is_directory(bin_dir)) {
+        std::cout << term::icon_info() << " No euxis-bin/ directory (already migrated to C++)\n";
+        return 0;
+    }
+
+    int issues = 0;
+    for (const auto& entry : fs::directory_iterator(bin_dir)) {
+        if (!entry.is_regular_file()) continue;
+        auto path = entry.path();
+        if (path.extension() == ".sh" || path.filename().string().starts_with("euxis-")) {
+            auto result = Process::run("shellcheck", {"-S", "warning", path.string()});
+            if (result.exit_code == 0) {
+                std::cout << "  " << term::icon_ok() << " " << path.filename().string() << "\n";
+            } else {
+                std::cout << "  " << term::icon_fail() << " " << path.filename().string() << "\n";
+                if (ctx.verbose && !result.stdout_output.empty()) {
+                    std::cout << result.stdout_output;
+                }
+                ++issues;
+            }
+        }
+    }
+
+    std::cout << "\n" << (issues == 0 ? term::green("All scripts pass") :
+                          term::red(std::to_string(issues) + " script(s) with issues")) << "\n";
+    return issues > 0 ? 1 : 0;
+}
+
+// --- verify-all ---
+
+int cmd_verify_all(Context& ctx, const std::vector<std::string>& /*args*/) {
+    std::cout << term::bold("Running All Verifications") << "\n\n";
+
+    int total_failures = 0;
+
+    std::cout << "--- Doctor ---\n";
+    total_failures += (cmd_doctor(ctx, {}) != 0 ? 1 : 0);
+
+    std::cout << "\n--- Health ---\n";
+    total_failures += (cmd_health(ctx, {}) != 0 ? 1 : 0);
+
+    std::cout << "\n--- Verify ---\n";
+    total_failures += (cmd_verify(ctx, {}) != 0 ? 1 : 0);
+
+    std::cout << "\n--- Lint ---\n";
+    total_failures += (cmd_lint(ctx, {}) != 0 ? 1 : 0);
+
+    std::cout << "\n" << term::bold("Total: ");
+    if (total_failures == 0) {
+        std::cout << term::green("All verifications passed") << "\n";
+    } else {
+        std::cout << term::red(std::to_string(total_failures) + " verification group(s) failed") << "\n";
+    }
+
+    return total_failures > 0 ? 1 : 0;
+}
+
+// --- cross-platform-verify ---
+
+int cmd_cross_platform_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
+    std::cout << term::bold("Cross-Platform Verification") << "\n\n";
+
+    int issues = 0;
+
+    // Check filesystem case sensitivity
+    {
+        auto test_dir = fs::path(ctx.euxis_home) / ".cross-platform-test";
+        fs::create_directories(test_dir);
+        auto upper = test_dir / "TEST";
+        auto lower = test_dir / "test";
+        std::ofstream(upper) << "upper";
+        bool case_sensitive = !fs::exists(lower) || fs::file_size(upper) != fs::file_size(lower);
+        std::cout << "  " << term::icon_info() << " Filesystem: "
+                  << (case_sensitive ? "case-sensitive" : "case-insensitive") << "\n";
+        fs::remove_all(test_dir);
+    }
+
+    // Check path separators
+    std::cout << "  " << term::icon_info() << " Path separator: "
+              << fs::path::preferred_separator << "\n";
+
+    // Check available shells
+    for (const auto& sh : {"bash", "zsh", "fish"}) {
+        bool found = Process::available(sh);
+        std::cout << "  " << (found ? term::icon_ok() : term::icon_skip())
+                  << " " << sh << "\n";
+    }
+
+    // Check line endings
+    {
+        auto sample = fs::path(ctx.euxis_home) / "euxis-data" / "agents" / "registry.json";
+        if (fs::exists(sample)) {
+            std::ifstream f(sample, std::ios::binary);
+            std::string content((std::istreambuf_iterator<char>(f)),
+                                std::istreambuf_iterator<char>());
+            bool has_crlf = content.find("\r\n") != std::string::npos;
+            std::cout << "  " << (!has_crlf ? term::icon_ok() : term::icon_warn())
+                      << " Line endings: " << (has_crlf ? "CRLF (Windows)" : "LF (Unix)") << "\n";
+            if (has_crlf) ++issues;
+        }
+    }
+
+    std::cout << "\n" << (issues == 0 ? term::green("Cross-platform checks passed") :
+                          term::yellow(std::to_string(issues) + " concern(s)")) << "\n";
+    return 0;
+}
+
+} // namespace euxis::cli::cmd

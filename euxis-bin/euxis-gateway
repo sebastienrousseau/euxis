@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-EUXIS_HOME="${EUXIS_HOME:-$HOME/.euxis}"
-export PYTHONPATH="${EUXIS_HOME}/euxis-gateway/src:${PYTHONPATH:-}"
-exec python3 -m gateway.server "$@"

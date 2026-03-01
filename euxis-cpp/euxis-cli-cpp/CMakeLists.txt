@@ -1,38 +1,58 @@
-# euxis-cli-cpp is an executable, not a library
-add_executable(euxis-cli
-  src/main.cpp
+# Static library with all sources except main.cpp (for test linking)
+add_library(euxis-cli-lib STATIC
   src/engine.cpp
   src/omnigraph.cpp
+  src/terminal.cpp
+  src/config_loader.cpp
+  src/pii_filter.cpp
+  src/process.cpp
+  src/session.cpp
+  src/registry_client.cpp
+  src/provider_router.cpp
+  src/provider_executor.cpp
+  src/cmd/system.cpp
+  src/cmd/fleet.cpp
+  src/cmd/knowledge.cpp
+  src/cmd/infra.cpp
+  src/cmd/dev.cpp
+  src/cmd/specialized.cpp
 )
-target_include_directories(euxis-cli PRIVATE
+target_include_directories(euxis-cli-lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-target_link_libraries(euxis-cli PRIVATE
+target_link_libraries(euxis-cli-lib PUBLIC
   euxis-core-cpp
   euxis-gateway-cpp
   euxis-metrics-cpp
   euxis-security-cpp
   nlohmann_json::nlohmann_json
   spdlog::spdlog
+  SQLite::SQLite3
 )
 
-# Tests for the CLI library components
+# Main executable
+add_executable(euxis-cli src/main.cpp)
+target_link_libraries(euxis-cli PRIVATE euxis-cli-lib)
+
+# Tests
 add_executable(euxis-cli-cpp_tests
   tests/test_engine.cpp
   tests/test_omnigraph.cpp
-  src/engine.cpp
-  src/omnigraph.cpp
-)
-target_include_directories(euxis-cli-cpp_tests PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  tests/test_terminal.cpp
+  tests/test_config_loader.cpp
+  tests/test_registry_client.cpp
+  tests/test_provider_router.cpp
+  tests/test_session.cpp
+  tests/test_pii_filter.cpp
+  tests/test_cmd_system.cpp
+  tests/test_cmd_fleet.cpp
+  tests/test_cmd_knowledge.cpp
+  tests/test_cmd_infra.cpp
+  tests/test_cmd_dev.cpp
+  tests/test_cmd_specialized.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
-  euxis-core-cpp
-  euxis-gateway-cpp
-  euxis-metrics-cpp
-  euxis-security-cpp
-  nlohmann_json::nlohmann_json
-  spdlog::spdlog
+  euxis-cli-lib
   GTest::gtest_main
 )
 add_test(NAME euxis-cli-cpp_tests COMMAND euxis-cli-cpp_tests)

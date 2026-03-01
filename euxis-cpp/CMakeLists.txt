@@ -16,6 +16,7 @@ include(FetchContent)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 # libsodium: vcpkg uses unofficial-sodium::sodium, system uses pkg-config
 find_package(unofficial-sodium CONFIG QUIET)

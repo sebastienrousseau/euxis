@@ -1,11 +1,13 @@
 #pragma once
 
+#include "euxis/cli/command.hpp"
+
 #include <string>
 #include <vector>
 
 namespace euxis::cli {
 
-/// Dispatch CLI commands to the appropriate handler.
+/// Table-driven CLI engine. Dispatches commands by name, generates grouped help.
 class Engine {
 public:
     explicit Engine(const std::string& euxis_home = {});
@@ -13,17 +15,17 @@ public:
     /// Run a command. Returns exit code.
     auto run(const std::vector<std::string>& args) -> int;
 
-    /// Run a bridge sub-command.
-    auto run_bridge(const std::vector<std::string>& args) -> int;
-
-    /// Start the gateway server.
-    auto run_gateway(const std::vector<std::string>& args) -> int;
-
     /// Display version info.
     static void print_version();
 
+    /// Display grouped help for all registered commands.
+    void print_help() const;
+
 private:
-    std::string euxis_home_;
+    Context ctx_;
+    std::vector<CommandEntry> commands_;
+
+    void register_commands();
 };
 
 } // namespace euxis::cli
