@@ -1,3 +1,9 @@
+if(APPLE)
+  set(PLATFORM_SRC src/platform_macos.cpp)
+else()
+  set(PLATFORM_SRC src/platform_linux.cpp)
+endif()
+
 euxis_add_library(euxis-bridge-cpp
   SOURCES
     src/skill.cpp
@@ -11,7 +17,7 @@ euxis_add_library(euxis-bridge-cpp
     src/provenance.cpp
     src/audit.cpp
     src/executor.cpp
-    src/platform_linux.cpp
+    ${PLATFORM_SRC}
   DEPS
     euxis-crypto-cpp
     unofficial-sodium::sodium
