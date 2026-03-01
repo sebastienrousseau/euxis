@@ -57,7 +57,7 @@ version: "0.0.2"
 
 ### Version Consistency Checker
 ```bash
-scripts/check-version-consistency.sh
+euxis-ops/check-version-consistency.sh
 ```
 
 **Purpose**: Validates that all version references are consistent
@@ -66,7 +66,7 @@ scripts/check-version-consistency.sh
 
 ### Version Synchronization
 ```bash
-scripts/sync-versions.sh
+euxis-ops/sync-versions.sh
 ```
 
 **Purpose**: Updates all version references to match `agents/registry.json`
@@ -89,12 +89,12 @@ When releasing a new version:
 
 2. **Synchronize all references**:
    ```bash
-   scripts/sync-versions.sh
+   euxis-ops/sync-versions.sh
    ```
 
 3. **Verify consistency**:
    ```bash
-   scripts/check-version-consistency.sh
+   euxis-ops/check-version-consistency.sh
    ```
 
 4. **Commit changes**:
@@ -152,12 +152,12 @@ echo "=== Euxis v$EUXIS_VERSION Platform Report ===" > report.md
 ### Version Mismatch Detected
 1. Check which files are inconsistent:
    ```bash
-   scripts/check-version-consistency.sh
+   euxis-ops/check-version-consistency.sh
    ```
 
 2. Synchronize to registry version:
    ```bash
-   scripts/sync-versions.sh
+   euxis-ops/sync-versions.sh
    ```
 
 ### Workflow Using Wrong Version

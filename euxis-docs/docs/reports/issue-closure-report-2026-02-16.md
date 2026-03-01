@@ -28,7 +28,7 @@ All open issues were closed after confirming implementation coverage across gate
 ## Repository State
 - Open issues: 0
 - Milestones: none
-- Labels: standard + api/src/gateway/security/channels/dx
+- Labels: standard + api/src/gateway/euxis-policy/channels/dx
 
 ## Next Actions
 - Merge PR #17 (security: update cryptography) after required review/checks.

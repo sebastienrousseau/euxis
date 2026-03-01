@@ -28,7 +28,7 @@ jobs:
           - euxis-cli
           - euxis-docs
           - euxis-gateway
-          - euxis-crypto-lib
+          - euxis-crypto
           - euxis-metrics
           - euxis-adapters
           - euxis-security
@@ -165,15 +165,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'euxis-crypto-packages/package*.json'
+          cache-dependency-path: 'euxis-web/package*.json'
 
       - name: Install dependencies
-        working-directory: euxis-crypto-packages
+        working-directory: euxis-web
         run: |
           npm ci --audit-level moderate
 
       - name: Run npm audit
-        working-directory: euxis-crypto-packages
+        working-directory: euxis-web
         run: |
           npm audit --audit-level high --json > npm-audit.json || true
           if [[ -f npm-audit.json ]]; then
@@ -192,7 +192,7 @@ jobs:
           fi
 
       - name: Run Semgrep for JavaScript/TypeScript
-        working-directory: euxis-crypto-packages
+        working-directory: euxis-web
         run: |
           # Install semgrep
           pip install semgrep==1.52.0
@@ -209,8 +209,8 @@ jobs:
         with:
           name: nodejs-security-reports
           path: |
-            euxis-crypto-packages/npm-audit.json
-            euxis-crypto-packages/semgrep-js-report.json
+            euxis-web/npm-audit.json
+            euxis-web/semgrep-js-report.json
           retention-days: 30
 
   security-summary:
@@ -270,7 +270,7 @@ jobs:
               status="❌ FAIL"
             fi
 
-            echo "| euxis-crypto-packages (Node.js) | $status | $critical | $high | - | - |" >> $GITHUB_STEP_SUMMARY
+            echo "| euxis-web (Node.js) | $status | $critical | $high | - | - |" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY

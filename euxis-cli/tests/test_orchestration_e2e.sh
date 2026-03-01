@@ -198,7 +198,7 @@ fi
 
 # T4.2: Conditional protocol loading — no extra for simple task
 protocols_simple=$(resolve_protocols "list all files in the project")
-# Should only contain _common and _protocol content, not security/versioning etc
+# Should only contain _common and _protocol content, not euxis-policy/versioning etc
 simple_len=${#protocols_simple}
 full_len=${#protocols}
 (( simple_len < full_len )) && pass "Simple task loads fewer protocols (${simple_len} < ${full_len} chars)" || fail "Simple task loaded same protocols as security task"

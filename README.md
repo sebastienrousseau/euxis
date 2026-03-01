@@ -33,7 +33,7 @@ Euxis is modular by design. Integrate exactly what your infrastructure requires.
 * `euxis-core`: The central execution engine.
 * `euxis-cli`: The command-line orchestrator.
 * `euxis-gateway`: The high-throughput HTTP and WebSockets interface.
-* `euxis-crypto-lib`: The native Rust cryptography library.
+* `euxis-crypto`: The native Rust cryptography library.
 * `euxis-tui`: The terminal user interface for real-time observability.
 * `euxis-metrics`: The telemetry and validation framework.
 

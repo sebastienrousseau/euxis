@@ -610,7 +610,7 @@ flowchart TB
 ├── runtime/data/                         # Runtime data (bus, lifecycle, projects)
 ├── runtime/memory/                       # Cortex storage
 ├── metrics/src/metrics/                      # Fleet metrics
-├── security/                     # Approval policies
+├── euxis-policy/                     # Approval policies
 │   ├── lifecycle/               # Agent state files
 │   ├── projects/                # Project-specific data
 │   └── registry_pool/           # Connection pool locks

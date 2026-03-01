@@ -77,7 +77,7 @@ euxis-health
 **Command Options:**
 
 ```bash
-# Exit code only (for scripts/CI)
+# Exit code only (for euxis-ops/CI)
 euxis-health --silent
 
 # JSON output for programmatic parsing
@@ -1033,7 +1033,7 @@ tail -20 ~/.euxis/metrics/events.jsonl
    ls ~/.euxis/agents/registry.db
 
    # If not, migrate
-   python3 ~/.euxis/scripts/migrate-registry-to-sqlite.py
+   python3 ~/.euxis/euxis-ops/migrate-registry-to-sqlite.py
    ```
 
 2. **Disable performance tracking (if not needed):**

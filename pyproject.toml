@@ -39,7 +39,7 @@ minversion = "7.0"
 pythonpath = [
     "euxis-core/src",
     "euxis-tui/src",
-    "euxis-crypto-lib/src",
+    "euxis-crypto/src",
     "euxis-gateway/src",
     "euxis-metrics/src",
     "euxis-adapters/src",
@@ -49,7 +49,7 @@ pythonpath = [
 testpaths = [
     "euxis-core/tests",
     "euxis-tui/tests",
-    "euxis-crypto-lib/tests",
+    "euxis-crypto/tests",
     "euxis-gateway/tests",
     "euxis-metrics/tests",
 ]
@@ -79,7 +79,7 @@ filterwarnings = [
 source = [
     "euxis-core/lib",
     "euxis-tui/src",
-    "euxis-crypto-lib/src",
+    "euxis-crypto/src",
     "euxis-gateway/src",
     "euxis-metrics/src",
 ]

@@ -14,11 +14,11 @@ Owns configuration files and schemas that define runtime behavior for gateway, a
 - `core/` — validation utilities
 
 ## Usage
-Configurations are loaded by runtime modules using `EUXIS_HOME/config`. Gateway policy defaults live in `security/gateway.json`.
+Configurations are loaded by runtime modules using `EUXIS_HOME/config`. Gateway policy defaults live in `euxis-policy/gateway.json`.
 
 ## Development
 ```bash
-jq '.' security/gateway.json
+jq '.' euxis-policy/gateway.json
 ```
 
 ## Testing

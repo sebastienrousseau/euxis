@@ -60,7 +60,7 @@ Execute specific intent-driven workloads explicitly designed for practical daily
 *   **[How to Deploy Agent Squads](operations/squads.md):** Construct custom YAML topology limits sequentially defining DAG orchestration.
 *   **[How to Write an Extism Plugin](development/custom-plugins.md):** Develop natively isolated logic explicitly in Rust using WebAssembly macros natively.
 *   **[How to Upgrade the Mesh](install-remove/gateway.md):** Gracefully tear down local servers and execute standard `uv` binary replacements natively.
-*   **[Example: Building a Python API](examples/python-workflow.md):** Orchestrating the architect natively.
+*   **[Example: Building a Python API](euxis-examples/python-workflow.md):** Orchestrating the architect natively.
 
 ---
 
@@ -68,8 +68,8 @@ Execute specific intent-driven workloads explicitly designed for practical daily
 
 Master the complex architectures and deeply integrated subsystems defining Euxis.
 
-*   **[The Security Paradigm](security/security-integration.md):** Why Extism sandboxing protects your host completely. 
-*   **[Capability Manifests (WASI)](security/manifests.md):** Locking down filesystem mapping boundaries and network egress routing.
+*   **[The Security Paradigm](euxis-policy/security-integration.md):** Why Extism sandboxing protects your host completely. 
+*   **[Capability Manifests (WASI)](euxis-policy/manifests.md):** Locking down filesystem mapping boundaries and network egress routing.
 *   **[Language Playbooks](development/playbooks.md):** Leveraging built-in `python`, `rust`, `go`, `swift`, `javascript`, and `css` compilers directly within the intelligence mesh.
 *   **[Native Python Integration](development/python-api.md):** Executing `euxis-core` Engine loops iteratively without CLI boundaries.
 

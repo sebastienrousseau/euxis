@@ -53,7 +53,7 @@
         },
         {
           "agent": "librarian",
-          "task_template": "Audit Rust crate file organization for: ${goal}. Verify every source module has clear single responsibility documented in a module-level doc comment. Verify mod.rs vs file-named modules consistency (pick one style, enforce everywhere). Remove orphaned files not referenced by any mod declaration. Verify test organization: unit tests in #[cfg(test)] mod tests within source files, integration tests in tests/ directory, test utilities in tests/common/mod.rs or a shared test crate. Verify examples/ contains runnable examples declared in Cargo.toml. Clean up empty modules and unused re-exports.",
+          "task_template": "Audit Rust crate file organization for: ${goal}. Verify every source module has clear single responsibility documented in a module-level doc comment. Verify mod.rs vs file-named modules consistency (pick one style, enforce everywhere). Remove orphaned files not referenced by any mod declaration. Verify test organization: unit tests in #[cfg(test)] mod tests within source files, integration tests in tests/ directory, test utilities in tests/common/mod.rs or a shared test crate. Verify euxis-examples/ contains runnable examples declared in Cargo.toml. Clean up empty modules and unused re-exports.",
           "verifies": [
             "every module has single responsibility",
             "consistent module file style (mod.rs vs file-named)",

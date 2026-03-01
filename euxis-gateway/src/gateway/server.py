@@ -204,7 +204,7 @@ def resolve_config(args: argparse.Namespace) -> Dict[str, Any]:
     elif "EUXIS_GATEWAY_CONFIG" in os_environ():
         config_path = Path(os_environ()["EUXIS_GATEWAY_CONFIG"]).expanduser()
     else:
-        config_path = Path("~/.euxis/security/gateway.json").expanduser()
+        config_path = Path("~/.euxis/euxis-policy/gateway.json").expanduser()
 
     config = load_config(config_path)
 

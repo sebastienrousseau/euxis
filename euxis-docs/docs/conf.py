@@ -15,7 +15,7 @@ package_paths = [
     "euxis-cli/bin",  # For euxis_engine.py
     "euxis-metrics/src",
     "euxis-metrics/src/metrics",  # For aggregators, verification submodules
-    "euxis-crypto-lib/src",
+    "euxis-crypto/src",
     "euxis-tui/src",
     "euxis-gateway/src",
     "euxis-adapters/src",

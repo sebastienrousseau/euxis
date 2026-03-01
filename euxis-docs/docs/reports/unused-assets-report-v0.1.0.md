@@ -1,10 +1,10 @@
 # Unused Assets Report (v0.0.2)
 
 ## Summary
-No safe deletions were performed. All scripts in `scripts/` are referenced by docs or tooling. No identical duplicates found for top-level guides.
+No safe deletions were performed. All scripts in `euxis-ops/` are referenced by docs or tooling. No identical duplicates found for top-level guides.
 
 ## Notes
-- `scripts/` entries are referenced in `scripts/README.md`, versioning docs, and troubleshooting.
+- `euxis-ops/` entries are referenced in `euxis-ops/README.md`, versioning docs, and troubleshooting.
 - `docs/archive/` contains legacy guides retained for history.
 
 ## Recommendation

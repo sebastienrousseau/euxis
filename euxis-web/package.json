@@ -1,0 +1,28 @@
+{
+  "name": "@euxis/crypto-packages",
+  "version": "0.0.2",
+  "description": "TypeScript crypto packages for the Euxis Agent Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm --prefix src/crypto-lib test",
+    "lint": "eslint src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/euxis/euxis-web"
+  },
+  "author": "Sebastien Rousseau",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "overrides": {
+    "minimatch": ">=10.2.3",
+    "rollup": ">=4.59.0"
+  }
+}

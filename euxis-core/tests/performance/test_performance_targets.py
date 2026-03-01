@@ -136,7 +136,7 @@ class TestResponseTime:
     async def test_async_encrypt_response_time(self):
         """Async encrypt should complete in <=10ms."""
         try:
-            sys.path.insert(0, str(Path.home() / ".euxis" / "euxis-crypto-lib" / "src"))
+            sys.path.insert(0, str(Path.home() / ".euxis" / "euxis-crypto" / "src"))
             from crypto_lib.async_core import async_encrypt
         except ImportError:
             pytest.skip("Async crypto not available")
@@ -170,7 +170,7 @@ class TestThroughput:
     async def test_crypto_tps(self):
         """Crypto operations should achieve >=1000 TPS."""
         try:
-            sys.path.insert(0, str(Path.home() / ".euxis" / "euxis-crypto-lib" / "src"))
+            sys.path.insert(0, str(Path.home() / ".euxis" / "euxis-crypto" / "src"))
             from crypto_lib.async_core import async_encrypt_batch
         except ImportError:
             pytest.skip("Async crypto not available")

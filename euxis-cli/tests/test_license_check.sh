@@ -8,7 +8,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LICENSE_CHECKER="${PROJECT_ROOT}/cli/bin/euxis-license-check"
 
 # Test data directory
-TEST_DATA_DIR="${SCRIPT_DIR}/data/license_check"
+TEST_DATA_DIR="${SCRIPT_DIR}/euxis-data/license_check"
 mkdir -p "${TEST_DATA_DIR}"
 
 # Create test requirements files

@@ -13,31 +13,33 @@ All workspace packages are covered:
 - `euxis-metrics`
 - `euxis-adapters`
 - `euxis-security`
-- `euxis-crypto-lib`
+- `euxis-crypto`
 - `euxis-runtime`
 - `euxis-scripts`
-- `euxis-sdk-rust`
-- `euxis-crypto-packages`
+- `euxis-sdk`
+- `euxis-web`
 - `euxis-docs`
 
 ## Enforcement Artifacts
 
-- Package standards manifest: `scripts/quality/package_standards.json`
-- Package resource policy: `scripts/perf/package_resource_policy.json`
-- Resource governance validator: `scripts/perf/validate_package_resource_governance.py`
-- Package excellence validator: `scripts/quality/validate_package_excellence.py`
-- Package excellence scorecard: `scripts/eval/package_excellence_scorecard.py`
-- Package benchmark collector: `scripts/perf/collect_package_benchmarks.py`
-- Package benchmark budget validator: `scripts/perf/validate_package_benchmark_budget.py`
-- Package benchmark PR trend renderer: `scripts/perf/render_package_benchmark_trend.py`
-- Package benchmark regression validator: `scripts/perf/validate_package_benchmark_regression.py`
-- Package benchmark baseline proposal generator: `scripts/perf/propose_package_benchmark_baseline.py`
-- Package benchmark baseline review gate: `scripts/release/review_package_benchmark_baseline.py`
-- Package benchmark baseline governance validator: `scripts/perf/validate_package_benchmark_baseline_governance.py`
-- Benchmark baseline dataset: `scripts/perf/package_benchmarks_baseline.json`
-- Package structure matrix generator/checker: `scripts/quality/render_package_structure_matrix.py`
-- Package harmony validator (duplicates + complexity + structure): `scripts/quality/validate_package_harmony.py`
-- Package harmony baseline limits: `scripts/quality/package_harmony_baseline.json`
+- Package standards manifest: `euxis-ops/quality/package_standards.json`
+- Workspace topology policy: `euxis-ops/quality/workspace_topology_policy.json`
+- Workspace topology validator: `euxis-ops/quality/validate_workspace_topology.py`
+- Package resource policy: `euxis-ops/perf/package_resource_policy.json`
+- Resource governance validator: `euxis-ops/perf/validate_package_resource_governance.py`
+- Package excellence validator: `euxis-ops/quality/validate_package_excellence.py`
+- Package excellence scorecard: `euxis-ops/eval/package_excellence_scorecard.py`
+- Package benchmark collector: `euxis-ops/perf/collect_package_benchmarks.py`
+- Package benchmark budget validator: `euxis-ops/perf/validate_package_benchmark_budget.py`
+- Package benchmark PR trend renderer: `euxis-ops/perf/render_package_benchmark_trend.py`
+- Package benchmark regression validator: `euxis-ops/perf/validate_package_benchmark_regression.py`
+- Package benchmark baseline proposal generator: `euxis-ops/perf/propose_package_benchmark_baseline.py`
+- Package benchmark baseline review gate: `euxis-ops/release/review_package_benchmark_baseline.py`
+- Package benchmark baseline governance validator: `euxis-ops/perf/validate_package_benchmark_baseline_governance.py`
+- Benchmark baseline dataset: `euxis-ops/perf/package_benchmarks_baseline.json`
+- Package structure matrix generator/checker: `euxis-ops/quality/render_package_structure_matrix.py`
+- Package harmony validator (duplicates + complexity + structure): `euxis-ops/quality/validate_package_harmony.py`
+- Package harmony baseline limits: `euxis-ops/quality/package_harmony_baseline.json`
 - Generated matrix doc: `euxis-docs/docs/architecture/package-structure-matrix.md`
 
 ## Resource Governance
@@ -58,6 +60,7 @@ Ratchet policy is enforced as:
 make package-resource-governance-check
 make package-excellence-check
 make package-excellence-scorecard
+make workspace-topology-check
 make package-harmony-check
 make package-structure-matrix
 make package-structure-matrix-check
@@ -81,3 +84,5 @@ Baseline review artifacts are cryptographically linked to proposals via canonica
 Package structural consistency is also enforced through a deterministic generated matrix and stale-doc check in `gate-all`.
 PR CI additionally publishes a matrix staleness summary and unified diff artifact for fast review when docs drift.
 Package harmony is additionally enforced through strict source-structure checks, exact duplicate-block detection, and Python complexity non-regression limits.
+Workspace topology is additionally enforced so package roots are consistently prefixed with `euxis-`, while explicitly-declared workspace-level infra directories remain controlled exceptions.
+Canonical naming policy requires package names to be exactly two words (`euxis-<singleword>`), with temporary legacy aliases permitted only for migration sequencing.

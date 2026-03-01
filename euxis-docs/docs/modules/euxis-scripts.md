@@ -1,6 +1,6 @@
 # euxis-scripts
 
-`euxis-scripts` and top-level `scripts/` automate quality, security, release, and governance workflows.
+`euxis-scripts` and top-level `euxis-ops/` automate quality, security, release, and governance workflows.
 
 ## Focus Areas
 
@@ -10,6 +10,6 @@
 
 ## Quality Controls
 
-- Package standards manifest: `scripts/quality/package_standards.json`
-- Package excellence validator: `scripts/quality/validate_package_excellence.py`
-- Package scorecard generator: `scripts/eval/package_excellence_scorecard.py`
+- Package standards manifest: `euxis-ops/quality/package_standards.json`
+- Package excellence validator: `euxis-ops/quality/validate_package_excellence.py`
+- Package scorecard generator: `euxis-ops/eval/package_excellence_scorecard.py`

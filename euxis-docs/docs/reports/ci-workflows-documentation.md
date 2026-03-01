@@ -40,7 +40,7 @@ Tests on both Ubuntu and macOS for portability.
 
 ### 5. Naming Conventions (`.github/workflows/naming-conventions.yml`)
 
-Enforces file naming standards using `scripts/check-naming-conventions.py`.
+Enforces file naming standards using `euxis-ops/check-naming-conventions.py`.
 
 ### 6. Branding Check (`.github/workflows/branding-check.yml`)
 
@@ -82,7 +82,7 @@ Modules with CI templates:
 - `crypto/ci/module-ci.yml`
 - `metrics/ci/module-ci.yml`
 - `packages/shared/ci/module-ci.yml`
-- `security/ci/module-ci.yml`
+- `euxis-policy/ci/module-ci.yml`
 - `ui/ci/module-ci.yml`
 
 ## Release Process
@@ -90,7 +90,7 @@ Modules with CI templates:
 ### Current Release Steps
 
 1. **Version Bump:** Update version in `agents/registry.json` (source of truth)
-2. **Version Sync:** Run `scripts/sync-docs.sh` to propagate version
+2. **Version Sync:** Run `euxis-ops/sync-docs.sh` to propagate version
 3. **Certification:** Run `euxis-cli/bin/euxis-certify` to validate all gates
 4. **Tag:** Create signed git tag `vX.Y.Z`
 5. **Push:** Push tag to origin

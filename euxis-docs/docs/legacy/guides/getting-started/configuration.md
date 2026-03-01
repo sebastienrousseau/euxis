@@ -10,7 +10,7 @@ By default, the installer provisions the following configuration block:
 
 ```toml
 [core]
-database_path = "~/.euxis/data/registry.db"
+database_path = "~/.euxis/euxis-data/registry.db"
 log_level = "info" # [debug, info, warn, error]
 max_concurrency = 4
 

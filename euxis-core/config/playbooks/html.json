@@ -160,7 +160,7 @@
           "agent": "sentinel",
           "task_template": "Audit HTML supply chain and third-party security for: ${goal}. Verify every external script/stylesheet uses Subresource Integrity (SRI). Check all CDN origins for known compromises. Flag any inline scripts that could be replaced with external files (CSP nonce/hash compatibility). Verify cookie attributes on forms: Secure, HttpOnly, SameSite=Strict recommended. Verify no third-party tracking pixels without consent mechanism. Verify no sensitive data in HTML comments or data attributes. Audit forms: CSRF tokens present, action URLs use HTTPS. Verify Content-Security-Policy is strict: no unsafe-inline, no unsafe-eval (use nonce or hash). Classify threat level using S0-S3 severity.",
           "verifies": [
-            "SRI on all external scripts/stylesheets",
+            "SRI on all external euxis-ops/stylesheets",
             "CDN origins verified (no known compromises)",
             "no sensitive data in HTML comments",
             "CSRF tokens on forms",

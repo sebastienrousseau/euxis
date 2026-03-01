@@ -606,8 +606,8 @@ curl -X POST "http://localhost:18789/voice/upload?session_id=test" \
 | Component | Path |
 |-----------|------|
 | Gateway Server | `${EUXIS_HOME}/euxis-gateway/src/gateway/server.py` |
-| Gateway Config | `~/.euxis/security/gateway.json` |
-| Audit Logs | `~/.euxis/data/audit/` |
+| Gateway Config | `~/.euxis/euxis-policy/gateway.json` |
+| Audit Logs | `~/.euxis/euxis-data/audit/` |
 
 ## Appendix B: Related Documentation
 

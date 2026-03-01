@@ -27,7 +27,7 @@ jobs:
           pip install -e .[dev]
       - name: Architecture boundaries
         shell: bash
-        run: python3 scripts/architecture/check_boundaries.py
+        run: python3 euxis-ops/architecture/check_boundaries.py
       - name: Platform parity tests
         shell: bash
         run: |

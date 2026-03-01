@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Add crypto lib to path to import the rust extension
 repo_root = Path(__file__).resolve().parents[2]
-crypto_lib_path = repo_root / "euxis-crypto-lib" / "target" / "release"
+crypto_lib_path = repo_root / "euxis-crypto" / "target" / "release"
 if str(crypto_lib_path) not in sys.path:
     sys.path.insert(0, str(crypto_lib_path))
 
@@ -20,7 +20,7 @@ except ImportError:
     try:
         import crypto_lib_rs as crypto
     except ImportError as e:
-        print(f"Error: Could not load euxis-crypto-lib-rs. Ensure it is compiled. ({e})")
+        print(f"Error: Could not load euxis-crypto-rs. Ensure it is compiled. ({e})")
         sys.exit(1)
 
 def generate_keys(args):

@@ -14,7 +14,7 @@ class RuntimeValidationError(ValueError):
 
 @dataclass(frozen=True)
 class RuntimeValidator:
-    """Validate runtime package data/config artifacts."""
+    """Validate runtime package euxis-data/config artifacts."""
 
     runtime_root: Path
 

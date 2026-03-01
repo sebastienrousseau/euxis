@@ -12,7 +12,7 @@ MAX_PRAGMAS = 183
 MAX_TODOS = 13
 
 search_dirs = [
-    "euxis-adapters", "euxis-cli", "euxis-core", "euxis-crypto-lib",
+    "euxis-adapters", "euxis-cli", "euxis-core", "euxis-crypto",
     "euxis-gateway", "euxis-metrics", "euxis-runtime", "euxis-security", "euxis-tui"
 ]
 

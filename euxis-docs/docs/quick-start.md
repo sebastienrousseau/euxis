@@ -221,7 +221,7 @@ THOUGHT 1: I need to examine the Euxis system structure to understand its archit
 
 ACTION 1: List the main directories to see the overall organization.
 
-OBSERVATION 1: Found: euxis-cli/bin/, config/, security/, runtime/memory/, metrics/src/metrics/, runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
+OBSERVATION 1: Found: euxis-cli/bin/, config/, euxis-policy/, runtime/memory/, metrics/src/metrics/, runtime/data/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/
 
 THOUGHT 2: I can now describe each component's role in the system.
 
@@ -235,8 +235,8 @@ FINAL ANSWER:
 - Shell libraries in core/lib/ for shared functionality
 - Entry point: `euxis` command
 
-### 2. Configuration (config/ + security/)
-- Gateway policy defaults: `security/gateway.json`
+### 2. Configuration (config/ + euxis-policy/)
+- Gateway policy defaults: `euxis-policy/gateway.json`
 - Quality patterns for code enforcement
 - Playbook definitions for workflows
 - Provider routing rules

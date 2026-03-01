@@ -40,7 +40,7 @@ The `filesystem` object maps physical host paths to virtual container paths.
 * **Key:** The actual path on your physical machine or container.
 * **Value:** The virtualized path explicitly exposed to the Wasm agent.
 
-Never map your user `~` or `/` directory directly. Constrain agent execution specifically to your repository `src/` or `data/` endpoints.
+Never map your user `~` or `/` directory directly. Constrain agent execution specifically to your repository `src/` or `euxis-data/` endpoints.
 
 ### The `env` Constraints
 

@@ -255,12 +255,12 @@ def test_session_detail_and_runs(monkeypatch, tmp_path):
     config = server.load_config(None)
     config["gateway"]["auth"]["mode"] = "none"
     server.STATE.sessions["sess"] = [{"role": "user"}]
-    app = _build_app(monkeypatch, config)
     monkeypatch.setattr(server, "load_session_meta", lambda _sid: {"session_id": "sess"})
-    monkeypatch.setattr(server, "runs_dir", lambda: tmp_path)
+    app = _build_app(monkeypatch, config)
     (tmp_path / "run1.jsonl").write_text("{}\n", encoding="utf-8")
     detail_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/sessions/{session_id}")
     runs_endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/runs")
+    runs_endpoint.__globals__["runs_dir"] = lambda: tmp_path
     req = Request({"type": "http", "headers": [], "query_string": b"", "client": ("127.0.0.2", 1234)})
 
     detail = asyncio.run(detail_endpoint("sess", req))

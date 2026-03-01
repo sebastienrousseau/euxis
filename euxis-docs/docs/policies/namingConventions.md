@@ -64,13 +64,13 @@ Every folder must include a `README.md` explaining:
 Use the naming checker to validate changes (new, renamed, or modified files/folders):
 
 ```bash
-python scripts/check-naming-conventions.py --changed
+python euxis-ops/check-naming-conventions.py --changed
 ```
 
 For full-repo audits:
 
 ```bash
-python scripts/check-naming-conventions.py --all
+python euxis-ops/check-naming-conventions.py --all
 ```
 
 ## Shared Templates

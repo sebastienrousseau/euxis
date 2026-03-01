@@ -9,7 +9,7 @@ This section contains auto-generated API documentation for all Euxis packages.
    euxis-core
    euxis-cli
    euxis-metrics
-   euxis-crypto-lib
+   euxis-crypto
    euxis-tui
    euxis-gateway
    euxis-adapters

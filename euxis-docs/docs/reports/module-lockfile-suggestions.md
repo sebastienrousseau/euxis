@@ -11,5 +11,5 @@ Recommended lockfiles per module:
 - metrics: use uv lock or pip-tools to generate lockfile from metrics/pyproject.toml
 - ui: use uv lock or pip-tools to generate lockfile from ui/pyproject.toml
 - config: use uv lock or pip-tools to generate lockfile from config/pyproject.toml
-- security: use uv lock or pip-tools to generate lockfile from security/pyproject.toml
+- security: use uv lock or pip-tools to generate lockfile from euxis-policy/pyproject.toml
 - packages/shared: use uv lock or pip-tools to generate lockfile from packages/shared/pyproject.toml

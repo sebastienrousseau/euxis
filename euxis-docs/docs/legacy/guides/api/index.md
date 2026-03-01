@@ -16,8 +16,8 @@ Euxis operates primarily through specialized gateways and native library binding
 For maximum throughput and 0-copy serialization, embed Euxis directly into your runtime via our supported package libraries.
 
 * **[Python (`euxis-core`)](python/index.md):** The native Python orchestrator and dependency manager bindings.
-* **[Rust (`crypto-lib`)](../euxis-crypto-lib/docs/index.md):** Highly deterministic, memory-safe cryptographic primitives embedded via `PyO3`.
+* **[Rust (`crypto-lib`)](../euxis-crypto/docs/index.md):** Highly deterministic, memory-safe cryptographic primitives embedded via `PyO3`.
 
 ## Rate Limiting & Authentication
 
-All API endpoints enforcing state mutations or deploying agents require cryptographic authentication. Consult the **[Security Guide](../security/SECURITY_INTEGRATION.md)** before exposing your Gateway instance to public networks.
+All API endpoints enforcing state mutations or deploying agents require cryptographic authentication. Consult the **[Security Guide](../euxis-policy/SECURITY_INTEGRATION.md)** before exposing your Gateway instance to public networks.

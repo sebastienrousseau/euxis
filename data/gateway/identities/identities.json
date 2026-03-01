@@ -1,0 +1,41 @@
+{
+  "architect": {
+    "agent_id": "architect",
+    "name": "Architect (Core)",
+    "trust_level": "trusted",
+    "permissions": [
+      "*"
+    ],
+    "capabilities": [
+      "mcp",
+      "mesh"
+    ],
+    "metadata": {}
+  },
+  "orchestrator": {
+    "agent_id": "orchestrator",
+    "name": "Orchestrator (Core)",
+    "trust_level": "trusted",
+    "permissions": [
+      "*"
+    ],
+    "capabilities": [
+      "mcp",
+      "mesh"
+    ],
+    "metadata": {}
+  },
+  "researcher": {
+    "agent_id": "researcher",
+    "name": "Researcher",
+    "trust_level": "restricted",
+    "permissions": [
+      "web_search",
+      "web_fetch"
+    ],
+    "capabilities": [
+      "mcp"
+    ],
+    "metadata": {}
+  }
+}

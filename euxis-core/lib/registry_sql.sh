@@ -432,7 +432,7 @@ resolve_agent_path_hybrid() {
 # ============================================================================
 
 registry_rebuild() {
-    local migrate_script="${EUXIS_HOME}/scripts/migration/migrate-registry-to-sqlite.py"
+    local migrate_script="${EUXIS_HOME}/euxis-ops/migration/migrate-registry-to-sqlite.py"
 
     # Fallback: use JSON directly if migration script doesn't exist
     if [[ ! -f "${migrate_script}" ]]; then

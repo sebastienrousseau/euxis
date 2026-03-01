@@ -33,4 +33,4 @@ timeout_keep_alive = 5
 
 All programmatic environments interacting with a remote Euxis Gateway must provide pre-shared cryptographic secrets or valid Vault identities. If you are operating completely locally on your machine, Euxis automatically bypasses the explicit authorization channels, substituting them with active session lockfiles via `tmp`.
 
-Consult the [Authentication and Security](security/gateway-security.md) documentation prior to production rollout.
+Consult the [Authentication and Security](euxis-policy/gateway-security.md) documentation prior to production rollout.

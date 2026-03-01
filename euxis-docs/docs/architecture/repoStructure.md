@@ -2,16 +2,34 @@
 
 This document captures the target split for functional repositories to reduce coupling and simplify releases.
 
+## Naming Convention
+
+- Canonical package repository names must be exactly two words: `euxis-<singleword>`.
+- Multi-word package suffixes are treated as legacy aliases during migration only.
+- Workspace-only infrastructure directories are explicitly allowlisted by policy and are not package repos.
+
 ## Target Repos
 
-- `euxis-frontend`
-- `euxis-backend`
-- `euxis-docs`
+- `euxis-core`
+- `euxis-cli`
+- `euxis-gateway`
+- `euxis-tui`
+- `euxis-metrics`
+- `euxis-adapters`
+- `euxis-security`
+- `euxis-crypto`
+- `euxis-runtime`
 - `euxis-scripts`
-- `euxis-assets`
+- `euxis-sdk`
+- `euxis-docs`
 
 ## Migration Notes
 
 - Keep shared conventions in `.github/` and `config/templates/` and sync across repos.
 - Extract one domain at a time to avoid large, breaking migrations.
 - Publish versioned release notes for each repo as the split progresses.
+- Keep workspace-level policy assets (e.g. `euxis-policy/gateway.json`) in a dedicated policy repo or bundled release asset set during split.
+- Canonical migration mapping:
+  - `euxis-crypto` -> `euxis-crypto`
+  - `euxis-web` -> `euxis-crypto`
+  - `euxis-sdk` -> `euxis-sdk`

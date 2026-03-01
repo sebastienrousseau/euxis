@@ -20,7 +20,7 @@ jobs:
           - euxis-adapters
           - euxis-tui
           - euxis-metrics
-          - euxis-crypto-lib
+          - euxis-crypto
 
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install and test
         run: |
-          cd euxis-crypto-packages
+          cd euxis-web
           npm ci || npm install
           npm test || echo "No tests configured"
 

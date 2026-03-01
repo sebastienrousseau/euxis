@@ -114,7 +114,7 @@ Runs and manages the Gateway control plane for channels, sessions, and WebSocket
 **Options:**
 - `--bind <addr>` - Bind address (default: `127.0.0.1`)
 - `--port <port>` - Bind port (default: `18789`)
-- `--config <path>` - Path to gateway config (default: `~/.euxis/security/gateway.json`)
+- `--config <path>` - Path to gateway config (default: `~/.euxis/euxis-policy/gateway.json`)
 - `--auth-mode <token|password>` - Override auth mode
 
 **Examples:**

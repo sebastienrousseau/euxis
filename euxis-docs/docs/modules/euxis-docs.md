@@ -13,6 +13,6 @@
 
 - Docs manifest: `euxis-docs/pyproject.toml`
 - Package tests: `euxis-docs/tests/`
-- Stable docs gate: `scripts/quality/run_docs_tests_stable.sh`
-- Phase docs coverage gate: `scripts/quality/validate_phase_docs_coverage.py`
-- Package excellence gate: `scripts/quality/validate_package_excellence.py`
+- Stable docs gate: `euxis-ops/quality/run_docs_tests_stable.sh`
+- Phase docs coverage gate: `euxis-ops/quality/validate_phase_docs_coverage.py`
+- Package excellence gate: `euxis-ops/quality/validate_package_excellence.py`

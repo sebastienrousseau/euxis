@@ -10,7 +10,7 @@ This document tracks the implementation of the 2026 architecture hardening roadm
   - Primary adapter implementation: `euxis-core/src/euxis_core/platform/adapters.py`
 - Runtime adapter is isolated in `euxis-core/src/euxis_core/runtime/`.
   - Gateway transport adapter: `euxis-core/src/euxis_core/runtime/gateway_ws.py`
-- CI guardrail: `scripts/architecture/check_boundaries.py`.
+- CI guardrail: `euxis-ops/architecture/check_boundaries.py`.
 - Guardrail blocks direct `subprocess`/network imports in pure core logic.
   - IO adapter allowlist: `platform/`, `runtime/`.
 - Guardrail also blocks direct `asyncio` imports outside `runtime/`.
@@ -38,7 +38,7 @@ This document tracks the implementation of the 2026 architecture hardening roadm
   - paired `*.sig` and `*.pem` for each artifact
 - Local verification command:
   - `make verify-signed-artifacts`
-  - Verification script: `scripts/supply_chain/verify_signed_artifacts.sh`
+  - Verification script: `euxis-ops/supply_chain/verify_signed_artifacts.sh`
 - CI now verifies uploaded signed artifacts in a separate job after artifact transfer.
 
 ## Phase 4: Resilience and performance
@@ -50,47 +50,47 @@ This document tracks the implementation of the 2026 architecture hardening roadm
   - `euxis-core/src/euxis_core/runtime/concurrency.py`
   - `euxis-core/src/euxis_core/mesh/swarm.py`
 - Performance budget gate:
-  - `scripts/perf/check_perf_budget.py`
-  - Policy file: `scripts/perf/perf_policy.json` (`current`, `target_q2_2026`, `target_q4_2026`)
+  - `euxis-ops/perf/check_perf_budget.py`
+  - Policy file: `euxis-ops/perf/perf_policy.json` (`current`, `target_q2_2026`, `target_q4_2026`)
 - Governance gate:
-  - `scripts/perf/validate_perf_governance.py`
+  - `euxis-ops/perf/validate_perf_governance.py`
   - Validates policy schema, stage presence, monotonic ratcheting (`current >= q2 >= q4`), and baseline format.
 - Warning-only trend reporting:
   - PR job evaluates `target_q2_2026` and posts deltas to the job summary without blocking merge.
-  - Summary rendering script: `scripts/perf/render_trend_summary.py`
+  - Summary rendering script: `euxis-ops/perf/render_trend_summary.py`
 
 ## Phase 5: Quality/cost scorecard
 
 - Scorecard generator:
-  - `scripts/eval/scorecard.py`
+  - `euxis-ops/eval/scorecard.py`
 - Sample metrics:
-  - `data/scorecard/metrics.sample.json`
+  - `euxis-data/scorecard/metrics.sample.json`
 - Gate output:
-  - `data/scorecard/latest.json`
+  - `euxis-data/scorecard/latest.json`
 - Release checklist gate:
-  - `scripts/release/generate_checklist.py`
-  - Fails if p95 regresses by >10% vs `scripts/perf/release_baseline.json`.
+  - `euxis-ops/release/generate_checklist.py`
+  - Fails if p95 regresses by >10% vs `euxis-ops/perf/release_baseline.json`.
 - Baseline proposal helper:
-  - `scripts/perf/propose_release_baseline.py`
-  - Generates `data/release/proposed-baseline.json` for next release review.
+  - `euxis-ops/perf/propose_release_baseline.py`
+  - Generates `euxis-data/release/proposed-baseline.json` for next release review.
 - Baseline proposal review:
-  - `scripts/release/review_baseline_proposal.py`
+  - `euxis-ops/release/review_baseline_proposal.py`
   - Flags suspicious baseline drift (default >20%) for manual review.
 - Release evidence bundle:
-  - `scripts/release/aggregate_release_evidence.py`
-  - Generates `data/release/release-evidence.json` as a single gate artifact.
+  - `euxis-ops/release/aggregate_release_evidence.py`
+  - Generates `euxis-data/release/release-evidence.json` as a single gate artifact.
 - Release evidence validator:
-  - `scripts/release/validate_release_evidence.py`
+  - `euxis-ops/release/validate_release_evidence.py`
   - Enforces minimum score thresholds and checklist/baseline-review integrity.
   - Optional strict mode requires signature status `verified`.
   - Supply-chain workflow runs strict mode after artifact signature verification.
 - Phase completion validator:
-  - `scripts/release/validate_phase_completion.py`
+  - `euxis-ops/release/validate_phase_completion.py`
   - Ensures required phase 1-5 implementation artifacts are present.
 - 100% phase-critical code coverage gate:
-  - `scripts/quality/enforce_phase_code_coverage.py`
+  - `euxis-ops/quality/enforce_phase_code_coverage.py`
 - 100% phase docs-coverage gate:
-  - `scripts/quality/validate_phase_docs_coverage.py`
+  - `euxis-ops/quality/validate_phase_docs_coverage.py`
 
 ## Local commands
 

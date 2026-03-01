@@ -242,8 +242,8 @@ temp/
 # ============================================================================
 # EXCEPTIONS (Explicit includes)
 # ============================================================================
-# Override global gitignore for bin/ (contains Euxis scripts, not build output)
-!bin/
+# Override global gitignore for euxis-bin/ (contains Euxis scripts, not build output)
+!euxis-bin/
 
 # Keep example env file
 !.env.example
@@ -264,4 +264,5 @@ target/
 
 # Application specific cache 
 euxis-runtime/data/projects/.euxis/
-data/gateway/
+euxis-data/gateway/
+euxis-data/release/workspace-topology.json

@@ -42,4 +42,4 @@ Agents execute natively as `wasm32-wasi` modules explicitly bound to operational
 euxis manifest generate rust_compiler > rust_manifest.json
 ```
 
-Use manuals within the [Security Integration](../security/manifests.md) documentation to securely limit virtual directory overrides within your customized JSON schemas.
+Use manuals within the [Security Integration](../euxis-policy/manifests.md) documentation to securely limit virtual directory overrides within your customized JSON schemas.

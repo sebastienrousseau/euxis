@@ -83,7 +83,7 @@ See ``reports/initial-user-expectations-2026-02-18`` for full details.
    :maxdepth: 2
    :caption: Examples & Templates
 
-   examples/index
+   euxis-examples/index
    templates/index
 
 .. toctree::

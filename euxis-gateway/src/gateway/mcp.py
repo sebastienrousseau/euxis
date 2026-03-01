@@ -159,7 +159,7 @@ class MCPHost:
 
     async def _tool_sign_payload(self, payload: str, key_id: Optional[str] = None) -> Dict[str, Any]:
         """Tool handler for signing payloads."""
-        # Integration with euxis-crypto-lib
+        # Integration with euxis-crypto
         # For now, a mock implementation that would call into the Rust crypto lib
         import hashlib
         signature = hashlib.sha256(payload.encode()).hexdigest()

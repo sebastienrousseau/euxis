@@ -6,7 +6,7 @@ Security in Euxis is enforced by explicit policy defaults and audited approvals.
 
 Gateway security policy defaults live in:
 
-`~/.euxis/security/gateway.json`
+`~/.euxis/euxis-policy/gateway.json`
 
 Key controls include:
 - **Execution policy** (`policy`, `ask`, `ask_fallback`)

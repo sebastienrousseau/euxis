@@ -87,7 +87,7 @@ jobs:
             euxis-metrics
             euxis-security
             euxis-tui
-            euxis-crypto-lib
+            euxis-crypto
           )
           for module in "${modules[@]}"; do
             if [[ -f "${module}/pyproject.toml" ]]; then
@@ -164,9 +164,9 @@ jobs:
 
       - name: Verify downloaded signatures end-to-end
         run: |
-          bash scripts/supply_chain/verify_signed_artifacts.sh release-artifacts
-          mkdir -p data/release
-          cat > data/release/signature-verification.json <<'JSON'
+          bash euxis-ops/supply_chain/verify_signed_artifacts.sh release-artifacts
+          mkdir -p euxis-data/release
+          cat > euxis-data/release/signature-verification.json <<'JSON'
           {
             "status": "verified",
             "source": "supply-chain.verify-uploaded-artifacts"
@@ -176,46 +176,46 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: signature-verification-status
-          path: data/release/signature-verification.json
+          path: euxis-data/release/signature-verification.json
 
       - name: Build quality artifacts for strict evidence validation
         run: |
-          python3 scripts/eval/scorecard.py data/scorecard/metrics.sample.json data/scorecard/latest.json
-          python3 scripts/release/generate_checklist.py \
+          python3 euxis-ops/eval/scorecard.py euxis-data/scorecard/metrics.sample.json euxis-data/scorecard/latest.json
+          python3 euxis-ops/release/generate_checklist.py \
             --metrics euxis-runtime/data/perf/metrics.jsonl \
-            --policy scripts/perf/perf_policy.json \
+            --policy euxis-ops/perf/perf_policy.json \
             --stage current \
-            --baseline scripts/perf/release_baseline.json \
+            --baseline euxis-ops/perf/release_baseline.json \
             --threshold-percent 10 \
-            --output data/release/checklist.md \
-            --json-output data/release/checklist.json
-          python3 scripts/perf/propose_release_baseline.py \
+            --output euxis-data/release/checklist.md \
+            --json-output euxis-data/release/checklist.json
+          python3 euxis-ops/perf/propose_release_baseline.py \
             --metrics euxis-runtime/data/perf/metrics.jsonl \
             --previous-release v0.0.2 \
             --next-release v0.0.3 \
-            --output data/release/proposed-baseline.json
-          python3 scripts/release/review_baseline_proposal.py \
-            --baseline scripts/perf/release_baseline.json \
-            --proposal data/release/proposed-baseline.json \
+            --output euxis-data/release/proposed-baseline.json
+          python3 euxis-ops/release/review_baseline_proposal.py \
+            --baseline euxis-ops/perf/release_baseline.json \
+            --proposal euxis-data/release/proposed-baseline.json \
             --threshold-percent 20 \
-            --output data/release/baseline-review.json \
-            --markdown-output data/release/baseline-review.md
+            --output euxis-data/release/baseline-review.json \
+            --markdown-output euxis-data/release/baseline-review.md
 
       - name: Build strict release evidence bundle
         run: |
-          python3 scripts/release/aggregate_release_evidence.py \
-            --scorecard data/scorecard/latest.json \
-            --checklist data/release/checklist.json \
-            --proposal data/release/proposed-baseline.json \
-            --baseline-review data/release/baseline-review.json \
-            --signature-status data/release/signature-verification.json \
-            --output data/release/release-evidence.json \
-            --markdown-output data/release/release-evidence.md
+          python3 euxis-ops/release/aggregate_release_evidence.py \
+            --scorecard euxis-data/scorecard/latest.json \
+            --checklist euxis-data/release/checklist.json \
+            --proposal euxis-data/release/proposed-baseline.json \
+            --baseline-review euxis-data/release/baseline-review.json \
+            --signature-status euxis-data/release/signature-verification.json \
+            --output euxis-data/release/release-evidence.json \
+            --markdown-output euxis-data/release/release-evidence.md
 
       - name: Validate strict release evidence (signature required)
         run: |
-          python3 scripts/release/validate_release_evidence.py \
-            --evidence data/release/release-evidence.json \
+          python3 euxis-ops/release/validate_release_evidence.py \
+            --evidence euxis-data/release/release-evidence.json \
             --min-overall 9.0 \
             --min-category 8.0 \
             --require-signature-verified
@@ -225,5 +225,5 @@ jobs:
         with:
           name: strict-release-evidence
           path: |
-            data/release/release-evidence.json
-            data/release/release-evidence.md
+            euxis-data/release/release-evidence.json
+            euxis-data/release/release-evidence.md

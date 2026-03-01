@@ -34,7 +34,7 @@ Split Euxis into a small set of purpose-built repos that mirror today’s module
   - Evidence: `metrics/src/metrics/verification/evidence_framework.py:27`.
 
 **Security policy is read by Gateway:**
-- Gateway config defaults load from `~/.euxis/security/gateway.json`.
+- Gateway config defaults load from `~/.euxis/euxis-policy/gateway.json`.
   - Evidence: `api/src/gateway/server.py:133`.
 
 ### Circular Dependencies
@@ -42,7 +42,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 
 ### Shared Utilities & Types
 - `core/lib/*` provides shared shell utilities and validation (used by CLI).
-- `security/gateway.json` defines approval policy defaults (consumed by Gateway).
+- `euxis-policy/gateway.json` defines approval policy defaults (consumed by Gateway).
 - `agents/registry.json` and `agents/squads.json` provide agent metadata (consumed by CLI and TUI).
 
 ### Data Flow (runtime)
@@ -56,7 +56,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 - TUI tests in `tests/unit/test_*` reference `ui/src/tui/` screens.
 
 ### Configuration & Secrets
-- Gateway policy defaults in `security/gateway.json`.
+- Gateway policy defaults in `euxis-policy/gateway.json`.
 - Other configuration in `config/` (playbooks, schemas, codex).
 - Provider credentials are environment variables (documented in `README.md`).
 
@@ -113,8 +113,8 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 
 6. **`euxis-security`**
    - **Purpose:** security policy defaults.
-   - **Contents:** `security/`.
-   - **Public interface:** `security/gateway.json`.
+   - **Contents:** `euxis-policy/`.
+   - **Public interface:** `euxis-policy/gateway.json`.
    - **Dependencies:** none.
    - **Build/deploy:** static config distribution.
    - **Migration complexity:** Low.
@@ -134,14 +134,14 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
    - **Dependencies:** none.
    - **Migration complexity:** Low.
 
-9. **`euxis-crypto-lib`**
+9. **`euxis-crypto`**
    - **Purpose:** Python crypto helpers.
    - **Contents:** `crypto/src/crypto_lib/`.
    - **Public interface:** Python package exports.
    - **Dependencies:** none.
    - **Migration complexity:** Low.
 
-10. **`euxis-crypto-packages`**
+10. **`euxis-web`**
    - **Purpose:** TypeScript crypto packages.
    - **Contents:** `packages/crypto-lib`, `packages/crypto-server`.
    - **Public interface:** npm packages.
@@ -165,7 +165,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 ### API Contracts (Gateway)
 - WebSocket event schema: `docs/reference/gateway.md`.
 - HTTP endpoints: `api/src/gateway/server.py` (`/health`, `/approvals/*`).
-- Auth and policy defaults: `~/.euxis/security/gateway.json`.
+- Auth and policy defaults: `~/.euxis/euxis-policy/gateway.json`.
 
 ### Event Contracts
 - Gateway emits `agent`, `presence`, `tick`, `shutdown` events (documented in gateway docs).
@@ -200,7 +200,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
    - Ensure core/lib is a dependency via checkout or package.
 
 3. **Extract `euxis-security`**
-   - Move `security/` and update Gateway config default path.
+   - Move `euxis-policy/` and update Gateway config default path.
 
 4. **Extract `euxis-gateway` + `euxis-adapters`**
    - Move `api/src/gateway/` and `adapters/src/adapters/` into separate repos or a single repo with packages.
@@ -261,8 +261,8 @@ Use `git filter-repo --path` per repo to preserve history. Example:
 [euxis-security] ----> [euxis-gateway]
 [euxis-adapters] ----> [euxis-gateway]
 [euxis-docs]
-[euxis-crypto-lib]
-[euxis-crypto-packages]
+[euxis-crypto]
+[euxis-web]
 ```
 
 
@@ -312,12 +312,12 @@ cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path docs --path mkdocs.yml --force
 
 # Crypto (Python)
-mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-lib && cd ${TMPDIR:-/tmp}/euxis-crypto-lib
+mkdir -p ${TMPDIR:-/tmp}/euxis-crypto && cd ${TMPDIR:-/tmp}/euxis-crypto
 cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path crypto/src/crypto_lib --force
 
 # Crypto packages (TS)
-mkdir -p ${TMPDIR:-/tmp}/euxis-crypto-packages && cd ${TMPDIR:-/tmp}/euxis-crypto-packages
+mkdir -p ${TMPDIR:-/tmp}/euxis-web && cd ${TMPDIR:-/tmp}/euxis-web
 cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path packages/crypto-lib --path packages/crypto-server --force
 ```
@@ -373,7 +373,7 @@ Scaffold (monorepo-friendly) assets:
 
 - `docs/workflows/multi-repo-workflow.md` for day-to-day dev flow.
 - `config/multi-repo.example.json` to define local repo URLs.
-- `scripts/setup/multi-repo-dev.sh` to clone a local multi-repo layout.
+- `euxis-ops/setup/multi-repo-dev.sh` to clone a local multi-repo layout.
 
 Example worktree setup:
 
@@ -393,5 +393,5 @@ git -C ~/dev/euxis-core worktree add ../euxis-cli
 - **euxis-security** — approval and allowlist policy defaults.
 - **euxis-metrics** — observability tooling and fleet metrics schemas.
 - **euxis-docs** — documentation and ADRs.
-- **euxis-crypto-lib** — Python crypto utilities.
-- **euxis-crypto-packages** — TypeScript crypto packages.
+- **euxis-crypto** — Python crypto utilities.
+- **euxis-web** — TypeScript crypto packages.

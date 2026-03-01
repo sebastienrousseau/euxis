@@ -7,7 +7,7 @@ Documentation for the Euxis Fleet framework, built with Sphinx.
 Run the strict package gate:
 
 ```bash
-bash ../scripts/quality/run_docs_tests_stable.sh
+bash ../euxis-ops/quality/run_docs_tests_stable.sh
 ```
 
 Run tests directly from package root:

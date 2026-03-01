@@ -1044,7 +1044,7 @@ run_tests_gate() {
     local test_dirs=(
         "${EUXIS_HOME}/euxis-core/tests"
         "${EUXIS_HOME}/euxis-tui/tests"
-        "${EUXIS_HOME}/euxis-crypto-lib/tests"
+        "${EUXIS_HOME}/euxis-crypto/tests"
         "${EUXIS_HOME}/euxis-gateway/tests"
         "${EUXIS_HOME}/euxis-metrics/tests"
     )

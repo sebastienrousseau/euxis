@@ -27,8 +27,8 @@
 6. [ ] `euxis-tui`
 7. [ ] `euxis-metrics`
 8. [ ] `euxis-docs`
-9. [ ] `euxis-crypto-lib`
-10. [ ] `euxis-crypto-packages`
+9. [ ] `euxis-crypto`
+10. [ ] `euxis-web`
 
 ## Verification
 - [ ] Each repo builds and tests independently
@@ -39,7 +39,7 @@
 ## Local Multi-Repo Workflow
 - [x] Publish `docs/workflows/multi-repo-workflow.md`
 - [x] Provide `config/multi-repo.example.json`
-- [x] Provide `scripts/setup/multi-repo-dev.sh`
+- [x] Provide `euxis-ops/setup/multi-repo-dev.sh`
 
 ## Rollback
 - [ ] Keep monorepo branch intact until all repos are stable

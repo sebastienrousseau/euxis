@@ -151,7 +151,7 @@ python -m pytest
 Follow `docs/policies/namingConventions.md` for folder and file names. For local checks:
 
 ```bash
-python scripts/check-naming-conventions.py --changed
+python euxis-ops/check-naming-conventions.py --changed
 ```
 
 If a language or toolchain requires different naming, use `config/namingExceptions.txt` and keep exceptions narrowly scoped.

@@ -1,0 +1,54 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "euxis-crypto"
+version = "0.0.2"
+description = "Python cryptography utilities for the Euxis Agent Framework"
+readme = "README.md"
+license = {text = "AGPL-3.0-or-later"}
+requires-python = ">=3.11"
+authors = [{name = "Sebastien Rousseau", email = "sebastian.rousseau@gmail.com"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = [
+    "cryptography>=46.0.5,<48.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "ruff>=0.5.0", "black>=24.0.0"]
+
+[project.urls]
+Homepage = "https://euxis.co"
+Repository = "https://github.com/euxis/euxis-crypto"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=crypto_lib --cov-report=term-missing --cov-fail-under=95"
+
+[tool.coverage.run]
+source = ["src/crypto_lib"]
+branch = true
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]

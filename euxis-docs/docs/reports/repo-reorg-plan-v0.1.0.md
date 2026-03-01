@@ -17,13 +17,13 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 - `metrics/src/metrics/`: metrics collection, aggregation, verification, dashboard schemas.
 - `packages/`: sub-packages (`crypto-lib`, `crypto-server`).
 - `agents/prompts/`: agent prompts and protocols.
-- `scripts/`: gateway server + adapters + tooling scripts.
-- `security/`: approval policies, allowlists, audit policy defaults.
+- `euxis-ops/`: gateway server + adapters + tooling scripts.
+- `euxis-policy/`: approval policies, allowlists, audit policy defaults.
 - `tests/`: test suites for infra, TUI, CLI, gateway, etc.
 - `ui/src/tui/`: Textual-based ETX TUI app.
 
 ### Multipurpose directories
-- `scripts/` mixes Gateway runtime, adapters, demos, and tooling.
+- `euxis-ops/` mixes Gateway runtime, adapters, demos, and tooling.
 - `euxis-cli/bin/` mixes user-facing commands with internal helpers.
 - `packages/` overlaps with `crypto/src/crypto_lib/` (duplication risk).
 
@@ -39,11 +39,11 @@ cli/         # Command-line entrypoints and shell libs
 ui/src/tui/         # ETX Textual UI
 adapters/src/adapters/    # Channel adapters (Slack, Telegram, WebChat)
 runtime/memory/      # Cortex + memory persistence
-security/    # Approvals, allowlists, audit, Guard logic
+euxis-policy/    # Approvals, allowlists, audit, Guard logic
 metrics/src/metrics/     # Metrics collection, aggregation, dashboards
 config/      # Config schemas and defaults
 docs/        # Docs (kept as-is)
-scripts/     # Build/dev tooling (non-runtime)
+euxis-ops/     # Build/dev tooling (non-runtime)
 tests/       # Cross-module integration tests only
 ```
 
@@ -66,7 +66,7 @@ tests/       # Cross-module integration tests only
 ### `api/src/gateway/`
 - **Purpose**: WebSocket control plane and HTTP endpoints.
 - **Contains**: `api/src/gateway/server.py`, `api/src/gateway/utils.py`, gateway schemas, `api/src/gateway/webchat/`.
-- **Depends on**: `core/`, `security/`, `config/`.
+- **Depends on**: `core/`, `euxis-policy/`, `config/`.
 
 ### `cli/`
 - **Purpose**: User entrypoints and shell tooling.
@@ -88,7 +88,7 @@ tests/       # Cross-module integration tests only
 - **Contains**: `runtime/memory/cortex/` schema + related tools.
 - **Depends on**: `core/`.
 
-### `security/`
+### `euxis-policy/`
 - **Purpose**: approvals, allowlists, audit trail.
 - **Contains**: approval persistence, allowlist configs.
 - **Depends on**: `core/`, `config/`.
@@ -106,9 +106,9 @@ tests/       # Cross-module integration tests only
 - `core/lib/*` → `core/lib/*`
 - `prompts/*` → `agents/prompts/*`
 - `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
-- `scripts/gateway_*` → `api/src/gateway/`
+- `euxis-ops/gateway_*` → `api/src/gateway/`
 - `adapters/src/adapters/*` → `adapters/src/adapters/`
-- `config/gateway.json` → `security/gateway.json`
+- `config/gateway.json` → `euxis-policy/gateway.json`
 - `runtime/data/cortex/*` → `runtime/memory/cortex/*`
 - `api/src/gateway/webchat/*` → `api/src/gateway/webchat/*`
 - `api/src/gateway/utils.py` → `api/src/gateway/utils.py`
@@ -148,7 +148,7 @@ Owns connection handling, session routing, event streaming, and HTTP endpoints. 
 ## Dependencies
 - `core/`
 - `config/`
-- `security/`
+- `euxis-policy/`
 
 ## Usage
 ```bash

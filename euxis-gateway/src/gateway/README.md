@@ -16,7 +16,7 @@ Gateway owns connection handling, session routing, approvals, and event streamin
 - `core/` — shared utilities
 - `config/` — gateway schemas and defaults
 - `adapters/src/adapters/` — channel adapters
-- `security/` — approval and allowlist policy defaults
+- `euxis-policy/` — approval and allowlist policy defaults
 
 ## Usage
 ```bash
@@ -24,7 +24,7 @@ python3 api/src/gateway/server.py --bind 127.0.0.2 --port 18789
 ```
 
 Default policy config:
-`~/.euxis/security/gateway.json`
+`~/.euxis/euxis-policy/gateway.json`
 
 ## Development
 ```bash

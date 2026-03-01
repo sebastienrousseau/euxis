@@ -15,12 +15,12 @@ Ensure you explicitly define the verbosity index natively in your Gateway initia
 
 ## Examining Structural Data
 
-All native logs emit explicitly as structured JSONLines (`.jsonl`) into your explicit Gateway telemetry registry (default: `~/.euxis/data/gateway/runs/`). 
+All native logs emit explicitly as structured JSONLines (`.jsonl`) into your explicit Gateway telemetry registry (default: `~/.euxis/euxis-data/gateway/runs/`). 
 
 You can view these payloads safely utilizing standard native JSON processors like `jq`. 
 
 ```bash
-cat ~/.euxis/data/gateway/runs/run_broadcast_1771789900646.jsonl | jq '.payload | .is_valid'
+cat ~/.euxis/euxis-data/gateway/runs/run_broadcast_1771789900646.jsonl | jq '.payload | .is_valid'
 ```
 
 Alternatively, invoke `euxis ui` to attach locally to the real-time WebSocket logger stream and filter dynamically across running Wasm architectures.

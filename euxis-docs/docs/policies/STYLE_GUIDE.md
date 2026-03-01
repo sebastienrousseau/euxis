@@ -337,7 +337,7 @@ troubleshooting.md  (too vague)
 docs/
   guides/
   api-reference/
-  examples/
+  euxis-examples/
 ```
 
 ## Accessibility

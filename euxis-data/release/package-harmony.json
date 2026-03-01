@@ -1,0 +1,73 @@
+{
+  "status": "ok",
+  "limits": {
+    "max_duplicate_blocks": 0,
+    "max_function_complexity": 80,
+    "max_functions_over_30": 4,
+    "max_functions_over_40": 3
+  },
+  "structure_issues": [],
+  "duplicate_blocks": {
+    "count": 0,
+    "minimum_block_lines": 30,
+    "examples": []
+  },
+  "python_complexity": {
+    "max_function_complexity": 80,
+    "functions_over_30": 4,
+    "functions_over_40": 3,
+    "top_functions": [
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
+        "function": "build_app",
+        "complexity": 80
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/mesh.py",
+        "function": "setup_mesh",
+        "complexity": 63
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
+        "function": "voice_stream",
+        "complexity": 50
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/protocol_test.py",
+        "function": "minimal_validate",
+        "complexity": 40
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
+        "function": "handle_frame",
+        "complexity": 30
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/auth.py",
+        "function": "setup_auth",
+        "complexity": 25
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-tui/src/tui/__main__.py",
+        "function": "run_audit",
+        "complexity": 24
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/orchestrator.py",
+        "function": "setup_orchestrator",
+        "complexity": 23
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-scripts/check_tech_debt.py",
+        "function": "check_debt",
+        "complexity": 20
+      },
+      {
+        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/mcp.py",
+        "function": "handle_connection",
+        "complexity": 18
+      }
+    ]
+  },
+  "failures": []
+}

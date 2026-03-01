@@ -24,8 +24,8 @@ jobs:
           node-version: "22.14.0"
           cache: "npm"
           cache-dependency-path: |
-            euxis-crypto-packages/package-lock.json
-            euxis-crypto-packages/src/crypto-lib/package-lock.json
+            euxis-web/package-lock.json
+            euxis-web/src/crypto-lib/package-lock.json
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -44,8 +44,8 @@ jobs:
 
       - name: Install pinned Node deps
         run: |
-          npm --prefix euxis-crypto-packages ci
-          npm --prefix euxis-crypto-packages/src/crypto-lib ci
+          npm --prefix euxis-web ci
+          npm --prefix euxis-web/src/crypto-lib ci
 
       - name: Strict verify (single path)
         run: make verify-all-packages REQUIRE_DEPS=1

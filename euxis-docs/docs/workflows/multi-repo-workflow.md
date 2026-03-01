@@ -20,8 +20,8 @@ Recommended local layout (one folder per repo):
   euxis-security/
   euxis-metrics/
   euxis-docs/
-  euxis-crypto-lib/
-  euxis-crypto-packages/
+  euxis-crypto/
+  euxis-web/
 ```
 
 ## Setup
@@ -29,8 +29,8 @@ Recommended local layout (one folder per repo):
 2. Run:
 
 ```bash
-scripts/setup/validate-multi-repo-config.sh
-scripts/setup/multi-repo-dev.sh
+euxis-ops/setup/validate-multi-repo-config.sh
+euxis-ops/setup/multi-repo-dev.sh
 ```
 
 This creates the layout above and clones each repo into it.
@@ -47,7 +47,7 @@ Use path-based dependencies while iterating across repos:
 If you prefer git worktrees:
 
 ```
-scripts/setup/multi-repo-dev.sh --worktree --branch main
+euxis-ops/setup/multi-repo-dev.sh --worktree --branch main
 ```
 
 ## Guardrails

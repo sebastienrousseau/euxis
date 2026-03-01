@@ -16,7 +16,7 @@ Adapters translate platform-specific events into Gateway messages. Each adapter 
 - `api/src/gateway/` — session and message routing APIs
 
 ## Usage
-Adapters are loaded by the Gateway based on `security/gateway.json`.
+Adapters are loaded by the Gateway based on `euxis-policy/gateway.json`.
 
 ## Development
 ```bash

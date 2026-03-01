@@ -307,7 +307,7 @@ class DispatchEngine:
         1. EUXIS_LOOP_PATH environment variable (if set)
         2. ${REPO_ROOT}/cli/bin/euxis-loop (repo-local install)
         3. ~/bin/euxis-loop (user binary location)
-        4. ${EUXIS_HOME}/bin/euxis-loop (local installation)
+        4. ${EUXIS_HOME}/euxis-bin/euxis-loop (local installation)
         5. ${EUXIS_HOME}/euxis-cli/bin/euxis-loop (legacy local installation)
 
         Raises:

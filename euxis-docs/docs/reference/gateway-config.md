@@ -2,7 +2,7 @@
 
 ## Security Policy Defaults
 
-Gateway policy defaults live in `~/.euxis/security/gateway.json`.
+Gateway policy defaults live in `~/.euxis/euxis-policy/gateway.json`.
 Use this file to configure approvals, allowlists, and execution gates.
 
 Reference for the Gateway configuration file.
@@ -95,13 +95,13 @@ Reference for the Gateway configuration file.
 
 ## Fields
 
-**File location:** `~/.euxis/security/gateway.json`
+**File location:** `~/.euxis/euxis-policy/gateway.json`
 
 ## Config Loading Order
 
 1. `--config <path>` CLI override
 2. `EUXIS_GATEWAY_CONFIG` environment override
-3. Default: `~/.euxis/security/gateway.json`
+3. Default: `~/.euxis/euxis-policy/gateway.json`
 4. Built-in defaults if file is missing
 
 ### `gateway`
