@@ -4,6 +4,6 @@
   "next_release": "v0.0.3",
   "threshold_percent": 25.0,
   "package_count": 13,
-  "flagged_packages_count": 11,
-  "proposal_sha256": "56535d29ef6f38554bc4fed5e0ef30106be3d6c3b8b9850f57f0cb262c9ab2ae"
+  "flagged_packages_count": 12,
+  "proposal_sha256": "e67f68c6862b85847e15c5c31736d0ff674e66206598d68a7aac92f00b85645b"
 }

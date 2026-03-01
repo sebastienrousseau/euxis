@@ -1,0 +1,81 @@
+version: 1
+mode: openclaw-bridge
+
+paths:
+  euxis_home: "${EUXIS_HOME:-~/.euxis}"
+  openclaw_home: "${OPENCLAW_HOME:-~/.openclaw}"
+  euxis_runtime: "${EUXIS_HOME:-~/.euxis}/euxis-runtime"
+  euxis_data: "${EUXIS_HOME:-~/.euxis}/euxis-data"
+
+openclaw_compat:
+  skill_format: agentskills-skill-md
+  skill_frontmatter_required:
+    - name
+    - description
+  skill_precedence:
+    - "<workspace>/skills"
+    - "~/.openclaw/skills"
+    - bundled
+  clawsite_registry:
+    docs: "https://docs.openclaw.ai/tools/clawhub"
+
+migration:
+  enabled: true
+  source_roots:
+    - "${OPENCLAW_HOME:-~/.openclaw}/credentials"
+    - "${OPENCLAW_HOME:-~/.openclaw}/agents"
+    - "${OPENCLAW_HOME:-~/.openclaw}/skills"
+  memory_formats:
+    - json
+    - jsonl
+    - markdown
+  output_roots:
+    identities: "${EUXIS_HOME:-~/.euxis}/euxis-data/gateway/identities"
+    sessions: "${EUXIS_HOME:-~/.euxis}/euxis-data/gateway/sessions"
+    transcripts: "${EUXIS_HOME:-~/.euxis}/euxis-data/gateway/transcripts"
+  integrity:
+    checksum: sha256
+    write_provenance: true
+
+bridge_daemon:
+  enabled: true
+  bind: "127.0.0.1"
+  port: 18889
+  inbound_channels:
+    telegram:
+      enabled: true
+      webhook_path: "/webhook/telegram"
+      token_env: "TELEGRAM_BOT_TOKEN"
+    signal:
+      enabled: false
+      webhook_path: "/webhook/signal"
+      token_env: "SIGNAL_BRIDGE_TOKEN"
+  gateway_forward:
+    ws_url: "ws://127.0.0.1:18789/ws"
+    auth_env: "EUXIS_GATEWAY_TOKEN"
+    session_mode: per_sender
+
+security:
+  enforce_signed_scripts: true
+  signature:
+    algorithm: ed25519
+    public_key_path: "${EUXIS_HOME:-~/.euxis}/euxis-security/keys/bridge-public.pem"
+    detached_signature_ext: ".sig"
+  policy:
+    require_allowlisted_tools: true
+    require_approval_for:
+      - shell
+      - file_write
+      - network_egress
+    sandbox_profile: strict
+  audit:
+    log_path: "${EUXIS_HOME:-~/.euxis}/euxis-data/security/bridge-audit.jsonl"
+    include_hashes: true
+
+platform:
+  supported:
+    - macos
+    - linux
+    - wsl
+  path_normalization: true
+  line_endings: lf
