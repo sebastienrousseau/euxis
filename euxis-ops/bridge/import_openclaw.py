@@ -48,6 +48,68 @@ def collect_source_files(root: Path) -> list[Path]:
     return sorted(files)
 
 
+def _safe_json(raw: str) -> Any:
+    try:
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+def _normalized_records(src: Path, rel: Path, target_type: str) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    suffix = src.suffix.lower()
+    text = src.read_text(encoding="utf-8", errors="replace")
+
+    if suffix == ".json":
+        data = _safe_json(text)
+        if isinstance(data, dict):
+            if target_type == "identities":
+                identity_id = (
+                    data.get("agent_id")
+                    or data.get("id")
+                    or data.get("user_id")
+                    or rel.stem
+                )
+                identity_name = data.get("name") or data.get("display_name") or str(identity_id)
+                records.append(
+                    {
+                        "kind": "identity",
+                        "id": str(identity_id),
+                        "name": str(identity_name),
+                        "source_file": str(rel),
+                        "raw": data,
+                    }
+                )
+            else:
+                messages = data.get("messages") or data.get("history") or data.get("entries")
+                if isinstance(messages, list):
+                    for idx, item in enumerate(messages):
+                        records.append(
+                            {
+                                "kind": "message",
+                                "index": idx,
+                                "source_file": str(rel),
+                                "content": item,
+                            }
+                        )
+    elif suffix == ".jsonl":
+        for idx, line in enumerate(text.splitlines()):
+            parsed = _safe_json(line)
+            if parsed is None:
+                continue
+            records.append({"kind": "jsonl", "index": idx, "source_file": str(rel), "content": parsed})
+    elif suffix in {".md", ".markdown"}:
+        records.append(
+            {
+                "kind": "markdown",
+                "source_file": str(rel),
+                "content": text,
+            }
+        )
+
+    return records
+
+
 def main() -> int:
     args = parse_args()
     config = load_config(Path(args.config))
@@ -61,6 +123,12 @@ def main() -> int:
 
     all_files = collect_source_files(source_root)
     manifest_entries: list[dict[str, Any]] = []
+
+    normalized_paths = {
+        "identities": out_identities / "identities.normalized.jsonl",
+        "sessions": out_sessions / "sessions.normalized.jsonl",
+        "transcripts": out_transcripts / "transcripts.normalized.jsonl",
+    }
 
     for src in all_files:
         target_type = classify_target(src)
@@ -81,9 +149,19 @@ def main() -> int:
         }
         manifest_entries.append(entry)
 
+        records = _normalized_records(src, rel, target_type)
         if not args.dry_run:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)
+            for record in records:
+                append_jsonl(
+                    normalized_paths[target_type],
+                    {
+                        "imported_at": utc_ts(),
+                        "source": "openclaw",
+                        **record,
+                    },
+                )
 
     default_manifest = expand_user_path("~/.euxis/euxis-data/bridge/import-manifest.json")
     manifest_path = expand_user_path(args.output_manifest) if args.output_manifest else default_manifest

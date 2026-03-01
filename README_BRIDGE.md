@@ -27,6 +27,17 @@ This document defines the implementation plan and initial artifacts to make Euxi
    - `euxis-docs/docs/reports/euxis-openclaw-bridge-sprint.md`
 3. Adopt the runtime instruction set:
    - `euxis-ops/bridge/system_prompt_openclaw_bridge.txt`
+4. Deploy daemon with platform runbook:
+   - `euxis-docs/docs/guides/bridge-daemon.md`
+
+## CLI Entry Points
+
+- `euxis bridge import-openclaw --source ~/.openclaw --dry-run`
+- `euxis bridge daemon --config bridge_config.yaml`
+- `euxis bridge keygen --private-key ~/.euxis/euxis-security/keys/bridge-private.pem --public-key ~/.euxis/euxis-security/keys/bridge-public.pem`
+- `euxis bridge sign-script --script ./script.sh --private-key ~/.euxis/euxis-security/keys/bridge-private.pem --sig ./script.sh.sig`
+- `euxis bridge verify-script --script ./script.sh --public-key ~/.euxis/euxis-security/keys/bridge-public.pem --sig ./script.sh.sig`
+- `euxis bridge signed-exec --script ./script.sh --sig ./script.sh.sig --public-key ~/.euxis/euxis-security/keys/bridge-public.pem -- ./script.sh`
 
 ## Compatibility Intent
 

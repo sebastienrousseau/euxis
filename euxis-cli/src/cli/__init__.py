@@ -15,6 +15,40 @@ from rich.syntax import Syntax
 
 __version__ = "v0.0.2"
 
+
+def _run_bridge_tool(euxis_home: str, args: list[str]) -> int:
+    """Execute bridge tooling from euxis-ops."""
+    if not args:
+        print("Usage: euxis bridge <import-openclaw|daemon|signed-exec|keygen|sign-script|verify-script> [...]")
+        return 2
+
+    command = args[0]
+    command_map = {
+        "import-openclaw": "import_openclaw.py",
+        "daemon": "daemon.py",
+        "signed-exec": "signed_exec.py",
+        "keygen": "signature_tools.py",
+        "sign-script": "signature_tools.py",
+        "verify-script": "signature_tools.py",
+    }
+    script_name = command_map.get(command)
+    if not script_name:
+        print(f"Unknown bridge command: {command}")
+        return 2
+
+    script = Path(euxis_home) / "euxis-ops" / "bridge" / script_name
+    if not script.exists():
+        print(f"Bridge tool not found: {script}")
+        return 1
+
+    # signature_tools.py expects the lifecycle command as first argument
+    passthrough = args
+    if script_name == "signature_tools.py":
+        passthrough = [command] + args[1:]
+
+    result = subprocess.run([sys.executable, str(script)] + passthrough, env=os.environ)
+    return int(result.returncode)
+
 def _run_interactive(bash_script: Path, args: list[str]) -> int:
     """Run script in fully interactive terminal passthrough."""
     result = subprocess.run(
@@ -79,6 +113,9 @@ def main() -> int:
     """
     euxis_home = os.environ.get("EUXIS_HOME", str(Path.home() / ".euxis"))
     bash_script = Path(euxis_home) / "euxis-cli" / "bin" / "euxis.sh"
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "bridge":
+        return _run_bridge_tool(euxis_home, sys.argv[2:])
 
     if not bash_script.exists():
         print(f"Error: Euxis bash script not found at {bash_script}")

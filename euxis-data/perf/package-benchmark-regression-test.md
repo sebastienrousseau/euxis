@@ -5,18 +5,18 @@ Mode: `blocking`
 
 | Package | Wall p95 Δ | CPU ms p95 Δ | Memory p95 Δ | Status |
 | --- | ---: | ---: | ---: | --- |
-| `euxis-adapters` | +15.18% | +15.88% | -0.02% | ok |
-| `euxis-cli` | -42.69% | -42.28% | -0.02% | ok |
-| `euxis-core` | -56.46% | -55.90% | -0.73% | ok |
-| `euxis-crypto` | +59.12% | +61.79% | -0.02% | ok |
-| `euxis-docs` | -38.80% | -39.07% | -0.02% | ok |
-| `euxis-gateway` | -45.30% | -45.35% | -0.02% | ok |
-| `euxis-metrics` | -42.81% | -42.70% | -0.02% | ok |
-| `euxis-runtime` | -43.23% | -44.42% | -0.02% | ok |
-| `euxis-scripts` | -55.52% | -54.75% | -0.02% | ok |
-| `euxis-sdk` | +236.72% | +241.95% | -0.02% | ok |
-| `euxis-security` | -16.79% | -15.21% | -0.02% | ok |
-| `euxis-tui` | -31.77% | -31.21% | -0.02% | ok |
-| `euxis-web` | -45.45% | -42.93% | -0.02% | ok |
+| `euxis-adapters` | -14.55% | -13.94% | +0.61% | ok |
+| `euxis-cli` | -42.50% | -42.04% | +0.61% | ok |
+| `euxis-core` | -52.72% | -52.13% | -0.84% | ok |
+| `euxis-crypto` | +79.84% | +80.67% | +0.61% | ok |
+| `euxis-docs` | -32.92% | -32.49% | +0.61% | ok |
+| `euxis-gateway` | -57.32% | -56.97% | +0.61% | ok |
+| `euxis-metrics` | -46.97% | -46.33% | +0.61% | ok |
+| `euxis-runtime` | -50.36% | -50.49% | +0.61% | ok |
+| `euxis-scripts` | -53.55% | -52.29% | +0.61% | ok |
+| `euxis-sdk` | +236.72% | +243.63% | +0.61% | ok |
+| `euxis-security` | -6.18% | -5.11% | +0.61% | ok |
+| `euxis-tui` | -27.26% | -26.48% | +0.61% | ok |
+| `euxis-web` | -38.28% | -36.13% | +0.61% | ok |
 
 Regressed packages: `0`

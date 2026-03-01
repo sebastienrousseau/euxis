@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cli import _run_interactive, _run_artifact_only, main, __version__
+from cli import _run_interactive, _run_artifact_only, _run_bridge_tool, main, __version__
 
 def test_version():
     assert __version__ == "v0.0.2"
@@ -214,3 +214,61 @@ def test_main_artifact_only(tmp_path):
             code = main()
             assert code == 0
             mock_run_artifact.assert_called_once_with(script_file, ["--artifact-only", "agent2", "task"])
+
+
+@patch("cli.subprocess.run")
+def test_run_bridge_tool_import_openclaw(mock_run, tmp_path):
+    bridge_script = tmp_path / "euxis-ops" / "bridge"
+    bridge_script.mkdir(parents=True)
+    (bridge_script / "import_openclaw.py").write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+    mock_run.return_value.returncode = 0
+
+    code = _run_bridge_tool(str(tmp_path), ["import-openclaw", "--dry-run"])
+    assert code == 0
+    called = mock_run.call_args[0][0]
+    assert called[0] == sys.executable
+    assert called[1].endswith("import_openclaw.py")
+    assert "--dry-run" in called
+
+
+@patch("cli.subprocess.run")
+def test_run_bridge_tool_signature_passthrough(mock_run, tmp_path):
+    bridge_script = tmp_path / "euxis-ops" / "bridge"
+    bridge_script.mkdir(parents=True)
+    (bridge_script / "signature_tools.py").write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+    mock_run.return_value.returncode = 0
+
+    code = _run_bridge_tool(str(tmp_path), ["keygen", "--private-key", "a", "--public-key", "b"])
+    assert code == 0
+    called = mock_run.call_args[0][0]
+    assert called[1].endswith("signature_tools.py")
+    assert called[2] == "keygen"
+
+
+def test_run_bridge_tool_unknown(tmp_path):
+    code = _run_bridge_tool(str(tmp_path), ["unknown"])
+    assert code == 2
+
+
+def test_run_bridge_tool_no_args(tmp_path):
+    code = _run_bridge_tool(str(tmp_path), [])
+    assert code == 2
+
+
+def test_run_bridge_tool_missing_script(tmp_path):
+    code = _run_bridge_tool(str(tmp_path), ["daemon"])
+    assert code == 1
+
+
+@patch("sys.argv", ["euxis", "bridge", "daemon"])
+@patch("cli._run_bridge_tool")
+def test_main_bridge(mock_bridge, tmp_path):
+    script_dir = tmp_path / "euxis-cli" / "bin"
+    script_dir.mkdir(parents=True)
+    (script_dir / "euxis.sh").touch()
+    os.environ["EUXIS_HOME"] = str(tmp_path)
+    mock_bridge.return_value = 0
+
+    code = main()
+    assert code == 0
+    mock_bridge.assert_called_once_with(str(tmp_path), ["daemon"])

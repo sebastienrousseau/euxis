@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 IMPORT_TOOL = REPO_ROOT / "euxis-ops" / "bridge" / "import_openclaw.py"
 DAEMON_TOOL = REPO_ROOT / "euxis-ops" / "bridge" / "daemon.py"
 SIGNED_EXEC_TOOL = REPO_ROOT / "euxis-ops" / "bridge" / "signed_exec.py"
+SIGNATURE_TOOL = REPO_ROOT / "euxis-ops" / "bridge" / "signature_tools.py"
 
 
 def _run(cmd: list[str], env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -108,6 +109,58 @@ def test_import_openclaw_copy(tmp_path: Path) -> None:
     )
     assert proc.returncode == 0, proc.stderr
     assert (out_root / "ids" / "credentials" / "id.json").exists()
+    normalized = out_root / "ids" / "identities.normalized.jsonl"
+    assert normalized.exists()
+    assert "identity" in normalized.read_text(encoding="utf-8")
+
+
+def test_import_openclaw_golden_layout_adapters(tmp_path: Path) -> None:
+    source = tmp_path / "openclaw"
+    (source / "credentials").mkdir(parents=True)
+    (source / "agents" / "alpha").mkdir(parents=True)
+    (source / "notes").mkdir(parents=True)
+    (source / "credentials" / "profile.json").write_text(
+        json.dumps({"agent_id": "alpha", "display_name": "Agent Alpha"}),
+        encoding="utf-8",
+    )
+    (source / "agents" / "alpha" / "memory.json").write_text(
+        json.dumps({"messages": [{"role": "user", "content": "hello"}]}),
+        encoding="utf-8",
+    )
+    (source / "agents" / "alpha" / "session.jsonl").write_text(
+        '{"role":"assistant","content":"hi"}\n',
+        encoding="utf-8",
+    )
+    (source / "notes" / "memo.md").write_text("# hello\n", encoding="utf-8")
+
+    out_root = tmp_path / "euxis"
+    cfg = tmp_path / "bridge.json"
+    cfg.write_text(
+        json.dumps(
+            {
+                "migration": {
+                    "output_roots": {
+                        "identities": str(out_root / "ids"),
+                        "sessions": str(out_root / "sessions"),
+                        "transcripts": str(out_root / "transcripts"),
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    env = {**os.environ, "HOME": str(tmp_path)}
+    proc = _run(
+        [sys.executable, str(IMPORT_TOOL), "--config", str(cfg), "--source", str(source)],
+        env=env,
+    )
+    assert proc.returncode == 0, proc.stderr
+    sessions_norm = out_root / "sessions" / "sessions.normalized.jsonl"
+    ids_norm = out_root / "ids" / "identities.normalized.jsonl"
+    assert sessions_norm.exists()
+    assert ids_norm.exists()
+    assert "Agent Alpha" in ids_norm.read_text(encoding="utf-8")
+    assert "hello" in sessions_norm.read_text(encoding="utf-8")
 
 
 def test_daemon_runtime_process(tmp_path: Path) -> None:
@@ -116,6 +169,7 @@ def test_daemon_runtime_process(tmp_path: Path) -> None:
         "paths": {"euxis_data": str(euxis_data)},
         "bridge_daemon": {
             "inbound_channels": {"telegram": {"token_env": ""}},
+            "gateway_forward": {"live_forward": False},
         },
         "security": {"audit": {"log_path": str(tmp_path / "audit.jsonl")}},
     }
@@ -131,8 +185,28 @@ def test_daemon_runtime_process(tmp_path: Path) -> None:
             }
         },
     )
-    assert result["status"] == "queued"
+    assert result["status"] == "forwarded"
     assert (euxis_data / "bridge" / "outbox.jsonl").exists()
+
+
+def test_daemon_idempotency_and_dead_letter(tmp_path: Path) -> None:
+    euxis_data = tmp_path / "euxis-data"
+    config = {
+        "paths": {"euxis_data": str(euxis_data)},
+        "bridge_daemon": {"inbound_channels": {"telegram": {"token_env": ""}}},
+        "security": {"audit": {"log_path": str(tmp_path / "audit.jsonl")}},
+    }
+    daemon_mod = _load_module("bridge_daemon_dlq", DAEMON_TOOL)
+    runtime = daemon_mod.BridgeRuntime(config)
+    runtime.forward_to_gateway = lambda _frame: (False, "simulated-failure")
+
+    payload = {"message": {"from": {"id": 1}, "chat": {"id": 2}, "text": "x"}}
+    first = runtime.process("telegram", payload, "idem-1")
+    second = runtime.process("telegram", payload, "idem-1")
+
+    assert first["status"] == "dead_letter"
+    assert second["status"] == "duplicate"
+    assert (euxis_data / "bridge" / "dead_letter.jsonl").exists()
 
 
 def test_signed_exec_verifies_and_blocks(tmp_path: Path) -> None:
@@ -193,3 +267,73 @@ def test_signed_exec_verifies_and_blocks(tmp_path: Path) -> None:
     )
     assert proc_bad.returncode == 10
     assert "blocked" in proc_bad.stdout
+
+
+def test_signature_tools_lifecycle(tmp_path: Path) -> None:
+    script = tmp_path / "script.sh"
+    script.write_text("#!/bin/sh\necho ok\n", encoding="utf-8")
+    private_key = tmp_path / "bridge-private.pem"
+    public_key = tmp_path / "bridge-public.pem"
+    sig_file = tmp_path / "script.sig"
+
+    keygen = _run(
+        [
+            sys.executable,
+            str(SIGNATURE_TOOL),
+            "keygen",
+            "--private-key",
+            str(private_key),
+            "--public-key",
+            str(public_key),
+        ]
+    )
+    assert keygen.returncode == 0, keygen.stderr
+    assert private_key.exists()
+    assert public_key.exists()
+
+    sign = _run(
+        [
+            sys.executable,
+            str(SIGNATURE_TOOL),
+            "sign-script",
+            "--script",
+            str(script),
+            "--private-key",
+            str(private_key),
+            "--sig",
+            str(sig_file),
+        ]
+    )
+    assert sign.returncode == 0, sign.stderr
+    assert sig_file.exists()
+
+    verify_ok = _run(
+        [
+            sys.executable,
+            str(SIGNATURE_TOOL),
+            "verify-script",
+            "--script",
+            str(script),
+            "--public-key",
+            str(public_key),
+            "--sig",
+            str(sig_file),
+        ]
+    )
+    assert verify_ok.returncode == 0, verify_ok.stderr
+
+    script.write_text("#!/bin/sh\necho changed\n", encoding="utf-8")
+    verify_bad = _run(
+        [
+            sys.executable,
+            str(SIGNATURE_TOOL),
+            "verify-script",
+            "--script",
+            str(script),
+            "--public-key",
+            str(public_key),
+            "--sig",
+            str(sig_file),
+        ]
+    )
+    assert verify_bad.returncode == 10
