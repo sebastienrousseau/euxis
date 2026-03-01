@@ -33,6 +33,7 @@ This document defines the implementation plan and initial artifacts to make Euxi
 ## CLI Entry Points
 
 - `euxis bridge import-openclaw --source ~/.openclaw --dry-run`
+- `euxis bridge import-clawhub --source ~/.openclaw/skills --output ~/.euxis/euxis-data/bridge/clawhub-registry.json`
 - `euxis bridge daemon --config bridge_config.yaml`
 - `euxis bridge keygen --private-key ~/.euxis/euxis-security/keys/bridge-private.pem --public-key ~/.euxis/euxis-security/keys/bridge-public.pem`
 - `euxis bridge sign-script --script ./script.sh --private-key ~/.euxis/euxis-security/keys/bridge-private.pem --sig ./script.sh.sig`

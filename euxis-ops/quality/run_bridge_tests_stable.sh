@@ -20,6 +20,7 @@ required_files=(
   "bridge_config.yaml"
   "euxis-ops/bridge/daemon.py"
   "euxis-ops/bridge/import_openclaw.py"
+  "euxis-ops/bridge/import_clawhub.py"
   "euxis-ops/bridge/signed_exec.py"
   "euxis-ops/bridge/signature_tools.py"
   "euxis-ops/bridge/openclaw_skill_map.yaml"

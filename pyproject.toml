@@ -45,6 +45,7 @@ pythonpath = [
     "euxis-adapters/src",
     "euxis-cli/src",
     "euxis-security/src",
+    "euxis-bridge/src",
 ]
 testpaths = [
     "euxis-core/tests",
@@ -52,6 +53,7 @@ testpaths = [
     "euxis-crypto/tests",
     "euxis-gateway/tests",
     "euxis-metrics/tests",
+    "euxis-bridge/tests",
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -82,6 +84,7 @@ source = [
     "euxis-crypto/src",
     "euxis-gateway/src",
     "euxis-metrics/src",
+    "euxis-bridge/src",
 ]
 branch = true
 parallel = true

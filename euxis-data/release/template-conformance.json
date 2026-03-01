@@ -62,6 +62,11 @@
       "missing": []
     },
     {
+      "name": "euxis-bridge",
+      "status": "ok",
+      "missing": []
+    },
+    {
       "name": "euxis-docs",
       "status": "ok",
       "missing": []

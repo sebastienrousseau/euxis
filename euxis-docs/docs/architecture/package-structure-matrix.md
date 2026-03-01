@@ -16,6 +16,7 @@ Generated from `euxis-ops/quality/package_standards.json`.
 | `euxis-scripts` | `ops` | `euxis-scripts` | `README.md` (yes) | `-` (yes) | `euxis-docs/docs/modules/euxis-scripts.md` (yes) | `ok` |
 | `euxis-sdk` | `rust` | `euxis-sdk` | `Cargo.toml, README.md` (yes) | `euxis-sdk/tests` (yes) | `euxis-docs/docs/modules/euxis-sdk.md` (yes) | `ok` |
 | `euxis-web` | `node` | `euxis-web` | `package.json, README.md` (yes) | `euxis-web/src/crypto-lib/tests` (yes) | `euxis-docs/docs/modules/euxis-web.md` (yes) | `ok` |
+| `euxis-bridge` | `python` | `euxis-bridge` | `pyproject.toml, README.md` (yes) | `euxis-bridge/tests` (yes) | `euxis-docs/docs/modules/euxis-bridge.md` (yes) | `ok` |
 | `euxis-docs` | `docs` | `euxis-docs` | `README.md, pyproject.toml` (yes) | `euxis-docs/tests` (yes) | `euxis-docs/docs/modules/euxis-docs.md` (yes) | `ok` |
 
 ## Enforcement

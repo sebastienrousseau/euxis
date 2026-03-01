@@ -98,6 +98,14 @@
       "docs_path": "euxis-docs/docs/modules/euxis-web.md"
     },
     {
+      "name": "euxis-bridge",
+      "path": "euxis-bridge",
+      "kind": "python",
+      "required_files": ["pyproject.toml", "README.md"],
+      "test_paths": ["euxis-bridge/tests"],
+      "docs_path": "euxis-docs/docs/modules/euxis-bridge.md"
+    },
+    {
       "name": "euxis-docs",
       "path": "euxis-docs",
       "kind": "docs",

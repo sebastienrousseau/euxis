@@ -16,4 +16,5 @@ Each module owns its documentation in-repo. These pages embed the module docs di
 - [euxis-scripts](./euxis-scripts.md)
 - [euxis-sdk](./euxis-sdk.md)
 - [euxis-web](./euxis-web.md)
+- [euxis-bridge](./euxis-bridge.md)
 - [euxis-docs](./euxis-docs.md)

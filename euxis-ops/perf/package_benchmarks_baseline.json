@@ -326,6 +326,33 @@
         "package_json_bytes": 625
       }
     },
+    "euxis-bridge": {
+      "samples": 3,
+      "wall_ms": {
+        "p50": 0.6,
+        "p95": 0.8,
+        "max": 0.8
+      },
+      "cpu_pct": {
+        "p50": 96.0,
+        "p95": 98.0,
+        "max": 98.0
+      },
+      "cpu_ms": {
+        "p50": 0.58,
+        "p95": 0.78,
+        "max": 0.78
+      },
+      "memory_mb": {
+        "p50": 17.758,
+        "p95": 17.758,
+        "max": 17.758
+      },
+      "probe": {
+        "python_lines": 251,
+        "pyproject_bytes": 653
+      }
+    },
     "euxis-docs": {
       "samples": 3,
       "wall_ms": {

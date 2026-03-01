@@ -19,12 +19,15 @@ __version__ = "v0.0.2"
 def _run_bridge_tool(euxis_home: str, args: list[str]) -> int:
     """Execute bridge tooling from euxis-ops."""
     if not args:
-        print("Usage: euxis bridge <import-openclaw|daemon|signed-exec|keygen|sign-script|verify-script> [...]")
+        print(
+            "Usage: euxis bridge <import-openclaw|import-clawhub|daemon|signed-exec|keygen|sign-script|verify-script> [...]"
+        )
         return 2
 
     command = args[0]
     command_map = {
         "import-openclaw": "import_openclaw.py",
+        "import-clawhub": "import_clawhub.py",
         "daemon": "daemon.py",
         "signed-exec": "signed_exec.py",
         "keygen": "signature_tools.py",

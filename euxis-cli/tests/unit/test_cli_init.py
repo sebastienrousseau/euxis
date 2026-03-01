@@ -232,6 +232,25 @@ def test_run_bridge_tool_import_openclaw(mock_run, tmp_path):
 
 
 @patch("cli.subprocess.run")
+def test_run_bridge_tool_import_clawhub(mock_run, tmp_path):
+    bridge_script = tmp_path / "euxis-ops" / "bridge"
+    bridge_script.mkdir(parents=True)
+    (bridge_script / "import_clawhub.py").write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+    mock_run.return_value.returncode = 0
+
+    code = _run_bridge_tool(
+        str(tmp_path),
+        ["import-clawhub", "--source", "/tmp/skills", "--output", "/tmp/out.json"],
+    )
+    assert code == 0
+    called = mock_run.call_args[0][0]
+    assert called[0] == sys.executable
+    assert called[1].endswith("import_clawhub.py")
+    assert "--source" in called
+    assert "--output" in called
+
+
+@patch("cli.subprocess.run")
 def test_run_bridge_tool_signature_passthrough(mock_run, tmp_path):
     bridge_script = tmp_path / "euxis-ops" / "bridge"
     bridge_script.mkdir(parents=True)

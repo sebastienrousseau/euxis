@@ -2,19 +2,19 @@
 
 - Previous release: `v0.0.2`
 - Next release: `v0.0.3`
-- Proposal SHA-256: `dd28fe99bbf0ca4f68e6fb2650a8303e698399829cae5a1638fcb8598e05bcd1`
+- Proposal SHA-256: `61a2934b6ef1f85fdbb0be576dd066e0c95b31f77f8fcc9d75fcc1e130e067da`
 - Threshold: `25.00%`
 - Manual review required: `yes`
 
 ## Flagged Packages
-- `euxis-cli`: wall_p95_delta_percent=-41.635%, cpu_ms_p95_delta_percent=-41.215%
-- `euxis-core`: wall_p95_delta_percent=-49.968%, cpu_ms_p95_delta_percent=-49.435%
-- `euxis-crypto`: wall_p95_delta_percent=73.446%, cpu_ms_p95_delta_percent=75.439%
-- `euxis-docs`: wall_p95_delta_percent=-40.721%, cpu_ms_p95_delta_percent=-40.618%
-- `euxis-gateway`: wall_p95_delta_percent=-45.174%, cpu_ms_p95_delta_percent=-45.024%
-- `euxis-metrics`: wall_p95_delta_percent=-38.932%, cpu_ms_p95_delta_percent=-38.439%
-- `euxis-runtime`: wall_p95_delta_percent=-36.342%, cpu_ms_p95_delta_percent=-38.592%
-- `euxis-scripts`: wall_p95_delta_percent=-42.429%, cpu_ms_p95_delta_percent=-41.244%
-- `euxis-sdk`: wall_p95_delta_percent=248.190%, cpu_ms_p95_delta_percent=253.540%
-- `euxis-tui`: wall_p95_delta_percent=-27.929%, cpu_ms_p95_delta_percent=-27.432%
-- `euxis-web`: wall_p95_delta_percent=-25.359%
+- `euxis-bridge`: wall_p95_delta_percent=73.500%, cpu_ms_p95_delta_percent=75.897%
+- `euxis-cli`: wall_p95_delta_percent=-40.940%, cpu_ms_p95_delta_percent=-40.875%
+- `euxis-core`: wall_p95_delta_percent=-46.628%, cpu_ms_p95_delta_percent=-46.226%
+- `euxis-crypto`: wall_p95_delta_percent=63.105%, cpu_ms_p95_delta_percent=65.684%
+- `euxis-docs`: wall_p95_delta_percent=-42.492%, cpu_ms_p95_delta_percent=-42.161%
+- `euxis-gateway`: wall_p95_delta_percent=-43.448%, cpu_ms_p95_delta_percent=-43.468%
+- `euxis-metrics`: wall_p95_delta_percent=-46.558%, cpu_ms_p95_delta_percent=-46.043%
+- `euxis-runtime`: wall_p95_delta_percent=-32.067%, cpu_ms_p95_delta_percent=-32.282%
+- `euxis-scripts`: wall_p95_delta_percent=-43.139%, cpu_ms_p95_delta_percent=-42.553%
+- `euxis-sdk`: wall_p95_delta_percent=215.431%, cpu_ms_p95_delta_percent=220.973%
+- `euxis-web`: wall_p95_delta_percent=-29.187%, cpu_ms_p95_delta_percent=-26.702%

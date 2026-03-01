@@ -1,7 +1,7 @@
 {
   "status": "ok",
-  "packages_checked": 13,
-  "packages_passed": 13,
+  "packages_checked": 14,
+  "packages_passed": 14,
   "packages_failed": 0,
   "errors": [],
   "packages": {
@@ -143,6 +143,18 @@
       ],
       "required_files": [
         "package.json",
+        "README.md"
+      ]
+    },
+    "euxis-bridge": {
+      "status": "ok",
+      "kind": "python",
+      "docs_path": "euxis-docs/docs/modules/euxis-bridge.md",
+      "test_paths": [
+        "euxis-bridge/tests"
+      ],
+      "required_files": [
+        "pyproject.toml",
         "README.md"
       ]
     },
