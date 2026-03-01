@@ -1,12 +1,12 @@
-.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
+
+# Conservative default for laptop thermals/memory; override per run as needed.
+CPP_BUILD_JOBS ?= 4
 
 all: install test
 
 test:
 	pytest
-
-test-cov:
-	pytest --cov=euxis-core/src --cov-report=term-missing
 
 lint:
 	ruff check .
@@ -32,7 +32,7 @@ core-platform-boundary-check:
 		--json-output euxis-data/release/core-platform-boundaries.json
 
 perf-gate:
-	python3 euxis-ops/perf/check_perf_budget.py euxis-runtime/data/perf/metrics.jsonl euxis-ops/perf/perf_policy.json current
+	python3 euxis-ops/perf/check_perf_budget.py euxis-data/runtime/perf/metrics.jsonl euxis-ops/perf/perf_policy.json current
 
 perf-governance-check:
 	python3 euxis-ops/perf/validate_perf_governance.py \
@@ -44,7 +44,7 @@ scorecard:
 
 release-checklist:
 	python3 euxis-ops/release/generate_checklist.py \
-		--metrics euxis-runtime/data/perf/metrics.jsonl \
+		--metrics euxis-data/runtime/perf/metrics.jsonl \
 		--policy euxis-ops/perf/perf_policy.json \
 		--stage current \
 		--baseline euxis-ops/perf/release_baseline.json \
@@ -54,7 +54,7 @@ release-checklist:
 
 propose-release-baseline:
 	python3 euxis-ops/perf/propose_release_baseline.py \
-		--metrics euxis-runtime/data/perf/metrics.jsonl \
+		--metrics euxis-data/runtime/perf/metrics.jsonl \
 		--previous-release v0.0.3 \
 		--next-release v0.0.3 \
 		--output euxis-data/release/proposed-baseline.json
@@ -138,20 +138,20 @@ package-structure-matrix:
 	python3 euxis-ops/quality/render_package_structure_matrix.py \
 		--repo-root . \
 		--standards euxis-ops/quality/package_standards.json \
-		--output euxis-docs/docs/architecture/package-structure-matrix.md
+		--output euxis-data/docs/architecture/package-structure-matrix.md
 
 package-structure-matrix-check:
 	python3 euxis-ops/quality/render_package_structure_matrix.py \
 		--repo-root . \
 		--standards euxis-ops/quality/package_standards.json \
-		--output euxis-docs/docs/architecture/package-structure-matrix.md \
+		--output euxis-data/docs/architecture/package-structure-matrix.md \
 		--check
 
 package-structure-matrix-report:
 	python3 euxis-ops/quality/report_package_structure_matrix_staleness.py \
 		--repo-root . \
 		--standards euxis-ops/quality/package_standards.json \
-		--matrix euxis-docs/docs/architecture/package-structure-matrix.md \
+		--matrix euxis-data/docs/architecture/package-structure-matrix.md \
 		--summary-output euxis-data/release/package-structure-matrix-staleness.md \
 		--diff-output euxis-data/release/package-structure-matrix-staleness.diff \
 		--warn-only
@@ -227,33 +227,6 @@ gate-all: architecture-check core-platform-boundary-check perf-governance-check 
 workspace-bootstrap:
 	bash euxis-ops/bootstrap/verify_workspace.sh
 
-gateway-tests-stable:
-	bash euxis-ops/quality/run_gateway_tests_stable.sh
-
-core-tests-stable:
-	bash euxis-ops/quality/run_core_tests_stable.sh
-
-cli-tests-stable:
-	bash euxis-ops/quality/run_cli_tests_stable.sh
-
-metrics-tests-stable:
-	bash euxis-ops/quality/run_metrics_tests_stable.sh
-
-adapters-tests-stable:
-	bash euxis-ops/quality/run_adapters_tests_stable.sh
-
-security-tests-stable:
-	bash euxis-ops/quality/run_security_tests_stable.sh
-
-runtime-tests-stable:
-	bash euxis-ops/quality/run_runtime_tests_stable.sh
-
-scripts-tests-stable:
-	bash euxis-ops/quality/run_scripts_tests_stable.sh
-
-docs-tests-stable:
-	bash euxis-ops/quality/run_docs_tests_stable.sh
-
 sdk-rust-tests-stable:
 	bash euxis-ops/quality/run_sdk_rust_tests_stable.sh
 
@@ -275,7 +248,7 @@ bench-interop:
 bench-all:
 	python3 euxis-ops/benchmarks/runner.py --suite all --output euxis-data/perf/benchmark-results.json
 
-verify-all-packages: gate-all gateway-tests-stable core-tests-stable cli-tests-stable metrics-tests-stable adapters-tests-stable security-tests-stable runtime-tests-stable scripts-tests-stable docs-tests-stable sdk-rust-tests-stable cpp-test
+verify-all-packages: gate-all sdk-rust-tests-stable cpp-test
 
 verify-signed-artifacts:
 	bash euxis-ops/supply_chain/verify_signed_artifacts.sh release-artifacts
@@ -284,10 +257,11 @@ verify-signed-artifacts:
 cpp-configure:
 	cmake -B euxis-cpp/build -S euxis-cpp \
 		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
-		-DCMAKE_BUILD_TYPE=Release
+		-DCMAKE_BUILD_TYPE=Release \
+		$(if $(shell command -v ccache 2>/dev/null),-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache,)
 
 cpp-build: cpp-configure
-	cmake --build euxis-cpp/build --parallel
+	cmake --build euxis-cpp/build --parallel $(CPP_BUILD_JOBS)
 
 cpp-test: cpp-build
 	ctest --test-dir euxis-cpp/build --output-on-failure

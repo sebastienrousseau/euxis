@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 #include "euxis/crypto/aes_gcm.hpp"
@@ -93,16 +94,13 @@ TEST_F(TierIsolationTest, CrossTierDecryptionFails) {
     // Attempt to decrypt with the WRONG tier AAD ("relevant" instead of "hot").
     // We need the agent key, which we can verify indirectly: the store can
     // decrypt with "hot" AAD, so using "relevant" AAD should fail authentication.
-    auto wrong_aad = tier_label(MemoryTier::Relevant);
-    auto wrong_aad_bytes = std::span<const std::byte>(
-        reinterpret_cast<const std::byte*>(wrong_aad.data()),
-        wrong_aad.size());
+    [[maybe_unused]] auto wrong_aad = tier_label(MemoryTier::Relevant);
 
     // We cannot access agent_key_ directly, but we can verify tier isolation
     // through the store's API: store an entry as Hot, but if we were to forge
     // the tier in the JSONL file, decryption would fail.
     // Instead, verify that retrieve_tier correctly filters by tier.
-    store.store("relevant data", MemoryTier::Relevant);
+    (void)store.store("relevant data", MemoryTier::Relevant);
 
     auto hot_results = store.retrieve_tier(MemoryTier::Hot);
     auto relevant_results = store.retrieve_tier(MemoryTier::Relevant);
@@ -173,11 +171,11 @@ TEST_F(TierIsolationTest, RetrieveTierFiltersCorrectly) {
     auto master = random_master_key();
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:filter");
 
-    store.store("hot-1", MemoryTier::Hot);
-    store.store("hot-2", MemoryTier::Hot);
-    store.store("relevant-1", MemoryTier::Relevant);
-    store.store("cross-1", MemoryTier::CrossAgent);
-    store.store("relevant-2", MemoryTier::Relevant);
+    (void)store.store("hot-1", MemoryTier::Hot);
+    (void)store.store("hot-2", MemoryTier::Hot);
+    (void)store.store("relevant-1", MemoryTier::Relevant);
+    (void)store.store("cross-1", MemoryTier::CrossAgent);
+    (void)store.store("relevant-2", MemoryTier::Relevant);
 
     auto hot = store.retrieve_tier(MemoryTier::Hot);
     ASSERT_EQ(hot.size(), 2u);
@@ -201,9 +199,9 @@ TEST_F(TierIsolationTest, ExportTierFiltersByTier) {
     auto master = random_master_key();
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:export");
 
-    store.store("hot-data", MemoryTier::Hot);
-    store.store("relevant-data", MemoryTier::Relevant);
-    store.store("cross-data", MemoryTier::CrossAgent);
+    (void)store.store("hot-data", MemoryTier::Hot);
+    (void)store.store("relevant-data", MemoryTier::Relevant);
+    (void)store.store("cross-data", MemoryTier::CrossAgent);
 
     auto hot_export = store.export_tier_encrypted(MemoryTier::Hot);
     EXPECT_EQ(hot_export.size(), 1u);

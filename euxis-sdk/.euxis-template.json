@@ -10,7 +10,7 @@
   "test_paths": [
     "euxis-sdk/tests"
   ],
-  "docs_path": "euxis-docs/docs/modules/euxis-sdk.md",
+  "docs_path": "euxis-data/docs/modules/euxis-sdk.md",
   "platform_support": [
     "macos",
     "linux",

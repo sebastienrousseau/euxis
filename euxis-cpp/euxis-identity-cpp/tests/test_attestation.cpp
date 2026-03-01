@@ -14,7 +14,7 @@ namespace {
 class AttestationTest : public ::testing::Test {
 protected:
     static void SetUpTestSuite() {
-        ASSERT_EQ(sodium_init(), 0);
+        ASSERT_GE(sodium_init(), 0);
     }
 };
 
@@ -70,14 +70,14 @@ TEST_F(AttestationTest, ConfidenceOne) {
 
 TEST_F(AttestationTest, ConfidenceBelowZeroThrows) {
     EXPECT_THROW(
-        create_attestation("did:euxis:a", "did:euxis:b", "test", -0.1),
+        (void)create_attestation("did:euxis:a", "did:euxis:b", "test", -0.1),
         std::invalid_argument
     );
 }
 
 TEST_F(AttestationTest, ConfidenceAboveOneThrows) {
     EXPECT_THROW(
-        create_attestation("did:euxis:a", "did:euxis:b", "test", 1.1),
+        (void)create_attestation("did:euxis:a", "did:euxis:b", "test", 1.1),
         std::invalid_argument
     );
 }

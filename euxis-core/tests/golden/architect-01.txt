@@ -1,2 +1,0 @@
-INPUT: Design a minimal folder structure for a Python CLI app with tests and packaging.
-EXPECTED_OUTPUT: Must mention src/ (or a package directory), tests/, and an entry point (console script or __main__).

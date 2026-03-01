@@ -135,7 +135,7 @@ TEST_F(ModelRegistryTest, FindByName) {
     write_fake_gguf("beta", "BBB");
 
     ModelRegistry reg(temp_dir_);
-    reg.discover();
+    (void)reg.discover();
 
     auto found = reg.find("alpha");
     ASSERT_TRUE(found.has_value());

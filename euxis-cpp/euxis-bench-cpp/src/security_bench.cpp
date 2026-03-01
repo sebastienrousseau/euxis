@@ -48,7 +48,7 @@ static auto bench_malicious_detection_rate() -> BenchmarkResult {
 
     const auto start = std::chrono::steady_clock::now();
 
-    bridge::SkillStaticAnalyzer analyzer;
+    [[maybe_unused]] bridge::SkillStaticAnalyzer analyzer;
     size_t detections = 0;
 
     for (const auto& pattern : malicious_patterns) {

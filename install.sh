@@ -6,7 +6,7 @@
 #
 # This script makes Euxis CLI tools available system-wide by:
 #   1. Setting EUXIS_HOME in shell profile
-#   2. Adding euxis-cli/bin to PATH
+#   2. Adding euxis-bin to PATH
 #   3. Creating symlinks in ~/.local/bin (optional)
 #
 # Usage:
@@ -62,7 +62,7 @@ else
 
 # Euxis CLI
 export EUXIS_HOME="$EUXIS_HOME"
-export PATH="\$EUXIS_HOME/euxis-cli/bin:\$PATH"
+export PATH="\$EUXIS_HOME/euxis-bin:\$PATH"
 EOF
 
     echo -e "${GREEN}✓${NC} Added EUXIS_HOME and PATH to $PROFILE_FILE"
@@ -85,7 +85,7 @@ if [[ "${1:-}" == "--symlinks" ]]; then
     )
 
     for cmd in "${CLI_COMMANDS[@]}"; do
-        src="$EUXIS_HOME/euxis-cli/bin/$cmd"
+        src="$EUXIS_HOME/euxis-bin/$cmd"
         dst="$SYMLINK_DIR/$cmd"
         if [[ -f "$src" ]]; then
             ln -sf "$src" "$dst"
@@ -103,26 +103,26 @@ fi
 echo ""
 echo -e "${BLUE}Verifying installation...${NC}"
 
-if [[ -x "$EUXIS_HOME/euxis-cli/bin/euxis-dispatch" ]]; then
+if [[ -x "$EUXIS_HOME/euxis-bin/euxis-dispatch" ]]; then
     echo -e "  ${GREEN}✓${NC} euxis-dispatch found"
 else
     echo -e "  ${RED}✗${NC} euxis-dispatch not found"
 fi
 
-if [[ -f "$EUXIS_HOME/euxis-core/lib/mesh.sh" ]]; then
+if [[ -f "$EUXIS_HOME/euxis-bin/lib/mesh.sh" ]]; then
     echo -e "  ${GREEN}✓${NC} mesh.sh library found"
 else
     echo -e "  ${RED}✗${NC} mesh.sh library not found"
 fi
 
-if [[ -f "$EUXIS_HOME/euxis-core/lib/resources.sh" ]]; then
+if [[ -f "$EUXIS_HOME/euxis-bin/lib/resources.sh" ]]; then
     echo -e "  ${GREEN}✓${NC} resources.sh library found"
 else
     echo -e "  ${RED}✗${NC} resources.sh library not found"
 fi
 
-if [[ -f "$EUXIS_HOME/euxis-core/agents/registry.json" ]]; then
-    AGENT_COUNT=$(jq '.agents | length' "$EUXIS_HOME/euxis-core/agents/registry.json")
+if [[ -f "$EUXIS_HOME/euxis-data/agents/registry.json" ]]; then
+    AGENT_COUNT=$(jq '.agents | length' "$EUXIS_HOME/euxis-data/agents/registry.json")
     echo -e "  ${GREEN}✓${NC} Agent registry: $AGENT_COUNT agents"
 else
     echo -e "  ${RED}✗${NC} Agent registry not found"

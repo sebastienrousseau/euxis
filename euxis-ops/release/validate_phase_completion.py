@@ -14,22 +14,22 @@ from pathlib import Path
 REQUIRED_FILES = {
     "phase1": [
         "euxis-ops/architecture/check_boundaries.py",
-        "euxis-core/src/euxis_core/contracts/ports.py",
-        "euxis-core/src/euxis_core/platform/adapters.py",
-        "euxis-core/src/euxis_core/runtime/gateway_ws.py",
+        "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
+        "euxis-cpp/euxis-core-cpp/src/router.cpp",
+        "euxis-cpp/euxis-core-cpp/src/swarm.cpp",
     ],
     "phase2": [
         ".github/workflows/cross-platform-ci.yml",
-        "euxis-core/tests/unit/test_platform_adapter.py",
-        "euxis-core/tests/unit/test_contracts.py",
+        "euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp",
+        "euxis-cpp/euxis-core-cpp/tests/test_router.cpp",
+        "euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp",
     ],
     "phase3": [
         ".github/workflows/supply-chain.yml",
         "euxis-ops/supply_chain/verify_signed_artifacts.sh",
     ],
     "phase4": [
-        "euxis-core/src/euxis_core/resilience.py",
-        "euxis-core/src/euxis_core/runtime/concurrency.py",
+        "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
         "euxis-ops/perf/check_perf_budget.py",
         "euxis-ops/perf/validate_perf_governance.py",
     ],

@@ -12,6 +12,7 @@
 #include <QStackedWidget>
 #include <QShortcut>
 #include <QSplitter>
+#include <QHeaderView>
 
 namespace euxis::etx {
 

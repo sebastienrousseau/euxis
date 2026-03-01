@@ -16,7 +16,7 @@ namespace {
 class RegistryTest : public ::testing::Test {
 protected:
     static void SetUpTestSuite() {
-        ASSERT_EQ(sodium_init(), 0);
+        ASSERT_GE(sodium_init(), 0);
     }
 
     void SetUp() override {

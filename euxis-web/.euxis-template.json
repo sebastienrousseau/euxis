@@ -10,7 +10,7 @@
   "test_paths": [
     "euxis-web/src/crypto-lib/tests"
   ],
-  "docs_path": "euxis-docs/docs/modules/euxis-web.md",
+  "docs_path": "euxis-data/docs/modules/euxis-web.md",
   "platform_support": [
     "macos",
     "linux",

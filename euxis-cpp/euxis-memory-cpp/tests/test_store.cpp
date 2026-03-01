@@ -153,10 +153,10 @@ TEST_F(MemoryStoreTest, ExportTierEntries) {
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:eve");
 
     // Store entries across tiers.
-    store.store("hot1", MemoryTier::Hot);
-    store.store("hot2", MemoryTier::Hot);
-    store.store("relevant1", MemoryTier::Relevant);
-    store.store("cross1", MemoryTier::CrossAgent);
+    (void)store.store("hot1", MemoryTier::Hot);
+    (void)store.store("hot2", MemoryTier::Hot);
+    (void)store.store("relevant1", MemoryTier::Relevant);
+    (void)store.store("cross1", MemoryTier::CrossAgent);
 
     auto hot_entries = store.export_tier_encrypted(MemoryTier::Hot);
     EXPECT_EQ(hot_entries.size(), 2u);
@@ -179,9 +179,9 @@ TEST_F(MemoryStoreTest, RetrieveTierReturnsCorrectEntries) {
     auto master = random_master_key();
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:frank");
 
-    store.store("hot memory 1", MemoryTier::Hot);
-    store.store("hot memory 2", MemoryTier::Hot);
-    store.store("relevant memory", MemoryTier::Relevant);
+    (void)store.store("hot memory 1", MemoryTier::Hot);
+    (void)store.store("hot memory 2", MemoryTier::Hot);
+    (void)store.store("relevant memory", MemoryTier::Relevant);
 
     auto hot_results = store.retrieve_tier(MemoryTier::Hot);
     EXPECT_EQ(hot_results.size(), 2u);
@@ -201,7 +201,7 @@ TEST_F(MemoryStoreTest, RetrieveTierRespectsLimit) {
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:grace");
 
     for (int i = 0; i < 10; ++i) {
-        store.store("entry " + std::to_string(i), MemoryTier::Hot);
+        (void)store.store("entry " + std::to_string(i), MemoryTier::Hot);
     }
 
     auto results = store.retrieve_tier(MemoryTier::Hot, 3);

@@ -1,0 +1,17 @@
+euxis_add_library(euxis-core-cpp
+  SOURCES
+    src/resilience.cpp
+    src/router.cpp
+    src/swarm.cpp
+    src/ws_client.cpp
+  DEPS
+    euxis-crypto-cpp
+    euxis-metrics-cpp
+    ixwebsocket::ixwebsocket
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_resilience.cpp
+    tests/test_router.cpp
+    tests/test_swarm.cpp
+)

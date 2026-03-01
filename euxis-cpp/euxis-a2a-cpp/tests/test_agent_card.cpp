@@ -52,16 +52,16 @@ TEST(AgentCardTest, RoundtripSerialization) {
     EXPECT_EQ(restored.capabilities[0].description, "Echoes input back");
     ASSERT_TRUE(restored.capabilities[0].input_schema.has_value());
     EXPECT_EQ(*restored.capabilities[0].input_schema,
-              nlohmann::json{{"type", "string"}});
+              (nlohmann::json{{"type", "string"}}));
     ASSERT_TRUE(restored.capabilities[0].output_schema.has_value());
     EXPECT_EQ(*restored.capabilities[0].output_schema,
-              nlohmann::json{{"type", "string"}});
+              (nlohmann::json{{"type", "string"}}));
     ASSERT_TRUE(restored.auth.has_value());
     EXPECT_EQ(restored.auth->type, "bearer");
     EXPECT_EQ(restored.auth->description, "Bearer token authentication");
     ASSERT_TRUE(restored.identity_did.has_value());
     EXPECT_EQ(*restored.identity_did, "did:euxis:test-agent-001");
-    EXPECT_EQ(restored.metadata, nlohmann::json{{"env", "test"}});
+    EXPECT_EQ(restored.metadata, (nlohmann::json{{"env", "test"}}));
 }
 
 // ---------------------------------------------------------------------------

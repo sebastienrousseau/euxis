@@ -10,7 +10,7 @@
 
 ## Documentation
 
-- Module docs page: `euxis-docs/docs/modules/euxis-web.md`
+- Module docs page: `euxis-data/docs/modules/euxis-web.md`
 
 ## Tests
 

@@ -256,8 +256,10 @@ QWidget* create_time_travel_screen(QWidget* parent) {
 
         // Scroll to current event
         if (value >= 0 && value < event_cards.size()) {
-            event_cards[value]->parentWidget()->parentWidget()->ensureVisible(
-                0, event_cards[value]->y(), 0, 100);
+            if (auto* scroll = qobject_cast<QScrollArea*>(
+                    event_cards[value]->parentWidget()->parentWidget())) {
+                scroll->ensureWidgetVisible(event_cards[value], 0, 100);
+            }
         }
     });
 

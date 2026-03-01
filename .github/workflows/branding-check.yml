@@ -18,7 +18,7 @@ jobs:
 
       - name: Check signature file exists
         run: |
-          if [[ ! -f "euxis-core/config/branding/signature.txt" ]]; then
+          if [[ ! -f "euxis-data/config/branding/signature.txt" ]]; then
             echo "::error::Missing branding signature file"
             exit 1
           fi

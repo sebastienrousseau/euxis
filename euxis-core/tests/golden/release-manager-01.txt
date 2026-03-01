@@ -1,2 +1,0 @@
-INPUT: Draft release notes for v1.2.0 with features A and B and bugfix C.
-EXPECTED_OUTPUT: Must include a version header and sections for Features and Fixes mentioning A, B, and C.

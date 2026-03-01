@@ -1,0 +1,17 @@
+euxis_add_library(euxis-metrics-cpp
+  SOURCES
+    src/performance_collector.cpp
+    src/fast_collector.cpp
+    src/analyzer.cpp
+    src/evidence.cpp
+    src/validation_pipeline.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_performance_collector.cpp
+    tests/test_fast_collector.cpp
+    tests/test_analyzer.cpp
+    tests/test_evidence.cpp
+    tests/test_validation_pipeline.cpp
+)

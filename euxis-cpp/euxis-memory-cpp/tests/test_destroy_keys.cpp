@@ -115,8 +115,8 @@ TEST_F(DestroyKeysTest, RetrieveTierReturnsEmptyAfterDestroy) {
     auto master = random_master_key();
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:no-tier");
 
-    store.store("hot memory", MemoryTier::Hot);
-    store.store("relevant memory", MemoryTier::Relevant);
+    (void)store.store("hot memory", MemoryTier::Hot);
+    (void)store.store("relevant memory", MemoryTier::Relevant);
 
     store.destroy_agent_keys();
 
@@ -134,7 +134,7 @@ TEST_F(DestroyKeysTest, ExportStillWorksAfterDestroy) {
     auto master = random_master_key();
     EncryptedMemoryStore store(test_dir_, master, "did:euxis:agent:export-ok");
 
-    store.store("export data", MemoryTier::Hot);
+    (void)store.store("export data", MemoryTier::Hot);
 
     store.destroy_agent_keys();
 

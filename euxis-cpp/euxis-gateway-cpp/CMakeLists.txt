@@ -1,0 +1,32 @@
+euxis_add_library(euxis-gateway-cpp
+  SOURCES
+    src/config.cpp
+    src/state.cpp
+    src/auth.cpp
+    src/server.cpp
+    src/routes_health.cpp
+    src/routes_sessions.cpp
+    src/routes_webhooks.cpp
+    src/routes_admin.cpp
+    src/mcp.cpp
+    src/routes_mcp.cpp
+    src/websocket.cpp
+  DEPS
+    euxis-security-cpp
+    euxis-core-cpp
+    euxis-crypto-cpp
+    euxis-adapters-cpp
+    euxis-metrics-cpp
+    httplib::httplib
+    ixwebsocket::ixwebsocket
+    unofficial-sodium::sodium
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_config.cpp
+    tests/test_auth.cpp
+    tests/test_server.cpp
+    tests/test_routes.cpp
+    tests/test_mcp.cpp
+    tests/test_websocket.cpp
+)

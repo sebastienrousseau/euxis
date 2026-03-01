@@ -1,7 +1,9 @@
 #include <euxis/bridge/verification.hpp>
 #include <euxis/crypto/ed25519.hpp>
 
+#include <cstring>
 #include <fstream>
+#include <vector>
 #include <sodium.h>
 
 namespace euxis::bridge {
@@ -11,18 +13,11 @@ auto verify_skill_signature(
     const std::filesystem::path& signature_path,
     const std::array<std::byte, 32>& public_key
 ) -> std::expected<VerificationResult, std::string> {
-    // Read the file content
     std::ifstream file(file_path, std::ios::binary);
     if (!file.is_open()) {
         return std::unexpected("Cannot open file: " + file_path.string());
     }
-    std::vector<std::byte> content(
-        (std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>()
-    );
-    // Reinterpret char iterators to byte
-    std::ifstream file2(file_path, std::ios::binary);
-    std::string file_str((std::istreambuf_iterator<char>(file2)),
+    std::string file_str((std::istreambuf_iterator<char>(file)),
                           std::istreambuf_iterator<char>());
     std::vector<std::byte> file_bytes(file_str.size());
     std::memcpy(file_bytes.data(), file_str.data(), file_str.size());

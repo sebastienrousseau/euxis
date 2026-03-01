@@ -1,33 +1,15 @@
 {
-  "version": "2026-02-28",
+  "version": "2026-03-01",
   "allowed_prefix_for_packages": "euxis-",
   "package_name_regex": "^euxis-[a-z0-9]+$",
   "canonical_package_dirs": [
-    "euxis-adapters",
-    "euxis-cli",
-    "euxis-core",
     "euxis-web",
-    "euxis-docs",
-    "euxis-gateway",
-    "euxis-metrics",
-    "euxis-runtime",
-    "euxis-scripts",
-    "euxis-sdk",
-    "euxis-security"
+    "euxis-sdk"
   ],
   "legacy_package_aliases": {},
   "required_package_dirs": [
-    "euxis-adapters",
-    "euxis-cli",
-    "euxis-core",
     "euxis-web",
-    "euxis-docs",
-    "euxis-gateway",
-    "euxis-metrics",
-    "euxis-runtime",
-    "euxis-scripts",
-    "euxis-sdk",
-    "euxis-security"
+    "euxis-sdk"
   ],
   "allowed_workspace_dirs": [
     ".git",
@@ -35,6 +17,7 @@
     ".hypothesis",
     ".venv",
     "euxis-bin",
+    "euxis-cpp",
     "euxis-data",
     "euxis-examples",
     "euxis-ops",

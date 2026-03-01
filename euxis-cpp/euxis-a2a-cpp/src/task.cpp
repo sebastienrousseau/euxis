@@ -39,7 +39,7 @@ auto now_iso8601() -> std::string {
     std::tm utc{};
     gmtime_r(&tt, &utc);
 
-    char buf[32];
+    char buf[64];
     std::snprintf(buf, sizeof(buf), "%04d-%02d-%02dT%02d:%02d:%02dZ",
         utc.tm_year + 1900, utc.tm_mon + 1, utc.tm_mday,
         utc.tm_hour, utc.tm_min, utc.tm_sec);

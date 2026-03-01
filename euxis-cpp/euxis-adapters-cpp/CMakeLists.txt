@@ -1,0 +1,18 @@
+euxis_add_library(euxis-adapters-cpp
+  SOURCES
+    src/slack.cpp
+    src/telegram.cpp
+    src/discord.cpp
+    src/whatsapp.cpp
+    src/registry.cpp
+  DEPS
+    httplib::httplib
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_slack.cpp
+    tests/test_telegram.cpp
+    tests/test_discord.cpp
+    tests/test_whatsapp.cpp
+    tests/test_registry.cpp
+)

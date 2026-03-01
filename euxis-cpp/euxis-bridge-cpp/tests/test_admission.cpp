@@ -10,7 +10,7 @@ namespace euxis::bridge {
 
 class AdmissionTest : public ::testing::Test {
 protected:
-    static void SetUpTestSuite() { sodium_init(); }
+    static void SetUpTestSuite() { [[maybe_unused]] int rc = sodium_init(); }
 
     std::filesystem::path tmp_dir_;
 

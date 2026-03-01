@@ -66,7 +66,7 @@ TEST_F(ImporterTest, ImportWithOpenclaw) {
 
     auto result = importer.import_skill(tmp_dir_ / "oc-skill");
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->metadata["source"], "openclaw");
+    EXPECT_EQ(result->metadata["source"], "clawhub");
 }
 
 TEST_F(ImporterTest, ImportAll) {

@@ -186,7 +186,7 @@ OpenClaw's creator (Peter Steinberger) joined OpenAI on 2026-02-14. The project 
 
 ### 4.1 Portability: Native Parity Across macOS, Linux, WSL2
 
-**Current state:** Platform adapters exist in `euxis-core/platform/` and `euxis-bridge/platform/` with `linux.py`, `macos.py`, `wsl.py` + factory pattern.
+**Current state:** Platform adapters exist in `euxis-cpp/euxis-core-cpp/` (C++23 modules) and `euxis-bridge/platform/` with `linux.py`, `macos.py`, `wsl.py` + factory pattern.
 
 **Roadmap:**
 
@@ -308,13 +308,13 @@ class EncryptedMemoryStore:
 
 ### 4.3 Performance: Sparse Attention Local Fallback
 
-**Current state:** Euxis routes to cloud LLM providers via FinOps router (`euxis-core/mesh/router.py`). No local inference capability.
+**Current state:** Euxis routes to cloud LLM providers via the C++23 FinOps router (`euxis-cpp/euxis-core-cpp/`). No local inference capability.
 
 **Roadmap:**
 
 #### Phase 1: Local Model Runtime (Q2 2026)
 ```python
-# New module: euxis-core/mesh/local_inference.py
+# New module: euxis-cpp/euxis-core-cpp/local_inference.cppm
 class LocalModelRuntime:
     """GGUF-based local inference with sparse attention support."""
 
@@ -725,7 +725,7 @@ euxis-ops/benchmarks/
     euxis-a2a (NEW)    euxis-crypto    euxis-core
          |                  |              |
          |                  |              |
-    euxis-gateway      euxis-bridge   euxis-core/mesh/local_inference (NEW)
+    euxis-gateway      euxis-bridge   euxis-cpp/euxis-core-cpp/local_inference (NEW)
          |                  |
          |                  |
     euxis-hub (NEW)    euxis-security

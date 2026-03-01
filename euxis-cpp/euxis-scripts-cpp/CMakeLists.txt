@@ -1,0 +1,10 @@
+euxis_add_library(euxis-scripts-cpp
+  SOURCES
+    src/tech_debt.cpp
+    src/docs_quality.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+  TEST_SOURCES
+    tests/test_tech_debt.cpp
+    tests/test_docs_quality.cpp
+)

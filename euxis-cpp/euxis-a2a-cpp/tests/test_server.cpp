@@ -220,7 +220,7 @@ TEST_F(ServerTest, MultipleTasks) {
     EXPECT_NE(id1, id2);
 
     // Cancel only task 1
-    handler_.handle_request("task/cancel", {{"id", id1}});
+    (void)handler_.handle_request("task/cancel", {{"id", id1}});
 
     // Task 1 is cancelled
     auto get1 = handler_.handle_request("task/get", {{"id", id1}});

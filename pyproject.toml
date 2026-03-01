@@ -36,19 +36,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-pythonpath = [
-    "euxis-core/src",
-    "euxis-gateway/src",
-    "euxis-metrics/src",
-    "euxis-adapters/src",
-    "euxis-cli/src",
-    "euxis-security/src",
-]
-testpaths = [
-    "euxis-core/tests",
-    "euxis-gateway/tests",
-    "euxis-metrics/tests",
-]
+pythonpath = []
+testpaths = []
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -73,11 +62,7 @@ filterwarnings = [
 # ============================================================================
 
 [tool.coverage.run]
-source = [
-    "euxis-core/lib",
-    "euxis-gateway/src",
-    "euxis-metrics/src",
-]
+source = []
 branch = true
 parallel = true
 omit = [

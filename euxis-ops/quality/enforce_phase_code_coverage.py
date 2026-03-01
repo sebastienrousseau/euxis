@@ -14,25 +14,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-TESTS = [
-    "euxis-core/tests/unit/test_contracts.py",
-    "euxis-core/tests/unit/test_platform_adapter.py",
-    "euxis-core/tests/unit/test_resilience.py",
-    "euxis-core/tests/unit/test_swarm_router.py",
-    "euxis-core/tests/unit/test_extism_runner.py",
-    "euxis-core/tests/unit/test_runtime_adapters.py",
-    "euxis-core/tests/unit/test_quality_scripts.py",
-]
+TESTS: list[str] = []
 
-COVERAGE_TARGETS = [
-    "euxis_core.contracts",
-    "euxis_core.platform.adapters",
-    "euxis_core.runtime.async_bridge",
-    "euxis_core.runtime.concurrency",
-    "euxis_core.runtime.gateway_ws",
-    "euxis_core.runtime.wasm_adapter",
-    "euxis_core.resilience",
-]
+COVERAGE_TARGETS: list[str] = []
 
 
 def main() -> int:

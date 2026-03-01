@@ -1,0 +1,17 @@
+# System library leaks (not our code) — suppress for Qt/Gtk tests
+leak:libfontconfig
+leak:libGdk
+leak:libGtk
+leak:libglib
+leak:libgobject
+leak:libpango
+leak:libcairo
+leak:libfreetype
+leak:libX11
+leak:libxcb
+leak:libGL
+leak:libEGL
+leak:libwayland
+leak:QtCore
+leak:QtGui
+leak:QtWidgets

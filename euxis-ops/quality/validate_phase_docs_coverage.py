@@ -13,16 +13,15 @@ from pathlib import Path
 
 DEFAULT_ARTIFACTS = [
     "euxis-ops/architecture/check_boundaries.py",
-    "euxis-core/src/euxis_core/contracts/ports.py",
-    "euxis-core/src/euxis_core/platform/adapters.py",
-    "euxis-core/src/euxis_core/runtime/gateway_ws.py",
+    "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
+    "euxis-cpp/euxis-core-cpp/src/router.cpp",
+    "euxis-cpp/euxis-core-cpp/src/swarm.cpp",
     ".github/workflows/cross-platform-ci.yml",
-    "euxis-core/tests/unit/test_platform_adapter.py",
-    "euxis-core/tests/unit/test_contracts.py",
+    "euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp",
+    "euxis-cpp/euxis-core-cpp/tests/test_router.cpp",
+    "euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp",
     ".github/workflows/supply-chain.yml",
     "euxis-ops/supply_chain/verify_signed_artifacts.sh",
-    "euxis-core/src/euxis_core/resilience.py",
-    "euxis-core/src/euxis_core/runtime/concurrency.py",
     "euxis-ops/perf/check_perf_budget.py",
     "euxis-ops/perf/validate_perf_governance.py",
     "euxis-ops/eval/scorecard.py",
@@ -35,7 +34,7 @@ DEFAULT_ARTIFACTS = [
 ]
 
 DEFAULT_DOCS = [
-    "euxis-docs/docs/architecture/core-platform-separation-2026.md",
+    "euxis-data/docs/architecture/core-platform-separation-2026.md",
 ]
 
 

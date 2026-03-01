@@ -1,0 +1,25 @@
+#include "euxis/gateway/routes.hpp"
+#include "euxis/gateway/state.hpp"
+
+#include <nlohmann/json.hpp>
+
+namespace euxis::gateway {
+
+void register_webhook_routes(httplib::Server& server) {
+    server.Post("/api/webhooks/inbound",
+                [](const httplib::Request& req, httplib::Response& res) {
+                    try {
+                        auto j = nlohmann::json::parse(req.body);
+                        audit_log({{"event", "webhook.inbound"},
+                                   {"payload", j},
+                                   {"timestamp", timestamp()}});
+                        res.set_content(R"({"ok":true})", "application/json");
+                    } catch (...) {
+                        res.status = 400;
+                        res.set_content(R"({"error":"invalid json"})",
+                                        "application/json");
+                    }
+                });
+}
+
+} // namespace euxis::gateway

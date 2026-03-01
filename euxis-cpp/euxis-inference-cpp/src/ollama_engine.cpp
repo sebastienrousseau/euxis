@@ -6,7 +6,6 @@
 #include <spdlog/spdlog.h>
 
 // cpp-httplib — single-header HTTP client
-#define CPPHTTPLIB_OPENSSL_SUPPORT 0
 #include <httplib.h>
 
 namespace euxis::inference {
