@@ -76,4 +76,18 @@ auto Session::get_memory_context(const std::string& agent_id, int lines) const -
     return out.str();
 }
 
+void Session::save_memory(const std::string& agent_id, const std::string& user_msg, const std::string& assistant_msg) const {
+    auto project = project_name();
+    auto agent_dir = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" / project / agent_id;
+    std::filesystem::create_directories(agent_dir);
+    
+    auto memory_path = agent_dir / "memory.md";
+    std::ofstream f(memory_path, std::ios::app);
+    if (f.is_open()) {
+        f << "\n### " << session_id() << "\n"
+          << "**User:** " << user_msg << "\n"
+          << "**Assistant:** " << assistant_msg << "\n";
+    }
+}
+
 } // namespace euxis::cli

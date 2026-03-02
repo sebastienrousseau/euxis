@@ -155,9 +155,17 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         nlohmann::json body;
         body["model"] = m;
         body["max_tokens"] = 4096;
-        body["messages"] = nlohmann::json::array({
-            {{"role", "user"}, {"content", prompt}}
+        
+        // Anthropic Prompt Caching: Mark the initial system/context blocks as cacheable
+        nlohmann::json messages = nlohmann::json::array();
+        nlohmann::json first_msg;
+        first_msg["role"] = "user";
+        first_msg["content"] = nlohmann::json::array({
+            {{"type", "text"}, {"text", prompt}, {"cache_control", {{"type", "ephemeral"}}}}
         });
+        messages.push_back(first_msg);
+        
+        body["messages"] = messages;
 
         std::string body_str = body.dump();
 

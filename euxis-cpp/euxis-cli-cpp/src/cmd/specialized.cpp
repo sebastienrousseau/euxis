@@ -218,9 +218,13 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
     // Interactive Chat Loop
     std::string line;
     int turn = 0;
-    std::string memory_ctx;
-    std::vector<std::pair<std::string, std::string>> history;
     std::string active_agent = "code-agent";
+    
+    // Create session for memory persistence
+    Session session(ctx.euxis_home);
+    std::string memory_ctx = session.get_memory_context(active_agent);
+    
+    std::vector<std::pair<std::string, std::string>> history;
     
     bool processed_initial = false;
 
@@ -285,8 +289,11 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
             auto agent_ptr = registry.get_agent(target);
             if (agent_ptr) {
                 active_agent = target;
+                // Reload memory for new agent
+                memory_ctx = session.get_memory_context(active_agent);
+                
                 if (space == std::string::npos) {
-                    std::cout << term::icon_ok() << " " << term::dim("Switched to ") << term::bold(target) << "\n\n";
+                    std::cout << term::icon_ok() << " " << term::dim("Switched to ") << term::bold(target) << " (Memory loaded)\n\n";
                     continue;
                 }
                 trimmed = trimmed.substr(space + 1);
@@ -347,6 +354,10 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
             
             // Add turn to context memory & history
             history.push_back({trimmed, response.output});
+            
+            // Save to persistent memory
+            session.save_memory(active_agent, trimmed, response.output);
+            
             memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
             if (memory_ctx.size() > 12000) {
                 memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);

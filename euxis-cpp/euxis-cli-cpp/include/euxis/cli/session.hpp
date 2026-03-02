@@ -24,6 +24,9 @@ public:
     /// Get the last N lines of agent memory context.
     [[nodiscard]] auto get_memory_context(const std::string& agent_id, int lines = 50) const -> std::string;
 
+    /// Save a message turn to the agent's memory.
+    void save_memory(const std::string& agent_id, const std::string& user_msg, const std::string& assistant_msg) const;
+
 private:
     std::string euxis_home_;
 };
