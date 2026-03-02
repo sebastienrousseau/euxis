@@ -87,7 +87,7 @@ auto ProviderRouter::detect_provider() const -> std::string {
     // Detect active provider sessions / auth tokens
     if (std::getenv("ANTHROPIC_API_KEY") ||
         !ProviderExecutor::resolve_anthropic_token().empty())
-        return "anthropic";
+        return "claude";
     if (std::getenv("OPENAI_API_KEY"))
         return "openai";
     if (std::getenv("GEMINI_API_KEY") || std::getenv("GOOGLE_API_KEY"))
@@ -98,12 +98,9 @@ auto ProviderRouter::detect_provider() const -> std::string {
         "claude", "gemini", "openai", "ollama", "goose"
     };
     for (const auto& p : providers) {
-        if (Process::available(p)) {
-            if (p == "claude") return "anthropic";
-            return p;
-        }
+        if (Process::available(p)) return p;
     }
-    return "anthropic";  // default
+    return "claude";  // default
 }
 
 auto ProviderRouter::select_model(Tier tier) const -> ModelSelection {
@@ -246,16 +243,16 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const
         chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
         chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
     } else if (model.find("gpt") != std::string::npos) {
-        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"claude", "claude-sonnet-4-6", Tier::Code, 0.0});
         chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
         chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
     } else if (model.find("gemini") != std::string::npos) {
-        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"claude", "claude-sonnet-4-6", Tier::Code, 0.0});
         chain.push_back({"openai", "gpt-4o", Tier::Code, 0.0});
         chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
     } else {
         // Generic: try cloud providers
-        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"claude", "claude-sonnet-4-6", Tier::Code, 0.0});
         chain.push_back({"openai", "gpt-4o", Tier::Code, 0.0});
         chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
     }

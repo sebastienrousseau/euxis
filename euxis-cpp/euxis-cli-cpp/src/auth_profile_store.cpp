@@ -11,10 +11,10 @@ namespace euxis::cli {
 
 // Default fallback chains
 static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
-    {"anthropic", {"openai", "gemini", "ollama"}},
-    {"openai",    {"anthropic", "gemini", "ollama"}},
-    {"gemini",    {"anthropic", "openai", "ollama"}},
-    {"ollama",    {"anthropic", "openai", "gemini"}},
+    {"claude",  {"openai", "gemini", "ollama"}},
+    {"openai",  {"claude", "gemini", "ollama"}},
+    {"gemini",  {"claude", "openai", "ollama"}},
+    {"ollama",  {"claude", "openai", "gemini"}},
 };
 
 AuthProfileStore::AuthProfileStore(const std::string& data_dir)
@@ -209,12 +209,12 @@ void AuthProfileStore::auto_import_claude_oauth() {
 
         // Check if already imported
         for (const auto& p : profiles_) {
-            if (p.source == "claude_code_import" && p.provider == "anthropic") return;
+            if (p.source == "claude_code_import" && p.provider == "claude") return;
         }
 
         AuthProfile profile;
-        profile.id = "anthropic:claude_code";
-        profile.provider = "anthropic";
+        profile.id = "claude:claude_code";
+        profile.provider = "claude";
         profile.type = ProfileType::OAuth;
         profile.label = "Claude Code";
         profile.access_token = access_token;
@@ -302,7 +302,7 @@ void AuthProfileStore::import_env_vars() {
         profiles_.push_back(std::move(profile));
     };
 
-    import_key("ANTHROPIC_API_KEY", "anthropic");
+    import_key("ANTHROPIC_API_KEY", "claude");
     import_key("OPENAI_API_KEY", "openai");
     import_key("GEMINI_API_KEY", "gemini");
     import_key("GOOGLE_API_KEY", "gemini");

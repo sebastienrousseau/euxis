@@ -27,9 +27,13 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
                                 std::optional<ResolvedAuth> auth) -> ProviderResponse {
     auto start = std::chrono::steady_clock::now();
 
+    // Standardise provider for auth resolution
+    std::string effective_provider = selection.provider;
+    if (effective_provider == "anthropic") effective_provider = "claude";
+
     // Resolve auth if not provided
     if (!auth.has_value()) {
-        auth = auth_store_.resolve_with_fallback(selection.provider);
+        auth = auth_store_.resolve_with_fallback(effective_provider);
     }
 
     ProviderResponse resp;
