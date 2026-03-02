@@ -348,4 +348,24 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/cmd/specialized.cpp.o: \
  /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/include/euxis/cli/registry_client.hpp \
  /home/seb/.euxis/euxis-cpp/euxis-runtime-cpp/include/euxis/runtime/manifesto.hpp \
  /usr/include/c++/15.2.1/expected \
- /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/include/euxis/cli/session.hpp
+ /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/include/euxis/cli/session.hpp \
+ /usr/include/spdlog/spdlog.h /usr/include/spdlog/common.h \
+ /usr/include/spdlog/details/null_mutex.h /usr/include/c++/15.2.1/atomic \
+ /usr/include/spdlog/tweakme.h /usr/include/spdlog/fmt/fmt.h \
+ /usr/include/fmt/format.h /usr/include/fmt/base.h \
+ /usr/include/c++/15.2.1/stdlib.h /usr/include/spdlog/details/registry.h \
+ /usr/include/spdlog/details/periodic_worker.h \
+ /usr/include/c++/15.2.1/condition_variable \
+ /usr/include/c++/15.2.1/stop_token \
+ /usr/include/c++/15.2.1/bits/std_thread.h \
+ /usr/include/c++/15.2.1/semaphore \
+ /usr/include/c++/15.2.1/bits/semaphore_base.h \
+ /usr/include/c++/15.2.1/bits/atomic_timed_wait.h \
+ /usr/include/c++/15.2.1/bits/this_thread_sleep.h /usr/include/sys/time.h \
+ /usr/include/semaphore.h /usr/include/bits/semaphore.h \
+ /usr/include/c++/15.2.1/thread \
+ /usr/include/spdlog/details/synchronous_factory.h \
+ /usr/include/spdlog/logger.h /usr/include/spdlog/details/backtracer.h \
+ /usr/include/spdlog/details/circular_q.h \
+ /usr/include/spdlog/details/log_msg_buffer.h \
+ /usr/include/spdlog/details/log_msg.h /usr/include/spdlog/version.h

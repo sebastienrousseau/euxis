@@ -10,6 +10,7 @@
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
 
+#include <spdlog/spdlog.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -163,212 +164,117 @@ int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
     return cmd_tui_ex(ctx, args, std::cin);
 }
 
-int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input) {
-    // TUI is now the dedicated Terminal User Interface (interactive REPL).
-    
-    // Check if we are in a non-interactive environment (only check STDIN if it's the real cin)
+int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args, std::istream& input) {
     if (&input == &std::cin && (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))) {
         std::cout << term::icon_info() << " " << tr("Non-interactive mode detected. TUI requires a terminal.") << "\n";
         return 1;
     }
 
-    term::print_banner();
+    // Modern "Catppuccin" inspired palette
+    auto color_user = [](const std::string& s) { return term::rgb_fg(139, 233, 253, s); }; // Cyan
+    auto color_ai   = [](const std::string& s) { return term::rgb_fg(189, 147, 249, s); }; // Purple
+    auto color_dim  = [](const std::string& s) { return term::rgb_fg(98, 114, 164, s); };  // Comment/Gray
+    auto color_err  = [](const std::string& s) { return term::rgb_fg(255, 85, 85, s); };   // Red
+
+    // Silence background logs for a clean "Crush" look
+    auto old_level = spdlog::get_level();
+    spdlog::set_level(spdlog::level::warn);
+
+    std::cout << "\n  " << term::bold(term::rgb_fg(255, 121, 198, "EUXIS")) 
+              << " " << color_dim("v0.0.4") << "\n";
     
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
-    
-    auto agents = registry.list_agents();
-    auto squads = registry.list_squads();
-    
-    // --- System Status Box ---
-    std::ostringstream sys_body;
-    sys_body << term::bold("Workspace: ") << term::cyan(ctx.euxis_home) << "\n"
-             << term::bold("Data Dir:  ") << term::cyan(ctx.data_dir) << "\n\n"
-             << term::bold("Active Provider: ") << term::rgb_fg(255, 215, 0, router.detect_provider()) << "\n";
-             
-    auto providers = router.available_providers();
-    sys_body << term::bold("Available:       ");
-    for (size_t i = 0; i < providers.size(); ++i) {
-        if (i > 0) sys_body << ", ";
-        sys_body << term::dim(providers[i]);
-    }
-    
-    term::print_box("EUXIS TERMINAL UI (v0.0.4)", sys_body.str());
-    std::cout << "\n";
-
-    // Determine model selection & initial message
-    std::string tier = "code";
-    std::string initial_msg;
-    for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i] == "--tier" && i + 1 < args.size()) {
-            tier = args[++i];
-        } else if (args[i].front() != '-') {
-            if (!initial_msg.empty()) initial_msg += " ";
-            initial_msg += args[i];
-        }
-    }
-
     ProviderExecutor executor(ctx.data_dir);
-    auto model = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
-
-    std::cout << term::dim("Connected to ") << term::bold(term::cyan(model.model)) 
-              << term::dim(" via ") << term::bold(model.provider) << "\n"
-              << term::dim("Commands: 'exit' to quit, 'clear' to reset context, 'history' to show log") << "\n\n";
-
-    // Interactive Chat Loop
-    std::string line;
-    int turn = 0;
-    std::string active_agent = "code-agent";
     
-    // Create session for memory persistence
+    std::string active_agent = "code-agent";
     Session session(ctx.euxis_home);
     std::string memory_ctx = session.get_memory_context(active_agent);
-    
-    std::vector<std::pair<std::string, std::string>> history;
-    
-    bool processed_initial = false;
 
+    // Initial setup info
+    auto model_info = router.route("code", "tui conversation");
+    std::cout << "  " << color_dim("Connected to ") << term::bold(model_info.model) << "\n\n";
+
+    std::string line;
     while (true) {
-        std::string trimmed;
+        // High-contrast, minimalist prompt
+        std::cout << "  " << color_user("› ");
+        std::cout.flush();
 
-        if (!initial_msg.empty() && !processed_initial) {
-            trimmed = initial_msg;
-            processed_initial = true;
-            std::cout << term::rgb_fg(100, 255, 100, "╭─ Initial Message\n╰─> ") << trimmed << "\n";
-        } else {
-            if (&input == &std::cin) {
-                std::cout << term::rgb_fg(100, 255, 100, "╭── " + active_agent + " (You)\n╰─> ");
-                std::cout.flush();
-            }
-
-            if (!std::getline(input, line)) {
-                if (&input == &std::cin) std::cout << "\n";
-                break;
-            }
-
-            trimmed = line;
-            // Trim whitespace
-            while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t' || trimmed.front() == '\r')) {
-                trimmed.erase(trimmed.begin());
-            }
-            while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t' || trimmed.back() == '\r' || trimmed.back() == '\n')) {
-                trimmed.pop_back();
-            }
+        if (!std::getline(input, line)) {
+            std::cout << "\n";
+            break;
         }
+
+        auto trimmed = line;
+        while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t' || trimmed.front() == '\r')) trimmed.erase(trimmed.begin());
+        while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t' || trimmed.back() == '\r' || trimmed.back() == '\n')) trimmed.pop_back();
 
         if (trimmed.empty()) continue;
 
-        // Commands
         if (trimmed == "exit" || trimmed == "quit") {
-            std::cout << "\n" << term::icon_ok() << " " << term::dim("Session ended.") << "\n";
+            std::cout << "  " << color_dim("Bye!") << "\n\n";
             break;
         }
         if (trimmed == "clear") {
             memory_ctx.clear();
-            history.clear();
-            std::cout << "\n" << term::icon_ok() << " " << term::dim("Context memory cleared.") << "\n\n";
-            continue;
-        }
-        if (trimmed == "history") {
-            std::cout << "\n" << term::bold("--- Session History ---") << "\n";
-            for (size_t i = 0; i < history.size(); ++i) {
-                std::cout << term::dim("Turn " + std::to_string(i+1) + ":\n")
-                          << term::green("  User:  ") << history[i].first << "\n"
-                          << term::cyan("  Euxis: ") << (history[i].second.size() > 100 ? 
-                                history[i].second.substr(0, 97) + "..." : history[i].second) << "\n\n";
-            }
-            std::cout << term::bold("-----------------------") << "\n\n";
+            std::cout << "  " << color_dim("Memory cleared.") << "\n\n";
             continue;
         }
 
-        // Check for agent switch @agent
+        // Agent switch
         if (trimmed.starts_with("@")) {
             auto space = trimmed.find(' ');
             std::string target = (space == std::string::npos) ? trimmed.substr(1) : trimmed.substr(1, space - 1);
-            
-            auto agent_ptr = registry.get_agent(target);
-            if (agent_ptr) {
+            if (registry.get_agent(target)) {
                 active_agent = target;
-                // Reload memory for new agent
                 memory_ctx = session.get_memory_context(active_agent);
-                
-                if (space == std::string::npos) {
-                    std::cout << term::icon_ok() << " " << term::dim("Switched to ") << term::bold(target) << " (Memory loaded)\n\n";
-                    continue;
-                }
-                trimmed = trimmed.substr(space + 1);
-                while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t')) trimmed.erase(trimmed.begin());
-            } else {
-                std::cout << term::icon_warn() << " " << term::dim("Unknown agent: ") << target << "\n\n";
+                std::cout << "  " << color_dim("Switched to ") << term::bold(active_agent) << "\n\n";
                 if (space == std::string::npos) continue;
+                trimmed = trimmed.substr(space + 1);
             }
         }
 
-        // PII filter the input
         auto safe_input = PiiFilter::redact(trimmed);
-
-        // Load agent system prompt
-        std::string system_prompt;
+        std::string system_prompt = "You are Euxis. Be technical and brief.";
         auto agent_info = registry.get_agent(active_agent);
         if (agent_info && !agent_info->prompt_path.empty()) {
             system_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent_info->prompt_path);
         }
         
-        if (system_prompt.empty()) {
-            system_prompt = "You are Euxis, an advanced AI engineering assistant. Be precise, technical, and use markdown.";
-        }
-            
         std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
 
-        ++turn;
-        
-        if (&input == &std::cin) {
-            std::cout << term::dim("  \xe2\xa0\x8b Thinking...");
-            std::cout.flush();
-        }
+        // Subtle "Thinking" indicator
+        std::cout << "  " << color_dim("...") << "\r";
+        std::cout.flush();
         
         auto start = std::chrono::steady_clock::now();
-        auto response = executor.execute(model, full_prompt);
+        auto response = executor.execute(model_info, full_prompt);
         auto end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-        // Clear the thinking line
-        if (&input == &std::cin) {
-            std::cout << "\r\033[K"; 
-        }
+        std::cout << "\r\033[K"; // Clear indicator
 
         if (response.success) {
-            std::cout << term::rgb_fg(100, 200, 255, "╭── " + active_agent + " ") 
-                      << term::dim(std::format("({}ms | {})", duration, model.model)) << "\n";
+            // Stylized response block
+            std::cout << "\n  " << color_ai(active_agent) << " " << color_dim(std::to_string(duration) + "ms") << "\n";
             
-            if (response.output.empty()) {
-                std::cout << term::rgb_fg(100, 200, 255, "│ ") << term::dim("<empty response>") << "\n";
-            } else {
-                std::istringstream stream{response.output};
-                std::string out_line;
-                while (std::getline(stream, out_line)) {
-                    std::cout << term::rgb_fg(100, 200, 255, "│ ") << out_line << "\n";
-                }
+            std::istringstream stream{response.output};
+            std::string out_line;
+            while (std::getline(stream, out_line)) {
+                std::cout << "  " << out_line << "\n";
             }
-            std::cout << term::rgb_fg(100, 200, 255, "╰──\n\n");
+            std::cout << "\n";
             
-            // Add turn to context memory & history
-            history.push_back({trimmed, response.output});
-            
-            // Save to persistent memory
             session.save_memory(active_agent, trimmed, response.output);
-            
             memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
-            if (memory_ctx.size() > 12000) {
-                memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
-            }
+            if (memory_ctx.size() > 12000) memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
         } else {
-            std::cerr << term::rgb_fg(255, 100, 100, "╭── Error\n│ ") << (response.error.empty() ? "Unknown execution failure" : response.error) << "\n"
-                      << term::rgb_fg(255, 100, 100, "│ Exit Code: ") << response.exit_code << "\n"
-                      << term::rgb_fg(255, 100, 100, "╰──\n\n");
+            std::cout << "\n  " << color_err("Error: ") << response.error << "\n\n";
         }
     }
 
+    spdlog::set_level(old_level);
     return 0;
 }
 
