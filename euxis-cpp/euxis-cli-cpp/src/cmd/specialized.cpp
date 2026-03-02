@@ -237,7 +237,7 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
             std::cout << term::rgb_fg(100, 255, 100, "╭─ Initial Message\n╰─> ") << trimmed << "\n";
         } else {
             if (&input == &std::cin) {
-                std::cout << term::rgb_fg(100, 255, 100, "╭─ " + active_agent + " (You)\n╰─> ");
+                std::cout << term::rgb_fg(100, 255, 100, "╭── " + active_agent + " (You)\n╰─> ");
                 std::cout.flush();
             }
 
@@ -338,7 +338,7 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
         }
 
         if (response.success) {
-            std::cout << term::rgb_fg(100, 200, 255, "╭─ " + active_agent + " ") 
+            std::cout << term::rgb_fg(100, 200, 255, "╭── " + active_agent + " ") 
                       << term::dim(std::format("({}ms | {})", duration, model.model)) << "\n";
             
             if (response.output.empty()) {
@@ -350,7 +350,7 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
                     std::cout << term::rgb_fg(100, 200, 255, "│ ") << out_line << "\n";
                 }
             }
-            std::cout << term::rgb_fg(100, 200, 255, "╰─\n\n");
+            std::cout << term::rgb_fg(100, 200, 255, "╰──\n\n");
             
             // Add turn to context memory & history
             history.push_back({trimmed, response.output});
@@ -363,9 +363,9 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
                 memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
             }
         } else {
-            std::cerr << term::rgb_fg(255, 100, 100, "╭─ Error\n│ ") << (response.error.empty() ? "Unknown execution failure" : response.error) << "\n"
+            std::cerr << term::rgb_fg(255, 100, 100, "╭── Error\n│ ") << (response.error.empty() ? "Unknown execution failure" : response.error) << "\n"
                       << term::rgb_fg(255, 100, 100, "│ Exit Code: ") << response.exit_code << "\n"
-                      << term::rgb_fg(255, 100, 100, "╰─\n\n");
+                      << term::rgb_fg(255, 100, 100, "╰──\n\n");
         }
     }
 
