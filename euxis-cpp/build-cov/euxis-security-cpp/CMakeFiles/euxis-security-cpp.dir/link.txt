@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-security-cpp.a "CMakeFiles/euxis-security-cpp.dir/src/policy.cpp.o" "CMakeFiles/euxis-security-cpp.dir/src/governance.cpp.o"
+/usr/bin/ranlib libeuxis-security-cpp.a

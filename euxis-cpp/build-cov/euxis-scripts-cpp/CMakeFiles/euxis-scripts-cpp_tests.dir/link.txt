@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,-z,relro -Wl,-z,now -pie --coverage -Wl,--dependency-file=CMakeFiles/euxis-scripts-cpp_tests.dir/link.d "CMakeFiles/euxis-scripts-cpp_tests.dir/tests/test_tech_debt.cpp.o" "CMakeFiles/euxis-scripts-cpp_tests.dir/tests/test_docs_quality.cpp.o" -o euxis-scripts-cpp_tests  libeuxis-scripts-cpp.a /usr/lib/libgtest_main.so.1.17.0 /usr/lib/libgtest.so.1.17.0

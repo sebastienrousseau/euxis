@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-metrics-cpp.a "CMakeFiles/euxis-metrics-cpp.dir/src/performance_collector.cpp.o" "CMakeFiles/euxis-metrics-cpp.dir/src/fast_collector.cpp.o" "CMakeFiles/euxis-metrics-cpp.dir/src/analyzer.cpp.o" "CMakeFiles/euxis-metrics-cpp.dir/src/evidence.cpp.o" "CMakeFiles/euxis-metrics-cpp.dir/src/validation_pipeline.cpp.o" "CMakeFiles/euxis-metrics-cpp.dir/src/mdspan_views.cpp.o"
+/usr/bin/ranlib libeuxis-metrics-cpp.a

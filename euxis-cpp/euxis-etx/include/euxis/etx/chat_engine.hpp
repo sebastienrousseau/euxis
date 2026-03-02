@@ -15,6 +15,7 @@
 
 namespace euxis::etx {
 
+class FleetRegistry;
 class OAuthFlow;
 
 /// A single message in the conversation history.
@@ -39,7 +40,9 @@ class ChatEngine : public QObject {
 
 public:
     /// Construct a ChatEngine rooted at @p data_dir for config/state persistence.
-    explicit ChatEngine(const QString& data_dir, QObject* parent = nullptr);
+    explicit ChatEngine(const QString& data_dir, FleetRegistry* registry,
+                           QObject* parent = nullptr);
+    ~ChatEngine() override;
 
     /// Send a user message to the active (or specified) agent.
     void send_message(const QString& text, const QString& agent_id = {});
@@ -117,6 +120,7 @@ private:
     cli::ProviderExecutor executor_;
     cli::AuthProfileStore auth_store_;
     cli::Session session_;
+    FleetRegistry* registry_{nullptr};
     OAuthFlow* oauth_flow_{nullptr};
     QString active_agent_id_{"code-agent"};
     QList<ChatMessage> history_;

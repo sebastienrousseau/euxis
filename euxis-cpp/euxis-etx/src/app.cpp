@@ -54,7 +54,7 @@ EuxisApp::EuxisApp(QWidget* parent)
     , theme_engine_(new ThemeEngine(this))
     , config_(new ETXConfig())
     , registry_(new FleetRegistry(ETXConfig::data_dir(), this))
-    , chat_engine_(new ChatEngine(ETXConfig::data_dir(), this))
+    , chat_engine_(new ChatEngine(ETXConfig::data_dir(), registry_, this))
 {
     setWindowTitle("Euxis ETX");
     setMinimumSize(1024, 768);

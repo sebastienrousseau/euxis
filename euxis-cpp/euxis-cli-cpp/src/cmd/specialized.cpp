@@ -1,4 +1,5 @@
 #include "euxis/cli/cmd/specialized.hpp"
+#include "euxis/cli/box.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/pii_filter.hpp"
@@ -159,67 +160,235 @@ int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istrea
 // --- tui ---
 
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
-    // If not in a terminal (e.g. during tests), don't try to launch GUI
-    if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
-        std::cout << term::icon_info() << " " << tr("Non-interactive mode detected, skipping GUI launch.") << "\n";
-    } else {
-        // Try to launch the full Qt GUI (euxis-etx)
-        // Search order: build dir, installed binary, PATH
-        std::vector<fs::path> search_paths = {
-            fs::path(ctx.euxis_home) / "build" / "euxis-etx" / "euxis-etx",
-            fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
-            fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
-        };
+    return cmd_tui_ex(ctx, args, std::cin);
+}
 
-        for (const auto& etx_path : search_paths) {
-            if (fs::exists(etx_path)) {
-                std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
-                // Forward any args to the GUI
-                std::vector<std::string> etx_args = args;
-                auto result = Process::run(etx_path.string(), etx_args);
-                return result.exit_code;
+int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input) {
+    // TUI is now the dedicated Terminal User Interface (interactive REPL).
+    
+    // Check if we are in a non-interactive environment (only check STDIN if it's the real cin)
+    if (&input == &std::cin && (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))) {
+        std::cout << term::icon_info() << " " << tr("Non-interactive mode detected. TUI requires a terminal.") << "\n";
+        return 1;
+    }
+
+    term::print_banner();
+    
+    RegistryClient registry(ctx.data_dir);
+    ProviderRouter router(ctx.data_dir);
+    
+    auto agents = registry.list_agents();
+    auto squads = registry.list_squads();
+    
+    // --- System Status Box ---
+    std::ostringstream sys_body;
+    sys_body << term::bold("Workspace: ") << term::cyan(ctx.euxis_home) << "\n"
+             << term::bold("Data Dir:  ") << term::cyan(ctx.data_dir) << "\n\n"
+             << term::bold("Active Provider: ") << term::rgb_fg(255, 215, 0, router.detect_provider()) << "\n";
+             
+    auto providers = router.available_providers();
+    sys_body << term::bold("Available:       ");
+    for (size_t i = 0; i < providers.size(); ++i) {
+        if (i > 0) sys_body << ", ";
+        sys_body << term::dim(providers[i]);
+    }
+    
+    term::print_box("EUXIS TERMINAL UI (v0.0.4)", sys_body.str());
+    std::cout << "\n";
+
+    // Determine model selection & initial message
+    std::string tier = "code";
+    std::string initial_msg;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (args[i] == "--tier" && i + 1 < args.size()) {
+            tier = args[++i];
+        } else if (args[i].front() != '-') {
+            if (!initial_msg.empty()) initial_msg += " ";
+            initial_msg += args[i];
+        }
+    }
+
+    ProviderExecutor executor(ctx.data_dir);
+    auto model = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
+
+    std::cout << term::dim("Connected to ") << term::bold(term::cyan(model.model)) 
+              << term::dim(" via ") << term::bold(model.provider) << "\n"
+              << term::dim("Commands: 'exit' to quit, 'clear' to reset context, 'history' to show log") << "\n\n";
+
+    // Interactive Chat Loop
+    std::string line;
+    int turn = 0;
+    std::string memory_ctx;
+    std::vector<std::pair<std::string, std::string>> history;
+    std::string active_agent = "code-agent";
+    
+    bool processed_initial = false;
+
+    while (true) {
+        std::string trimmed;
+
+        if (!initial_msg.empty() && !processed_initial) {
+            trimmed = initial_msg;
+            processed_initial = true;
+            std::cout << term::rgb_fg(100, 255, 100, "╭─ Initial Message\n╰─> ") << trimmed << "\n";
+        } else {
+            if (&input == &std::cin) {
+                std::cout << term::rgb_fg(100, 255, 100, "╭─ " + active_agent + " (You)\n╰─> ");
+                std::cout.flush();
+            }
+
+            if (!std::getline(input, line)) {
+                if (&input == &std::cin) std::cout << "\n";
+                break;
+            }
+
+            trimmed = line;
+            // Trim whitespace
+            while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t' || trimmed.front() == '\r')) {
+                trimmed.erase(trimmed.begin());
+            }
+            while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t' || trimmed.back() == '\r' || trimmed.back() == '\n')) {
+                trimmed.pop_back();
             }
         }
 
-        // Also check if euxis-etx is on PATH
-        if (Process::available("euxis-etx")) {
+        if (trimmed.empty()) continue;
+
+        // Commands
+        if (trimmed == "exit" || trimmed == "quit") {
+            std::cout << "\n" << term::icon_ok() << " " << term::dim("Session ended.") << "\n";
+            break;
+        }
+        if (trimmed == "clear") {
+            memory_ctx.clear();
+            history.clear();
+            std::cout << "\n" << term::icon_ok() << " " << term::dim("Context memory cleared.") << "\n\n";
+            continue;
+        }
+        if (trimmed == "history") {
+            std::cout << "\n" << term::bold("--- Session History ---") << "\n";
+            for (size_t i = 0; i < history.size(); ++i) {
+                std::cout << term::dim("Turn " + std::to_string(i+1) + ":\n")
+                          << term::green("  User:  ") << history[i].first << "\n"
+                          << term::cyan("  Euxis: ") << (history[i].second.size() > 100 ? 
+                                history[i].second.substr(0, 97) + "..." : history[i].second) << "\n\n";
+            }
+            std::cout << term::bold("-----------------------") << "\n\n";
+            continue;
+        }
+
+        // Check for agent switch @agent
+        if (trimmed.starts_with("@")) {
+            auto space = trimmed.find(' ');
+            std::string target = (space == std::string::npos) ? trimmed.substr(1) : trimmed.substr(1, space - 1);
+            
+            auto agent_ptr = registry.get_agent(target);
+            if (agent_ptr) {
+                active_agent = target;
+                if (space == std::string::npos) {
+                    std::cout << term::icon_ok() << " " << term::dim("Switched to ") << term::bold(target) << "\n\n";
+                    continue;
+                }
+                trimmed = trimmed.substr(space + 1);
+                while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t')) trimmed.erase(trimmed.begin());
+            } else {
+                std::cout << term::icon_warn() << " " << term::dim("Unknown agent: ") << target << "\n\n";
+                if (space == std::string::npos) continue;
+            }
+        }
+
+        // PII filter the input
+        auto safe_input = PiiFilter::redact(trimmed);
+
+        // Load agent system prompt
+        std::string system_prompt;
+        auto agent_info = registry.get_agent(active_agent);
+        if (agent_info && !agent_info->prompt_path.empty()) {
+            system_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent_info->prompt_path);
+        }
+        
+        if (system_prompt.empty()) {
+            system_prompt = "You are Euxis, an advanced AI engineering assistant. Be precise, technical, and use markdown.";
+        }
+            
+        std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
+
+        ++turn;
+        
+        if (&input == &std::cin) {
+            std::cout << term::dim("  \xe2\xa0\x8b Thinking...");
+            std::cout.flush();
+        }
+        
+        auto start = std::chrono::steady_clock::now();
+        auto response = executor.execute(model, full_prompt);
+        auto end = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        // Clear the thinking line
+        if (&input == &std::cin) {
+            std::cout << "\r\033[K"; 
+        }
+
+        if (response.success) {
+            std::cout << term::rgb_fg(100, 200, 255, "╭─ " + active_agent + " ") 
+                      << term::dim(std::format("({}ms | {})", duration, model.model)) << "\n";
+            
+            if (response.output.empty()) {
+                std::cout << term::rgb_fg(100, 200, 255, "│ ") << term::dim("<empty response>") << "\n";
+            } else {
+                std::istringstream stream{response.output};
+                std::string out_line;
+                while (std::getline(stream, out_line)) {
+                    std::cout << term::rgb_fg(100, 200, 255, "│ ") << out_line << "\n";
+                }
+            }
+            std::cout << term::rgb_fg(100, 200, 255, "╰─\n\n");
+            
+            // Add turn to context memory & history
+            history.push_back({trimmed, response.output});
+            memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
+            if (memory_ctx.size() > 12000) {
+                memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
+            }
+        } else {
+            std::cerr << term::rgb_fg(255, 100, 100, "╭─ Error\n│ ") << (response.error.empty() ? "Unknown execution failure" : response.error) << "\n"
+                      << term::rgb_fg(255, 100, 100, "│ Exit Code: ") << response.exit_code << "\n"
+                      << term::rgb_fg(255, 100, 100, "╰─\n\n");
+        }
+    }
+
+    return 0;
+}
+
+// --- gui ---
+
+int cmd_gui(Context& ctx, const std::vector<std::string>& args) {
+    // Try to launch the full Qt GUI (euxis-etx)
+    // Search order: build dir, installed binary, PATH
+    std::vector<fs::path> search_paths = {
+        fs::path(ctx.euxis_home) / "build" / "euxis-etx" / "euxis-etx",
+        fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
+        fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
+    };
+
+    for (const auto& etx_path : search_paths) {
+        if (fs::exists(etx_path)) {
             std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
-            auto result = Process::run("euxis-etx", args);
+            auto result = Process::run(etx_path.string(), args);
             return result.exit_code;
         }
     }
 
-    // Fallback: text-based dashboard when GUI binary not available
-    std::cout << term::yellow(tr("ETX GUI not found, showing text dashboard")) << "\n";
-    std::cout << term::dim(tr("(build euxis-etx or add it to PATH for the full GUI)")) << "\n\n";
-
-    std::cout << term::bold(tr("Terminal Dashboard")) << "\n\n";
-
-    RegistryClient registry(ctx.data_dir);
-    ProviderRouter router(ctx.data_dir);
-
-    std::cout << "  " << tr("Agents:") << "    " << registry.agent_count() << "\n"
-              << "  " << tr("Squads:") << "    " << registry.list_squads().size() << "\n"
-              << "  " << tr("Provider:") << "  " << router.detect_provider() << "\n"
-              << "  " << tr("Local:") << "     " << (router.local_available() ? tr("yes") : tr("no")) << "\n"
-              << "  " << tr("Home:") << "      " << ctx.euxis_home << "\n";
-
-    auto providers = router.available_providers();
-    std::cout << "  " << tr("Available:") << " ";
-    for (size_t i = 0; i < providers.size(); ++i) {
-        if (i > 0) std::cout << ", ";
-        std::cout << providers[i];
-    }
-    std::cout << "\n";
-
-    std::cout << "\n  " << term::bold(tr("Runtime:")) << "\n";
-    for (const auto& dir : {"euxis-data", "euxis-runtime", "euxis-core"}) {
-        auto path = fs::path(ctx.euxis_home) / dir;
-        std::cout << "    " << (fs::is_directory(path) ? term::icon_ok() : term::icon_fail())
-                  << " " << dir << "\n";
+    if (Process::available("euxis-etx")) {
+        std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
+        auto result = Process::run("euxis-etx", args);
+        return result.exit_code;
     }
 
-    return 0;
+    std::cerr << term::icon_fail() << " " << tr("ETX GUI binary not found.") << "\n"
+              << term::dim(tr("Please build 'euxis-etx' or ensure it is in your PATH.")) << "\n";
+    return 1;
 }
 
 // --- polish ---

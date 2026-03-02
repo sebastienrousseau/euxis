@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-a2a-cpp.a "CMakeFiles/euxis-a2a-cpp.dir/src/agent_card.cpp.o" "CMakeFiles/euxis-a2a-cpp.dir/src/task.cpp.o" "CMakeFiles/euxis-a2a-cpp.dir/src/message.cpp.o" "CMakeFiles/euxis-a2a-cpp.dir/src/server.cpp.o" "CMakeFiles/euxis-a2a-cpp.dir/src/http_transport.cpp.o"
+/usr/bin/ranlib libeuxis-a2a-cpp.a

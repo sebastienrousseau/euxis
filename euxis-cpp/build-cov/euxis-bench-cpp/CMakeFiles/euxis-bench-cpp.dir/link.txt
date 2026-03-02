@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-bench-cpp.a "CMakeFiles/euxis-bench-cpp.dir/src/runner.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/reporter.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/security_bench.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/autonomy_bench.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/performance_bench.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/portability_bench.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/interop_bench.cpp.o" "CMakeFiles/euxis-bench-cpp.dir/src/result_matrix.cpp.o"
+/usr/bin/ranlib libeuxis-bench-cpp.a

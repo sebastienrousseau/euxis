@@ -1,0 +1,18 @@
+euxis-crypto-cpp_tests 2 0.717853
+euxis-bridge-cpp_tests 2 0.252553
+euxis-memory-cpp_tests 1 19.5127
+euxis-identity-cpp_tests 2 0.00877738
+euxis-inference-cpp_tests 2 0.152962
+euxis-a2a-cpp_tests 2 0.00835876
+euxis-security-cpp_tests 2 0.00293818
+euxis-scripts-cpp_tests 2 0.00244168
+euxis-runtime-cpp_tests 2 0.0108582
+euxis-metrics-cpp_tests 2 1.52114
+euxis-core-cpp_tests 2 1.80892
+euxis-adapters-cpp_tests 2 1.32889
+euxis-gateway-cpp_tests 2 0.762773
+euxis-cli-cpp_tests 1 18.734
+euxis-bench-cpp_tests 1 41.536
+euxis-etx-tests 1 6.13903
+euxis-integration-tests 2 2.22517
+---

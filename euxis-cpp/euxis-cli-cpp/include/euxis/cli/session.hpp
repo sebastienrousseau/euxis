@@ -12,8 +12,11 @@ public:
     /// Get the current project name (EUXIS_PROJECT or PWD basename).
     [[nodiscard]] auto project_name() const -> std::string;
 
-    /// Get or create a session ID (EUXIS_SESSION_ID or timestamp).
+    /// Get the or create a session ID (EUXIS_SESSION_ID or timestamp).
     [[nodiscard]] auto session_id() const -> std::string;
+
+    /// Get the root euxis_home directory.
+    [[nodiscard]] auto euxis_home() const -> std::string;
 
     /// Ensure project/agent directories exist. Returns the project dir.
     [[nodiscard]] auto ensure_project_dirs(const std::string& agent_id) const -> std::string;

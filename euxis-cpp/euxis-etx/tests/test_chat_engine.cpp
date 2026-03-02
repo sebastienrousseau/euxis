@@ -35,7 +35,7 @@ protected:
         QDir().mkpath(dummy_home);
         setenv("HOME", dummy_home.toLocal8Bit().constData(), 1);
 
-        engine_ = new ChatEngine(test_data_dir_);
+        engine_ = new ChatEngine(test_data_dir_, nullptr);
     }
     void TearDown() override {
         if (engine_) {

@@ -89,9 +89,10 @@ void Engine::register_commands() {
     commands_.push_back({"sync-docs",          tr("Development"),    tr("Sync docs to latest code state"),            cmd::cmd_sync_docs});
     commands_.push_back({"test-infra",         tr("Development"),    tr("Run infrastructure test suite"),             cmd::cmd_test_infra});
 
-    // Specialized (11)
+    // Specialized (12)
     commands_.push_back({"voice",            tr("Specialized"),    tr("Voice interface mode"),                       cmd::cmd_voice});
     commands_.push_back({"tui",              tr("Specialized"),    tr("Terminal UI (interactive dashboard)"),        cmd::cmd_tui});
+    commands_.push_back({"gui",              tr("Specialized"),    tr("Launch the full Qt desktop GUI"),             cmd::cmd_gui});
     commands_.push_back({"polish",           tr("Specialized"),    tr("Polish agent outputs (formatting/style)"),   cmd::cmd_polish});
     commands_.push_back({"kaizen",           tr("Specialized"),    tr("Continuous improvement analysis"),            cmd::cmd_kaizen});
     commands_.push_back({"audit",            tr("Specialized"),    tr("Security and compliance audit"),              cmd::cmd_audit});

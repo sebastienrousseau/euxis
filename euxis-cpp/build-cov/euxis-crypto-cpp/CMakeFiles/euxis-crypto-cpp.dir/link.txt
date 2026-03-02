@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-crypto-cpp.a "CMakeFiles/euxis-crypto-cpp.dir/src/aes_gcm.cpp.o" "CMakeFiles/euxis-crypto-cpp.dir/src/key_derivation.cpp.o" "CMakeFiles/euxis-crypto-cpp.dir/src/ed25519.cpp.o"
+/usr/bin/ranlib libeuxis-crypto-cpp.a

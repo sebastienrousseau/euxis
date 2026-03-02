@@ -603,7 +603,7 @@ TEST_F(WidgetTest, ChatInputBarGhostLabel) {
 // =============================================================================
 
 TEST_F(WidgetTest, ProviderSelectDialogConstruction) {
-    ChatEngine engine("/tmp/euxis-etx-test-provider-select");
+    ChatEngine engine("/tmp/euxis-etx-test-provider-select", nullptr);
     auto* dialog = create_provider_select_dialog(&engine, nullptr);
     ASSERT_NE(dialog, nullptr);
 
@@ -616,7 +616,7 @@ TEST_F(WidgetTest, ProviderSelectDialogConstruction) {
 }
 
 TEST_F(WidgetTest, ProviderSelectDialogButtons) {
-    ChatEngine engine("/tmp/euxis-etx-test-provider-select2");
+    ChatEngine engine("/tmp/euxis-etx-test-provider-select2", nullptr);
     auto* dialog = create_provider_select_dialog(&engine, nullptr);
     ASSERT_NE(dialog, nullptr);
 
@@ -628,7 +628,7 @@ TEST_F(WidgetTest, ProviderSelectDialogButtons) {
 }
 
 TEST_F(WidgetTest, ProviderSelectDialogFallbackLabel) {
-    ChatEngine engine("/tmp/euxis-etx-test-provider-select3");
+    ChatEngine engine("/tmp/euxis-etx-test-provider-select3", nullptr);
     auto* dialog = create_provider_select_dialog(&engine, nullptr);
     ASSERT_NE(dialog, nullptr);
 
@@ -648,7 +648,7 @@ TEST_F(WidgetTest, ProviderSelectDialogFallbackLabel) {
 
 TEST_F(WidgetTest, ProviderSelectDialogSelectedProviderEmpty) {
     // Test selected_provider() when nothing is selected — should return empty
-    ChatEngine engine("/tmp/euxis-etx-test-provider-select4");
+    ChatEngine engine("/tmp/euxis-etx-test-provider-select4", nullptr);
     auto* dialog = create_provider_select_dialog(&engine, nullptr);
     ASSERT_NE(dialog, nullptr);
 

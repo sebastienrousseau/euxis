@@ -1,0 +1,2 @@
+/usr/bin/ar qc libeuxis-memory-cpp.a "CMakeFiles/euxis-memory-cpp.dir/src/store.cpp.o" "CMakeFiles/euxis-memory-cpp.dir/src/entry.cpp.o"
+/usr/bin/ranlib libeuxis-memory-cpp.a

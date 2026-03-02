@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/seb/.euxis/euxis-cpp/build-cov/_deps/httplib-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

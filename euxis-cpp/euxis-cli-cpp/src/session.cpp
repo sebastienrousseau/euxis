@@ -29,6 +29,10 @@ auto Session::session_id() const -> std::string {
     return std::to_string(epoch);
 }
 
+auto Session::euxis_home() const -> std::string {
+    return euxis_home_;
+}
+
 auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::string {
     auto project = project_name();
     auto base = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" / project;

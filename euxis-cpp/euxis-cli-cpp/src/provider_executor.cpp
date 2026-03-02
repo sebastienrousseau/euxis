@@ -243,19 +243,36 @@ fallback_to_cli:
     }
 
     std::vector<std::string> args = {
-        "-u", "CLAUDECODE", "-u", "CLAUDE_CODE_ENTRYPOINT",
+        "-u", "CLAUDECODE", 
+        "-u", "CLAUDE_CODE_ENTRYPOINT",
+        "-u", "CLAUDE_MODEL",
+        "-u", "ANTHROPIC_MODEL",
+        "-u", "MODEL",
         "claude", "-p", prompt, "--output-format", "text"
     };
-    if (!model.empty()) {
-        args.push_back("--model");
-        args.push_back(model);
-    }
+    
+    // Map Euxis aliases to Claude Code internal aliases if necessary
+    // or just omit the model if we're falling back, as the CLI handles defaults well.
+    // For now, if the fallback triggers, we just use the CLI's default model 
+    // to avoid compatibility issues across different versions of Claude Code.
+    // If the user explicitly asks for a non-sonnet model, we might want to pass it, 
+    // but the CLI is quite strict about model names.
 
     auto result = Process::run("env", args, timeout);
+    
+    // Some versions of Claude CLI might return non-zero even on success if they can't 
+    // access some terminal features, but still print the response to stdout.
+    bool success = (result.exit_code == 0) || (!result.stdout_output.empty() && result.exit_code != 127);
+    
+    std::string err = result.stderr_output;
+    if (err.empty() && !success) {
+        err = "Claude CLI failed with exit code " + std::to_string(result.exit_code);
+    }
+    
     return {
-        result.exit_code == 0,
+        success,
         result.stdout_output,
-        result.stderr_output,
+        err,
         result.exit_code,
         0.0,
         {}

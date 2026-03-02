@@ -1,0 +1,3291 @@
+Start testing: Mar 02 20:47 GMT
+----------------------------------------------------------
+7/17 Testing: euxis-security-cpp_tests
+7/17 Test: euxis-security-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-security-cpp/euxis-security-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-security-cpp
+"euxis-security-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 25 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from SecurityPolicyTest
+[ RUN      ] SecurityPolicyTest.DefaultValues
+[       OK ] SecurityPolicyTest.DefaultValues (0 ms)
+[ RUN      ] SecurityPolicyTest.ToJsonRoundtrip
+[       OK ] SecurityPolicyTest.ToJsonRoundtrip (0 ms)
+[ RUN      ] SecurityPolicyTest.FromJsonPartialFields
+[       OK ] SecurityPolicyTest.FromJsonPartialFields (0 ms)
+[----------] 3 tests from SecurityPolicyTest (0 ms total)
+
+[----------] 3 tests from ValidateAuthModeTest
+[ RUN      ] ValidateAuthModeTest.AcceptsValidModes
+[       OK ] ValidateAuthModeTest.AcceptsValidModes (0 ms)
+[ RUN      ] ValidateAuthModeTest.RejectsInvalidMode
+[       OK ] ValidateAuthModeTest.RejectsInvalidMode (0 ms)
+[ RUN      ] ValidateAuthModeTest.RejectsInvalidModeContainsMessage
+[       OK ] ValidateAuthModeTest.RejectsInvalidModeContainsMessage (0 ms)
+[----------] 3 tests from ValidateAuthModeTest (0 ms total)
+
+[----------] 3 tests from MergePolicyTest
+[ RUN      ] MergePolicyTest.EmptyOverridesReturnDefaults
+[       OK ] MergePolicyTest.EmptyOverridesReturnDefaults (0 ms)
+[ RUN      ] MergePolicyTest.OverridesApplied
+[       OK ] MergePolicyTest.OverridesApplied (0 ms)
+[ RUN      ] MergePolicyTest.InvalidModeReturnsError
+[       OK ] MergePolicyTest.InvalidModeReturnsError (0 ms)
+[----------] 3 tests from MergePolicyTest (0 ms total)
+
+[----------] 16 tests from GovernanceTest
+[ RUN      ] GovernanceTest.CleanSessionPasses
+[       OK ] GovernanceTest.CleanSessionPasses (0 ms)
+[ RUN      ] GovernanceTest.PiiDetection
+[       OK ] GovernanceTest.PiiDetection (0 ms)
+[ RUN      ] GovernanceTest.PiiViolationInSession
+[       OK ] GovernanceTest.PiiViolationInSession (0 ms)
+[ RUN      ] GovernanceTest.ScopeViolation
+[       OK ] GovernanceTest.ScopeViolation (0 ms)
+[ RUN      ] GovernanceTest.ScopeValid
+[       OK ] GovernanceTest.ScopeValid (0 ms)
+[ RUN      ] GovernanceTest.AuditTrailViolation
+[       OK ] GovernanceTest.AuditTrailViolation (0 ms)
+[ RUN      ] GovernanceTest.ActionAuthorizationValid
+[       OK ] GovernanceTest.ActionAuthorizationValid (0 ms)
+[ RUN      ] GovernanceTest.ActionAuthorizationScopeViolation
+[       OK ] GovernanceTest.ActionAuthorizationScopeViolation (0 ms)
+[ RUN      ] GovernanceTest.CriticalActionRequiresHumanOversight
+[       OK ] GovernanceTest.CriticalActionRequiresHumanOversight (0 ms)
+[ RUN      ] GovernanceTest.DataMinimizationViolation
+[       OK ] GovernanceTest.DataMinimizationViolation (0 ms)
+[ RUN      ] GovernanceTest.NoPiiDetectedInCleanText
+[       OK ] GovernanceTest.NoPiiDetectedInCleanText (0 ms)
+[ RUN      ] GovernanceTest.PiiFilteringDisabledWhenPatternsEmpty
+[       OK ] GovernanceTest.PiiFilteringDisabledWhenPatternsEmpty (0 ms)
+[ RUN      ] GovernanceTest.EmptyScopeSkipsCheck
+[       OK ] GovernanceTest.EmptyScopeSkipsCheck (0 ms)
+[ RUN      ] GovernanceTest.AuditTrailWithMessagesPasses
+[       OK ] GovernanceTest.AuditTrailWithMessagesPasses (0 ms)
+[ RUN      ] GovernanceTest.DataMinimizationSmallMessagesPasses
+[       OK ] GovernanceTest.DataMinimizationSmallMessagesPasses (0 ms)
+[ RUN      ] GovernanceTest.DataMinimizationDisabledSkipsCheck
+[       OK ] GovernanceTest.DataMinimizationDisabledSkipsCheck (0 ms)
+[----------] 16 tests from GovernanceTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 4 test suites ran. (2 ms total)
+[  PASSED  ] 25 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-security-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-security-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/17 Testing: euxis-scripts-cpp_tests
+8/17 Test: euxis-scripts-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-scripts-cpp/euxis-scripts-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-scripts-cpp
+"euxis-scripts-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from TechDebtTest
+[ RUN      ] TechDebtTest.CountsPragmasAndTodos
+[       OK ] TechDebtTest.CountsPragmasAndTodos (0 ms)
+[ RUN      ] TechDebtTest.EmptyRepoReportsZero
+[       OK ] TechDebtTest.EmptyRepoReportsZero (0 ms)
+[ RUN      ] TechDebtTest.ReportToJson
+[       OK ] TechDebtTest.ReportToJson (0 ms)
+[----------] 3 tests from TechDebtTest (1 ms total)
+
+[----------] 8 tests from DocsQualityTest
+[ RUN      ] DocsQualityTest.FindsDocFiles
+[       OK ] DocsQualityTest.FindsDocFiles (0 ms)
+[ RUN      ] DocsQualityTest.EmptyDocsDir
+[       OK ] DocsQualityTest.EmptyDocsDir (0 ms)
+[ RUN      ] DocsQualityTest.ModuleDocPath
+[       OK ] DocsQualityTest.ModuleDocPath (0 ms)
+[ RUN      ] DocsQualityTest.MissingModuleDocs
+[       OK ] DocsQualityTest.MissingModuleDocs (0 ms)
+[ RUN      ] DocsQualityTest.QualityReport
+[       OK ] DocsQualityTest.QualityReport (0 ms)
+[ RUN      ] DocsQualityTest.MissingRequiredDocs
+[       OK ] DocsQualityTest.MissingRequiredDocs (0 ms)
+[ RUN      ] DocsQualityTest.QualityReportAllDocsPresent
+[       OK ] DocsQualityTest.QualityReportAllDocsPresent (0 ms)
+[ RUN      ] DocsQualityTest.DocsSourceFilesIgnoresNonDocExtensions
+[       OK ] DocsQualityTest.DocsSourceFilesIgnoresNonDocExtensions (0 ms)
+[----------] 8 tests from DocsQualityTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 2 test suites ran. (3 ms total)
+[  PASSED  ] 11 tests.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-scripts-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-scripts-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/17 Testing: euxis-identity-cpp_tests
+4/17 Test: euxis-identity-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-identity-cpp/euxis-identity-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-identity-cpp
+"euxis-identity-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 83 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 22 tests from DIDTest
+[ RUN      ] DIDTest.CreateDIDReturnsCorrectFormat
+[       OK ] DIDTest.CreateDIDReturnsCorrectFormat (0 ms)
+[ RUN      ] DIDTest.CreateDIDWithNumericId
+[       OK ] DIDTest.CreateDIDWithNumericId (0 ms)
+[ RUN      ] DIDTest.CreateDIDWithEmptyId
+[       OK ] DIDTest.CreateDIDWithEmptyId (0 ms)
+[ RUN      ] DIDTest.CreateDIDWithComplexId
+[       OK ] DIDTest.CreateDIDWithComplexId (0 ms)
+[ RUN      ] DIDTest.CreateDIDDocumentBasic
+[       OK ] DIDTest.CreateDIDDocumentBasic (0 ms)
+[ RUN      ] DIDTest.CreateDIDDocumentMultibasePrefix
+[       OK ] DIDTest.CreateDIDDocumentMultibasePrefix (0 ms)
+[ RUN      ] DIDTest.CreateDIDDocumentWithServices
+[       OK ] DIDTest.CreateDIDDocumentWithServices (0 ms)
+[ RUN      ] DIDTest.CreateDIDDocumentTimestampFormat
+[       OK ] DIDTest.CreateDIDDocumentTimestampFormat (0 ms)
+[ RUN      ] DIDTest.ToJsonRoundtrip
+[       OK ] DIDTest.ToJsonRoundtrip (0 ms)
+[ RUN      ] DIDTest.ToJsonWithServices
+[       OK ] DIDTest.ToJsonWithServices (0 ms)
+[ RUN      ] DIDTest.ToJsonSerializesAndParses
+[       OK ] DIDTest.ToJsonSerializesAndParses (0 ms)
+[ RUN      ] DIDTest.ResolveValidDID
+[       OK ] DIDTest.ResolveValidDID (0 ms)
+[ RUN      ] DIDTest.ResolveNonEuxisDID
+[       OK ] DIDTest.ResolveNonEuxisDID (0 ms)
+[ RUN      ] DIDTest.ResolveDIDWithMultipleColons
+[       OK ] DIDTest.ResolveDIDWithMultipleColons (0 ms)
+[ RUN      ] DIDTest.ResolveInvalidDIDNoPrefix
+[       OK ] DIDTest.ResolveInvalidDIDNoPrefix (0 ms)
+[ RUN      ] DIDTest.ResolveInvalidDIDNoId
+[       OK ] DIDTest.ResolveInvalidDIDNoId (0 ms)
+[ RUN      ] DIDTest.ResolveInvalidDIDEmptyMethod
+[       OK ] DIDTest.ResolveInvalidDIDEmptyMethod (0 ms)
+[ RUN      ] DIDTest.ResolveInvalidDIDEmptyId
+[       OK ] DIDTest.ResolveInvalidDIDEmptyId (0 ms)
+[ RUN      ] DIDTest.ResolveEmptyStringFails
+[       OK ] DIDTest.ResolveEmptyStringFails (0 ms)
+[ RUN      ] DIDTest.ResolveDIDOnlyPrefix
+[       OK ] DIDTest.ResolveDIDOnlyPrefix (0 ms)
+[ RUN      ] DIDTest.ResolveInvalidDIDPrefixOnly
+[       OK ] DIDTest.ResolveInvalidDIDPrefixOnly (0 ms)
+[ RUN      ] DIDTest.ResolveEmptyMethodAndId
+[       OK ] DIDTest.ResolveEmptyMethodAndId (0 ms)
+[----------] 22 tests from DIDTest (1 ms total)
+
+[----------] 16 tests from CredentialsTest
+[ RUN      ] CredentialsTest.IssueAndVerifyRoundtrip
+[       OK ] CredentialsTest.IssueAndVerifyRoundtrip (0 ms)
+[ RUN      ] CredentialsTest.VerifyWithWrongKeyFails
+[2026-03-02 20:47:40.225] [warning] Credential 11c8b18f-b367-d7af-5360-1590f05d773d proof verification failed
+[       OK ] CredentialsTest.VerifyWithWrongKeyFails (0 ms)
+[ RUN      ] CredentialsTest.TamperedClaimFailsVerification
+[2026-03-02 20:47:40.226] [warning] Credential 5a4c2e59-7ce4-85f7-efb1-eb6b9c228d8b proof verification failed
+[       OK ] CredentialsTest.TamperedClaimFailsVerification (0 ms)
+[ RUN      ] CredentialsTest.MultipleClaims
+[       OK ] CredentialsTest.MultipleClaims (0 ms)
+[ RUN      ] CredentialsTest.EmptyClaims
+[       OK ] CredentialsTest.EmptyClaims (0 ms)
+[ RUN      ] CredentialsTest.CustomTTL
+[       OK ] CredentialsTest.CustomTTL (0 ms)
+[ RUN      ] CredentialsTest.CredentialIdIsUnique
+[       OK ] CredentialsTest.CredentialIdIsUnique (0 ms)
+[ RUN      ] CredentialsTest.ProofVerificationMethod
+[       OK ] CredentialsTest.ProofVerificationMethod (0 ms)
+[ RUN      ] CredentialsTest.ToJsonContainsAllFields
+[       OK ] CredentialsTest.ToJsonContainsAllFields (0 ms)
+[ RUN      ] CredentialsTest.ToJsonSerializesAndParses
+[       OK ] CredentialsTest.ToJsonSerializesAndParses (0 ms)
+[ RUN      ] CredentialsTest.TamperedProofValueFails
+[2026-03-02 20:47:40.228] [warning] Credential 0ab9e175-6e03-b4b5-2ed2-a35c3a8bfe6a proof verification failed
+[       OK ] CredentialsTest.TamperedProofValueFails (0 ms)
+[ RUN      ] CredentialsTest.NonHexProofValueFails
+[2026-03-02 20:47:40.228] [warning] Credential a8d1849c-b3b5-3ec8-e417-8de0e3900bb4 has invalid proof length
+[       OK ] CredentialsTest.NonHexProofValueFails (0 ms)
+[ RUN      ] CredentialsTest.NonStandardKeySize
+[2026-03-02 20:47:40.228] [warning] Credential 980fe68d-d53c-d31e-f21a-7d7a8cdc5305 proof verification failed
+[       OK ] CredentialsTest.NonStandardKeySize (0 ms)
+[ RUN      ] CredentialsTest.ProofValueHasCorrectHexLength
+[       OK ] CredentialsTest.ProofValueHasCorrectHexLength (0 ms)
+[ RUN      ] CredentialsTest.ProofValueWrongLengthFails
+[2026-03-02 20:47:40.228] [warning] Credential 30fa6873-3ef6-b1af-0784-a4c0733bfeed has invalid proof length
+[       OK ] CredentialsTest.ProofValueWrongLengthFails (0 ms)
+[ RUN      ] CredentialsTest.MalformedHexProofFails
+[2026-03-02 20:47:40.229] [warning] Credential 3d37b591-8105-4147-bead-53de93bf39ff has malformed hex proof
+[       OK ] CredentialsTest.MalformedHexProofFails (0 ms)
+[----------] 16 tests from CredentialsTest (3 ms total)
+
+[----------] 16 tests from AttestationTest
+[ RUN      ] AttestationTest.CreateBasicAttestation
+[       OK ] AttestationTest.CreateBasicAttestation (0 ms)
+[ RUN      ] AttestationTest.CreateAttestationWithEvidence
+[       OK ] AttestationTest.CreateAttestationWithEvidence (0 ms)
+[ RUN      ] AttestationTest.AttestationIdUnique
+[       OK ] AttestationTest.AttestationIdUnique (0 ms)
+[ RUN      ] AttestationTest.ConfidenceZero
+[       OK ] AttestationTest.ConfidenceZero (0 ms)
+[ RUN      ] AttestationTest.ConfidenceOne
+[       OK ] AttestationTest.ConfidenceOne (0 ms)
+[ RUN      ] AttestationTest.ConfidenceBelowZeroThrows
+[       OK ] AttestationTest.ConfidenceBelowZeroThrows (0 ms)
+[ RUN      ] AttestationTest.ConfidenceAboveOneThrows
+[       OK ] AttestationTest.ConfidenceAboveOneThrows (0 ms)
+[ RUN      ] AttestationTest.ConfidenceMidRange
+[       OK ] AttestationTest.ConfidenceMidRange (0 ms)
+[ RUN      ] AttestationTest.TimestampFormat
+[       OK ] AttestationTest.TimestampFormat (0 ms)
+[ RUN      ] AttestationTest.ToJsonContainsAllFields
+[       OK ] AttestationTest.ToJsonContainsAllFields (0 ms)
+[ RUN      ] AttestationTest.ToJsonSerializesAndParses
+[       OK ] AttestationTest.ToJsonSerializesAndParses (0 ms)
+[ RUN      ] AttestationTest.ToJsonEmptyEvidence
+[       OK ] AttestationTest.ToJsonEmptyEvidence (0 ms)
+[ RUN      ] AttestationTest.ConfidenceExactBoundaryValues
+[       OK ] AttestationTest.ConfidenceExactBoundaryValues (0 ms)
+[ RUN      ] AttestationTest.AllFieldsPopulatedAfterCreate
+[       OK ] AttestationTest.AllFieldsPopulatedAfterCreate (0 ms)
+[ RUN      ] AttestationTest.LargeNegativeConfidenceThrows
+[       OK ] AttestationTest.LargeNegativeConfidenceThrows (0 ms)
+[ RUN      ] AttestationTest.AttestationIdFormat
+[       OK ] AttestationTest.AttestationIdFormat (0 ms)
+[----------] 16 tests from AttestationTest (0 ms total)
+
+[----------] 15 tests from RegistryTest
+[ RUN      ] RegistryTest.RegisterAgentSuccess
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:agent-1
+[       OK ] RegistryTest.RegisterAgentSuccess (0 ms)
+[ RUN      ] RegistryTest.RegisterDuplicateFails
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:agent-dup
+[2026-03-02 20:47:40.229] [warning] Agent with DID did:euxis:agent-dup is already registered
+[       OK ] RegistryTest.RegisterDuplicateFails (0 ms)
+[ RUN      ] RegistryTest.RegisterMultipleAgents
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:a
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:b
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:c
+[       OK ] RegistryTest.RegisterMultipleAgents (0 ms)
+[ RUN      ] RegistryTest.ResolveRegisteredAgent
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:resolve-me
+[       OK ] RegistryTest.ResolveRegisteredAgent (0 ms)
+[ RUN      ] RegistryTest.ResolveUnknownDID
+[       OK ] RegistryTest.ResolveUnknownDID (0 ms)
+[ RUN      ] RegistryTest.ResolveAfterMultipleRegistrations
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:x
+[2026-03-02 20:47:40.229] [info] Registering agent with DID did:euxis:y
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:z
+[       OK ] RegistryTest.ResolveAfterMultipleRegistrations (0 ms)
+[ RUN      ] RegistryTest.ListAgentsEmpty
+[       OK ] RegistryTest.ListAgentsEmpty (0 ms)
+[ RUN      ] RegistryTest.ListAgentsAfterRegistrations
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:l1
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:l2
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:l3
+[       OK ] RegistryTest.ListAgentsAfterRegistrations (0 ms)
+[ RUN      ] RegistryTest.RevokeExistingAgent
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:revoke-me
+[2026-03-02 20:47:40.230] [info] Revoking agent with DID did:euxis:revoke-me
+[       OK ] RegistryTest.RevokeExistingAgent (0 ms)
+[ RUN      ] RegistryTest.RevokeNonexistentAgent
+[2026-03-02 20:47:40.230] [warning] Cannot revoke DID did:euxis:ghost: not found
+[       OK ] RegistryTest.RevokeNonexistentAgent (0 ms)
+[ RUN      ] RegistryTest.RevokeDoesNotAffectOthers
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:keep
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:remove
+[2026-03-02 20:47:40.230] [info] Revoking agent with DID did:euxis:remove
+[       OK ] RegistryTest.RevokeDoesNotAffectOthers (0 ms)
+[ RUN      ] RegistryTest.RevokeAndReRegister
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:cycle
+[2026-03-02 20:47:40.230] [info] Revoking agent with DID did:euxis:cycle
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:cycle
+[       OK ] RegistryTest.RevokeAndReRegister (0 ms)
+[ RUN      ] RegistryTest.DoubleRevokeFails
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:double-rev
+[2026-03-02 20:47:40.230] [info] Revoking agent with DID did:euxis:double-rev
+[2026-03-02 20:47:40.230] [warning] Cannot revoke DID did:euxis:double-rev: not found
+[       OK ] RegistryTest.DoubleRevokeFails (0 ms)
+[ RUN      ] RegistryTest.PreservesCredentialsAndAttestations
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:full-agent
+[       OK ] RegistryTest.PreservesCredentialsAndAttestations (0 ms)
+[ RUN      ] RegistryTest.RegisterDuplicateReturnsFalseWithExistingData
+[2026-03-02 20:47:40.230] [info] Registering agent with DID did:euxis:dup-check
+[2026-03-02 20:47:40.230] [warning] Agent with DID did:euxis:dup-check is already registered
+[       OK ] RegistryTest.RegisterDuplicateReturnsFalseWithExistingData (0 ms)
+[----------] 15 tests from RegistryTest (0 ms total)
+
+[----------] 14 tests from ERC8004Test
+[ RUN      ] ERC8004Test.GenerateCardBasic
+[       OK ] ERC8004Test.GenerateCardBasic (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardCustomVersion
+[       OK ] ERC8004Test.GenerateCardCustomVersion (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardEmptyCapabilities
+[       OK ] ERC8004Test.GenerateCardEmptyCapabilities (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardDIDFormat
+[       OK ] ERC8004Test.GenerateCardDIDFormat (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardManyCapabilities
+[       OK ] ERC8004Test.GenerateCardManyCapabilities (0 ms)
+[ RUN      ] ERC8004Test.ToJsonContainsAllFields
+[       OK ] ERC8004Test.ToJsonContainsAllFields (0 ms)
+[ RUN      ] ERC8004Test.ToJsonSerializesAndParses
+[       OK ] ERC8004Test.ToJsonSerializesAndParses (0 ms)
+[ RUN      ] ERC8004Test.ToJsonEmptyCapabilitiesIsArray
+[       OK ] ERC8004Test.ToJsonEmptyCapabilitiesIsArray (0 ms)
+[ RUN      ] ERC8004Test.ToJsonMetadataIsExtensible
+[       OK ] ERC8004Test.ToJsonMetadataIsExtensible (0 ms)
+[ RUN      ] ERC8004Test.MultipleCardsHaveSameFormatDifferentData
+[       OK ] ERC8004Test.MultipleCardsHaveSameFormatDifferentData (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardEmptyStrings
+[       OK ] ERC8004Test.GenerateCardEmptyStrings (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardSpecialCharacters
+[       OK ] ERC8004Test.GenerateCardSpecialCharacters (0 ms)
+[ RUN      ] ERC8004Test.ToJsonMetadataDefaultEmpty
+[       OK ] ERC8004Test.ToJsonMetadataDefaultEmpty (0 ms)
+[ RUN      ] ERC8004Test.GenerateCardDefaultVersion
+[       OK ] ERC8004Test.GenerateCardDefaultVersion (0 ms)
+[----------] 14 tests from ERC8004Test (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 83 tests from 5 test suites ran. (6 ms total)
+[  PASSED  ] 83 tests.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-identity-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-identity-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/17 Testing: euxis-a2a-cpp_tests
+6/17 Test: euxis-a2a-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-a2a-cpp/euxis-a2a-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-a2a-cpp
+"euxis-a2a-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 73 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 9 tests from AgentCardTest
+[ RUN      ] AgentCardTest.RoundtripSerialization
+[       OK ] AgentCardTest.RoundtripSerialization (0 ms)
+[ RUN      ] AgentCardTest.JsonUsesCamelCase
+[       OK ] AgentCardTest.JsonUsesCamelCase (0 ms)
+[ RUN      ] AgentCardTest.OptionalFieldsOmitted
+[       OK ] AgentCardTest.OptionalFieldsOmitted (0 ms)
+[ RUN      ] AgentCardTest.ValidateCardPasses
+[       OK ] AgentCardTest.ValidateCardPasses (0 ms)
+[ RUN      ] AgentCardTest.ValidateCardEmptyNameFails
+[2026-03-02 20:47:40.229] [warning] A2A agent card validation failed: name is empty
+[       OK ] AgentCardTest.ValidateCardEmptyNameFails (0 ms)
+[ RUN      ] AgentCardTest.ValidateCardEmptyUrlFails
+[2026-03-02 20:47:40.229] [warning] A2A agent card validation failed: url is empty
+[       OK ] AgentCardTest.ValidateCardEmptyUrlFails (0 ms)
+[ RUN      ] AgentCardTest.ValidateCardNoCapabilitiesFails
+[2026-03-02 20:47:40.229] [warning] A2A agent card validation failed: no capabilities
+[       OK ] AgentCardTest.ValidateCardNoCapabilitiesFails (0 ms)
+[ RUN      ] AgentCardTest.MultipleCapabilities
+[       OK ] AgentCardTest.MultipleCapabilities (0 ms)
+[ RUN      ] AgentCardTest.FromJsonWithMetadata
+[       OK ] AgentCardTest.FromJsonWithMetadata (0 ms)
+[----------] 9 tests from AgentCardTest (0 ms total)
+
+[----------] 22 tests from TaskTest
+[ RUN      ] TaskTest.StatusStringValues
+[       OK ] TaskTest.StatusStringValues (0 ms)
+[ RUN      ] TaskTest.CreateTaskDefault
+[       OK ] TaskTest.CreateTaskDefault (0 ms)
+[ RUN      ] TaskTest.CreateTaskWithMessage
+[       OK ] TaskTest.CreateTaskWithMessage (0 ms)
+[ RUN      ] TaskTest.UniqueIds
+[       OK ] TaskTest.UniqueIds (0 ms)
+[ RUN      ] TaskTest.TaskIdFormat
+[       OK ] TaskTest.TaskIdFormat (0 ms)
+[ RUN      ] TaskTest.TransitionPendingToActive
+[       OK ] TaskTest.TransitionPendingToActive (0 ms)
+[ RUN      ] TaskTest.TransitionPendingToCancelled
+[       OK ] TaskTest.TransitionPendingToCancelled (0 ms)
+[ RUN      ] TaskTest.TransitionPendingToFailed
+[       OK ] TaskTest.TransitionPendingToFailed (0 ms)
+[ RUN      ] TaskTest.TransitionActiveToCompleted
+[       OK ] TaskTest.TransitionActiveToCompleted (0 ms)
+[ RUN      ] TaskTest.TransitionActiveToFailed
+[       OK ] TaskTest.TransitionActiveToFailed (0 ms)
+[ RUN      ] TaskTest.TransitionActiveToCancelled
+[       OK ] TaskTest.TransitionActiveToCancelled (0 ms)
+[ RUN      ] TaskTest.InvalidPendingToCompleted
+[       OK ] TaskTest.InvalidPendingToCompleted (0 ms)
+[ RUN      ] TaskTest.TerminalStateCompletedRejectsAll
+[       OK ] TaskTest.TerminalStateCompletedRejectsAll (0 ms)
+[ RUN      ] TaskTest.TerminalStateFailedRejectsAll
+[       OK ] TaskTest.TerminalStateFailedRejectsAll (0 ms)
+[ RUN      ] TaskTest.TerminalStateCancelledRejectsAll
+[       OK ] TaskTest.TerminalStateCancelledRejectsAll (0 ms)
+[ RUN      ] TaskTest.FullLifecycleHistory
+[       OK ] TaskTest.FullLifecycleHistory (0 ms)
+[ RUN      ] TaskTest.ToJsonComplete
+[       OK ] TaskTest.ToJsonComplete (0 ms)
+[ RUN      ] TaskTest.UpdatedAtChanges
+[       OK ] TaskTest.UpdatedAtChanges (0 ms)
+[ RUN      ] TaskTest.InvalidPendingToPending
+[       OK ] TaskTest.InvalidPendingToPending (0 ms)
+[ RUN      ] TaskTest.CreateTaskEmptyMessage
+[       OK ] TaskTest.CreateTaskEmptyMessage (0 ms)
+[ RUN      ] TaskTest.TransitionFromTerminalHasErrorMessage
+[       OK ] TaskTest.TransitionFromTerminalHasErrorMessage (0 ms)
+[ RUN      ] TaskTest.InvalidTransitionHasErrorMessage
+[       OK ] TaskTest.InvalidTransitionHasErrorMessage (0 ms)
+[----------] 22 tests from TaskTest (0 ms total)
+
+[----------] 8 tests from MessageTest
+[ RUN      ] MessageTest.MessageRoundtrip
+[       OK ] MessageTest.MessageRoundtrip (0 ms)
+[ RUN      ] MessageTest.JsonCamelCase
+[       OK ] MessageTest.JsonCamelCase (0 ms)
+[ RUN      ] MessageTest.ContentPartTypes
+[       OK ] MessageTest.ContentPartTypes (0 ms)
+[ RUN      ] MessageTest.EmptyParts
+[       OK ] MessageTest.EmptyParts (0 ms)
+[ RUN      ] MessageTest.AgentRole
+[       OK ] MessageTest.AgentRole (0 ms)
+[ RUN      ] MessageTest.ArtifactRoundtrip
+[       OK ] MessageTest.ArtifactRoundtrip (0 ms)
+[ RUN      ] MessageTest.ArtifactJsonCamelCase
+[       OK ] MessageTest.ArtifactJsonCamelCase (0 ms)
+[ RUN      ] MessageTest.MultipleArtifacts
+[       OK ] MessageTest.MultipleArtifacts (0 ms)
+[----------] 8 tests from MessageTest (0 ms total)
+
+[----------] 21 tests from ServerTest
+[ RUN      ] ServerTest.AgentCardMethod
+[2026-03-02 20:47:40.230] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.AgentCardMethod (0 ms)
+[ RUN      ] ServerTest.CapabilitiesListMethod
+[2026-03-02 20:47:40.230] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.CapabilitiesListMethod (0 ms)
+[ RUN      ] ServerTest.TaskCreate
+[2026-03-02 20:47:40.230] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.230] [info] A2A server created task: 9b5434d2-4106-7347-a4d6-6290ab64ee1b
+[       OK ] ServerTest.TaskCreate (0 ms)
+[ RUN      ] ServerTest.TaskCreateWithMessage
+[2026-03-02 20:47:40.230] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.230] [info] A2A server created task: e867c4a6-4c82-b999-6b03-eb3e6087da26
+[       OK ] ServerTest.TaskCreateWithMessage (0 ms)
+[ RUN      ] ServerTest.TaskGet
+[2026-03-02 20:47:40.230] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.230] [info] A2A server created task: d4794db7-ef9a-ed58-e4d7-52d5ba131f18
+[       OK ] ServerTest.TaskGet (0 ms)
+[ RUN      ] ServerTest.TaskGetUnknownId
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskGetUnknownId (0 ms)
+[ RUN      ] ServerTest.TaskGetMissingId
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskGetMissingId (0 ms)
+[ RUN      ] ServerTest.TaskCancel
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.231] [info] A2A server created task: ffd23209-4e32-d5d4-dfd6-d985221f5387
+[2026-03-02 20:47:40.231] [info] A2A server cancelled task: ffd23209-4e32-d5d4-dfd6-d985221f5387
+[       OK ] ServerTest.TaskCancel (0 ms)
+[ RUN      ] ServerTest.TaskCancelAlreadyCancelled
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.231] [info] A2A server created task: 12347f36-d052-85de-2bd4-12b320a6e6c2
+[2026-03-02 20:47:40.231] [info] A2A server cancelled task: 12347f36-d052-85de-2bd4-12b320a6e6c2
+[       OK ] ServerTest.TaskCancelAlreadyCancelled (0 ms)
+[ RUN      ] ServerTest.TaskCancelUnknownId
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskCancelUnknownId (0 ms)
+[ RUN      ] ServerTest.UnknownMethodReturnsError
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.231] [warning] A2A server: unknown method 'invalid/method'
+[       OK ] ServerTest.UnknownMethodReturnsError (0 ms)
+[ RUN      ] ServerTest.FullTaskLifecycle
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.231] [info] A2A server created task: d2c9022c-b9e7-a973-8a6d-3400b657c1ba
+[2026-03-02 20:47:40.231] [info] A2A server cancelled task: d2c9022c-b9e7-a973-8a6d-3400b657c1ba
+[       OK ] ServerTest.FullTaskLifecycle (0 ms)
+[ RUN      ] ServerTest.MultipleTasks
+[2026-03-02 20:47:40.231] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.231] [info] A2A server created task: a6bfebe5-1eb6-c881-11d3-b40039d13b9a
+[2026-03-02 20:47:40.231] [info] A2A server created task: e0ecfbae-d8a3-6e75-e761-613c17faa74d
+[2026-03-02 20:47:40.231] [info] A2A server cancelled task: a6bfebe5-1eb6-c881-11d3-b40039d13b9a
+[       OK ] ServerTest.MultipleTasks (0 ms)
+[ RUN      ] ServerTest.UnknownMethodErrorHasCorrectCode
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.232] [warning] A2A server: unknown method 'bogus/method'
+[       OK ] ServerTest.UnknownMethodErrorHasCorrectCode (0 ms)
+[ RUN      ] ServerTest.TaskGetIdNotString
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskGetIdNotString (0 ms)
+[ RUN      ] ServerTest.TaskGetUnknownStringId
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskGetUnknownStringId (0 ms)
+[ RUN      ] ServerTest.TaskCancelIdNotString
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskCancelIdNotString (0 ms)
+[ RUN      ] ServerTest.TaskCancelMissingId
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskCancelMissingId (0 ms)
+[ RUN      ] ServerTest.TaskCancelUnknownStringId
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[       OK ] ServerTest.TaskCancelUnknownStringId (0 ms)
+[ RUN      ] ServerTest.TaskCancelTransitionFailureReturnsError
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.232] [info] A2A server created task: cceb45b4-2370-430a-a953-737dfd5b1031
+[2026-03-02 20:47:40.232] [info] A2A server cancelled task: cceb45b4-2370-430a-a953-737dfd5b1031
+[       OK ] ServerTest.TaskCancelTransitionFailureReturnsError (0 ms)
+[ RUN      ] ServerTest.CapabilitiesWithSchemas
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'test-server-agent'
+[2026-03-02 20:47:40.232] [info] A2A server handler initialised for agent 'schema-agent'
+[       OK ] ServerTest.CapabilitiesWithSchemas (0 ms)
+[----------] 21 tests from ServerTest (2 ms total)
+
+[----------] 13 tests from HttpTransportTest
+[ RUN      ] HttpTransportTest.ConstructorStoresBaseUrl
+[       OK ] HttpTransportTest.ConstructorStoresBaseUrl (0 ms)
+[ RUN      ] HttpTransportTest.ConstructorStripsTrailingSlash
+[       OK ] HttpTransportTest.ConstructorStripsTrailingSlash (0 ms)
+[ RUN      ] HttpTransportTest.SendToUnreachableHostReturnsError
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.SendToUnreachableHostReturnsError (0 ms)
+[ RUN      ] HttpTransportTest.DiscoverUnreachableReturnsError
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::discover failed: Could not establish connection
+[       OK ] HttpTransportTest.DiscoverUnreachableReturnsError (0 ms)
+[ RUN      ] HttpTransportTest.SendEmptyParamsNoCrash
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.SendEmptyParamsNoCrash (0 ms)
+[ RUN      ] HttpTransportTest.DiscoverWithPathUrl
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::discover failed: Could not establish connection
+[       OK ] HttpTransportTest.DiscoverWithPathUrl (0 ms)
+[ RUN      ] HttpTransportTest.MultipleSendsDoNotCorruptState
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::send failed: Could not establish connection
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::send failed: Could not establish connection
+[2026-03-02 20:47:40.234] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.MultipleSendsDoNotCorruptState (0 ms)
+[ RUN      ] HttpTransportTest.ConstructorWithoutScheme
+[2026-03-02 20:47:40.237] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.ConstructorWithoutScheme (2 ms)
+[ RUN      ] HttpTransportTest.ConstructorWithPathNoScheme
+[2026-03-02 20:47:40.238] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.ConstructorWithPathNoScheme (0 ms)
+[ RUN      ] HttpTransportTest.DiscoverWithNoPath
+[2026-03-02 20:47:40.238] [error] HttpA2ATransport::discover failed: Could not establish connection
+[       OK ] HttpTransportTest.DiscoverWithNoPath (0 ms)
+[ RUN      ] HttpTransportTest.SendWithComplexParams
+[2026-03-02 20:47:40.239] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.SendWithComplexParams (0 ms)
+[ RUN      ] HttpTransportTest.DiscoverWithTrailingSlash
+[2026-03-02 20:47:40.239] [error] HttpA2ATransport::discover failed: Could not establish connection
+[       OK ] HttpTransportTest.DiscoverWithTrailingSlash (0 ms)
+[ RUN      ] HttpTransportTest.SendWithEmptyMethod
+[2026-03-02 20:47:40.239] [error] HttpA2ATransport::send failed: Could not establish connection
+[       OK ] HttpTransportTest.SendWithEmptyMethod (0 ms)
+[----------] 13 tests from HttpTransportTest (6 ms total)
+
+[----------] Global test environment tear-down
+[==========] 73 tests from 5 test suites ran. (10 ms total)
+[  PASSED  ] 73 tests.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-a2a-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-a2a-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/17 Testing: euxis-inference-cpp_tests
+5/17 Test: euxis-inference-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-inference-cpp/euxis-inference-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-inference-cpp
+"euxis-inference-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 55 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from ConfigTest
+[ RUN      ] ConfigTest.RoundtripFullFields
+[       OK ] ConfigTest.RoundtripFullFields (0 ms)
+[ RUN      ] ConfigTest.DefaultValues
+[       OK ] ConfigTest.DefaultValues (0 ms)
+[ RUN      ] ConfigTest.PartialJson
+[       OK ] ConfigTest.PartialJson (0 ms)
+[ RUN      ] ConfigTest.ToJsonKeys
+[       OK ] ConfigTest.ToJsonKeys (0 ms)
+[ RUN      ] ConfigTest.ExtraKeysIgnored
+[       OK ] ConfigTest.ExtraKeysIgnored (0 ms)
+[ RUN      ] ConfigTest.MissingModelPathReturnsEmptyPath
+[       OK ] ConfigTest.MissingModelPathReturnsEmptyPath (0 ms)
+[----------] 6 tests from ConfigTest (0 ms total)
+
+[----------] 12 tests from ModelRegistryTest
+[ RUN      ] ModelRegistryTest.DiscoverFindsGgufFiles
+[       OK ] ModelRegistryTest.DiscoverFindsGgufFiles (0 ms)
+[ RUN      ] ModelRegistryTest.DiscoverEmptyDir
+[       OK ] ModelRegistryTest.DiscoverEmptyDir (0 ms)
+[ RUN      ] ModelRegistryTest.DiscoverNonexistentDir
+[       OK ] ModelRegistryTest.DiscoverNonexistentDir (0 ms)
+[ RUN      ] ModelRegistryTest.VerifyChecksum
+[       OK ] ModelRegistryTest.VerifyChecksum (0 ms)
+[ RUN      ] ModelRegistryTest.VerifyFailsAfterModification
+[       OK ] ModelRegistryTest.VerifyFailsAfterModification (0 ms)
+[ RUN      ] ModelRegistryTest.FindByName
+[       OK ] ModelRegistryTest.FindByName (0 ms)
+[ RUN      ] ModelRegistryTest.VerifyNonexistentPathReturnsFalse
+[       OK ] ModelRegistryTest.VerifyNonexistentPathReturnsFalse (0 ms)
+[ RUN      ] ModelRegistryTest.ComputeSha256EmptyOnFailure
+[       OK ] ModelRegistryTest.ComputeSha256EmptyOnFailure (0 ms)
+[ RUN      ] ModelRegistryTest.FindWithoutDiscoverReturnsNullopt
+[       OK ] ModelRegistryTest.FindWithoutDiscoverReturnsNullopt (0 ms)
+[ RUN      ] ModelRegistryTest.ComputeSha256MultiChunk
+[       OK ] ModelRegistryTest.ComputeSha256MultiChunk (1 ms)
+[ RUN      ] ModelRegistryTest.ComputeSha256ExactChunkSize
+[       OK ] ModelRegistryTest.ComputeSha256ExactChunkSize (0 ms)
+[ RUN      ] ModelRegistryTest.ComputeSha256PartialFinalRead
+[       OK ] ModelRegistryTest.ComputeSha256PartialFinalRead (1 ms)
+[----------] 12 tests from ModelRegistryTest (5 ms total)
+
+[----------] 12 tests from QualityGateTest
+[ RUN      ] QualityGateTest.CoherentTextPasses
+[       OK ] QualityGateTest.CoherentTextPasses (0 ms)
+[ RUN      ] QualityGateTest.GibberishFails
+[       OK ] QualityGateTest.GibberishFails (0 ms)
+[ RUN      ] QualityGateTest.RepetitiveTextFlagged
+[       OK ] QualityGateTest.RepetitiveTextFlagged (0 ms)
+[ RUN      ] QualityGateTest.RelevanceWithOverlap
+[       OK ] QualityGateTest.RelevanceWithOverlap (0 ms)
+[ RUN      ] QualityGateTest.EmptyResponse
+[       OK ] QualityGateTest.EmptyResponse (0 ms)
+[ RUN      ] QualityGateTest.SingleLongSentenceIsCoherent
+[       OK ] QualityGateTest.SingleLongSentenceIsCoherent (0 ms)
+[ RUN      ] QualityGateTest.ScoresInRange
+[       OK ] QualityGateTest.ScoresInRange (0 ms)
+[ RUN      ] QualityGateTest.TextWithoutPunctuation
+[       OK ] QualityGateTest.TextWithoutPunctuation (0 ms)
+[ RUN      ] QualityGateTest.BothEmptyRelevanceIsOne
+[       OK ] QualityGateTest.BothEmptyRelevanceIsOne (0 ms)
+[ RUN      ] QualityGateTest.OneEmptyRelevanceIsZero
+[       OK ] QualityGateTest.OneEmptyRelevanceIsZero (0 ms)
+[ RUN      ] QualityGateTest.SentencesWithLeadingWhitespace
+[       OK ] QualityGateTest.SentencesWithLeadingWhitespace (0 ms)
+[ RUN      ] QualityGateTest.SingleWordRepetitionIsZero
+[       OK ] QualityGateTest.SingleWordRepetitionIsZero (0 ms)
+[----------] 12 tests from QualityGateTest (1 ms total)
+
+[----------] 13 tests from LlamaEngineTest
+[ RUN      ] LlamaEngineTest.ConstructorWorks
+[2026-03-02 20:47:40.235] [info] LlamaEngine: config for model 'test-model', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.236] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.ConstructorWorks (0 ms)
+[ RUN      ] LlamaEngineTest.GenerateReturnsErrorWhenServerUnavailable
+[2026-03-02 20:47:40.236] [info] LlamaEngine: config for model 'stub-model', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.236] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.GenerateReturnsErrorWhenServerUnavailable (0 ms)
+[ RUN      ] LlamaEngineTest.SupportsModelMatchesConfig
+[2026-03-02 20:47:40.236] [info] LlamaEngine: config for model 'llama3-8b', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.236] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.SupportsModelMatchesConfig (0 ms)
+[ RUN      ] LlamaEngineTest.HealthReturnsJson
+[2026-03-02 20:47:40.237] [info] LlamaEngine: config for model 'health-test', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.237] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.HealthReturnsJson (0 ms)
+[ RUN      ] LlamaEngineTest.HealthContainsConnectionInfo
+[2026-03-02 20:47:40.237] [info] LlamaEngine: config for model 'conn-test', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.237] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.HealthContainsConnectionInfo (0 ms)
+[ RUN      ] LlamaEngineTest.MoveConstruction
+[2026-03-02 20:47:40.237] [info] LlamaEngine: config for model 'movable', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.237] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.MoveConstruction (0 ms)
+[ RUN      ] LlamaEngineTest.MoveAssignment
+[2026-03-02 20:47:40.238] [info] LlamaEngine: config for model 'model-a', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.238] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[2026-03-02 20:47:40.238] [info] LlamaEngine: config for model 'model-b', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.238] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.MoveAssignment (0 ms)
+[ RUN      ] LlamaEngineTest.GenerateWithDifferentMaxTokens
+[2026-03-02 20:47:40.238] [info] LlamaEngine: config for model 'token-test', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.238] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.GenerateWithDifferentMaxTokens (0 ms)
+[ RUN      ] LlamaEngineTest.SupportsModelEmptyString
+[2026-03-02 20:47:40.238] [info] LlamaEngine: config for model 'my-model', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.239] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.SupportsModelEmptyString (0 ms)
+[ RUN      ] LlamaEngineTest.HealthWithLargeContextSize
+[2026-03-02 20:47:40.239] [info] LlamaEngine: config for model 'large-ctx', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.239] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.HealthWithLargeContextSize (0 ms)
+[ RUN      ] LlamaEngineTest.ConfigWithCustomTemperature
+[2026-03-02 20:47:40.239] [info] LlamaEngine: config for model 'temp-model', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.239] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.ConfigWithCustomTemperature (0 ms)
+[ RUN      ] LlamaEngineTest.RepeatedHealthChecks
+[2026-03-02 20:47:40.239] [info] LlamaEngine: config for model 'repeat-check', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.239] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.RepeatedHealthChecks (0 ms)
+[ RUN      ] LlamaEngineTest.GenerateAfterHealthCheck
+[2026-03-02 20:47:40.240] [info] LlamaEngine: config for model 'sequence-test', server at 127.0.0.1:8080
+[2026-03-02 20:47:40.240] [warning] LlamaEngine: llama-server not reachable at 127.0.0.1:8080
+[       OK ] LlamaEngineTest.GenerateAfterHealthCheck (0 ms)
+[----------] 13 tests from LlamaEngineTest (5 ms total)
+
+[----------] 12 tests from OllamaEngineTest
+[ RUN      ] OllamaEngineTest.ConstructorDefaults
+[       OK ] OllamaEngineTest.ConstructorDefaults (0 ms)
+[ RUN      ] OllamaEngineTest.ConstructorCustom
+[       OK ] OllamaEngineTest.ConstructorCustom (0 ms)
+[ RUN      ] OllamaEngineTest.HealthReturnsJsonWhenUnreachable
+[       OK ] OllamaEngineTest.HealthReturnsJsonWhenUnreachable (2 ms)
+[ RUN      ] OllamaEngineTest.HealthReturnsErrorField
+[       OK ] OllamaEngineTest.HealthReturnsErrorField (0 ms)
+[ RUN      ] OllamaEngineTest.GenerateFailsGracefully
+[       OK ] OllamaEngineTest.GenerateFailsGracefully (0 ms)
+[ RUN      ] OllamaEngineTest.GenerateDefaultMaxTokens
+[       OK ] OllamaEngineTest.GenerateDefaultMaxTokens (0 ms)
+[ RUN      ] OllamaEngineTest.GenerateWithLargeMaxTokens
+[       OK ] OllamaEngineTest.GenerateWithLargeMaxTokens (1 ms)
+[ RUN      ] OllamaEngineTest.SupportsModelFalseWhenUnreachable
+[       OK ] OllamaEngineTest.SupportsModelFalseWhenUnreachable (1 ms)
+[ RUN      ] OllamaEngineTest.SupportsModelEmptyName
+[       OK ] OllamaEngineTest.SupportsModelEmptyName (0 ms)
+[ RUN      ] OllamaEngineTest.MakeRequestBadHost
+[       OK ] OllamaEngineTest.MakeRequestBadHost (0 ms)
+[ RUN      ] OllamaEngineTest.HealthIntegration
+[       OK ] OllamaEngineTest.HealthIntegration (1 ms)
+[ RUN      ] OllamaEngineTest.HealthStructure
+[       OK ] OllamaEngineTest.HealthStructure (1 ms)
+[----------] 12 tests from OllamaEngineTest (12 ms total)
+
+[----------] Global test environment tear-down
+[==========] 55 tests from 5 test suites ran. (24 ms total)
+[  PASSED  ] 55 tests.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-inference-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-inference-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/17 Testing: euxis-runtime-cpp_tests
+9/17 Test: euxis-runtime-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-runtime-cpp/euxis-runtime-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-runtime-cpp
+"euxis-runtime-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 86 tests from 8 test suites.
+[----------] Global test environment set-up.
+[----------] 12 tests from ValidatorTest
+[ RUN      ] ValidatorTest.ValidLayoutPasses
+[       OK ] ValidatorTest.ValidLayoutPasses (2 ms)
+[ RUN      ] ValidatorTest.MissingFileThrows
+[       OK ] ValidatorTest.MissingFileThrows (0 ms)
+[ RUN      ] ValidatorTest.InvalidJsonlThrows
+[       OK ] ValidatorTest.InvalidJsonlThrows (0 ms)
+[ RUN      ] ValidatorTest.MissingKeysThrows
+[       OK ] ValidatorTest.MissingKeysThrows (0 ms)
+[ RUN      ] ValidatorTest.NegativeMsThrows
+[       OK ] ValidatorTest.NegativeMsThrows (0 ms)
+[ RUN      ] ValidatorTest.EmptyStateFileThrows
+[       OK ] ValidatorTest.EmptyStateFileThrows (0 ms)
+[ RUN      ] ValidatorTest.InvalidManifestThrows
+[       OK ] ValidatorTest.InvalidManifestThrows (0 ms)
+[ RUN      ] ValidatorTest.MultipleMissingFilesReported
+[       OK ] ValidatorTest.MultipleMissingFilesReported (0 ms)
+[ RUN      ] ValidatorTest.JsonlNonObjectRecordThrows
+[       OK ] ValidatorTest.JsonlNonObjectRecordThrows (0 ms)
+[ RUN      ] ValidatorTest.EmptyJsonlThrows
+[       OK ] ValidatorTest.EmptyJsonlThrows (0 ms)
+[ RUN      ] ValidatorTest.NoStateFilesThrows
+[       OK ] ValidatorTest.NoStateFilesThrows (0 ms)
+[ RUN      ] ValidatorTest.ManifestNotObjectThrows
+[       OK ] ValidatorTest.ManifestNotObjectThrows (0 ms)
+[----------] 12 tests from ValidatorTest (8 ms total)
+
+[----------] 17 tests from LifecycleTest
+[ RUN      ] LifecycleTest.StateRoundTrip
+[       OK ] LifecycleTest.StateRoundTrip (0 ms)
+[ RUN      ] LifecycleTest.ValidTransitions
+[       OK ] LifecycleTest.ValidTransitions (0 ms)
+[ RUN      ] LifecycleTest.NewAgentStartsIdle
+[       OK ] LifecycleTest.NewAgentStartsIdle (0 ms)
+[ RUN      ] LifecycleTest.ValidTransitionSucceeds
+[       OK ] LifecycleTest.ValidTransitionSucceeds (0 ms)
+[ RUN      ] LifecycleTest.InvalidTransitionFails
+[       OK ] LifecycleTest.InvalidTransitionFails (0 ms)
+[ RUN      ] LifecycleTest.FullLifecycle
+[       OK ] LifecycleTest.FullLifecycle (0 ms)
+[ RUN      ] LifecycleTest.PauseResume
+[       OK ] LifecycleTest.PauseResume (0 ms)
+[ RUN      ] LifecycleTest.TerminatedIsFinal
+[       OK ] LifecycleTest.TerminatedIsFinal (0 ms)
+[ RUN      ] LifecycleTest.TransitionHistory
+[       OK ] LifecycleTest.TransitionHistory (0 ms)
+[ RUN      ] LifecycleTest.PersistAndLoad
+[       OK ] LifecycleTest.PersistAndLoad (0 ms)
+[ RUN      ] LifecycleTest.MultipleAgents
+[       OK ] LifecycleTest.MultipleAgents (0 ms)
+[ RUN      ] LifecycleTest.FailedCanRecoverOrTerminate
+[       OK ] LifecycleTest.FailedCanRecoverOrTerminate (1 ms)
+[ RUN      ] LifecycleTest.StateToStringDefaultFallback
+[       OK ] LifecycleTest.StateToStringDefaultFallback (0 ms)
+[ RUN      ] LifecycleTest.ValidTransitionsDefaultFallback
+[       OK ] LifecycleTest.ValidTransitionsDefaultFallback (0 ms)
+[ RUN      ] LifecycleTest.LoadFromDiskMalformedTransitionLine
+[       OK ] LifecycleTest.LoadFromDiskMalformedTransitionLine (0 ms)
+[ RUN      ] LifecycleTest.AgentsReturnsSorted
+[       OK ] LifecycleTest.AgentsReturnsSorted (0 ms)
+[ RUN      ] LifecycleTest.HistoryForUnknownAgentIsEmpty
+[       OK ] LifecycleTest.HistoryForUnknownAgentIsEmpty (0 ms)
+[----------] 17 tests from LifecycleTest (5 ms total)
+
+[----------] 5 tests from ToolRegistryTest
+[ RUN      ] ToolRegistryTest.RegisterAndInvoke
+[       OK ] ToolRegistryTest.RegisterAndInvoke (0 ms)
+[ RUN      ] ToolRegistryTest.InvokeMissingToolFails
+[       OK ] ToolRegistryTest.InvokeMissingToolFails (0 ms)
+[ RUN      ] ToolRegistryTest.ListTools
+[       OK ] ToolRegistryTest.ListTools (0 ms)
+[ RUN      ] ToolRegistryTest.RemoveTool
+[       OK ] ToolRegistryTest.RemoveTool (0 ms)
+[ RUN      ] ToolRegistryTest.DuplicateRegistrationOverwrites
+[       OK ] ToolRegistryTest.DuplicateRegistrationOverwrites (0 ms)
+[----------] 5 tests from ToolRegistryTest (0 ms total)
+
+[----------] 9 tests from SessionStoreTest
+[ RUN      ] SessionStoreTest.SaveAndLoadRoundtrip
+[       OK ] SessionStoreTest.SaveAndLoadRoundtrip (0 ms)
+[ RUN      ] SessionStoreTest.LoadNonexistentFails
+[       OK ] SessionStoreTest.LoadNonexistentFails (0 ms)
+[ RUN      ] SessionStoreTest.ListBranches
+[       OK ] SessionStoreTest.ListBranches (0 ms)
+[ RUN      ] SessionStoreTest.Compaction
+[       OK ] SessionStoreTest.Compaction (4 ms)
+[ RUN      ] SessionStoreTest.SystemRoleRoundtrip
+[       OK ] SessionStoreTest.SystemRoleRoundtrip (0 ms)
+[ RUN      ] SessionStoreTest.UnknownRoleDefaultsToUser
+[       OK ] SessionStoreTest.UnknownRoleDefaultsToUser (0 ms)
+[ RUN      ] SessionStoreTest.LoadCorruptedFileFails
+[       OK ] SessionStoreTest.LoadCorruptedFileFails (0 ms)
+[ RUN      ] SessionStoreTest.CompactNonexistentSessionFails
+[       OK ] SessionStoreTest.CompactNonexistentSessionFails (0 ms)
+[ RUN      ] SessionStoreTest.ListBranchesNonexistent
+[       OK ] SessionStoreTest.ListBranchesNonexistent (0 ms)
+[----------] 9 tests from SessionStoreTest (6 ms total)
+
+[----------] 14 tests from AgentSessionTest
+[ RUN      ] AgentSessionTest.SendAndReceive
+[       OK ] AgentSessionTest.SendAndReceive (0 ms)
+[ RUN      ] AgentSessionTest.SystemPromptIncluded
+[       OK ] AgentSessionTest.SystemPromptIncluded (0 ms)
+[ RUN      ] AgentSessionTest.ToolRegistration
+[       OK ] AgentSessionTest.ToolRegistration (0 ms)
+[ RUN      ] AgentSessionTest.SaveAndLoad
+[       OK ] AgentSessionTest.SaveAndLoad (0 ms)
+[ RUN      ] AgentSessionTest.Branching
+[       OK ] AgentSessionTest.Branching (0 ms)
+[ RUN      ] AgentSessionTest.Compaction
+[       OK ] AgentSessionTest.Compaction (0 ms)
+[ RUN      ] AgentSessionTest.EventEmission
+[       OK ] AgentSessionTest.EventEmission (0 ms)
+[ RUN      ] AgentSessionTest.ModelSwitch
+[       OK ] AgentSessionTest.ModelSwitch (0 ms)
+[ RUN      ] AgentSessionTest.RemoveTool
+[       OK ] AgentSessionTest.RemoveTool (0 ms)
+[ RUN      ] AgentSessionTest.AppendSystemContext
+[       OK ] AgentSessionTest.AppendSystemContext (0 ms)
+[ RUN      ] AgentSessionTest.Getters
+[       OK ] AgentSessionTest.Getters (0 ms)
+[ RUN      ] AgentSessionTest.SaveWithoutStoreReturnsError
+[       OK ] AgentSessionTest.SaveWithoutStoreReturnsError (0 ms)
+[ RUN      ] AgentSessionTest.LoadWithoutStoreReturnsError
+[       OK ] AgentSessionTest.LoadWithoutStoreReturnsError (0 ms)
+[ RUN      ] AgentSessionTest.LoadNonexistentSessionFails
+[       OK ] AgentSessionTest.LoadNonexistentSessionFails (0 ms)
+[----------] 14 tests from AgentSessionTest (2 ms total)
+
+[----------] 7 tests from ManifestoTest
+[ RUN      ] ManifestoTest.SerializeRoundtrip
+[       OK ] ManifestoTest.SerializeRoundtrip (0 ms)
+[ RUN      ] ManifestoTest.ValidateValid
+[       OK ] ManifestoTest.ValidateValid (0 ms)
+[ RUN      ] ManifestoTest.ValidateMissingName
+[       OK ] ManifestoTest.ValidateMissingName (0 ms)
+[ RUN      ] ManifestoTest.ValidateMissingRole
+[       OK ] ManifestoTest.ValidateMissingRole (0 ms)
+[ RUN      ] ManifestoTest.ValidateMissingObjective
+[       OK ] ManifestoTest.ValidateMissingObjective (0 ms)
+[ RUN      ] ManifestoTest.DeserializeMissingBlocks
+[       OK ] ManifestoTest.DeserializeMissingBlocks (0 ms)
+[ RUN      ] ManifestoTest.ConstraintTypes
+[       OK ] ManifestoTest.ConstraintTypes (0 ms)
+[----------] 7 tests from ManifestoTest (0 ms total)
+
+[----------] 8 tests from ToolManifestTest
+[ RUN      ] ToolManifestTest.LoadValid
+[       OK ] ToolManifestTest.LoadValid (0 ms)
+[ RUN      ] ToolManifestTest.LoadNonexistent
+[       OK ] ToolManifestTest.LoadNonexistent (0 ms)
+[ RUN      ] ToolManifestTest.MergeOverrides
+[       OK ] ToolManifestTest.MergeOverrides (0 ms)
+[ RUN      ] ToolManifestTest.ValidateScopePresent
+[       OK ] ToolManifestTest.ValidateScopePresent (0 ms)
+[ RUN      ] ToolManifestTest.ValidateScopeMissing
+[       OK ] ToolManifestTest.ValidateScopeMissing (0 ms)
+[ RUN      ] ToolManifestTest.LoadMalformedJson
+[       OK ] ToolManifestTest.LoadMalformedJson (0 ms)
+[ RUN      ] ToolManifestTest.MergeEmptyOverlayVersionKeepsBase
+[       OK ] ToolManifestTest.MergeEmptyOverlayVersionKeepsBase (0 ms)
+[ RUN      ] ToolManifestTest.ValidateEmptyToolNameFails
+[       OK ] ToolManifestTest.ValidateEmptyToolNameFails (0 ms)
+[----------] 8 tests from ToolManifestTest (0 ms total)
+
+[----------] 14 tests from InteractionTest
+[ RUN      ] InteractionTest.Sequential
+[       OK ] InteractionTest.Sequential (0 ms)
+[ RUN      ] InteractionTest.SequentialFailure
+[       OK ] InteractionTest.SequentialFailure (0 ms)
+[ RUN      ] InteractionTest.Parallel
+[       OK ] InteractionTest.Parallel (0 ms)
+[ RUN      ] InteractionTest.Scratchpad
+[       OK ] InteractionTest.Scratchpad (0 ms)
+[ RUN      ] InteractionTest.ScratchpadReadWrite
+[       OK ] InteractionTest.ScratchpadReadWrite (0 ms)
+[ RUN      ] InteractionTest.EvaluatorLoop
+[       OK ] InteractionTest.EvaluatorLoop (0 ms)
+[ RUN      ] InteractionTest.EvaluatorLoopFails
+[       OK ] InteractionTest.EvaluatorLoopFails (0 ms)
+[ RUN      ] InteractionTest.SupervisorWorker
+[       OK ] InteractionTest.SupervisorWorker (0 ms)
+[ RUN      ] InteractionTest.ParallelPartialFailure
+[       OK ] InteractionTest.ParallelPartialFailure (0 ms)
+[ RUN      ] InteractionTest.ScratchpadFailure
+[       OK ] InteractionTest.ScratchpadFailure (0 ms)
+[ RUN      ] InteractionTest.ScratchpadSuccessOutputIsJson
+[       OK ] InteractionTest.ScratchpadSuccessOutputIsJson (0 ms)
+[ RUN      ] InteractionTest.EvaluatorExhaustsRetries
+[       OK ] InteractionTest.EvaluatorExhaustsRetries (0 ms)
+[ RUN      ] InteractionTest.SupervisorDecompositionFails
+[       OK ] InteractionTest.SupervisorDecompositionFails (0 ms)
+[ RUN      ] InteractionTest.SupervisorWorkerPartialFailure
+[       OK ] InteractionTest.SupervisorWorkerPartialFailure (0 ms)
+[----------] 14 tests from InteractionTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 86 tests from 8 test suites ran. (25 ms total)
+[  PASSED  ] 86 tests.
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-runtime-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-runtime-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/17 Testing: euxis-bridge-cpp_tests
+2/17 Test: euxis-bridge-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-bridge-cpp/euxis-bridge-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-bridge-cpp
+"euxis-bridge-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 139 tests from 12 test suites.
+[----------] Global test environment set-up.
+[----------] 11 tests from BridgedSkillTest
+[ RUN      ] BridgedSkillTest.ToJson
+[       OK ] BridgedSkillTest.ToJson (0 ms)
+[ RUN      ] BridgedSkillTest.FromJson
+[       OK ] BridgedSkillTest.FromJson (0 ms)
+[ RUN      ] BridgedSkillTest.RoundTrip
+[       OK ] BridgedSkillTest.RoundTrip (0 ms)
+[ RUN      ] BridgedSkillTest.OptionalSignaturePath
+[       OK ] BridgedSkillTest.OptionalSignaturePath (0 ms)
+[ RUN      ] BridgedSkillTest.OptionalOutputSchema
+[       OK ] BridgedSkillTest.OptionalOutputSchema (0 ms)
+[ RUN      ] BridgedSkillTest.ToJsonMinimalSkill
+[       OK ] BridgedSkillTest.ToJsonMinimalSkill (0 ms)
+[ RUN      ] BridgedSkillTest.FromJsonWithSignaturePath
+[       OK ] BridgedSkillTest.FromJsonWithSignaturePath (0 ms)
+[ RUN      ] BridgedSkillTest.FromJsonMissingOptionalFields
+[       OK ] BridgedSkillTest.FromJsonMissingOptionalFields (0 ms)
+[ RUN      ] BridgedSkillTest.FromJsonDefaultMetadata
+[       OK ] BridgedSkillTest.FromJsonDefaultMetadata (0 ms)
+[ RUN      ] BridgedSkillTest.ToJsonWithAllOptionals
+[       OK ] BridgedSkillTest.ToJsonWithAllOptionals (0 ms)
+[ RUN      ] BridgedSkillTest.FromJsonCompleteRoundtrip
+[       OK ] BridgedSkillTest.FromJsonCompleteRoundtrip (0 ms)
+[----------] 11 tests from BridgedSkillTest (0 ms total)
+
+[----------] 9 tests from PolicyTest
+[ RUN      ] PolicyTest.DefaultValues
+[       OK ] PolicyTest.DefaultValues (0 ms)
+[ RUN      ] PolicyTest.Permissive
+[       OK ] PolicyTest.Permissive (0 ms)
+[ RUN      ] PolicyTest.ToJson
+[       OK ] PolicyTest.ToJson (0 ms)
+[ RUN      ] PolicyTest.ResourceLimits
+[       OK ] PolicyTest.ResourceLimits (0 ms)
+[ RUN      ] PolicyTest.FilesystemPolicy
+[       OK ] PolicyTest.FilesystemPolicy (0 ms)
+[ RUN      ] PolicyTest.ToJsonWithPublicKeyPath
+[       OK ] PolicyTest.ToJsonWithPublicKeyPath (0 ms)
+[ RUN      ] PolicyTest.ToJsonWithWritePaths
+[       OK ] PolicyTest.ToJsonWithWritePaths (0 ms)
+[ RUN      ] PolicyTest.ToJsonWithOutputSchema
+[       OK ] PolicyTest.ToJsonWithOutputSchema (0 ms)
+[ RUN      ] PolicyTest.ToJsonWithAuditLogPath
+[       OK ] PolicyTest.ToJsonWithAuditLogPath (0 ms)
+[----------] 9 tests from PolicyTest (0 ms total)
+
+[----------] 21 tests from ImporterTest
+[ RUN      ] ImporterTest.ImportSingleSkill
+[       OK ] ImporterTest.ImportSingleSkill (0 ms)
+[ RUN      ] ImporterTest.ImportWithOpenclaw
+[       OK ] ImporterTest.ImportWithOpenclaw (0 ms)
+[ RUN      ] ImporterTest.ImportAll
+[       OK ] ImporterTest.ImportAll (0 ms)
+[ RUN      ] ImporterTest.ImportNonexistent
+[       OK ] ImporterTest.ImportNonexistent (0 ms)
+[ RUN      ] ImporterTest.ImportInvalidSkill
+[       OK ] ImporterTest.ImportInvalidSkill (0 ms)
+[ RUN      ] ImporterTest.MetadataSourceTag
+[       OK ] ImporterTest.MetadataSourceTag (0 ms)
+[ RUN      ] ImporterTest.ImportSkillWithoutSkillMdFails
+[       OK ] ImporterTest.ImportSkillWithoutSkillMdFails (0 ms)
+[ RUN      ] ImporterTest.ImportSkillWithSignature
+[       OK ] ImporterTest.ImportSkillWithSignature (0 ms)
+[ RUN      ] ImporterTest.ImportAllRecordsErrors
+[       OK ] ImporterTest.ImportAllRecordsErrors (0 ms)
+[ RUN      ] ImporterTest.ImportAllEmptyDirectory
+[       OK ] ImporterTest.ImportAllEmptyDirectory (0 ms)
+[ RUN      ] ImporterTest.ImportWithCorruptOpenclaw
+[       OK ] ImporterTest.ImportWithCorruptOpenclaw (0 ms)
+[ RUN      ] ImporterTest.ImportWithFullOpenclaw
+[       OK ] ImporterTest.ImportWithFullOpenclaw (0 ms)
+[ RUN      ] ImporterTest.ImportOpencawFillsEmptyDescription
+[       OK ] ImporterTest.ImportOpencawFillsEmptyDescription (0 ms)
+[ RUN      ] ImporterTest.ImportAllWithMixedResults
+[       OK ] ImporterTest.ImportAllWithMixedResults (0 ms)
+[ RUN      ] ImporterTest.SlugDefaultsToName
+[       OK ] ImporterTest.SlugDefaultsToName (0 ms)
+[ RUN      ] ImporterTest.ImportAllSkipsFiles
+[       OK ] ImporterTest.ImportAllSkipsFiles (0 ms)
+[ RUN      ] ImporterTest.TagsWhitespaceTrimmed
+[       OK ] ImporterTest.TagsWhitespaceTrimmed (0 ms)
+[ RUN      ] ImporterTest.ImportAllRecordsFailedImports
+[       OK ] ImporterTest.ImportAllRecordsFailedImports (0 ms)
+[ RUN      ] ImporterTest.ImportAllDirectoryWithOnlyNonSkillDirs
+[       OK ] ImporterTest.ImportAllDirectoryWithOnlyNonSkillDirs (0 ms)
+[ RUN      ] ImporterTest.ImportSkillWithMissingOpenclaw
+[       OK ] ImporterTest.ImportSkillWithMissingOpenclaw (0 ms)
+[ RUN      ] ImporterTest.MergeMetadataNoDescriptionOverride
+[       OK ] ImporterTest.MergeMetadataNoDescriptionOverride (0 ms)
+[----------] 21 tests from ImporterTest (5 ms total)
+
+[----------] 10 tests from ParserTest
+[ RUN      ] ParserTest.ParseFrontmatter
+[       OK ] ParserTest.ParseFrontmatter (0 ms)
+[ RUN      ] ParserTest.MissingField
+[       OK ] ParserTest.MissingField (0 ms)
+[ RUN      ] ParserTest.NoFrontmatter
+[       OK ] ParserTest.NoFrontmatter (0 ms)
+[ RUN      ] ParserTest.EmptyContent
+[       OK ] ParserTest.EmptyContent (0 ms)
+[ RUN      ] ParserTest.ParseSkillFile
+[       OK ] ParserTest.ParseSkillFile (0 ms)
+[ RUN      ] ParserTest.ParseSkillFileNotFound
+[       OK ] ParserTest.ParseSkillFileNotFound (0 ms)
+[ RUN      ] ParserTest.WhitespaceHandling
+[       OK ] ParserTest.WhitespaceHandling (0 ms)
+[ RUN      ] ParserTest.FrontmatterLineWithoutColon
+[       OK ] ParserTest.FrontmatterLineWithoutColon (0 ms)
+[ RUN      ] ParserTest.CarriageReturnTrimming
+[       OK ] ParserTest.CarriageReturnTrimming (0 ms)
+[ RUN      ] ParserTest.WhitespaceOnlyValue
+[       OK ] ParserTest.WhitespaceOnlyValue (0 ms)
+[----------] 10 tests from ParserTest (0 ms total)
+
+[----------] 9 tests from VerificationTest
+[ RUN      ] VerificationTest.ValidSignature
+[       OK ] VerificationTest.ValidSignature (0 ms)
+[ RUN      ] VerificationTest.InvalidSignature
+[       OK ] VerificationTest.InvalidSignature (0 ms)
+[ RUN      ] VerificationTest.MissingFile
+[       OK ] VerificationTest.MissingFile (0 ms)
+[ RUN      ] VerificationTest.LoadPublicKeyRaw
+[       OK ] VerificationTest.LoadPublicKeyRaw (0 ms)
+[ RUN      ] VerificationTest.LoadPublicKeyMissing
+[       OK ] VerificationTest.LoadPublicKeyMissing (0 ms)
+[ RUN      ] VerificationTest.LoadPublicKeyInvalidSize
+[       OK ] VerificationTest.LoadPublicKeyInvalidSize (0 ms)
+[ RUN      ] VerificationTest.MissingSignatureFile
+[       OK ] VerificationTest.MissingSignatureFile (0 ms)
+[ RUN      ] VerificationTest.InvalidSignatureSize
+[       OK ] VerificationTest.InvalidSignatureSize (0 ms)
+[ RUN      ] VerificationTest.LoadPublicKeyBase64
+[       OK ] VerificationTest.LoadPublicKeyBase64 (0 ms)
+[----------] 9 tests from VerificationTest (1 ms total)
+
+[----------] 16 tests from StaticAnalysisTest
+[ RUN      ] StaticAnalysisTest.DetectEval
+[       OK ] StaticAnalysisTest.DetectEval (1 ms)
+[ RUN      ] StaticAnalysisTest.DetectSubprocess
+[       OK ] StaticAnalysisTest.DetectSubprocess (0 ms)
+[ RUN      ] StaticAnalysisTest.DetectOsSystem
+[       OK ] StaticAnalysisTest.DetectOsSystem (0 ms)
+[ RUN      ] StaticAnalysisTest.CleanFile
+[       OK ] StaticAnalysisTest.CleanFile (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeDirectory
+[       OK ] StaticAnalysisTest.AnalyzeDirectory (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeCleanDirectory
+[       OK ] StaticAnalysisTest.AnalyzeCleanDirectory (0 ms)
+[ RUN      ] StaticAnalysisTest.SkipNonAnalyzableFiles
+[       OK ] StaticAnalysisTest.SkipNonAnalyzableFiles (0 ms)
+[ RUN      ] StaticAnalysisTest.DetectChildProcess
+[       OK ] StaticAnalysisTest.DetectChildProcess (0 ms)
+[ RUN      ] StaticAnalysisTest.NonAnalyzableFileReturnsEmpty
+[       OK ] StaticAnalysisTest.NonAnalyzableFileReturnsEmpty (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeNonexistentFileReturnsEmpty
+[       OK ] StaticAnalysisTest.AnalyzeNonexistentFileReturnsEmpty (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeUnreadableFileReturnsEmpty
+[       OK ] StaticAnalysisTest.AnalyzeUnreadableFileReturnsEmpty (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeNonexistentDirectoryReturnsEmpty
+[       OK ] StaticAnalysisTest.AnalyzeNonexistentDirectoryReturnsEmpty (0 ms)
+[ RUN      ] StaticAnalysisTest.WarningOnlyPassesReport
+[       OK ] StaticAnalysisTest.WarningOnlyPassesReport (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeDirectoryReturnsReport
+[       OK ] StaticAnalysisTest.AnalyzeDirectoryReturnsReport (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzeTypeScriptFile
+[       OK ] StaticAnalysisTest.AnalyzeTypeScriptFile (0 ms)
+[ RUN      ] StaticAnalysisTest.AnalyzePythonFsDestructive
+[       OK ] StaticAnalysisTest.AnalyzePythonFsDestructive (0 ms)
+[----------] 16 tests from StaticAnalysisTest (8 ms total)
+
+[----------] 15 tests from AdmissionTest
+[ RUN      ] AdmissionTest.ValidSkillAdmitted
+[       OK ] AdmissionTest.ValidSkillAdmitted (0 ms)
+[ RUN      ] AdmissionTest.EmptyNameRejected
+[       OK ] AdmissionTest.EmptyNameRejected (0 ms)
+[ RUN      ] AdmissionTest.MaliciousCodeRejected
+[       OK ] AdmissionTest.MaliciousCodeRejected (1 ms)
+[ RUN      ] AdmissionTest.SignatureRequiredButMissing
+[       OK ] AdmissionTest.SignatureRequiredButMissing (0 ms)
+[ RUN      ] AdmissionTest.SignatureNotRequired
+[       OK ] AdmissionTest.SignatureNotRequired (0 ms)
+[ RUN      ] AdmissionTest.NoPolicy
+[       OK ] AdmissionTest.NoPolicy (0 ms)
+[ RUN      ] AdmissionTest.StagesTracked
+[       OK ] AdmissionTest.StagesTracked (0 ms)
+[ RUN      ] AdmissionTest.EmptyRuntimeRejected
+[       OK ] AdmissionTest.EmptyRuntimeRejected (0 ms)
+[ RUN      ] AdmissionTest.EmptyEntrypointRejected
+[       OK ] AdmissionTest.EmptyEntrypointRejected (0 ms)
+[ RUN      ] AdmissionTest.EmptySourceDirRejected
+[       OK ] AdmissionTest.EmptySourceDirRejected (0 ms)
+[ RUN      ] AdmissionTest.SignatureRequiredNoPublicKeyPath
+[       OK ] AdmissionTest.SignatureRequiredNoPublicKeyPath (0 ms)
+[ RUN      ] AdmissionTest.SignatureRequiredWithInvalidKeyPath
+[       OK ] AdmissionTest.SignatureRequiredWithInvalidKeyPath (0 ms)
+[ RUN      ] AdmissionTest.NonexistentSourceDirPassesStaticAnalysis
+[       OK ] AdmissionTest.NonexistentSourceDirPassesStaticAnalysis (0 ms)
+[ RUN      ] AdmissionTest.CustomReputationThreshold
+[       OK ] AdmissionTest.CustomReputationThreshold (0 ms)
+[ RUN      ] AdmissionTest.SignatureWithValidKeyButBadSignatureFile
+[       OK ] AdmissionTest.SignatureWithValidKeyButBadSignatureFile (0 ms)
+[----------] 15 tests from AdmissionTest (8 ms total)
+
+[----------] 9 tests from ReputationTest
+[ RUN      ] ReputationTest.DefaultScore
+[       OK ] ReputationTest.DefaultScore (0 ms)
+[ RUN      ] ReputationTest.UpdateScore
+[       OK ] ReputationTest.UpdateScore (0 ms)
+[ RUN      ] ReputationTest.FlagDecaysScore
+[       OK ] ReputationTest.FlagDecaysScore (0 ms)
+[ RUN      ] ReputationTest.PublishIncrements
+[       OK ] ReputationTest.PublishIncrements (0 ms)
+[ RUN      ] ReputationTest.ScoreClamped
+[       OK ] ReputationTest.ScoreClamped (0 ms)
+[ RUN      ] ReputationTest.MultipleFlagsDecay
+[       OK ] ReputationTest.MultipleFlagsDecay (0 ms)
+[ RUN      ] ReputationTest.UnknownAuthorGet
+[       OK ] ReputationTest.UnknownAuthorGet (0 ms)
+[ RUN      ] ReputationTest.HasTimestamp
+[       OK ] ReputationTest.HasTimestamp (0 ms)
+[ RUN      ] ReputationTest.ScoreUnknownAuthorReturnsDefault
+[       OK ] ReputationTest.ScoreUnknownAuthorReturnsDefault (0 ms)
+[----------] 9 tests from ReputationTest (0 ms total)
+
+[----------] 9 tests from ProvenanceTest
+[ RUN      ] ProvenanceTest.HashFile
+[       OK ] ProvenanceTest.HashFile (0 ms)
+[ RUN      ] ProvenanceTest.HashBytes
+[       OK ] ProvenanceTest.HashBytes (0 ms)
+[ RUN      ] ProvenanceTest.ConsistentHashing
+[       OK ] ProvenanceTest.ConsistentHashing (0 ms)
+[ RUN      ] ProvenanceTest.DifferentDataDifferentHash
+[       OK ] ProvenanceTest.DifferentDataDifferentHash (0 ms)
+[ RUN      ] ProvenanceTest.RecordAndVerify
+[       OK ] ProvenanceTest.RecordAndVerify (0 ms)
+[ RUN      ] ProvenanceTest.VerifyFailsAfterModification
+[       OK ] ProvenanceTest.VerifyFailsAfterModification (0 ms)
+[ RUN      ] ProvenanceTest.ChainGrows
+[       OK ] ProvenanceTest.ChainGrows (0 ms)
+[ RUN      ] ProvenanceTest.HashNonexistentFile
+[       OK ] ProvenanceTest.HashNonexistentFile (0 ms)
+[ RUN      ] ProvenanceTest.VerifyNonMatchingHash
+[       OK ] ProvenanceTest.VerifyNonMatchingHash (0 ms)
+[----------] 9 tests from ProvenanceTest (0 ms total)
+
+[----------] 7 tests from AuditTest
+[ RUN      ] AuditTest.LogCreatesFile
+[       OK ] AuditTest.LogCreatesFile (0 ms)
+[ RUN      ] AuditTest.LogAppends
+[       OK ] AuditTest.LogAppends (0 ms)
+[ RUN      ] AuditTest.LogAdmission
+[       OK ] AuditTest.LogAdmission (0 ms)
+[ RUN      ] AuditTest.LogExecution
+[       OK ] AuditTest.LogExecution (0 ms)
+[ RUN      ] AuditTest.HasTimestamp
+[       OK ] AuditTest.HasTimestamp (0 ms)
+[ RUN      ] AuditTest.Path
+[       OK ] AuditTest.Path (0 ms)
+[ RUN      ] AuditTest.CreateParentDirectories
+[       OK ] AuditTest.CreateParentDirectories (0 ms)
+[----------] 7 tests from AuditTest (1 ms total)
+
+[----------] 17 tests from ExecutorTest
+[ RUN      ] ExecutorTest.DefaultConstructor
+[       OK ] ExecutorTest.DefaultConstructor (0 ms)
+[ RUN      ] ExecutorTest.WithPolicy
+[       OK ] ExecutorTest.WithPolicy (0 ms)
+[ RUN      ] ExecutorTest.ExecutionResultFields
+[       OK ] ExecutorTest.ExecutionResultFields (0 ms)
+[ RUN      ] ExecutorTest.RunMissingEntrypoint
+[2026-03-02 20:47:40.249] [info] Running skill 'missing' directly
+[       OK ] ExecutorTest.RunMissingEntrypoint (44 ms)
+[ RUN      ] ExecutorTest.PermissivePolicy
+[       OK ] ExecutorTest.PermissivePolicy (0 ms)
+[ RUN      ] ExecutorTest.BuildEnvWithoutPolicy
+[2026-03-02 20:47:40.294] [info] Running skill 'env-test' directly
+[       OK ] ExecutorTest.BuildEnvWithoutPolicy (30 ms)
+[ RUN      ] ExecutorTest.BuildEnvWithPolicy
+[2026-03-02 20:47:40.324] [info] Running skill 'policy-test' directly
+[       OK ] ExecutorTest.BuildEnvWithPolicy (60 ms)
+[ RUN      ] ExecutorTest.PythonRuntimeCommand
+[2026-03-02 20:47:40.385] [info] Running skill 'py-skill' directly
+[       OK ] ExecutorTest.PythonRuntimeCommand (29 ms)
+[ RUN      ] ExecutorTest.NodeRuntimeCommand
+[2026-03-02 20:47:40.415] [info] Running skill 'node-skill' directly
+[       OK ] ExecutorTest.NodeRuntimeCommand (45 ms)
+[ RUN      ] ExecutorTest.PolicyWithReadOnlyFs
+[2026-03-02 20:47:40.460] [info] Running skill 'ro-skill' directly
+[       OK ] ExecutorTest.PolicyWithReadOnlyFs (48 ms)
+[ RUN      ] ExecutorTest.SpawnDirectWithRealEcho
+[2026-03-02 20:47:40.509] [info] Running skill 'echo-skill' directly
+[       OK ] ExecutorTest.SpawnDirectWithRealEcho (52 ms)
+[ RUN      ] ExecutorTest.SandboxedExecutionWithPolicy
+[2026-03-02 20:47:40.562] [info] Running skill 'sandbox-test' directly
+[       OK ] ExecutorTest.SandboxedExecutionWithPolicy (19 ms)
+[ RUN      ] ExecutorTest.BuildEnvWithNetworkDeny
+[2026-03-02 20:47:40.581] [info] Running skill 'env-deny' directly
+[       OK ] ExecutorTest.BuildEnvWithNetworkDeny (42 ms)
+[ RUN      ] ExecutorTest.BuildEnvWithNetworkAllow
+[2026-03-02 20:47:40.624] [info] Running skill 'env-allow' directly
+[       OK ] ExecutorTest.BuildEnvWithNetworkAllow (24 ms)
+[ RUN      ] ExecutorTest.UnknownRuntimeCommandPassthrough
+[2026-03-02 20:47:40.648] [info] Running skill 'custom-rt' directly
+[       OK ] ExecutorTest.UnknownRuntimeCommandPassthrough (50 ms)
+[ RUN      ] ExecutorTest.SpawnDirectWithTrueCommand
+[2026-03-02 20:47:40.699] [info] Running skill 'true-skill' directly
+[       OK ] ExecutorTest.SpawnDirectWithTrueCommand (48 ms)
+[ RUN      ] ExecutorTest.SandboxedNodeRuntime
+[2026-03-02 20:47:40.747] [info] Running skill 'sandboxed-node' directly
+[       OK ] ExecutorTest.SandboxedNodeRuntime (55 ms)
+[----------] 17 tests from ExecutorTest (553 ms total)
+
+[----------] 6 tests from PlatformTest
+[ RUN      ] PlatformTest.DetectPlatformReturnsLinux
+[       OK ] PlatformTest.DetectPlatformReturnsLinux (0 ms)
+[ RUN      ] PlatformTest.ArchIsKnown
+[       OK ] PlatformTest.ArchIsKnown (0 ms)
+[ RUN      ] PlatformTest.HasNsjailReturnsBool
+[       OK ] PlatformTest.HasNsjailReturnsBool (0 ms)
+[ RUN      ] PlatformTest.DetectPlatformSandboxExec
+[       OK ] PlatformTest.DetectPlatformSandboxExec (0 ms)
+[ RUN      ] PlatformTest.DetectPlatformNsjailConsistent
+[       OK ] PlatformTest.DetectPlatformNsjailConsistent (0 ms)
+[ RUN      ] PlatformTest.HasNsjailReturnsFalseWithEmptyPath
+[       OK ] PlatformTest.HasNsjailReturnsFalseWithEmptyPath (0 ms)
+[----------] 6 tests from PlatformTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 139 tests from 12 test suites ran. (581 ms total)
+[  PASSED  ] 139 tests.
+<end of output>
+Test time =   0.60 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-bridge-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-bridge-cpp_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+1/17 Testing: euxis-crypto-cpp_tests
+1/17 Test: euxis-crypto-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-crypto-cpp/euxis-crypto-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-crypto-cpp
+"euxis-crypto-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 41 tests from 4 test suites.
+[----------] Global test environment set-up.
+[----------] 12 tests from AesGcmTest
+[ RUN      ] AesGcmTest.EncryptDecryptRoundtrip
+[       OK ] AesGcmTest.EncryptDecryptRoundtrip (0 ms)
+[ RUN      ] AesGcmTest.WrongKeyFails
+[       OK ] AesGcmTest.WrongKeyFails (0 ms)
+[ RUN      ] AesGcmTest.EmptyData
+[       OK ] AesGcmTest.EmptyData (0 ms)
+[ RUN      ] AesGcmTest.LargeData
+[       OK ] AesGcmTest.LargeData (5 ms)
+[ RUN      ] AesGcmTest.ToBase64
+[       OK ] AesGcmTest.ToBase64 (0 ms)
+[ RUN      ] AesGcmTest.TamperedCiphertextFails
+[       OK ] AesGcmTest.TamperedCiphertextFails (0 ms)
+[ RUN      ] AesGcmTest.UniqueIVs
+[       OK ] AesGcmTest.UniqueIVs (0 ms)
+[ RUN      ] AesGcmTest.DecryptTooShortCiphertext
+[       OK ] AesGcmTest.DecryptTooShortCiphertext (0 ms)
+[ RUN      ] AesGcmTest.EncryptDecryptAadRoundtrip
+[       OK ] AesGcmTest.EncryptDecryptAadRoundtrip (0 ms)
+[ RUN      ] AesGcmTest.DecryptAadWrongAadFails
+[       OK ] AesGcmTest.DecryptAadWrongAadFails (0 ms)
+[ RUN      ] AesGcmTest.DecryptAadTooShortCiphertext
+[       OK ] AesGcmTest.DecryptAadTooShortCiphertext (0 ms)
+[ RUN      ] AesGcmTest.CryptoErrorToStringAllValues
+[       OK ] AesGcmTest.CryptoErrorToStringAllValues (0 ms)
+[----------] 12 tests from AesGcmTest (5 ms total)
+
+[----------] 6 tests from AesGcmAadTest
+[ RUN      ] AesGcmAadTest.EncryptDecryptRoundtrip
+[       OK ] AesGcmAadTest.EncryptDecryptRoundtrip (0 ms)
+[ RUN      ] AesGcmAadTest.WrongAadFails
+[       OK ] AesGcmAadTest.WrongAadFails (0 ms)
+[ RUN      ] AesGcmAadTest.MissingAadFails
+[       OK ] AesGcmAadTest.MissingAadFails (0 ms)
+[ RUN      ] AesGcmAadTest.DifferentAadContexts
+[       OK ] AesGcmAadTest.DifferentAadContexts (0 ms)
+[ RUN      ] AesGcmAadTest.EmptyAadRoundtrip
+[       OK ] AesGcmAadTest.EmptyAadRoundtrip (0 ms)
+[ RUN      ] AesGcmAadTest.LargeAad
+[       OK ] AesGcmAadTest.LargeAad (0 ms)
+[----------] 6 tests from AesGcmAadTest (0 ms total)
+
+[----------] 14 tests from KeyDerivationTest
+[ RUN      ] KeyDerivationTest.SameSaltSameKey
+[       OK ] KeyDerivationTest.SameSaltSameKey (122 ms)
+[ RUN      ] KeyDerivationTest.DifferentSaltDifferentKey
+[       OK ] KeyDerivationTest.DifferentSaltDifferentKey (122 ms)
+[ RUN      ] KeyDerivationTest.GenerateKeyDefaultSize
+[       OK ] KeyDerivationTest.GenerateKeyDefaultSize (0 ms)
+[ RUN      ] KeyDerivationTest.GenerateKeyCustomSize
+[       OK ] KeyDerivationTest.GenerateKeyCustomSize (0 ms)
+[ RUN      ] KeyDerivationTest.GenerateKeyUnique
+[       OK ] KeyDerivationTest.GenerateKeyUnique (0 ms)
+[ RUN      ] KeyDerivationTest.InvalidSaltSizeFails
+[       OK ] KeyDerivationTest.InvalidSaltSizeFails (0 ms)
+[ RUN      ] KeyDerivationTest.CustomKeySize
+[       OK ] KeyDerivationTest.CustomKeySize (60 ms)
+[ RUN      ] KeyDerivationTest.ReturnedSaltMatchesInput
+[       OK ] KeyDerivationTest.ReturnedSaltMatchesInput (60 ms)
+[ RUN      ] KeyDerivationTest.HighIterationsSensitive
+[       OK ] KeyDerivationTest.HighIterationsSensitive (551 ms)
+[ RUN      ] KeyDerivationTest.ModerateIterations
+[       OK ] KeyDerivationTest.ModerateIterations (458 ms)
+[ RUN      ] KeyDerivationTest.KeySizeTooSmall
+[       OK ] KeyDerivationTest.KeySizeTooSmall (0 ms)
+[ RUN      ] KeyDerivationTest.EmptyPasswordWorks
+[       OK ] KeyDerivationTest.EmptyPasswordWorks (75 ms)
+[ RUN      ] KeyDerivationTest.SaltTooLong
+[       OK ] KeyDerivationTest.SaltTooLong (0 ms)
+[ RUN      ] KeyDerivationTest.SameOpslimitBucketSameKey
+[       OK ] KeyDerivationTest.SameOpslimitBucketSameKey (155 ms)
+[----------] 14 tests from KeyDerivationTest (1608 ms total)
+
+[----------] 9 tests from Ed25519Test
+[ RUN      ] Ed25519Test.SignVerifyRoundtrip
+[       OK ] Ed25519Test.SignVerifyRoundtrip (0 ms)
+[ RUN      ] Ed25519Test.WrongPublicKeyFails
+[       OK ] Ed25519Test.WrongPublicKeyFails (0 ms)
+[ RUN      ] Ed25519Test.WrongMessageFails
+[       OK ] Ed25519Test.WrongMessageFails (0 ms)
+[ RUN      ] Ed25519Test.DifferentKeypairsDifferentSignatures
+[       OK ] Ed25519Test.DifferentKeypairsDifferentSignatures (0 ms)
+[ RUN      ] Ed25519Test.EmptyMessage
+[       OK ] Ed25519Test.EmptyMessage (0 ms)
+[ RUN      ] Ed25519Test.LargeMessage
+[       OK ] Ed25519Test.LargeMessage (5 ms)
+[ RUN      ] Ed25519Test.TamperedSignatureFails
+[       OK ] Ed25519Test.TamperedSignatureFails (0 ms)
+[ RUN      ] Ed25519Test.KeypairSizes
+[       OK ] Ed25519Test.KeypairSizes (0 ms)
+[ RUN      ] Ed25519Test.KeypairsAreDistinct
+[       OK ] Ed25519Test.KeypairsAreDistinct (0 ms)
+[----------] 9 tests from Ed25519Test (8 ms total)
+
+[----------] Global test environment tear-down
+[==========] 41 tests from 4 test suites ran. (1622 ms total)
+[  PASSED  ] 41 tests.
+<end of output>
+Test time =   1.63 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-crypto-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-crypto-cpp_tests" time elapsed: 00:00:01
+----------------------------------------------------------
+
+13/17 Testing: euxis-gateway-cpp_tests
+13/17 Test: euxis-gateway-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-gateway-cpp/euxis-gateway-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-gateway-cpp
+"euxis-gateway-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 74 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from GatewayConfigTest
+[ RUN      ] GatewayConfigTest.DefaultValues
+[       OK ] GatewayConfigTest.DefaultValues (0 ms)
+[ RUN      ] GatewayConfigTest.FromJson
+[       OK ] GatewayConfigTest.FromJson (0 ms)
+[ RUN      ] GatewayConfigTest.LoadFromFile
+[       OK ] GatewayConfigTest.LoadFromFile (0 ms)
+[ RUN      ] GatewayConfigTest.LoadFromFileNonexistent
+[       OK ] GatewayConfigTest.LoadFromFileNonexistent (0 ms)
+[ RUN      ] GatewayConfigTest.FromJsonWithoutTimeouts
+[       OK ] GatewayConfigTest.FromJsonWithoutTimeouts (0 ms)
+[ RUN      ] GatewayConfigTest.FromJsonAllTimeouts
+[       OK ] GatewayConfigTest.FromJsonAllTimeouts (0 ms)
+[----------] 6 tests from GatewayConfigTest (0 ms total)
+
+[----------] 8 tests from AuthTest
+[ RUN      ] AuthTest.ValidHmac
+[       OK ] AuthTest.ValidHmac (0 ms)
+[ RUN      ] AuthTest.InvalidHmacRejects
+[       OK ] AuthTest.InvalidHmacRejects (0 ms)
+[ RUN      ] AuthTest.EmptySecretRejects
+[       OK ] AuthTest.EmptySecretRejects (0 ms)
+[ RUN      ] AuthTest.ValidBearerToken
+[       OK ] AuthTest.ValidBearerToken (0 ms)
+[ RUN      ] AuthTest.InvalidBearerToken
+[       OK ] AuthTest.InvalidBearerToken (0 ms)
+[ RUN      ] AuthTest.NoAuthConfigured
+[       OK ] AuthTest.NoAuthConfigured (0 ms)
+[ RUN      ] AuthTest.HmacSignatureWrongLengthRejects
+[       OK ] AuthTest.HmacSignatureWrongLengthRejects (0 ms)
+[ RUN      ] AuthTest.EmptyBearerTokenRejects
+[       OK ] AuthTest.EmptyBearerTokenRejects (0 ms)
+[----------] 8 tests from AuthTest (0 ms total)
+
+[----------] 7 tests from GatewayServerTest
+[ RUN      ] GatewayServerTest.HealthEndpoint
+[       OK ] GatewayServerTest.HealthEndpoint (0 ms)
+[ RUN      ] GatewayServerTest.DefaultConstruction
+[       OK ] GatewayServerTest.DefaultConstruction (0 ms)
+[ RUN      ] GatewayServerTest.CustomConfig
+[       OK ] GatewayServerTest.CustomConfig (0 ms)
+[ RUN      ] GatewayServerTest.ServerAccessor
+[       OK ] GatewayServerTest.ServerAccessor (0 ms)
+[ RUN      ] GatewayServerTest.WsHubAccessor
+[       OK ] GatewayServerTest.WsHubAccessor (0 ms)
+[ RUN      ] GatewayServerTest.StopWithoutStart
+[       OK ] GatewayServerTest.StopWithoutStart (0 ms)
+[ RUN      ] GatewayServerTest.StartAndStopWithClient
+[       OK ] GatewayServerTest.StartAndStopWithClient (73 ms)
+[----------] 7 tests from GatewayServerTest (75 ms total)
+
+[----------] 13 tests from StateTest
+[ RUN      ] StateTest.TimestampNotEmpty
+[       OK ] StateTest.TimestampNotEmpty (0 ms)
+[ RUN      ] StateTest.TimestampContainsDateParts
+[       OK ] StateTest.TimestampContainsDateParts (0 ms)
+[ RUN      ] StateTest.MakeSessionId
+[       OK ] StateTest.MakeSessionId (0 ms)
+[ RUN      ] StateTest.MakeSessionIdWithThread
+[       OK ] StateTest.MakeSessionIdWithThread (0 ms)
+[ RUN      ] StateTest.MakeSessionIdEmptyThread
+[       OK ] StateTest.MakeSessionIdEmptyThread (0 ms)
+[ RUN      ] StateTest.PersistAndLoadSession
+[       OK ] StateTest.PersistAndLoadSession (0 ms)
+[ RUN      ] StateTest.PersistMultipleMessages
+[       OK ] StateTest.PersistMultipleMessages (0 ms)
+[ RUN      ] StateTest.LoadEmptySession
+[       OK ] StateTest.LoadEmptySession (0 ms)
+[ RUN      ] StateTest.AuditLogCreatesEntry
+[       OK ] StateTest.AuditLogCreatesEntry (0 ms)
+[ RUN      ] StateTest.PersistSessionMeta
+[       OK ] StateTest.PersistSessionMeta (0 ms)
+[ RUN      ] StateTest.LoadSessionMetaNonexistent
+[       OK ] StateTest.LoadSessionMetaNonexistent (0 ms)
+[ RUN      ] StateTest.PersistRunEvent
+[       OK ] StateTest.PersistRunEvent (0 ms)
+[ RUN      ] StateTest.LoadRunEventsEmpty
+[       OK ] StateTest.LoadRunEventsEmpty (0 ms)
+[----------] 13 tests from StateTest (2 ms total)
+
+[----------] 14 tests from McpHostTest
+[ RUN      ] McpHostTest.InitializationRequired
+[       OK ] McpHostTest.InitializationRequired (0 ms)
+[ RUN      ] McpHostTest.InitializeReturnsCapabilities
+[       OK ] McpHostTest.InitializeReturnsCapabilities (0 ms)
+[ RUN      ] McpHostTest.ToolsListReturnsRegisteredTools
+[       OK ] McpHostTest.ToolsListReturnsRegisteredTools (0 ms)
+[ RUN      ] McpHostTest.ToolsCallGetMetrics
+[       OK ] McpHostTest.ToolsCallGetMetrics (0 ms)
+[ RUN      ] McpHostTest.ToolsCallSignPayload
+[       OK ] McpHostTest.ToolsCallSignPayload (0 ms)
+[ RUN      ] McpHostTest.ToolsCallUnknownTool
+[       OK ] McpHostTest.ToolsCallUnknownTool (0 ms)
+[ RUN      ] McpHostTest.PingReturnsEmptyResult
+[       OK ] McpHostTest.PingReturnsEmptyResult (0 ms)
+[ RUN      ] McpHostTest.CustomToolRegistration
+[       OK ] McpHostTest.CustomToolRegistration (0 ms)
+[ RUN      ] McpHostTest.ToolHandlerException
+[       OK ] McpHostTest.ToolHandlerException (0 ms)
+[ RUN      ] McpHostTest.ParseErrorOnInvalidRequest
+[       OK ] McpHostTest.ParseErrorOnInvalidRequest (0 ms)
+[ RUN      ] McpHostTest.UnknownMethod
+[       OK ] McpHostTest.UnknownMethod (0 ms)
+[ RUN      ] McpHostTest.NotificationsInitializedAck
+[       OK ] McpHostTest.NotificationsInitializedAck (0 ms)
+[ RUN      ] McpHostTest.ToolsAccessorReturnsList
+[       OK ] McpHostTest.ToolsAccessorReturnsList (0 ms)
+[ RUN      ] McpHostTest.ToolsAccessorIncludesCustomTools
+[       OK ] McpHostTest.ToolsAccessorIncludesCustomTools (0 ms)
+[----------] 14 tests from McpHostTest (4 ms total)
+
+[----------] 12 tests from WebSocketHubTest
+[ RUN      ] WebSocketHubTest.StartAndStop
+[2026-03-02 20:47:40.359] [info] WebSocket server started on 0.0.0.0:19876
+[       OK ] WebSocketHubTest.StartAndStop (60 ms)
+[ RUN      ] WebSocketHubTest.ClientConnectAndPing
+[2026-03-02 20:47:40.420] [info] WebSocket server started on 0.0.0.0:19877
+[2026-03-02 20:47:40.472] [info] WS client connected: 0
+[2026-03-02 20:47:40.481] [info] WS client disconnected: 0
+[       OK ] WebSocketHubTest.ClientConnectAndPing (70 ms)
+[ RUN      ] WebSocketHubTest.ClientCountUpdates
+[2026-03-02 20:47:40.491] [info] WebSocket server started on 0.0.0.0:19878
+[2026-03-02 20:47:40.543] [info] WS client connected: 1
+[2026-03-02 20:47:40.653] [info] WS client disconnected: 1
+[       OK ] WebSocketHubTest.ClientCountUpdates (275 ms)
+[ RUN      ] WebSocketHubTest.DispatchMessage
+[2026-03-02 20:47:40.766] [info] WebSocket server started on 0.0.0.0:19879
+[2026-03-02 20:47:40.818] [info] WS client connected: 2
+[2026-03-02 20:47:40.827] [info] WS client disconnected: 2
+[       OK ] WebSocketHubTest.DispatchMessage (71 ms)
+[ RUN      ] WebSocketHubTest.BroadcastToNoClients
+[2026-03-02 20:47:40.838] [info] WebSocket server started on 0.0.0.0:19880
+[       OK ] WebSocketHubTest.BroadcastToNoClients (61 ms)
+[ RUN      ] WebSocketHubTest.SendToNonExistentClient
+[2026-03-02 20:47:40.899] [info] WebSocket server started on 0.0.0.0:19881
+[       OK ] WebSocketHubTest.SendToNonExistentClient (51 ms)
+[ RUN      ] WebSocketHubTest.MultipleMessagesInSequence
+[2026-03-02 20:47:40.950] [info] WebSocket server started on 0.0.0.0:19882
+[2026-03-02 20:47:41.002] [info] WS client connected: 3
+[2026-03-02 20:47:41.013] [info] WS client disconnected: 3
+[       OK ] WebSocketHubTest.MultipleMessagesInSequence (83 ms)
+[ RUN      ] WebSocketHubTest.StopWithoutStart
+[       OK ] WebSocketHubTest.StopWithoutStart (0 ms)
+[ RUN      ] WebSocketHubTest.DoubleStop
+[2026-03-02 20:47:41.033] [info] WebSocket server started on 0.0.0.0:19884
+[       OK ] WebSocketHubTest.DoubleStop (60 ms)
+[ RUN      ] WebSocketHubTest.BroadcastWithConnectedClient
+[2026-03-02 20:47:41.094] [info] WebSocket server started on 0.0.0.0:19885
+[2026-03-02 20:47:41.146] [info] WS client connected: 4
+[2026-03-02 20:47:41.455] [info] WS client disconnected: 4
+[       OK ] WebSocketHubTest.BroadcastWithConnectedClient (371 ms)
+[ RUN      ] WebSocketHubTest.NoMessageHandler
+[2026-03-02 20:47:41.465] [info] WebSocket server started on 0.0.0.0:19886
+[2026-03-02 20:47:41.517] [info] WS client connected: 5
+[2026-03-02 20:47:41.726] [info] WS client disconnected: 5
+[       OK ] WebSocketHubTest.NoMessageHandler (274 ms)
+[ RUN      ] WebSocketHubTest.CustomHost
+[2026-03-02 20:47:41.740] [info] WebSocket server started on 127.0.0.1:19887
+[       OK ] WebSocketHubTest.CustomHost (62 ms)
+[----------] 12 tests from WebSocketHubTest (1443 ms total)
+
+[----------] 14 tests from StatePersistenceTest
+[ RUN      ] StatePersistenceTest.TimestampFormat
+[       OK ] StatePersistenceTest.TimestampFormat (0 ms)
+[ RUN      ] StatePersistenceTest.MakeSessionIdNoThread
+[       OK ] StatePersistenceTest.MakeSessionIdNoThread (0 ms)
+[ RUN      ] StatePersistenceTest.MakeSessionIdWithThread
+[       OK ] StatePersistenceTest.MakeSessionIdWithThread (0 ms)
+[ RUN      ] StatePersistenceTest.MakeSessionIdEmptyThread
+[       OK ] StatePersistenceTest.MakeSessionIdEmptyThread (0 ms)
+[ RUN      ] StatePersistenceTest.PersistAndLoadMessages
+[       OK ] StatePersistenceTest.PersistAndLoadMessages (0 ms)
+[ RUN      ] StatePersistenceTest.LoadNonexistentSessionReturnsEmpty
+[       OK ] StatePersistenceTest.LoadNonexistentSessionReturnsEmpty (0 ms)
+[ RUN      ] StatePersistenceTest.PersistAndLoadSessionMeta
+[       OK ] StatePersistenceTest.PersistAndLoadSessionMeta (0 ms)
+[ RUN      ] StatePersistenceTest.LoadNonexistentMetaReturnsEmpty
+[       OK ] StatePersistenceTest.LoadNonexistentMetaReturnsEmpty (0 ms)
+[ RUN      ] StatePersistenceTest.AuditLogWritesEntry
+[       OK ] StatePersistenceTest.AuditLogWritesEntry (0 ms)
+[ RUN      ] StatePersistenceTest.PersistAndLoadRunEvents
+[       OK ] StatePersistenceTest.PersistAndLoadRunEvents (0 ms)
+[ RUN      ] StatePersistenceTest.LoadNonexistentRunReturnsEmpty
+[       OK ] StatePersistenceTest.LoadNonexistentRunReturnsEmpty (0 ms)
+[ RUN      ] StatePersistenceTest.DirectoryCreation
+[       OK ] StatePersistenceTest.DirectoryCreation (0 ms)
+[ RUN      ] StatePersistenceTest.EuxisHomeWithoutEnvVar
+[       OK ] StatePersistenceTest.EuxisHomeWithoutEnvVar (0 ms)
+[ RUN      ] StatePersistenceTest.AllDirsCreatedCorrectly
+[       OK ] StatePersistenceTest.AllDirsCreatedCorrectly (0 ms)
+[----------] 14 tests from StatePersistenceTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 74 tests from 7 test suites ran. (1531 ms total)
+[  PASSED  ] 74 tests.
+<end of output>
+Test time =   1.61 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-gateway-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-gateway-cpp_tests" time elapsed: 00:00:01
+----------------------------------------------------------
+
+12/17 Testing: euxis-adapters-cpp_tests
+12/17 Test: euxis-adapters-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-adapters-cpp/euxis-adapters-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-adapters-cpp
+"euxis-adapters-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 83 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 22 tests from SlackAdapterTest
+[ RUN      ] SlackAdapterTest.ReceiveExtractsText
+[       OK ] SlackAdapterTest.ReceiveExtractsText (0 ms)
+[ RUN      ] SlackAdapterTest.IgnoresBotMessages
+[       OK ] SlackAdapterTest.IgnoresBotMessages (0 ms)
+[ RUN      ] SlackAdapterTest.ThreadSession
+[       OK ] SlackAdapterTest.ThreadSession (0 ms)
+[ RUN      ] SlackAdapterTest.NonThreadSession
+[       OK ] SlackAdapterTest.NonThreadSession (0 ms)
+[ RUN      ] SlackAdapterTest.ReceiveDirectPayload
+[       OK ] SlackAdapterTest.ReceiveDirectPayload (0 ms)
+[ RUN      ] SlackAdapterTest.GroupScope
+[       OK ] SlackAdapterTest.GroupScope (0 ms)
+[ RUN      ] SlackAdapterTest.GroupScopeForGroup
+[       OK ] SlackAdapterTest.GroupScopeForGroup (0 ms)
+[ RUN      ] SlackAdapterTest.GroupScopeForMpim
+[       OK ] SlackAdapterTest.GroupScopeForMpim (0 ms)
+[ RUN      ] SlackAdapterTest.DmScope
+[       OK ] SlackAdapterTest.DmScope (0 ms)
+[ RUN      ] SlackAdapterTest.ReceiveNonObject
+[       OK ] SlackAdapterTest.ReceiveNonObject (0 ms)
+[ RUN      ] SlackAdapterTest.ConnectNonSocket
+[       OK ] SlackAdapterTest.ConnectNonSocket (0 ms)
+[ RUN      ] SlackAdapterTest.ConnectSocketMissingTokens
+[2026-03-02 20:47:40.257] [warning] Slack adapter missing token/app_token for socket mode
+[       OK ] SlackAdapterTest.ConnectSocketMissingTokens (0 ms)
+[ RUN      ] SlackAdapterTest.ConnectSocketWithTokens
+[2026-03-02 20:47:40.257] [info] Slack adapter ready (webhook-based receive)
+[       OK ] SlackAdapterTest.ConnectSocketWithTokens (0 ms)
+[ RUN      ] SlackAdapterTest.SendWithEmptyToken
+[2026-03-02 20:47:40.257] [warning] Slack adapter missing token for send
+[       OK ] SlackAdapterTest.SendWithEmptyToken (0 ms)
+[ RUN      ] SlackAdapterTest.SendResolvesSessionFromId
+[       OK ] SlackAdapterTest.SendResolvesSessionFromId (332 ms)
+[ RUN      ] SlackAdapterTest.SendResolvesThreadFromId
+[       OK ] SlackAdapterTest.SendResolvesThreadFromId (266 ms)
+[ RUN      ] SlackAdapterTest.SendWithSessionMeta
+[       OK ] SlackAdapterTest.SendWithSessionMeta (273 ms)
+[ RUN      ] SlackAdapterTest.AckIsNoop
+[       OK ] SlackAdapterTest.AckIsNoop (0 ms)
+[ RUN      ] SlackAdapterTest.DisconnectIsNoop
+[       OK ] SlackAdapterTest.DisconnectIsNoop (0 ms)
+[ RUN      ] SlackAdapterTest.ReceiveWithChannelId
+[       OK ] SlackAdapterTest.ReceiveWithChannelId (0 ms)
+[ RUN      ] SlackAdapterTest.ReceiveWithMessageKey
+[       OK ] SlackAdapterTest.ReceiveWithMessageKey (0 ms)
+[ RUN      ] SlackAdapterTest.SendResolvesEmptyChannel
+[       OK ] SlackAdapterTest.SendResolvesEmptyChannel (0 ms)
+[----------] 22 tests from SlackAdapterTest (873 ms total)
+
+[----------] 18 tests from TelegramAdapterTest
+[ RUN      ] TelegramAdapterTest.ReceiveExtractsText
+[       OK ] TelegramAdapterTest.ReceiveExtractsText (0 ms)
+[ RUN      ] TelegramAdapterTest.GroupScope
+[       OK ] TelegramAdapterTest.GroupScope (0 ms)
+[ RUN      ] TelegramAdapterTest.GroupScopeRegular
+[       OK ] TelegramAdapterTest.GroupScopeRegular (0 ms)
+[ RUN      ] TelegramAdapterTest.DmScope
+[       OK ] TelegramAdapterTest.DmScope (0 ms)
+[ RUN      ] TelegramAdapterTest.SessionIdFormat
+[       OK ] TelegramAdapterTest.SessionIdFormat (0 ms)
+[ RUN      ] TelegramAdapterTest.ReceiveWithCaption
+[       OK ] TelegramAdapterTest.ReceiveWithCaption (0 ms)
+[ RUN      ] TelegramAdapterTest.ReceiveDirectMessage
+[       OK ] TelegramAdapterTest.ReceiveDirectMessage (0 ms)
+[ RUN      ] TelegramAdapterTest.ReceiveNoChatId
+[       OK ] TelegramAdapterTest.ReceiveNoChatId (0 ms)
+[ RUN      ] TelegramAdapterTest.ReceiveNonObject
+[       OK ] TelegramAdapterTest.ReceiveNonObject (0 ms)
+[ RUN      ] TelegramAdapterTest.ConnectWithEmptyToken
+[2026-03-02 20:47:41.132] [warning] Telegram adapter missing token
+[       OK ] TelegramAdapterTest.ConnectWithEmptyToken (0 ms)
+[ RUN      ] TelegramAdapterTest.ConnectWebhookNoUrl
+[2026-03-02 20:47:41.132] [warning] Telegram webhook_url is empty
+[       OK ] TelegramAdapterTest.ConnectWebhookNoUrl (0 ms)
+[ RUN      ] TelegramAdapterTest.SendWithEmptyToken
+[       OK ] TelegramAdapterTest.SendWithEmptyToken (0 ms)
+[ RUN      ] TelegramAdapterTest.AckIsNoop
+[       OK ] TelegramAdapterTest.AckIsNoop (0 ms)
+[ RUN      ] TelegramAdapterTest.DisconnectSafe
+[       OK ] TelegramAdapterTest.DisconnectSafe (0 ms)
+[ RUN      ] TelegramAdapterTest.DisconnectWebhookMode
+[       OK ] TelegramAdapterTest.DisconnectWebhookMode (222 ms)
+[ RUN      ] TelegramAdapterTest.SendWithSessionMeta
+[       OK ] TelegramAdapterTest.SendWithSessionMeta (0 ms)
+[ RUN      ] TelegramAdapterTest.SendResolvesFromSessionId
+[       OK ] TelegramAdapterTest.SendResolvesFromSessionId (213 ms)
+[ RUN      ] TelegramAdapterTest.SendInvalidSessionId
+[       OK ] TelegramAdapterTest.SendInvalidSessionId (0 ms)
+[----------] 18 tests from TelegramAdapterTest (438 ms total)
+
+[----------] 15 tests from DiscordAdapterTest
+[ RUN      ] DiscordAdapterTest.ReceiveExtractsContent
+[       OK ] DiscordAdapterTest.ReceiveExtractsContent (0 ms)
+[ RUN      ] DiscordAdapterTest.SessionId
+[       OK ] DiscordAdapterTest.SessionId (0 ms)
+[ RUN      ] DiscordAdapterTest.PrivateDmScope
+[       OK ] DiscordAdapterTest.PrivateDmScope (0 ms)
+[ RUN      ] DiscordAdapterTest.GroupScope
+[       OK ] DiscordAdapterTest.GroupScope (0 ms)
+[ RUN      ] DiscordAdapterTest.MetaContainsSender
+[       OK ] DiscordAdapterTest.MetaContainsSender (0 ms)
+[ RUN      ] DiscordAdapterTest.ConnectDisabled
+[2026-03-02 20:47:41.570] [info] Discord adapter disabled or missing token
+[       OK ] DiscordAdapterTest.ConnectDisabled (0 ms)
+[ RUN      ] DiscordAdapterTest.ConnectEmptyToken
+[2026-03-02 20:47:41.570] [info] Discord adapter disabled or missing token
+[       OK ] DiscordAdapterTest.ConnectEmptyToken (0 ms)
+[ RUN      ] DiscordAdapterTest.ConnectEnabled
+[2026-03-02 20:47:41.570] [info] Discord adapter ready (webhook-based receive)
+[       OK ] DiscordAdapterTest.ConnectEnabled (0 ms)
+[ RUN      ] DiscordAdapterTest.SendWithEmptyToken
+[2026-03-02 20:47:41.570] [warning] Discord adapter: cannot send without token
+[       OK ] DiscordAdapterTest.SendWithEmptyToken (0 ms)
+[ RUN      ] DiscordAdapterTest.SendExtractsChannelFromSessionId
+[2026-03-02 20:47:41.931] [warning] Discord API returned HTTP 401 for channel 456
+[       OK ] DiscordAdapterTest.SendExtractsChannelFromSessionId (363 ms)
+[ RUN      ] DiscordAdapterTest.SendWithSessionMeta
+[2026-03-02 20:47:42.282] [warning] Discord API returned HTTP 401 for channel 789
+[       OK ] DiscordAdapterTest.SendWithSessionMeta (350 ms)
+[ RUN      ] DiscordAdapterTest.SendNoChannelId
+[2026-03-02 20:47:42.284] [warning] Discord adapter: no channel_id for session 'unknown_session'
+[       OK ] DiscordAdapterTest.SendNoChannelId (0 ms)
+[ RUN      ] DiscordAdapterTest.AckIsNoop
+[       OK ] DiscordAdapterTest.AckIsNoop (0 ms)
+[ RUN      ] DiscordAdapterTest.DisconnectIsNoop
+[       OK ] DiscordAdapterTest.DisconnectIsNoop (0 ms)
+[ RUN      ] DiscordAdapterTest.NoHandlerNoCall
+[       OK ] DiscordAdapterTest.NoHandlerNoCall (0 ms)
+[----------] 15 tests from DiscordAdapterTest (715 ms total)
+
+[----------] 19 tests from WhatsAppAdapterTest
+[ RUN      ] WhatsAppAdapterTest.ReceiveExtractsText
+[       OK ] WhatsAppAdapterTest.ReceiveExtractsText (0 ms)
+[ RUN      ] WhatsAppAdapterTest.EmptyTextIgnored
+[       OK ] WhatsAppAdapterTest.EmptyTextIgnored (0 ms)
+[ RUN      ] WhatsAppAdapterTest.MissingFromIgnored
+[       OK ] WhatsAppAdapterTest.MissingFromIgnored (0 ms)
+[ RUN      ] WhatsAppAdapterTest.SessionIdFormat
+[       OK ] WhatsAppAdapterTest.SessionIdFormat (0 ms)
+[ RUN      ] WhatsAppAdapterTest.MetaContainsSender
+[       OK ] WhatsAppAdapterTest.MetaContainsSender (0 ms)
+[ RUN      ] WhatsAppAdapterTest.MultipleMessages
+[       OK ] WhatsAppAdapterTest.MultipleMessages (0 ms)
+[ RUN      ] WhatsAppAdapterTest.MultipleEntries
+[       OK ] WhatsAppAdapterTest.MultipleEntries (0 ms)
+[ RUN      ] WhatsAppAdapterTest.EmptyPayload
+[       OK ] WhatsAppAdapterTest.EmptyPayload (0 ms)
+[ RUN      ] WhatsAppAdapterTest.MessageWithoutText
+[       OK ] WhatsAppAdapterTest.MessageWithoutText (0 ms)
+[ RUN      ] WhatsAppAdapterTest.ConnectDisabled
+[2026-03-02 20:47:42.288] [info] WhatsApp adapter disabled or missing token
+[       OK ] WhatsAppAdapterTest.ConnectDisabled (0 ms)
+[ RUN      ] WhatsAppAdapterTest.ConnectMissingToken
+[2026-03-02 20:47:42.288] [info] WhatsApp adapter disabled or missing token
+[       OK ] WhatsAppAdapterTest.ConnectMissingToken (0 ms)
+[ RUN      ] WhatsAppAdapterTest.ConnectEnabled
+[2026-03-02 20:47:42.288] [info] WhatsApp adapter ready (webhook-based)
+[       OK ] WhatsAppAdapterTest.ConnectEnabled (0 ms)
+[ RUN      ] WhatsAppAdapterTest.SendMissingToken
+[2026-03-02 20:47:42.288] [warning] WhatsApp adapter missing token or phone_number_id
+[       OK ] WhatsAppAdapterTest.SendMissingToken (0 ms)
+[ RUN      ] WhatsAppAdapterTest.SendMissingPhoneNumberId
+[2026-03-02 20:47:42.288] [warning] WhatsApp adapter missing token or phone_number_id
+[       OK ] WhatsAppAdapterTest.SendMissingPhoneNumberId (0 ms)
+[ RUN      ] WhatsAppAdapterTest.SendWithSessionMeta
+[       OK ] WhatsAppAdapterTest.SendWithSessionMeta (305 ms)
+[ RUN      ] WhatsAppAdapterTest.SendResolvesFromSessionId
+[       OK ] WhatsAppAdapterTest.SendResolvesFromSessionId (277 ms)
+[ RUN      ] WhatsAppAdapterTest.SendInvalidSessionId
+[       OK ] WhatsAppAdapterTest.SendInvalidSessionId (0 ms)
+[ RUN      ] WhatsAppAdapterTest.AckIsNoop
+[       OK ] WhatsAppAdapterTest.AckIsNoop (0 ms)
+[ RUN      ] WhatsAppAdapterTest.DisconnectIsNoop
+[       OK ] WhatsAppAdapterTest.DisconnectIsNoop (0 ms)
+[----------] 19 tests from WhatsAppAdapterTest (585 ms total)
+
+[----------] 9 tests from RegistryTest
+[ RUN      ] RegistryTest.EmptyConfigReturnsNoAdapters
+[       OK ] RegistryTest.EmptyConfigReturnsNoAdapters (0 ms)
+[ RUN      ] RegistryTest.EnabledSlackCreatesAdapter
+[       OK ] RegistryTest.EnabledSlackCreatesAdapter (0 ms)
+[ RUN      ] RegistryTest.DisabledAdapterNotCreated
+[       OK ] RegistryTest.DisabledAdapterNotCreated (0 ms)
+[ RUN      ] RegistryTest.EnabledTelegramCreatesAdapter
+[       OK ] RegistryTest.EnabledTelegramCreatesAdapter (0 ms)
+[ RUN      ] RegistryTest.EnabledDiscordCreatesAdapter
+[       OK ] RegistryTest.EnabledDiscordCreatesAdapter (0 ms)
+[ RUN      ] RegistryTest.EnabledWhatsappCreatesAdapter
+[       OK ] RegistryTest.EnabledWhatsappCreatesAdapter (0 ms)
+[ RUN      ] RegistryTest.AllChannelsEnabled
+[       OK ] RegistryTest.AllChannelsEnabled (0 ms)
+[ RUN      ] RegistryTest.NonObjectConfigReturnsEmpty
+[       OK ] RegistryTest.NonObjectConfigReturnsEmpty (0 ms)
+[ RUN      ] RegistryTest.MissingGatewayKeyReturnsEmpty
+[       OK ] RegistryTest.MissingGatewayKeyReturnsEmpty (0 ms)
+[----------] 9 tests from RegistryTest (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 83 tests from 5 test suites ran. (2614 ms total)
+[  PASSED  ] 83 tests.
+<end of output>
+Test time =   2.66 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-adapters-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-adapters-cpp_tests" time elapsed: 00:00:02
+----------------------------------------------------------
+
+10/17 Testing: euxis-metrics-cpp_tests
+10/17 Test: euxis-metrics-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-metrics-cpp/euxis-metrics-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-metrics-cpp
+"euxis-metrics-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 119 tests from 7 test suites.
+[----------] Global test environment set-up.
+[----------] 22 tests from PerfCollectorTest
+[ RUN      ] PerfCollectorTest.TaskStartedReturnsCorrelationId
+[       OK ] PerfCollectorTest.TaskStartedReturnsCorrelationId (0 ms)
+[ RUN      ] PerfCollectorTest.TaskCompletedWritesSession
+[       OK ] PerfCollectorTest.TaskCompletedWritesSession (0 ms)
+[ RUN      ] PerfCollectorTest.TaskFailedEmitsEvent
+[       OK ] PerfCollectorTest.TaskFailedEmitsEvent (0 ms)
+[ RUN      ] PerfCollectorTest.UnknownSessionIgnored
+[       OK ] PerfCollectorTest.UnknownSessionIgnored (0 ms)
+[ RUN      ] PerfCollectorTest.DelegationRoundtrip
+[       OK ] PerfCollectorTest.DelegationRoundtrip (0 ms)
+[ RUN      ] PerfCollectorTest.ToolExecution
+[       OK ] PerfCollectorTest.ToolExecution (0 ms)
+[ RUN      ] PerfCollectorTest.MemoryOperation
+[       OK ] PerfCollectorTest.MemoryOperation (0 ms)
+[ RUN      ] PerfCollectorTest.MemoryOperationWithCorrelationId
+[       OK ] PerfCollectorTest.MemoryOperationWithCorrelationId (0 ms)
+[ RUN      ] PerfCollectorTest.ReflexionGenerated
+[       OK ] PerfCollectorTest.ReflexionGenerated (0 ms)
+[ RUN      ] PerfCollectorTest.ReflexionGeneratedWithCorrelationId
+[       OK ] PerfCollectorTest.ReflexionGeneratedWithCorrelationId (0 ms)
+[ RUN      ] PerfCollectorTest.CleanupStaleSessions
+[       OK ] PerfCollectorTest.CleanupStaleSessions (0 ms)
+[ RUN      ] PerfCollectorTest.CleanupNoStaleSessions
+[       OK ] PerfCollectorTest.CleanupNoStaleSessions (0 ms)
+[ RUN      ] PerfCollectorTest.TaskStartedWithContext
+[       OK ] PerfCollectorTest.TaskStartedWithContext (0 ms)
+[ RUN      ] PerfCollectorTest.TaskFailedWithContext
+[       OK ] PerfCollectorTest.TaskFailedWithContext (0 ms)
+[ RUN      ] PerfCollectorTest.TaskFailedUnknownSessionIgnored
+[       OK ] PerfCollectorTest.TaskFailedUnknownSessionIgnored (0 ms)
+[ RUN      ] PerfCollectorTest.DelegationWithQualityScore
+[       OK ] PerfCollectorTest.DelegationWithQualityScore (0 ms)
+[ RUN      ] PerfCollectorTest.ToolExecutionWithRetries
+[       OK ] PerfCollectorTest.ToolExecutionWithRetries (0 ms)
+[ RUN      ] PerfCollectorTest.TaskCompletedWithFullContext
+[       OK ] PerfCollectorTest.TaskCompletedWithFullContext (0 ms)
+[ RUN      ] PerfCollectorTest.MultipleSessionsLifecycle
+[       OK ] PerfCollectorTest.MultipleSessionsLifecycle (0 ms)
+[ RUN      ] PerfCollectorTest.DefaultMetricsDirFromEuxisHome
+[       OK ] PerfCollectorTest.DefaultMetricsDirFromEuxisHome (0 ms)
+[ RUN      ] PerfCollectorTest.DefaultMetricsDirFromHomeFallback
+[       OK ] PerfCollectorTest.DefaultMetricsDirFromHomeFallback (0 ms)
+[ RUN      ] PerfCollectorTest.CleanupStaleSessionsCallsTaskFailed
+[       OK ] PerfCollectorTest.CleanupStaleSessionsCallsTaskFailed (0 ms)
+[----------] 22 tests from PerfCollectorTest (7 ms total)
+
+[----------] 18 tests from FastCollectorTest
+[ RUN      ] FastCollectorTest.RecordAndFlush
+[       OK ] FastCollectorTest.RecordAndFlush (0 ms)
+[ RUN      ] FastCollectorTest.EmptyFlushReturnsZero
+[       OK ] FastCollectorTest.EmptyFlushReturnsZero (0 ms)
+[ RUN      ] FastCollectorTest.RecordMetric
+[       OK ] FastCollectorTest.RecordMetric (0 ms)
+[ RUN      ] FastCollectorTest.RecordTiming
+[       OK ] FastCollectorTest.RecordTiming (0 ms)
+[ RUN      ] FastCollectorTest.RecordCounter
+[       OK ] FastCollectorTest.RecordCounter (0 ms)
+[ RUN      ] FastCollectorTest.BufferRespectsSizeLimit
+[       OK ] FastCollectorTest.BufferRespectsSizeLimit (0 ms)
+[ RUN      ] FastCollectorTest.BufferSize
+[       OK ] FastCollectorTest.BufferSize (0 ms)
+[ RUN      ] FastCollectorTest.BufferDrainClearsBuffer
+[       OK ] FastCollectorTest.BufferDrainClearsBuffer (0 ms)
+[ RUN      ] FastCollectorTest.MultipleFlushes
+[       OK ] FastCollectorTest.MultipleFlushes (0 ms)
+[ RUN      ] FastCollectorTest.RecordMetricWithTags
+[       OK ] FastCollectorTest.RecordMetricWithTags (0 ms)
+[ RUN      ] FastCollectorTest.RecordTimingWithTags
+[       OK ] FastCollectorTest.RecordTimingWithTags (0 ms)
+[ RUN      ] FastCollectorTest.RecordCounterWithTags
+[       OK ] FastCollectorTest.RecordCounterWithTags (0 ms)
+[ RUN      ] FastCollectorTest.ShutdownFlushesRemaining
+[       OK ] FastCollectorTest.ShutdownFlushesRemaining (0 ms)
+[ RUN      ] FastCollectorTest.BackgroundFlushStartsAndStops
+[       OK ] FastCollectorTest.BackgroundFlushStartsAndStops (1000 ms)
+[ RUN      ] FastCollectorTest.BackgroundFlushDoubleStartIgnored
+[       OK ] FastCollectorTest.BackgroundFlushDoubleStartIgnored (0 ms)
+[ RUN      ] FastCollectorTest.DefaultMetricsDirFromEuxisHome
+[       OK ] FastCollectorTest.DefaultMetricsDirFromEuxisHome (0 ms)
+[ RUN      ] FastCollectorTest.DefaultMetricsDirFromHomeFallback
+[       OK ] FastCollectorTest.DefaultMetricsDirFromHomeFallback (0 ms)
+[ RUN      ] FastCollectorTest.BackgroundFlushLoopWithEvents
+[       OK ] FastCollectorTest.BackgroundFlushLoopWithEvents (2001 ms)
+[----------] 18 tests from FastCollectorTest (3004 ms total)
+
+[----------] 4 tests from AnalyzerTest
+[ RUN      ] AnalyzerTest.PercentileCalculation
+[       OK ] AnalyzerTest.PercentileCalculation (0 ms)
+[ RUN      ] AnalyzerTest.EmptyPercentile
+[       OK ] AnalyzerTest.EmptyPercentile (0 ms)
+[ RUN      ] AnalyzerTest.SingleValuePercentile
+[       OK ] AnalyzerTest.SingleValuePercentile (0 ms)
+[ RUN      ] AnalyzerTest.EmptyDirReturnsEmptyReport
+[       OK ] AnalyzerTest.EmptyDirReturnsEmptyReport (0 ms)
+[----------] 4 tests from AnalyzerTest (0 ms total)
+
+[----------] 21 tests from AnalyzerWithDataTest
+[ RUN      ] AnalyzerWithDataTest.AnalyzeAgentPerformanceWithSessions
+[       OK ] AnalyzerWithDataTest.AnalyzeAgentPerformanceWithSessions (1 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeAgentPerformancePercentiles
+[       OK ] AnalyzerWithDataTest.AnalyzeAgentPerformancePercentiles (3 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeDelegationPatterns
+[       OK ] AnalyzerWithDataTest.AnalyzeDelegationPatterns (1 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeToolUsagePatterns
+[       OK ] AnalyzerWithDataTest.AnalyzeToolUsagePatterns (1 ms)
+[ RUN      ] AnalyzerWithDataTest.GeneratePerformanceReportWithData
+[       OK ] AnalyzerWithDataTest.GeneratePerformanceReportWithData (4 ms)
+[ RUN      ] AnalyzerWithDataTest.SaveReport
+[       OK ] AnalyzerWithDataTest.SaveReport (0 ms)
+[ RUN      ] AnalyzerWithDataTest.SaveReportAutoFilename
+[       OK ] AnalyzerWithDataTest.SaveReportAutoFilename (0 ms)
+[ RUN      ] AnalyzerWithDataTest.GetAgentRankings
+[       OK ] AnalyzerWithDataTest.GetAgentRankings (1 ms)
+[ RUN      ] AnalyzerWithDataTest.GetAgentRankingsEmpty
+[       OK ] AnalyzerWithDataTest.GetAgentRankingsEmpty (0 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeDelegationPatternsEmpty
+[       OK ] AnalyzerWithDataTest.AnalyzeDelegationPatternsEmpty (0 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeToolUsagePatternsEmpty
+[       OK ] AnalyzerWithDataTest.AnalyzeToolUsagePatternsEmpty (0 ms)
+[ RUN      ] AnalyzerWithDataTest.PercentileTwoValues
+[       OK ] AnalyzerWithDataTest.PercentileTwoValues (0 ms)
+[ RUN      ] AnalyzerWithDataTest.LoadEventsWithCorruptLines
+[       OK ] AnalyzerWithDataTest.LoadEventsWithCorruptLines (0 ms)
+[ RUN      ] AnalyzerWithDataTest.LoadSessionsWithCorruptLines
+[       OK ] AnalyzerWithDataTest.LoadSessionsWithCorruptLines (0 ms)
+[ RUN      ] AnalyzerWithDataTest.WarningStatusTracked
+[       OK ] AnalyzerWithDataTest.WarningStatusTracked (0 ms)
+[ RUN      ] AnalyzerWithDataTest.DefaultMetricsDirFromEuxisHome
+[       OK ] AnalyzerWithDataTest.DefaultMetricsDirFromEuxisHome (0 ms)
+[ RUN      ] AnalyzerWithDataTest.DefaultMetricsDirFromHomeFallback
+[       OK ] AnalyzerWithDataTest.DefaultMetricsDirFromHomeFallback (3 ms)
+[ RUN      ] AnalyzerWithDataTest.AnalyzeWithEvenNumberOfSessions
+[       OK ] AnalyzerWithDataTest.AnalyzeWithEvenNumberOfSessions (1 ms)
+[ RUN      ] AnalyzerWithDataTest.LoadEventsWithEmptyLines
+[       OK ] AnalyzerWithDataTest.LoadEventsWithEmptyLines (0 ms)
+[ RUN      ] AnalyzerWithDataTest.GetAgentRankingsByDuration
+[       OK ] AnalyzerWithDataTest.GetAgentRankingsByDuration (0 ms)
+[ RUN      ] AnalyzerWithDataTest.GetAgentRankingsWithNonexistentMetric
+[       OK ] AnalyzerWithDataTest.GetAgentRankingsWithNonexistentMetric (0 ms)
+[----------] 21 tests from AnalyzerWithDataTest (24 ms total)
+
+[----------] 30 tests from EvidenceFrameworkTest
+[ RUN      ] EvidenceFrameworkTest.GradeRoundTrip
+[       OK ] EvidenceFrameworkTest.GradeRoundTrip (0 ms)
+[ RUN      ] EvidenceFrameworkTest.EvidenceJsonRoundTrip
+[       OK ] EvidenceFrameworkTest.EvidenceJsonRoundTrip (0 ms)
+[ RUN      ] EvidenceFrameworkTest.HashDeterministic
+[       OK ] EvidenceFrameworkTest.HashDeterministic (0 ms)
+[ RUN      ] EvidenceFrameworkTest.StoreAndLoad
+[       OK ] EvidenceFrameworkTest.StoreAndLoad (0 ms)
+[ RUN      ] EvidenceFrameworkTest.LoadMissing
+[       OK ] EvidenceFrameworkTest.LoadMissing (0 ms)
+[ RUN      ] EvidenceFrameworkTest.LoadAll
+[       OK ] EvidenceFrameworkTest.LoadAll (1 ms)
+[ RUN      ] EvidenceFrameworkTest.SpeculatedAlwaysDecayed
+[       OK ] EvidenceFrameworkTest.SpeculatedAlwaysDecayed (0 ms)
+[ RUN      ] EvidenceFrameworkTest.ClaimHighestGrade
+[       OK ] EvidenceFrameworkTest.ClaimHighestGrade (0 ms)
+[ RUN      ] EvidenceFrameworkTest.ClaimNoEvidence
+[       OK ] EvidenceFrameworkTest.ClaimNoEvidence (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimRequiresEvidence
+[       OK ] EvidenceFrameworkTest.VerifyClaimRequiresEvidence (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimRejectsE4Only
+[       OK ] EvidenceFrameworkTest.VerifyClaimRejectsE4Only (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimAcceptsE1
+[       OK ] EvidenceFrameworkTest.VerifyClaimAcceptsE1 (0 ms)
+[ RUN      ] EvidenceFrameworkTest.CheckDecayDateOnlyFormat
+[       OK ] EvidenceFrameworkTest.CheckDecayDateOnlyFormat (0 ms)
+[ RUN      ] EvidenceFrameworkTest.CheckDecayInvalidTimestamp
+[       OK ] EvidenceFrameworkTest.CheckDecayInvalidTimestamp (0 ms)
+[ RUN      ] EvidenceFrameworkTest.CheckDecayRecentEvidence
+[       OK ] EvidenceFrameworkTest.CheckDecayRecentEvidence (0 ms)
+[ RUN      ] EvidenceFrameworkTest.CheckDecayObserved
+[       OK ] EvidenceFrameworkTest.CheckDecayObserved (0 ms)
+[ RUN      ] EvidenceFrameworkTest.CheckDecayMeasured
+[       OK ] EvidenceFrameworkTest.CheckDecayMeasured (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimLowConfidence
+[       OK ] EvidenceFrameworkTest.VerifyClaimLowConfidence (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimExactlyThreshold
+[       OK ] EvidenceFrameworkTest.VerifyClaimExactlyThreshold (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimE3Accepted
+[       OK ] EvidenceFrameworkTest.VerifyClaimE3Accepted (0 ms)
+[ RUN      ] EvidenceFrameworkTest.VerifyClaimE5Rejected
+[       OK ] EvidenceFrameworkTest.VerifyClaimE5Rejected (0 ms)
+[ RUN      ] EvidenceFrameworkTest.EvidenceFromJsonWithoutOptionals
+[       OK ] EvidenceFrameworkTest.EvidenceFromJsonWithoutOptionals (0 ms)
+[ RUN      ] EvidenceFrameworkTest.EvidenceToJsonWithOptionals
+[       OK ] EvidenceFrameworkTest.EvidenceToJsonWithOptionals (0 ms)
+[ RUN      ] EvidenceFrameworkTest.EvidenceToJsonWithoutOptionals
+[       OK ] EvidenceFrameworkTest.EvidenceToJsonWithoutOptionals (0 ms)
+[ RUN      ] EvidenceFrameworkTest.LoadEvidenceFromCorruptLines
+[       OK ] EvidenceFrameworkTest.LoadEvidenceFromCorruptLines (0 ms)
+[ RUN      ] EvidenceFrameworkTest.LoadAllEvidenceSkipsCorruptLines
+[       OK ] EvidenceFrameworkTest.LoadAllEvidenceSkipsCorruptLines (3 ms)
+[ RUN      ] EvidenceFrameworkTest.LoadEvidenceNotFoundReturnsNullopt
+[       OK ] EvidenceFrameworkTest.LoadEvidenceNotFoundReturnsNullopt (0 ms)
+[ RUN      ] EvidenceFrameworkTest.GradeFromStringAllValues
+[       OK ] EvidenceFrameworkTest.GradeFromStringAllValues (0 ms)
+[ RUN      ] EvidenceFrameworkTest.ClaimHighestGradeMultipleSame
+[       OK ] EvidenceFrameworkTest.ClaimHighestGradeMultipleSame (0 ms)
+[ RUN      ] EvidenceFrameworkTest.ConstructorWithEmptyPath
+[       OK ] EvidenceFrameworkTest.ConstructorWithEmptyPath (0 ms)
+[----------] 30 tests from EvidenceFrameworkTest (9 ms total)
+
+[----------] 14 tests from ValidationPipelineTest
+[ RUN      ] ValidationPipelineTest.ExtractPercentageClaims
+[       OK ] ValidationPipelineTest.ExtractPercentageClaims (5 ms)
+[ RUN      ] ValidationPipelineTest.ExtractTimingClaims
+[       OK ] ValidationPipelineTest.ExtractTimingClaims (4 ms)
+[ RUN      ] ValidationPipelineTest.ExtractSizeClaims
+[       OK ] ValidationPipelineTest.ExtractSizeClaims (4 ms)
+[ RUN      ] ValidationPipelineTest.NoClaimsInPlainText
+[       OK ] ValidationPipelineTest.NoClaimsInPlainText (4 ms)
+[ RUN      ] ValidationPipelineTest.DetectForbiddenTerms
+[       OK ] ValidationPipelineTest.DetectForbiddenTerms (0 ms)
+[ RUN      ] ValidationPipelineTest.NoForbiddenTermsCleanText
+[       OK ] ValidationPipelineTest.NoForbiddenTermsCleanText (0 ms)
+[ RUN      ] ValidationPipelineTest.CitationCheckFindsEvidence
+[       OK ] ValidationPipelineTest.CitationCheckFindsEvidence (5 ms)
+[ RUN      ] ValidationPipelineTest.CitationCheckFindsMissing
+[       OK ] ValidationPipelineTest.CitationCheckFindsMissing (5 ms)
+[ RUN      ] ValidationPipelineTest.ValidateReportPasses
+[       OK ] ValidationPipelineTest.ValidateReportPasses (7 ms)
+[ RUN      ] ValidationPipelineTest.ValidateReportFailsForbiddenTerms
+[       OK ] ValidationPipelineTest.ValidateReportFailsForbiddenTerms (5 ms)
+[ RUN      ] ValidationPipelineTest.ValidateReportFailsUncited
+[       OK ] ValidationPipelineTest.ValidateReportFailsUncited (6 ms)
+[ RUN      ] ValidationPipelineTest.CheckCitationsWithNoCitations
+[       OK ] ValidationPipelineTest.CheckCitationsWithNoCitations (8 ms)
+[ RUN      ] ValidationPipelineTest.CheckForbiddenTermsMultiple
+[       OK ] ValidationPipelineTest.CheckForbiddenTermsMultiple (0 ms)
+[ RUN      ] ValidationPipelineTest.CheckCitationsWithForbiddenTerms
+[       OK ] ValidationPipelineTest.CheckCitationsWithForbiddenTerms (9 ms)
+[----------] 14 tests from ValidationPipelineTest (68 ms total)
+
+[----------] 10 tests from AgentMetricsGridTest
+[ RUN      ] AgentMetricsGridTest.SetAndGet
+[       OK ] AgentMetricsGridTest.SetAndGet (0 ms)
+[ RUN      ] AgentMetricsGridTest.OutOfBoundsThrows
+[       OK ] AgentMetricsGridTest.OutOfBoundsThrows (0 ms)
+[ RUN      ] AgentMetricsGridTest.MdspanViewAccess
+[       OK ] AgentMetricsGridTest.MdspanViewAccess (0 ms)
+[ RUN      ] AgentMetricsGridTest.AgentSlice
+[       OK ] AgentMetricsGridTest.AgentSlice (0 ms)
+[ RUN      ] AgentMetricsGridTest.RowMeans
+[       OK ] AgentMetricsGridTest.RowMeans (0 ms)
+[ RUN      ] AgentMetricsGridTest.ColMeans
+[       OK ] AgentMetricsGridTest.ColMeans (0 ms)
+[ RUN      ] AgentMetricsGridTest.Dimensions
+[       OK ] AgentMetricsGridTest.Dimensions (0 ms)
+[ RUN      ] AgentMetricsGridTest.AgentSliceOutOfBoundsThrows
+[       OK ] AgentMetricsGridTest.AgentSliceOutOfBoundsThrows (0 ms)
+[ RUN      ] AgentMetricsGridTest.RowMeansZeroTimesteps
+[       OK ] AgentMetricsGridTest.RowMeansZeroTimesteps (0 ms)
+[ RUN      ] AgentMetricsGridTest.ColMeansZeroAgents
+[       OK ] AgentMetricsGridTest.ColMeansZeroAgents (0 ms)
+[----------] 10 tests from AgentMetricsGridTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 119 tests from 7 test suites ran. (3115 ms total)
+[  PASSED  ] 119 tests.
+<end of output>
+Test time =   3.15 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-metrics-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-metrics-cpp_tests" time elapsed: 00:00:03
+----------------------------------------------------------
+
+11/17 Testing: euxis-core-cpp_tests
+11/17 Test: euxis-core-cpp_tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-core-cpp/euxis-core-cpp_tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-core-cpp
+"euxis-core-cpp_tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 54 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 3 tests from RetryPolicyTest
+[ RUN      ] RetryPolicyTest.DefaultValues
+[       OK ] RetryPolicyTest.DefaultValues (0 ms)
+[ RUN      ] RetryPolicyTest.SleepDurationBounded
+[       OK ] RetryPolicyTest.SleepDurationBounded (0 ms)
+[ RUN      ] RetryPolicyTest.ExponentialGrowth
+[       OK ] RetryPolicyTest.ExponentialGrowth (0 ms)
+[----------] 3 tests from RetryPolicyTest (0 ms total)
+
+[----------] 5 tests from CircuitBreakerTest
+[ RUN      ] CircuitBreakerTest.StartsClose
+[       OK ] CircuitBreakerTest.StartsClose (0 ms)
+[ RUN      ] CircuitBreakerTest.OpensAfterThreshold
+[       OK ] CircuitBreakerTest.OpensAfterThreshold (0 ms)
+[ RUN      ] CircuitBreakerTest.SuccessResets
+[       OK ] CircuitBreakerTest.SuccessResets (0 ms)
+[ RUN      ] CircuitBreakerTest.ResetClearsState
+[       OK ] CircuitBreakerTest.ResetClearsState (0 ms)
+[ RUN      ] CircuitBreakerTest.RecoverAfterTimeout
+[       OK ] CircuitBreakerTest.RecoverAfterTimeout (10 ms)
+[----------] 5 tests from CircuitBreakerTest (10 ms total)
+
+[----------] 16 tests from FinOpsRouterTest
+[ RUN      ] FinOpsRouterTest.LowComplexityUsesOllama
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: low, priority: balanced)
+[       OK ] FinOpsRouterTest.LowComplexityUsesOllama (0 ms)
+[ RUN      ] FinOpsRouterTest.SpeedPrioritySelectsFastest
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: high, priority: speed)
+[       OK ] FinOpsRouterTest.SpeedPrioritySelectsFastest (0 ms)
+[ RUN      ] FinOpsRouterTest.CostPrioritySelectsCheapest
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: high, priority: cost)
+[       OK ] FinOpsRouterTest.CostPrioritySelectsCheapest (0 ms)
+[ RUN      ] FinOpsRouterTest.TrackUsageUpdatesSpend
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0150
+[       OK ] FinOpsRouterTest.TrackUsageUpdatesSpend (0 ms)
+[ RUN      ] FinOpsRouterTest.BalancedSelection
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.260] [info] FinOps Router selected: groq (score: 9.65)
+[       OK ] FinOpsRouterTest.BalancedSelection (0 ms)
+[ RUN      ] FinOpsRouterTest.TrackUsageUnknownProvider
+[       OK ] FinOpsRouterTest.TrackUsageUnknownProvider (0 ms)
+[ RUN      ] FinOpsRouterTest.TrackUsageMultipleProviders
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0150
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0250
+[       OK ] FinOpsRouterTest.TrackUsageMultipleProviders (0 ms)
+[ RUN      ] FinOpsRouterTest.TrackUsageOllama
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0000
+[       OK ] FinOpsRouterTest.TrackUsageOllama (0 ms)
+[ RUN      ] FinOpsRouterTest.SessionUsageTracking
+[       OK ] FinOpsRouterTest.SessionUsageTracking (0 ms)
+[ RUN      ] FinOpsRouterTest.SessionUsageWithUnknownModel
+[       OK ] FinOpsRouterTest.SessionUsageWithUnknownModel (0 ms)
+[ RUN      ] FinOpsRouterTest.SessionCostUnknownSession
+[       OK ] FinOpsRouterTest.SessionCostUnknownSession (0 ms)
+[ RUN      ] FinOpsRouterTest.CheckBudgetUnderLimit
+[       OK ] FinOpsRouterTest.CheckBudgetUnderLimit (0 ms)
+[ RUN      ] FinOpsRouterTest.CheckBudgetOverLimit
+[       OK ] FinOpsRouterTest.CheckBudgetOverLimit (0 ms)
+[ RUN      ] FinOpsRouterTest.CustomBudgetLimit
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0150
+[       OK ] FinOpsRouterTest.CustomBudgetLimit (0 ms)
+[ RUN      ] FinOpsRouterTest.HighComplexityDefaultSelection
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: high, priority: balanced)
+[2026-03-02 20:47:40.260] [info] FinOps Router selected: groq (score: 9.65)
+[       OK ] FinOpsRouterTest.HighComplexityDefaultSelection (0 ms)
+[ RUN      ] FinOpsRouterTest.MultipleSessionUsageAccumulates
+[       OK ] FinOpsRouterTest.MultipleSessionUsageAccumulates (0 ms)
+[----------] 16 tests from FinOpsRouterTest (0 ms total)
+
+[----------] 15 tests from SwarmOrchestratorTest
+[ RUN      ] SwarmOrchestratorTest.SimulationModeExecutes
+[2026-03-02 20:47:40.260] [info] Starting swarm playbook: test-playbook
+[2026-03-02 20:47:40.260] [info] Executing phase: Phase 1 (mode: sequential)
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.260] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.260] [info] Dispatching task to agent architect via groq...
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.260] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.SimulationModeExecutes (0 ms)
+[ RUN      ] SwarmOrchestratorTest.EmptyPlaybook
+[2026-03-02 20:47:40.260] [info] Starting swarm playbook: empty
+[2026-03-02 20:47:40.260] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.EmptyPlaybook (0 ms)
+[ RUN      ] SwarmOrchestratorTest.GoalSubstitution
+[2026-03-02 20:47:40.260] [info] Starting swarm playbook: sub-test
+[2026-03-02 20:47:40.260] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.260] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.260] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.260] [info] Dispatching task to agent coder via groq...
+[2026-03-02 20:47:40.260] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.260] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.GoalSubstitution (0 ms)
+[ RUN      ] SwarmOrchestratorTest.ParallelModeExecutesConcurrently
+[2026-03-02 20:47:40.260] [info] Starting swarm playbook: parallel-test
+[2026-03-02 20:47:40.260] [info] Executing phase: Parallel Phase (mode: parallel)
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent tester via groq...
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent reviewer via groq...
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent coder via groq...
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0002
+[2026-03-02 20:47:40.261] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.ParallelModeExecutesConcurrently (0 ms)
+[ RUN      ] SwarmOrchestratorTest.MixedSequentialAndParallelPhases
+[2026-03-02 20:47:40.261] [info] Starting swarm playbook: mixed
+[2026-03-02 20:47:40.261] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent planner via groq...
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.261] [info] Executing phase: P2 (mode: parallel)
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent coder1 via groq...
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.261] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.261] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.261] [info] Dispatching task to agent coder2 via groq...
+[2026-03-02 20:47:40.261] [info] Current session spend: $0.0002
+[2026-03-02 20:47:40.261] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.MixedSequentialAndParallelPhases (0 ms)
+[ RUN      ] SwarmOrchestratorTest.NoGoalSubstitutionWhenMissing
+[2026-03-02 20:47:40.262] [info] Starting swarm playbook: no-sub
+[2026-03-02 20:47:40.262] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.262] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.262] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.262] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:40.262] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.262] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.NoGoalSubstitutionWhenMissing (0 ms)
+[ RUN      ] SwarmOrchestratorTest.MultipleGoalSubstitutions
+[2026-03-02 20:47:40.262] [info] Starting swarm playbook: multi-sub
+[2026-03-02 20:47:40.262] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.262] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.262] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.262] [info] Dispatching task to agent coder via groq...
+[2026-03-02 20:47:40.262] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.262] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.MultipleGoalSubstitutions (0 ms)
+[ RUN      ] SwarmOrchestratorTest.NonLocalhostUsesNonSimulation
+[2026-03-02 20:47:40.262] [info] Starting swarm playbook: remote-test
+[2026-03-02 20:47:40.262] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.262] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.262] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.262] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:40.774] [error] WS error: Unable to connect to remote-server on port 8081, error: cancellation requested
+[2026-03-02 20:47:40.774] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.NonLocalhostUsesNonSimulation (511 ms)
+[ RUN      ] SwarmOrchestratorTest.PlaybookWithoutName
+[2026-03-02 20:47:40.774] [info] Starting swarm playbook: unnamed
+[2026-03-02 20:47:40.774] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.774] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.774] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.774] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:40.774] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.774] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.PlaybookWithoutName (0 ms)
+[ RUN      ] SwarmOrchestratorTest.PhaseWithoutDelegates
+[2026-03-02 20:47:40.774] [info] Starting swarm playbook: empty-phase
+[2026-03-02 20:47:40.774] [info] Executing phase: Empty Phase (mode: sequential)
+[2026-03-02 20:47:40.774] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.PhaseWithoutDelegates (0 ms)
+[ RUN      ] SwarmOrchestratorTest.ManyParallelTasks
+[2026-03-02 20:47:40.774] [info] Starting swarm playbook: many-parallel
+[2026-03-02 20:47:40.774] [info] Executing phase: Parallel (mode: parallel)
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-0 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-1 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0001
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-2 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0002
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-4 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0002
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-3 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0003
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-6 via groq...
+[2026-03-02 20:47:40.775] [info] Current session spend: $0.0003
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-7 via groq...
+[2026-03-02 20:47:40.776] [info] Current session spend: $0.0004
+[2026-03-02 20:47:40.775] [info] Dispatching task to agent worker-8 via groq...
+[2026-03-02 20:47:40.776] [info] Current session spend: $0.0004
+[2026-03-02 20:47:40.775] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.776] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.776] [info] Dispatching task to agent worker-9 via groq...
+[2026-03-02 20:47:40.776] [info] Current session spend: $0.0005
+[2026-03-02 20:47:40.775] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.776] [info] Dispatching task to agent worker-5 via groq...
+[2026-03-02 20:47:40.776] [info] Current session spend: $0.0005
+[2026-03-02 20:47:40.776] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.ManyParallelTasks (2 ms)
+[ RUN      ] SwarmOrchestratorTest.HttpsUrlUsesWss
+[2026-03-02 20:47:40.776] [info] Starting swarm playbook: https-test
+[2026-03-02 20:47:40.776] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:40.776] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:40.776] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:40.776] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:40.777] [error] WS error: TLS support is not enabled on this platform.
+[2026-03-02 20:47:40.877] [error] WS error: TLS support is not enabled on this platform.
+[2026-03-02 20:47:41.077] [error] WS error: TLS support is not enabled on this platform.
+[2026-03-02 20:47:41.289] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.HttpsUrlUsesWss (512 ms)
+[ RUN      ] SwarmOrchestratorTest.NoSchemeUrlGetsWsPrefix
+[2026-03-02 20:47:41.289] [info] Starting swarm playbook: no-scheme
+[2026-03-02 20:47:41.289] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:41.289] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:41.289] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:41.289] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:41.800] [error] WS error: Unable to connect to remote-host on port 9091, error: cancellation requested
+[2026-03-02 20:47:41.800] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.NoSchemeUrlGetsWsPrefix (511 ms)
+[ RUN      ] SwarmOrchestratorTest.UrlWithPathAfterPort
+[2026-03-02 20:47:41.800] [info] Starting swarm playbook: path-test
+[2026-03-02 20:47:41.800] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:41.800] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:41.800] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:41.800] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:42.316] [error] WS error: Unable to connect to remote-host on port 8081, error: cancellation requested
+[2026-03-02 20:47:42.316] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.UrlWithPathAfterPort (515 ms)
+[ RUN      ] SwarmOrchestratorTest.NonNumericPortInUrl
+[2026-03-02 20:47:42.316] [info] Starting swarm playbook: badport
+[2026-03-02 20:47:42.316] [info] Executing phase: P1 (mode: sequential)
+[2026-03-02 20:47:42.316] [info] Routing task (complexity: medium, priority: balanced)
+[2026-03-02 20:47:42.316] [info] FinOps Router selected: groq (score: 9.65)
+[2026-03-02 20:47:42.316] [info] Dispatching task to agent worker via groq...
+[2026-03-02 20:47:42.842] [error] WS error: Unable to connect to remote-host on port 80, error: cancellation requested
+[2026-03-02 20:47:42.842] [info] Swarm playbook execution complete.
+[       OK ] SwarmOrchestratorTest.NonNumericPortInUrl (525 ms)
+[----------] 15 tests from SwarmOrchestratorTest (2581 ms total)
+
+[----------] 7 tests from WebSocketClientTest
+[ RUN      ] WebSocketClientTest.ConstructionSetsDisconnected
+[       OK ] WebSocketClientTest.ConstructionSetsDisconnected (0 ms)
+[ RUN      ] WebSocketClientTest.ConnectToInvalidHostStaysDisconnected
+[2026-03-02 20:47:42.844] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[2026-03-02 20:47:42.946] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[2026-03-02 20:47:43.149] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[       OK ] WebSocketClientTest.ConnectToInvalidHostStaysDisconnected (522 ms)
+[ RUN      ] WebSocketClientTest.DisconnectOnDisconnected
+[       OK ] WebSocketClientTest.DisconnectOnDisconnected (0 ms)
+[ RUN      ] WebSocketClientTest.SendAndWaitTimesOut
+[       OK ] WebSocketClientTest.SendAndWaitTimesOut (50 ms)
+[ RUN      ] WebSocketClientTest.SendFireAndForget
+[       OK ] WebSocketClientTest.SendFireAndForget (0 ms)
+[ RUN      ] WebSocketClientTest.SendJsonMessage
+[       OK ] WebSocketClientTest.SendJsonMessage (0 ms)
+[ RUN      ] WebSocketClientTest.DestructorCallsDisconnect
+[2026-03-02 20:47:43.418] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[2026-03-02 20:47:43.520] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[2026-03-02 20:47:43.722] [error] WS error: Unable to connect to 127.0.0.1 on port 1, error: Connect error: Connection refused
+[       OK ] WebSocketClientTest.DestructorCallsDisconnect (530 ms)
+[----------] 7 tests from WebSocketClientTest (1103 ms total)
+
+[----------] 8 tests from TopologyGridTest
+[ RUN      ] TopologyGridTest.SetAndGet
+[       OK ] TopologyGridTest.SetAndGet (0 ms)
+[ RUN      ] TopologyGridTest.OutOfBoundsThrows
+[       OK ] TopologyGridTest.OutOfBoundsThrows (0 ms)
+[ RUN      ] TopologyGridTest.MdspanView
+[       OK ] TopologyGridTest.MdspanView (0 ms)
+[ RUN      ] TopologyGridTest.BestCoordinator
+[       OK ] TopologyGridTest.BestCoordinator (0 ms)
+[ RUN      ] TopologyGridTest.Reachable
+[       OK ] TopologyGridTest.Reachable (0 ms)
+[ RUN      ] TopologyGridTest.NumAgents
+[       OK ] TopologyGridTest.NumAgents (0 ms)
+[ RUN      ] TopologyGridTest.BestCoordinatorEmptyThrows
+[       OK ] TopologyGridTest.BestCoordinatorEmptyThrows (0 ms)
+[ RUN      ] TopologyGridTest.ReachableOutOfBoundsThrows
+[       OK ] TopologyGridTest.ReachableOutOfBoundsThrows (0 ms)
+[----------] 8 tests from TopologyGridTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 54 tests from 6 test suites ran. (3697 ms total)
+[  PASSED  ] 54 tests.
+<end of output>
+Test time =   3.72 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-core-cpp_tests" end time: Mar 02 20:47 GMT
+"euxis-core-cpp_tests" time elapsed: 00:00:03
+----------------------------------------------------------
+
+17/17 Testing: euxis-integration-tests
+17/17 Test: euxis-integration-tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/tests-integration/euxis-integration-tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/tests-integration
+"euxis-integration-tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+Running main() from /usr/src/debug/gtest/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 25 tests from 5 test suites.
+[----------] Global test environment set-up.
+[----------] 4 tests from CryptoMemoryRoundtripTest
+[ RUN      ] CryptoMemoryRoundtripTest.EncryptStoreRetrieveDecrypt
+[       OK ] CryptoMemoryRoundtripTest.EncryptStoreRetrieveDecrypt (1521 ms)
+[ RUN      ] CryptoMemoryRoundtripTest.MultipleTiersRoundtrip
+[       OK ] CryptoMemoryRoundtripTest.MultipleTiersRoundtrip (1514 ms)
+[ RUN      ] CryptoMemoryRoundtripTest.RetrieveTierReturnsCorrectEntries
+[       OK ] CryptoMemoryRoundtripTest.RetrieveTierReturnsCorrectEntries (1608 ms)
+[ RUN      ] CryptoMemoryRoundtripTest.DestroyAgentKeysInvalidatesRetrieval
+[2026-03-02 20:47:48.786] [info] Agent keys destroyed for did:euxis:destroy-test
+[       OK ] CryptoMemoryRoundtripTest.DestroyAgentKeysInvalidatesRetrieval (2262 ms)
+[----------] 4 tests from CryptoMemoryRoundtripTest (6906 ms total)
+
+[----------] 4 tests from BridgeAdmissionTest
+[ RUN      ] BridgeAdmissionTest.SafeSkillAdmitted
+[       OK ] BridgeAdmissionTest.SafeSkillAdmitted (13 ms)
+[ RUN      ] BridgeAdmissionTest.MaliciousSkillRejected
+[       OK ] BridgeAdmissionTest.MaliciousSkillRejected (6 ms)
+[ RUN      ] BridgeAdmissionTest.PolicyEnforcedSignatureRequired
+[       OK ] BridgeAdmissionTest.PolicyEnforcedSignatureRequired (3 ms)
+[ RUN      ] BridgeAdmissionTest.SafeSkillWithPermissivePolicy
+[       OK ] BridgeAdmissionTest.SafeSkillWithPermissivePolicy (2 ms)
+[----------] 4 tests from BridgeAdmissionTest (27 ms total)
+
+[----------] 5 tests from MetricsFlowTest
+[ RUN      ] MetricsFlowTest.CollectorToAnalyzerPipeline
+[       OK ] MetricsFlowTest.CollectorToAnalyzerPipeline (29 ms)
+[ RUN      ] MetricsFlowTest.FastCollectorFlushPersists
+[       OK ] MetricsFlowTest.FastCollectorFlushPersists (1 ms)
+[ RUN      ] MetricsFlowTest.AgentRankingsFromCollectedData
+[       OK ] MetricsFlowTest.AgentRankingsFromCollectedData (9 ms)
+[ RUN      ] MetricsFlowTest.DelegationTracking
+[       OK ] MetricsFlowTest.DelegationTracking (1 ms)
+[ RUN      ] MetricsFlowTest.ToolExecutionMetrics
+[       OK ] MetricsFlowTest.ToolExecutionMetrics (4 ms)
+[----------] 5 tests from MetricsFlowTest (46 ms total)
+
+[----------] 7 tests from CliDispatchTest
+[ RUN      ] CliDispatchTest.RouterDetectsProvider
+[       OK ] CliDispatchTest.RouterDetectsProvider (0 ms)
+[ RUN      ] CliDispatchTest.TierAnalysisClassifiesTask
+[       OK ] CliDispatchTest.TierAnalysisClassifiesTask (0 ms)
+[ RUN      ] CliDispatchTest.ModelSelectionReturnsTierMatch
+[       OK ] CliDispatchTest.ModelSelectionReturnsTierMatch (1 ms)
+[ RUN      ] CliDispatchTest.PromptBuilding
+[       OK ] CliDispatchTest.PromptBuilding (0 ms)
+[ RUN      ] CliDispatchTest.ErrorClassification
+[       OK ] CliDispatchTest.ErrorClassification (0 ms)
+[ RUN      ] CliDispatchTest.FallbackChainNonEmpty
+[       OK ] CliDispatchTest.FallbackChainNonEmpty (0 ms)
+[ RUN      ] CliDispatchTest.RoutingByAgentTier
+[       OK ] CliDispatchTest.RoutingByAgentTier (0 ms)
+[----------] 7 tests from CliDispatchTest (3 ms total)
+
+[----------] 5 tests from CoreResilienceIntegration
+[ RUN      ] CoreResilienceIntegration.RetryPolicyExponentialBackoff
+[       OK ] CoreResilienceIntegration.RetryPolicyExponentialBackoff (0 ms)
+[ RUN      ] CoreResilienceIntegration.CircuitBreakerOpensAndRecovers
+[       OK ] CoreResilienceIntegration.CircuitBreakerOpensAndRecovers (0 ms)
+[ RUN      ] CoreResilienceIntegration.CircuitBreakerSuccessResetsCounts
+[       OK ] CoreResilienceIntegration.CircuitBreakerSuccessResetsCounts (0 ms)
+[ RUN      ] CoreResilienceIntegration.RetryPolicyWithJitter
+[       OK ] CoreResilienceIntegration.RetryPolicyWithJitter (0 ms)
+[ RUN      ] CoreResilienceIntegration.MultipleBreakersIndependent
+[       OK ] CoreResilienceIntegration.MultipleBreakersIndependent (0 ms)
+[----------] 5 tests from CoreResilienceIntegration (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 5 test suites ran. (6984 ms total)
+[  PASSED  ] 25 tests.
+<end of output>
+Test time =   7.03 sec
+----------------------------------------------------------
+Test Passed.
+"euxis-integration-tests" end time: Mar 02 20:47 GMT
+"euxis-integration-tests" time elapsed: 00:00:07
+----------------------------------------------------------
+
+16/17 Testing: euxis-etx-tests
+16/17 Test: euxis-etx-tests
+Command: "/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis-etx-tests"
+Directory: /home/seb/.euxis/euxis-cpp/build-cov/euxis-etx
+"euxis-etx-tests" start time: Mar 02 20:47 GMT
+Output:
+----------------------------------------------------------
+
+(euxis-etx-tests:25540): Gtk-WARNING **: 20:47:41.990: Theme parsing error: gtk.css:5:8: 'window' is not a valid property name
+
+(euxis-etx-tests:25540): Gtk-WARNING **: 20:47:41.990: Theme parsing error: gtk.css:27:11: 'transform' is not a valid property name
+
+(euxis-etx-tests:25540): Gtk-WARNING **: 20:47:41.990: Theme parsing error: gtk.css:39:11: 'transform' is not a valid property name
+[==========] Running 308 tests from 20 test suites.
+[----------] Global test environment set-up.
+[----------] 10 tests from ETXConfigTest
+[ RUN      ] ETXConfigTest.DefaultThemeIsLiquidGlass
+[       OK ] ETXConfigTest.DefaultThemeIsLiquidGlass (41 ms)
+[ RUN      ] ETXConfigTest.SetAndGetTheme
+[       OK ] ETXConfigTest.SetAndGetTheme (81 ms)
+[ RUN      ] ETXConfigTest.ThemePersistsAcrossInstances
+[       OK ] ETXConfigTest.ThemePersistsAcrossInstances (80 ms)
+[ RUN      ] ETXConfigTest.DefaultRefreshIntervalIs5000
+[       OK ] ETXConfigTest.DefaultRefreshIntervalIs5000 (0 ms)
+[ RUN      ] ETXConfigTest.SetAndGetRefreshInterval
+[       OK ] ETXConfigTest.SetAndGetRefreshInterval (79 ms)
+[ RUN      ] ETXConfigTest.DefaultShowTipsIsTrue
+[       OK ] ETXConfigTest.DefaultShowTipsIsTrue (0 ms)
+[ RUN      ] ETXConfigTest.SetAndGetShowTips
+[       OK ] ETXConfigTest.SetAndGetShowTips (78 ms)
+[ RUN      ] ETXConfigTest.EuxisHomeFromEnvVar
+[       OK ] ETXConfigTest.EuxisHomeFromEnvVar (0 ms)
+[ RUN      ] ETXConfigTest.DataDirDerivedFromHome
+[       OK ] ETXConfigTest.DataDirDerivedFromHome (0 ms)
+[ RUN      ] ETXConfigTest.RuntimeDirDerivedFromHome
+[       OK ] ETXConfigTest.RuntimeDirDerivedFromHome (0 ms)
+[----------] 10 tests from ETXConfigTest (363 ms total)
+
+[----------] 18 tests from FleetRegistryDefaultTest
+[ RUN      ] FleetRegistryDefaultTest.LoadDefaultsPopulatesAgents
+[       OK ] FleetRegistryDefaultTest.LoadDefaultsPopulatesAgents (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FindExistingAgent
+[       OK ] FleetRegistryDefaultTest.FindExistingAgent (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FindReturnsNullForMissing
+[       OK ] FleetRegistryDefaultTest.FindReturnsNullForMissing (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByName
+[       OK ] FleetRegistryDefaultTest.FilterByName (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByDescription
+[       OK ] FleetRegistryDefaultTest.FilterByDescription (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterById
+[       OK ] FleetRegistryDefaultTest.FilterById (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterCaseInsensitive
+[       OK ] FleetRegistryDefaultTest.FilterCaseInsensitive (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.EmptyFilterReturnsAll
+[       OK ] FleetRegistryDefaultTest.EmptyFilterReturnsAll (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.AgentTypesPresent
+[       OK ] FleetRegistryDefaultTest.AgentTypesPresent (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.AgentStatusesPresent
+[       OK ] FleetRegistryDefaultTest.AgentStatusesPresent (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.RefreshReloadsAgents
+[       OK ] FleetRegistryDefaultTest.RefreshReloadsAgents (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.CountMethods
+[       OK ] FleetRegistryDefaultTest.CountMethods (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.InvalidDirFallsBackToDefaults
+[       OK ] FleetRegistryDefaultTest.InvalidDirFallsBackToDefaults (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByTierCore
+[       OK ] FleetRegistryDefaultTest.FilterByTierCore (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByTierFleet
+[       OK ] FleetRegistryDefaultTest.FilterByTierFleet (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByTierNonExistent
+[       OK ] FleetRegistryDefaultTest.FilterByTierNonExistent (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FilterByTagEmpty
+[       OK ] FleetRegistryDefaultTest.FilterByTagEmpty (0 ms)
+[ RUN      ] FleetRegistryDefaultTest.FindSquadNonExistent
+[       OK ] FleetRegistryDefaultTest.FindSquadNonExistent (0 ms)
+[----------] 18 tests from FleetRegistryDefaultTest (1 ms total)
+
+[----------] 5 tests from FleetRegistryRealDataTest
+[ RUN      ] FleetRegistryRealDataTest.LoadsRealAgents
+[       OK ] FleetRegistryRealDataTest.LoadsRealAgents (181 ms)
+[ RUN      ] FleetRegistryRealDataTest.LoadsSquadsAndCombos
+[       OK ] FleetRegistryRealDataTest.LoadsSquadsAndCombos (155 ms)
+[ RUN      ] FleetRegistryRealDataTest.LoadsPlaybooks
+[       OK ] FleetRegistryRealDataTest.LoadsPlaybooks (174 ms)
+[ RUN      ] FleetRegistryRealDataTest.FilterByTier
+[       OK ] FleetRegistryRealDataTest.FilterByTier (158 ms)
+[ RUN      ] FleetRegistryRealDataTest.FindSquad
+[       OK ] FleetRegistryRealDataTest.FindSquad (182 ms)
+[----------] 5 tests from FleetRegistryRealDataTest (852 ms total)
+
+[----------] 4 tests from FleetRegistryTagTest
+[ RUN      ] FleetRegistryTagTest.FilterByTagFindsTaggedAgent
+[       OK ] FleetRegistryTagTest.FilterByTagFindsTaggedAgent (0 ms)
+[ RUN      ] FleetRegistryTagTest.FilterByTagNoMatch
+[       OK ] FleetRegistryTagTest.FilterByTagNoMatch (0 ms)
+[ RUN      ] FleetRegistryTagTest.FilterByQueryMatchesTag
+[       OK ] FleetRegistryTagTest.FilterByQueryMatchesTag (0 ms)
+[ RUN      ] FleetRegistryTagTest.AgentsHaveCapabilityTags
+[       OK ] FleetRegistryTagTest.AgentsHaveCapabilityTags (0 ms)
+[----------] 4 tests from FleetRegistryTagTest (2 ms total)
+
+[----------] 3 tests from FleetRegistryBadJsonTest
+[ RUN      ] FleetRegistryBadJsonTest.MalformedAgentRegistryFallsBack
+[       OK ] FleetRegistryBadJsonTest.MalformedAgentRegistryFallsBack (0 ms)
+[ RUN      ] FleetRegistryBadJsonTest.MalformedSquadsJsonDoesNotCrash
+[       OK ] FleetRegistryBadJsonTest.MalformedSquadsJsonDoesNotCrash (0 ms)
+[ RUN      ] FleetRegistryBadJsonTest.MalformedPlaybookJsonSkipped
+[       OK ] FleetRegistryBadJsonTest.MalformedPlaybookJsonSkipped (1 ms)
+[----------] 3 tests from FleetRegistryBadJsonTest (2 ms total)
+
+[----------] 4 tests from FleetRegistrySquadTest
+[ RUN      ] FleetRegistrySquadTest.FindSquadReturnsSquad
+[       OK ] FleetRegistrySquadTest.FindSquadReturnsSquad (1 ms)
+[ RUN      ] FleetRegistrySquadTest.FindSquadNonExistentReturnsNull
+[       OK ] FleetRegistrySquadTest.FindSquadNonExistentReturnsNull (1 ms)
+[ RUN      ] FleetRegistrySquadTest.SquadCountCorrect
+[       OK ] FleetRegistrySquadTest.SquadCountCorrect (0 ms)
+[ RUN      ] FleetRegistrySquadTest.ComboCountCorrect
+[       OK ] FleetRegistrySquadTest.ComboCountCorrect (0 ms)
+[----------] 4 tests from FleetRegistrySquadTest (3 ms total)
+
+[----------] 1 test from FleetRegistryPlaybookTest
+[ RUN      ] FleetRegistryPlaybookTest.PlaybooksLoaded
+[       OK ] FleetRegistryPlaybookTest.PlaybooksLoaded (0 ms)
+[----------] 1 test from FleetRegistryPlaybookTest (0 ms total)
+
+[----------] 3 tests from FleetRegistryRoleTest
+[ RUN      ] FleetRegistryRoleTest.AgentWithRoleHasDescription
+[       OK ] FleetRegistryRoleTest.AgentWithRoleHasDescription (0 ms)
+[ RUN      ] FleetRegistryRoleTest.AgentNoRoleUsesNameAsDescription
+[       OK ] FleetRegistryRoleTest.AgentNoRoleUsesNameAsDescription (0 ms)
+[ RUN      ] FleetRegistryRoleTest.AgentBadPathUsesNameAsDescription
+[       OK ] FleetRegistryRoleTest.AgentBadPathUsesNameAsDescription (0 ms)
+[----------] 3 tests from FleetRegistryRoleTest (2 ms total)
+
+[----------] 12 tests from ThemeEngineTest
+[ RUN      ] ThemeEngineTest.DefaultThemeIsLiquidGlass
+[       OK ] ThemeEngineTest.DefaultThemeIsLiquidGlass (0 ms)
+[ RUN      ] ThemeEngineTest.AvailableThemesCount
+[       OK ] ThemeEngineTest.AvailableThemesCount (0 ms)
+[ RUN      ] ThemeEngineTest.AvailableThemesContents
+[       OK ] ThemeEngineTest.AvailableThemesContents (0 ms)
+[ RUN      ] ThemeEngineTest.ApplyInvalidThemeDoesNotChange
+[       OK ] ThemeEngineTest.ApplyInvalidThemeDoesNotChange (0 ms)
+[ RUN      ] ThemeEngineTest.ApplyValidThemeChanges
+[       OK ] ThemeEngineTest.ApplyValidThemeChanges (0 ms)
+[ RUN      ] ThemeEngineTest.ApplyThemeEmitsSignal
+[       OK ] ThemeEngineTest.ApplyThemeEmitsSignal (0 ms)
+[ RUN      ] ThemeEngineTest.CycleThemeAdvances
+[       OK ] ThemeEngineTest.CycleThemeAdvances (0 ms)
+[ RUN      ] ThemeEngineTest.CycleThemeWrapsAround
+[       OK ] ThemeEngineTest.CycleThemeWrapsAround (0 ms)
+[ RUN      ] ThemeEngineTest.LoadStylesheetValidTheme
+[       OK ] ThemeEngineTest.LoadStylesheetValidTheme (0 ms)
+[ RUN      ] ThemeEngineTest.LoadStylesheetInvalidReturnsEmpty
+[       OK ] ThemeEngineTest.LoadStylesheetInvalidReturnsEmpty (0 ms)
+[ RUN      ] ThemeEngineTest.InvalidApplyDoesNotEmitSignal
+[       OK ] ThemeEngineTest.InvalidApplyDoesNotEmitSignal (0 ms)
+[ RUN      ] ThemeEngineTest.SemanticOverridesReturnsEmptyByDefault
+[       OK ] ThemeEngineTest.SemanticOverridesReturnsEmptyByDefault (0 ms)
+[----------] 12 tests from ThemeEngineTest (0 ms total)
+
+[----------] 20 tests from AccessibilityTest
+[ RUN      ] AccessibilityTest.LabelSetsAccessibleName
+[       OK ] AccessibilityTest.LabelSetsAccessibleName (8 ms)
+[ RUN      ] AccessibilityTest.LabelWithoutDescription
+[       OK ] AccessibilityTest.LabelWithoutDescription (0 ms)
+[ RUN      ] AccessibilityTest.InteractiveSetsTabFocus
+[       OK ] AccessibilityTest.InteractiveSetsTabFocus (0 ms)
+[ RUN      ] AccessibilityTest.FocusStyleApplied
+[       OK ] AccessibilityTest.FocusStyleApplied (0 ms)
+[ RUN      ] AccessibilityTest.StatusIndicatorCreated
+[       OK ] AccessibilityTest.StatusIndicatorCreated (0 ms)
+[ RUN      ] AccessibilityTest.FocusChainInstalled
+QWidget::setTabOrder: 'first' and 'second' must be in the same window
+QWidget::setTabOrder: 'first' and 'second' must be in the same window
+[       OK ] AccessibilityTest.FocusChainInstalled (0 ms)
+[ RUN      ] AccessibilityTest.NullWidgetSafe
+[       OK ] AccessibilityTest.NullWidgetSafe (0 ms)
+[ RUN      ] AccessibilityTest.FocusStyleNotDuplicated
+[       OK ] AccessibilityTest.FocusStyleNotDuplicated (0 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationFilterNotDuplicated
+[       OK ] AccessibilityTest.KeyboardActivationFilterNotDuplicated (0 ms)
+[ RUN      ] AccessibilityTest.InteractiveSetsAccessibleName
+[       OK ] AccessibilityTest.InteractiveSetsAccessibleName (0 ms)
+[ RUN      ] AccessibilityTest.StatusIndicatorColorApplied
+[       OK ] AccessibilityTest.StatusIndicatorColorApplied (0 ms)
+[ RUN      ] AccessibilityTest.EmptyFocusChain
+[       OK ] AccessibilityTest.EmptyFocusChain (0 ms)
+[ RUN      ] AccessibilityTest.SingleItemFocusChain
+[       OK ] AccessibilityTest.SingleItemFocusChain (0 ms)
+[ RUN      ] AccessibilityTest.RegisterAccessibilityFactories
+[       OK ] AccessibilityTest.RegisterAccessibilityFactories (0 ms)
+[ RUN      ] AccessibilityTest.LabelWithEmptyName
+[       OK ] AccessibilityTest.LabelWithEmptyName (0 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationFilterEnterKey
+[       OK ] AccessibilityTest.KeyboardActivationFilterEnterKey (35 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationFilterSpaceKey
+[       OK ] AccessibilityTest.KeyboardActivationFilterSpaceKey (0 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationFilterEnterNumpadKey
+[       OK ] AccessibilityTest.KeyboardActivationFilterEnterNumpadKey (0 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationFilterOtherKeyIgnored
+[       OK ] AccessibilityTest.KeyboardActivationFilterOtherKeyIgnored (0 ms)
+[ RUN      ] AccessibilityTest.KeyboardActivationViaInteractive
+[       OK ] AccessibilityTest.KeyboardActivationViaInteractive (0 ms)
+[----------] 20 tests from AccessibilityTest (48 ms total)
+
+[----------] 9 tests from GhostTextTest
+[ RUN      ] GhostTextTest.SuggestEmptyPrefix
+[       OK ] GhostTextTest.SuggestEmptyPrefix (0 ms)
+[ RUN      ] GhostTextTest.SuggestNoMatch
+[       OK ] GhostTextTest.SuggestNoMatch (0 ms)
+[ RUN      ] GhostTextTest.SuggestBasicMatch
+[       OK ] GhostTextTest.SuggestBasicMatch (0 ms)
+[ RUN      ] GhostTextTest.SuggestByFrequency
+[       OK ] GhostTextTest.SuggestByFrequency (0 ms)
+[ RUN      ] GhostTextTest.SuggestExactMatchSkipped
+[       OK ] GhostTextTest.SuggestExactMatchSkipped (0 ms)
+[ RUN      ] GhostTextTest.LoadFrequencies
+[       OK ] GhostTextTest.LoadFrequencies (0 ms)
+[ RUN      ] GhostTextTest.RecordAndFrequencies
+[       OK ] GhostTextTest.RecordAndFrequencies (0 ms)
+[ RUN      ] GhostTextTest.ClearResetsAll
+[       OK ] GhostTextTest.ClearResetsAll (0 ms)
+[ RUN      ] GhostTextTest.RecordEmptyStringIgnored
+[       OK ] GhostTextTest.RecordEmptyStringIgnored (0 ms)
+[----------] 9 tests from GhostTextTest (0 ms total)
+
+[----------] 6 tests from BreadcrumbTest
+[ RUN      ] BreadcrumbTest.InitEmpty
+[       OK ] BreadcrumbTest.InitEmpty (0 ms)
+[ RUN      ] BreadcrumbTest.NavigateSingle
+[       OK ] BreadcrumbTest.NavigateSingle (0 ms)
+[ RUN      ] BreadcrumbTest.NavigateSequence
+[       OK ] BreadcrumbTest.NavigateSequence (0 ms)
+[ RUN      ] BreadcrumbTest.TruncateOnRevisit
+[       OK ] BreadcrumbTest.TruncateOnRevisit (0 ms)
+[ RUN      ] BreadcrumbTest.Reset
+[       OK ] BreadcrumbTest.Reset (0 ms)
+[ RUN      ] BreadcrumbTest.SignalEmitted
+[       OK ] BreadcrumbTest.SignalEmitted (0 ms)
+[----------] 6 tests from BreadcrumbTest (2 ms total)
+
+[----------] 6 tests from BentoLayoutTest
+[ RUN      ] BentoLayoutTest.DefaultsEmpty
+[       OK ] BentoLayoutTest.DefaultsEmpty (0 ms)
+[ RUN      ] BentoLayoutTest.AddCards
+[       OK ] BentoLayoutTest.AddCards (0 ms)
+[ RUN      ] BentoLayoutTest.CustomBreakpoints
+[       OK ] BentoLayoutTest.CustomBreakpoints (0 ms)
+[ RUN      ] BentoLayoutTest.RelayoutOnResize
+[       OK ] BentoLayoutTest.RelayoutOnResize (0 ms)
+[ RUN      ] BentoLayoutTest.RelayoutWithZeroCards
+[       OK ] BentoLayoutTest.RelayoutWithZeroCards (0 ms)
+[ RUN      ] BentoLayoutTest.SetBreakpointsWithNoCards
+[       OK ] BentoLayoutTest.SetBreakpointsWithNoCards (0 ms)
+[----------] 6 tests from BentoLayoutTest (0 ms total)
+
+[----------] 4 tests from CollapsibleSectionTest
+[ RUN      ] CollapsibleSectionTest.DefaultExpanded
+[       OK ] CollapsibleSectionTest.DefaultExpanded (0 ms)
+[ RUN      ] CollapsibleSectionTest.ToggleChangesState
+[       OK ] CollapsibleSectionTest.ToggleChangesState (0 ms)
+[ RUN      ] CollapsibleSectionTest.SignalEmitted
+[       OK ] CollapsibleSectionTest.SignalEmitted (0 ms)
+[ RUN      ] CollapsibleSectionTest.SetContent
+[       OK ] CollapsibleSectionTest.SetContent (1 ms)
+[----------] 4 tests from CollapsibleSectionTest (3 ms total)
+
+[----------] 8 tests from SemanticColorsTest
+[ RUN      ] SemanticColorsTest.SeverityColorReturnsValid
+[       OK ] SemanticColorsTest.SeverityColorReturnsValid (0 ms)
+[ RUN      ] SemanticColorsTest.ColorsAreDistinct
+[       OK ] SemanticColorsTest.ColorsAreDistinct (0 ms)
+[ RUN      ] SemanticColorsTest.QssReturnsNonEmpty
+[       OK ] SemanticColorsTest.QssReturnsNonEmpty (0 ms)
+[ RUN      ] SemanticColorsTest.StatusToSeverityMapping
+[       OK ] SemanticColorsTest.StatusToSeverityMapping (0 ms)
+[ RUN      ] SemanticColorsTest.ApplyBadgeNoCrash
+[       OK ] SemanticColorsTest.ApplyBadgeNoCrash (1 ms)
+[ RUN      ] SemanticColorsTest.ApplyPulseNoCrash
+[       OK ] SemanticColorsTest.ApplyPulseNoCrash (0 ms)
+[ RUN      ] SemanticColorsTest.SeverityColorFallbackForInvalidEnum
+[       OK ] SemanticColorsTest.SeverityColorFallbackForInvalidEnum (0 ms)
+[ RUN      ] SemanticColorsTest.SeverityQssAllLevels
+[       OK ] SemanticColorsTest.SeverityQssAllLevels (0 ms)
+[----------] 8 tests from SemanticColorsTest (1 ms total)
+
+[----------] 72 tests from ScreenTest
+[ RUN      ] ScreenTest.AboutScreenConstruction
+[       OK ] ScreenTest.AboutScreenConstruction (2 ms)
+[ RUN      ] ScreenTest.AboutScreenChildWidgets
+[       OK ] ScreenTest.AboutScreenChildWidgets (2 ms)
+[ RUN      ] ScreenTest.AboutScreenInStack
+[       OK ] ScreenTest.AboutScreenInStack (28 ms)
+[ RUN      ] ScreenTest.AgentScreenConstruction
+[       OK ] ScreenTest.AgentScreenConstruction (28 ms)
+[ RUN      ] ScreenTest.AgentScreenExtendedFields
+[       OK ] ScreenTest.AgentScreenExtendedFields (15 ms)
+[ RUN      ] ScreenTest.AgentScreenDefaultValues
+[       OK ] ScreenTest.AgentScreenDefaultValues (16 ms)
+[ RUN      ] ScreenTest.ApprovalsScreenConstruction
+[       OK ] ScreenTest.ApprovalsScreenConstruction (0 ms)
+[ RUN      ] ScreenTest.ApprovalsScreenEmptyState
+[       OK ] ScreenTest.ApprovalsScreenEmptyState (0 ms)
+[ RUN      ] ScreenTest.CortexScreenConstruction
+[       OK ] ScreenTest.CortexScreenConstruction (2 ms)
+[ RUN      ] ScreenTest.CortexScreenOutputContent
+[       OK ] ScreenTest.CortexScreenOutputContent (2 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenConstruction
+[       OK ] ScreenTest.ErrorDetailsScreenConstruction (5 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenButtons
+[       OK ] ScreenTest.ErrorDetailsScreenButtons (10 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenConfidenceBar
+[       OK ] ScreenTest.ErrorDetailsScreenConfidenceBar (5 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenRecoverySteps
+[       OK ] ScreenTest.ErrorDetailsScreenRecoverySteps (6 ms)
+[ RUN      ] ScreenTest.FleetMonitorScreenConstruction
+[       OK ] ScreenTest.FleetMonitorScreenConstruction (2 ms)
+[ RUN      ] ScreenTest.FleetMonitorScreenPopulatesAgents
+[       OK ] ScreenTest.FleetMonitorScreenPopulatesAgents (2 ms)
+[ RUN      ] ScreenTest.HelpScreenConstruction
+[       OK ] ScreenTest.HelpScreenConstruction (9 ms)
+[ RUN      ] ScreenTest.HelpScreenShortcutEntries
+[       OK ] ScreenTest.HelpScreenShortcutEntries (9 ms)
+[ RUN      ] ScreenTest.LogsScreenConstruction
+[       OK ] ScreenTest.LogsScreenConstruction (3 ms)
+[ RUN      ] ScreenTest.LogsScreenButtons
+[       OK ] ScreenTest.LogsScreenButtons (3 ms)
+[ RUN      ] ScreenTest.MetricsScreenConstruction
+[       OK ] ScreenTest.MetricsScreenConstruction (21 ms)
+[ RUN      ] ScreenTest.MetricsScreenAgentTable
+[       OK ] ScreenTest.MetricsScreenAgentTable (16 ms)
+[ RUN      ] ScreenTest.MetricsScreenRouterTable
+[       OK ] ScreenTest.MetricsScreenRouterTable (17 ms)
+[ RUN      ] ScreenTest.OmnigraphScreenConstruction
+[       OK ] ScreenTest.OmnigraphScreenConstruction (6 ms)
+[ RUN      ] ScreenTest.OmnigraphScreenTree
+[       OK ] ScreenTest.OmnigraphScreenTree (5 ms)
+[ RUN      ] ScreenTest.OmnigraphScreenSummaryLabels
+[       OK ] ScreenTest.OmnigraphScreenSummaryLabels (5 ms)
+[ RUN      ] ScreenTest.PlaybooksScreenConstruction
+[       OK ] ScreenTest.PlaybooksScreenConstruction (5 ms)
+[ RUN      ] ScreenTest.PlaybooksScreenRunButtonDisabledInitially
+[       OK ] ScreenTest.PlaybooksScreenRunButtonDisabledInitially (3 ms)
+[ RUN      ] ScreenTest.SettingsScreenConstruction
+[       OK ] ScreenTest.SettingsScreenConstruction (4 ms)
+[ RUN      ] ScreenTest.SettingsScreenDefaultValues
+[       OK ] ScreenTest.SettingsScreenDefaultValues (3 ms)
+[ RUN      ] ScreenTest.SettingsScreenRefreshSpinRange
+[       OK ] ScreenTest.SettingsScreenRefreshSpinRange (3 ms)
+[ RUN      ] ScreenTest.SquadDetailScreenConstruction
+[       OK ] ScreenTest.SquadDetailScreenConstruction (2 ms)
+[ RUN      ] ScreenTest.SquadDetailScreenLabels
+[       OK ] ScreenTest.SquadDetailScreenLabels (1 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenConstruction
+[       OK ] ScreenTest.TimeTravelScreenConstruction (34 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenMissionList
+[       OK ] ScreenTest.TimeTravelScreenMissionList (32 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenSlider
+[       OK ] ScreenTest.TimeTravelScreenSlider (25 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenSliderUpdatesLabel
+[       OK ] ScreenTest.TimeTravelScreenSliderUpdatesLabel (31 ms)
+[ RUN      ] ScreenTest.ToolRunnerScreenConstruction
+[       OK ] ScreenTest.ToolRunnerScreenConstruction (4 ms)
+[ RUN      ] ScreenTest.ToolRunnerScreenOutputPopulated
+[       OK ] ScreenTest.ToolRunnerScreenOutputPopulated (4 ms)
+[ RUN      ] ScreenTest.ToolRunnerScreenClearButton
+[       OK ] ScreenTest.ToolRunnerScreenClearButton (3 ms)
+[ RUN      ] ScreenTest.AboutScreenBackNavigation
+[       OK ] ScreenTest.AboutScreenBackNavigation (8 ms)
+[ RUN      ] ScreenTest.ApprovalsScreenBackNavigation
+[       OK ] ScreenTest.ApprovalsScreenBackNavigation (6 ms)
+[ RUN      ] ScreenTest.LogsScreenBackNavigation
+[       OK ] ScreenTest.LogsScreenBackNavigation (4 ms)
+[ RUN      ] ScreenTest.LogsScreenRefreshButton
+[       OK ] ScreenTest.LogsScreenRefreshButton (4 ms)
+[ RUN      ] ScreenTest.LogsScreenClearButton
+[       OK ] ScreenTest.LogsScreenClearButton (4 ms)
+[ RUN      ] ScreenTest.FleetMonitorScreenBackNavigation
+[       OK ] ScreenTest.FleetMonitorScreenBackNavigation (3 ms)
+[ RUN      ] ScreenTest.HelpScreenBackNavigation
+[       OK ] ScreenTest.HelpScreenBackNavigation (6 ms)
+[ RUN      ] ScreenTest.SettingsScreenBackNavigation
+[       OK ] ScreenTest.SettingsScreenBackNavigation (5 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenBackNavigation
+[       OK ] ScreenTest.ErrorDetailsScreenBackNavigation (11 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenCloseButton
+[       OK ] ScreenTest.ErrorDetailsScreenCloseButton (10 ms)
+[ RUN      ] ScreenTest.ErrorDetailsScreenEscapeShortcut
+[       OK ] ScreenTest.ErrorDetailsScreenEscapeShortcut (10 ms)
+[ RUN      ] ScreenTest.MetricsScreenBackNavigation
+[       OK ] ScreenTest.MetricsScreenBackNavigation (14 ms)
+[ RUN      ] ScreenTest.MetricsScreenEscapeShortcut
+[       OK ] ScreenTest.MetricsScreenEscapeShortcut (21 ms)
+[ RUN      ] ScreenTest.OmnigraphScreenBackNavigation
+[       OK ] ScreenTest.OmnigraphScreenBackNavigation (10 ms)
+[ RUN      ] ScreenTest.OmnigraphScreenRefreshButton
+[       OK ] ScreenTest.OmnigraphScreenRefreshButton (5 ms)
+[ RUN      ] ScreenTest.CortexScreenBackNavigation
+[       OK ] ScreenTest.CortexScreenBackNavigation (4 ms)
+[ RUN      ] ScreenTest.CortexScreenSearchAction
+[       OK ] ScreenTest.CortexScreenSearchAction (4 ms)
+[ RUN      ] ScreenTest.CortexScreenSearchEmptyQuery
+[       OK ] ScreenTest.CortexScreenSearchEmptyQuery (2 ms)
+[ RUN      ] ScreenTest.ToolRunnerScreenBackNavigation
+[       OK ] ScreenTest.ToolRunnerScreenBackNavigation (5 ms)
+[ RUN      ] ScreenTest.ToolRunnerScreenRunButton
+[       OK ] ScreenTest.ToolRunnerScreenRunButton (4 ms)
+[ RUN      ] ScreenTest.AgentScreenBackNavigation
+[       OK ] ScreenTest.AgentScreenBackNavigation (13 ms)
+[ RUN      ] ScreenTest.AgentScreenDeployButton
+QProcess: Destroyed while process ("euxis-cli") is still running.
+[       OK ] ScreenTest.AgentScreenDeployButton (17 ms)
+[ RUN      ] ScreenTest.AgentScreenDeployEmptyTask
+[       OK ] ScreenTest.AgentScreenDeployEmptyTask (14 ms)
+[ RUN      ] ScreenTest.PlaybooksScreenBackNavigation
+[       OK ] ScreenTest.PlaybooksScreenBackNavigation (4 ms)
+[ RUN      ] ScreenTest.PlaybooksScreenPlaybookCount
+[       OK ] ScreenTest.PlaybooksScreenPlaybookCount (3 ms)
+[ RUN      ] ScreenTest.SquadDetailScreenBackNavigation
+[       OK ] ScreenTest.SquadDetailScreenBackNavigation (4 ms)
+[ RUN      ] ScreenTest.SquadDetailScreenEscapeShortcut
+[       OK ] ScreenTest.SquadDetailScreenEscapeShortcut (5 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenBackNavigation
+[       OK ] ScreenTest.TimeTravelScreenBackNavigation (29 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenScrubLeftRight
+[       OK ] ScreenTest.TimeTravelScreenScrubLeftRight (35 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenScrubVimKeys
+[       OK ] ScreenTest.TimeTravelScreenScrubVimKeys (37 ms)
+[ RUN      ] ScreenTest.TimeTravelScreenEscapeShortcut
+[       OK ] ScreenTest.TimeTravelScreenEscapeShortcut (34 ms)
+[ RUN      ] ScreenTest.WelcomeScreenInStack
+[       OK ] ScreenTest.WelcomeScreenInStack (0 ms)
+[----------] 72 tests from ScreenTest (741 ms total)
+
+[----------] 63 tests from WidgetTest
+[ RUN      ] WidgetTest.HeaderWidgetConstruction
+[       OK ] WidgetTest.HeaderWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.HeaderWidgetThemeIndicator
+[       OK ] WidgetTest.HeaderWidgetThemeIndicator (1 ms)
+[ RUN      ] WidgetTest.ShortcutBarWidgetConstruction
+[       OK ] WidgetTest.ShortcutBarWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.SearchBarWidgetConstruction
+[       OK ] WidgetTest.SearchBarWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.TipBarWidgetConstruction
+[       OK ] WidgetTest.TipBarWidgetConstruction (1 ms)
+[ RUN      ] WidgetTest.TipBarWidgetHiddenWhenDisabled
+[       OK ] WidgetTest.TipBarWidgetHiddenWhenDisabled (42 ms)
+[ RUN      ] WidgetTest.OutputPanelWidgetConstruction
+[       OK ] WidgetTest.OutputPanelWidgetConstruction (7 ms)
+[ RUN      ] WidgetTest.ScrollMinimapWidgetConstruction
+[       OK ] WidgetTest.ScrollMinimapWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetConstruction
+[       OK ] WidgetTest.SparklineChartWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetConstruction
+[       OK ] WidgetTest.AgentCardWidgetConstruction (0 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetTypeBadge
+[       OK ] WidgetTest.AgentCardWidgetTypeBadge (0 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetComboType
+[       OK ] WidgetTest.AgentCardWidgetComboType (0 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetEmptyTier
+[       OK ] WidgetTest.AgentCardWidgetEmptyTier (0 ms)
+[ RUN      ] WidgetTest.FleetGridWidgetConstruction
+[       OK ] WidgetTest.FleetGridWidgetConstruction (46 ms)
+[ RUN      ] WidgetTest.FleetGridWidgetContainsCards
+[       OK ] WidgetTest.FleetGridWidgetContainsCards (41 ms)
+[ RUN      ] WidgetTest.ResourceMonitorWidgetConstruction
+[       OK ] WidgetTest.ResourceMonitorWidgetConstruction (76 ms)
+[ RUN      ] WidgetTest.ConversationWidgetConstruction
+[       OK ] WidgetTest.ConversationWidgetConstruction (2 ms)
+[ RUN      ] WidgetTest.ConversationWidgetAddUserMessage
+[       OK ] WidgetTest.ConversationWidgetAddUserMessage (2 ms)
+[ RUN      ] WidgetTest.ConversationWidgetAddAssistantMessage
+[       OK ] WidgetTest.ConversationWidgetAddAssistantMessage (4 ms)
+[ RUN      ] WidgetTest.ConversationWidgetAddSystemMessage
+[       OK ] WidgetTest.ConversationWidgetAddSystemMessage (2 ms)
+[ RUN      ] WidgetTest.ConversationWidgetMultipleMessages
+[       OK ] WidgetTest.ConversationWidgetMultipleMessages (5 ms)
+[ RUN      ] WidgetTest.ConversationWidgetClear
+[       OK ] WidgetTest.ConversationWidgetClear (2 ms)
+[ RUN      ] WidgetTest.ConversationWidgetThinkingIndicator
+[       OK ] WidgetTest.ConversationWidgetThinkingIndicator (2 ms)
+[ RUN      ] WidgetTest.ConversationWidgetAssistantNoModel
+[       OK ] WidgetTest.ConversationWidgetAssistantNoModel (2 ms)
+[ RUN      ] WidgetTest.ThinkingIndicatorConstruction
+[       OK ] WidgetTest.ThinkingIndicatorConstruction (0 ms)
+[ RUN      ] WidgetTest.ThinkingIndicatorStartStop
+[       OK ] WidgetTest.ThinkingIndicatorStartStop (2 ms)
+[ RUN      ] WidgetTest.ChatInputBarConstruction
+[       OK ] WidgetTest.ChatInputBarConstruction (4 ms)
+[ RUN      ] WidgetTest.ChatInputBarUpdatePlaceholder
+[       OK ] WidgetTest.ChatInputBarUpdatePlaceholder (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarUpdateProviderLabel
+[       OK ] WidgetTest.ChatInputBarUpdateProviderLabel (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarEmptySubmit
+[       OK ] WidgetTest.ChatInputBarEmptySubmit (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarSubmitMessage
+[       OK ] WidgetTest.ChatInputBarSubmitMessage (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarSlashCommand
+qt.qpa.wayland: Failed to create grabbing popup. Ensure popup  QWidgetWindow(0x5637c561f720, name="autocomplete_popupWindow") has a transientParent set and that parent window has received input.
+[       OK ] WidgetTest.ChatInputBarSlashCommand (6 ms)
+[ RUN      ] WidgetTest.ChatInputBarSlashCommandWithArgs
+[       OK ] WidgetTest.ChatInputBarSlashCommandWithArgs (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarProviderButtonSignal
+[       OK ] WidgetTest.ChatInputBarProviderButtonSignal (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarSetFocus
+[       OK ] WidgetTest.ChatInputBarSetFocus (8 ms)
+[ RUN      ] WidgetTest.ChatInputBarGhostLabel
+[       OK ] WidgetTest.ChatInputBarGhostLabel (3 ms)
+[ RUN      ] WidgetTest.ProviderSelectDialogConstruction
+[2026-03-02 20:47:44.389] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.391] [info] Auto-imported Gemini OAuth from Gemini CLI
+[2026-03-02 20:47:44.391] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.392] [info] Auto-imported Gemini OAuth from Gemini CLI
+[       OK ] WidgetTest.ProviderSelectDialogConstruction (7 ms)
+[ RUN      ] WidgetTest.ProviderSelectDialogButtons
+[2026-03-02 20:47:44.397] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.398] [info] Auto-imported Gemini OAuth from Gemini CLI
+[2026-03-02 20:47:44.399] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.399] [info] Auto-imported Gemini OAuth from Gemini CLI
+[       OK ] WidgetTest.ProviderSelectDialogButtons (5 ms)
+[ RUN      ] WidgetTest.ProviderSelectDialogFallbackLabel
+[2026-03-02 20:47:44.402] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.403] [info] Auto-imported Gemini OAuth from Gemini CLI
+[2026-03-02 20:47:44.403] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.403] [info] Auto-imported Gemini OAuth from Gemini CLI
+[       OK ] WidgetTest.ProviderSelectDialogFallbackLabel (3 ms)
+[ RUN      ] WidgetTest.ProviderSelectDialogSelectedProviderEmpty
+[2026-03-02 20:47:44.406] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.406] [info] Auto-imported Gemini OAuth from Gemini CLI
+[2026-03-02 20:47:44.407] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:44.407] [info] Auto-imported Gemini OAuth from Gemini CLI
+[       OK ] WidgetTest.ProviderSelectDialogSelectedProviderEmpty (3 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetSetValues
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::set_values(QVector<float>)
+[       OK ] WidgetTest.SparklineChartWidgetSetValues (0 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetSetLabel
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::set_label(QString)
+[       OK ] WidgetTest.SparklineChartWidgetSetLabel (1 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetAddValue
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::add_value(float)
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::add_value(float)
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::add_value(float)
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::set_label(QString)
+[       OK ] WidgetTest.SparklineChartWidgetAddValue (0 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetFlatValues
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::set_values(QVector<float>)
+[       OK ] WidgetTest.SparklineChartWidgetFlatValues (0 ms)
+[ RUN      ] WidgetTest.SparklineChartWidgetSingleValue
+QMetaObject::invokeMethod: No such method euxis::etx::SparklineChartWidget::add_value(float)
+[       OK ] WidgetTest.SparklineChartWidgetSingleValue (0 ms)
+[ RUN      ] WidgetTest.ScrollMinimapWidgetPaintWithData
+[       OK ] WidgetTest.ScrollMinimapWidgetPaintWithData (0 ms)
+[ RUN      ] WidgetTest.ScrollMinimapWidgetEmptyPositions
+QMetaObject::invokeMethod: No such method euxis::etx::ScrollMinimapWidget::update_viewport(float,float)
+[       OK ] WidgetTest.ScrollMinimapWidgetEmptyPositions (0 ms)
+[ RUN      ] WidgetTest.HeaderWidgetSparklinePaint
+[       OK ] WidgetTest.HeaderWidgetSparklinePaint (7 ms)
+[ RUN      ] WidgetTest.ResourceMonitorWidgetPollAndPaint
+[       OK ] WidgetTest.ResourceMonitorWidgetPollAndPaint (6 ms)
+[ RUN      ] WidgetTest.ConversationWidgetThinkingAnimate
+[       OK ] WidgetTest.ConversationWidgetThinkingAnimate (504 ms)
+[ RUN      ] WidgetTest.ConversationWidgetScrollToBottom
+[       OK ] WidgetTest.ConversationWidgetScrollToBottom (83 ms)
+[ RUN      ] WidgetTest.ChatInputBarHistoryNavigation
+[       OK ] WidgetTest.ChatInputBarHistoryNavigation (4 ms)
+[ RUN      ] WidgetTest.ChatInputBarEscapeKey
+[       OK ] WidgetTest.ChatInputBarEscapeKey (8 ms)
+[ RUN      ] WidgetTest.ChatInputBarAtSignAutocomplete
+qt.qpa.wayland: Failed to create grabbing popup. Ensure popup  QWidgetWindow(0x5637c55cbc40, name="autocomplete_popupWindow") has a transientParent set and that parent window has received input.
+[       OK ] WidgetTest.ChatInputBarAtSignAutocomplete (28 ms)
+[ RUN      ] WidgetTest.ChatInputBarSlashAutocomplete
+qt.qpa.wayland: Failed to create grabbing popup. Ensure popup  QWidgetWindow(0x5637c52a24a0, name="autocomplete_popupWindow") has a transientParent set and that parent window has received input.
+[       OK ] WidgetTest.ChatInputBarSlashAutocomplete (41 ms)
+[ RUN      ] WidgetTest.ChatInputBarEnterKeySubmits
+[       OK ] WidgetTest.ChatInputBarEnterKeySubmits (3 ms)
+[ RUN      ] WidgetTest.ChatInputBarShiftEnterDoesNotSubmit
+[       OK ] WidgetTest.ChatInputBarShiftEnterDoesNotSubmit (4 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetEnterEvent
+[       OK ] WidgetTest.AgentCardWidgetEnterEvent (6 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetMousePress
+[       OK ] WidgetTest.AgentCardWidgetMousePress (5 ms)
+[ RUN      ] WidgetTest.AgentCardWidgetStatusColors
+[       OK ] WidgetTest.AgentCardWidgetStatusColors (1 ms)
+[ RUN      ] WidgetTest.TipBarWidgetRotation
+[       OK ] WidgetTest.TipBarWidgetRotation (2 ms)
+[ RUN      ] WidgetTest.BentoLayoutResizeEvent
+[       OK ] WidgetTest.BentoLayoutResizeEvent (1 ms)
+[ RUN      ] WidgetTest.BreadcrumbWidgetCrumbClick
+[       OK ] WidgetTest.BreadcrumbWidgetCrumbClick (1 ms)
+[----------] 63 tests from WidgetTest (1033 ms total)
+
+[----------] 24 tests from ChatEngineTest
+[ RUN      ] ChatEngineTest.Construction
+[       OK ] ChatEngineTest.Construction (5 ms)
+[ RUN      ] ChatEngineTest.DefaultActiveAgent
+[       OK ] ChatEngineTest.DefaultActiveAgent (6 ms)
+[ RUN      ] ChatEngineTest.SetActiveAgent
+[       OK ] ChatEngineTest.SetActiveAgent (4 ms)
+[ RUN      ] ChatEngineTest.EmptyConversationHistory
+[       OK ] ChatEngineTest.EmptyConversationHistory (5 ms)
+[ RUN      ] ChatEngineTest.ClearHistory
+[       OK ] ChatEngineTest.ClearHistory (5 ms)
+[ RUN      ] ChatEngineTest.CurrentProviderNotEmpty
+[       OK ] ChatEngineTest.CurrentProviderNotEmpty (5 ms)
+[ RUN      ] ChatEngineTest.DetectedProvider
+[       OK ] ChatEngineTest.DetectedProvider (5 ms)
+[ RUN      ] ChatEngineTest.AvailableProviders
+[       OK ] ChatEngineTest.AvailableProviders (8 ms)
+[ RUN      ] ChatEngineTest.ProviderStatusText
+[       OK ] ChatEngineTest.ProviderStatusText (4 ms)
+[ RUN      ] ChatEngineTest.SetProviderOverride
+[       OK ] ChatEngineTest.SetProviderOverride (2 ms)
+[ RUN      ] ChatEngineTest.SetProviderClearOverride
+/home/seb/.euxis/euxis-cpp/euxis-etx/tests/test_chat_engine.cpp:94: Failure
+Expected: (engine_->current_provider()) != ("anthropic"), actual: { 2-byte object <61-00>, 2-byte object <6E-00>, 2-byte object <74-00>, 2-byte object <68-00>, 2-byte object <72-00>, 2-byte object <6F-00>, 2-byte object <70-00>, 2-byte object <69-00>, 2-byte object <63-00> } vs 0x5637959ce3c4
+
+[  FAILED  ] ChatEngineTest.SetProviderClearOverride (3 ms)
+[ RUN      ] ChatEngineTest.OAuthFlowNotNull
+[       OK ] ChatEngineTest.OAuthFlowNotNull (2 ms)
+[ RUN      ] ChatEngineTest.AuthStoreAccessible
+[       OK ] ChatEngineTest.AuthStoreAccessible (2 ms)
+[ RUN      ] ChatEngineTest.AuthProfilesForProvider
+[       OK ] ChatEngineTest.AuthProfilesForProvider (2 ms)
+[ RUN      ] ChatEngineTest.RemoveNonexistentProfile
+[       OK ] ChatEngineTest.RemoveNonexistentProfile (3 ms)
+[ RUN      ] ChatEngineTest.StartLoginForProvider
+[       OK ] ChatEngineTest.StartLoginForProvider (3 ms)
+[ RUN      ] ChatEngineTest.SignalsAreValid
+[       OK ] ChatEngineTest.SignalsAreValid (2 ms)
+[ RUN      ] ChatEngineTest.SendMessageAppendsToHistory
+[       OK ] ChatEngineTest.SendMessageAppendsToHistory (205 ms)
+[ RUN      ] ChatEngineTest.SendMessageWithAtPrefix
+[2026-03-02 20:47:45.598] [info] Anthropic API rejected OAuth token, falling back to 'claude' CLI
+[       OK ] ChatEngineTest.SendMessageWithAtPrefix (207 ms)
+[ RUN      ] ChatEngineTest.SendMessageWithSpecificAgent
+[2026-03-02 20:47:45.721] [info] Anthropic API rejected OAuth token, falling back to 'claude' CLI
+[       OK ] ChatEngineTest.SendMessageWithSpecificAgent (207 ms)
+[ RUN      ] ChatEngineTest.SendMessageWithOverrideProvider
+[2026-03-02 20:47:45.851] [info] Anthropic API rejected OAuth token, falling back to 'claude' CLI
+[       OK ] ChatEngineTest.SendMessageWithOverrideProvider (208 ms)
+[ RUN      ] ChatEngineTest.ResponseErrorOnFailure
+[2026-03-02 20:47:46.122] [info] Anthropic API rejected OAuth token, falling back to 'claude' CLI
+[2026-03-02 20:47:46.257] [info] Anthropic API rejected OAuth token, falling back to 'claude' CLI
+/home/seb/.euxis/euxis-cpp/euxis-etx/tests/test_chat_engine.cpp:220: Failure
+Expected: (error_spy.count()) >= (1), actual: 0 vs 1
+
+[  FAILED  ] ChatEngineTest.ResponseErrorOnFailure (3009 ms)
+[ RUN      ] ChatEngineTest.AddApiKey
+[       OK ] ChatEngineTest.AddApiKey (15 ms)
+[ RUN      ] ChatEngineTest.AddAndRemoveApiKey
+[       OK ] ChatEngineTest.AddAndRemoveApiKey (13 ms)
+[----------] 24 tests from ChatEngineTest (3944 ms total)
+
+[----------] 17 tests from OAuthFlowTest
+[ RUN      ] OAuthFlowTest.Construction
+[       OK ] OAuthFlowTest.Construction (0 ms)
+[ RUN      ] OAuthFlowTest.CancelWithoutStart
+[       OK ] OAuthFlowTest.CancelWithoutStart (0 ms)
+[ RUN      ] OAuthFlowTest.LoginFailedSignalForUnsupportedProvider
+[       OK ] OAuthFlowTest.LoginFailedSignalForUnsupportedProvider (0 ms)
+[ RUN      ] OAuthFlowTest.LoginSucceededSignalIsValid
+[       OK ] OAuthFlowTest.LoginSucceededSignalIsValid (0 ms)
+[ RUN      ] OAuthFlowTest.LoginFailedSignalIsValid
+[       OK ] OAuthFlowTest.LoginFailedSignalIsValid (0 ms)
+[ RUN      ] OAuthFlowTest.AnthropicWithoutClientIdFails
+[       OK ] OAuthFlowTest.AnthropicWithoutClientIdFails (0 ms)
+[ RUN      ] OAuthFlowTest.GeminiWithoutClientIdFails
+[       OK ] OAuthFlowTest.GeminiWithoutClientIdFails (0 ms)
+[ RUN      ] OAuthFlowTest.GoogleWithoutClientIdFails
+[       OK ] OAuthFlowTest.GoogleWithoutClientIdFails (0 ms)
+[ RUN      ] OAuthFlowTest.CancelIsIdempotent
+[       OK ] OAuthFlowTest.CancelIsIdempotent (0 ms)
+[ RUN      ] OAuthFlowTest.EmptyProviderFails
+[       OK ] OAuthFlowTest.EmptyProviderFails (0 ms)
+[ RUN      ] OAuthFlowTest.StartLoginAnthropicExercisesPKCE
+[       OK ] OAuthFlowTest.StartLoginAnthropicExercisesPKCE (5 ms)
+[ RUN      ] OAuthFlowTest.StartLoginGeminiExercisesPKCE
+[       OK ] OAuthFlowTest.StartLoginGeminiExercisesPKCE (8 ms)
+[ RUN      ] OAuthFlowTest.StartLoginGoogleExercisesPKCE
+[       OK ] OAuthFlowTest.StartLoginGoogleExercisesPKCE (8 ms)
+[ RUN      ] OAuthFlowTest.HandleCallbackStateMismatch
+[       OK ] OAuthFlowTest.HandleCallbackStateMismatch (205 ms)
+[ RUN      ] OAuthFlowTest.HandleCallbackWithErrorParam
+[       OK ] OAuthFlowTest.HandleCallbackWithErrorParam (205 ms)
+[ RUN      ] OAuthFlowTest.HandleCallbackNoCode
+Opening in existing browser session.
+[       OK ] OAuthFlowTest.HandleCallbackNoCode (207 ms)
+[ RUN      ] OAuthFlowTest.CancelCleansUpServer
+[       OK ] OAuthFlowTest.CancelCleansUpServer (74 ms)
+[----------] 17 tests from OAuthFlowTest (718 ms total)
+
+[----------] 19 tests from AppTest
+[ RUN      ] AppTest.Construction
+Opening in existing browser session.
+Opening in existing browser session.
+Opening in existing browser session.
+Opening in existing browser session.
+Opening in existing browser session.
+[2026-03-02 20:47:50.881] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:50.882] [info] Auto-imported Gemini OAuth from Gemini CLI
+[2026-03-02 20:47:50.883] [info] Auto-imported Anthropic OAuth from Claude Code
+[2026-03-02 20:47:50.884] [info] Auto-imported Gemini OAuth from Gemini CLI
+Opening in existing browser session.
+[       OK ] AppTest.Construction (8218 ms)
+[ RUN      ] AppTest.MinimumSize
+<end of output>
+Test time =  20.76 sec
+----------------------------------------------------------
+Test Failed.
+"euxis-etx-tests" end time: Mar 02 20:48 GMT
+"euxis-etx-tests" time elapsed: 00:00:20
+----------------------------------------------------------
+

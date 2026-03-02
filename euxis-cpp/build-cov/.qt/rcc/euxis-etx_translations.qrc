@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="/translations">
+    <file alias="euxis_etx_en.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_en.qm</file>
+    <file alias="euxis_etx_fr.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_fr.qm</file>
+    <file alias="euxis_etx_es.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_es.qm</file>
+    <file alias="euxis_etx_de.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_de.qm</file>
+    <file alias="euxis_etx_pt.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_pt.qm</file>
+    <file alias="euxis_etx_zh.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_zh.qm</file>
+    <file alias="euxis_etx_ja.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_ja.qm</file>
+    <file alias="euxis_etx_ko.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_ko.qm</file>
+    <file alias="euxis_etx_ru.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_ru.qm</file>
+    <file alias="euxis_etx_it.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_it.qm</file>
+    <file alias="euxis_etx_ar.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_ar.qm</file>
+    <file alias="euxis_etx_he.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_he.qm</file>
+    <file alias="euxis_etx_hi.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_hi.qm</file>
+    <file alias="euxis_etx_nl.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_nl.qm</file>
+    <file alias="euxis_etx_id.qm">/home/seb/.euxis/euxis-cpp/build-cov/euxis-etx/euxis_etx_id.qm</file>
+  </qresource>
+</RCC>
+

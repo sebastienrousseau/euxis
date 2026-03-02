@@ -1,17 +1,19 @@
 #include <euxis/etx/chat_engine.hpp>
 #include <euxis/etx/oauth_flow.hpp>
+#include <euxis/etx/registry.hpp>
 
 #include <QtConcurrent/QtConcurrent>
 #include <QRegularExpression>
 
 namespace euxis::etx {
 
-ChatEngine::ChatEngine(const QString& data_dir, QObject* parent)
+ChatEngine::ChatEngine(const QString& data_dir, FleetRegistry* registry, QObject* parent)
     : QObject(parent)
     , router_(data_dir.toStdString())
     , executor_(data_dir.toStdString())
     , auth_store_(data_dir.toStdString())
     , session_(data_dir.toStdString())
+    , registry_(registry)
     , data_dir_(data_dir)
 {
     // Auto-import auth from Claude Code and Gemini CLI
@@ -32,6 +34,10 @@ ChatEngine::ChatEngine(const QString& data_dir, QObject* parent)
                                   email.toStdString());
             auth_store_.save();
         });
+}
+
+ChatEngine::~ChatEngine() {
+    shutdown();
 }
 
 void ChatEngine::send_message(const QString& text, const QString& agent_id) {
@@ -80,9 +86,23 @@ void ChatEngine::execute_async(const QString& prompt, const QString& agent_id,
                                 const cli::ModelSelection& selection) {
     active_tasks_.fetchAndAddRelaxed(1);
 
-    std::string system_prompt = cli::ProviderExecutor::load_agent_prompt(
-        data_dir_.toStdString(),
-        "agents/" + agent_id.toStdString() + "/prompt.md");
+    // Resolve agent prompt path from registry
+    std::string system_prompt;
+    if (registry_) {
+        const AgentInfo* agent = registry_->find(agent_id);
+        if (agent && !agent->prompt_path.isEmpty()) {
+            system_prompt = cli::ProviderExecutor::load_agent_prompt(
+                session_.euxis_home(),
+                agent->prompt_path.toStdString());
+        }
+    }
+
+    // Fallback if registry resolution fails
+    if (system_prompt.empty()) {
+        system_prompt = cli::ProviderExecutor::load_agent_prompt(
+            data_dir_.toStdString(),
+            "agents/" + agent_id.toStdString() + "/prompt.md");
+    }
 
     std::string memory_ctx = session_.get_memory_context(agent_id.toStdString());
 

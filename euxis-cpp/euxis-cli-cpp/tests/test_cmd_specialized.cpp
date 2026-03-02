@@ -38,7 +38,8 @@ TEST_F(SpecializedCmdTest, VoiceRuns) {
 }
 
 TEST_F(SpecializedCmdTest, TuiRuns) {
-    auto code = cmd_tui(ctx_, {});
+    std::istringstream input("exit\n");
+    auto code = cmd_tui_ex(ctx_, {}, input);
     EXPECT_EQ(code, 0);
 }
 
