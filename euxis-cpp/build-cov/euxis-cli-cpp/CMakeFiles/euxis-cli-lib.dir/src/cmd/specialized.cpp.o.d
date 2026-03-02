@@ -368,4 +368,6 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/cmd/specialized.cpp.o: \
  /usr/include/spdlog/logger.h /usr/include/spdlog/details/backtracer.h \
  /usr/include/spdlog/details/circular_q.h \
  /usr/include/spdlog/details/log_msg_buffer.h \
- /usr/include/spdlog/details/log_msg.h /usr/include/spdlog/version.h
+ /usr/include/spdlog/details/log_msg.h /usr/include/spdlog/version.h \
+ /usr/include/c++/15.2.1/future \
+ /usr/include/c++/15.2.1/bits/atomic_futex.h

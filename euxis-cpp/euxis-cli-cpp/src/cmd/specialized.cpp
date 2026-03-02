@@ -17,6 +17,9 @@
 #include <chrono>
 #include <sstream>
 #include <unistd.h>
+#include <future>
+#include <thread>
+#include <atomic>
 
 namespace euxis::cli::cmd {
 
@@ -158,6 +161,19 @@ int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istrea
     return 0;
 }
 
+// --- Help Menu ---
+namespace {
+void print_tui_help(const std::function<std::string(const std::string&)>& color_user) {
+    std::cout << "\n  " << terminal::bold("COMMANDS") << "\n"
+              << "  " << color_user("?") << " or " << color_user("/help") << "    Show this help menu\n"
+              << "  " << color_user("/exit") << " or " << color_user("/quit") << "  Exit the session\n"
+              << "  " << color_user("/clear") << "           Clear context memory\n"
+              << "  " << color_user("/history") << "         Show session history\n"
+              << "  " << color_user("/agent <id>") << "     Switch to a different agent\n"
+              << "  " << color_user("@<id> <msg>") << "     Message a specific agent\n\n";
+}
+} // namespace
+
 // --- tui ---
 
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
@@ -193,9 +209,12 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     // Initial setup info
     auto model_info = router.route("code", "tui conversation");
-    std::cout << "  " << color_dim("Connected to ") << term::bold(model_info.model) << "\n\n";
+    std::cout << "  " << color_dim("Connected to ") << term::bold(model_info.model) << "\n"
+              << "  " << color_dim("Type ") << color_user("?") << color_dim(" for help") << "\n\n";
 
     std::string line;
+    std::vector<std::pair<std::string, std::string>> history;
+
     while (true) {
         // High-contrast, minimalist prompt
         std::cout << "  " << color_user("› ");
@@ -212,17 +231,41 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
         if (trimmed.empty()) continue;
 
-        if (trimmed == "exit" || trimmed == "quit") {
+        // Command handling
+        if (trimmed == "?" || trimmed == "/help") {
+            print_tui_help(color_user);
+            continue;
+        }
+        if (trimmed == "/exit" || trimmed == "/quit" || trimmed == "exit" || trimmed == "quit") {
             std::cout << "  " << color_dim("Bye!") << "\n\n";
             break;
         }
-        if (trimmed == "clear") {
+        if (trimmed == "/clear") {
             memory_ctx.clear();
             std::cout << "  " << color_dim("Memory cleared.") << "\n\n";
             continue;
         }
+        if (trimmed == "/history") {
+            std::cout << "\n";
+            for (const auto& h : history) {
+                std::cout << "  " << color_user("User: ") << h.first << "\n"
+                          << "  " << color_ai("AI:   ") << (h.second.size() > 60 ? h.second.substr(0, 57) + "..." : h.second) << "\n\n";
+            }
+            continue;
+        }
+        if (trimmed.starts_with("/agent ")) {
+            std::string target = trimmed.substr(7);
+            if (registry.get_agent(target)) {
+                active_agent = target;
+                memory_ctx = session.get_memory_context(active_agent);
+                std::cout << "  " << color_dim("Switched to ") << term::bold(active_agent) << "\n\n";
+            } else {
+                std::cout << "  " << color_err("Unknown agent: ") << target << "\n\n";
+            }
+            continue;
+        }
 
-        // Agent switch
+        // Agent switch shortcut (@agent)
         if (trimmed.starts_with("@")) {
             auto space = trimmed.find(' ');
             std::string target = (space == std::string::npos) ? trimmed.substr(1) : trimmed.substr(1, space - 1);
@@ -244,12 +287,28 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         
         std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
 
-        // Subtle "Thinking" indicator
-        std::cout << "  " << color_dim("...") << "\r";
-        std::cout.flush();
-        
+        // --- Animated Execution ---
+        std::atomic<bool> done{false};
         auto start = std::chrono::steady_clock::now();
-        auto response = executor.execute(model_info, full_prompt);
+        
+        // Spin up the LLM request in a background thread
+        auto future = std::async(std::launch::async, [&]() {
+            auto res = executor.execute(model_info, full_prompt);
+            done = true;
+            return res;
+        });
+
+        // Spinner animation frames
+        static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
+        int frame_idx = 0;
+        while (!done) {
+            std::cout << "  " << color_dim(frames[frame_idx % frames.size()] + " Thinking...") << "\r";
+            std::cout.flush();
+            std::this_thread::sleep_for(std::chrono::milliseconds(80));
+            frame_idx++;
+        }
+        
+        auto response = future.get();
         auto end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
@@ -269,6 +328,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             session.save_memory(active_agent, trimmed, response.output);
             memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
             if (memory_ctx.size() > 12000) memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
+            history.push_back({trimmed, response.output});
         } else {
             std::cout << "\n  " << color_err("Error: ") << response.error << "\n\n";
         }

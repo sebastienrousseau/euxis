@@ -3217,6 +3217,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/cmd/specialized.cpp.o: /home/seb/
   /usr/include/c++/15.2.1/bits/allocated_ptr.h \
   /usr/include/c++/15.2.1/bits/allocator.h \
   /usr/include/c++/15.2.1/bits/atomic_base.h \
+  /usr/include/c++/15.2.1/bits/atomic_futex.h \
   /usr/include/c++/15.2.1/bits/atomic_lockfree_defines.h \
   /usr/include/c++/15.2.1/bits/atomic_timed_wait.h \
   /usr/include/c++/15.2.1/bits/atomic_wait.h \
@@ -3383,6 +3384,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/cmd/specialized.cpp.o: /home/seb/
   /usr/include/c++/15.2.1/forward_list \
   /usr/include/c++/15.2.1/fstream \
   /usr/include/c++/15.2.1/functional \
+  /usr/include/c++/15.2.1/future \
   /usr/include/c++/15.2.1/initializer_list \
   /usr/include/c++/15.2.1/iomanip \
   /usr/include/c++/15.2.1/ios \
@@ -8068,6 +8070,8 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: /home/seb/.euxis/
 
 /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/src/cmd/system.cpp:
 
+/usr/include/c++/15.2.1/future:
+
 /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/include/euxis/cli/pii_filter.hpp:
 
 /home/seb/.euxis/euxis-cpp/euxis-cli-cpp/src/cmd/knowledge.cpp:
@@ -8215,6 +8219,8 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: /home/seb/.euxis/
 /usr/include/c++/15.2.1/bits/regex_executor.tcc:
 
 /usr/include/c++/15.2.1/bits/regex_executor.h:
+
+/usr/include/c++/15.2.1/bits/atomic_futex.h:
 
 /usr/include/c++/15.2.1/bits/regex_error.h:
 
