@@ -64,5 +64,26 @@ TEST_F(ETXConfigTest, SetAndGetShowTips) {
     EXPECT_FALSE(config.show_tips());
 }
 
+// --- Coverage: line 39 (euxis_home with EUXIS_HOME env var set) ---
+TEST_F(ETXConfigTest, EuxisHomeFromEnvVar) {
+    setenv("EUXIS_HOME", "/tmp/euxis-test-home", 1);
+    EXPECT_EQ(ETXConfig::euxis_home(), "/tmp/euxis-test-home");
+    unsetenv("EUXIS_HOME");
+}
+
+// --- Coverage: line 48 (data_dir derived from euxis_home) ---
+TEST_F(ETXConfigTest, DataDirDerivedFromHome) {
+    setenv("EUXIS_HOME", "/tmp/test-etx", 1);
+    EXPECT_EQ(ETXConfig::data_dir(), "/tmp/test-etx/euxis-data");
+    unsetenv("EUXIS_HOME");
+}
+
+// --- Coverage: line 49 (runtime_dir derived from euxis_home) ---
+TEST_F(ETXConfigTest, RuntimeDirDerivedFromHome) {
+    setenv("EUXIS_HOME", "/tmp/test-etx", 1);
+    EXPECT_EQ(ETXConfig::runtime_dir(), "/tmp/test-etx/euxis-runtime");
+    unsetenv("EUXIS_HOME");
+}
+
 } // namespace
 } // namespace euxis::etx

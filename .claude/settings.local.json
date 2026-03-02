@@ -51,7 +51,31 @@
       "Bash(rm -rf euxis-cpp/build && cmake -B euxis-cpp/build -S euxis-cpp -DCMAKE_BUILD_TYPE=Release -G Ninja 2>&1)",
       "Bash(ninja -C euxis-cpp/build euxis-adapters-cpp/CMakeFiles/euxis-adapters-cpp.dir/src/slack.cpp.o 2>&1 | grep 'error:' | head -10 && echo \"=== discord ===\" && ninja -C euxis-cpp/build euxis-adapters-cpp/CMakeFiles/euxis-adapters-cpp.dir/src/discord.cpp.o 2>&1 | grep 'error:' | head -10 && echo \"=== registry ===\" && ninja -C euxis-cpp/build euxis-adapters-cpp/CMakeFiles/euxis-adapters-cpp.dir/src/registry.cpp.o 2>&1 | grep 'error:' | head -10)",
       "Bash(ninja -C euxis-cpp/build -k 0 2>&1 | grep -E 'FAILED|Linking|^ninja:|^\\\\[' | grep -v 'Scanning\\\\|Generating' | tail -40)",
-      "Bash(ninja -C euxis-cpp/build -k 0 2>&1 | tee /tmp/build.log | grep -E 'FAILED|Linking|^ninja:' | head -40)"
+      "Bash(ninja -C euxis-cpp/build -k 0 2>&1 | tee /tmp/build.log | grep -E 'FAILED|Linking|^ninja:' | head -40)",
+      "Bash(cmake --build build --parallel 4)",
+      "Bash(g++ --version)",
+      "Bash(g++ -std=c++23 -x c++ -E -)",
+      "Bash(ctest --test-dir build --output-on-failure)",
+      "Bash(g++ -std=c++23 -Wall -Wextra -Wpedantic -Werror -x c++ - -o /tmp/test_cpp23)",
+      "Bash(/tmp/test_cpp23)",
+      "Bash(cmake --build build --parallel 4 --target euxis-cli-lib euxis-cli-cpp_tests)",
+      "Bash(cmake --build build --parallel 4 --target euxis-etx-tests)",
+      "Bash(ctest --test-dir build -R euxis-etx-tests --output-on-failure)",
+      "Bash(gcovr --version)",
+      "Bash(pip install gcovr)",
+      "Bash(cmake -B build-cov -DEUXIS_COVERAGE=ON -DEUXIS_DISABLE_SANITIZERS=ON -DCMAKE_BUILD_TYPE=Debug)",
+      "Bash(cmake --build build-cov --parallel 4)",
+      "Bash(ctest --test-dir build-cov --output-on-failure)",
+      "Bash(gcovr --root . --filter 'euxis-.*-cpp/src/' --filter 'euxis-.*-cpp/include/' --filter 'euxis-etx/src/' --filter 'euxis-etx/include/' --exclude '.*_autogen.*' --exclude '.*moc_.*' --exclude '.*qrc_.*' --print-summary --txt build-cov/coverage.txt --json build-cov/coverage.json)",
+      "Bash(for dir in euxis-core-cpp euxis-runtime-cpp euxis-security-cpp euxis-crypto-cpp euxis-metrics-cpp euxis-gateway-cpp euxis-adapters-cpp euxis-cli-cpp euxis-etx euxis-bridge-cpp euxis-memory-cpp euxis-identity-cpp euxis-inference-cpp euxis-a2a-cpp euxis-scripts-cpp euxis-bench-cpp)",
+      "Bash(do echo -n \"$dir: \")",
+      "Bash(gcovr --root . --filter \"$dir/src/\" --filter \"$dir/include/\" --exclude '.*_autogen.*' --exclude '.*moc_.*' --exclude '.*qrc_.*')",
+      "Bash(done)",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 -c \"\nimport json\nwith open\\('build-cov/coverage.json'\\) as f:\n    data = json.load\\(f\\)\n\n# Files between 85-99% — just need a few more lines covered\nfor finfo in sorted\\(data['files'], key=lambda f: -sum\\(1 for l in f['lines'] if l.get\\('count',0\\)>0\\)/max\\(1,len\\(f['lines']\\)\\)\\):\n    path = finfo['file']\n    lines_data = finfo['lines']\n    total = len\\(lines_data\\)\n    covered = sum\\(1 for l in lines_data if l.get\\('count', 0\\) > 0\\)\n    if total == 0: continue\n    pct = covered * 100.0 / total\n    if pct >= 100.0: continue\n    if pct < 85.0: continue\n    \n    # Show uncovered line numbers\n    uncov_lines = [l['line_number'] for l in lines_data if l.get\\('count', 0\\) == 0]\n    print\\(f'{pct:.1f}% {path} — uncovered lines: {uncov_lines}'\\)\n\" 2>&1)",
+      "Bash(/home/seb/.euxis/euxis-cpp/build-cov/euxis-bench-cpp/euxis-bench-cpp_tests --gtest_filter=\"BenchRunnerTest.ZeroDurationAutoFilled\" 2>&1 | tail -15)",
+      "Bash(/home/seb/.euxis/euxis-cpp/build-cov/euxis-core-cpp/euxis-core-cpp_tests --gtest_filter=\"CircuitBreakerTest.RecoverAfterTimeout\" 2>&1 | tail -15)",
+      "Bash(./build-cov/euxis-gateway-cpp/euxis-gateway-cpp_tests 2>&1 | grep -B3 \"FAILED\" | head -15)"
     ]
   }
 }

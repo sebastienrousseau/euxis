@@ -1,3 +1,6 @@
+#include <euxis/etx/registry.hpp>
+#include <euxis/etx/semantic_colors.hpp>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -7,10 +10,11 @@
 #include <QFrame>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
-QWidget* create_fleet_monitor_screen(QWidget* parent) {
+QWidget* create_fleet_monitor_screen(FleetRegistry* registry, QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -18,7 +22,7 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("FleetMonitorScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -32,7 +36,7 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Fleet Monitor", widget);
+    auto* title = new QLabel(QCoreApplication::translate("FleetMonitorScreen", "Fleet Monitor"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
@@ -40,7 +44,7 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
     layout->addWidget(title);
 
     // Operation type label
-    auto* op_label = new QLabel("Operation: --", widget);
+    auto* op_label = new QLabel(QCoreApplication::translate("FleetMonitorScreen", "Operation: Fleet Overview"), widget);
     op_label->setObjectName("operation_type_label");
     QFont op_font;
     op_font.setPointSize(14);
@@ -55,7 +59,7 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
     layout->addWidget(separator);
 
     // Members section
-    auto* members_label = new QLabel("Members", widget);
+    auto* members_label = new QLabel(QCoreApplication::translate("FleetMonitorScreen", "Agents"), widget);
     QFont members_font;
     members_font.setPointSize(16);
     members_font.setBold(true);
@@ -73,6 +77,20 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
         "QListWidget::item { padding: 8px 12px; border-radius: 4px; }"
         "QListWidget::item:alternate { background: rgba(255,255,255,0.02); }"
         "QListWidget::item:selected { background: rgba(15,52,96,0.6); }");
+
+    // Populate with all agents from registry
+    auto populate = [member_list, registry]() {
+        member_list->clear();
+        const auto& agents = registry->agents();
+        for (const auto& a : agents) {
+            QString display = a.name + "  [" + a.tier.toUpper() + "]  " + a.activation;
+            member_list->addItem(display);
+        }
+    };
+    populate();
+
+    QObject::connect(registry, &FleetRegistry::refreshed, widget, populate);
+
     layout->addWidget(member_list, 1);
 
     // Status section
@@ -90,9 +108,12 @@ QWidget* create_fleet_monitor_screen(QWidget* parent) {
         status_bar->addSpacing(16);
     };
 
-    add_status_indicator("Idle", "#2196f3");
-    add_status_indicator("Running", "#4caf50");
-    add_status_indicator("Error", "#f44336");
+    add_status_indicator(QCoreApplication::translate("FleetMonitorScreen", "Idle"),
+                         severity_color(Severity::Info).name());
+    add_status_indicator(QCoreApplication::translate("FleetMonitorScreen", "Running"),
+                         severity_color(Severity::Success).name());
+    add_status_indicator(QCoreApplication::translate("FleetMonitorScreen", "Error"),
+                         severity_color(Severity::Error).name());
     status_bar->addStretch();
 
     layout->addLayout(status_bar);

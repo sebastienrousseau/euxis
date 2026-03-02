@@ -74,7 +74,7 @@ void DiscordAdapter::send(const std::string& text,
     }
 
     // POST to Discord REST API
-    httplib::SSLClient cli("discord.com");
+    httplib::Client cli(!config_.api_base_url.empty() ? config_.api_base_url : "https://discord.com");
     cli.set_connection_timeout(10);
 
     httplib::Headers headers = {

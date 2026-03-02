@@ -107,12 +107,12 @@ public:
             auto* section = new QHBoxLayout();
             section->setSpacing(6);
 
-            auto* label = new QLabel("CPU", this);
+            auto* label = new QLabel(tr("CPU"), this);
             label->setFont(label_font);
             label->setStyleSheet("color: #666; background: transparent; border: none;");
             section->addWidget(label);
 
-            cpu_value_ = new QLabel("---%", this);
+            cpu_value_ = new QLabel(tr("---%"), this);
             cpu_value_->setFont(value_font);
             cpu_value_->setStyleSheet("color: #4fc3f7; background: transparent; border: none;");
             section->addWidget(cpu_value_);
@@ -128,12 +128,12 @@ public:
             auto* section = new QHBoxLayout();
             section->setSpacing(6);
 
-            auto* label = new QLabel("MEM", this);
+            auto* label = new QLabel(tr("MEM"), this);
             label->setFont(label_font);
             label->setStyleSheet("color: #666; background: transparent; border: none;");
             section->addWidget(label);
 
-            mem_value_ = new QLabel("---%", this);
+            mem_value_ = new QLabel(tr("---%"), this);
             mem_value_->setFont(value_font);
             mem_value_->setStyleSheet("color: #81c784; background: transparent; border: none;");
             section->addWidget(mem_value_);
@@ -149,12 +149,12 @@ public:
             auto* section = new QHBoxLayout();
             section->setSpacing(6);
 
-            auto* label = new QLabel("TEMP", this);
+            auto* label = new QLabel(tr("TEMP"), this);
             label->setFont(label_font);
             label->setStyleSheet("color: #666; background: transparent; border: none;");
             section->addWidget(label);
 
-            thermal_value_ = new QLabel("---C", this);
+            thermal_value_ = new QLabel(tr("---C"), this);
             thermal_value_->setFont(value_font);
             thermal_value_->setStyleSheet("color: #ffab00; background: transparent; border: none;");
             section->addWidget(thermal_value_);
@@ -192,7 +192,7 @@ private:
 #ifdef Q_OS_LINUX
         QFile file("/proc/stat");
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            cpu_value_->setText("N/A");
+            cpu_value_->setText(tr("N/A"));
             return;
         }
 
@@ -201,13 +201,13 @@ private:
         file.close();
 
         if (!line.startsWith("cpu ")) {
-            cpu_value_->setText("N/A");
+            cpu_value_->setText(tr("N/A"));
             return;
         }
 
         auto parts = line.split(' ', Qt::SkipEmptyParts);
         if (parts.size() < 8) {
-            cpu_value_->setText("N/A");
+            cpu_value_->setText(tr("N/A"));
             return;
         }
 
@@ -225,14 +225,14 @@ private:
 
         if (total_diff > 0 && prev_total_ > 0) {
             cpu_percent_ = 100.0f * (1.0f - static_cast<float>(idle_diff) / total_diff);
-            cpu_value_->setText(QString("%1%").arg(cpu_percent_, 0, 'f', 1));
+            cpu_value_->setText(tr("%1%").arg(cpu_percent_, 0, 'f', 1));
             cpu_sparkline_->add_value(cpu_percent_);
         }
 
         prev_total_ = total;
         prev_idle_ = idle;
 #else
-        cpu_value_->setText("N/A");
+        cpu_value_->setText(tr("N/A"));
 #endif
     }
 
@@ -240,7 +240,7 @@ private:
 #ifdef Q_OS_LINUX
         QFile file("/proc/meminfo");
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            mem_value_->setText("N/A");
+            mem_value_->setText(tr("N/A"));
             return;
         }
 
@@ -261,13 +261,13 @@ private:
 
         if (mem_total > 0) {
             memory_percent_ = 100.0f * (1.0f - static_cast<float>(mem_available) / mem_total);
-            mem_value_->setText(QString("%1%").arg(memory_percent_, 0, 'f', 1));
+            mem_value_->setText(tr("%1%").arg(memory_percent_, 0, 'f', 1));
             mem_sparkline_->add_value(memory_percent_);
         } else {
-            mem_value_->setText("N/A");
+            mem_value_->setText(tr("N/A"));
         }
 #else
-        mem_value_->setText("N/A");
+        mem_value_->setText(tr("N/A"));
 #endif
     }
 
@@ -275,7 +275,7 @@ private:
 #ifdef Q_OS_LINUX
         QFile file("/sys/class/thermal/thermal_zone0/temp");
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            thermal_value_->setText("N/A");
+            thermal_value_->setText(tr("N/A"));
             return;
         }
 
@@ -284,7 +284,7 @@ private:
         file.close();
 
         thermal_celsius_ = millideg / 1000.0f;
-        thermal_value_->setText(QString::fromUtf8("%1\xc2\xb0""C").arg(thermal_celsius_, 0, 'f', 0));
+        thermal_value_->setText(tr("%1\xc2\xb0""C").arg(thermal_celsius_, 0, 'f', 0));
         thermal_sparkline_->add_value(thermal_celsius_);
 
         // Color red when >= 85C
@@ -296,7 +296,7 @@ private:
                 "color: #ffab00; background: transparent; border: none;");
         }
 #else
-        thermal_value_->setText("N/A");
+        thermal_value_->setText(tr("N/A"));
 #endif
     }
 

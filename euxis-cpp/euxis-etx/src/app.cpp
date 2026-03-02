@@ -2,6 +2,9 @@
 #include <euxis/etx/theme.hpp>
 #include <euxis/etx/config.hpp>
 #include <euxis/etx/registry.hpp>
+#include <euxis/etx/chat_engine.hpp>
+#include <euxis/etx/accessibility.hpp>
+#include <euxis/etx/breadcrumb_widget.hpp>
 
 #include <QApplication>
 #include <QMessageBox>
@@ -14,27 +17,31 @@
 #include <QListWidget>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QPlainTextEdit>
+#include <QFile>
+#include <QTextStream>
 
 // Forward declarations for screen widgets
 namespace euxis::etx {
     QWidget* create_welcome_screen(EuxisApp* app, QWidget* parent);
     QWidget* create_dashboard_screen(EuxisApp* app, FleetRegistry* registry,
                                      ThemeEngine* theme, ETXConfig* config,
-                                     QWidget* parent);
+                                     ChatEngine* chat, QWidget* parent);
     QWidget* create_agent_screen(QWidget* parent);
     QWidget* create_about_screen(QWidget* parent);
-    QWidget* create_fleet_monitor_screen(QWidget* parent);
+    QWidget* create_fleet_monitor_screen(FleetRegistry* registry, QWidget* parent);
     QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
                                     QWidget* parent);
     QWidget* create_help_screen(QWidget* parent);
-    QWidget* create_logs_screen(QWidget* parent);
-    QWidget* create_playbooks_screen(QWidget* parent);
-    QWidget* create_approvals_screen(QWidget* parent);
-    QWidget* create_cortex_screen(QWidget* parent);
+    QWidget* create_logs_screen(ETXConfig* config, QWidget* parent);
+    QWidget* create_playbooks_screen(FleetRegistry* registry, QWidget* parent);
+    QWidget* create_approvals_screen(ETXConfig* config, QWidget* parent);
+    QWidget* create_cortex_screen(ETXConfig* config, QWidget* parent);
     QWidget* create_error_details_screen(QWidget* parent);
-    QWidget* create_metrics_screen(QWidget* parent);
-    QWidget* create_omnigraph_screen(QWidget* parent);
-    QWidget* create_squad_detail_screen(QWidget* parent);
+    QWidget* create_metrics_screen(FleetRegistry* registry, ETXConfig* config,
+                                   QWidget* parent);
+    QWidget* create_omnigraph_screen(FleetRegistry* registry, QWidget* parent);
+    QWidget* create_squad_detail_screen(FleetRegistry* registry, QWidget* parent);
     QWidget* create_time_travel_screen(QWidget* parent);
     QWidget* create_tool_runner_screen(QWidget* parent);
 }
@@ -46,21 +53,26 @@ EuxisApp::EuxisApp(QWidget* parent)
     , screen_stack_(new QStackedWidget(this))
     , theme_engine_(new ThemeEngine(this))
     , config_(new ETXConfig())
-    , registry_(new FleetRegistry(this))
+    , registry_(new FleetRegistry(ETXConfig::data_dir(), this))
+    , chat_engine_(new ChatEngine(ETXConfig::data_dir(), this))
 {
     setWindowTitle("Euxis ETX");
     setMinimumSize(1024, 768);
     setCentralWidget(screen_stack_);
 
+    // Register accessibility factories for custom widgets
+    a11y::register_accessibility_factories();
+
     // Index 0: Welcome
     screen_stack_->addWidget(create_welcome_screen(this, screen_stack_));
     // Index 1: Dashboard
     screen_stack_->addWidget(create_dashboard_screen(this, registry_, theme_engine_,
-                                                      config_, screen_stack_));
+                                                      config_, chat_engine_,
+                                                      screen_stack_));
     // Index 2: Agent
     screen_stack_->addWidget(create_agent_screen(screen_stack_));
     // Index 3: Fleet Monitor
-    screen_stack_->addWidget(create_fleet_monitor_screen(screen_stack_));
+    screen_stack_->addWidget(create_fleet_monitor_screen(registry_, screen_stack_));
     // Index 4: About
     screen_stack_->addWidget(create_about_screen(screen_stack_));
     // Index 5: Settings
@@ -69,21 +81,21 @@ EuxisApp::EuxisApp(QWidget* parent)
     // Index 6: Help
     screen_stack_->addWidget(create_help_screen(screen_stack_));
     // Index 7: Logs
-    screen_stack_->addWidget(create_logs_screen(screen_stack_));
+    screen_stack_->addWidget(create_logs_screen(config_, screen_stack_));
     // Index 8: Playbooks
-    screen_stack_->addWidget(create_playbooks_screen(screen_stack_));
+    screen_stack_->addWidget(create_playbooks_screen(registry_, screen_stack_));
     // Index 9: Approvals
-    screen_stack_->addWidget(create_approvals_screen(screen_stack_));
+    screen_stack_->addWidget(create_approvals_screen(config_, screen_stack_));
     // Index 10: Cortex
-    screen_stack_->addWidget(create_cortex_screen(screen_stack_));
+    screen_stack_->addWidget(create_cortex_screen(config_, screen_stack_));
     // Index 11: Error Details
     screen_stack_->addWidget(create_error_details_screen(screen_stack_));
     // Index 12: Metrics
-    screen_stack_->addWidget(create_metrics_screen(screen_stack_));
+    screen_stack_->addWidget(create_metrics_screen(registry_, config_, screen_stack_));
     // Index 13: OmniGraph
-    screen_stack_->addWidget(create_omnigraph_screen(screen_stack_));
+    screen_stack_->addWidget(create_omnigraph_screen(registry_, screen_stack_));
     // Index 14: Squad Detail
-    screen_stack_->addWidget(create_squad_detail_screen(screen_stack_));
+    screen_stack_->addWidget(create_squad_detail_screen(registry_, screen_stack_));
     // Index 15: Time Travel
     screen_stack_->addWidget(create_time_travel_screen(screen_stack_));
     // Index 16: Tool Runner
@@ -102,6 +114,24 @@ EuxisApp::EuxisApp(QWidget* parent)
 
     connect(theme_engine_, &ThemeEngine::theme_applied,
             this, &EuxisApp::theme_changed);
+
+    // Wire breadcrumb navigation (find it in the header widget)
+    auto* breadcrumb = findChild<BreadcrumbWidget*>("header_breadcrumb");
+    if (breadcrumb) {
+        breadcrumb->reset(0, screen_name_for(0));
+        connect(screen_stack_, &QStackedWidget::currentChanged, this,
+                [breadcrumb](int index) {
+            breadcrumb->navigate_to(index, screen_name_for(index));
+        });
+        connect(breadcrumb, &BreadcrumbWidget::crumb_clicked,
+                screen_stack_, &QStackedWidget::setCurrentIndex);
+    }
+}
+
+EuxisApp::~EuxisApp() {
+    if (chat_engine_) {
+        chat_engine_->shutdown();
+    }
 }
 
 void EuxisApp::show_dashboard() {
@@ -113,7 +143,6 @@ void EuxisApp::show_welcome() {
 }
 
 void EuxisApp::show_agent(const std::string& agent_id) {
-    // Update agent screen with agent info
     auto* agent_widget = screen_stack_->widget(2);
     auto* name_label = agent_widget->findChild<QLabel*>("agent_name_label");
     auto* desc_label = agent_widget->findChild<QLabel*>("agent_desc_label");
@@ -124,6 +153,44 @@ void EuxisApp::show_agent(const std::string& agent_id) {
         name_label->setText(info->name);
         desc_label->setText(info->description);
         status_label->setText("Status: " + info->status);
+
+        // Populate extended fields
+        auto* tier_label = agent_widget->findChild<QLabel*>("agent_tier_label");
+        auto* activation_label = agent_widget->findChild<QLabel*>("agent_activation_label");
+        auto* version_label = agent_widget->findChild<QLabel*>("agent_version_label");
+        auto* tags_label = agent_widget->findChild<QLabel*>("agent_tags_label");
+        auto* caps_label = agent_widget->findChild<QLabel*>("agent_caps_label");
+        auto* prompt_edit = agent_widget->findChild<QPlainTextEdit*>("agent_prompt_edit");
+
+        if (tier_label) {
+            tier_label->setText("Tier: " + info->tier.toUpper());
+        }
+        if (activation_label) {
+            activation_label->setText("Activation: " + info->activation);
+        }
+        if (version_label) {
+            version_label->setText("Version: " + info->version);
+        }
+        if (tags_label) {
+            tags_label->setText(info->tags.isEmpty() ? "No tags" : info->tags.join(", "));
+        }
+        if (caps_label) {
+            caps_label->setText(info->capability_tags.isEmpty()
+                                ? "No capabilities"
+                                : info->capability_tags.join(", "));
+        }
+        if (prompt_edit && !info->prompt_path.isEmpty()) {
+            QString full_path = ETXConfig::data_dir() + "/" + info->prompt_path;
+            QFile file(full_path);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&file);
+                prompt_edit->setPlainText(in.readAll());
+            } else {
+                prompt_edit->setPlainText("(prompt file not found: " + info->prompt_path + ")");
+            }
+        } else if (prompt_edit) {
+            prompt_edit->setPlainText("(no prompt file configured)");
+        }
     }
 
     screen_stack_->setCurrentIndex(2);
@@ -149,27 +216,21 @@ void EuxisApp::show_fleet_monitor(const std::string& operation_type,
 }
 
 void EuxisApp::setup_shortcuts() {
-    // Ctrl+K -> command palette
     auto* ctrl_k = new QShortcut(QKeySequence("Ctrl+K"), this);
     connect(ctrl_k, &QShortcut::activated, this, &EuxisApp::on_command_palette);
 
-    // Ctrl+P -> command palette
     auto* ctrl_p = new QShortcut(QKeySequence("Ctrl+P"), this);
     connect(ctrl_p, &QShortcut::activated, this, &EuxisApp::on_command_palette);
 
-    // / -> command palette
-    auto* slash = new QShortcut(QKeySequence("/"), this);
-    connect(slash, &QShortcut::activated, this, &EuxisApp::on_command_palette);
+    // Note: "/" shortcut removed — it conflicts with chat input slash commands.
+    // Use Ctrl+K or Ctrl+P instead.
 
-    // Ctrl+Q -> quit
     auto* ctrl_q = new QShortcut(QKeySequence("Ctrl+Q"), this);
     connect(ctrl_q, &QShortcut::activated, this, &QWidget::close);
 
-    // F3 -> toggle theme
     auto* f3 = new QShortcut(QKeySequence("F3"), this);
     connect(f3, &QShortcut::activated, this, &EuxisApp::on_toggle_theme);
 
-    // F5 -> refresh
     auto* f5 = new QShortcut(QKeySequence("F5"), this);
     connect(f5, &QShortcut::activated, this, &EuxisApp::on_refresh);
 }
@@ -180,13 +241,21 @@ void EuxisApp::on_toggle_theme() {
 }
 
 void EuxisApp::on_deploy_agent(const QString& agent_id, const QString& task) {
-    QMessageBox::information(this, "Deploy Agent",
-        QString("Deploying agent '%1' with task:\n%2").arg(agent_id, task));
+    chat_engine_->set_active_agent(agent_id);
+    chat_engine_->send_message(task, agent_id);
+    show_dashboard();
 }
 
 void EuxisApp::on_deploy_squad(const QString& squad_id, const QString& task) {
-    QMessageBox::information(this, "Deploy Squad",
-        QString("Deploying squad '%1' with task:\n%2").arg(squad_id, task));
+    // Route squad tasks through the squad lead agent
+    const auto* squad = registry_->find_squad(squad_id);
+    if (squad && !squad->lead.isEmpty()) {
+        chat_engine_->set_active_agent(squad->lead);
+        chat_engine_->send_message(task, squad->lead);
+    } else {
+        chat_engine_->send_message(task);
+    }
+    show_dashboard();
 }
 
 void EuxisApp::on_refresh() {
@@ -298,6 +367,32 @@ void EuxisApp::suggest_calm_theme() {
         theme_engine_->apply_theme("calm");
         config_->set_theme("calm");
     }
+}
+
+auto EuxisApp::screen_name_for(int index) -> QString {
+    static const QStringList names = {
+        "Welcome",       // 0
+        "Dashboard",     // 1
+        "Agent",         // 2
+        "Fleet Monitor", // 3
+        "About",         // 4
+        "Settings",      // 5
+        "Help",          // 6
+        "Logs",          // 7
+        "Playbooks",     // 8
+        "Approvals",     // 9
+        "Cortex",        // 10
+        "Error Details", // 11
+        "Metrics",       // 12
+        "OmniGraph",     // 13
+        "Squad Detail",  // 14
+        "Time Travel",   // 15
+        "Tool Runner",   // 16
+    };
+    if (index >= 0 && index < names.size()) {
+        return names[index];
+    }
+    return QString("Screen %1").arg(index);
 }
 
 } // namespace euxis::etx

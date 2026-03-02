@@ -1,0 +1,22 @@
+{
+  "description": "Minimum expected test counts per module. CI fails if any drops below.",
+  "modules": {
+    "euxis-crypto-cpp_tests": 5,
+    "euxis-memory-cpp_tests": 5,
+    "euxis-bridge-cpp_tests": 5,
+    "euxis-identity-cpp_tests": 3,
+    "euxis-inference-cpp_tests": 3,
+    "euxis-a2a-cpp_tests": 3,
+    "euxis-security-cpp_tests": 3,
+    "euxis-scripts-cpp_tests": 3,
+    "euxis-runtime-cpp_tests": 3,
+    "euxis-metrics-cpp_tests": 10,
+    "euxis-core-cpp_tests": 8,
+    "euxis-adapters-cpp_tests": 3,
+    "euxis-gateway-cpp_tests": 3,
+    "euxis-cli-cpp_tests": 10,
+    "euxis-bench-cpp_tests": 3,
+    "euxis-etx-tests": 3,
+    "euxis-integration-tests": 15
+  }
+}

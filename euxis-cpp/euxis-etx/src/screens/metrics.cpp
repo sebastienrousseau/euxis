@@ -1,3 +1,8 @@
+#include <euxis/etx/registry.hpp>
+#include <euxis/etx/config.hpp>
+#include <euxis/etx/semantic_colors.hpp>
+
+#include <nlohmann/json.hpp>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -10,10 +15,15 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QShortcut>
+#include <QFile>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
-QWidget* create_metrics_screen(QWidget* parent) {
+using json = nlohmann::json;
+
+QWidget* create_metrics_screen(FleetRegistry* registry, ETXConfig* /*config*/,
+                               QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -21,7 +31,7 @@ QWidget* create_metrics_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("MetricsScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -35,14 +45,14 @@ QWidget* create_metrics_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Performance Metrics", widget);
+    auto* title = new QLabel(QCoreApplication::translate("MetricsScreen", "Fleet Metrics"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
 
-    // Summary section
+    // Summary section — real counts from registry
     auto* summary_card = new QFrame(widget);
     summary_card->setObjectName("metrics_summary");
     summary_card->setFrameShape(QFrame::StyledPanel);
@@ -71,25 +81,100 @@ QWidget* create_metrics_screen(QWidget* parent) {
         summary_layout->addLayout(stat_box);
     };
 
-    add_stat("Total Runs", "1,247", "#4caf50");
-    add_stat("Agents Used", "8", "#2196f3");
-    add_stat("Avg Time", "2.3s", "#ff9800");
+    add_stat(QCoreApplication::translate("MetricsScreen", "Agents"),
+             QString::number(registry->agent_count()),
+             severity_color(Severity::Info).name());
+    add_stat(QCoreApplication::translate("MetricsScreen", "Squads"),
+             QString::number(registry->squad_count()),
+             severity_color(Severity::Success).name());
+    add_stat(QCoreApplication::translate("MetricsScreen", "Combos"),
+             QString::number(registry->combo_count()),
+             severity_color(Severity::Warning).name());
+    add_stat(QCoreApplication::translate("MetricsScreen", "Playbooks"),
+             QString::number(static_cast<int>(registry->playbooks().size())),
+             "#9c27b0");  // purple — no severity equivalent
 
     summary_layout->addStretch();
     layout->addWidget(summary_card);
 
-    // Per-agent stats table
-    auto* table_label = new QLabel("Per-Agent Statistics", widget);
-    QFont table_label_font;
-    table_label_font.setPointSize(16);
-    table_label_font.setBold(true);
-    table_label->setFont(table_label_font);
-    layout->addWidget(table_label);
+    // Provider tier table from router.json
+    auto* provider_label = new QLabel(QCoreApplication::translate("MetricsScreen", "Router Configuration"), widget);
+    QFont provider_font;
+    provider_font.setPointSize(16);
+    provider_font.setBold(true);
+    provider_label->setFont(provider_font);
+    layout->addWidget(provider_label);
+
+    // Load router.json
+    auto* router_table = new QTableWidget(widget);
+    router_table->setObjectName("router_table");
+    router_table->setColumnCount(3);
+    router_table->setHorizontalHeaderLabels({
+        QCoreApplication::translate("MetricsScreen", "Tier"),
+        QCoreApplication::translate("MetricsScreen", "Model"),
+        QCoreApplication::translate("MetricsScreen", "Cost ($/M tokens)")});
+    router_table->horizontalHeader()->setStretchLastSection(true);
+    router_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    router_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    router_table->verticalHeader()->setVisible(false);
+    router_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    router_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    router_table->setAlternatingRowColors(true);
+    router_table->setShowGrid(false);
+
+    QString router_path = ETXConfig::data_dir() + "/config/router.json";
+    QFile router_file(router_path);
+    if (router_file.open(QIODevice::ReadOnly)) {
+        try {
+            auto doc = json::parse(router_file.readAll().toStdString());
+            auto models = doc.value("models", json::object());
+            auto costs = doc.value("cost_estimates", json::object());
+
+            QStringList tiers = {"routine", "data", "code", "reason"};
+            router_table->setRowCount(tiers.size());
+
+            for (int i = 0; i < tiers.size(); ++i) {
+                std::string tier = tiers[i].toStdString();
+                router_table->setItem(i, 0, new QTableWidgetItem(tiers[i]));
+                router_table->setItem(i, 1, new QTableWidgetItem(
+                    QString::fromStdString(models.value(tier, ""))));
+                double cost = costs.value(tier, 0.0);
+                router_table->setItem(i, 2, new QTableWidgetItem(
+                    QString("$%1").arg(cost, 0, 'f', 2)));
+                router_table->setRowHeight(i, 36);
+            }
+        } catch (const json::exception&) {
+            // Ignore parse errors
+        }
+    }
+
+    router_table->setMaximumHeight(200);
+    router_table->setStyleSheet(
+        "QTableWidget { background: rgba(255,255,255,0.03); "
+        "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }"
+        "QTableWidget::item { padding: 8px; }"
+        "QTableWidget::item:alternate { background: rgba(255,255,255,0.02); }"
+        "QTableWidget::item:selected { background: rgba(15,52,96,0.6); }"
+        "QHeaderView::section { background: rgba(255,255,255,0.05); "
+        "padding: 8px; border: none; font-weight: bold; }");
+    layout->addWidget(router_table);
+
+    // Agent table — all agents with tier/activation/tags
+    auto* agent_label = new QLabel(QCoreApplication::translate("MetricsScreen", "All Agents"), widget);
+    QFont agent_label_font;
+    agent_label_font.setPointSize(16);
+    agent_label_font.setBold(true);
+    agent_label->setFont(agent_label_font);
+    layout->addWidget(agent_label);
 
     auto* table = new QTableWidget(widget);
     table->setObjectName("metrics_table");
     table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"Agent", "Runs", "Avg Duration", "Status"});
+    table->setHorizontalHeaderLabels({
+        QCoreApplication::translate("MetricsScreen", "Agent"),
+        QCoreApplication::translate("MetricsScreen", "Tier"),
+        QCoreApplication::translate("MetricsScreen", "Activation"),
+        QCoreApplication::translate("MetricsScreen", "Tags")});
     table->horizontalHeader()->setStretchLastSection(true);
     table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -100,99 +185,31 @@ QWidget* create_metrics_screen(QWidget* parent) {
     table->setAlternatingRowColors(true);
     table->setShowGrid(false);
 
-    struct AgentStats {
-        QString name;
-        int runs;
-        QString avg_duration;
-        QString status;
-        QString status_color;
-    };
+    const auto& agents = registry->agents();
+    table->setRowCount(static_cast<int>(agents.size()));
+    for (int i = 0; i < static_cast<int>(agents.size()); ++i) {
+        const auto& a = agents[static_cast<size_t>(i)];
+        table->setItem(i, 0, new QTableWidgetItem(a.name));
 
-    QList<AgentStats> stats = {
-        {"code-agent",      412, "1.8s", "running",  "#4caf50"},
-        {"research-agent",  287, "3.1s", "running",  "#4caf50"},
-        {"security-agent",  198, "2.7s", "idle",     "#2196f3"},
-        {"bridge-agent",    156, "1.4s", "running",  "#4caf50"},
-        {"identity-agent",  194, "2.9s", "error",    "#f44336"},
-    };
+        auto* tier_item = new QTableWidgetItem(a.tier.toUpper());
+        tier_item->setForeground(a.tier == "core" ? QColor("#6db3f2") : QColor("#888"));
+        table->setItem(i, 1, tier_item);
 
-    table->setRowCount(stats.size());
-    for (int i = 0; i < stats.size(); ++i) {
-        table->setItem(i, 0, new QTableWidgetItem(stats[i].name));
-        table->setItem(i, 1, new QTableWidgetItem(QString::number(stats[i].runs)));
-        table->setItem(i, 2, new QTableWidgetItem(stats[i].avg_duration));
-
-        auto* status_item = new QTableWidgetItem(stats[i].status);
-        status_item->setForeground(QColor(stats[i].status_color));
-        table->setItem(i, 3, status_item);
-
-        table->setRowHeight(i, 40);
+        table->setItem(i, 2, new QTableWidgetItem(a.activation));
+        table->setItem(i, 3, new QTableWidgetItem(a.tags.join(", ")));
+        table->setRowHeight(i, 32);
     }
 
     table->setStyleSheet(
         "QTableWidget { background: rgba(255,255,255,0.03); "
         "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }"
-        "QTableWidget::item { padding: 8px; }"
+        "QTableWidget::item { padding: 6px; }"
         "QTableWidget::item:alternate { background: rgba(255,255,255,0.02); }"
         "QTableWidget::item:selected { background: rgba(15,52,96,0.6); }"
         "QHeaderView::section { background: rgba(255,255,255,0.05); "
         "padding: 8px; border: none; font-weight: bold; }");
 
     layout->addWidget(table, 1);
-
-    // Provider distribution
-    auto* provider_label = new QLabel("Provider Distribution", widget);
-    QFont provider_font;
-    provider_font.setPointSize(16);
-    provider_font.setBold(true);
-    provider_label->setFont(provider_font);
-    layout->addWidget(provider_label);
-
-    auto* provider_card = new QFrame(widget);
-    provider_card->setObjectName("provider_card");
-    provider_card->setFrameShape(QFrame::StyledPanel);
-    auto* provider_layout = new QVBoxLayout(provider_card);
-    provider_layout->setContentsMargins(20, 16, 20, 16);
-    provider_layout->setSpacing(12);
-
-    struct Provider {
-        QString name;
-        int percentage;
-        QString color;
-    };
-
-    QList<Provider> providers = {
-        {"Anthropic (Claude)",  62, "#0f3460"},
-        {"Local Inference",     25, "#4caf50"},
-        {"OpenAI (Fallback)",   13, "#ff9800"},
-    };
-
-    for (const auto& p : providers) {
-        auto* row = new QHBoxLayout();
-        row->setSpacing(12);
-
-        auto* name = new QLabel(p.name, provider_card);
-        name->setFixedWidth(180);
-        name->setStyleSheet("color: #ccc; font-size: 13px;");
-        row->addWidget(name);
-
-        auto* bar = new QProgressBar(provider_card);
-        bar->setRange(0, 100);
-        bar->setValue(p.percentage);
-        bar->setFormat(QString("%1%").arg(p.percentage));
-        bar->setMinimumHeight(24);
-        bar->setStyleSheet(
-            QString("QProgressBar { background: rgba(255,255,255,0.05); "
-                    "border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; "
-                    "text-align: center; color: #ccc; }"
-                    "QProgressBar::chunk { background: %1; border-radius: 3px; }")
-            .arg(p.color));
-        row->addWidget(bar);
-
-        provider_layout->addLayout(row);
-    }
-
-    layout->addWidget(provider_card);
 
     // Escape to go back
     auto* shortcut_esc = new QShortcut(QKeySequence(Qt::Key_Escape), widget);

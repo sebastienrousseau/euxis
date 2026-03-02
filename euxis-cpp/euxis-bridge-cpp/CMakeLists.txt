@@ -35,4 +35,5 @@ euxis_add_library(euxis-bridge-cpp
     tests/test_provenance.cpp
     tests/test_audit.cpp
     tests/test_executor.cpp
+    tests/test_platform.cpp
 )

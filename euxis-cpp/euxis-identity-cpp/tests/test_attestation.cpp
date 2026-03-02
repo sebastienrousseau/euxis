@@ -145,5 +145,53 @@ TEST_F(AttestationTest, ToJsonEmptyEvidence) {
     EXPECT_EQ(j["evidence"], "");
 }
 
+// --- Coverage: lines 58-60 (attestation with boundary confidence values) ---
+TEST_F(AttestationTest, ConfidenceExactBoundaryValues) {
+    // Exactly 0.0 and 1.0 should not throw (boundary conditions)
+    auto att_zero = create_attestation("did:a", "did:b", "test", 0.0);
+    EXPECT_DOUBLE_EQ(att_zero.confidence, 0.0);
+    EXPECT_FALSE(att_zero.id.empty());
+
+    auto att_one = create_attestation("did:a", "did:b", "test", 1.0);
+    EXPECT_DOUBLE_EQ(att_one.confidence, 1.0);
+    EXPECT_FALSE(att_one.id.empty());
+}
+
+// --- Coverage: line 63 (create_attestation all fields populated) ---
+TEST_F(AttestationTest, AllFieldsPopulatedAfterCreate) {
+    auto att = create_attestation(
+        "did:euxis:full-attester",
+        "did:euxis:full-subject",
+        "reliability",
+        0.99,
+        "comprehensive evidence string");
+
+    EXPECT_EQ(att.attester_did, "did:euxis:full-attester");
+    EXPECT_EQ(att.subject_did, "did:euxis:full-subject");
+    EXPECT_EQ(att.attestation_type, "reliability");
+    EXPECT_DOUBLE_EQ(att.confidence, 0.99);
+    EXPECT_EQ(att.evidence, "comprehensive evidence string");
+    EXPECT_FALSE(att.created_at.empty());
+    EXPECT_FALSE(att.id.empty());
+}
+
+// --- Coverage: line 68 (large negative confidence) ---
+TEST_F(AttestationTest, LargeNegativeConfidenceThrows) {
+    EXPECT_THROW(
+        (void)create_attestation("did:a", "did:b", "test", -100.0),
+        std::invalid_argument);
+}
+
+// --- Coverage: UUID format of attestation id ---
+TEST_F(AttestationTest, AttestationIdFormat) {
+    auto att = create_attestation("did:a", "did:b", "test", 0.5);
+    // UUID format: 8-4-4-4-12 = 36 chars
+    EXPECT_EQ(att.id.size(), 36u);
+    EXPECT_EQ(att.id[8], '-');
+    EXPECT_EQ(att.id[13], '-');
+    EXPECT_EQ(att.id[18], '-');
+    EXPECT_EQ(att.id[23], '-');
+}
+
 } // namespace
 } // namespace euxis::identity

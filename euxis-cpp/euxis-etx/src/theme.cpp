@@ -48,4 +48,10 @@ auto ThemeEngine::load_stylesheet(const QString& name) const -> QString {
     return stream.readAll();
 }
 
+auto ThemeEngine::semantic_overrides() const -> QHash<QString, QColor> {
+    // Extension point: themes can override severity colors.
+    // Returns empty by default (use built-in semantic_colors defaults).
+    return {};
+}
+
 } // namespace euxis::etx

@@ -168,5 +168,80 @@ TEST_F(AesGcmTest, UniqueIVs) {
     EXPECT_NE(enc1->ciphertext, enc2->ciphertext);
 }
 
+// ---------------------------------------------------------------------------
+// decrypt with too-short ciphertext fails (covers line 91)
+// ---------------------------------------------------------------------------
+TEST_F(AesGcmTest, DecryptTooShortCiphertext) {
+    const auto key = random_key();
+    // Ciphertext shorter than 16 bytes (the auth tag size)
+    std::vector<std::byte> short_ct(10, std::byte{0x42});
+    std::array<std::byte, 12> iv{};
+    randombytes_buf(iv.data(), iv.size());
+
+    auto dec = decrypt(short_ct, key, iv);
+    ASSERT_FALSE(dec.has_value());
+    EXPECT_EQ(dec.error(), CryptoError::DecryptionFailed);
+}
+
+// ---------------------------------------------------------------------------
+// encrypt_aad / decrypt_aad roundtrip (covers lines 146, 163)
+// ---------------------------------------------------------------------------
+TEST_F(AesGcmTest, EncryptDecryptAadRoundtrip) {
+    const auto key = random_key();
+    const auto plaintext = as_bytes("AAD protected data");
+    const auto aad = as_bytes("additional-auth-data");
+
+    auto enc = encrypt_aad(plaintext, key, aad);
+    ASSERT_TRUE(enc.has_value()) << to_string(enc.error());
+
+    auto dec = decrypt_aad(enc->ciphertext, key, enc->iv, aad);
+    ASSERT_TRUE(dec.has_value()) << to_string(dec.error());
+    EXPECT_EQ(dec->plaintext, plaintext);
+    EXPECT_EQ(dec->to_string(), "AAD protected data");
+}
+
+// ---------------------------------------------------------------------------
+// decrypt_aad with wrong AAD fails authentication (covers line 163)
+// ---------------------------------------------------------------------------
+TEST_F(AesGcmTest, DecryptAadWrongAadFails) {
+    const auto key = random_key();
+    const auto plaintext = as_bytes("secret");
+    const auto aad = as_bytes("correct-aad");
+    const auto wrong_aad = as_bytes("wrong-aad");
+
+    auto enc = encrypt_aad(plaintext, key, aad);
+    ASSERT_TRUE(enc.has_value());
+
+    auto dec = decrypt_aad(enc->ciphertext, key, enc->iv, wrong_aad);
+    ASSERT_FALSE(dec.has_value());
+    EXPECT_EQ(dec.error(), CryptoError::AuthenticationFailed);
+}
+
+// ---------------------------------------------------------------------------
+// decrypt_aad with too-short ciphertext (covers line 163)
+// ---------------------------------------------------------------------------
+TEST_F(AesGcmTest, DecryptAadTooShortCiphertext) {
+    const auto key = random_key();
+    std::vector<std::byte> short_ct(5, std::byte{0x00});
+    std::array<std::byte, 12> iv{};
+    randombytes_buf(iv.data(), iv.size());
+    const auto aad = as_bytes("some-aad");
+
+    auto dec = decrypt_aad(short_ct, key, iv, aad);
+    ASSERT_FALSE(dec.has_value());
+    EXPECT_EQ(dec.error(), CryptoError::DecryptionFailed);
+}
+
+// --- Coverage: errors.hpp lines 21-29 (to_string all CryptoError enum values) ---
+TEST_F(AesGcmTest, CryptoErrorToStringAllValues) {
+    EXPECT_EQ(to_string(CryptoError::InvalidKeySize), "Invalid key size");
+    EXPECT_EQ(to_string(CryptoError::InvalidIVSize), "Invalid IV size");
+    EXPECT_EQ(to_string(CryptoError::EncryptionFailed), "Encryption failed");
+    EXPECT_EQ(to_string(CryptoError::DecryptionFailed), "Decryption failed");
+    EXPECT_EQ(to_string(CryptoError::AuthenticationFailed), "Authentication failed");
+    EXPECT_EQ(to_string(CryptoError::InvalidSignature), "Invalid signature");
+    EXPECT_EQ(to_string(CryptoError::KeyDerivationFailed), "Key derivation failed");
+}
+
 } // namespace
 } // namespace euxis::crypto

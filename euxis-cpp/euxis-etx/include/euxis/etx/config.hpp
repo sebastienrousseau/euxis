@@ -17,6 +17,11 @@ public:
     [[nodiscard]] auto show_tips() const -> bool;
     void set_show_tips(bool show);
 
+    // Path resolution
+    [[nodiscard]] static auto euxis_home() -> QString;
+    [[nodiscard]] static auto data_dir() -> QString;
+    [[nodiscard]] static auto runtime_dir() -> QString;
+
 private:
     QSettings settings_;
 };

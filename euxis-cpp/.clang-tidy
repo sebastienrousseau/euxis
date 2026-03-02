@@ -14,7 +14,7 @@ Checks: >
   -misc-non-private-member-variables-in-classes,
   -cppcoreguidelines-non-private-member-variables-in-classes
 
-WarningsAsErrors: ''
+WarningsAsErrors: 'bugprone-*,clang-analyzer-*'
 
 HeaderFilterRegex: 'include/euxis/.*\.hpp$'
 

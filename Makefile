@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean cpp-format cpp-format-check cpp-tidy cpp-coverage
 
 # Conservative default for laptop thermals/memory; override per run as needed.
 CPP_BUILD_JOBS ?= 4
@@ -272,3 +272,30 @@ cpp-bench: cpp-build
 
 cpp-clean:
 	rm -rf euxis-cpp/build
+
+# C++ style guide enforcement (Google C++ Style via clang-format/clang-tidy)
+cpp-format:
+	find euxis-cpp -name '*.cpp' -o -name '*.hpp' | grep -v build/ | xargs clang-format -i --style=file:euxis-cpp/.clang-format
+
+cpp-format-check:
+	find euxis-cpp -name '*.cpp' -o -name '*.hpp' | grep -v build/ | xargs clang-format --dry-run --Werror --style=file:euxis-cpp/.clang-format
+
+cpp-tidy: cpp-build
+	find euxis-cpp -name '*.cpp' | grep -v build/ | grep -v tests/ | \
+		xargs -P $(CPP_BUILD_JOBS) -I{} clang-tidy {} -p euxis-cpp/build --config-file=euxis-cpp/.clang-tidy
+
+# C++ code coverage (requires lcov; run after cpp-test)
+cpp-coverage:
+	cmake -B euxis-cpp/build -S euxis-cpp \
+		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DEUXIS_COVERAGE=ON -DEUXIS_DISABLE_SANITIZERS=ON \
+		$(if $(shell command -v ccache 2>/dev/null),-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache,)
+	cmake --build euxis-cpp/build --parallel $(CPP_BUILD_JOBS)
+	ctest --test-dir euxis-cpp/build --output-on-failure
+	lcov --capture --directory euxis-cpp/build --output-file euxis-cpp/build/coverage.info \
+		--ignore-errors mismatch
+	lcov --remove euxis-cpp/build/coverage.info '/usr/*' '*/vcpkg_installed/*' '*/tests/*' '*/build/*' \
+		--output-file euxis-cpp/build/coverage-filtered.info --ignore-errors unused
+	genhtml euxis-cpp/build/coverage-filtered.info --output-directory euxis-cpp/build/coverage-report
+	@echo "Coverage report: euxis-cpp/build/coverage-report/index.html"

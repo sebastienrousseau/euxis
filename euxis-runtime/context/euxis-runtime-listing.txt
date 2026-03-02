@@ -1,0 +1,7 @@
+# Context listing for euxis-runtime
+
+  memory/
+  memory/cortex/
+  memory/cortex/entries.json (3 bytes)
+  context/
+  context/euxis-data-listing.txt (10781 bytes)

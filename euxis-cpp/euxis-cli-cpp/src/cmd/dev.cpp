@@ -1,4 +1,5 @@
 #include "euxis/cli/cmd/dev.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/terminal.hpp"
 
@@ -7,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <chrono>
+
+using euxis::cli::i18n::tr;
 
 namespace euxis::cli::cmd {
 namespace {
@@ -27,8 +30,8 @@ int cmd_bench(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << term::bold("Benchmark: ") << target << "\n"
-              << "  Iterations: " << iterations << "\n\n";
+    std::cout << term::bold(tr("Benchmark:")) << " " << target << "\n"
+              << "  " << tr("Iterations:") << " " << iterations << "\n\n";
 
     // Built-in benchmarks
     if (target == "all" || target == "registry") {
@@ -42,7 +45,7 @@ int cmd_bench(Context& ctx, const std::vector<std::string>& args) {
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - start);
-        std::cout << "  registry.json parse: "
+        std::cout << "  " << tr("registry.json parse:") << " "
                   << (elapsed.count() / iterations) << " us/iter\n";
     }
 
@@ -53,7 +56,7 @@ int cmd_bench(Context& ctx, const std::vector<std::string>& args) {
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - start);
-        std::cout << "  process spawn: "
+        std::cout << "  " << tr("process spawn:") << " "
                   << (elapsed.count() / iterations) << " us/iter\n";
     }
 
@@ -65,11 +68,11 @@ int cmd_bench(Context& ctx, const std::vector<std::string>& args) {
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
             std::chrono::steady_clock::now() - start);
-        std::cout << "  filesystem check: "
+        std::cout << "  " << tr("filesystem check:") << " "
                   << (elapsed.count() / iterations) << " us/iter\n";
     }
 
-    std::cout << "\n" << term::icon_ok() << " Benchmark complete\n";
+    std::cout << "\n" << term::icon_ok() << " " << tr("Benchmark complete") << "\n";
     return 0;
 }
 
@@ -80,20 +83,20 @@ int cmd_hooks(Context& ctx, const std::vector<std::string>& args) {
     auto git_hooks_dir = fs::path(ctx.euxis_home) / ".git" / "hooks";
 
     if (args.empty() || args[0] == "list") {
-        std::cout << term::bold("Git Hooks") << "\n\n";
+        std::cout << term::bold(tr("Git Hooks")) << "\n\n";
         if (fs::is_directory(hooks_dir)) {
             for (const auto& entry : fs::directory_iterator(hooks_dir)) {
                 std::cout << "  " << entry.path().filename().string() << "\n";
             }
         } else {
-            std::cout << "  No hooks directory\n";
+            std::cout << "  " << tr("No hooks directory") << "\n";
         }
         return 0;
     }
 
     if (args[0] == "install") {
         if (!fs::is_directory(hooks_dir)) {
-            std::cerr << "No hooks to install\n";
+            std::cerr << tr("No hooks to install") << "\n";
             return 1;
         }
         fs::create_directories(git_hooks_dir);
@@ -105,11 +108,11 @@ int cmd_hooks(Context& ctx, const std::vector<std::string>& args) {
                                    fs::perms::owner_write, fs::perm_options::add);
             ++installed;
         }
-        std::cout << term::icon_ok() << " Installed " << installed << " hook(s)\n";
+        std::cout << term::icon_ok() << " " << tr("Installed") << " " << installed << " " << tr("hook(s)") << "\n";
         return 0;
     }
 
-    std::cerr << "Usage: euxis hooks <list|install>\n";
+    std::cerr << tr("Usage: euxis hooks <list|install>") << "\n";
     return 2;
 }
 
@@ -120,8 +123,8 @@ int cmd_setup_shell_hooks(Context& ctx, const std::vector<std::string>& args) {
     const char* shell = std::getenv("SHELL");
     std::string shell_name = shell ? fs::path(shell).filename().string() : "unknown";
 
-    std::cout << term::bold("Shell Hook Setup") << "\n"
-              << "  Shell: " << shell_name << "\n\n";
+    std::cout << term::bold(tr("Shell Hook Setup")) << "\n"
+              << "  " << tr("Shell:") << " " << shell_name << "\n\n";
 
     auto bin_path = fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-cli-cpp" / "euxis-cli";
     if (!fs::exists(bin_path)) {
@@ -129,17 +132,17 @@ int cmd_setup_shell_hooks(Context& ctx, const std::vector<std::string>& args) {
     }
 
     if (shell_name == "bash") {
-        std::cout << "Add to ~/.bashrc:\n\n"
+        std::cout << tr("Add to ~/.bashrc:") << "\n\n"
                   << "  export PATH=\"" << bin_path.parent_path().string() << ":$PATH\"\n"
-                  << "  # Optional: source euxis completions\n";
+                  << "  # " << tr("Optional: source euxis completions") << "\n";
     } else if (shell_name == "zsh") {
-        std::cout << "Add to ~/.zshrc:\n\n"
+        std::cout << tr("Add to ~/.zshrc:") << "\n\n"
                   << "  export PATH=\"" << bin_path.parent_path().string() << ":$PATH\"\n";
     } else if (shell_name == "fish") {
-        std::cout << "Run:\n\n"
+        std::cout << tr("Run:") << "\n\n"
                   << "  fish_add_path " << bin_path.parent_path().string() << "\n";
     } else {
-        std::cout << "Add to your shell config:\n"
+        std::cout << tr("Add to your shell config:") << "\n"
                   << "  export PATH=\"" << bin_path.parent_path().string() << ":$PATH\"\n";
     }
 
@@ -153,20 +156,20 @@ int cmd_git_guard(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
     if (!Process::available("git")) {
-        std::cerr << "git not found\n";
+        std::cerr << tr("git not found") << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Git Guard") << "\n\n";
+    std::cout << term::bold(tr("Git Guard")) << "\n\n";
     int issues = 0;
 
     // Check for uncommitted changes
     auto status = Process::run("git", {"status", "--porcelain"});
     if (!status.stdout_output.empty()) {
-        std::cout << "  " << term::icon_warn() << " Uncommitted changes detected\n";
+        std::cout << "  " << term::icon_warn() << " " << tr("Uncommitted changes detected") << "\n";
         ++issues;
     } else {
-        std::cout << "  " << term::icon_ok() << " Working tree clean\n";
+        std::cout << "  " << term::icon_ok() << " " << tr("Working tree clean") << "\n";
     }
 
     // Check branch
@@ -175,9 +178,9 @@ int cmd_git_guard(Context& ctx, const std::vector<std::string>& args) {
         auto name = branch.stdout_output;
         while (!name.empty() && (name.back() == '\n' || name.back() == '\r'))
             name.pop_back();
-        std::cout << "  " << term::icon_info() << " Branch: " << name << "\n";
+        std::cout << "  " << term::icon_info() << " " << tr("Branch:") << " " << name << "\n";
         if (name == "main" || name == "master") {
-            std::cout << "  " << term::icon_warn() << " Working on protected branch\n";
+            std::cout << "  " << term::icon_warn() << " " << tr("Working on protected branch") << "\n";
             ++issues;
         }
     }
@@ -185,13 +188,13 @@ int cmd_git_guard(Context& ctx, const std::vector<std::string>& args) {
     // Check for large files
     auto diff = Process::run("git", {"diff", "--cached", "--stat"});
     if (!diff.stdout_output.empty() && ctx.verbose) {
-        std::cout << "  Staged changes:\n" << diff.stdout_output;
+        std::cout << "  " << tr("Staged changes:") << "\n" << diff.stdout_output;
     }
 
     if (issues == 0) {
-        std::cout << "\n" << term::green("Git guard passed") << "\n";
+        std::cout << "\n" << term::green(tr("Git guard passed")) << "\n";
     } else {
-        std::cout << "\n" << term::yellow(std::to_string(issues) + " concern(s)") << "\n";
+        std::cout << "\n" << term::yellow(std::to_string(issues) + " " + tr("concern(s)")) << "\n";
     }
     return 0;
 }
@@ -201,7 +204,7 @@ int cmd_git_guard(Context& ctx, const std::vector<std::string>& args) {
 int cmd_license_check(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
-    std::cout << term::bold("License Check") << "\n\n";
+    std::cout << term::bold(tr("License Check")) << "\n\n";
 
     auto root = fs::path(ctx.euxis_home);
     int found = 0;
@@ -215,7 +218,7 @@ int cmd_license_check(Context& ctx, const std::vector<std::string>& args) {
         }
     }
     if (found == 0) {
-        std::cout << "  " << term::icon_fail() << " No LICENSE file found\n";
+        std::cout << "  " << term::icon_fail() << " " << tr("No LICENSE file found") << "\n";
         ++missing;
     }
 
@@ -237,8 +240,8 @@ int cmd_license_check(Context& ctx, const std::vector<std::string>& args) {
                 }
             }
         }
-        std::cout << "  " << term::icon_info() << " Source files: " << checked
-                  << " checked, " << with_header << " with headers\n";
+        std::cout << "  " << term::icon_info() << " " << tr("Source files:") << " " << checked
+                  << " " << tr("checked,") << " " << with_header << " " << tr("with headers") << "\n";
     }
 
     return missing > 0 ? 1 : 0;
@@ -249,11 +252,11 @@ int cmd_license_check(Context& ctx, const std::vector<std::string>& args) {
 int cmd_docs_test(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
-    std::cout << term::bold("Documentation Tests") << "\n\n";
+    std::cout << term::bold(tr("Documentation Tests")) << "\n\n";
 
     auto docs_dir = fs::path(ctx.euxis_home) / "docs";
     if (!fs::is_directory(docs_dir)) {
-        std::cout << "  No docs/ directory\n";
+        std::cout << "  " << tr("No docs/ directory") << "\n";
         return 0;
     }
 
@@ -295,23 +298,23 @@ int cmd_docs_test(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << "  Files checked: " << total << "\n"
-              << "  Broken links:  " << issues << "\n\n";
-    std::cout << (issues == 0 ? term::green("Docs OK") : term::yellow(std::to_string(issues) + " issue(s)")) << "\n";
+    std::cout << "  " << tr("Files checked:") << " " << total << "\n"
+              << "  " << tr("Broken links:") << "  " << issues << "\n\n";
+    std::cout << (issues == 0 ? term::green(tr("Docs OK")) : term::yellow(std::to_string(issues) + " " + tr("issue(s)"))) << "\n";
     return issues > 0 ? 1 : 0;
 }
 
 // --- sync-docs ---
 
 int cmd_sync_docs(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Sync Documentation") << "\n\n";
+    std::cout << term::bold(tr("Sync Documentation")) << "\n\n";
 
     auto docs_dir = fs::path(ctx.euxis_home) / "docs";
     auto output_dir = fs::path(ctx.euxis_home) / "euxis-data" / "docs";
     auto man_dir = output_dir / "man";
 
     if (!fs::is_directory(docs_dir)) {
-        std::cout << "  " << term::icon_fail() << " No docs/ directory found\n";
+        std::cout << "  " << term::icon_fail() << " " << tr("No docs/ directory found") << "\n";
         return 1;
     }
 
@@ -362,18 +365,18 @@ int cmd_sync_docs(Context& ctx, const std::vector<std::string>& /*args*/) {
 
     // Summary
     std::cout << "\n";
-    std::cout << "  Synced: " << synced << " file(s) -> "
+    std::cout << "  " << tr("Synced:") << " " << synced << " " << tr("file(s)") << " -> "
               << output_dir.string() << "\n";
     if (has_pandoc) {
-        std::cout << "  Man pages: " << man_pages << " generated -> "
+        std::cout << "  " << tr("Man pages:") << " " << man_pages << " " << tr("generated") << " -> "
                   << man_dir.string() << "\n";
     } else {
         std::cout << "  " << term::icon_info()
-                  << " pandoc not found (man page generation skipped)\n";
+                  << " " << tr("pandoc not found (man page generation skipped)") << "\n";
     }
 
-    std::cout << "\n" << (synced > 0 ? term::green("Sync complete") :
-                          term::yellow("Nothing to sync")) << "\n";
+    std::cout << "\n" << (synced > 0 ? term::green(tr("Sync complete")) :
+                          term::yellow(tr("Nothing to sync"))) << "\n";
     return 0;
 }
 
@@ -382,7 +385,7 @@ int cmd_sync_docs(Context& ctx, const std::vector<std::string>& /*args*/) {
 int cmd_test_infra(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
-    std::cout << term::bold("Infrastructure Test Suite") << "\n\n";
+    std::cout << term::bold(tr("Infrastructure Test Suite")) << "\n\n";
 
     struct InfraTest {
         std::string name;
@@ -390,11 +393,11 @@ int cmd_test_infra(Context& ctx, const std::vector<std::string>& args) {
     };
 
     std::vector<InfraTest> tests = {
-        {"EUXIS_HOME exists", "dir:" + ctx.euxis_home},
-        {"euxis-data exists", "dir:" + ctx.data_dir},
+        {tr("EUXIS_HOME exists"), "dir:" + ctx.euxis_home},
+        {tr("euxis-data exists"), "dir:" + ctx.data_dir},
         {"registry.json", "file:" + ctx.data_dir + "/agents/registry.json"},
-        {"git available", "cmd:git"},
-        {"sqlite3 available", "cmd:sqlite3"},
+        {tr("git available"), "cmd:git"},
+        {tr("sqlite3 available"), "cmd:sqlite3"},
     };
 
     int passed = 0;
@@ -415,7 +418,7 @@ int cmd_test_infra(Context& ctx, const std::vector<std::string>& args) {
         if (ok) ++passed; else ++failed;
     }
 
-    std::cout << "\n" << passed << " passed, " << failed << " failed\n";
+    std::cout << "\n" << passed << " " << tr("passed,") << " " << failed << " " << tr("failed") << "\n";
     return failed > 0 ? 1 : 0;
 }
 

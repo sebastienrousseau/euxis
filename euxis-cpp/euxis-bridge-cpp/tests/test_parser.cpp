@@ -80,4 +80,33 @@ TEST(ParserTest, WhitespaceHandling) {
     EXPECT_EQ(fm.get("runtime"), "node");
 }
 
+TEST(ParserTest, FrontmatterLineWithoutColon) {
+    // Parsing error path: line in frontmatter with no colon is ignored (line 52)
+    std::string content = "---\nname: valid\nthis-has-no-colon\nruntime: python\n---\nBody.\n";
+    auto fm = parse_frontmatter(content);
+    EXPECT_EQ(fm.get("name"), "valid");
+    EXPECT_EQ(fm.get("runtime"), "python");
+    // The line without a colon should not produce any field
+    EXPECT_EQ(fm.fields.size(), 2u);
+}
+
+TEST(ParserTest, CarriageReturnTrimming) {
+    // Parsing path: lines with trailing \r are trimmed (line 27)
+    std::string content = "---\r\nname: crlf-test\r\nruntime: node\r\n---\r\nBody text.\r\n";
+    auto fm = parse_frontmatter(content);
+    EXPECT_EQ(fm.get("name"), "crlf-test");
+    EXPECT_EQ(fm.get("runtime"), "node");
+}
+
+TEST(ParserTest, WhitespaceOnlyValue) {
+    // Parsing edge case: a key with whitespace-only value (line 52: s.clear())
+    std::string content = "---\nempty_val:   \nname: test\n---\nBody.\n";
+    auto fm = parse_frontmatter(content);
+    EXPECT_EQ(fm.get("name"), "test");
+    // empty_val should have an empty string value after trimming
+    auto val = fm.get("empty_val");
+    ASSERT_TRUE(val.has_value());
+    EXPECT_TRUE(val->empty());
+}
+
 }  // namespace euxis::bridge

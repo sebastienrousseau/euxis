@@ -1,5 +1,6 @@
 #include "euxis/cli/cmd/fleet.hpp"
 #include "euxis/cli/config_loader.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/provider_router.hpp"
@@ -10,6 +11,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+
+using euxis::cli::i18n::tr;
 
 namespace euxis::cli::cmd {
 namespace {
@@ -65,19 +68,19 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
             return 0;
         }
 
-        std::cout << term::bold("Registered Agents") << " (" << agents.size() << ")\n\n";
+        std::cout << term::bold(tr("Registered Agents")) << " (" << agents.size() << ")\n\n";
         std::vector<term::TableRow> rows;
         for (const auto& a : agents) {
             rows.push_back({{a.id, a.role, a.tier, a.version}});
         }
-        term::print_table({"ID", "Role", "Tier", "Version"}, rows);
+        term::print_table({tr("ID"), tr("Role"), tr("Tier"), tr("Version")}, rows);
         return 0;
     }
 
     if (args[0] == "register" && args.size() >= 2) {
         auto manifest_path = args[1];
         if (!fs::exists(manifest_path)) {
-            std::cerr << "Manifest not found: " << manifest_path << "\n";
+            std::cerr << tr("Manifest not found: ") << manifest_path << "\n";
             return 1;
         }
         std::ifstream f(manifest_path);
@@ -85,35 +88,35 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
         try {
             manifest = nlohmann::json::parse(f);
         } catch (const std::exception& e) {
-            std::cerr << "Invalid JSON: " << e.what() << "\n";
+            std::cerr << tr("Invalid JSON: ") << e.what() << "\n";
             return 1;
         }
         auto agent_id = manifest.value("agent_id", manifest.value("id", ""));
         if (agent_id.empty()) {
-            std::cerr << "Manifest missing agent_id\n";
+            std::cerr << tr("Manifest missing agent_id") << "\n";
             return 1;
         }
         if (registry.register_plugin(agent_id, manifest)) {
-            std::cout << term::icon_ok() << " Registered: " << agent_id << "\n";
+            std::cout << term::icon_ok() << " " << tr("Registered: ") << agent_id << "\n";
             return 0;
         }
-        std::cerr << "Registration failed\n";
+        std::cerr << tr("Registration failed") << "\n";
         return 1;
     }
 
     if (args[0] == "unregister" && args.size() >= 2) {
         if (registry.unregister_plugin(args[1])) {
-            std::cout << term::icon_ok() << " Unregistered: " << args[1] << "\n";
+            std::cout << term::icon_ok() << " " << tr("Unregistered: ") << args[1] << "\n";
             return 0;
         }
-        std::cerr << "Agent not found: " << args[1] << "\n";
+        std::cerr << tr("Agent not found: ") << args[1] << "\n";
         return 1;
     }
 
     if (args[0] == "info" && args.size() >= 2) {
         auto agent = registry.get_agent(args[1]);
         if (!agent) {
-            std::cerr << "Agent not found: " << args[1] << "\n";
+            std::cerr << tr("Agent not found: ") << args[1] << "\n";
             return 1;
         }
         if (ctx.json_output) {
@@ -129,11 +132,11 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
             return 0;
         }
         std::cout << term::bold(agent->id) << "\n"
-                  << "  Role:    " << agent->role << "\n"
-                  << "  Tier:    " << agent->tier << "\n"
-                  << "  Version: " << agent->version << "\n";
+                  << "  " << tr("Role:") << "    " << agent->role << "\n"
+                  << "  " << tr("Tier:") << "    " << agent->tier << "\n"
+                  << "  " << tr("Version:") << " " << agent->version << "\n";
         if (!agent->tags.empty()) {
-            std::cout << "  Tags:    ";
+            std::cout << "  " << tr("Tags:") << "    ";
             for (size_t i = 0; i < agent->tags.size(); ++i) {
                 if (i > 0) std::cout << ", ";
                 std::cout << agent->tags[i];
@@ -143,7 +146,7 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
         return 0;
     }
 
-    std::cerr << "Usage: euxis agent <list|register|unregister|info> [args]\n";
+    std::cerr << tr("Usage: euxis agent <list|register|unregister|info> [args]") << "\n";
     return 2;
 }
 
@@ -151,7 +154,7 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_agent_bootstrap(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis agent-bootstrap <agent-id> [--tier TIER]\n";
+        std::cerr << tr("Usage: euxis agent-bootstrap <agent-id> [--tier TIER]") << "\n";
         return 2;
     }
 
@@ -166,7 +169,7 @@ int cmd_agent_bootstrap(Context& ctx, const std::vector<std::string>& args) {
     // Validate agent_id
     for (char c : agent_id) {
         if (!std::isalnum(c) && c != '-' && c != '_') {
-            std::cerr << "Invalid agent-id (alphanumeric, dash, underscore only)\n";
+            std::cerr << tr("Invalid agent-id (alphanumeric, dash, underscore only)") << "\n";
             return 1;
         }
     }
@@ -176,7 +179,7 @@ int cmd_agent_bootstrap(Context& ctx, const std::vector<std::string>& args) {
     auto prompt_path = prompt_dir / (agent_id + ".md");
 
     if (fs::exists(prompt_path)) {
-        std::cerr << "Agent already exists: " << prompt_path.string() << "\n";
+        std::cerr << tr("Agent already exists: ") << prompt_path.string() << "\n";
         return 1;
     }
 
@@ -193,7 +196,7 @@ int cmd_agent_bootstrap(Context& ctx, const std::vector<std::string>& args) {
       << "## Role\nDescribe this agent's purpose.\n\n"
       << "## Instructions\nAdd instructions here.\n";
 
-    std::cout << term::icon_ok() << " Created: " << prompt_path.string() << "\n";
+    std::cout << term::icon_ok() << " " << tr("Created: ") << prompt_path.string() << "\n";
     return 0;
 }
 
@@ -214,27 +217,27 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
             return 0;
         }
 
-        std::cout << term::bold("Squads") << " (" << squads.size() << ")\n\n";
+        std::cout << term::bold(tr("Squads")) << " (" << squads.size() << ")\n\n";
         std::vector<term::TableRow> rows;
         for (const auto& s : squads) {
             rows.push_back({{s.id, s.name, s.purpose, std::to_string(s.members.size())}});
         }
-        term::print_table({"ID", "Name", "Purpose", "Members"}, rows);
+        term::print_table({tr("ID"), tr("Name"), tr("Purpose"), tr("Members")}, rows);
         return 0;
     }
 
     if (args[0] == "info" && args.size() >= 2) {
         auto squad = registry.get_squad(args[1]);
         if (!squad) {
-            std::cerr << "Squad not found: " << args[1] << "\n";
+            std::cerr << tr("Squad not found: ") << args[1] << "\n";
             return 1;
         }
         std::cout << term::bold(squad->name) << " (" << squad->id << ")\n"
-                  << "  Purpose: " << squad->purpose << "\n"
-                  << "  Lead:    " << squad->lead << "\n"
-                  << "  Members: " << squad->members.size() << "\n";
+                  << "  " << tr("Purpose:") << " " << squad->purpose << "\n"
+                  << "  " << tr("Lead:") << "    " << squad->lead << "\n"
+                  << "  " << tr("Members:") << " " << squad->members.size() << "\n";
         for (const auto& m : squad->members) {
-            std::cout << "    - " << m << (m == squad->lead ? " (lead)" : "") << "\n";
+            std::cout << "    - " << m << (m == squad->lead ? std::string(" (") + tr("lead") + ")" : "") << "\n";
         }
         return 0;
     }
@@ -242,7 +245,7 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
     if (args[0] == "deploy" && args.size() >= 3) {
         auto squad = registry.get_squad(args[1]);
         if (!squad) {
-            std::cerr << "Squad not found: " << args[1] << "\n";
+            std::cerr << tr("Squad not found: ") << args[1] << "\n";
             return 1;
         }
         std::string task = args[2];
@@ -251,10 +254,10 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
             if (args[i] == "--mode" && i + 1 < args.size()) mode = args[++i];
         }
 
-        std::cout << term::bold("Deploying squad: ") << squad->name << "\n"
-                  << "  Task: " << task << "\n"
-                  << "  Mode: " << mode << "\n"
-                  << "  Members: " << squad->members.size() << "\n\n";
+        std::cout << term::bold(tr("Deploying squad: ")) << squad->name << "\n"
+                  << "  " << tr("Task:") << " " << task << "\n"
+                  << "  " << tr("Mode:") << " " << mode << "\n"
+                  << "  " << tr("Members:") << " " << squad->members.size() << "\n\n";
 
         // Generate dispatch manifest
         Session session(ctx.euxis_home);
@@ -276,24 +279,24 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
         std::ofstream f(manifest_path);
         f << manifest.dump(2);
 
-        std::cout << term::icon_ok() << " Manifest: " << manifest_path.string() << "\n";
+        std::cout << term::icon_ok() << " " << tr("Manifest: ") << manifest_path.string() << "\n";
         return 0;
     }
 
     if (args[0] == "members" && args.size() >= 2) {
         auto squad = registry.get_squad(args[1]);
         if (!squad) {
-            std::cerr << "Squad not found: " << args[1] << "\n";
+            std::cerr << tr("Squad not found: ") << args[1] << "\n";
             return 1;
         }
         std::vector<term::TableRow> rows;
         for (const auto& m : squad->members) {
             auto agent = registry.get_agent(m);
-            std::string role_str = (m == squad->lead) ? "lead" : "member";
+            std::string role_str = (m == squad->lead) ? tr("lead") : tr("member");
             std::string tier_str = agent ? agent->tier : "?";
             rows.push_back({{m, role_str, tier_str}});
         }
-        term::print_table({"Agent", "Role", "Tier"}, rows);
+        term::print_table({tr("Agent"), tr("Role"), tr("Tier")}, rows);
         return 0;
     }
 
@@ -304,17 +307,17 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
             for (const auto& m : sq.members) {
                 auto agent = registry.get_agent(m);
                 if (!agent) {
-                    std::cout << term::icon_fail() << " " << sq.id << ": member '"
-                              << m << "' not in registry\n";
+                    std::cout << term::icon_fail() << " " << sq.id << ": " << tr("member '")
+                              << m << tr("' not in registry") << "\n";
                     ++issues;
                 }
             }
         }
-        if (issues == 0) std::cout << term::icon_ok() << " All squad members valid\n";
+        if (issues == 0) std::cout << term::icon_ok() << " " << tr("All squad members valid") << "\n";
         return issues > 0 ? 1 : 0;
     }
 
-    std::cerr << "Usage: euxis squad <list|info|deploy|members|validate> [args]\n";
+    std::cerr << tr("Usage: euxis squad <list|info|deploy|members|validate> [args]") << "\n";
     return 2;
 }
 
@@ -322,7 +325,7 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis combo <agent1,agent2,...> <task>\n";
+        std::cerr << tr("Usage: euxis combo <agent1,agent2,...> <task>") << "\n";
         return 2;
     }
 
@@ -337,11 +340,11 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
         start = end + 1;
     }
 
-    std::string task = args.size() > 1 ? args[1] : "default task";
+    std::string task = args.size() > 1 ? args[1] : tr("default task");
 
-    std::cout << term::bold("Running Combo Pipeline") << "\n"
-              << "  Agents: " << agent_ids.size() << "\n"
-              << "  Task:   " << task << "\n\n";
+    std::cout << term::bold(tr("Running Combo Pipeline")) << "\n"
+              << "  " << tr("Agents:") << " " << agent_ids.size() << "\n"
+              << "  " << tr("Task:") << "   " << task << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
@@ -370,7 +373,7 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
 
         // Invoke provider with spinner
         int frame = 0;
-        term::spinner_frame(frame++, "Invoking " + aid + "...");
+        term::spinner_frame(frame++, tr("Invoking ") + aid + "...");
         auto response = executor.execute(model, combined_prompt);
         term::spinner_clear();
 
@@ -383,7 +386,7 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
             write_output_file(output_path, response.output);
 
             std::cout << "    " << term::icon_ok() << " "
-                      << response.output.size() << " chars, "
+                      << response.output.size() << " " << tr("chars") << ", "
                       << response.duration_ms << "ms\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << aid << ": "
@@ -395,11 +398,11 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << "\n";
     if (failures > 0) {
-        std::cout << term::icon_warn() << " Combo pipeline finished with "
-                  << failures << " failure(s)\n";
+        std::cout << term::icon_warn() << " " << tr("Combo pipeline finished with ")
+                  << failures << tr(" failure(s)") << "\n";
         return 1;
     }
-    std::cout << term::icon_ok() << " Combo pipeline complete\n";
+    std::cout << term::icon_ok() << " " << tr("Combo pipeline complete") << "\n";
     return 0;
 }
 
@@ -407,13 +410,13 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis playbook <manifest.json>\n";
+        std::cerr << tr("Usage: euxis playbook <manifest.json>") << "\n";
         return 2;
     }
 
     auto manifest_path = args[0];
     if (!fs::exists(manifest_path)) {
-        std::cerr << "Manifest not found: " << manifest_path << "\n";
+        std::cerr << tr("Manifest not found: ") << manifest_path << "\n";
         return 1;
     }
 
@@ -422,20 +425,20 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     try {
         manifest = nlohmann::json::parse(f);
     } catch (const std::exception& e) {
-        std::cerr << "Invalid JSON: " << e.what() << "\n";
+        std::cerr << tr("Invalid JSON: ") << e.what() << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Executing Playbook") << "\n"
-              << "  Source: " << manifest_path << "\n";
+    std::cout << term::bold(tr("Executing Playbook")) << "\n"
+              << "  " << tr("Source:") << " " << manifest_path << "\n";
 
     if (!manifest.contains("steps") || !manifest["steps"].is_array()) {
-        std::cerr << "Manifest missing 'steps' array\n";
+        std::cerr << tr("Manifest missing 'steps' array") << "\n";
         return 1;
     }
 
     const auto& steps = manifest["steps"];
-    std::cout << "  Steps:  " << steps.size() << "\n\n";
+    std::cout << "  " << tr("Steps:") << "  " << steps.size() << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
@@ -453,10 +456,10 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         std::string step_task = step.value("task", manifest.value("task", ""));
 
         std::cout << "  [" << (i + 1) << "/" << steps.size() << "] "
-                  << term::cyan(name) << " (agent: " << agent_id << ")\n";
+                  << term::cyan(name) << " (" << tr("agent:") << " " << agent_id << ")\n";
 
         if (agent_id.empty()) {
-            std::cerr << "    " << term::icon_fail() << " Step missing 'agent' field\n";
+            std::cerr << "    " << term::icon_fail() << " " << tr("Step missing 'agent' field") << "\n";
             ++failures;
             continue;
         }
@@ -487,7 +490,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
         // Invoke provider
         int frame = 0;
-        term::spinner_frame(frame++, "Running " + name + "...");
+        term::spinner_frame(frame++, tr("Running ") + name + "...");
         auto response = executor.execute(model, combined_prompt);
         term::spinner_clear();
 
@@ -501,7 +504,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
             write_output_file(output_path, response.output);
 
             std::cout << "    " << term::icon_ok() << " "
-                      << response.output.size() << " chars, "
+                      << response.output.size() << " " << tr("chars") << ", "
                       << response.duration_ms << "ms\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << name << ": "
@@ -512,11 +515,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << "\n";
     if (failures > 0) {
-        std::cout << term::icon_warn() << " Playbook finished with "
-                  << failures << " failure(s)\n";
+        std::cout << term::icon_warn() << " " << tr("Playbook finished with ")
+                  << failures << tr(" failure(s)") << "\n";
         return 1;
     }
-    std::cout << term::icon_ok() << " Playbook complete\n";
+    std::cout << term::icon_ok() << " " << tr("Playbook complete") << "\n";
     return 0;
 }
 
@@ -524,13 +527,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis dispatch <manifest.json>\n";
+        std::cerr << tr("Usage: euxis dispatch <manifest.json>") << "\n";
         return 2;
     }
 
     auto manifest_path = args[0];
     if (!fs::exists(manifest_path)) {
-        std::cerr << "Manifest not found: " << manifest_path << "\n";
+        std::cerr << tr("Manifest not found: ") << manifest_path << "\n";
         return 1;
     }
 
@@ -539,14 +542,14 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     try {
         manifest = nlohmann::json::parse(f);
     } catch (const std::exception& e) {
-        std::cerr << "Invalid JSON: " << e.what() << "\n";
+        std::cerr << tr("Invalid JSON: ") << e.what() << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Dispatching Agents") << "\n";
+    std::cout << term::bold(tr("Dispatching Agents")) << "\n";
 
     if (!manifest.contains("agents") || !manifest["agents"].is_array()) {
-        std::cerr << "Manifest missing 'agents' array\n";
+        std::cerr << tr("Manifest missing 'agents' array") << "\n";
         return 1;
     }
 
@@ -556,7 +559,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     Session session(ctx.euxis_home);
 
     const auto& agents_arr = manifest["agents"];
-    std::cout << "  Agents: " << agents_arr.size() << "\n\n";
+    std::cout << "  " << tr("Agents:") << " " << agents_arr.size() << "\n\n";
 
     int failures = 0;
 
@@ -583,7 +586,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 
         // Invoke provider
         int frame = 0;
-        term::spinner_frame(frame++, "Dispatching " + aid + "...");
+        term::spinner_frame(frame++, tr("Dispatching ") + aid + "...");
         auto response = executor.execute(model, combined_prompt);
         term::spinner_clear();
 
@@ -594,7 +597,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
             write_output_file(output_path, response.output);
 
             std::cout << "    " << term::icon_ok() << " "
-                      << response.output.size() << " chars, "
+                      << response.output.size() << " " << tr("chars") << ", "
                       << response.duration_ms << "ms\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << aid << ": "
@@ -605,11 +608,11 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << "\n";
     if (failures > 0) {
-        std::cout << term::icon_warn() << " Dispatch finished with "
-                  << failures << " failure(s)\n";
+        std::cout << term::icon_warn() << " " << tr("Dispatch finished with ")
+                  << failures << tr(" failure(s)") << "\n";
         return 1;
     }
-    std::cout << term::icon_ok() << " Dispatch complete\n";
+    std::cout << term::icon_ok() << " " << tr("Dispatch complete") << "\n";
     return 0;
 }
 
@@ -617,7 +620,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_council(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) {
-        std::cerr << "Usage: euxis council <topic> <agent1,agent2,...> [--rounds N]\n";
+        std::cerr << tr("Usage: euxis council <topic> <agent1,agent2,...> [--rounds N]") << "\n";
         return 2;
     }
 
@@ -640,10 +643,10 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << term::bold("Council Deliberation") << "\n"
-              << "  Topic:        " << topic << "\n"
-              << "  Participants: " << participants.size() << "\n"
-              << "  Rounds:       " << rounds << "\n\n";
+    std::cout << term::bold(tr("Council Deliberation")) << "\n"
+              << "  " << tr("Topic:") << "        " << topic << "\n"
+              << "  " << tr("Participants:") << " " << participants.size() << "\n"
+              << "  " << tr("Rounds:") << "       " << rounds << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
@@ -655,7 +658,7 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
     int failures = 0;
 
     for (int r = 1; r <= rounds; ++r) {
-        std::cout << "  Round " << r << "/" << rounds << ":\n";
+        std::cout << "  " << tr("Round") << " " << r << "/" << rounds << ":\n";
 
         for (const auto& pid : participants) {
             auto agent = registry.get_agent(pid);
@@ -679,7 +682,7 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
 
             // Invoke provider
             int frame = 0;
-            term::spinner_frame(frame++, pid + " deliberating...");
+            term::spinner_frame(frame++, pid + " " + tr("deliberating..."));
             auto response = executor.execute(model, combined_prompt);
             term::spinner_clear();
 
@@ -689,7 +692,7 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
                 all_responses.push_back(labeled);
 
                 std::cout << "    " << term::icon_ok() << " " << term::cyan(pid)
-                          << " " << response.output.size() << " chars, "
+                          << " " << response.output.size() << " " << tr("chars") << ", "
                           << response.duration_ms << "ms\n";
             } else {
                 std::cerr << "    " << term::icon_fail() << " " << pid << ": "
@@ -713,16 +716,16 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
         auto output_path = fs::path(project_dir) / "output" / "council-summary.md";
         write_output_file(output_path, summary);
 
-        std::cout << "\n  Summary written to: " << output_path.string() << "\n";
+        std::cout << "\n  " << tr("Summary written to: ") << output_path.string() << "\n";
     }
 
     std::cout << "\n";
     if (failures > 0) {
-        std::cout << term::icon_warn() << " Council finished with "
-                  << failures << " failure(s)\n";
+        std::cout << term::icon_warn() << " " << tr("Council finished with ")
+                  << failures << tr(" failure(s)") << "\n";
         return 1;
     }
-    std::cout << term::icon_ok() << " Council complete\n";
+    std::cout << term::icon_ok() << " " << tr("Council complete") << "\n";
     return 0;
 }
 
@@ -730,7 +733,7 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) {
-        std::cerr << "Usage: euxis loop <agent> <task> [--max-iterations N] [--threshold T]\n";
+        std::cerr << tr("Usage: euxis loop <agent> <task> [--max-iterations N] [--threshold T]") << "\n";
         return 2;
     }
 
@@ -754,12 +757,12 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
     auto agent = registry.get_agent(agent_id);
     auto model = router.route(agent ? agent->tier : "code", task);
 
-    std::cout << term::bold("Feedback Loop") << "\n"
-              << "  Agent:      " << agent_id << "\n"
-              << "  Task:       " << task << "\n"
-              << "  Model:      " << model.model << "\n"
-              << "  Max iters:  " << max_iter << "\n"
-              << "  Threshold:  " << threshold << "\n\n";
+    std::cout << term::bold(tr("Feedback Loop")) << "\n"
+              << "  " << tr("Agent:") << "      " << agent_id << "\n"
+              << "  " << tr("Task:") << "       " << task << "\n"
+              << "  " << tr("Model:") << "      " << model.model << "\n"
+              << "  " << tr("Max iters:") << "  " << max_iter << "\n"
+              << "  " << tr("Threshold:") << "  " << threshold << "\n\n";
 
     // Load agent system prompt
     std::string system_prompt;
@@ -772,7 +775,7 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
     bool converged = false;
 
     for (int i = 1; i <= max_iter; ++i) {
-        term::progress_bar(i, max_iter, "Iteration");
+        term::progress_bar(i, max_iter, tr("Iteration"));
 
         // Build prompt with previous output as context for refinement
         auto combined_prompt = ProviderExecutor::build_prompt(
@@ -780,18 +783,18 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
 
         int frame = 0;
         term::spinner_frame(frame++,
-            "Iteration " + std::to_string(i) + "/" + std::to_string(max_iter) + "...");
+            tr("Iteration ") + std::to_string(i) + "/" + std::to_string(max_iter) + "...");
         auto response = executor.execute(model, combined_prompt);
         term::spinner_clear();
 
         if (!response.success) {
-            std::cerr << "  " << term::icon_fail() << " Iteration " << i << ": "
+            std::cerr << "  " << term::icon_fail() << " " << tr("Iteration") << " " << i << ": "
                       << response.error << "\n";
             continue;
         }
 
-        std::cout << "  Iteration " << i << ": "
-                  << response.output.size() << " chars, "
+        std::cout << "  " << tr("Iteration") << " " << i << ": "
+                  << response.output.size() << " " << tr("chars") << ", "
                   << response.duration_ms << "ms\n";
 
         // Write iteration output
@@ -803,7 +806,7 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
         if (!previous_output.empty() &&
             has_converged(previous_output, response.output, threshold)) {
             converged = true;
-            std::cout << "  " << term::icon_ok() << " Converged at iteration " << i << "\n";
+            std::cout << "  " << term::icon_ok() << " " << tr("Converged at iteration ") << i << "\n";
 
             // Write final converged output
             auto final_path = fs::path(project_dir) / "output" / "loop-final.md";
@@ -820,11 +823,11 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
             auto final_path = fs::path(project_dir) / "output" / "loop-final.md";
             write_output_file(final_path, previous_output);
         }
-        std::cout << term::icon_warn() << " Loop reached max iterations without convergence\n";
+        std::cout << term::icon_warn() << " " << tr("Loop reached max iterations without convergence") << "\n";
         return 0;
     }
 
-    std::cout << term::icon_ok() << " Loop complete\n";
+    std::cout << term::icon_ok() << " " << tr("Loop complete") << "\n";
     return 0;
 }
 
@@ -832,7 +835,7 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis synthesize <output-dir> [--agents a1,a2,...] [--agent SYNTH_AGENT]\n";
+        std::cerr << tr("Usage: euxis synthesize <output-dir> [--agents a1,a2,...] [--agent SYNTH_AGENT]") << "\n";
         return 2;
     }
 
@@ -855,13 +858,13 @@ int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << term::bold("Synthesize Outputs") << "\n"
-              << "  Output:  " << output_dir.string() << "\n"
-              << "  Agents:  " << agent_ids.size() << "\n"
-              << "  Synth:   " << synth_agent_id << "\n\n";
+    std::cout << term::bold(tr("Synthesize Outputs")) << "\n"
+              << "  " << tr("Output:") << "  " << output_dir.string() << "\n"
+              << "  " << tr("Agents:") << "  " << agent_ids.size() << "\n"
+              << "  " << tr("Synth:") << "   " << synth_agent_id << "\n\n";
 
     if (!fs::is_directory(output_dir)) {
-        std::cerr << "Output directory not found: " << output_dir.string() << "\n";
+        std::cerr << tr("Output directory not found: ") << output_dir.string() << "\n";
         return 1;
     }
 
@@ -889,10 +892,10 @@ int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << "  Files collected: " << collected.size() << "\n";
+    std::cout << "  " << tr("Files collected:") << " " << collected.size() << "\n";
 
     if (collected.empty()) {
-        std::cout << term::icon_warn() << " No output files found to synthesize\n";
+        std::cout << term::icon_warn() << " " << tr("No output files found to synthesize") << "\n";
         return 0;
     }
 
@@ -916,14 +919,14 @@ int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
         system_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent->prompt_path);
     }
 
-    std::string synth_task = "Synthesize and merge the following "
+    std::string synth_task = tr("Synthesize and merge the following ")
                              + std::to_string(collected.size())
-                             + " outputs into a coherent summary.";
+                             + tr(" outputs into a coherent summary.");
     auto combined_prompt = ProviderExecutor::build_prompt(
         system_prompt, synth_task, synthesis_context);
 
     int frame = 0;
-    term::spinner_frame(frame++, "Synthesizing...");
+    term::spinner_frame(frame++, tr("Synthesizing..."));
     auto response = executor.execute(model, combined_prompt);
     term::spinner_clear();
 
@@ -933,17 +936,17 @@ int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
         auto synth_path = fs::path(project_dir) / "output" / "synthesis.md";
         write_output_file(synth_path, response.output);
 
-        std::cout << "  " << term::icon_ok() << " Synthesized "
-                  << response.output.size() << " chars, "
+        std::cout << "  " << term::icon_ok() << " " << tr("Synthesized ")
+                  << response.output.size() << " " << tr("chars") << ", "
                   << response.duration_ms << "ms\n"
-                  << "  Written to: " << synth_path.string() << "\n";
+                  << "  " << tr("Written to: ") << synth_path.string() << "\n";
     } else {
-        std::cerr << "  " << term::icon_fail() << " Synthesis failed: "
+        std::cerr << "  " << term::icon_fail() << " " << tr("Synthesis failed: ")
                   << response.error << "\n";
         return 1;
     }
 
-    std::cout << term::icon_ok() << " Synthesis complete\n";
+    std::cout << term::icon_ok() << " " << tr("Synthesis complete") << "\n";
     return 0;
 }
 

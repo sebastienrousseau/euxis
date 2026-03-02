@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QShortcut>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -21,7 +22,7 @@ QWidget* create_error_details_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("ErrorDetailsScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -35,7 +36,7 @@ QWidget* create_error_details_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Error Analysis", widget);
+    auto* title = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Error Analysis"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
@@ -66,16 +67,18 @@ QWidget* create_error_details_screen(QWidget* parent) {
         error_layout->addLayout(row);
     };
 
-    add_info_row("Timestamp:", "2026-03-01 14:23:07 UTC");
-    add_info_row("Agent:", "identity-agent");
-    add_info_row("Error:", "KYA/DID endpoint unreachable after 3 retries "
-                 "(ConnectionError: ETIMEDOUT)", "color: #f44336;");
-    add_info_row("Last Task:", "Verify agent identity for run-0041");
+    add_info_row(QCoreApplication::translate("ErrorDetailsScreen", "Timestamp:"), "2026-03-01 14:23:07 UTC");
+    add_info_row(QCoreApplication::translate("ErrorDetailsScreen", "Agent:"), "identity-agent");
+    add_info_row(QCoreApplication::translate("ErrorDetailsScreen", "Error:"),
+                 QCoreApplication::translate("ErrorDetailsScreen", "KYA/DID endpoint unreachable after 3 retries "
+                 "(ConnectionError: ETIMEDOUT)"), "color: #f44336;");
+    add_info_row(QCoreApplication::translate("ErrorDetailsScreen", "Last Task:"),
+                 QCoreApplication::translate("ErrorDetailsScreen", "Verify agent identity for run-0041"));
 
     layout->addWidget(error_card);
 
     // Analysis section
-    auto* analysis_label = new QLabel("Analysis", widget);
+    auto* analysis_label = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Analysis"), widget);
     QFont analysis_font;
     analysis_font.setPointSize(16);
     analysis_font.setBold(true);
@@ -91,12 +94,12 @@ QWidget* create_error_details_screen(QWidget* parent) {
 
     // Severity
     auto* severity_row = new QHBoxLayout();
-    auto* severity_label = new QLabel("Severity:", analysis_card);
+    auto* severity_label = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Severity:"), analysis_card);
     severity_label->setStyleSheet("color: #888; font-weight: bold;");
     severity_label->setFixedWidth(140);
     severity_row->addWidget(severity_label);
 
-    auto* severity_badge = new QLabel("HIGH", analysis_card);
+    auto* severity_badge = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "HIGH"), analysis_card);
     severity_badge->setObjectName("severity_badge");
     severity_badge->setStyleSheet(
         "background: #d32f2f; color: #fff; padding: 4px 16px; "
@@ -109,7 +112,7 @@ QWidget* create_error_details_screen(QWidget* parent) {
 
     // Confidence
     auto* confidence_row = new QHBoxLayout();
-    auto* confidence_label = new QLabel("Confidence:", analysis_card);
+    auto* confidence_label = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Confidence:"), analysis_card);
     confidence_label->setStyleSheet("color: #888; font-weight: bold;");
     confidence_label->setFixedWidth(140);
     confidence_row->addWidget(confidence_label);
@@ -132,17 +135,17 @@ QWidget* create_error_details_screen(QWidget* parent) {
     analysis_layout->addLayout(confidence_row);
 
     // Recovery steps
-    auto* steps_label = new QLabel("Recovery Steps:", analysis_card);
+    auto* steps_label = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Recovery Steps:"), analysis_card);
     steps_label->setStyleSheet("color: #888; font-weight: bold;");
     analysis_layout->addWidget(steps_label);
 
     auto* steps_list = new QListWidget(analysis_card);
     steps_list->setObjectName("recovery_steps");
-    steps_list->addItem("1. Check KYA/DID endpoint availability at did.euxis.io");
-    steps_list->addItem("2. Verify network connectivity and DNS resolution");
-    steps_list->addItem("3. Check identity-agent retry configuration (max_retries: 3)");
-    steps_list->addItem("4. Fallback: use cached identity token if within TTL");
-    steps_list->addItem("5. Escalate to ops-squad if endpoint remains unreachable");
+    steps_list->addItem(QCoreApplication::translate("ErrorDetailsScreen", "1. Check KYA/DID endpoint availability at did.euxis.io"));
+    steps_list->addItem(QCoreApplication::translate("ErrorDetailsScreen", "2. Verify network connectivity and DNS resolution"));
+    steps_list->addItem(QCoreApplication::translate("ErrorDetailsScreen", "3. Check identity-agent retry configuration (max_retries: 3)"));
+    steps_list->addItem(QCoreApplication::translate("ErrorDetailsScreen", "4. Fallback: use cached identity token if within TTL"));
+    steps_list->addItem(QCoreApplication::translate("ErrorDetailsScreen", "5. Escalate to ops-squad if endpoint remains unreachable"));
     steps_list->setMaximumHeight(160);
     steps_list->setStyleSheet(
         "QListWidget { background: rgba(255,255,255,0.03); "
@@ -154,7 +157,7 @@ QWidget* create_error_details_screen(QWidget* parent) {
     layout->addWidget(analysis_card);
 
     // Audit trail
-    auto* audit_label = new QLabel("Delegation Chain", widget);
+    auto* audit_label = new QLabel(QCoreApplication::translate("ErrorDetailsScreen", "Delegation Chain"), widget);
     QFont audit_font;
     audit_font.setPointSize(14);
     audit_font.setBold(true);
@@ -186,7 +189,7 @@ QWidget* create_error_details_screen(QWidget* parent) {
     auto* button_row = new QHBoxLayout();
     button_row->addStretch();
 
-    auto* restart_btn = new QPushButton("Restart Agent", widget);
+    auto* restart_btn = new QPushButton(QCoreApplication::translate("ErrorDetailsScreen", "Restart Agent"), widget);
     restart_btn->setObjectName("restart_button");
     restart_btn->setCursor(Qt::PointingHandCursor);
     restart_btn->setMinimumHeight(40);
@@ -197,21 +200,21 @@ QWidget* create_error_details_screen(QWidget* parent) {
         "QPushButton:hover { background: #1a4a7a; }");
     button_row->addWidget(restart_btn);
 
-    auto* simulate_btn = new QPushButton("Simulate Fix", widget);
+    auto* simulate_btn = new QPushButton(QCoreApplication::translate("ErrorDetailsScreen", "Simulate Fix"), widget);
     simulate_btn->setObjectName("simulate_button");
     simulate_btn->setCursor(Qt::PointingHandCursor);
     simulate_btn->setMinimumHeight(40);
     simulate_btn->setMinimumWidth(130);
     button_row->addWidget(simulate_btn);
 
-    auto* logs_btn = new QPushButton("View Logs", widget);
+    auto* logs_btn = new QPushButton(QCoreApplication::translate("ErrorDetailsScreen", "View Logs"), widget);
     logs_btn->setObjectName("view_logs_button");
     logs_btn->setCursor(Qt::PointingHandCursor);
     logs_btn->setMinimumHeight(40);
     logs_btn->setMinimumWidth(130);
     button_row->addWidget(logs_btn);
 
-    auto* close_btn = new QPushButton("Close", widget);
+    auto* close_btn = new QPushButton(QCoreApplication::translate("ErrorDetailsScreen", "Close"), widget);
     close_btn->setObjectName("close_button");
     close_btn->setCursor(Qt::PointingHandCursor);
     close_btn->setMinimumHeight(40);

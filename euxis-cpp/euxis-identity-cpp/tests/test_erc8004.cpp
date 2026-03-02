@@ -158,5 +158,41 @@ TEST_F(ERC8004Test, MultipleCardsHaveSameFormatDifferentData) {
     EXPECT_NE(j1["did"], j2["did"]);
 }
 
+TEST_F(ERC8004Test, GenerateCardEmptyStrings) {
+    const auto card = generate_agent_card("", "", "", {});
+    EXPECT_EQ(card.agent_id, "");
+    EXPECT_EQ(card.did, "did:euxis:");
+    EXPECT_EQ(card.name, "");
+    EXPECT_EQ(card.description, "");
+    EXPECT_TRUE(card.capabilities.empty());
+}
+
+TEST_F(ERC8004Test, GenerateCardSpecialCharacters) {
+    const auto card = generate_agent_card(
+        "agent/with-special_chars.v2",
+        "Agent With Special Chars",
+        "Description with 'quotes' and \"double quotes\"",
+        {"cap-1", "cap/2", "cap.3"});
+
+    EXPECT_EQ(card.agent_id, "agent/with-special_chars.v2");
+    EXPECT_EQ(card.did, "did:euxis:agent/with-special_chars.v2");
+    EXPECT_EQ(card.capabilities.size(), 3);
+}
+
+TEST_F(ERC8004Test, ToJsonMetadataDefaultEmpty) {
+    const auto card = generate_agent_card(
+        "test-agent", "Test", "Test desc", {"cap"});
+    const auto j = card.to_json();
+    EXPECT_TRUE(j["metadata"].is_object());
+    EXPECT_TRUE(j["metadata"].empty());
+}
+
+TEST_F(ERC8004Test, GenerateCardDefaultVersion) {
+    const auto card = generate_agent_card(
+        "ver-agent", "Version Agent", "Test default version", {"cap"});
+    // Default version should be "1.0.0"
+    EXPECT_EQ(card.version, "1.0.0");
+}
+
 } // namespace
 } // namespace euxis::identity

@@ -2,6 +2,7 @@
 #include <QLabel>
 #include <QFont>
 #include <QWidget>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -24,10 +25,10 @@ QWidget* create_shortcut_bar_widget(QWidget* parent) {
     };
 
     QList<Hint> hints = {
-        {"Ctrl+K", "Command Palette"},
-        {"F3",     "Theme"},
-        {"F5",     "Refresh"},
-        {"Ctrl+Q", "Quit"},
+        {"Ctrl+K", QCoreApplication::translate("ShortcutBar", "Command Palette")},
+        {"F3",     QCoreApplication::translate("ShortcutBar", "Theme")},
+        {"F5",     QCoreApplication::translate("ShortcutBar", "Refresh")},
+        {"Ctrl+Q", QCoreApplication::translate("ShortcutBar", "Quit")},
     };
 
     layout->addStretch();

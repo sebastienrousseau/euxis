@@ -244,5 +244,41 @@ TEST_F(CredentialsTest, NonStandardKeySize) {
     EXPECT_FALSE(verify_credential(cred, issuer_key_));
 }
 
+// --- Coverage: line 105 (hmac_sha256_hex return path) ---
+// Covered implicitly by issue/verify roundtrip; ensure hex result length.
+TEST_F(CredentialsTest, ProofValueHasCorrectHexLength) {
+    std::vector<Claim> claims = {
+        {.type = "role", .value = "admin", .scope = "system"},
+    };
+    const auto cred = issue_credential(
+        "did:euxis:issuer", issuer_key_, "did:euxis:subject", claims);
+    // HMAC-SHA256 is 32 bytes = 64 hex chars
+    EXPECT_EQ(cred.proof.proof_value.size(), 64u);
+}
+
+// --- Coverage: lines 152, 160-161 (verify with different formats of bad proof) ---
+TEST_F(CredentialsTest, ProofValueWrongLengthFails) {
+    std::vector<Claim> claims = {
+        {.type = "role", .value = "admin", .scope = "system"},
+    };
+    auto cred = issue_credential(
+        "did:euxis:issuer", issuer_key_, "did:euxis:subject", claims);
+    // Set proof to wrong length (not 64 hex chars)
+    cred.proof.proof_value = "abcd";
+    EXPECT_FALSE(verify_credential(cred, issuer_key_));
+}
+
+// --- Coverage: lines 198-199 (malformed hex proof) ---
+TEST_F(CredentialsTest, MalformedHexProofFails) {
+    std::vector<Claim> claims = {
+        {.type = "role", .value = "admin", .scope = "system"},
+    };
+    auto cred = issue_credential(
+        "did:euxis:issuer", issuer_key_, "did:euxis:subject", claims);
+    // Replace proof with correct length but invalid hex characters
+    cred.proof.proof_value = std::string(64, 'g');
+    EXPECT_FALSE(verify_credential(cred, issuer_key_));
+}
+
 } // namespace
 } // namespace euxis::identity

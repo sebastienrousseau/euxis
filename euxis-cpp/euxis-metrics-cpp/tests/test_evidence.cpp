@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <chrono>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 
@@ -132,6 +134,188 @@ TEST_F(EvidenceFrameworkTest, VerifyClaimAcceptsE1) {
     claim.confidence = 0.9;
     claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Verified));
     EXPECT_TRUE(fw.verify_claim(claim));
+}
+
+TEST_F(EvidenceFrameworkTest, CheckDecayDateOnlyFormat) {
+    EvidenceFramework fw(tmp_);
+    auto e = make_evidence(EvidenceGrade::Verified);
+    // Use date-only format instead of full ISO-8601
+    e.timestamp = "2020-01-01";
+    // Old date, should be decayed
+    EXPECT_TRUE(fw.check_decay(e));
+}
+
+TEST_F(EvidenceFrameworkTest, CheckDecayInvalidTimestamp) {
+    EvidenceFramework fw(tmp_);
+    auto e = make_evidence(EvidenceGrade::Verified);
+    e.timestamp = "not-a-date";
+    // Unparseable timestamp should count as decayed
+    EXPECT_TRUE(fw.check_decay(e));
+}
+
+TEST_F(EvidenceFrameworkTest, CheckDecayRecentEvidence) {
+    EvidenceFramework fw(tmp_);
+    // Create evidence with a recent timestamp (today)
+    auto now = std::chrono::system_clock::now();
+    auto time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm tm{};
+    gmtime_r(&time_t, &tm);
+    char buf[64];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm);
+
+    auto e = make_evidence(EvidenceGrade::Inferred);
+    e.timestamp = buf;
+    // Inferred has 30-day decay, so today's evidence should NOT be decayed
+    EXPECT_FALSE(fw.check_decay(e));
+}
+
+TEST_F(EvidenceFrameworkTest, CheckDecayObserved) {
+    EvidenceFramework fw(tmp_);
+    auto e = make_evidence(EvidenceGrade::Observed);
+    e.timestamp = "2020-01-01T00:00:00";
+    // Old observed evidence should be decayed (7-day window)
+    EXPECT_TRUE(fw.check_decay(e));
+}
+
+TEST_F(EvidenceFrameworkTest, CheckDecayMeasured) {
+    EvidenceFramework fw(tmp_);
+    auto e = make_evidence(EvidenceGrade::Measured);
+    e.timestamp = "2020-01-01T00:00:00";
+    // Old measured evidence should be decayed (1-day window)
+    EXPECT_TRUE(fw.check_decay(e));
+}
+
+TEST_F(EvidenceFrameworkTest, VerifyClaimLowConfidence) {
+    EvidenceFramework fw(tmp_);
+    Claim claim;
+    claim.confidence = 0.3;  // Below 0.5 threshold
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Verified));
+    EXPECT_FALSE(fw.verify_claim(claim));
+}
+
+TEST_F(EvidenceFrameworkTest, VerifyClaimExactlyThreshold) {
+    EvidenceFramework fw(tmp_);
+    Claim claim;
+    claim.confidence = 0.5;  // Exactly at threshold
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Verified));
+    EXPECT_TRUE(fw.verify_claim(claim));
+}
+
+TEST_F(EvidenceFrameworkTest, VerifyClaimE3Accepted) {
+    EvidenceFramework fw(tmp_);
+    Claim claim;
+    claim.confidence = 0.9;
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Observed));
+    EXPECT_TRUE(fw.verify_claim(claim));
+}
+
+TEST_F(EvidenceFrameworkTest, VerifyClaimE5Rejected) {
+    EvidenceFramework fw(tmp_);
+    Claim claim;
+    claim.confidence = 1.0;
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Speculated));
+    EXPECT_FALSE(fw.verify_claim(claim));
+}
+
+TEST_F(EvidenceFrameworkTest, EvidenceFromJsonWithoutOptionals) {
+    nlohmann::json j = {
+        {"source_file", "test.cpp"},
+        {"evidence_type", "test_result"},
+        {"grade", "E3"},
+        {"content", "Some content"},
+        {"timestamp", "2026-01-01T00:00:00"},
+    };
+    // No source_line, no verification_cmd, no metadata
+    auto e = Evidence::from_json(j);
+    EXPECT_FALSE(e.source_line.has_value());
+    EXPECT_FALSE(e.verification_cmd.has_value());
+    EXPECT_EQ(e.grade, EvidenceGrade::Observed);
+}
+
+TEST_F(EvidenceFrameworkTest, EvidenceToJsonWithOptionals) {
+    auto e = make_evidence();
+    auto j = e.to_json();
+    EXPECT_TRUE(j.contains("source_line"));
+    EXPECT_EQ(j["source_line"], 42);
+    EXPECT_TRUE(j.contains("verification_cmd"));
+    EXPECT_EQ(j["verification_cmd"], "make test");
+}
+
+TEST_F(EvidenceFrameworkTest, EvidenceToJsonWithoutOptionals) {
+    Evidence e;
+    e.source_file = "test.cpp";
+    e.evidence_type = "test";
+    e.grade = EvidenceGrade::Verified;
+    e.content = "content";
+    e.timestamp = "2026-01-01";
+    // source_line and verification_cmd are nullopt
+    auto j = e.to_json();
+    EXPECT_FALSE(j.contains("source_line"));
+    EXPECT_FALSE(j.contains("verification_cmd"));
+}
+
+TEST_F(EvidenceFrameworkTest, LoadEvidenceFromCorruptLines) {
+    EvidenceFramework fw(tmp_);
+    // Store a valid one first
+    auto h = fw.store_evidence(make_evidence());
+
+    // Append a corrupt line to the DB
+    auto db_path = tmp_ / "evidence.jsonl";
+    std::ofstream f(db_path, std::ios::app);
+    f << "not-valid-json\n";
+    f << "\n";  // empty line
+    f.close();
+
+    // Should still find the valid evidence
+    auto loaded = fw.load_evidence(h);
+    ASSERT_TRUE(loaded.has_value());
+    EXPECT_EQ(loaded->content, "All tests pass");
+}
+
+TEST_F(EvidenceFrameworkTest, LoadAllEvidenceSkipsCorruptLines) {
+    EvidenceFramework fw(tmp_);
+    fw.store_evidence(make_evidence(EvidenceGrade::Verified));
+    fw.store_evidence(make_evidence(EvidenceGrade::Measured));
+
+    // Append corrupt lines
+    auto db_path = tmp_ / "evidence.jsonl";
+    std::ofstream f(db_path, std::ios::app);
+    f << "corrupt\n";
+    f << "\n";
+    f.close();
+
+    auto all = fw.load_all_evidence();
+    EXPECT_EQ(all.size(), 2);
+}
+
+TEST_F(EvidenceFrameworkTest, LoadEvidenceNotFoundReturnsNullopt) {
+    EvidenceFramework fw(tmp_);
+    fw.store_evidence(make_evidence());
+    auto loaded = fw.load_evidence("definitely-not-a-real-hash");
+    EXPECT_FALSE(loaded.has_value());
+}
+
+TEST_F(EvidenceFrameworkTest, GradeFromStringAllValues) {
+    EXPECT_EQ(grade_from_string("E2"), EvidenceGrade::Measured);
+    EXPECT_EQ(grade_from_string("E3"), EvidenceGrade::Observed);
+    EXPECT_EQ(grade_from_string("E4"), EvidenceGrade::Inferred);
+}
+
+TEST_F(EvidenceFrameworkTest, ClaimHighestGradeMultipleSame) {
+    Claim claim;
+    claim.statement = "Test";
+    claim.confidence = 0.9;
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Measured));
+    claim.supporting_evidence.push_back(make_evidence(EvidenceGrade::Measured));
+    auto best = claim.highest_grade();
+    ASSERT_TRUE(best.has_value());
+    EXPECT_EQ(*best, EvidenceGrade::Measured);
+}
+
+TEST_F(EvidenceFrameworkTest, ConstructorWithEmptyPath) {
+    // Empty path triggers environment-based default
+    EvidenceFramework fw({});
+    EXPECT_FALSE(fw.evidence_dir().empty());
 }
 
 } // namespace

@@ -1,6 +1,7 @@
 #include "euxis/cli/cmd/knowledge.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/engine.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/terminal.hpp"
@@ -13,6 +14,8 @@
 #include <sstream>
 
 namespace euxis::cli::cmd {
+
+using euxis::cli::i18n::tr;
 namespace {
 
 namespace fs = std::filesystem;
@@ -59,7 +62,7 @@ void save_cortex_entries(const fs::path& path, const nlohmann::json& entries) {
 
 int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis cortex <remember|recall|stats|forget> [args]\n";
+        std::cerr << tr("Usage: euxis cortex <remember|recall|stats|forget> [args]") << "\n";
         return 2;
     }
 
@@ -89,18 +92,18 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
             j["entries"] = entry_count;
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cout << "Cortex Stats\n"
-                      << "  DB path:  " << db_dir.string() << "\n"
-                      << "  Files:    " << file_count << "\n"
-                      << "  Size:     " << (total_size / 1024) << " KB\n"
-                      << "  Entries:  " << entry_count << "\n";
+            std::cout << tr("Cortex Stats") << "\n"
+                      << "  " << tr("DB path:") << "  " << db_dir.string() << "\n"
+                      << "  " << tr("Files:") << "    " << file_count << "\n"
+                      << "  " << tr("Size:") << "     " << (total_size / 1024) << " KB\n"
+                      << "  " << tr("Entries:") << "  " << entry_count << "\n";
         }
         return 0;
     }
 
     if (args[0] == "remember") {
         if (args.size() < 3) {
-            std::cerr << "Usage: euxis cortex remember <key> <value...>\n";
+            std::cerr << tr("Usage: euxis cortex remember <key> <value...>") << "\n";
             return 2;
         }
         auto key = args[1];
@@ -122,7 +125,7 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
             j["value"] = value;
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cout << term::icon_ok() << " Remembered: " << term::cyan(key)
+            std::cout << term::icon_ok() << " " << tr("Remembered:") << " " << term::cyan(key)
                       << " = " << value << "\n";
         }
         return 0;
@@ -130,7 +133,7 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
 
     if (args[0] == "recall") {
         if (args.size() < 2) {
-            std::cerr << "Usage: euxis cortex recall <key>\n";
+            std::cerr << tr("Usage: euxis cortex recall <key>") << "\n";
             return 2;
         }
         auto key = args[1];
@@ -168,7 +171,7 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
                 j["results"] = matches;
                 std::cout << j.dump(2) << "\n";
             } else {
-                std::cout << term::yellow("No exact match. Partial matches:") << "\n";
+                std::cout << term::yellow(tr("No exact match. Partial matches:")) << "\n";
                 for (const auto& m : matches) {
                     std::cout << "  " << term::cyan(m["key"].get<std::string>())
                               << " = " << m["value"].get<std::string>() << "\n";
@@ -184,14 +187,14 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
             j["results"] = nlohmann::json::array();
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cerr << term::icon_fail() << " Not found: " << key << "\n";
+            std::cerr << term::icon_fail() << " " << tr("Not found:") << " " << key << "\n";
         }
         return 1;
     }
 
     if (args[0] == "forget") {
         if (args.size() < 2) {
-            std::cerr << "Usage: euxis cortex forget <key>\n";
+            std::cerr << tr("Usage: euxis cortex forget <key>") << "\n";
             return 2;
         }
         auto key = args[1];
@@ -205,7 +208,7 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
                 j["found"] = false;
                 std::cout << j.dump(2) << "\n";
             } else {
-                std::cerr << term::icon_fail() << " Key not found: " << key << "\n";
+                std::cerr << term::icon_fail() << " " << tr("Key not found:") << " " << key << "\n";
             }
             return 1;
         }
@@ -220,13 +223,13 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
             j["found"] = true;
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cout << term::icon_ok() << " Forgot: " << key << "\n";
+            std::cout << term::icon_ok() << " " << tr("Forgot:") << " " << key << "\n";
         }
         return 0;
     }
 
-    std::cerr << "Unknown cortex command: " << args[0] << "\n"
-              << "Usage: euxis cortex <remember|recall|stats|forget> [args]\n";
+    std::cerr << tr("Unknown cortex command:") << " " << args[0] << "\n"
+              << tr("Usage: euxis cortex <remember|recall|stats|forget> [args]") << "\n";
     return 2;
 }
 
@@ -234,14 +237,14 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis graph <show|query|export> [args]\n";
+        std::cerr << tr("Usage: euxis graph <show|query|export> [args]") << "\n";
         return 2;
     }
 
     auto graph_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "memory" / "cortex";
 
     if (args[0] == "show") {
-        std::cout << term::bold("Knowledge Graph") << "\n";
+        std::cout << term::bold(tr("Knowledge Graph")) << "\n";
         if (fs::is_directory(graph_dir)) {
             int count = 0;
             for (const auto& entry : fs::directory_iterator(graph_dir)) {
@@ -250,22 +253,22 @@ int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
                     ++count;
                 }
             }
-            std::cout << "\n" << count << " file(s)\n";
+            std::cout << "\n" << count << " " << tr("file(s)") << "\n";
         } else {
-            std::cout << "  Graph directory not found\n";
+            std::cout << "  " << tr("Graph directory not found") << "\n";
         }
         return 0;
     }
 
     if (args[0] == "query") {
         if (args.size() < 2) {
-            std::cerr << "Usage: euxis graph query <search-term>\n";
+            std::cerr << tr("Usage: euxis graph query <search-term>") << "\n";
             return 2;
         }
         auto term_str = args[1];
 
         if (!fs::is_directory(graph_dir)) {
-            std::cerr << "Graph directory not found: " << graph_dir.string() << "\n";
+            std::cerr << tr("Graph directory not found:") << " " << graph_dir.string() << "\n";
             return 1;
         }
 
@@ -305,9 +308,9 @@ int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
             j["results"] = results;
             std::cout << j.dump(2) << "\n";
         } else if (match_count == 0) {
-            std::cout << "No matches for: " << term_str << "\n";
+            std::cout << tr("No matches for:") << " " << term_str << "\n";
         } else {
-            std::cout << "\n" << match_count << " match(es)\n";
+            std::cout << "\n" << match_count << " " << tr("match(es)") << "\n";
         }
         return 0;
     }
@@ -326,14 +329,14 @@ int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
             }
             std::ofstream f(output);
             f << j.dump(2);
-            std::cout << term::icon_ok() << " Exported to: " << output << "\n";
+            std::cout << term::icon_ok() << " " << tr("Exported to:") << " " << output << "\n";
             return 0;
         }
-        std::cerr << "No graph data to export\n";
+        std::cerr << tr("No graph data to export") << "\n";
         return 1;
     }
 
-    std::cerr << "Unknown graph command: " << args[0] << "\n";
+    std::cerr << tr("Unknown graph command:") << " " << args[0] << "\n";
     return 2;
 }
 
@@ -345,11 +348,11 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty() || args[0] == "list") {
         auto codex = loader.load("config/codex.json");
         if (!codex) {
-            std::cout << "No codex.json found\n";
+            std::cout << tr("No codex.json found") << "\n";
             return 0;
         }
 
-        std::cout << term::bold("Template Codex") << "\n\n";
+        std::cout << term::bold(tr("Template Codex")) << "\n\n";
         if (codex->contains("templates") && (*codex)["templates"].is_array()) {
             for (const auto& t : (*codex)["templates"]) {
                 std::string name = t.value("name", "?");
@@ -363,7 +366,7 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
     if (args[0] == "validate") {
         auto codex = loader.load("config/codex.json");
         if (!codex) {
-            std::cerr << "codex.json not found\n";
+            std::cerr << tr("codex.json not found") << "\n";
             return 1;
         }
         int issues = 0;
@@ -373,19 +376,19 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
                 if (!file.empty()) {
                     auto path = fs::path(ctx.euxis_home) / file;
                     if (!fs::exists(path)) {
-                        std::cout << term::icon_fail() << " Missing: " << file << "\n";
+                        std::cout << term::icon_fail() << " " << tr("Missing:") << " " << file << "\n";
                         ++issues;
                     }
                 }
             }
         }
-        if (issues == 0) std::cout << term::icon_ok() << " Codex valid\n";
+        if (issues == 0) std::cout << term::icon_ok() << " " << tr("Codex valid") << "\n";
         return issues > 0 ? 1 : 0;
     }
 
     if (args[0] == "render") {
         if (args.size() < 2) {
-            std::cerr << "Usage: euxis codex render <template-name> [--var KEY=VALUE ...]\n";
+            std::cerr << tr("Usage: euxis codex render <template-name> [--var KEY=VALUE ...]") << "\n";
             return 2;
         }
         auto template_name = args[1];
@@ -405,12 +408,12 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
         // Load codex.json and find the template
         auto codex = loader.load("config/codex.json");
         if (!codex) {
-            std::cerr << "codex.json not found\n";
+            std::cerr << tr("codex.json not found") << "\n";
             return 1;
         }
 
         if (!codex->contains("templates") || !(*codex)["templates"].is_array()) {
-            std::cerr << "No templates defined in codex.json\n";
+            std::cerr << tr("No templates defined in codex.json") << "\n";
             return 1;
         }
 
@@ -423,14 +426,14 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
         }
 
         if (template_file.empty()) {
-            std::cerr << term::icon_fail() << " Template not found: " << template_name << "\n";
+            std::cerr << term::icon_fail() << " " << tr("Template not found:") << " " << template_name << "\n";
             return 1;
         }
 
         // Resolve template file path
         auto tpl_path = fs::path(ctx.euxis_home) / template_file;
         if (!fs::exists(tpl_path)) {
-            std::cerr << term::icon_fail() << " Template file missing: "
+            std::cerr << term::icon_fail() << " " << tr("Template file missing:") << " "
                       << tpl_path.string() << "\n";
             return 1;
         }
@@ -455,7 +458,7 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
         return 0;
     }
 
-    std::cerr << "Usage: euxis codex <list|validate|render> [args]\n";
+    std::cerr << tr("Usage: euxis codex <list|validate|render> [args]") << "\n";
     return 2;
 }
 
@@ -513,17 +516,17 @@ int cmd_slash(Context& ctx, const std::vector<std::string>& args) {
         auto config = loader.load("config/slash-commands.json");
         if (!config) {
             // Built-in slash commands
-            std::cout << term::bold("Slash Commands") << "\n\n"
-                      << "  /help       Show help\n"
-                      << "  /agents     List agents\n"
-                      << "  /squad      Squad operations\n"
-                      << "  /cortex     Memory operations\n"
-                      << "  /status     System status\n";
+            std::cout << term::bold(tr("Slash Commands")) << "\n\n"
+                      << "  /help       " << tr("Show help") << "\n"
+                      << "  /agents     " << tr("List agents") << "\n"
+                      << "  /squad      " << tr("Squad operations") << "\n"
+                      << "  /cortex     " << tr("Memory operations") << "\n"
+                      << "  /status     " << tr("System status") << "\n";
             return 0;
         }
 
         if (config->contains("commands") && (*config)["commands"].is_array()) {
-            std::cout << term::bold("Slash Commands") << "\n\n";
+            std::cout << term::bold(tr("Slash Commands")) << "\n\n";
             for (const auto& c : (*config)["commands"]) {
                 std::string name = c.value("name", "?");
                 std::string desc = c.value("description", "");
@@ -535,19 +538,19 @@ int cmd_slash(Context& ctx, const std::vector<std::string>& args) {
 
     if (args[0] == "run") {
         if (args.size() < 2) {
-            std::cerr << "Usage: euxis slash run <command-name> [args...]\n";
+            std::cerr << tr("Usage: euxis slash run <command-name> [args...]") << "\n";
             return 2;
         }
         auto cmd_name = args[1];
 
         auto config = loader.load("config/slash-commands.json");
         if (!config) {
-            std::cerr << term::icon_fail() << " No slash-commands.json found\n";
+            std::cerr << term::icon_fail() << " " << tr("No slash-commands.json found") << "\n";
             return 1;
         }
 
         if (!config->contains("commands") || !(*config)["commands"].is_array()) {
-            std::cerr << term::icon_fail() << " No commands defined in slash-commands.json\n";
+            std::cerr << term::icon_fail() << " " << tr("No commands defined in slash-commands.json") << "\n";
             return 1;
         }
 
@@ -563,7 +566,7 @@ int cmd_slash(Context& ctx, const std::vector<std::string>& args) {
         }
 
         if (!found) {
-            std::cerr << term::icon_fail() << " Unknown slash command: /" << cmd_name << "\n";
+            std::cerr << term::icon_fail() << " " << tr("Unknown slash command:") << " /" << cmd_name << "\n";
             return 1;
         }
 
@@ -604,12 +607,12 @@ int cmd_slash(Context& ctx, const std::vector<std::string>& args) {
             return result.exit_code;
         }
 
-        std::cerr << term::icon_fail() << " Command /" << cmd_name
-                  << " has no action or script defined\n";
+        std::cerr << term::icon_fail() << " " << tr("Command") << " /" << cmd_name
+                  << " " << tr("has no action or script defined") << "\n";
         return 1;
     }
 
-    std::cerr << "Usage: euxis slash <list|run> [args]\n";
+    std::cerr << tr("Usage: euxis slash <list|run> [args]") << "\n";
     return 2;
 }
 

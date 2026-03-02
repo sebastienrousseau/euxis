@@ -75,5 +75,67 @@ TEST_F(ValidatorTest, InvalidManifestThrows) {
     EXPECT_THROW(validate_runtime_layout(tmp_), RuntimeValidationError);
 }
 
+// --- Coverage: line 22 (ensure_required_files multiple missing) ---
+TEST_F(ValidatorTest, MultipleMissingFilesReported) {
+    std::filesystem::remove(tmp_ / "README.md");
+    std::filesystem::remove(tmp_ / "config" / "etx-settings.json");
+    try {
+        validate_runtime_layout(tmp_);
+        FAIL() << "Expected exception";
+    } catch (const RuntimeValidationError& e) {
+        std::string msg = e.what();
+        EXPECT_NE(msg.find("README.md"), std::string::npos);
+        EXPECT_NE(msg.find("etx-settings.json"), std::string::npos);
+    }
+}
+
+// --- Coverage: lines 61-62 (non-object jsonl record) ---
+TEST_F(ValidatorTest, JsonlNonObjectRecordThrows) {
+    write("data/perf/metrics.jsonl", "[1, 2, 3]\n");
+    try {
+        validate_runtime_layout(tmp_);
+        FAIL() << "Expected exception";
+    } catch (const RuntimeValidationError& e) {
+        std::string msg = e.what();
+        EXPECT_NE(msg.find("not an object"), std::string::npos);
+    }
+}
+
+// --- Coverage: line 72 (empty jsonl file) ---
+TEST_F(ValidatorTest, EmptyJsonlThrows) {
+    write("data/perf/metrics.jsonl", "  \n\n");
+    try {
+        validate_runtime_layout(tmp_);
+        FAIL() << "Expected exception";
+    } catch (const RuntimeValidationError& e) {
+        std::string msg = e.what();
+        EXPECT_NE(msg.find("no records"), std::string::npos);
+    }
+}
+
+// --- Coverage: line 130 (no .state files in lifecycle dir) ---
+TEST_F(ValidatorTest, NoStateFilesThrows) {
+    std::filesystem::remove(tmp_ / "data" / "lifecycle" / "agent.state");
+    try {
+        validate_runtime_layout(tmp_);
+        FAIL() << "Expected exception";
+    } catch (const RuntimeValidationError& e) {
+        std::string msg = e.what();
+        EXPECT_NE(msg.find("no .state files"), std::string::npos);
+    }
+}
+
+// --- Coverage: line 156 (manifest is not an object) ---
+TEST_F(ValidatorTest, ManifestNotObjectThrows) {
+    write("data/manifests/performance-optimization.json", "[1, 2, 3]");
+    try {
+        validate_runtime_layout(tmp_);
+        FAIL() << "Expected exception";
+    } catch (const RuntimeValidationError& e) {
+        std::string msg = e.what();
+        EXPECT_NE(msg.find("must be an object"), std::string::npos);
+    }
+}
+
 } // namespace
 } // namespace euxis::runtime

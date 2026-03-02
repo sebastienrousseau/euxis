@@ -3,18 +3,111 @@
 
 #include <array>
 #include <chrono>
-#include <cstdio>
 #include <cstring>
-#include <sstream>
 
 #include <spdlog/spdlog.h>
 
 #ifdef __linux__
+#include <poll.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #endif
 
 namespace euxis::bridge {
+
+namespace {
+
+#ifdef __linux__
+/// Safe process spawner using fork/execvp (no shell involved).
+struct SpawnResult {
+    int exit_code{-1};
+    std::string stdout_output;
+    std::string stderr_output;
+    std::chrono::milliseconds duration{0};
+};
+
+auto safe_spawn(const std::vector<std::string>& argv,
+                const std::vector<std::string>& env_vars)
+    -> std::expected<SpawnResult, std::string> {
+    int stdout_pipe[2];
+    if (pipe(stdout_pipe) != 0) {
+        return std::unexpected("pipe() failed: " + std::string(strerror(errno)));
+    }
+
+    auto start = std::chrono::steady_clock::now();
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        close(stdout_pipe[0]);
+        close(stdout_pipe[1]);
+        return std::unexpected("fork() failed: " + std::string(strerror(errno)));
+    }
+
+    if (pid == 0) {
+        // Child process
+        close(stdout_pipe[0]);
+        dup2(stdout_pipe[1], STDOUT_FILENO);
+        dup2(stdout_pipe[1], STDERR_FILENO);
+        close(stdout_pipe[1]);
+
+        // Set environment variables
+        for (const auto& e : env_vars) {
+            auto eq = e.find('=');
+            if (eq != std::string::npos) {
+                setenv(e.substr(0, eq).c_str(), e.substr(eq + 1).c_str(), 1);
+            }
+        }
+
+        // Build argv for execvp
+        std::vector<const char*> c_argv;
+        for (const auto& a : argv) {
+            c_argv.push_back(a.c_str());
+        }
+        c_argv.push_back(nullptr);
+
+        execvp(c_argv[0], const_cast<char* const*>(c_argv.data()));
+        _exit(127);
+    }
+
+    // Parent process
+    close(stdout_pipe[1]);
+
+    std::string output;
+    std::array<char, 4096> buffer{};
+
+    struct pollfd pfd{};
+    pfd.fd = stdout_pipe[0];
+    pfd.events = POLLIN;
+
+    while (true) {
+        int ret = poll(&pfd, 1, 60000);  // 60s timeout
+        if (ret <= 0) break;
+        ssize_t n = read(stdout_pipe[0], buffer.data(), buffer.size());
+        if (n <= 0) break;
+        output.append(buffer.data(), static_cast<size_t>(n));
+    }
+
+    close(stdout_pipe[0]);
+
+    int status = 0;
+    waitpid(pid, &status, 0);
+
+    auto end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    int exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+
+    return SpawnResult{
+        .exit_code = exit_code,
+        .stdout_output = output,
+        .stderr_output = "",
+        .duration = duration,
+    };
+}
+#endif
+
+}  // namespace
 
 SkillExecutor::SkillExecutor(std::optional<SkillExecutionPolicy> policy)
     : policy_(std::move(policy)) {}
@@ -37,117 +130,82 @@ auto SkillExecutor::spawn_sandboxed(
     const std::filesystem::path& entrypoint,
     const std::vector<std::string>& env
 ) -> std::expected<ExecutionResult, std::string> {
-    // Build nsjail command
-    std::ostringstream cmd;
-    cmd << "nsjail --mode o --time_limit "
-        << (policy_ ? policy_->resources.timeout_seconds : 20u)
-        << " --rlimit_as "
-        << (policy_ ? policy_->resources.memory_mb : 256u)
-        << " --chroot / ";
+#ifdef __linux__
+    auto runtime = runtime_command(
+        entrypoint.extension().string() == ".py" ? "python" : "node"
+    );
+
+    // Build nsjail argv safely (no shell)
+    std::vector<std::string> argv = {"nsjail", "--mode", "o"};
+
+    argv.push_back("--time_limit");
+    argv.push_back(std::to_string(policy_ ? policy_->resources.timeout_seconds : 20u));
+
+    argv.push_back("--rlimit_as");
+    argv.push_back(std::to_string(policy_ ? policy_->resources.memory_mb : 256u));
+
+    argv.push_back("--chroot");
+    argv.push_back("/");
 
     if (policy_ && policy_->filesystem.read_only) {
-        cmd << "--disable_proc ";
+        argv.push_back("--disable_proc");
     }
 
     if (policy_ && policy_->network.deny_all) {
-        cmd << "--disable_clone_newnet 0 ";
+        argv.push_back("--disable_clone_newnet");
+        argv.push_back("0");
     }
 
-    // Add environment variables
     for (const auto& e : env) {
-        cmd << "--env " << e << " ";
+        argv.push_back("--env");
+        argv.push_back(e);
     }
 
-    auto runtime = runtime_command(entrypoint.extension().string() == ".py" ? "python" : "node");
-    cmd << "-- " << runtime << " " << entrypoint.string() << " 2>&1";
+    argv.push_back("--");
+    argv.push_back(runtime);
+    argv.push_back(entrypoint.string());
 
-    auto start = std::chrono::steady_clock::now();
-
-    // Execute via popen
-    std::array<char, 4096> buffer{};
-    std::string output;
-
-    FILE* pipe = popen(cmd.str().c_str(), "r");
-    if (!pipe) {
-        return std::unexpected("Failed to launch nsjail");
-    }
-
-    while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
-        output += buffer.data();
-    }
-
-    int status = pclose(pipe);
-    auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-    int exit_code = 0;
-#ifdef __linux__
-    if (WIFEXITED(status)) {
-        exit_code = WEXITSTATUS(status);
-    } else {
-        exit_code = -1;
-    }
-#else
-    exit_code = status;
-#endif
+    auto result = safe_spawn(argv, {});
+    if (!result) return std::unexpected(result.error());
 
     return ExecutionResult{
-        .exit_code = exit_code,
-        .stdout_output = output,
-        .stderr_output = "",
-        .duration = duration,
+        .exit_code = result->exit_code,
+        .stdout_output = result->stdout_output,
+        .stderr_output = result->stderr_output,
+        .duration = result->duration,
     };
+#else
+    (void)entrypoint;
+    (void)env;
+    return std::unexpected("Sandboxed execution requires Linux");
+#endif
 }
 
 auto SkillExecutor::spawn_direct(
     const std::filesystem::path& entrypoint,
     const std::vector<std::string>& env
 ) -> std::expected<ExecutionResult, std::string> {
+#ifdef __linux__
     auto runtime = runtime_command(
         entrypoint.extension().string() == ".py" ? "python" : "node"
     );
 
-    std::ostringstream cmd;
-    for (const auto& e : env) {
-        cmd << e << " ";
-    }
-    cmd << runtime << " " << entrypoint.string() << " 2>&1";
+    std::vector<std::string> argv = {runtime, entrypoint.string()};
 
-    auto start = std::chrono::steady_clock::now();
-
-    std::array<char, 4096> buffer{};
-    std::string output;
-
-    FILE* pipe = popen(cmd.str().c_str(), "r");
-    if (!pipe) {
-        return std::unexpected("Failed to launch process");
-    }
-
-    while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe) != nullptr) {
-        output += buffer.data();
-    }
-
-    int status = pclose(pipe);
-    auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-    int exit_code = 0;
-#ifdef __linux__
-    if (WIFEXITED(status)) {
-        exit_code = WEXITSTATUS(status);
-    } else {
-        exit_code = -1;
-    }
-#else
-    exit_code = status;
-#endif
+    auto result = safe_spawn(argv, env);
+    if (!result) return std::unexpected(result.error());
 
     return ExecutionResult{
-        .exit_code = exit_code,
-        .stdout_output = output,
-        .stderr_output = "",
-        .duration = duration,
+        .exit_code = result->exit_code,
+        .stdout_output = result->stdout_output,
+        .stderr_output = result->stderr_output,
+        .duration = result->duration,
     };
+#else
+    (void)entrypoint;
+    (void)env;
+    return std::unexpected("Direct execution not supported on this platform");
+#endif
 }
 
 auto SkillExecutor::build_env(const BridgedSkill& skill) const

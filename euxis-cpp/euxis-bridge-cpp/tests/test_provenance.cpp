@@ -107,4 +107,21 @@ TEST_F(ProvenanceTest, HashNonexistentFile) {
     EXPECT_TRUE(hash.empty());
 }
 
+TEST_F(ProvenanceTest, VerifyNonMatchingHash) {
+    // Create an artifact and record provenance
+    auto file = tmp_dir_ / "original.bin";
+    std::ofstream f(file);
+    f << "original content";
+    f.close();
+
+    ProvenanceChain chain;
+    // Create a fake entry with a non-matching hash
+    ProvenanceEntry fake_entry;
+    fake_entry.artifact_hash = "0000000000000000000000000000000000000000000000000000000000000000";
+    fake_entry.builder_id = "builder-fake";
+
+    // verify() should return false because the hashes don't match
+    EXPECT_FALSE(chain.verify(file, fake_entry));
+}
+
 }  // namespace euxis::bridge

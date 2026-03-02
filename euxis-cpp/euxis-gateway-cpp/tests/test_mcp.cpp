@@ -152,5 +152,32 @@ TEST_F(McpHostTest, NotificationsInitializedAck) {
     ASSERT_TRUE(res.contains("result"));
 }
 
+// --- Coverage: mcp.cpp lines 77-78 (tools() const accessor) ---
+TEST_F(McpHostTest, ToolsAccessorReturnsList) {
+    const auto& tools = host.tools();
+    ASSERT_GE(tools.size(), 2u);
+    bool has_metrics = false;
+    bool has_sign = false;
+    for (const auto& t : tools) {
+        if (t.name == "get_metrics") has_metrics = true;
+        if (t.name == "sign_payload") has_sign = true;
+    }
+    EXPECT_TRUE(has_metrics);
+    EXPECT_TRUE(has_sign);
+}
+
+// --- Coverage: mcp.cpp line 77 (tools() on host with custom tool) ---
+TEST_F(McpHostTest, ToolsAccessorIncludesCustomTools) {
+    host.register_tool("custom", "Custom tool", {{"type", "object"}},
+                       [](const nlohmann::json& args) { return args; });
+    const auto& tools = host.tools();
+    ASSERT_GE(tools.size(), 3u);
+    bool has_custom = false;
+    for (const auto& t : tools) {
+        if (t.name == "custom") has_custom = true;
+    }
+    EXPECT_TRUE(has_custom);
+}
+
 } // namespace
 } // namespace euxis::gateway

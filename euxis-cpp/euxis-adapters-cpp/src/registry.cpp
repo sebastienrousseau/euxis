@@ -20,7 +20,8 @@ auto build_adapters(const nlohmann::json& config, MessageHandler on_message)
                              SlackAdapterConfig{
                                  .token = slack.value("token", ""),
                                  .app_token = slack.value("app_token", ""),
-                                 .mode = slack.value("mode", "socket")},
+                                 .mode = slack.value("mode", "socket"),
+                                 .api_base_url = slack.value("api_base_url", "")},
                              on_message)));
     }
 
@@ -33,7 +34,8 @@ auto build_adapters(const nlohmann::json& config, MessageHandler on_message)
                                  .mode = tg.value("mode", "webhook"),
                                  .webhook_url = tg.value("webhook_url", ""),
                                  .poll_timeout = tg.value("poll_timeout", 20),
-                                 .poll_interval = tg.value("poll_interval", 1.5)},
+                                 .poll_interval = tg.value("poll_interval", 1.5),
+                                 .api_base_url = tg.value("api_base_url", "")},
                              on_message)));
     }
 
@@ -42,7 +44,9 @@ auto build_adapters(const nlohmann::json& config, MessageHandler on_message)
         adapters.emplace(std::string("discord"),
                          AnyAdapter(std::make_unique<DiscordAdapter>(
                              DiscordAdapterConfig{
-                                 .token = dc.value("token", ""), .enabled = true},
+                                 .token = dc.value("token", ""),
+                                 .enabled = true,
+                                 .api_base_url = dc.value("api_base_url", "")},
                              on_message)));
     }
 
@@ -54,7 +58,8 @@ auto build_adapters(const nlohmann::json& config, MessageHandler on_message)
                                  .token = wa.value("token", ""),
                                  .phone_number_id = wa.value("phone_number_id", ""),
                                  .verify_token = wa.value("verify_token", ""),
-                                 .enabled = true},
+                                 .enabled = true,
+                                 .api_base_url = wa.value("api_base_url", "")},
                              on_message)));
     }
 

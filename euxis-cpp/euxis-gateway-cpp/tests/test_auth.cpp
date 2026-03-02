@@ -69,5 +69,21 @@ TEST_F(AuthTest, NoAuthConfigured) {
     EXPECT_TRUE(*result);
 }
 
+// --- Coverage: line 43 (HMAC signature wrong length) ---
+TEST_F(AuthTest, HmacSignatureWrongLengthRejects) {
+    // Compute valid HMAC hex but then truncate it to wrong length
+    auto result = verify_hmac("payload", "abc", "secret");
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().status_code, 401);
+}
+
+// --- Coverage: line 54 (empty bearer token) ---
+TEST_F(AuthTest, EmptyBearerTokenRejects) {
+    auto result = verify_bearer_token("", "expected-token");
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().status_code, 401);
+    EXPECT_NE(result.error().message.find("Missing"), std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::gateway

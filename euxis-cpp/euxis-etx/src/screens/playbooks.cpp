@@ -1,3 +1,5 @@
+#include <euxis/etx/registry.hpp>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -9,10 +11,17 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QSplitter>
+#include <QProcess>
+#include <QFile>
+#include <QCoreApplication>
+
+#include <nlohmann/json.hpp>
 
 namespace euxis::etx {
 
-QWidget* create_playbooks_screen(QWidget* parent) {
+using json = nlohmann::json;
+
+QWidget* create_playbooks_screen(FleetRegistry* registry, QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -20,7 +29,7 @@ QWidget* create_playbooks_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("PlaybooksScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -34,12 +43,16 @@ QWidget* create_playbooks_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Playbooks", widget);
+    auto* title = new QLabel(QCoreApplication::translate("PlaybooksScreen", "Playbooks"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
+
+    auto* count_label = new QLabel(widget);
+    count_label->setStyleSheet("color: #888; font-size: 12px;");
+    layout->addWidget(count_label);
 
     // Splitter: list on left, description on right
     auto* splitter = new QSplitter(Qt::Horizontal, widget);
@@ -55,60 +68,15 @@ QWidget* create_playbooks_screen(QWidget* parent) {
         "QListWidget::item { padding: 10px 12px; border-radius: 4px; }"
         "QListWidget::item:selected { background: rgba(15,52,96,0.6); }");
 
-    struct Playbook {
-        QString name;
-        QString description;
-    };
-
-    QList<Playbook> playbooks = {
-        {"security-audit",
-         "Comprehensive security audit playbook.\n\n"
-         "Steps:\n"
-         "1. Run supply chain verification on all dependencies\n"
-         "2. Execute vulnerability scanning with security-agent\n"
-         "3. Verify WASM sandbox integrity via Extism runtime\n"
-         "4. Check AES-256-GCM encryption key rotation\n"
-         "5. Audit OpenClaw bridge imports for ClawHavoc threats\n"
-         "6. Generate security report"},
-        {"full-deployment",
-         "Deploy all agents and squads to production.\n\n"
-         "Steps:\n"
-         "1. Pre-flight checks (health, memory, identity)\n"
-         "2. Deploy inference-agent with FinOps routing\n"
-         "3. Deploy code-agent and research-agent\n"
-         "4. Initialize bridge-squad for OpenClaw interop\n"
-         "5. Start ops-combo monitoring\n"
-         "6. Verify A2A protocol connectivity"},
-        {"bridge-import",
-         "Import skills from ClawHub with verification.\n\n"
-         "Steps:\n"
-         "1. Enumerate available ClawHub skills\n"
-         "2. Download SKILL.md and openclaw.json manifests\n"
-         "3. Run bridge verification (signature + hash)\n"
-         "4. Sandbox-test imported skills in WASM\n"
-         "5. Register verified skills in local registry"},
-        {"incident-response",
-         "Respond to production incidents.\n\n"
-         "Steps:\n"
-         "1. Isolate affected agents\n"
-         "2. Capture encrypted memory snapshots\n"
-         "3. Engage security-agent for threat assessment\n"
-         "4. Roll back to last known-good checkpoint\n"
-         "5. Verify system integrity post-recovery\n"
-         "6. Generate incident report"},
-        {"onboarding",
-         "New agent onboarding playbook.\n\n"
-         "Steps:\n"
-         "1. Generate KYA/DID identity for new agent\n"
-         "2. Provision AES-256-GCM encrypted memory store\n"
-         "3. Configure WASM sandbox boundaries\n"
-         "4. Register agent in fleet registry\n"
-         "5. Run baseline capability assessment\n"
-         "6. Assign to appropriate squad"},
-    };
+    // Populate from registry
+    const auto& playbooks = registry->playbooks();
+    count_label->setText(QCoreApplication::translate("PlaybooksScreen", "%1 playbooks available").arg(playbooks.size()));
 
     for (const auto& pb : playbooks) {
-        list->addItem(pb.name);
+        auto* item = new QListWidgetItem(pb.name);
+        item->setData(Qt::UserRole, pb.file_path);
+        item->setData(Qt::UserRole + 1, pb.id);
+        list->addItem(item);
     }
 
     splitter->addWidget(list);
@@ -120,7 +88,7 @@ QWidget* create_playbooks_screen(QWidget* parent) {
     auto* desc_layout = new QVBoxLayout(desc_panel);
     desc_layout->setContentsMargins(20, 20, 20, 20);
 
-    auto* desc_title = new QLabel("Select a playbook", desc_panel);
+    auto* desc_title = new QLabel(QCoreApplication::translate("PlaybooksScreen", "Select a playbook"), desc_panel);
     desc_title->setObjectName("playbook_title_label");
     QFont desc_title_font;
     desc_title_font.setPointSize(16);
@@ -136,11 +104,11 @@ QWidget* create_playbooks_screen(QWidget* parent) {
     desc_text->setFont(desc_font);
     desc_text->setStyleSheet(
         "QTextEdit { background: transparent; border: none; color: #bbb; }");
-    desc_text->setPlainText("Choose a playbook from the list to see its details.");
+    desc_text->setPlainText(QCoreApplication::translate("PlaybooksScreen", "Choose a playbook from the list to see its details."));
     desc_layout->addWidget(desc_text, 1);
 
     // Run button
-    auto* run_btn = new QPushButton("Run Playbook", desc_panel);
+    auto* run_btn = new QPushButton(QCoreApplication::translate("PlaybooksScreen", "Run Playbook"), desc_panel);
     run_btn->setObjectName("run_playbook_button");
     run_btn->setCursor(Qt::PointingHandCursor);
     run_btn->setMinimumHeight(40);
@@ -158,14 +126,92 @@ QWidget* create_playbooks_screen(QWidget* parent) {
 
     layout->addWidget(splitter, 1);
 
-    // Connect list selection to description
-    QObject::connect(list, &QListWidget::currentRowChanged, widget,
-                     [playbooks, desc_title, desc_text, run_btn](int row) {
-        if (row >= 0 && row < playbooks.size()) {
-            desc_title->setText(playbooks[row].name);
-            desc_text->setPlainText(playbooks[row].description);
-            run_btn->setEnabled(true);
+    // Connect list selection to description — load full JSON
+    QObject::connect(list, &QListWidget::currentItemChanged, widget,
+                     [desc_title, desc_text, run_btn](QListWidgetItem* current, QListWidgetItem*) {
+        if (!current) return;
+
+        QString file_path = current->data(Qt::UserRole).toString();
+        desc_title->setText(current->text());
+        run_btn->setEnabled(true);
+
+        // Load full playbook JSON for details
+        QFile file(file_path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            desc_text->setPlainText(QCoreApplication::translate("PlaybooksScreen", "Could not load playbook file."));
+            return;
         }
+
+        try {
+            auto doc = json::parse(file.readAll().toStdString());
+            QString details;
+            details += QString::fromStdString(doc.value("description", "")) + "\n\n";
+
+            if (doc.contains("phases") && doc["phases"].is_array()) {
+                details += QCoreApplication::translate("PlaybooksScreen", "Phases: %1").arg(doc["phases"].size()) + "\n\n";
+                for (const auto& phase : doc["phases"]) {
+                    int num = phase.value("phase", 0);
+                    std::string pname = phase.value("name", "");
+                    std::string mode = phase.value("mode", "");
+                    std::string checkpoint = phase.value("checkpoint", "");
+
+                    details += QCoreApplication::translate("PlaybooksScreen", "  Phase %1: %2")
+                        .arg(num)
+                        .arg(QString::fromStdString(pname));
+
+                    if (!mode.empty()) {
+                        details += QString(" [%1]").arg(QString::fromStdString(mode));
+                    }
+                    details += "\n";
+
+                    if (phase.contains("squad")) {
+                        details += QCoreApplication::translate("PlaybooksScreen", "    Squad: %1\n")
+                            .arg(QString::fromStdString(phase["squad"].get<std::string>()));
+                    }
+
+                    if (phase.contains("delegates") && phase["delegates"].is_array()) {
+                        for (const auto& d : phase["delegates"]) {
+                            details += QCoreApplication::translate("PlaybooksScreen", "    Agent: %1\n")
+                                .arg(QString::fromStdString(d.value("agent", "")));
+                        }
+                    }
+
+                    if (!checkpoint.empty()) {
+                        details += QCoreApplication::translate("PlaybooksScreen", "    Checkpoint: %1\n")
+                            .arg(QString::fromStdString(checkpoint));
+                    }
+                    details += "\n";
+                }
+            }
+            desc_text->setPlainText(details);
+        } catch (const json::exception&) {
+            desc_text->setPlainText(QCoreApplication::translate("PlaybooksScreen", "Error parsing playbook JSON."));
+        }
+    });
+
+    // Run button action
+    QObject::connect(run_btn, &QPushButton::clicked, widget, [list, desc_text]() {
+        auto* current = list->currentItem();
+        if (!current) return;
+
+        QString pb_id = current->data(Qt::UserRole + 1).toString();
+        desc_text->append("\n--- " + QCoreApplication::translate("PlaybooksScreen", "Running playbook: %1").arg(pb_id) + " ---\n");
+
+        auto* process = new QProcess(desc_text);
+        process->setProgram("euxis-cli");
+        process->setArguments({"playbook", "run", pb_id});
+
+        QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            desc_text, [desc_text, process](int exitCode, QProcess::ExitStatus) {
+                QString out = process->readAllStandardOutput();
+                QString err = process->readAllStandardError();
+                if (!out.isEmpty()) desc_text->append(out.trimmed());
+                if (!err.isEmpty()) desc_text->append(QCoreApplication::translate("PlaybooksScreen", "Error: %1").arg(err.trimmed()));
+                desc_text->append(QCoreApplication::translate("PlaybooksScreen", "Exit code: %1").arg(exitCode));
+                process->deleteLater();
+            });
+
+        process->start();
     });
 
     return widget;

@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <print>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include "euxis/cli/term_caps.hpp"
 
 namespace euxis::cli::terminal {
 
@@ -58,5 +62,13 @@ void progress_bar(int current, int total, std::string_view label);
 
 /// Print the Euxis ASCII banner.
 void print_banner();
+
+// --- 24-bit color ---
+
+/// Apply 24-bit foreground color (falls back to plain text if truecolor unsupported).
+auto rgb_fg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::string;
+
+/// Apply 24-bit background color (falls back to plain text if truecolor unsupported).
+auto rgb_bg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::string;
 
 } // namespace euxis::cli::terminal

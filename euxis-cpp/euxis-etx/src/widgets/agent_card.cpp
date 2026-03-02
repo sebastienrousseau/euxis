@@ -1,5 +1,7 @@
 #include <euxis/etx/app.hpp>
 #include <euxis/etx/registry.hpp>
+#include <euxis/etx/accessibility.hpp>
+#include <euxis/etx/semantic_colors.hpp>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -26,26 +28,25 @@ public:
         setFrameShape(QFrame::StyledPanel);
         setCursor(Qt::PointingHandCursor);
         setMinimumHeight(120);
-        setMaximumHeight(160);
+        setMaximumHeight(180);
+
+        // Accessibility: keyboard-navigable card
+        a11y::interactive(this, agent.name + " - " + agent.status,
+                          QAccessible::ListItem);
 
         auto* layout = new QVBoxLayout(this);
-        layout->setSpacing(8);
+        layout->setSpacing(6);
         layout->setContentsMargins(16, 12, 16, 12);
 
-        // Top row: status dot + name + type badge
+        // Top row: status dot + name + tier badge + type badge
         auto* top_row = new QHBoxLayout();
-        top_row->setSpacing(8);
+        top_row->setSpacing(6);
 
-        // Status dot
-        auto* status_dot = new QLabel(this);
-        status_dot->setFixedSize(12, 12);
-        QString dot_color = "#888888";
-        if (agent.status == "running") dot_color = "#4caf50";
-        else if (agent.status == "error") dot_color = "#f44336";
-        else if (agent.status == "idle") dot_color = "#2196f3";
-        status_dot->setStyleSheet(
-            QString("background: %1; border-radius: 6px; border: none;").arg(dot_color));
-        top_row->addWidget(status_dot);
+        // Status indicator with semantic severity color
+        QString dot_color = severity_color(status_to_severity(agent.status)).name();
+        auto* status_indicator = a11y::create_status_indicator(
+            agent.status, dot_color, this);
+        top_row->addWidget(status_indicator);
 
         // Name
         auto* name = new QLabel(agent.name, this);
@@ -56,6 +57,23 @@ public:
         name->setStyleSheet("background: transparent; border: none;");
         top_row->addWidget(name);
         top_row->addStretch();
+
+        // Tier badge (CORE/FLEET)
+        if (!agent.tier.isEmpty()) {
+            auto* tier_badge = new QLabel(agent.tier.toUpper(), this);
+            QFont tier_font;
+            tier_font.setPointSize(8);
+            tier_font.setBold(true);
+            tier_badge->setFont(tier_font);
+            QString tier_bg = agent.tier == "core"
+                ? "rgba(15,52,96,0.5)"
+                : "rgba(255,255,255,0.06)";
+            QString tier_fg = agent.tier == "core" ? "#6db3f2" : "#888";
+            tier_badge->setStyleSheet(
+                QString("background: %1; color: %2; padding: 2px 6px; "
+                        "border-radius: 3px; border: none;").arg(tier_bg, tier_fg));
+            top_row->addWidget(tier_badge);
+        }
 
         // Type badge
         auto* badge = new QLabel(agent.type.toUpper(), this);
@@ -82,13 +100,26 @@ public:
         desc->setFont(desc_font);
         layout->addWidget(desc, 1);
 
-        // Status text at bottom
+        // Bottom row: activation + status
+        auto* bottom_row = new QHBoxLayout();
+
+        if (!agent.activation.isEmpty()) {
+            auto* act_label = new QLabel(agent.activation, this);
+            act_label->setStyleSheet(
+                "color: #666; font-size: 9px; background: transparent; border: none;");
+            bottom_row->addWidget(act_label);
+        }
+
+        bottom_row->addStretch();
+
         auto* status_text = new QLabel(agent.status, this);
         status_text->setStyleSheet(
             QString("color: %1; font-size: 10px; font-weight: bold; "
                     "background: transparent; border: none;").arg(dot_color));
         status_text->setAlignment(Qt::AlignRight);
-        layout->addWidget(status_text);
+        bottom_row->addWidget(status_text);
+
+        layout->addLayout(bottom_row);
     }
 
 protected:

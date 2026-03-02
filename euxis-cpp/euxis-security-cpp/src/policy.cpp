@@ -32,6 +32,12 @@ auto SecurityPolicy::to_json() const -> nlohmann::json {
         {"require_https", require_https},
         {"require_mfa_for_elevated", require_mfa_for_elevated},
         {"allow_query_token", allow_query_token},
+        {"require_pii_filtering", require_pii_filtering},
+        {"require_audit_trail", require_audit_trail},
+        {"require_human_oversight_for_critical", require_human_oversight_for_critical},
+        {"require_data_minimization", require_data_minimization},
+        {"require_transparency_log", require_transparency_log},
+        {"allowed_scopes", allowed_scopes},
     };
 }
 
@@ -43,6 +49,18 @@ auto SecurityPolicy::from_json(const nlohmann::json& j) -> SecurityPolicy {
         p.require_mfa_for_elevated = j["require_mfa_for_elevated"].get<bool>();
     if (j.contains("allow_query_token"))
         p.allow_query_token = j["allow_query_token"].get<bool>();
+    if (j.contains("require_pii_filtering"))
+        p.require_pii_filtering = j["require_pii_filtering"].get<bool>();
+    if (j.contains("require_audit_trail"))
+        p.require_audit_trail = j["require_audit_trail"].get<bool>();
+    if (j.contains("require_human_oversight_for_critical"))
+        p.require_human_oversight_for_critical = j["require_human_oversight_for_critical"].get<bool>();
+    if (j.contains("require_data_minimization"))
+        p.require_data_minimization = j["require_data_minimization"].get<bool>();
+    if (j.contains("require_transparency_log"))
+        p.require_transparency_log = j["require_transparency_log"].get<bool>();
+    if (j.contains("allowed_scopes"))
+        p.allowed_scopes = j["allowed_scopes"].get<std::vector<std::string>>();
     return p;
 }
 
@@ -71,6 +89,19 @@ auto merge_policy(const nlohmann::json& overrides)
         .require_mfa_for_elevated =
             overrides.value("require_mfa_for_elevated", base.require_mfa_for_elevated),
         .allow_query_token = overrides.value("allow_query_token", base.allow_query_token),
+        .require_pii_filtering =
+            overrides.value("require_pii_filtering", base.require_pii_filtering),
+        .require_audit_trail =
+            overrides.value("require_audit_trail", base.require_audit_trail),
+        .require_human_oversight_for_critical =
+            overrides.value("require_human_oversight_for_critical",
+                            base.require_human_oversight_for_critical),
+        .require_data_minimization =
+            overrides.value("require_data_minimization", base.require_data_minimization),
+        .require_transparency_log =
+            overrides.value("require_transparency_log", base.require_transparency_log),
+        .allowed_scopes = overrides.value("allowed_scopes",
+                                           base.allowed_scopes),
     };
 }
 

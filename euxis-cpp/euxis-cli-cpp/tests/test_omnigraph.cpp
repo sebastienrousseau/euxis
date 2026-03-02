@@ -47,5 +47,81 @@ TEST(TokenBudgeterTest, PrunesLargeGraph) {
     EXPECT_TRUE(pruned["edges"].empty());
 }
 
+// --- Coverage: line 20 (unknown provider falls back to system prompt format) ---
+TEST(GraphAdapterTest, UnknownProviderDefaultsToSystemPrompt) {
+    nlohmann::json graph = {
+        {"nodes", {{"main.py", {{"type", "module"}}}}},
+        {"edges", nlohmann::json::array()},
+    };
+    auto result = GraphAdapter::format_for_provider(graph, "unknown-provider");
+    EXPECT_TRUE(result.find("OMNIGRAPH") != std::string::npos);
+}
+
+// --- Coverage: line 58 (system prompt format via format_for_provider("claude")) ---
+TEST(GraphAdapterTest, SystemPromptViaClaudeProvider) {
+    nlohmann::json graph = {
+        {"nodes", {{"a", {{"label", "test"}}}}},
+        {"edges", nlohmann::json::array()},
+    };
+    auto result = GraphAdapter::format_for_provider(graph, "claude");
+    EXPECT_FALSE(result.empty());
+}
+
+// --- Coverage: line 71 (minimal format via format_for_provider("ollama")) ---
+TEST(GraphAdapterTest, MinimalFormatViaOllamaProvider) {
+    nlohmann::json graph = {{"nodes", nlohmann::json::object()}};
+    auto result = GraphAdapter::format_for_provider(graph, "ollama");
+    EXPECT_FALSE(result.empty());
+}
+
+// --- Coverage: line 87 (optimize_graph within budget does not prune) ---
+TEST(TokenBudgeterTest, WithinBudgetNoPruning) {
+    TokenBudgeter b(100000);
+    nlohmann::json graph = {
+        {"nodes", {{"a", {}}}},
+        {"edges", {{{"source", "a"}, {"target", "b"}, {"relation", "x"}}}},
+    };
+    auto result = b.optimize_graph(graph, "json");
+    EXPECT_FALSE(result["edges"].empty());
+}
+
+// --- Coverage: line 58 (format_system_prompt with populated graph) ---
+TEST(GraphAdapterTest, SystemPromptFormatContent) {
+    nlohmann::json graph = {
+        {"nodes", {{"main.py", {{"type", "module"}, {"classes", {"App"}}}}}},
+        {"edges", {
+            {{"source", "main.py"}, {"relation", "imports"}, {"target", "utils.py"}}
+        }},
+    };
+    auto result = GraphAdapter::format_for_provider(graph, "claude");
+    EXPECT_NE(result.find("OMNIGRAPH"), std::string::npos);
+    EXPECT_NE(result.find("RELATIONSHIPS"), std::string::npos);
+    EXPECT_FALSE(result.empty());
+}
+
+// --- Coverage: line 71 (format_minimal with populated graph) ---
+TEST(GraphAdapterTest, MinimalFormatContent) {
+    nlohmann::json graph = {
+        {"nodes", {{"a.py", {{"type", "module"}}}, {"b.py", {{"type", "module"}}}}},
+    };
+    auto result = GraphAdapter::format_for_provider(graph, "ollama");
+    EXPECT_NE(result.find("Workspace Map"), std::string::npos);
+    EXPECT_FALSE(result.empty());
+}
+
+// --- Coverage: line 87 (optimize_graph within budget returns full graph) ---
+TEST(TokenBudgeterTest, WithinBudgetReturnsFull) {
+    TokenBudgeter b(1000000); // very large budget
+    nlohmann::json graph = {
+        {"nodes", {{"a", {{"type", "file"}}}, {"b", {{"type", "file"}}}}},
+        {"edges", {
+            {{"source", "a"}, {"target", "b"}, {"relation", "imports"}}
+        }},
+    };
+    auto result = b.optimize_graph(graph, "json");
+    EXPECT_FALSE(result["nodes"].empty());
+    EXPECT_FALSE(result["edges"].empty());
+}
+
 } // namespace
 } // namespace euxis::cli

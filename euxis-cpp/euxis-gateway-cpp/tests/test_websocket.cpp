@@ -110,5 +110,135 @@ TEST_F(WebSocketHubTest, DispatchMessage) {
     hub.stop();
 }
 
+TEST_F(WebSocketHubTest, BroadcastToNoClients) {
+    WebSocketHub hub(TEST_PORT + 4);
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json&) -> nlohmann::json {
+            return {{"ok", true}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Broadcast with no clients should not crash
+    hub.broadcast({{"type", "announcement"}, {"data", "hello"}});
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, SendToNonExistentClient) {
+    WebSocketHub hub(TEST_PORT + 5);
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json&) -> nlohmann::json {
+            return {{"ok", true}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // Send to a client ID that doesn't exist should not crash
+    hub.send_to("nonexistent-client-id", {{"type", "message"}});
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, MultipleMessagesInSequence) {
+    WebSocketHub hub(TEST_PORT + 6);
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json& msg) -> nlohmann::json {
+            return {{"echo", msg}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    euxis::core::WebSocketClient client(
+        "ws://127.0.0.1:" + std::to_string(TEST_PORT + 6));
+    client.connect();
+    ASSERT_TRUE(client.is_connected());
+
+    // Send multiple messages in sequence
+    auto resp1 = client.send_and_wait(
+        {{"type", "msg1"}}, std::chrono::milliseconds(2000));
+    ASSERT_TRUE(resp1.has_value());
+
+    auto resp2 = client.send_and_wait(
+        {{"type", "msg2"}}, std::chrono::milliseconds(2000));
+    ASSERT_TRUE(resp2.has_value());
+
+    client.disconnect();
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, StopWithoutStart) {
+    WebSocketHub hub(TEST_PORT + 7);
+    // Stopping without starting should not crash
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, DoubleStop) {
+    WebSocketHub hub(TEST_PORT + 8);
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json&) -> nlohmann::json {
+            return {{"ok", true}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    hub.stop();
+    // Second stop should not crash
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, BroadcastWithConnectedClient) {
+    WebSocketHub hub(TEST_PORT + 9);
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json& msg) -> nlohmann::json {
+            return {{"echo", msg}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    euxis::core::WebSocketClient client(
+        "ws://127.0.0.1:" + std::to_string(TEST_PORT + 9));
+    client.connect();
+    ASSERT_TRUE(client.is_connected());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Broadcast should reach the connected client
+    hub.broadcast({{"type", "broadcast"}, {"data", "hello all"}});
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    client.disconnect();
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, NoMessageHandler) {
+    WebSocketHub hub(TEST_PORT + 10);
+    // Do NOT set a message handler
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    euxis::core::WebSocketClient client(
+        "ws://127.0.0.1:" + std::to_string(TEST_PORT + 10));
+    client.connect();
+    ASSERT_TRUE(client.is_connected());
+
+    // Send a message without handler - should not crash
+    // Use fire-and-forget since there won't be a response without handler
+    client.send({{"type", "test"}});
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    client.disconnect();
+    hub.stop();
+}
+
+TEST_F(WebSocketHubTest, CustomHost) {
+    // Construct with custom host
+    WebSocketHub hub(TEST_PORT + 11, "127.0.0.1");
+    hub.set_message_handler(
+        [](const std::string&, const nlohmann::json&) -> nlohmann::json {
+            return {{"ok", true}};
+        });
+    hub.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    EXPECT_EQ(hub.client_count(), 0);
+    hub.stop();
+}
+
 } // namespace
 } // namespace euxis::gateway

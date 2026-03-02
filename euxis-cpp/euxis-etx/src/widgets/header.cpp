@@ -1,4 +1,5 @@
 #include <euxis/etx/theme.hpp>
+#include <euxis/etx/breadcrumb_widget.hpp>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -8,6 +9,7 @@
 #include <QPainterPath>
 #include <QTimer>
 #include <QRandomGenerator>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -19,7 +21,7 @@ public:
         : QWidget(parent)
     {
         setFixedSize(120, 32);
-        setToolTip("Burn rate (simulated)");
+        setToolTip(tr("Burn rate (simulated)"));
 
         // Initialize data points
         for (int i = 0; i < 20; ++i) {
@@ -101,7 +103,7 @@ QWidget* create_header_widget(ThemeEngine* theme, QWidget* parent) {
     layout->addWidget(logo);
 
     // Title
-    auto* title = new QLabel("Euxis ETX", widget);
+    auto* title = new QLabel(QCoreApplication::translate("HeaderWidget", "Euxis ETX"), widget);
     title->setObjectName("header_title");
     QFont title_font;
     title_font.setPointSize(16);
@@ -109,6 +111,11 @@ QWidget* create_header_widget(ThemeEngine* theme, QWidget* parent) {
     title->setFont(title_font);
     title->setStyleSheet("color: #e0e0e0; background: transparent; border: none;");
     layout->addWidget(title);
+
+    // Breadcrumb navigation trail
+    auto* breadcrumb = new BreadcrumbWidget(widget);
+    breadcrumb->setObjectName("header_breadcrumb");
+    layout->addWidget(breadcrumb);
 
     // Spacer
     layout->addStretch();

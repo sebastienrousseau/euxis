@@ -93,5 +93,68 @@ TEST(HttpTransportTest, MultipleSendsDoNotCorruptState) {
     EXPECT_FALSE(r3.has_value());
 }
 
+// ---------------------------------------------------------------------------
+// Constructor with URL without scheme
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, ConstructorWithoutScheme) {
+    HttpA2ATransport transport("localhost:8080");
+    // parse_url should add http:// prefix
+    auto result = transport.send("test/method", {});
+    ASSERT_FALSE(result.has_value());
+    EXPECT_FALSE(result.error().empty());
+}
+
+// ---------------------------------------------------------------------------
+// Constructor with URL containing path but no scheme
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, ConstructorWithPathNoScheme) {
+    HttpA2ATransport transport("localhost:8080/api/v1");
+    auto result = transport.send("test/method", {});
+    ASSERT_FALSE(result.has_value());
+}
+
+// ---------------------------------------------------------------------------
+// Discover with URL that has no path
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, DiscoverWithNoPath) {
+    HttpA2ATransport transport("http://127.0.0.1:1");
+    auto result = transport.discover("http://127.0.0.1:1");
+    ASSERT_FALSE(result.has_value());
+    // Error should mention HTTP failure
+    EXPECT_FALSE(result.error().empty());
+}
+
+// ---------------------------------------------------------------------------
+// Send with complex JSON params
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, SendWithComplexParams) {
+    HttpA2ATransport transport("http://127.0.0.1:1");
+    nlohmann::json params = {
+        {"task", {{"description", "test task"}, {"priority", "high"}}},
+        {"artifacts", nlohmann::json::array({"file1.txt", "file2.txt"})},
+        {"metadata", {{"version", 2}, {"nested", {{"key", "value"}}}}}
+    };
+    auto result = transport.send("task/create", params);
+    ASSERT_FALSE(result.has_value());
+}
+
+// ---------------------------------------------------------------------------
+// Discover URL with trailing slash on path
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, DiscoverWithTrailingSlash) {
+    HttpA2ATransport transport("http://127.0.0.1:1");
+    auto result = transport.discover("http://127.0.0.1:1/api/");
+    ASSERT_FALSE(result.has_value());
+}
+
+// ---------------------------------------------------------------------------
+// Send with empty method name
+// ---------------------------------------------------------------------------
+TEST(HttpTransportTest, SendWithEmptyMethod) {
+    HttpA2ATransport transport("http://127.0.0.1:1");
+    auto result = transport.send("", {});
+    ASSERT_FALSE(result.has_value());
+}
+
 } // namespace
 } // namespace euxis::a2a

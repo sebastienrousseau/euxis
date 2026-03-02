@@ -115,5 +115,49 @@ TEST(QualityGateTest, ScoresInRange) {
     EXPECT_LE(score.repetition_ratio, 1.0f);
 }
 
+// --- Coverage: lines 67-77 (split_sentences with trailing text, no punctuation) ---
+TEST(QualityGateTest, TextWithoutPunctuation) {
+    QualityGate gate(0.0f, 1.0f);
+    auto score = gate.evaluate(
+        "prompt",
+        "This is a sentence without any terminal punctuation marks at all");
+    // Without '.', '!', '?' the whole text is one "sentence"
+    EXPECT_GE(score.coherence, 0.0f);
+    EXPECT_LE(score.coherence, 1.0f);
+}
+
+// --- Coverage: line 112 (compute_relevance: both prompts empty -> relevance=1.0) ---
+TEST(QualityGateTest, BothEmptyRelevanceIsOne) {
+    QualityGate gate(0.0f, 1.0f);
+    // Both prompt and response empty -> relevance = 1.0
+    auto score = gate.evaluate("", "");
+    EXPECT_FLOAT_EQ(score.relevance, 1.0f);
+}
+
+// --- Coverage: line 135 (compute_relevance: one empty, one not -> relevance=0.0) ---
+TEST(QualityGateTest, OneEmptyRelevanceIsZero) {
+    QualityGate gate(0.0f, 1.0f);
+    auto score1 = gate.evaluate("hello world", "");
+    EXPECT_FLOAT_EQ(score1.relevance, 0.0f);
+    auto score2 = gate.evaluate("", "hello world");
+    EXPECT_FLOAT_EQ(score2.relevance, 0.0f);
+}
+
+// --- Coverage: lines 67-77 (sentence trimming with leading whitespace) ---
+TEST(QualityGateTest, SentencesWithLeadingWhitespace) {
+    QualityGate gate(0.0f, 1.0f);
+    auto score = gate.evaluate(
+        "prompt",
+        "  First sentence here.   Second one right there.  \n Third sentence too.");
+    EXPECT_GE(score.coherence, 0.0f);
+}
+
+// --- Coverage: single word text (repetition = 0) ---
+TEST(QualityGateTest, SingleWordRepetitionIsZero) {
+    QualityGate gate(0.0f, 1.0f);
+    auto score = gate.evaluate("prompt", "hello");
+    EXPECT_FLOAT_EQ(score.repetition_ratio, 0.0f);
+}
+
 } // anonymous namespace
 } // namespace euxis::inference

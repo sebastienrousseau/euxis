@@ -1,3 +1,5 @@
+#include <euxis/etx/config.hpp>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -7,10 +9,46 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QDateTime>
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
-QWidget* create_logs_screen(QWidget* parent) {
+static void load_daemon_log(QPlainTextEdit* log_edit, const QString& runtime_dir) {
+    QString log_path = runtime_dir + "/logs/daemon.log";
+    QFile file(log_path);
+
+    if (!file.exists()) {
+        log_edit->setPlainText(QCoreApplication::translate("LogsScreen", "No daemon log found at:\n%1\n\nThe daemon has not been started yet, or logs are stored elsewhere.").arg(log_path));
+        return;
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        log_edit->setPlainText(QCoreApplication::translate("LogsScreen", "Could not open daemon log:\n%1").arg(log_path));
+        return;
+    }
+
+    // Read last 500 lines
+    QStringList lines;
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        lines.append(in.readLine());
+        if (lines.size() > 500) {
+            lines.removeFirst();
+        }
+    }
+
+    log_edit->setPlainText(lines.join('\n'));
+
+    // Scroll to bottom
+    auto cursor = log_edit->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    log_edit->setTextCursor(cursor);
+}
+
+QWidget* create_logs_screen(ETXConfig* /*config*/, QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -18,7 +56,7 @@ QWidget* create_logs_screen(QWidget* parent) {
 
     // Top bar with back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("LogsScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -32,12 +70,18 @@ QWidget* create_logs_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("System Logs", widget);
+    auto* title = new QLabel(QCoreApplication::translate("LogsScreen", "System Logs"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
+
+    // Source label
+    QString runtime_dir = ETXConfig::runtime_dir();
+    auto* source_label = new QLabel(QCoreApplication::translate("LogsScreen", "Source: %1/logs/daemon.log").arg(runtime_dir), widget);
+    source_label->setStyleSheet("color: #666; font-size: 11px;");
+    layout->addWidget(source_label);
 
     // Log display
     auto* log_edit = new QPlainTextEdit(widget);
@@ -53,38 +97,8 @@ QWidget* create_logs_screen(QWidget* parent) {
         "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; "
         "padding: 12px; }");
 
-    // Populate with sample log entries
-    auto now = QDateTime::currentDateTime();
-    log_edit->appendPlainText(
-        now.addSecs(-300).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] Euxis ETX v0.0.3 initialized");
-    log_edit->appendPlainText(
-        now.addSecs(-280).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] ThemeEngine: applied liquid-glass theme");
-    log_edit->appendPlainText(
-        now.addSecs(-260).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] FleetRegistry: loaded 8 agents");
-    log_edit->appendPlainText(
-        now.addSecs(-200).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] CryptoModule: AES-256-GCM backend ready (Rust/PyO3)");
-    log_edit->appendPlainText(
-        now.addSecs(-150).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] BridgeModule: OpenClaw interop layer initialized");
-    log_edit->appendPlainText(
-        now.addSecs(-120).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [WARN] IdentityAgent: KYA/DID endpoint unreachable, retrying...");
-    log_edit->appendPlainText(
-        now.addSecs(-90).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [ERROR] IdentityAgent: failed to connect after 3 retries");
-    log_edit->appendPlainText(
-        now.addSecs(-60).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] InferenceAgent: local model endpoint available at :8080");
-    log_edit->appendPlainText(
-        now.addSecs(-30).toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] MemoryAgent: encrypted checkpoint loaded (AES-256-GCM)");
-    log_edit->appendPlainText(
-        now.toString("[yyyy-MM-dd hh:mm:ss]") +
-        " [INFO] ResearchAgent: task 'audit-openclaw-security' running");
+    // Load daemon.log
+    load_daemon_log(log_edit, runtime_dir);
 
     layout->addWidget(log_edit, 1);
 
@@ -92,13 +106,13 @@ QWidget* create_logs_screen(QWidget* parent) {
     auto* button_row = new QHBoxLayout();
     button_row->addStretch();
 
-    auto* clear_btn = new QPushButton("Clear", widget);
+    auto* clear_btn = new QPushButton(QCoreApplication::translate("LogsScreen", "Clear"), widget);
     clear_btn->setCursor(Qt::PointingHandCursor);
     clear_btn->setMinimumHeight(36);
     clear_btn->setMinimumWidth(100);
     button_row->addWidget(clear_btn);
 
-    auto* refresh_btn = new QPushButton("Refresh", widget);
+    auto* refresh_btn = new QPushButton(QCoreApplication::translate("LogsScreen", "Refresh"), widget);
     refresh_btn->setCursor(Qt::PointingHandCursor);
     refresh_btn->setMinimumHeight(36);
     refresh_btn->setMinimumWidth(100);
@@ -108,9 +122,9 @@ QWidget* create_logs_screen(QWidget* parent) {
 
     QObject::connect(clear_btn, &QPushButton::clicked, log_edit, &QPlainTextEdit::clear);
 
-    QObject::connect(refresh_btn, &QPushButton::clicked, widget, [log_edit]() {
-        auto ts = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss]");
-        log_edit->appendPlainText(ts + " [INFO] Log refreshed");
+    QObject::connect(refresh_btn, &QPushButton::clicked, widget,
+                     [log_edit, runtime_dir]() {
+        load_daemon_log(log_edit, runtime_dir);
     });
 
     return widget;

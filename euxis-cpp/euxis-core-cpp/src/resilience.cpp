@@ -15,7 +15,8 @@ auto now_epoch() -> double {
         .count();
 }
 
-thread_local std::mt19937 rng{std::random_device{}()};
+// Use std::random_device directly for cryptographically safe jitter
+thread_local std::random_device secure_rng;
 
 } // namespace
 
@@ -25,7 +26,7 @@ auto RetryPolicy::sleep_duration(int attempt) const -> double {
                  max_delay_seconds);
     double jitter = raw * jitter_ratio;
     std::uniform_real_distribution<double> dist(-jitter, jitter);
-    return std::max(0.0, raw + dist(rng));
+    return std::max(0.0, raw + dist(secure_rng));
 }
 
 CircuitBreaker::CircuitBreaker(int failure_threshold,

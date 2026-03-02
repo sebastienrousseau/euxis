@@ -217,5 +217,35 @@ TEST_F(DIDTest, ResolveInvalidDIDEmptyId) {
     EXPECT_TRUE(result.error().find("empty id") != std::string::npos);
 }
 
+// ---------------------------------------------------------------------------
+// resolve_did: additional failure paths (covers lines 50, 62, 69)
+// ---------------------------------------------------------------------------
+TEST_F(DIDTest, ResolveEmptyStringFails) {
+    const auto result = resolve_did("");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_TRUE(result.error().find("must start with 'did:'") != std::string::npos);
+}
+
+TEST_F(DIDTest, ResolveDIDOnlyPrefix) {
+    // "did:" with nothing after — missing method-specific id (line 62)
+    const auto result = resolve_did("did:");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_TRUE(result.error().find("missing method-specific id") != std::string::npos);
+}
+
+TEST_F(DIDTest, ResolveInvalidDIDPrefixOnly) {
+    // "xyz:something" — does not start with "did:" (line 50)
+    const auto result = resolve_did("xyz:method:id");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_TRUE(result.error().find("must start with 'did:'") != std::string::npos);
+}
+
+TEST_F(DIDTest, ResolveEmptyMethodAndId) {
+    // "did::" — empty method (line 69)
+    const auto result = resolve_did("did::");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_TRUE(result.error().find("empty method") != std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::identity

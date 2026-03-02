@@ -40,13 +40,13 @@ public:
         layout->addStretch();
 
         tips_ = {
-            "Press F3 to cycle themes",
-            "Use Ctrl+K to open the command palette",
-            "Press F5 to refresh the fleet registry",
-            "Ctrl+Q quits the application",
-            "Click on any agent card to see details",
-            "Use the search bar to filter agents",
-            "Press / to quickly open the command palette",
+            tr("Press F3 to cycle themes"),
+            tr("Use Ctrl+K to open the command palette"),
+            tr("Press F5 to refresh the fleet registry"),
+            tr("Ctrl+Q quits the application"),
+            tr("Click on any agent card to see details"),
+            tr("Use the search bar to filter agents"),
+            tr("Press / to quickly open the command palette"),
         };
 
         update_tip();

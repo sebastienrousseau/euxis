@@ -52,6 +52,9 @@ public:
     /// Print router status to stdout.
     void print_status() const;
 
+    /// Get fallback model chain for a given model.
+    [[nodiscard]] auto model_fallback_chain(const std::string& model) const -> std::vector<ModelSelection>;
+
 private:
     std::string data_dir_;
     nlohmann::json config_;

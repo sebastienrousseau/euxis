@@ -7,6 +7,7 @@
 #include <QFont>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -18,7 +19,7 @@ QWidget* create_help_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("HelpScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -32,7 +33,7 @@ QWidget* create_help_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Keyboard Shortcuts", widget);
+    auto* title = new QLabel(QCoreApplication::translate("HelpScreen", "Keyboard Shortcuts"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
@@ -43,7 +44,7 @@ QWidget* create_help_screen(QWidget* parent) {
     auto* table = new QTableWidget(widget);
     table->setObjectName("shortcuts_table");
     table->setColumnCount(2);
-    table->setHorizontalHeaderLabels({"Shortcut", "Action"});
+    table->setHorizontalHeaderLabels({QCoreApplication::translate("HelpScreen", "Shortcut"), QCoreApplication::translate("HelpScreen", "Action")});
     table->horizontalHeader()->setStretchLastSection(true);
     table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     table->verticalHeader()->setVisible(false);
@@ -58,15 +59,15 @@ QWidget* create_help_screen(QWidget* parent) {
     };
 
     QList<Shortcut> shortcuts = {
-        {"Ctrl+K",  "Open Command Palette"},
-        {"Ctrl+P",  "Open Command Palette (alternative)"},
-        {"/",       "Open Command Palette (vim-style)"},
-        {"Ctrl+Q",  "Quit Application"},
-        {"F3",      "Cycle Theme (liquid-glass / calm / focused)"},
-        {"F5",      "Refresh Fleet Registry"},
-        {"Enter",   "Continue from Welcome Screen"},
-        {"J / K",   "Vim-style navigation (in lists)"},
-        {"Escape",  "Close dialogs / Go back"},
+        {"Ctrl+K",  QCoreApplication::translate("HelpScreen", "Open Command Palette")},
+        {"Ctrl+P",  QCoreApplication::translate("HelpScreen", "Open Command Palette (alternative)")},
+        {"/",       QCoreApplication::translate("HelpScreen", "Open Command Palette (vim-style)")},
+        {"Ctrl+Q",  QCoreApplication::translate("HelpScreen", "Quit Application")},
+        {"F3",      QCoreApplication::translate("HelpScreen", "Cycle Theme (liquid-glass / calm / focused)")},
+        {"F5",      QCoreApplication::translate("HelpScreen", "Refresh Fleet Registry")},
+        {"Enter",   QCoreApplication::translate("HelpScreen", "Continue from Welcome Screen")},
+        {"J / K",   QCoreApplication::translate("HelpScreen", "Vim-style navigation (in lists)")},
+        {"Escape",  QCoreApplication::translate("HelpScreen", "Close dialogs / Go back")},
     };
 
     table->setRowCount(shortcuts.size());

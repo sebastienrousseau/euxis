@@ -2,6 +2,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QWidget>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -27,7 +28,7 @@ QWidget* create_search_bar_widget(QWidget* parent) {
     // Search input
     auto* input = new QLineEdit(widget);
     input->setObjectName("search_input");
-    input->setPlaceholderText("Search agents...");
+    input->setPlaceholderText(QCoreApplication::translate("SearchBar", "Search agents..."));
     input->setMinimumHeight(36);
     input->setStyleSheet(
         "QLineEdit { background: rgba(255,255,255,0.03); "

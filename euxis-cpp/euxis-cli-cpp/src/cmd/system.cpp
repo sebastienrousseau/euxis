@@ -1,5 +1,6 @@
 #include "euxis/cli/cmd/system.hpp"
 #include "euxis/cli/config_loader.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/registry_client.hpp"
 #include "euxis/cli/terminal.hpp"
@@ -9,6 +10,8 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+
+using euxis::cli::i18n::tr;
 
 namespace euxis::cli::cmd {
 namespace {
@@ -39,7 +42,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         if (a == "--fix") fix_mode = true;
     }
 
-    std::cout << term::bold("Euxis Doctor") << "\n\n";
+    std::cout << term::bold(tr("Euxis Doctor")) << "\n\n";
 
     // System info header
     {
@@ -53,10 +56,10 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
             return s;
         };
 
-        std::cout << term::bold("System:") << "\n";
-        std::cout << "  Hostname:     " << trim(hostname.stdout_output) << "\n";
-        std::cout << "  Kernel:       " << trim(kernel.stdout_output) << "\n";
-        std::cout << "  Architecture: " << trim(arch.stdout_output) << "\n\n";
+        std::cout << term::bold(tr("System:")) << "\n";
+        std::cout << "  " << tr("Hostname:") << "     " << trim(hostname.stdout_output) << "\n";
+        std::cout << "  " << tr("Kernel:") << "       " << trim(kernel.stdout_output) << "\n";
+        std::cout << "  " << tr("Architecture:") << " " << trim(arch.stdout_output) << "\n\n";
     }
 
     std::vector<CheckResult> checks;
@@ -65,7 +68,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
 
     // 1. Platform
     {
-        CheckResult r{"Platform", true, ""};
+        CheckResult r{tr("Platform"), true, ""};
 #ifdef __linux__
         r.detail = "Linux";
 #elif defined(__APPLE__)
@@ -79,7 +82,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     // 2. Shell
     {
         const char* shell = std::getenv("SHELL");
-        checks.push_back({"Shell", shell != nullptr, shell ? shell : "not set"});
+        checks.push_back({tr("Shell"), shell != nullptr, shell ? shell : tr("not set")});
     }
 
     // 3. Required dependencies
@@ -89,7 +92,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     };
     for (const auto& [name, required] : deps) {
         bool found = Process::available(name);
-        CheckResult r{name, found || !required, found ? "found" : "not found"};
+        CheckResult r{name, found || !required, found ? tr("found") : tr("not found")};
         if (!found && required) {
             ++failures;
             fixable.push_back(name);
@@ -100,7 +103,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     // 4. EUXIS_HOME
     {
         bool exists = fs::is_directory(ctx.euxis_home);
-        checks.push_back({"EUXIS_HOME", exists, ctx.euxis_home});
+        checks.push_back({tr("EUXIS_HOME"), exists, ctx.euxis_home});
         if (!exists) ++failures;
     }
 
@@ -108,7 +111,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     for (const auto& dir : {"euxis-data", "euxis-data/agents", "euxis-data/config"}) {
         auto path = fs::path(ctx.euxis_home) / dir;
         bool exists = fs::is_directory(path);
-        checks.push_back({std::string("dir: ") + dir, exists, exists ? "ok" : "missing"});
+        checks.push_back({std::string(tr("dir: ")) + dir, exists, exists ? tr("ok") : tr("missing")});
         if (!exists) {
             ++failures;
             fixable.push_back(std::string("mkdir -p ") + path.string());
@@ -121,8 +124,8 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         auto db_path = fs::path(ctx.data_dir) / "agents" / "registry.db";
         bool has_json = fs::exists(json_path);
         bool has_db = fs::exists(db_path);
-        checks.push_back({"registry.json", has_json, has_json ? "ok" : "missing"});
-        checks.push_back({"registry.db", has_db, has_db ? "ok" : "optional, missing"});
+        checks.push_back({"registry.json", has_json, has_json ? tr("ok") : tr("missing")});
+        checks.push_back({"registry.db", has_db, has_db ? tr("ok") : tr("optional, missing")});
         if (!has_json) ++failures;
     }
 
@@ -134,19 +137,19 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     for (const auto& p : providers) {
         bool found = Process::available(p);
         if (found) ++provider_count;
-        checks.push_back({"provider: " + p, found, found ? "available" : "not found"});
+        checks.push_back({tr("provider: ") + p, found, found ? tr("available") : tr("not found")});
     }
     if (provider_count == 0) {
-        checks.push_back({"providers", false, "no providers available"});
+        checks.push_back({tr("providers"), false, tr("no providers available")});
         ++failures;
     }
 
     // 8. Terminal
     {
         const char* term_env = std::getenv("TERM");
-        checks.push_back({"TERM", term_env != nullptr, term_env ? term_env : "not set"});
-        checks.push_back({"Colors", term::colors_enabled(), term::colors_enabled() ? "yes" : "no"});
-        checks.push_back({"CI mode", true, term::is_ci() ? "yes" : "no"});
+        checks.push_back({tr("TERM"), term_env != nullptr, term_env ? term_env : tr("not set")});
+        checks.push_back({tr("Colors"), term::colors_enabled(), term::colors_enabled() ? tr("yes") : tr("no")});
+        checks.push_back({tr("CI mode"), true, term::is_ci() ? tr("yes") : tr("no")});
     }
 
     // 9. Disk space
@@ -156,42 +159,42 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         if (!ec) {
             auto avail_mb = space_info.available / (1024 * 1024);
             bool ok = avail_mb >= 100;
-            checks.push_back({"Disk space", ok,
-                               std::to_string(avail_mb) + " MB available"});
+            checks.push_back({tr("Disk space"), ok,
+                               std::to_string(avail_mb) + " " + tr("MB available")});
             if (!ok) {
                 ++failures;
-                std::cout << term::yellow("  Warning: less than 100 MB free on EUXIS_HOME") << "\n";
+                std::cout << term::yellow("  " + tr("Warning: less than 100 MB free on EUXIS_HOME")) << "\n";
             }
         } else {
-            checks.push_back({"Disk space", false, "unable to query"});
+            checks.push_back({tr("Disk space"), false, tr("unable to query")});
             ++failures;
         }
     }
 
     // Print results
-    std::cout << term::bold("Checks:") << "\n";
+    std::cout << term::bold(tr("Checks:")) << "\n";
     for (const auto& c : checks) print_check(c);
 
-    std::cout << "\n" << term::bold("Summary: ");
+    std::cout << "\n" << term::bold(tr("Summary: "));
     if (failures == 0) {
-        std::cout << term::green("All checks passed") << "\n";
+        std::cout << term::green(tr("All checks passed")) << "\n";
     } else {
-        std::cout << term::red(std::to_string(failures) + " issue(s) found") << "\n";
+        std::cout << term::red(std::to_string(failures) + " " + tr("issue(s) found")) << "\n";
     }
 
     // Fix mode
     if (fix_mode && !fixable.empty()) {
-        std::cout << "\n" << term::bold("Auto-fix:") << "\n";
+        std::cout << "\n" << term::bold(tr("Auto-fix:")) << "\n";
         for (const auto& cmd : fixable) {
             if (cmd.starts_with("mkdir")) {
-                std::cout << "  Running: " << cmd << "\n";
+                std::cout << "  " << tr("Running:") << " " << cmd << "\n";
                 Process::shell(cmd);
             } else {
-                std::cout << "  Install: " << cmd << " (manual)\n";
+                std::cout << "  " << tr("Install:") << " " << cmd << " " << tr("(manual)") << "\n";
             }
         }
     } else if (!fixable.empty()) {
-        std::cout << "  Run with --fix to attempt auto-repair.\n";
+        std::cout << "  " << tr("Run with --fix to attempt auto-repair.") << "\n";
     }
 
     if (ctx.json_output) {
@@ -216,7 +219,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         if (a == "--silent") silent = true;
     }
 
-    if (!silent) std::cout << term::bold("Fleet Health Check") << "\n\n";
+    if (!silent) std::cout << term::bold(tr("Fleet Health Check")) << "\n\n";
 
     int failures = 0;
     int warnings = 0;
@@ -228,9 +231,9 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = registry.has_json() || registry.has_sqlite();
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
-                      << " Registry available"
-                      << " (SQLite: " << (registry.has_sqlite() ? "yes" : "no")
-                      << ", JSON: " << (registry.has_json() ? "yes" : "no") << ")\n";
+                      << " " << tr("Registry available")
+                      << " (SQLite: " << (registry.has_sqlite() ? tr("yes") : tr("no"))
+                      << ", JSON: " << (registry.has_json() ? tr("yes") : tr("no")) << ")\n";
         }
         if (!ok) ++failures;
     }
@@ -240,7 +243,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         int count = registry.agent_count();
         if (!silent) {
             std::cout << "  " << (count > 0 ? term::icon_ok() : term::icon_warn())
-                      << " Agents registered: " << count << "\n";
+                      << " " << tr("Agents registered:") << " " << count << "\n";
         }
         if (count == 0) ++warnings;
     }
@@ -258,7 +261,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = missing == 0;
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
-                      << " Prompt files" << (ok ? " all present" : " " + std::to_string(missing) + " missing") << "\n";
+                      << " " << tr("Prompt files") << (ok ? " " + tr("all present") : " " + std::to_string(missing) + " " + tr("missing")) << "\n";
         }
         if (!ok) ++warnings;
     }
@@ -272,7 +275,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         }
         if (!silent) {
             std::cout << "  " << (found > 0 ? term::icon_ok() : term::icon_fail())
-                      << " Providers available: " << found << "/" << providers.size() << "\n";
+                      << " " << tr("Providers available:") << " " << found << "/" << providers.size() << "\n";
         }
         if (found == 0) ++failures;
     }
@@ -282,7 +285,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = fs::is_directory(fs::path(ctx.euxis_home) / "euxis-data");
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
-                      << " Data directory\n";
+                      << " " << tr("Data directory") << "\n";
         }
         if (!ok) ++failures;
     }
@@ -293,7 +296,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = loader.exists("config/router.json") || loader.exists("agents/registry.json");
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
-                      << " Config files\n";
+                      << " " << tr("Config files") << "\n";
         }
         if (!ok) ++warnings;
     }
@@ -303,7 +306,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         auto squads = registry.list_squads();
         if (!silent) {
             std::cout << "  " << (!squads.empty() ? term::icon_ok() : term::icon_warn())
-                      << " Squads defined: " << squads.size() << "\n";
+                      << " " << tr("Squads defined:") << " " << squads.size() << "\n";
         }
     }
 
@@ -318,7 +321,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         }
         if (!silent) {
             std::cout << "  " << term::icon_info()
-                      << " Bus pipes: " << pipe_count << "\n";
+                      << " " << tr("Bus pipes:") << " " << pipe_count << "\n";
         }
     }
 
@@ -328,7 +331,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = fs::is_directory(cortex_db);
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
-                      << " Cortex DB" << (ok ? " present" : " not found") << "\n";
+                      << " " << tr("Cortex DB") << (ok ? " " + tr("present") : " " + tr("not found")) << "\n";
         }
     }
 
@@ -337,7 +340,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool has_lint = Process::available("shellcheck");
         if (!silent) {
             std::cout << "  " << (has_lint ? term::icon_ok() : term::icon_warn())
-                      << " shellcheck" << (has_lint ? " available" : " not found") << "\n";
+                      << " shellcheck" << (has_lint ? " " + tr("available") : " " + tr("not found")) << "\n";
         }
     }
 
@@ -356,8 +359,8 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         bool ok = orphans == 0;
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
-                      << " Orphan agents: " << orphans;
-            if (!ok) std::cout << " (prompt file missing)";
+                      << " " << tr("Orphan agents:") << " " << orphans;
+            if (!ok) std::cout << " " << tr("(prompt file missing)");
             std::cout << "\n";
         }
         if (!ok) ++warnings;
@@ -373,15 +376,15 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
                 ++bad_names;
                 if (!silent && ctx.verbose) {
                     std::cout << "    " << term::icon_warn()
-                              << " bad ID: " << term::dim(a.id) << "\n";
+                              << " " << tr("bad ID:") << " " << term::dim(a.id) << "\n";
                 }
             }
         }
         bool ok = bad_names == 0;
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
-                      << " Agent naming convention"
-                      << (ok ? "" : " (" + std::to_string(bad_names) + " non-conforming)")
+                      << " " << tr("Agent naming convention")
+                      << (ok ? "" : " (" + std::to_string(bad_names) + " " + tr("non-conforming") + ")")
                       << "\n";
         }
         if (!ok) ++warnings;
@@ -391,12 +394,12 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
     if (!silent) {
         std::cout << "\n";
         if (failures == 0 && warnings == 0) {
-            std::cout << term::green("Fleet healthy") << "\n";
+            std::cout << term::green(tr("Fleet healthy")) << "\n";
         } else if (failures == 0) {
-            std::cout << term::yellow(std::to_string(warnings) + " warning(s)") << "\n";
+            std::cout << term::yellow(std::to_string(warnings) + " " + tr("warning(s)")) << "\n";
         } else {
-            std::cout << term::red(std::to_string(failures) + " failure(s), " +
-                                   std::to_string(warnings) + " warning(s)") << "\n";
+            std::cout << term::red(std::to_string(failures) + " " + tr("failure(s),") + " " +
+                                   std::to_string(warnings) + " " + tr("warning(s)")) << "\n";
         }
     }
 
@@ -416,7 +419,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
 // --- verify ---
 
 int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Verify Agent Prompts") << "\n\n";
+    std::cout << term::bold(tr("Verify Agent Prompts")) << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     auto agents = registry.list_agents();
@@ -431,7 +434,7 @@ int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
             auto full = fs::path(ctx.euxis_home) / agent.prompt_path;
             if (!fs::exists(full)) {
                 ok = false;
-                detail = "prompt file missing";
+                detail = tr("prompt file missing");
             } else {
                 // Check for required frontmatter fields
                 std::ifstream f(full);
@@ -441,13 +444,13 @@ int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
                     if (content.find(field) == std::string::npos) {
                         ok = false;
                         detail += std::string(detail.empty() ? "" : ", ") +
-                                  "missing " + field;
+                                  tr("missing") + " " + field;
                     }
                 }
             }
         } else {
             ok = false;
-            detail = "no prompt path";
+            detail = tr("no prompt path");
         }
 
         std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
@@ -457,15 +460,15 @@ int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
         if (!ok) ++issues;
     }
 
-    std::cout << "\n" << (issues == 0 ? term::green("All verified") :
-                          term::red(std::to_string(issues) + " issue(s)")) << "\n";
+    std::cout << "\n" << (issues == 0 ? term::green(tr("All verified")) :
+                          term::red(std::to_string(issues) + " " + tr("issue(s)"))) << "\n";
     return issues > 0 ? 1 : 0;
 }
 
 // --- lint ---
 
 int cmd_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Lint Agent Configs") << "\n\n";
+    std::cout << term::bold(tr("Lint Agent Configs")) << "\n\n";
 
     ConfigLoader loader(ctx.data_dir);
     int issues = 0;
@@ -474,48 +477,48 @@ int cmd_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
     auto reg = loader.load("agents/registry.json");
     if (reg) {
         if (!reg->contains("agents") || !(*reg)["agents"].is_array()) {
-            std::cout << "  " << term::icon_fail() << " registry.json: missing 'agents' array\n";
+            std::cout << "  " << term::icon_fail() << " registry.json: " << tr("missing 'agents' array") << "\n";
             ++issues;
         } else {
-            std::cout << "  " << term::icon_ok() << " registry.json: valid ("
-                      << (*reg)["agents"].size() << " agents)\n";
+            std::cout << "  " << term::icon_ok() << " registry.json: " << tr("valid") << " ("
+                      << (*reg)["agents"].size() << " " << tr("agents") << ")\n";
         }
     } else {
-        std::cout << "  " << term::icon_warn() << " registry.json: not found\n";
+        std::cout << "  " << term::icon_warn() << " registry.json: " << tr("not found") << "\n";
     }
 
     // Lint router.json
     auto router = loader.load("config/router.json");
     if (router) {
-        std::cout << "  " << term::icon_ok() << " router.json: present\n";
+        std::cout << "  " << term::icon_ok() << " router.json: " << tr("present") << "\n";
     } else {
-        std::cout << "  " << term::icon_warn() << " router.json: not found (using defaults)\n";
+        std::cout << "  " << term::icon_warn() << " router.json: " << tr("not found (using defaults)") << "\n";
     }
 
     // Lint codex.json
     auto codex = loader.load("config/codex.json");
     if (codex) {
-        std::cout << "  " << term::icon_ok() << " codex.json: present\n";
+        std::cout << "  " << term::icon_ok() << " codex.json: " << tr("present") << "\n";
     }
 
-    std::cout << "\n" << (issues == 0 ? term::green("Lint passed") :
-                          term::red(std::to_string(issues) + " issue(s)")) << "\n";
+    std::cout << "\n" << (issues == 0 ? term::green(tr("Lint passed")) :
+                          term::red(std::to_string(issues) + " " + tr("issue(s)"))) << "\n";
     return issues > 0 ? 1 : 0;
 }
 
 // --- shell-lint ---
 
 int cmd_shell_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Shell Lint") << "\n\n";
+    std::cout << term::bold(tr("Shell Lint")) << "\n\n";
 
     if (!Process::available("shellcheck")) {
-        std::cerr << term::icon_fail() << " shellcheck not found. Install it first.\n";
+        std::cerr << term::icon_fail() << " " << tr("shellcheck not found. Install it first.") << "\n";
         return 1;
     }
 
     auto bin_dir = fs::path(ctx.euxis_home) / "euxis-bin";
     if (!fs::is_directory(bin_dir)) {
-        std::cout << term::icon_info() << " No euxis-bin/ directory (already migrated to C++)\n";
+        std::cout << term::icon_info() << " " << tr("No euxis-bin/ directory (already migrated to C++)") << "\n";
         return 0;
     }
 
@@ -537,35 +540,35 @@ int cmd_shell_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
         }
     }
 
-    std::cout << "\n" << (issues == 0 ? term::green("All scripts pass") :
-                          term::red(std::to_string(issues) + " script(s) with issues")) << "\n";
+    std::cout << "\n" << (issues == 0 ? term::green(tr("All scripts pass")) :
+                          term::red(std::to_string(issues) + " " + tr("script(s) with issues"))) << "\n";
     return issues > 0 ? 1 : 0;
 }
 
 // --- verify-all ---
 
 int cmd_verify_all(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Running All Verifications") << "\n\n";
+    std::cout << term::bold(tr("Running All Verifications")) << "\n\n";
 
     int total_failures = 0;
 
-    std::cout << "--- Doctor ---\n";
+    std::cout << "--- " << tr("Doctor") << " ---\n";
     total_failures += (cmd_doctor(ctx, {}) != 0 ? 1 : 0);
 
-    std::cout << "\n--- Health ---\n";
+    std::cout << "\n--- " << tr("Health") << " ---\n";
     total_failures += (cmd_health(ctx, {}) != 0 ? 1 : 0);
 
-    std::cout << "\n--- Verify ---\n";
+    std::cout << "\n--- " << tr("Verify") << " ---\n";
     total_failures += (cmd_verify(ctx, {}) != 0 ? 1 : 0);
 
-    std::cout << "\n--- Lint ---\n";
+    std::cout << "\n--- " << tr("Lint") << " ---\n";
     total_failures += (cmd_lint(ctx, {}) != 0 ? 1 : 0);
 
-    std::cout << "\n" << term::bold("Total: ");
+    std::cout << "\n" << term::bold(tr("Total:")) << " ";
     if (total_failures == 0) {
-        std::cout << term::green("All verifications passed") << "\n";
+        std::cout << term::green(tr("All verifications passed")) << "\n";
     } else {
-        std::cout << term::red(std::to_string(total_failures) + " verification group(s) failed") << "\n";
+        std::cout << term::red(std::to_string(total_failures) + " " + tr("verification group(s) failed")) << "\n";
     }
 
     return total_failures > 0 ? 1 : 0;
@@ -574,7 +577,7 @@ int cmd_verify_all(Context& ctx, const std::vector<std::string>& /*args*/) {
 // --- cross-platform-verify ---
 
 int cmd_cross_platform_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
-    std::cout << term::bold("Cross-Platform Verification") << "\n\n";
+    std::cout << term::bold(tr("Cross-Platform Verification")) << "\n\n";
 
     int issues = 0;
 
@@ -586,13 +589,13 @@ int cmd_cross_platform_verify(Context& ctx, const std::vector<std::string>& /*ar
         auto lower = test_dir / "test";
         std::ofstream(upper) << "upper";
         bool case_sensitive = !fs::exists(lower) || fs::file_size(upper) != fs::file_size(lower);
-        std::cout << "  " << term::icon_info() << " Filesystem: "
-                  << (case_sensitive ? "case-sensitive" : "case-insensitive") << "\n";
+        std::cout << "  " << term::icon_info() << " " << tr("Filesystem:") << " "
+                  << (case_sensitive ? tr("case-sensitive") : tr("case-insensitive")) << "\n";
         fs::remove_all(test_dir);
     }
 
     // Check path separators
-    std::cout << "  " << term::icon_info() << " Path separator: "
+    std::cout << "  " << term::icon_info() << " " << tr("Path separator:") << " "
               << fs::path::preferred_separator << "\n";
 
     // Check available shells
@@ -611,13 +614,13 @@ int cmd_cross_platform_verify(Context& ctx, const std::vector<std::string>& /*ar
                                 std::istreambuf_iterator<char>());
             bool has_crlf = content.find("\r\n") != std::string::npos;
             std::cout << "  " << (!has_crlf ? term::icon_ok() : term::icon_warn())
-                      << " Line endings: " << (has_crlf ? "CRLF (Windows)" : "LF (Unix)") << "\n";
+                      << " " << tr("Line endings:") << " " << (has_crlf ? tr("CRLF (Windows)") : tr("LF (Unix)")) << "\n";
             if (has_crlf) ++issues;
         }
     }
 
-    std::cout << "\n" << (issues == 0 ? term::green("Cross-platform checks passed") :
-                          term::yellow(std::to_string(issues) + " concern(s)")) << "\n";
+    std::cout << "\n" << (issues == 0 ? term::green(tr("Cross-platform checks passed")) :
+                          term::yellow(std::to_string(issues) + " " + tr("concern(s)"))) << "\n";
     return 0;
 }
 

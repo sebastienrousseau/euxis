@@ -1,10 +1,12 @@
 #include "euxis/cli/process.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstring>
 #include <filesystem>
 
 #include <fcntl.h>
+#include <poll.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -12,15 +14,57 @@
 namespace euxis::cli {
 namespace {
 
-/// Read all data from a file descriptor into a string.
-auto read_fd(int fd) -> std::string {
+using Clock = std::chrono::steady_clock;
+using TimePoint = Clock::time_point;
+
+/// Remaining milliseconds until deadline, clamped to [0, INT_MAX].
+auto ms_remaining(TimePoint deadline) -> int {
+    auto now = Clock::now();
+    if (now >= deadline) return 0;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now).count();
+    return static_cast<int>(std::min<long long>(ms, 2'000'000'000LL));
+}
+
+/// Read all data from a file descriptor, respecting a deadline.
+/// Uses poll() for thread-safe timeout instead of alarm().
+auto read_fd(int fd, TimePoint deadline) -> std::string {
     std::string result;
     std::array<char, 4096> buf{};
-    ssize_t n;
-    while ((n = ::read(fd, buf.data(), buf.size())) > 0) {
+    for (;;) {
+        int timeout_ms = ms_remaining(deadline);
+        if (timeout_ms <= 0) break;
+
+        struct pollfd pfd{fd, POLLIN, 0};
+        int pr = ::poll(&pfd, 1, timeout_ms);
+        if (pr <= 0) break;  // timeout or error
+
+        ssize_t n = ::read(fd, buf.data(), buf.size());
+        if (n <= 0) break;   // EOF or error
         result.append(buf.data(), static_cast<size_t>(n));
     }
     return result;
+}
+
+/// Wait for child process to exit, kill it if deadline is exceeded.
+auto reap_child(pid_t pid, TimePoint deadline) -> int {
+    for (;;) {
+        int status = 0;
+        pid_t w = ::waitpid(pid, &status, WNOHANG);
+        if (w > 0) return status;
+        if (w < 0) return -1;
+
+        if (Clock::now() >= deadline) {
+            // Graceful shutdown first
+            ::kill(pid, SIGTERM);
+            ::usleep(200'000);  // 200ms grace
+            if (::waitpid(pid, &status, WNOHANG) > 0) return status;
+            // Force kill
+            ::kill(pid, SIGKILL);
+            ::waitpid(pid, &status, 0);
+            return status;
+        }
+        ::usleep(20'000);  // 20ms poll interval
+    }
 }
 
 } // namespace
@@ -63,22 +107,19 @@ auto Process::run(const std::string& program,
     ::close(stdout_pipe[1]);
     ::close(stderr_pipe[1]);
 
-    // Set timeout alarm
-    if (timeout_seconds > 0) {
-        ::alarm(static_cast<unsigned>(timeout_seconds));
-    }
+    auto deadline = Clock::now() + std::chrono::seconds(timeout_seconds);
 
     ProcessResult result;
-    result.stdout_output = read_fd(stdout_pipe[0]);
-    result.stderr_output = read_fd(stderr_pipe[0]);
+    result.stdout_output = read_fd(stdout_pipe[0], deadline);
+    result.stderr_output = read_fd(stderr_pipe[0], deadline);
     ::close(stdout_pipe[0]);
     ::close(stderr_pipe[0]);
 
-    int status = 0;
-    ::waitpid(pid, &status, 0);
-    ::alarm(0);
-
-    if (WIFEXITED(status)) {
+    int status = reap_child(pid, deadline);
+    if (status == -1) {
+        result.exit_code = -1;
+        result.stderr_output += "\n[timeout after " + std::to_string(timeout_seconds) + "s]";
+    } else if (WIFEXITED(status)) {
         result.exit_code = WEXITSTATUS(status);
     } else if (WIFSIGNALED(status)) {
         result.exit_code = 128 + WTERMSIG(status);
@@ -145,21 +186,19 @@ auto Process::run_with_input(const std::string& program,
     }
     ::close(stdin_pipe[1]);
 
-    if (timeout_seconds > 0) {
-        ::alarm(static_cast<unsigned>(timeout_seconds));
-    }
+    auto deadline = Clock::now() + std::chrono::seconds(timeout_seconds);
 
     ProcessResult result;
-    result.stdout_output = read_fd(stdout_pipe[0]);
-    result.stderr_output = read_fd(stderr_pipe[0]);
+    result.stdout_output = read_fd(stdout_pipe[0], deadline);
+    result.stderr_output = read_fd(stderr_pipe[0], deadline);
     ::close(stdout_pipe[0]);
     ::close(stderr_pipe[0]);
 
-    int status = 0;
-    ::waitpid(pid, &status, 0);
-    ::alarm(0);
-
-    if (WIFEXITED(status)) {
+    int status = reap_child(pid, deadline);
+    if (status == -1) {
+        result.exit_code = -1;
+        result.stderr_output += "\n[timeout after " + std::to_string(timeout_seconds) + "s]";
+    } else if (WIFEXITED(status)) {
         result.exit_code = WEXITSTATUS(status);
     } else if (WIFSIGNALED(status)) {
         result.exit_code = 128 + WTERMSIG(status);

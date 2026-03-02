@@ -1,5 +1,6 @@
 #include "euxis/cli/cmd/infra.hpp"
 #include "euxis/cli/config_loader.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/provider_router.hpp"
@@ -22,6 +23,9 @@
 #include <unistd.h>
 
 namespace euxis::cli::cmd {
+
+using euxis::cli::i18n::tr;
+
 namespace {
 
 namespace fs = std::filesystem;
@@ -159,7 +163,7 @@ int cmd_gateway(Context& /*ctx*/, const std::vector<std::string>& args) {
     std::signal(SIGINT, [](int) { server_ptr->stop(); });
     std::signal(SIGTERM, [](int) { server_ptr->stop(); });
 
-    std::cout << "Starting gateway on " << config.host << ":" << config.port << "\n";
+    std::cout << tr("Starting gateway on") << " " << config.host << ":" << config.port << "\n";
     server.start();
     return 0;
 }
@@ -170,10 +174,10 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
     auto bus_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
 
     if (args.empty() || args[0] == "status") {
-        std::cout << term::bold("Message Bus Status") << "\n\n";
+        std::cout << term::bold(tr("Message Bus Status")) << "\n\n";
 
         if (!fs::is_directory(bus_dir)) {
-            std::cout << "  Bus directory not found\n";
+            std::cout << "  " << tr("Bus directory not found") << "\n";
             return 0;
         }
 
@@ -186,7 +190,7 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
                 ++pipe_count;
                 auto age = now - entry.last_write_time();
                 auto days = std::chrono::duration_cast<std::chrono::hours>(age).count() / 24;
-                std::string status = days > 7 ? "stale" : "active";
+                std::string status = days > 7 ? tr("stale") : tr("active");
                 if (days > 7) ++stale_count;
 
                 if (ctx.verbose) {
@@ -196,8 +200,8 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
             }
         }
 
-        std::cout << "  Pipes: " << pipe_count << "\n"
-                  << "  Stale: " << stale_count << "\n";
+        std::cout << "  " << tr("Pipes:") << " " << pipe_count << "\n"
+                  << "  " << tr("Stale:") << " " << stale_count << "\n";
         return 0;
     }
 
@@ -208,14 +212,14 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
         auto pipe_path = bus_dir / pipe;
         std::ofstream f(pipe_path, std::ios::app);
         f << message << "\n";
-        std::cout << term::icon_ok() << " Published to: " << pipe << "\n";
+        std::cout << term::icon_ok() << " " << tr("Published to:") << " " << pipe << "\n";
         return 0;
     }
 
     if (args[0] == "subscribe" && args.size() >= 2) {
         auto pipe_path = bus_dir / args[1];
         if (!fs::exists(pipe_path)) {
-            std::cerr << "Pipe not found: " << args[1] << "\n";
+            std::cerr << tr("Pipe not found:") << " " << args[1] << "\n";
             return 1;
         }
         std::ifstream f(pipe_path);
@@ -238,11 +242,11 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
                 ++removed;
             }
         }
-        std::cout << term::icon_ok() << " Removed " << removed << " stale pipe(s)\n";
+        std::cout << term::icon_ok() << " " << tr("Removed") << " " << removed << " " << tr("stale pipe(s)") << "\n";
         return 0;
     }
 
-    std::cerr << "Usage: euxis bus <status|publish|subscribe|clean> [args]\n";
+    std::cerr << tr("Usage: euxis bus <status|publish|subscribe|clean> [args]") << "\n";
     return 2;
 }
 
@@ -259,13 +263,13 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
             // Check if process is alive
             auto result = Process::run("kill", {"-0", pid_str});
             if (result.exit_code == 0) {
-                std::cout << term::icon_ok() << " Daemon running (PID " << pid_str << ")\n";
+                std::cout << term::icon_ok() << " " << tr("Daemon running (PID") << " " << pid_str << ")\n";
                 return 0;
             }
-            std::cout << term::icon_warn() << " Stale PID file (PID " << pid_str << ")\n";
+            std::cout << term::icon_warn() << " " << tr("Stale PID file (PID") << " " << pid_str << ")\n";
             return 1;
         }
-        std::cout << term::icon_info() << " Daemon not running\n";
+        std::cout << term::icon_info() << " " << tr("Daemon not running") << "\n";
         return 0;
     }
 
@@ -277,8 +281,8 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
             std::getline(pf, existing_pid);
             auto chk = Process::run("kill", {"-0", existing_pid});
             if (chk.exit_code == 0) {
-                std::cerr << term::icon_warn() << " Daemon already running (PID "
-                          << existing_pid << ")\n";
+                std::cerr << term::icon_warn() << " " << tr("Daemon already running (PID")
+                          << " " << existing_pid << ")\n";
                 return 1;
             }
             // Stale PID file, remove it
@@ -289,7 +293,7 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
 
         pid_t child = fork();
         if (child < 0) {
-            std::cerr << term::icon_warn() << " fork() failed: "
+            std::cerr << term::icon_warn() << " " << tr("fork() failed:") << " "
                       << std::strerror(errno) << "\n";
             return 1;
         }
@@ -320,7 +324,7 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
         }
 
         // --- Parent process ---
-        std::cout << term::icon_ok() << " Daemon started (PID " << child << ")\n";
+        std::cout << term::icon_ok() << " " << tr("Daemon started (PID") << " " << child << ")\n";
         return 0;
     }
 
@@ -331,14 +335,14 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
             std::getline(f, pid_str);
             Process::run("kill", {pid_str});
             fs::remove(pid_file);
-            std::cout << term::icon_ok() << " Daemon stopped\n";
+            std::cout << term::icon_ok() << " " << tr("Daemon stopped") << "\n";
             return 0;
         }
-        std::cout << "Daemon not running\n";
+        std::cout << tr("Daemon not running") << "\n";
         return 0;
     }
 
-    std::cerr << "Usage: euxis daemon <status|start|stop>\n";
+    std::cerr << tr("Usage: euxis daemon <status|start|stop>") << "\n";
     return 2;
 }
 
@@ -346,7 +350,7 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis deploy <config.json> [--dry-run]\n";
+        std::cerr << tr("Usage: euxis deploy <config.json> [--dry-run]") << "\n";
         return 2;
     }
 
@@ -357,7 +361,7 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
 
     auto config_path = args[0];
     if (!fs::exists(config_path)) {
-        std::cerr << "Config not found: " << config_path << "\n";
+        std::cerr << tr("Config not found:") << " " << config_path << "\n";
         return 1;
     }
 
@@ -366,12 +370,12 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
     try {
         config = nlohmann::json::parse(f);
     } catch (const std::exception& e) {
-        std::cerr << "Invalid JSON: " << e.what() << "\n";
+        std::cerr << tr("Invalid JSON:") << " " << e.what() << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Deploy Configuration") << "\n";
-    if (dry_run) std::cout << "  " << term::yellow("(dry run)") << "\n";
+    std::cout << term::bold(tr("Deploy Configuration")) << "\n";
+    if (dry_run) std::cout << "  " << term::yellow(tr("(dry run)")) << "\n";
 
     int agent_count = 0;
     int agent_errors = 0;
@@ -386,14 +390,14 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
 
             if (id.empty() || manifest_path.empty()) {
                 std::cout << "  " << term::icon_warn()
-                          << " Skipping agent (missing agent_id or manifest_path)\n";
+                          << " " << tr("Skipping agent (missing agent_id or manifest_path)") << "\n";
                 continue;
             }
 
-            std::cout << "  Agent: " << id;
+            std::cout << "  " << tr("Agent:") << " " << id;
 
             if (dry_run) {
-                std::cout << " (would register from " << manifest_path << ")\n";
+                std::cout << " " << tr("(would register from") << " " << manifest_path << ")\n";
             } else {
                 // Load manifest JSON from the manifest path
                 nlohmann::json manifest;
@@ -403,7 +407,7 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
                         manifest = nlohmann::json::parse(mf);
                     } catch (const std::exception& e) {
                         std::cerr << "\n    " << term::icon_warn()
-                                  << " Bad manifest JSON: " << e.what() << "\n";
+                                  << " " << tr("Bad manifest JSON:") << " " << e.what() << "\n";
                         ++agent_errors;
                         continue;
                     }
@@ -413,10 +417,10 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
                 }
 
                 if (registry.register_plugin(id, manifest)) {
-                    std::cout << " " << term::icon_ok() << " registered\n";
+                    std::cout << " " << term::icon_ok() << " " << tr("registered") << "\n";
                     ++agent_count;
                 } else {
-                    std::cout << " " << term::icon_warn() << " failed\n";
+                    std::cout << " " << term::icon_warn() << " " << tr("failed") << "\n";
                     ++agent_errors;
                 }
             }
@@ -428,16 +432,16 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
         auto router_dir = fs::path(ctx.data_dir) / "config";
         auto router_path = router_dir / "router.json";
 
-        std::cout << "  Router config: " << router_path.string();
+        std::cout << "  " << tr("Router config:") << " " << router_path.string();
 
         if (dry_run) {
-            std::cout << " (would write)\n";
+            std::cout << " " << tr("(would write)") << "\n";
         } else {
             fs::create_directories(router_dir);
             std::ofstream rf(router_path);
             rf << config["router"].dump(2) << "\n";
             rf.close();
-            std::cout << " " << term::icon_ok() << " written\n";
+            std::cout << " " << term::icon_ok() << " " << tr("written") << "\n";
         }
     }
 
@@ -445,27 +449,27 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
     if (config.contains("squads") && config["squads"].is_array()) {
         auto squads_path = fs::path(ctx.data_dir) / "squads.json";
 
-        std::cout << "  Squads config: " << squads_path.string();
+        std::cout << "  " << tr("Squads config:") << " " << squads_path.string();
 
         if (dry_run) {
-            std::cout << " (would write)\n";
+            std::cout << " " << tr("(would write)") << "\n";
         } else {
             fs::create_directories(fs::path(ctx.data_dir));
             std::ofstream sf(squads_path);
             sf << config["squads"].dump(2) << "\n";
             sf.close();
-            std::cout << " " << term::icon_ok() << " written\n";
+            std::cout << " " << term::icon_ok() << " " << tr("written") << "\n";
         }
     }
 
     // --- Summary ---
     if (dry_run) {
-        std::cout << "\n" << term::icon_info() << " Dry run — no changes made\n";
+        std::cout << "\n" << term::icon_info() << " " << tr("Dry run — no changes made") << "\n";
     } else {
-        std::cout << "\n" << term::icon_ok() << " Deployment complete ("
-                  << agent_count << " agent(s) registered";
+        std::cout << "\n" << term::icon_ok() << " " << tr("Deployment complete") << " ("
+                  << agent_count << " " << tr("agent(s) registered");
         if (agent_errors > 0) {
-            std::cout << ", " << agent_errors << " error(s)";
+            std::cout << ", " << agent_errors << " " << tr("error(s)");
         }
         std::cout << ")\n";
     }
@@ -477,7 +481,7 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
 int cmd_optimize(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
-    std::cout << term::bold("Runtime Optimization") << "\n\n";
+    std::cout << term::bold(tr("Runtime Optimization")) << "\n\n";
 
     ProviderRouter router(ctx.data_dir);
 
@@ -486,14 +490,14 @@ int cmd_optimize(Context& ctx, const std::vector<std::string>& args) {
     std::cout << "\n";
 
     // Check for optimization opportunities
-    std::cout << term::bold("Optimizations:") << "\n";
+    std::cout << term::bold(tr("Optimizations:")) << "\n";
 
     // 1. Local model fallback
     if (router.local_available()) {
-        std::cout << "  " << term::icon_ok() << " Local inference available (Ollama)\n"
-                  << "    Set EUXIS_LOCAL_ONLY=true for routine tasks\n";
+        std::cout << "  " << term::icon_ok() << " " << tr("Local inference available (Ollama)") << "\n"
+                  << "    " << tr("Set EUXIS_LOCAL_ONLY=true for routine tasks") << "\n";
     } else {
-        std::cout << "  " << term::icon_info() << " Install Ollama for local inference fallback\n";
+        std::cout << "  " << term::icon_info() << " " << tr("Install Ollama for local inference fallback") << "\n";
     }
 
     // 2. Cache directory size
@@ -504,18 +508,18 @@ int cmd_optimize(Context& ctx, const std::vector<std::string>& args) {
             if (entry.is_regular_file()) cache_size += entry.file_size();
         }
         double mb = static_cast<double>(cache_size) / (1024.0 * 1024.0);
-        std::cout << "  " << term::icon_info() << " Cache size: "
+        std::cout << "  " << term::icon_info() << " " << tr("Cache size:") << " "
                   << std::fixed << std::setprecision(1) << mb << " MB\n";
         if (mb > 100) {
-            std::cout << "    Consider running: euxis bus clean\n";
+            std::cout << "    " << tr("Consider running: euxis bus clean") << "\n";
         }
     }
 
     // 3. Provider count
     auto providers = router.available_providers();
-    std::cout << "  " << term::icon_info() << " Available providers: " << providers.size() << "\n";
+    std::cout << "  " << term::icon_info() << " " << tr("Available providers:") << " " << providers.size() << "\n";
     if (providers.size() >= 2) {
-        std::cout << "    Failover chain active\n";
+        std::cout << "    " << tr("Failover chain active") << "\n";
     }
 
     return 0;

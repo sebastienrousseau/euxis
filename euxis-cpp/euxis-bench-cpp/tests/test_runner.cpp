@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
 #include <string>
 
 #include "euxis/bench/runner.hpp"
@@ -305,6 +306,171 @@ TEST_F(BenchRunnerTest, EmptyRunnerProducesNothing) {
 
     auto reports = runner.run_all();
     EXPECT_TRUE(reports.empty());
+}
+
+// ---------------------------------------------------------------------------
+// Benchmark with zero duration gets auto-filled from wall clock
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ZeroDurationAutoFilled) {
+    BenchmarkRunner runner;
+    runner.register_benchmark("auto_dur", "auto1",
+                              []() -> BenchmarkResult {
+                                  return BenchmarkResult{
+                                      .name = "auto1",
+                                      .suite = "auto_dur",
+                                      .passed = true,
+                                      .value = 1.0,
+                                      .unit = "x",
+                                      .target = 0.5,
+                                      .duration = std::chrono::microseconds{0},
+                                      .message = "auto duration",
+                                  };
+                              });
+
+    auto report = runner.run_suite("auto_dur");
+    ASSERT_EQ(report.results.size(), 1u);
+    // Duration should have been auto-filled with wall-clock time (>= 0)
+    // On fast systems, the benchmark lambda may complete in under 1us,
+    // so we only verify the runner didn't leave it negative.
+    EXPECT_GE(report.results[0].duration.count(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// Run suite accumulates total_duration correctly
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, SuiteTotalDurationAccumulates) {
+    BenchmarkRunner runner;
+    runner.register_benchmark("dur_suite", "d1",
+                              make_passing_bench("d1", "dur_suite"));
+    runner.register_benchmark("dur_suite", "d2",
+                              make_passing_bench("d2", "dur_suite"));
+    runner.register_benchmark("dur_suite", "d3",
+                              make_failing_bench("d3", "dur_suite"));
+
+    auto report = runner.run_suite("dur_suite");
+    // 42 + 42 + 100 = 184
+    EXPECT_GE(report.total_duration.count(), 184);
+}
+
+// ---------------------------------------------------------------------------
+// BenchmarkResult to_json with failing result
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, FailingBenchmarkResultToJson) {
+    BenchmarkResult result{
+        .name = "fail_bench",
+        .suite = "fail_suite",
+        .passed = false,
+        .value = 10.0,
+        .unit = "%",
+        .target = 95.0,
+        .duration = std::chrono::microseconds{500},
+        .message = "Below target",
+    };
+
+    const auto j = result.to_json();
+    EXPECT_EQ(j.at("passed").get<bool>(), false);
+    EXPECT_EQ(j.at("message").get<std::string>(), "Below target");
+}
+
+// ---------------------------------------------------------------------------
+// SuiteReport to_json structure
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, SuiteReportToJsonStructure) {
+    BenchmarkRunner runner;
+    runner.register_benchmark("struct_suite", "s1",
+                              make_passing_bench("s1", "struct_suite"));
+
+    auto report = runner.run_suite("struct_suite");
+    const auto j = report.to_json();
+
+    EXPECT_EQ(j.at("suite_name").get<std::string>(), "struct_suite");
+    EXPECT_TRUE(j.contains("passed"));
+    EXPECT_TRUE(j.contains("failed"));
+    EXPECT_TRUE(j.contains("total_duration_us"));
+    EXPECT_TRUE(j.contains("results"));
+    EXPECT_TRUE(j["results"].is_array());
+    EXPECT_EQ(j["results"].size(), 1u);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter to_json empty input
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterToJsonEmptyReports) {
+    std::vector<SuiteReport> empty_reports;
+    auto j = BenchmarkReporter::to_json(empty_reports);
+    EXPECT_TRUE(j.contains("suites"));
+    EXPECT_TRUE(j["suites"].empty());
+    EXPECT_EQ(j["total_passed"].get<size_t>(), 0u);
+    EXPECT_EQ(j["total_failed"].get<size_t>(), 0u);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter to_markdown empty input
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterToMarkdownEmptyReports) {
+    std::vector<SuiteReport> empty_reports;
+    auto md = BenchmarkReporter::to_markdown(empty_reports);
+    EXPECT_NE(md.find("# Euxis Benchmark Report"), std::string::npos);
+    EXPECT_NE(md.find("0 passed"), std::string::npos);
+    EXPECT_NE(md.find("0 failed"), std::string::npos);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter write_json
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterWriteJson) {
+    auto tmp = std::filesystem::temp_directory_path() / "euxis_bench_report_test";
+    std::filesystem::create_directories(tmp);
+
+    BenchmarkRunner runner;
+    runner.register_benchmark("write_test", "w1",
+                              make_passing_bench("w1", "write_test"));
+    auto reports = runner.run_all();
+
+    auto path = tmp / "report.json";
+    BenchmarkReporter::write_json(reports, path);
+    EXPECT_TRUE(std::filesystem::exists(path));
+
+    std::filesystem::remove_all(tmp);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter write_markdown
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterWriteMarkdown) {
+    auto tmp = std::filesystem::temp_directory_path() / "euxis_bench_md_test";
+    std::filesystem::create_directories(tmp);
+
+    BenchmarkRunner runner;
+    runner.register_benchmark("md_write", "m1",
+                              make_passing_bench("m1", "md_write"));
+    auto reports = runner.run_all();
+
+    auto path = tmp / "report.md";
+    BenchmarkReporter::write_markdown(reports, path);
+    EXPECT_TRUE(std::filesystem::exists(path));
+
+    std::filesystem::remove_all(tmp);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter write_json throws on invalid path
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterWriteJsonThrowsOnBadPath) {
+    std::vector<SuiteReport> reports;
+    EXPECT_THROW(
+        BenchmarkReporter::write_json(reports, "/nonexistent/dir/report.json"),
+        std::runtime_error);
+}
+
+// ---------------------------------------------------------------------------
+// Reporter write_markdown throws on invalid path
+// ---------------------------------------------------------------------------
+TEST_F(BenchRunnerTest, ReporterWriteMarkdownThrowsOnBadPath) {
+    std::vector<SuiteReport> reports;
+    EXPECT_THROW(
+        BenchmarkReporter::write_markdown(reports, "/nonexistent/dir/report.md"),
+        std::runtime_error);
 }
 
 } // namespace

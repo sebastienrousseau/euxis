@@ -9,10 +9,10 @@ namespace euxis::core {
 namespace {
 
 auto generate_run_id() -> std::string {
-    static std::mt19937 gen(std::random_device{}());
-    static std::uniform_int_distribution<uint32_t> dist;
+    std::random_device rd;
+    std::uniform_int_distribution<uint32_t> dist;
     char buf[16];
-    std::snprintf(buf, sizeof(buf), "run_%08x", dist(gen));
+    std::snprintf(buf, sizeof(buf), "run_%08x", dist(rd));
     return buf;
 }
 

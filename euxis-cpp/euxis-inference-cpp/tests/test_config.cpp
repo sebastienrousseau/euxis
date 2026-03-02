@@ -98,5 +98,26 @@ TEST(ConfigTest, ExtraKeysIgnored) {
     });
 }
 
+// ---------------------------------------------------------------------------
+// Missing config key — from_json with no matching key returns defaults (line 39)
+// ---------------------------------------------------------------------------
+TEST(ConfigTest, MissingModelPathReturnsEmptyPath) {
+    nlohmann::json j = {
+        {"model_name", "tiny-model"},
+        {"context_size", 512},
+    };
+    auto cfg = LocalModelConfig::from_json(j);
+    EXPECT_EQ(cfg.model_name, "tiny-model");
+    EXPECT_EQ(cfg.context_size, 512u);
+    // model_path is missing, so it should remain at default (empty)
+    EXPECT_TRUE(cfg.model_path.empty());
+    // gpu_layers, threads, temperature, top_p, expected_sha256 all default
+    EXPECT_EQ(cfg.gpu_layers, 0u);
+    EXPECT_EQ(cfg.threads, 4u);
+    EXPECT_FLOAT_EQ(cfg.temperature, 0.7f);
+    EXPECT_FLOAT_EQ(cfg.top_p, 0.9f);
+    EXPECT_TRUE(cfg.expected_sha256.empty());
+}
+
 } // anonymous namespace
 } // namespace euxis::inference

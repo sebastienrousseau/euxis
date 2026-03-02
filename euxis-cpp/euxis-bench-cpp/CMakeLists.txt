@@ -7,6 +7,7 @@ euxis_add_library(euxis-bench-cpp
     src/performance_bench.cpp
     src/portability_bench.cpp
     src/interop_bench.cpp
+    src/result_matrix.cpp
   DEPS
     euxis-crypto-cpp
     euxis-bridge-cpp
@@ -18,4 +19,6 @@ euxis_add_library(euxis-bench-cpp
     spdlog::spdlog
   TEST_SOURCES
     tests/test_runner.cpp
+    tests/test_result_matrix.cpp
+    tests/test_bench_suites.cpp
 )

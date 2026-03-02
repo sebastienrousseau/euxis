@@ -111,5 +111,94 @@ TEST(LlamaEngineTest, MoveAssignment) {
     EXPECT_TRUE(b.supports_model("model-a"));
 }
 
+// ---------------------------------------------------------------------------
+// Generate with various max_tokens values
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, GenerateWithDifferentMaxTokens) {
+    LocalModelConfig cfg;
+    cfg.model_name = "token-test";
+    LlamaEngine engine(cfg);
+
+    auto result1 = engine.generate("test", 1);
+    ASSERT_FALSE(result1.has_value());
+
+    auto result2 = engine.generate("test", 4096);
+    ASSERT_FALSE(result2.has_value());
+
+    // Both should fail with "not reachable"
+    EXPECT_NE(result1.error().find("not reachable"), std::string::npos);
+    EXPECT_NE(result2.error().find("not reachable"), std::string::npos);
+}
+
+// ---------------------------------------------------------------------------
+// supports_model with empty string
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, SupportsModelEmptyString) {
+    LocalModelConfig cfg;
+    cfg.model_name = "my-model";
+    LlamaEngine engine(cfg);
+    // Empty name should not match config model_name
+    EXPECT_FALSE(engine.supports_model(""));
+}
+
+// ---------------------------------------------------------------------------
+// health() with different config values
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, HealthWithLargeContextSize) {
+    LocalModelConfig cfg;
+    cfg.model_name = "large-ctx";
+    cfg.context_size = 131072;
+    LlamaEngine engine(cfg);
+    auto h = engine.health();
+    EXPECT_EQ(h["context_size"], 131072u);
+    EXPECT_EQ(h["status"], "unreachable");
+}
+
+// ---------------------------------------------------------------------------
+// Config with temperature and top_p
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, ConfigWithCustomTemperature) {
+    LocalModelConfig cfg;
+    cfg.model_name = "temp-model";
+    cfg.temperature = 0.0f;
+    cfg.top_p = 0.5f;
+    LlamaEngine engine(cfg);
+
+    // Generate should build a body with the custom temperature
+    auto result = engine.generate("Hello", 32);
+    ASSERT_FALSE(result.has_value());
+    // Fails because server is down, but config was used
+}
+
+// ---------------------------------------------------------------------------
+// Repeated health checks return consistent results
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, RepeatedHealthChecks) {
+    LocalModelConfig cfg;
+    cfg.model_name = "repeat-check";
+    LlamaEngine engine(cfg);
+
+    auto h1 = engine.health();
+    auto h2 = engine.health();
+    EXPECT_EQ(h1["engine"], h2["engine"]);
+    EXPECT_EQ(h1["model"], h2["model"]);
+    EXPECT_EQ(h1["status"], h2["status"]);
+}
+
+// ---------------------------------------------------------------------------
+// Generate after health check returns consistent error
+// ---------------------------------------------------------------------------
+TEST(LlamaEngineTest, GenerateAfterHealthCheck) {
+    LocalModelConfig cfg;
+    cfg.model_name = "sequence-test";
+    LlamaEngine engine(cfg);
+
+    auto h = engine.health();
+    EXPECT_EQ(h["status"], "unreachable");
+
+    auto r = engine.generate("test prompt", 100);
+    ASSERT_FALSE(r.has_value());
+}
+
 } // anonymous namespace
 } // namespace euxis::inference

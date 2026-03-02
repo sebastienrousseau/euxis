@@ -11,6 +11,7 @@
 #include <QStackedWidget>
 #include <QShortcut>
 #include <QSplitter>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -22,7 +23,7 @@ QWidget* create_time_travel_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("TimeTravelScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -36,14 +37,14 @@ QWidget* create_time_travel_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Time Travel", widget);
+    auto* title = new QLabel(QCoreApplication::translate("TimeTravelScreen", "Time Travel"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
 
-    auto* subtitle = new QLabel("Mission replay timeline — scrub through past events", widget);
+    auto* subtitle = new QLabel(QCoreApplication::translate("TimeTravelScreen", "Mission replay timeline \u2014 scrub through past events"), widget);
     subtitle->setStyleSheet("color: #888; font-size: 12px;");
     layout->addWidget(subtitle);
 
@@ -85,7 +86,7 @@ QWidget* create_time_travel_screen(QWidget* parent) {
     timeline_layout->setSpacing(8);
 
     // Position label
-    auto* position_label = new QLabel("Event 1 of 5", timeline_card);
+    auto* position_label = new QLabel(QCoreApplication::translate("TimeTravelScreen", "Event %1 of %2").arg(1).arg(5), timeline_card);
     position_label->setObjectName("timeline_position");
     position_label->setAlignment(Qt::AlignCenter);
     position_label->setStyleSheet("color: #ccc; font-size: 14px; font-weight: bold;");
@@ -214,7 +215,7 @@ QWidget* create_time_travel_screen(QWidget* parent) {
     auto* button_row = new QHBoxLayout();
     button_row->addStretch();
 
-    auto* retry_btn = new QPushButton("Retry Checkpoint", widget);
+    auto* retry_btn = new QPushButton(QCoreApplication::translate("TimeTravelScreen", "Retry Checkpoint"), widget);
     retry_btn->setObjectName("retry_button");
     retry_btn->setCursor(Qt::PointingHandCursor);
     retry_btn->setMinimumHeight(40);
@@ -225,7 +226,7 @@ QWidget* create_time_travel_screen(QWidget* parent) {
         "QPushButton:hover { background: #1a4a7a; }");
     button_row->addWidget(retry_btn);
 
-    auto* export_btn = new QPushButton("Export", widget);
+    auto* export_btn = new QPushButton(QCoreApplication::translate("TimeTravelScreen", "Export"), widget);
     export_btn->setObjectName("export_button");
     export_btn->setCursor(Qt::PointingHandCursor);
     export_btn->setMinimumHeight(40);
@@ -237,7 +238,7 @@ QWidget* create_time_travel_screen(QWidget* parent) {
     // Slider change -> update position label and highlight current event card
     QObject::connect(slider, &QSlider::valueChanged, widget,
                      [position_label, event_cards](int value) {
-        position_label->setText(QString("Event %1 of %2")
+        position_label->setText(QCoreApplication::translate("TimeTravelScreen", "Event %1 of %2")
                                 .arg(value + 1)
                                 .arg(event_cards.size()));
 

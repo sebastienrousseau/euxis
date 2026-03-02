@@ -62,7 +62,7 @@ void SlackAdapter::send(const std::string& text,
     auto [channel, thread_ts] = resolve_session(session_id);
     if (channel.empty()) return;
 
-    httplib::SSLClient cli("slack.com");
+    httplib::Client cli(!config_.api_base_url.empty() ? config_.api_base_url : "https://slack.com");
     cli.set_connection_timeout(10);
     nlohmann::json payload = {{"channel", channel}, {"text", text}};
     if (!thread_ts.empty()) payload["thread_ts"] = thread_ts;

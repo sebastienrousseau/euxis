@@ -1,4 +1,6 @@
 #include "euxis/cli/provider_router.hpp"
+#include "euxis/cli/i18n.hpp"
+#include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/process.hpp"
 
 #include <algorithm>
@@ -10,6 +12,8 @@
 #include <spdlog/spdlog.h>
 
 namespace euxis::cli {
+
+using euxis::cli::i18n::tr;
 
 auto tier_label(Tier t) -> std::string {
     switch (t) {
@@ -80,9 +84,10 @@ auto ProviderRouter::detect_provider() const -> std::string {
     const char* override_var = std::getenv("EUXIS_DEFAULT_PROVIDER");
     if (override_var && override_var[0]) return override_var;
 
-    // Detect active provider sessions
-    if (std::getenv("CLAUDE_CODE_SESSION") || std::getenv("ANTHROPIC_API_KEY"))
-        return "claude";
+    // Detect active provider sessions / auth tokens
+    if (std::getenv("ANTHROPIC_API_KEY") ||
+        !ProviderExecutor::resolve_anthropic_token().empty())
+        return "anthropic";
     if (std::getenv("OPENAI_API_KEY"))
         return "openai";
     if (std::getenv("GEMINI_API_KEY") || std::getenv("GOOGLE_API_KEY"))
@@ -93,9 +98,12 @@ auto ProviderRouter::detect_provider() const -> std::string {
         "claude", "gemini", "openai", "ollama", "goose"
     };
     for (const auto& p : providers) {
-        if (Process::available(p)) return p;
+        if (Process::available(p)) {
+            if (p == "claude") return "anthropic";
+            return p;
+        }
     }
-    return "claude";  // default
+    return "anthropic";  // default
 }
 
 auto ProviderRouter::select_model(Tier tier) const -> ModelSelection {
@@ -193,21 +201,66 @@ auto ProviderRouter::available_providers() const -> std::vector<std::string> {
 
 void ProviderRouter::print_status() const {
     auto provider = detect_provider();
-    std::cout << "Provider Router Status\n"
-              << "  Active provider: " << provider << "\n"
-              << "  Models:\n"
+    std::cout << tr("Provider Router Status") << "\n"
+              << "  " << tr("Active provider:") << " " << provider << "\n"
+              << "  " << tr("Models:") << "\n"
               << "    routine: " << models_.routine << "\n"
               << "    data:    " << models_.data << "\n"
               << "    code:    " << models_.code << "\n"
               << "    reason:  " << models_.reason << "\n"
-              << "  Local (Ollama): " << (local_available() ? "available" : "not found") << "\n"
-              << "  Providers on PATH: ";
+              << "  " << tr("Local (Ollama):") << " " << (local_available() ? tr("available") : tr("not found")) << "\n"
+              << "  " << tr("Providers on PATH:") << " ";
     auto avail = available_providers();
     for (size_t i = 0; i < avail.size(); ++i) {
         if (i > 0) std::cout << ", ";
         std::cout << avail[i];
     }
     std::cout << "\n";
+}
+
+auto ProviderRouter::model_fallback_chain(const std::string& model) const
+    -> std::vector<ModelSelection> {
+    std::vector<ModelSelection> chain;
+
+    // Check config for explicit model fallback mappings
+    if (config_.contains("model_fallback")) {
+        auto& fb = config_["model_fallback"];
+        if (fb.contains(model)) {
+            for (const auto& entry : fb[model]) {
+                ModelSelection sel;
+                sel.provider = entry.value("provider", "");
+                sel.model = entry.value("model", "");
+                sel.tier = Tier::Code;
+                if (!sel.provider.empty() && !sel.model.empty()) {
+                    chain.push_back(sel);
+                }
+            }
+            return chain;
+        }
+    }
+
+    // Default fallback chains based on provider families
+    // Anthropic models → OpenAI → Gemini → Ollama
+    if (model.find("claude") != std::string::npos) {
+        chain.push_back({"openai", "gpt-4o", Tier::Code, 0.0});
+        chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
+        chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
+    } else if (model.find("gpt") != std::string::npos) {
+        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
+        chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
+    } else if (model.find("gemini") != std::string::npos) {
+        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"openai", "gpt-4o", Tier::Code, 0.0});
+        chain.push_back({"ollama", "qwen3:32b", Tier::Code, 0.0});
+    } else {
+        // Generic: try cloud providers
+        chain.push_back({"anthropic", "claude-sonnet-4-6", Tier::Code, 0.0});
+        chain.push_back({"openai", "gpt-4o", Tier::Code, 0.0});
+        chain.push_back({"gemini", "gemini-2.0-flash", Tier::Code, 0.0});
+    }
+
+    return chain;
 }
 
 } // namespace euxis::cli

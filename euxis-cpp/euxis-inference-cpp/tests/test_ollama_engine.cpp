@@ -41,6 +41,17 @@ TEST(OllamaEngineTest, HealthReturnsJsonWhenUnreachable) {
         << "Unexpected status: " << status;
 }
 
+TEST(OllamaEngineTest, HealthReturnsErrorField) {
+    OllamaEngine engine("localhost", 19999);
+
+    auto h = engine.health();
+    auto status = h["status"].get<std::string>();
+    if (status == "unreachable") {
+        EXPECT_TRUE(h.contains("error"));
+        EXPECT_FALSE(h["error"].get<std::string>().empty());
+    }
+}
+
 // ---------------------------------------------------------------------------
 // generate() fails gracefully when Ollama is not running
 // ---------------------------------------------------------------------------
@@ -54,6 +65,23 @@ TEST(OllamaEngineTest, GenerateFailsGracefully) {
     EXPECT_FALSE(result.error().empty());
 }
 
+TEST(OllamaEngineTest, GenerateDefaultMaxTokens) {
+    OllamaEngine engine("localhost", 19999);
+
+    // Test with default max_tokens parameter
+    auto result = engine.generate("Hello");
+    ASSERT_FALSE(result.has_value());
+    EXPECT_FALSE(result.error().empty());
+}
+
+TEST(OllamaEngineTest, GenerateWithLargeMaxTokens) {
+    OllamaEngine engine("localhost", 19999);
+
+    auto result = engine.generate("Hello", 4096);
+    ASSERT_FALSE(result.has_value());
+    EXPECT_FALSE(result.error().empty());
+}
+
 // ---------------------------------------------------------------------------
 // supports_model returns false when Ollama is not running
 // ---------------------------------------------------------------------------
@@ -62,6 +90,25 @@ TEST(OllamaEngineTest, SupportsModelFalseWhenUnreachable) {
 
     EXPECT_FALSE(engine.supports_model("llama3"));
     EXPECT_FALSE(engine.supports_model("nonexistent"));
+}
+
+TEST(OllamaEngineTest, SupportsModelEmptyName) {
+    OllamaEngine engine("localhost", 19999);
+    EXPECT_FALSE(engine.supports_model(""));
+}
+
+// ---------------------------------------------------------------------------
+// make_request fails gracefully with bad host
+// ---------------------------------------------------------------------------
+TEST(OllamaEngineTest, MakeRequestBadHost) {
+    OllamaEngine engine("localhost", 19999);
+
+    // generate internally calls make_request; error is propagated
+    auto result = engine.generate("test prompt", 10);
+    ASSERT_FALSE(result.has_value());
+    auto err = result.error();
+    // Error should mention HTTP or connection failure
+    EXPECT_FALSE(err.empty());
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +127,17 @@ TEST(OllamaEngineTest, HealthIntegration) {
     EXPECT_TRUE(status == "ok" || status == "unreachable" ||
                 status == "error")
         << "Unexpected status: " << status;
+}
+
+TEST(OllamaEngineTest, HealthStructure) {
+    OllamaEngine engine("localhost", 19999);
+
+    auto h = engine.health();
+    // Verify all expected fields are present
+    EXPECT_TRUE(h.contains("engine"));
+    EXPECT_TRUE(h.contains("host"));
+    EXPECT_TRUE(h.contains("port"));
+    EXPECT_TRUE(h.contains("status"));
 }
 
 } // anonymous namespace

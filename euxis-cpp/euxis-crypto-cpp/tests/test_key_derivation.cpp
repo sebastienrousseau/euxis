@@ -130,5 +130,83 @@ TEST_F(KeyDerivationTest, ReturnedSaltMatchesInput) {
     EXPECT_EQ(dk->salt, std::vector<std::byte>(salt.begin(), salt.end()));
 }
 
+// ---------------------------------------------------------------------------
+// High iterations (>= 100,000) uses SENSITIVE opslimit
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, HighIterationsSensitive) {
+    const auto password = as_bytes("strong-password");
+    const auto salt = random_salt();
+
+    // 100000 iterations -> SENSITIVE opslimit
+    auto dk = derive_key(password, salt, /*iterations=*/100000);
+    ASSERT_TRUE(dk.has_value()) << to_string(dk.error());
+    EXPECT_EQ(dk->key.size(), 32u);
+}
+
+// ---------------------------------------------------------------------------
+// Moderate iterations (>= 10,000) uses MODERATE opslimit
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, ModerateIterations) {
+    const auto password = as_bytes("moderate-password");
+    const auto salt = random_salt();
+
+    auto dk = derive_key(password, salt, /*iterations=*/10000);
+    ASSERT_TRUE(dk.has_value()) << to_string(dk.error());
+    EXPECT_EQ(dk->key.size(), 32u);
+}
+
+// ---------------------------------------------------------------------------
+// Invalid key size (too small) is rejected
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, KeySizeTooSmall) {
+    const auto password = as_bytes("pw");
+    const auto salt = random_salt();
+
+    // crypto_pwhash_BYTES_MIN is typically 16; try 0
+    auto dk = derive_key(password, salt, /*iterations=*/1, /*key_size=*/0);
+    ASSERT_FALSE(dk.has_value());
+    EXPECT_EQ(dk.error(), CryptoError::KeyDerivationFailed);
+}
+
+// ---------------------------------------------------------------------------
+// Empty password still works
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, EmptyPasswordWorks) {
+    const auto password = as_bytes("");
+    const auto salt = random_salt();
+
+    auto dk = derive_key(password, salt, /*iterations=*/1);
+    ASSERT_TRUE(dk.has_value()) << to_string(dk.error());
+    EXPECT_EQ(dk->key.size(), 32u);
+}
+
+// ---------------------------------------------------------------------------
+// Salt too long is rejected
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, SaltTooLong) {
+    const auto password = as_bytes("pw");
+    const std::vector<std::byte> long_salt(32);  // 32 bytes, expected 16
+
+    auto dk = derive_key(password, long_salt);
+    ASSERT_FALSE(dk.has_value());
+    EXPECT_EQ(dk.error(), CryptoError::KeyDerivationFailed);
+}
+
+// ---------------------------------------------------------------------------
+// Different iterations produce same key (opslimit maps, not directly used)
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, SameOpslimitBucketSameKey) {
+    const auto password = as_bytes("test-password");
+    const auto salt = random_salt();
+
+    // Both < 10000 -> INTERACTIVE
+    auto dk1 = derive_key(password, salt, /*iterations=*/1);
+    auto dk2 = derive_key(password, salt, /*iterations=*/5000);
+    ASSERT_TRUE(dk1.has_value());
+    ASSERT_TRUE(dk2.has_value());
+    // Both use the same opslimit (INTERACTIVE) and memlimit, so keys should match
+    EXPECT_EQ(dk1->key, dk2->key);
+}
+
 } // namespace
 } // namespace euxis::crypto

@@ -111,7 +111,7 @@ auto TelegramAdapter::resolve_chat_id(const std::string& session_id)
 
 auto TelegramAdapter::api_call(const std::string& method,
                                const nlohmann::json& data) -> nlohmann::json {
-    httplib::SSLClient cli("api.telegram.org");
+    httplib::Client cli(!config_.api_base_url.empty() ? config_.api_base_url : "https://api.telegram.org");
     cli.set_connection_timeout(15);
     auto path = "/bot" + config_.token + "/" + method;
     auto res = cli.Post(path, data.dump(), "application/json");

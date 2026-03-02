@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QSysInfo>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -18,7 +19,7 @@ QWidget* create_about_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("AboutScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -43,7 +44,7 @@ QWidget* create_about_screen(QWidget* parent) {
     layout->addWidget(logo);
 
     // Title
-    auto* title = new QLabel("Euxis ETX", widget);
+    auto* title = new QLabel(QCoreApplication::translate("AboutScreen", "Euxis ETX"), widget);
     QFont title_font;
     title_font.setPointSize(24);
     title_font.setBold(true);
@@ -52,7 +53,7 @@ QWidget* create_about_screen(QWidget* parent) {
     layout->addWidget(title);
 
     // Subtitle
-    auto* subtitle = new QLabel("Production-grade Agentic Platform", widget);
+    auto* subtitle = new QLabel(QCoreApplication::translate("AboutScreen", "Production-grade Agentic Platform"), widget);
     QFont sub_font;
     sub_font.setPointSize(14);
     subtitle->setFont(sub_font);
@@ -83,9 +84,9 @@ QWidget* create_about_screen(QWidget* parent) {
         card_layout->addLayout(row);
     };
 
-    add_info_row("Version:", "0.0.3");
-    add_info_row("Qt Version:", qVersion());
-    add_info_row("Compiler:", QString("%1 %2").arg(
+    add_info_row(QCoreApplication::translate("AboutScreen", "Version:"), "0.0.3");
+    add_info_row(QCoreApplication::translate("AboutScreen", "Qt Version:"), qVersion());
+    add_info_row(QCoreApplication::translate("AboutScreen", "Compiler:"), QString("%1 %2").arg(
 #if defined(__clang__)
         "Clang", __clang_version__
 #elif defined(__GNUC__)
@@ -93,15 +94,15 @@ QWidget* create_about_screen(QWidget* parent) {
 #elif defined(_MSC_VER)
         "MSVC", QString::number(_MSC_VER)
 #else
-        "Unknown", "Unknown"
+        QCoreApplication::translate("AboutScreen", "Unknown"), QCoreApplication::translate("AboutScreen", "Unknown")
 #endif
     ));
-    add_info_row("Platform:", QSysInfo::prettyProductName());
-    add_info_row("Architecture:", QSysInfo::currentCpuArchitecture());
-    add_info_row("Kernel:", QSysInfo::kernelType() + " " + QSysInfo::kernelVersion());
-    add_info_row("Packages:", "18+ (Python/Rust/TypeScript/C++)");
-    add_info_row("Agents:", "42 agents, 8 squads");
-    add_info_row("Security:", "WASM sandboxing, AES-256-GCM encryption");
+    add_info_row(QCoreApplication::translate("AboutScreen", "Platform:"), QSysInfo::prettyProductName());
+    add_info_row(QCoreApplication::translate("AboutScreen", "Architecture:"), QSysInfo::currentCpuArchitecture());
+    add_info_row(QCoreApplication::translate("AboutScreen", "Kernel:"), QSysInfo::kernelType() + " " + QSysInfo::kernelVersion());
+    add_info_row(QCoreApplication::translate("AboutScreen", "Packages:"), QCoreApplication::translate("AboutScreen", "18+ (Python/Rust/TypeScript/C++)"));
+    add_info_row(QCoreApplication::translate("AboutScreen", "Agents:"), QCoreApplication::translate("AboutScreen", "42 agents, 8 squads"));
+    add_info_row(QCoreApplication::translate("AboutScreen", "Security:"), QCoreApplication::translate("AboutScreen", "WASM sandboxing, AES-256-GCM encryption"));
 
     layout->addWidget(card);
     layout->addStretch();

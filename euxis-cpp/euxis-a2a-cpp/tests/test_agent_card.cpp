@@ -184,5 +184,27 @@ TEST(AgentCardTest, MultipleCapabilities) {
     EXPECT_FALSE(restored.capabilities[0].input_schema.has_value());
 }
 
+// ---------------------------------------------------------------------------
+// from_json with metadata field present (covers line 91)
+// ---------------------------------------------------------------------------
+TEST(AgentCardTest, FromJsonWithMetadata) {
+    nlohmann::json j = {
+        {"name", "meta-agent"},
+        {"description", "Agent with metadata"},
+        {"url", "http://localhost:9000"},
+        {"version", "1.0.0"},
+        {"capabilities", nlohmann::json::array({
+            {{"name", "ping"}, {"description", "Ping capability"}}
+        })},
+        {"metadata", {{"env", "production"}, {"tier", "premium"}}},
+    };
+
+    auto card = AgentCard::from_json(j);
+    EXPECT_EQ(card.name, "meta-agent");
+    EXPECT_FALSE(card.metadata.is_null());
+    EXPECT_EQ(card.metadata["env"], "production");
+    EXPECT_EQ(card.metadata["tier"], "premium");
+}
+
 } // namespace
 } // namespace euxis::a2a

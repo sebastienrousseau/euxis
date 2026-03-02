@@ -134,5 +134,58 @@ TEST_F(LifecycleTest, FailedCanRecoverOrTerminate) {
     EXPECT_EQ(mgr.get_state("a"), AgentState::Idle);
 }
 
+// --- Coverage: line 21 (default return in state_to_string switch) ---
+TEST_F(LifecycleTest, StateToStringDefaultFallback) {
+    // Cast an out-of-range int to AgentState to trigger the default return
+    auto bad = static_cast<AgentState>(99);
+    EXPECT_EQ(state_to_string(bad), "idle");
+}
+
+// --- Coverage: line 52 (default return in valid_transitions switch) ---
+TEST_F(LifecycleTest, ValidTransitionsDefaultFallback) {
+    auto bad = static_cast<AgentState>(99);
+    auto result = valid_transitions(bad);
+    EXPECT_TRUE(result.empty());
+}
+
+// --- Coverage: lines 130-131 (catch block in load_from_disk for malformed jsonl) ---
+TEST_F(LifecycleTest, LoadFromDiskMalformedTransitionLine) {
+    // Set up a valid lifecycle directory with a state file and malformed transitions
+    LifecycleManager mgr(tmp_);
+    mgr.transition("agent1", AgentState::Ready);
+
+    // Write a malformed line into the transitions file
+    auto transitions_path = tmp_ / "lifecycle" / "transitions.jsonl";
+    std::ofstream f(transitions_path, std::ios::app);
+    f << "this is not valid json\n";
+    f.close();
+
+    // Load should succeed, skipping the malformed line
+    LifecycleManager mgr2(tmp_);
+    EXPECT_NO_THROW(mgr2.load_from_disk());
+    EXPECT_EQ(mgr2.get_state("agent1"), AgentState::Ready);
+}
+
+// --- Coverage: line 150 (agents() returning sorted list) ---
+TEST_F(LifecycleTest, AgentsReturnsSorted) {
+    LifecycleManager mgr(tmp_);
+    mgr.transition("zebra", AgentState::Ready);
+    mgr.transition("alpha", AgentState::Ready);
+    mgr.transition("middle", AgentState::Ready);
+    auto names = mgr.agents();
+    ASSERT_EQ(names.size(), 3u);
+    EXPECT_EQ(names[0], "alpha");
+    EXPECT_EQ(names[1], "middle");
+    EXPECT_EQ(names[2], "zebra");
+}
+
+// --- Coverage: line 159 (history returns empty for unknown agent) ---
+TEST_F(LifecycleTest, HistoryForUnknownAgentIsEmpty) {
+    LifecycleManager mgr(tmp_);
+    mgr.transition("a", AgentState::Ready);
+    auto hist = mgr.history("nonexistent");
+    EXPECT_TRUE(hist.empty());
+}
+
 } // namespace
 } // namespace euxis::runtime

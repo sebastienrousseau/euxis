@@ -244,5 +244,38 @@ TEST_F(TaskTest, UpdatedAtChanges) {
     EXPECT_FALSE(task.updated_at.empty());
 }
 
+// --- Coverage: lines 71, 74, 76 (is_valid_transition default + terminal false) ---
+// Ensure Pending -> Pending is invalid (no self-transition)
+TEST_F(TaskTest, InvalidPendingToPending) {
+    auto task = create_task();
+    auto result = transition_task(task, TaskStatus::Pending);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(task.status, TaskStatus::Pending);
+}
+
+// --- Coverage: line 99 (create_task with empty message string) ---
+TEST_F(TaskTest, CreateTaskEmptyMessage) {
+    auto task = create_task("");
+    EXPECT_TRUE(task.messages.empty());
+}
+
+// --- Coverage: line 137 (transition error messages) ---
+TEST_F(TaskTest, TransitionFromTerminalHasErrorMessage) {
+    auto task = create_task();
+    ASSERT_TRUE(transition_task(task, TaskStatus::Active).has_value());
+    ASSERT_TRUE(transition_task(task, TaskStatus::Completed).has_value());
+
+    auto result = transition_task(task, TaskStatus::Active);
+    ASSERT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("terminal"), std::string::npos);
+}
+
+TEST_F(TaskTest, InvalidTransitionHasErrorMessage) {
+    auto task = create_task();
+    auto result = transition_task(task, TaskStatus::Completed);
+    ASSERT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("invalid transition"), std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::a2a

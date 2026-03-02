@@ -106,4 +106,78 @@ TEST_F(VerificationTest, LoadPublicKeyRaw) {
     EXPECT_EQ(*result, keypair.public_key);
 }
 
+TEST_F(VerificationTest, LoadPublicKeyMissing) {
+    auto result = load_public_key(tmp_dir_ / "nonexistent.pub");
+    EXPECT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("Cannot open"), std::string::npos);
+}
+
+TEST_F(VerificationTest, LoadPublicKeyInvalidSize) {
+    auto key_path = tmp_dir_ / "bad_key.pub";
+    std::ofstream f(key_path, std::ios::binary);
+    f << "too short";
+    f.close();
+
+    auto result = load_public_key(key_path);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("Invalid key format"), std::string::npos);
+}
+
+TEST_F(VerificationTest, MissingSignatureFile) {
+    auto keypair = euxis::crypto::generate_keypair();
+
+    // Write only the file, not the signature
+    auto file_path = tmp_dir_ / "test.js";
+    std::ofstream f(file_path, std::ios::binary);
+    f << "test content";
+    f.close();
+
+    auto result = verify_skill_signature(
+        file_path, tmp_dir_ / "nonexistent.sig", keypair.public_key);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("Cannot open signature"), std::string::npos);
+}
+
+TEST_F(VerificationTest, InvalidSignatureSize) {
+    auto keypair = euxis::crypto::generate_keypair();
+
+    auto file_path = tmp_dir_ / "test.js";
+    std::ofstream f(file_path, std::ios::binary);
+    f << "test content";
+    f.close();
+
+    // Write an invalid-sized signature
+    auto sig_path = tmp_dir_ / "test.js.sig";
+    std::ofstream sf(sig_path, std::ios::binary);
+    sf << "too short signature";
+    sf.close();
+
+    auto result = verify_skill_signature(file_path, sig_path, keypair.public_key);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_NE(result.error().find("Invalid signature size"), std::string::npos);
+}
+
+// --- Coverage: lines 78-79 (load_public_key base64-encoded key) ---
+TEST_F(VerificationTest, LoadPublicKeyBase64) {
+    auto keypair = euxis::crypto::generate_keypair();
+    auto key_path = tmp_dir_ / "key_b64.pub";
+
+    // Base64-encode the 32-byte public key
+    size_t b64_maxlen = sodium_base64_encoded_len(32, sodium_base64_VARIANT_ORIGINAL);
+    std::string b64(b64_maxlen, '\0');
+    sodium_bin2base64(
+        b64.data(), b64_maxlen,
+        reinterpret_cast<const unsigned char*>(keypair.public_key.data()), 32,
+        sodium_base64_VARIANT_ORIGINAL);
+    b64.resize(std::strlen(b64.c_str()));
+
+    std::ofstream f(key_path);
+    f << b64;
+    f.close();
+
+    auto result = load_public_key(key_path);
+    ASSERT_TRUE(result.has_value()) << result.error();
+    EXPECT_EQ(*result, keypair.public_key);
+}
+
 }  // namespace euxis::bridge

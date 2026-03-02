@@ -1,3 +1,6 @@
+#include <euxis/etx/config.hpp>
+
+#include <nlohmann/json.hpp>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -11,10 +14,15 @@
 #include <QStackedWidget>
 #include <QShortcut>
 #include <QSplitter>
+#include <QFile>
+#include <QFileInfo>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
-QWidget* create_approvals_screen(QWidget* parent) {
+using json = nlohmann::json;
+
+QWidget* create_approvals_screen(ETXConfig* /*config*/, QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -22,7 +30,7 @@ QWidget* create_approvals_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("ApprovalsScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -36,208 +44,218 @@ QWidget* create_approvals_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("HITL Approvals", widget);
+    auto* title = new QLabel(QCoreApplication::translate("ApprovalsScreen", "HITL Approvals"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
 
-    auto* subtitle = new QLabel("Pending agent actions requiring human approval", widget);
+    auto* subtitle = new QLabel(QCoreApplication::translate("ApprovalsScreen", "Pending agent actions requiring human approval"), widget);
     subtitle->setStyleSheet("color: #888; font-size: 12px;");
     layout->addWidget(subtitle);
 
-    // Splitter: table on top, detail panel below
-    auto* splitter = new QSplitter(Qt::Vertical, widget);
+    // Check for queue file
+    QString queue_path = ETXConfig::runtime_dir() + "/approvals/queue.json";
+    QFile queue_file(queue_path);
+    bool has_queue = false;
+    json queue_data;
 
-    // Approval table
-    auto* table = new QTableWidget(splitter);
-    table->setObjectName("approvals_table");
-    table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"Run ID", "Agent", "Action", "Task Preview"});
-    table->horizontalHeader()->setStretchLastSection(true);
-    table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    table->verticalHeader()->setVisible(false);
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table->setSelectionMode(QAbstractItemView::SingleSelection);
-    table->setAlternatingRowColors(true);
-    table->setShowGrid(false);
-
-    // Sample data
-    struct Approval {
-        QString run_id;
-        QString agent;
-        QString action;
-        QString preview;
-        QString details;
-    };
-
-    QList<Approval> approvals = {
-        {"run-0042", "code-agent", "file-write",
-         "Write generated module to src/auth.py",
-         "Run ID: run-0042\nAgent: code-agent\nAction: file-write\n"
-         "Target: src/auth.py\n\nThe agent wants to write a new authentication "
-         "module containing JWT token validation, session management, and "
-         "RBAC middleware. File size: 284 lines.\n\nRisk: MEDIUM - new file creation "
-         "in source tree."},
-        {"run-0043", "security-agent", "network-request",
-         "POST to https://api.vulndb.io/v2/scan",
-         "Run ID: run-0043\nAgent: security-agent\nAction: network-request\n"
-         "Method: POST\nURL: https://api.vulndb.io/v2/scan\n\nThe agent wants to "
-         "submit a dependency manifest for vulnerability scanning. Payload includes "
-         "package names and versions only (no secrets).\n\nRisk: LOW - read-only "
-         "external API call."},
-        {"run-0044", "bridge-agent", "skill-import",
-         "Import 'data-parser' from ClawHub registry",
-         "Run ID: run-0044\nAgent: bridge-agent\nAction: skill-import\n"
-         "Source: ClawHub registry\nSkill: data-parser v2.1.0\n\nThe agent wants to "
-         "import a third-party skill from ClawHub. Bridge verification passed "
-         "(signature valid, hash matches). WASM sandbox test: PASSED.\n\nRisk: MEDIUM "
-         "- external skill import, ClawHavoc threat vector."},
-        {"run-0045", "ops-agent", "system-exec",
-         "Execute 'systemctl restart euxis-gateway'",
-         "Run ID: run-0045\nAgent: ops-agent\nAction: system-exec\n"
-         "Command: systemctl restart euxis-gateway\n\nThe agent wants to restart the "
-         "gateway service after configuration changes. Current uptime: 14d 6h.\n"
-         "Active connections: 3\n\nRisk: HIGH - service restart will cause brief "
-         "downtime."},
-    };
-
-    table->setRowCount(approvals.size());
-    for (int i = 0; i < approvals.size(); ++i) {
-        table->setItem(i, 0, new QTableWidgetItem(approvals[i].run_id));
-        table->setItem(i, 1, new QTableWidgetItem(approvals[i].agent));
-        table->setItem(i, 2, new QTableWidgetItem(approvals[i].action));
-        table->setItem(i, 3, new QTableWidgetItem(approvals[i].preview));
-        table->setRowHeight(i, 40);
+    if (queue_file.open(QIODevice::ReadOnly)) {
+        try {
+            queue_data = json::parse(queue_file.readAll().toStdString());
+            if (queue_data.is_array() && !queue_data.empty()) {
+                has_queue = true;
+            }
+        } catch (const json::exception&) {
+            // ignore
+        }
     }
 
-    table->setStyleSheet(
-        "QTableWidget { background: rgba(255,255,255,0.03); "
-        "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }"
-        "QTableWidget::item { padding: 8px; }"
-        "QTableWidget::item:alternate { background: rgba(255,255,255,0.02); }"
-        "QTableWidget::item:selected { background: rgba(15,52,96,0.6); }"
-        "QHeaderView::section { background: rgba(255,255,255,0.05); "
-        "padding: 8px; border: none; font-weight: bold; }");
+    if (!has_queue) {
+        // Empty state
+        auto* empty_frame = new QFrame(widget);
+        empty_frame->setFrameShape(QFrame::StyledPanel);
+        auto* empty_layout = new QVBoxLayout(empty_frame);
+        empty_layout->setContentsMargins(40, 60, 40, 60);
+        empty_layout->setAlignment(Qt::AlignCenter);
 
-    splitter->addWidget(table);
+        auto* empty_icon = new QLabel("--", empty_frame);
+        QFont icon_font;
+        icon_font.setPointSize(48);
+        empty_icon->setFont(icon_font);
+        empty_icon->setStyleSheet("color: #444;");
+        empty_icon->setAlignment(Qt::AlignCenter);
+        empty_layout->addWidget(empty_icon);
 
-    // Detail panel
-    auto* detail_panel = new QFrame(splitter);
-    detail_panel->setObjectName("approval_detail");
-    detail_panel->setFrameShape(QFrame::StyledPanel);
-    auto* detail_layout = new QVBoxLayout(detail_panel);
-    detail_layout->setContentsMargins(16, 16, 16, 16);
+        auto* empty_title = new QLabel(QCoreApplication::translate("ApprovalsScreen", "No Pending Approvals"), empty_frame);
+        QFont empty_title_font;
+        empty_title_font.setPointSize(18);
+        empty_title_font.setBold(true);
+        empty_title->setFont(empty_title_font);
+        empty_title->setAlignment(Qt::AlignCenter);
+        empty_layout->addWidget(empty_title);
 
-    auto* detail_label = new QLabel("Details", detail_panel);
-    QFont detail_font;
-    detail_font.setPointSize(14);
-    detail_font.setBold(true);
-    detail_label->setFont(detail_font);
-    detail_layout->addWidget(detail_label);
+        auto* empty_desc = new QLabel(
+            QCoreApplication::translate("ApprovalsScreen",
+            "All agent actions are approved or no actions require HITL review.\n"
+            "Approval requests appear here when agents need permission for\n"
+            "file writes, network requests, skill imports, or system commands."),
+            empty_frame);
+        empty_desc->setAlignment(Qt::AlignCenter);
+        empty_desc->setStyleSheet("color: #888; font-size: 13px;");
+        empty_layout->addWidget(empty_desc);
 
-    auto* detail_text = new QTextEdit(detail_panel);
-    detail_text->setObjectName("approval_detail_text");
-    detail_text->setReadOnly(true);
-    QFont mono_font;
-    mono_font.setFamily("monospace");
-    mono_font.setPointSize(11);
-    detail_text->setFont(mono_font);
-    detail_text->setStyleSheet(
-        "QTextEdit { background: transparent; border: none; color: #bbb; }");
-    detail_text->setPlainText("Select a pending action to view details.");
-    detail_layout->addWidget(detail_text, 1);
+        auto* path_label = new QLabel(QCoreApplication::translate("ApprovalsScreen", "Queue file: %1").arg(queue_path), empty_frame);
+        path_label->setAlignment(Qt::AlignCenter);
+        path_label->setStyleSheet("color: #555; font-size: 11px;");
+        empty_layout->addWidget(path_label);
 
-    splitter->addWidget(detail_panel);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 1);
+        layout->addWidget(empty_frame, 1);
+    } else {
+        // Splitter: table on top, detail panel below
+        auto* splitter = new QSplitter(Qt::Vertical, widget);
 
-    layout->addWidget(splitter, 1);
+        auto* table = new QTableWidget(splitter);
+        table->setObjectName("approvals_table");
+        table->setColumnCount(4);
+        table->setHorizontalHeaderLabels({
+            QCoreApplication::translate("ApprovalsScreen", "Run ID"),
+            QCoreApplication::translate("ApprovalsScreen", "Agent"),
+            QCoreApplication::translate("ApprovalsScreen", "Action"),
+            QCoreApplication::translate("ApprovalsScreen", "Task Preview")});
+        table->horizontalHeader()->setStretchLastSection(true);
+        table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+        table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+        table->verticalHeader()->setVisible(false);
+        table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        table->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table->setSelectionMode(QAbstractItemView::SingleSelection);
+        table->setAlternatingRowColors(true);
+        table->setShowGrid(false);
 
-    // Connect row selection to detail panel
-    QObject::connect(table, &QTableWidget::currentCellChanged, widget,
-                     [approvals, detail_text](int row, int /*col*/, int /*prev_row*/, int /*prev_col*/) {
-        if (row >= 0 && row < approvals.size()) {
-            detail_text->setPlainText(approvals[row].details);
+        table->setRowCount(static_cast<int>(queue_data.size()));
+        for (int i = 0; i < static_cast<int>(queue_data.size()); ++i) {
+            const auto& item = queue_data[static_cast<size_t>(i)];
+            table->setItem(i, 0, new QTableWidgetItem(
+                QString::fromStdString(item.value("run_id", ""))));
+            table->setItem(i, 1, new QTableWidgetItem(
+                QString::fromStdString(item.value("agent", ""))));
+            table->setItem(i, 2, new QTableWidgetItem(
+                QString::fromStdString(item.value("action", ""))));
+            table->setItem(i, 3, new QTableWidgetItem(
+                QString::fromStdString(item.value("preview", ""))));
+            table->setRowHeight(i, 40);
         }
-    });
 
-    // Action buttons
-    auto* button_row = new QHBoxLayout();
-    button_row->addStretch();
+        table->setStyleSheet(
+            "QTableWidget { background: rgba(255,255,255,0.03); "
+            "border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }"
+            "QTableWidget::item { padding: 8px; }"
+            "QTableWidget::item:alternate { background: rgba(255,255,255,0.02); }"
+            "QTableWidget::item:selected { background: rgba(15,52,96,0.6); }"
+            "QHeaderView::section { background: rgba(255,255,255,0.05); "
+            "padding: 8px; border: none; font-weight: bold; }");
 
-    auto* refresh_btn = new QPushButton("Refresh (R)", widget);
-    refresh_btn->setObjectName("refresh_button");
-    refresh_btn->setCursor(Qt::PointingHandCursor);
-    refresh_btn->setMinimumHeight(40);
-    refresh_btn->setMinimumWidth(120);
-    button_row->addWidget(refresh_btn);
+        splitter->addWidget(table);
 
-    auto* reject_btn = new QPushButton("Reject (N)", widget);
-    reject_btn->setObjectName("reject_button");
-    reject_btn->setCursor(Qt::PointingHandCursor);
-    reject_btn->setMinimumHeight(40);
-    reject_btn->setMinimumWidth(120);
-    reject_btn->setStyleSheet(
-        "QPushButton { background: #6b2020; color: #fff; border: none; "
-        "border-radius: 6px; font-weight: bold; font-size: 13px; padding: 8px 24px; }"
-        "QPushButton:hover { background: #8b3030; }");
-    button_row->addWidget(reject_btn);
+        // Detail panel
+        auto* detail_panel = new QFrame(splitter);
+        detail_panel->setObjectName("approval_detail");
+        detail_panel->setFrameShape(QFrame::StyledPanel);
+        auto* detail_layout = new QVBoxLayout(detail_panel);
+        detail_layout->setContentsMargins(16, 16, 16, 16);
 
-    auto* approve_btn = new QPushButton("Approve (Y)", widget);
-    approve_btn->setObjectName("approve_button");
-    approve_btn->setCursor(Qt::PointingHandCursor);
-    approve_btn->setMinimumHeight(40);
-    approve_btn->setMinimumWidth(120);
-    approve_btn->setStyleSheet(
-        "QPushButton { background: #0f3460; color: #fff; border: none; "
-        "border-radius: 6px; font-weight: bold; font-size: 13px; padding: 8px 24px; }"
-        "QPushButton:hover { background: #1a4a7a; }");
-    button_row->addWidget(approve_btn);
+        auto* detail_label = new QLabel(QCoreApplication::translate("ApprovalsScreen", "Details"), detail_panel);
+        QFont detail_font;
+        detail_font.setPointSize(14);
+        detail_font.setBold(true);
+        detail_label->setFont(detail_font);
+        detail_layout->addWidget(detail_label);
 
-    layout->addLayout(button_row);
+        auto* detail_text = new QTextEdit(detail_panel);
+        detail_text->setObjectName("approval_detail_text");
+        detail_text->setReadOnly(true);
+        QFont mono_font;
+        mono_font.setFamily("monospace");
+        mono_font.setPointSize(11);
+        detail_text->setFont(mono_font);
+        detail_text->setStyleSheet(
+            "QTextEdit { background: transparent; border: none; color: #bbb; }");
+        detail_text->setPlainText(QCoreApplication::translate("ApprovalsScreen", "Select a pending action to view details."));
+        detail_layout->addWidget(detail_text, 1);
 
-    // Approve action
-    auto approve_action = [table, detail_text]() {
-        int row = table->currentRow();
-        if (row < 0) return;
-        QString run_id = table->item(row, 0)->text();
-        table->removeRow(row);
-        detail_text->setPlainText("Approved: " + run_id);
-    };
+        splitter->addWidget(detail_panel);
+        splitter->setStretchFactor(0, 2);
+        splitter->setStretchFactor(1, 1);
 
-    // Reject action
-    auto reject_action = [table, detail_text]() {
-        int row = table->currentRow();
-        if (row < 0) return;
-        QString run_id = table->item(row, 0)->text();
-        table->removeRow(row);
-        detail_text->setPlainText("Rejected: " + run_id);
-    };
+        layout->addWidget(splitter, 1);
 
-    // Refresh action
-    auto refresh_action = [detail_text]() {
-        detail_text->setPlainText("Refreshing pending approvals...");
-    };
+        // Connect row selection
+        QObject::connect(table, &QTableWidget::currentCellChanged, widget,
+                         [queue_data, detail_text](int row, int, int, int) {
+            if (row >= 0 && row < static_cast<int>(queue_data.size())) {
+                const auto& item = queue_data[static_cast<size_t>(row)];
+                QString details = QString::fromStdString(
+                    item.value("details", item.dump(2)));
+                detail_text->setPlainText(details);
+            }
+        });
 
-    QObject::connect(approve_btn, &QPushButton::clicked, widget, approve_action);
-    QObject::connect(reject_btn, &QPushButton::clicked, widget, reject_action);
-    QObject::connect(refresh_btn, &QPushButton::clicked, widget, refresh_action);
+        // Action buttons
+        auto* button_row = new QHBoxLayout();
+        button_row->addStretch();
 
-    // Keyboard shortcuts
-    auto* shortcut_y = new QShortcut(QKeySequence(Qt::Key_Y), widget);
-    QObject::connect(shortcut_y, &QShortcut::activated, widget, approve_action);
+        auto* reject_btn = new QPushButton(QCoreApplication::translate("ApprovalsScreen", "Reject (N)"), widget);
+        reject_btn->setCursor(Qt::PointingHandCursor);
+        reject_btn->setMinimumHeight(40);
+        reject_btn->setMinimumWidth(120);
+        reject_btn->setStyleSheet(
+            "QPushButton { background: #6b2020; color: #fff; border: none; "
+            "border-radius: 6px; font-weight: bold; font-size: 13px; padding: 8px 24px; }"
+            "QPushButton:hover { background: #8b3030; }");
+        button_row->addWidget(reject_btn);
 
-    auto* shortcut_n = new QShortcut(QKeySequence(Qt::Key_N), widget);
-    QObject::connect(shortcut_n, &QShortcut::activated, widget, reject_action);
+        auto* approve_btn = new QPushButton(QCoreApplication::translate("ApprovalsScreen", "Approve (Y)"), widget);
+        approve_btn->setCursor(Qt::PointingHandCursor);
+        approve_btn->setMinimumHeight(40);
+        approve_btn->setMinimumWidth(120);
+        approve_btn->setStyleSheet(
+            "QPushButton { background: #0f3460; color: #fff; border: none; "
+            "border-radius: 6px; font-weight: bold; font-size: 13px; padding: 8px 24px; }"
+            "QPushButton:hover { background: #1a4a7a; }");
+        button_row->addWidget(approve_btn);
 
-    auto* shortcut_r = new QShortcut(QKeySequence(Qt::Key_R), widget);
-    QObject::connect(shortcut_r, &QShortcut::activated, widget, refresh_action);
+        layout->addLayout(button_row);
 
+        auto approve_action = [table, detail_text]() {
+            int row = table->currentRow();
+            if (row < 0) return;
+            QString run_id = table->item(row, 0)->text();
+            table->removeRow(row);
+            detail_text->setPlainText(QCoreApplication::translate("ApprovalsScreen", "Approved: %1").arg(run_id));
+        };
+
+        auto reject_action = [table, detail_text]() {
+            int row = table->currentRow();
+            if (row < 0) return;
+            QString run_id = table->item(row, 0)->text();
+            table->removeRow(row);
+            detail_text->setPlainText(QCoreApplication::translate("ApprovalsScreen", "Rejected: %1").arg(run_id));
+        };
+
+        QObject::connect(approve_btn, &QPushButton::clicked, widget, approve_action);
+        QObject::connect(reject_btn, &QPushButton::clicked, widget, reject_action);
+
+        auto* shortcut_y = new QShortcut(QKeySequence(Qt::Key_Y), widget);
+        QObject::connect(shortcut_y, &QShortcut::activated, widget, approve_action);
+
+        auto* shortcut_n = new QShortcut(QKeySequence(Qt::Key_N), widget);
+        QObject::connect(shortcut_n, &QShortcut::activated, widget, reject_action);
+    }
+
+    // Escape to go back
     auto* shortcut_esc = new QShortcut(QKeySequence(Qt::Key_Escape), widget);
     QObject::connect(shortcut_esc, &QShortcut::activated, widget, [widget]() {
         if (auto* stack = qobject_cast<QStackedWidget*>(widget->parentWidget())) {

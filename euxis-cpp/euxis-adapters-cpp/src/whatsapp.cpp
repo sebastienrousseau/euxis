@@ -73,7 +73,7 @@ void WhatsAppAdapter::send(const std::string& text,
         else return;
     }
 
-    httplib::SSLClient cli("graph.facebook.com");
+    httplib::Client cli(!config_.api_base_url.empty() ? config_.api_base_url : "https://graph.facebook.com");
     cli.set_connection_timeout(10);
     nlohmann::json payload = {
         {"messaging_product", "whatsapp"},

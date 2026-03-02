@@ -3,6 +3,8 @@ add_library(euxis-cli-lib STATIC
   src/engine.cpp
   src/omnigraph.cpp
   src/terminal.cpp
+  src/term_caps.cpp
+  src/box.cpp
   src/config_loader.cpp
   src/pii_filter.cpp
   src/process.cpp
@@ -10,6 +12,8 @@ add_library(euxis-cli-lib STATIC
   src/registry_client.cpp
   src/provider_router.cpp
   src/provider_executor.cpp
+  src/auth_profile_store.cpp
+  src/cli_provider.cpp
   src/cmd/system.cpp
   src/cmd/fleet.cpp
   src/cmd/knowledge.cpp
@@ -22,6 +26,7 @@ target_include_directories(euxis-cli-lib PUBLIC
 )
 target_link_libraries(euxis-cli-lib PUBLIC
   euxis-core-cpp
+  euxis-runtime-cpp
   euxis-gateway-cpp
   euxis-metrics-cpp
   euxis-security-cpp
@@ -50,6 +55,13 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_infra.cpp
   tests/test_cmd_dev.cpp
   tests/test_cmd_specialized.cpp
+  tests/test_auth_profile_store.cpp
+  tests/test_process.cpp
+  tests/test_provider_executor.cpp
+  tests/test_term_caps.cpp
+  tests/test_box.cpp
+  tests/test_cli_provider.cpp
+  tests/test_i18n.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib

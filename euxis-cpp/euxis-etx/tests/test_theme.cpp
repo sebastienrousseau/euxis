@@ -72,5 +72,11 @@ TEST_F(ThemeEngineTest, InvalidApplyDoesNotEmitSignal) {
     EXPECT_EQ(spy.count(), 0);
 }
 
+// --- Coverage: lines 51, 54 (semantic_overrides returns empty hash) ---
+TEST_F(ThemeEngineTest, SemanticOverridesReturnsEmptyByDefault) {
+    auto overrides = engine_.semantic_overrides();
+    EXPECT_TRUE(overrides.isEmpty());
+}
+
 } // namespace
 } // namespace euxis::etx

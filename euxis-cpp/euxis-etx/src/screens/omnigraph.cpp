@@ -1,3 +1,5 @@
+#include <euxis/etx/registry.hpp>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -13,10 +15,11 @@
 #include <QShortcut>
 #include <QSplitter>
 #include <QHeaderView>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
-QWidget* create_omnigraph_screen(QWidget* parent) {
+QWidget* create_omnigraph_screen(FleetRegistry* registry, QWidget* parent) {
     auto* widget = new QWidget(parent);
     auto* layout = new QVBoxLayout(widget);
     layout->setContentsMargins(32, 32, 32, 32);
@@ -24,13 +27,13 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
 
     // Back button + refresh
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("OmnigraphScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
     top_bar->addStretch();
 
-    auto* refresh_btn = new QPushButton("Refresh", widget);
+    auto* refresh_btn = new QPushButton(QCoreApplication::translate("OmnigraphScreen", "Refresh"), widget);
     refresh_btn->setObjectName("omnigraph_refresh");
     refresh_btn->setCursor(Qt::PointingHandCursor);
     refresh_btn->setMinimumHeight(36);
@@ -46,43 +49,41 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
     });
 
     // Title
-    auto* title = new QLabel("Omnigraph", widget);
+    auto* title = new QLabel(QCoreApplication::translate("OmnigraphScreen", "Omnigraph"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
     title->setFont(title_font);
     layout->addWidget(title);
 
-    auto* subtitle = new QLabel("Dependency graph and token budget viewer", widget);
+    auto* subtitle = new QLabel(QCoreApplication::translate("OmnigraphScreen", "Agent and squad dependency graph"), widget);
     subtitle->setStyleSheet("color: #888; font-size: 12px;");
     layout->addWidget(subtitle);
 
-    // Token budget display
-    auto* budget_card = new QFrame(widget);
-    budget_card->setObjectName("token_budget_card");
-    budget_card->setFrameShape(QFrame::StyledPanel);
-    auto* budget_layout = new QHBoxLayout(budget_card);
-    budget_layout->setContentsMargins(20, 12, 20, 12);
-    budget_layout->setSpacing(16);
+    // Summary bar
+    auto* summary_card = new QFrame(widget);
+    summary_card->setFrameShape(QFrame::StyledPanel);
+    auto* summary_layout = new QHBoxLayout(summary_card);
+    summary_layout->setContentsMargins(20, 12, 20, 12);
+    summary_layout->setSpacing(24);
 
-    auto* budget_label = new QLabel("Token Budget:", budget_card);
-    budget_label->setStyleSheet("color: #888; font-weight: bold; font-size: 13px;");
-    budget_layout->addWidget(budget_label);
+    auto* agents_count = new QLabel(widget);
+    agents_count->setObjectName("omnigraph_agents_count");
+    agents_count->setStyleSheet("color: #2196f3; font-weight: bold; font-size: 14px;");
+    summary_layout->addWidget(agents_count);
 
-    auto* budget_bar = new QProgressBar(budget_card);
-    budget_bar->setObjectName("token_budget_bar");
-    budget_bar->setRange(0, 100);
-    budget_bar->setValue(34);
-    budget_bar->setFormat("34,200 / 100,000 tokens (34%)");
-    budget_bar->setMinimumHeight(28);
-    budget_bar->setStyleSheet(
-        "QProgressBar { background: rgba(255,255,255,0.05); "
-        "border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; "
-        "text-align: center; color: #ccc; font-size: 12px; }"
-        "QProgressBar::chunk { background: #0f3460; border-radius: 3px; }");
-    budget_layout->addWidget(budget_bar, 1);
+    auto* squads_count = new QLabel(widget);
+    squads_count->setObjectName("omnigraph_squads_count");
+    squads_count->setStyleSheet("color: #4caf50; font-weight: bold; font-size: 14px;");
+    summary_layout->addWidget(squads_count);
 
-    layout->addWidget(budget_card);
+    auto* combos_count = new QLabel(widget);
+    combos_count->setObjectName("omnigraph_combos_count");
+    combos_count->setStyleSheet("color: #ff9800; font-weight: bold; font-size: 14px;");
+    summary_layout->addWidget(combos_count);
+
+    summary_layout->addStretch();
+    layout->addWidget(summary_card);
 
     // Splitter: tree on left, details on right
     auto* splitter = new QSplitter(Qt::Horizontal, widget);
@@ -90,7 +91,10 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
     // Tree widget
     auto* tree = new QTreeWidget(splitter);
     tree->setObjectName("omnigraph_tree");
-    tree->setHeaderLabels({"Node", "Type", "Tokens"});
+    tree->setHeaderLabels({
+        QCoreApplication::translate("OmnigraphScreen", "Node"),
+        QCoreApplication::translate("OmnigraphScreen", "Type"),
+        QCoreApplication::translate("OmnigraphScreen", "Info")});
     tree->setMinimumWidth(350);
     tree->setAlternatingRowColors(true);
     tree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -106,29 +110,6 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
         "QHeaderView::section { background: rgba(255,255,255,0.05); "
         "padding: 6px; border: none; font-weight: bold; }");
 
-    // Populate tree with sample data
-    auto* root = new QTreeWidgetItem(tree, {"euxis-workspace", "root", "34,200"});
-    root->setExpanded(true);
-
-    // Agents
-    auto* agents_node = new QTreeWidgetItem(root, {"agents/", "group", "18,400"});
-    agents_node->setExpanded(true);
-    new QTreeWidgetItem(agents_node, {"code-agent", "agent", "7,200"});
-    new QTreeWidgetItem(agents_node, {"research-agent", "agent", "6,800"});
-    new QTreeWidgetItem(agents_node, {"security-agent", "agent", "4,400"});
-
-    // Squads
-    auto* squads_node = new QTreeWidgetItem(root, {"squads/", "group", "9,600"});
-    squads_node->setExpanded(true);
-    new QTreeWidgetItem(squads_node, {"bridge-squad", "squad", "5,200"});
-    new QTreeWidgetItem(squads_node, {"ops-squad", "squad", "4,400"});
-
-    // Tools
-    auto* tools_node = new QTreeWidgetItem(root, {"tools/", "group", "6,200"});
-    tools_node->setExpanded(true);
-    new QTreeWidgetItem(tools_node, {"wasm-sandbox", "tool", "3,800"});
-    new QTreeWidgetItem(tools_node, {"crypto-backend", "tool", "2,400"});
-
     splitter->addWidget(tree);
 
     // Detail panel
@@ -138,7 +119,7 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
     auto* detail_layout = new QVBoxLayout(detail_panel);
     detail_layout->setContentsMargins(20, 20, 20, 20);
 
-    auto* detail_title = new QLabel("Node Details", detail_panel);
+    auto* detail_title = new QLabel(QCoreApplication::translate("OmnigraphScreen", "Node Details"), detail_panel);
     QFont detail_font;
     detail_font.setPointSize(14);
     detail_font.setBold(true);
@@ -154,7 +135,7 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
     detail_text->setFont(mono_font);
     detail_text->setStyleSheet(
         "QTextEdit { background: transparent; border: none; color: #bbb; }");
-    detail_text->setPlainText("Select a node in the tree to view its details.");
+    detail_text->setPlainText(QCoreApplication::translate("OmnigraphScreen", "Select a node in the tree to view its details."));
     detail_layout->addWidget(detail_text, 1);
 
     splitter->addWidget(detail_panel);
@@ -163,55 +144,125 @@ QWidget* create_omnigraph_screen(QWidget* parent) {
 
     layout->addWidget(splitter, 1);
 
+    // Build tree from registry data
+    auto build_tree = [tree, registry, agents_count, squads_count, combos_count]() {
+        tree->clear();
+
+        auto* root = new QTreeWidgetItem(tree, {"euxis-fleet", "root",
+            QCoreApplication::translate("OmnigraphScreen", "%1 agents").arg(registry->agent_count())});
+        root->setExpanded(true);
+
+        // Core agents
+        auto core_agents = registry->filter_by_tier("core");
+        auto* core_node = new QTreeWidgetItem(root, {"core/", "tier",
+            QCoreApplication::translate("OmnigraphScreen", "%1 agents").arg(core_agents.size())});
+        core_node->setExpanded(true);
+        for (const auto& a : core_agents) {
+            new QTreeWidgetItem(core_node, {a.id, "agent", a.activation});
+        }
+
+        // Fleet agents
+        auto fleet_agents = registry->filter_by_tier("fleet");
+        auto* fleet_node = new QTreeWidgetItem(root, {"fleet/", "tier",
+            QCoreApplication::translate("OmnigraphScreen", "%1 agents").arg(fleet_agents.size())});
+        fleet_node->setExpanded(true);
+        for (const auto& a : fleet_agents) {
+            new QTreeWidgetItem(fleet_node, {a.id, "agent", a.activation});
+        }
+
+        // Squads
+        const auto& squads = registry->squads();
+        if (!squads.empty()) {
+            auto* squads_node = new QTreeWidgetItem(root, {"squads/", "group",
+                QCoreApplication::translate("OmnigraphScreen", "%1 squads").arg(squads.size())});
+            squads_node->setExpanded(true);
+            for (const auto& s : squads) {
+                auto* snode = new QTreeWidgetItem(squads_node, {s.name, "squad",
+                    QCoreApplication::translate("OmnigraphScreen", "%1 members").arg(s.members.size())});
+                for (const auto& m : s.members) {
+                    new QTreeWidgetItem(snode, {m, "member", ""});
+                }
+            }
+        }
+
+        // Combos
+        const auto& combos = registry->combos();
+        if (!combos.empty()) {
+            auto* combos_node = new QTreeWidgetItem(root, {"combos/", "group",
+                QCoreApplication::translate("OmnigraphScreen", "%1 combos").arg(combos.size())});
+            combos_node->setExpanded(true);
+            for (const auto& c : combos) {
+                auto* cnode = new QTreeWidgetItem(combos_node, {c.name, "combo",
+                    QCoreApplication::translate("OmnigraphScreen", "%1 steps").arg(c.chain.size())});
+                for (const auto& step : c.chain) {
+                    new QTreeWidgetItem(cnode, {step, "step", ""});
+                }
+            }
+        }
+
+        // Update summary
+        agents_count->setText(QCoreApplication::translate("OmnigraphScreen", "Agents: %1").arg(registry->agent_count()));
+        squads_count->setText(QCoreApplication::translate("OmnigraphScreen", "Squads: %1").arg(registry->squad_count()));
+        combos_count->setText(QCoreApplication::translate("OmnigraphScreen", "Combos: %1").arg(registry->combo_count()));
+    };
+
+    build_tree();
+
     // Connect tree selection to detail display
     QObject::connect(tree, &QTreeWidget::currentItemChanged, widget,
-                     [detail_text](QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/) {
+                     [detail_text, registry](QTreeWidgetItem* current, QTreeWidgetItem*) {
         if (!current) return;
 
         QString name = current->text(0);
         QString type = current->text(1);
-        QString tokens = current->text(2);
+        QString info = current->text(2);
 
-        QString details = QString("Name: %1\nType: %2\nTokens: %3\n")
-                          .arg(name, type, tokens);
+        QString details = QCoreApplication::translate("OmnigraphScreen", "Name: %1\nType: %2\n").arg(name, type);
+        if (!info.isEmpty()) {
+            details += QCoreApplication::translate("OmnigraphScreen", "Info: %1").arg(info) + "\n";
+        }
 
-        if (type == "agent") {
-            details += "\nCapabilities:\n"
-                       "  - Task execution\n"
-                       "  - Memory persistence (AES-256-GCM)\n"
-                       "  - WASM sandboxed runtime\n"
-                       "\nDependencies:\n"
-                       "  - euxis-core (mesh orchestration)\n"
-                       "  - euxis-crypto (encryption)\n"
-                       "  - euxis-memory (checkpoint/resume)";
+        if (type == "agent" || type == "member" || type == "step") {
+            const auto* agent = registry->find(name);
+            if (agent) {
+                details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Tier: %1").arg(agent->tier.toUpper());
+                details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Activation: %1").arg(agent->activation);
+                details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Version: %1").arg(agent->version);
+                if (!agent->tags.isEmpty()) {
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Tags: %1").arg(agent->tags.join(", "));
+                }
+                if (!agent->capability_tags.isEmpty()) {
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Capabilities: %1").arg(agent->capability_tags.join(", "));
+                }
+                details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Description: %1").arg(agent->description);
+            }
         } else if (type == "squad") {
-            details += "\nComposition:\n"
-                       "  - Lead agent + 2-4 members\n"
-                       "  - A2A protocol coordination\n"
-                       "\nDependencies:\n"
-                       "  - euxis-core (swarm orchestration)\n"
-                       "  - euxis-a2a (protocol support)";
-        } else if (type == "tool") {
-            details += "\nRuntime:\n"
-                       "  - Extism WASM plugin\n"
-                       "  - Isolated execution context\n"
-                       "\nDependencies:\n"
-                       "  - euxis-core (plugin host)";
-        } else if (type == "root") {
-            details += "\nWorkspace Summary:\n"
-                       "  Agents: 3\n"
-                       "  Squads: 2\n"
-                       "  Tools: 2\n"
-                       "  Token utilization: 34.2%";
+            const auto& squads = registry->squads();
+            for (const auto& s : squads) {
+                if (s.name == name) {
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Purpose: %1").arg(s.purpose);
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Lead: %1").arg(s.lead);
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Members: %1").arg(s.members.join(", "));
+                    break;
+                }
+            }
+        } else if (type == "combo") {
+            const auto& combos = registry->combos();
+            for (const auto& c : combos) {
+                if (c.name == name) {
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Description: %1").arg(c.description);
+                    details += "\n" + QCoreApplication::translate("OmnigraphScreen", "Chain: %1").arg(c.chain.join(" -> "));
+                    break;
+                }
+            }
         }
 
         detail_text->setPlainText(details);
     });
 
-    // Refresh action
-    QObject::connect(refresh_btn, &QPushButton::clicked, widget, [detail_text]() {
-        detail_text->setPlainText("Refreshing dependency graph...");
-    });
+    // Refresh
+    QObject::connect(refresh_btn, &QPushButton::clicked, widget, build_tree);
+    QObject::connect(registry, &FleetRegistry::refreshed, widget, build_tree);
 
     // Escape to go back
     auto* shortcut_esc = new QShortcut(QKeySequence(Qt::Key_Escape), widget);

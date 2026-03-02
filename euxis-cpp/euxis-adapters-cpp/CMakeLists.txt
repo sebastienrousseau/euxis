@@ -11,8 +11,12 @@ euxis_add_library(euxis-adapters-cpp
     spdlog::spdlog
   TEST_SOURCES
     tests/test_slack.cpp
+    tests/test_slack_api.cpp
     tests/test_telegram.cpp
+    tests/test_telegram_api.cpp
     tests/test_discord.cpp
+    tests/test_discord_api.cpp
     tests/test_whatsapp.cpp
+    tests/test_whatsapp_api.cpp
     tests/test_registry.cpp
 )

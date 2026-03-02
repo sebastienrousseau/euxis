@@ -45,9 +45,9 @@ PerformanceMetricsCollector::PerformanceMetricsCollector(
 }
 
 auto PerformanceMetricsCollector::generate_correlation_id() -> std::string {
-    static std::mt19937 gen(std::random_device{}());
-    static std::uniform_int_distribution<uint64_t> dist;
-    auto val = dist(gen);
+    std::random_device rd;
+    std::uniform_int_distribution<uint64_t> dist;
+    auto val = dist(rd);
     char buf[32];
     std::snprintf(buf, sizeof(buf), "metrics-%012lx",
                   static_cast<unsigned long>(val & 0xFFFFFFFFFFFFULL));

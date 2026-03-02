@@ -4,6 +4,7 @@ euxis_add_library(euxis-core-cpp
     src/router.cpp
     src/swarm.cpp
     src/ws_client.cpp
+    src/topology_grid.cpp
   DEPS
     euxis-crypto-cpp
     euxis-metrics-cpp
@@ -14,4 +15,6 @@ euxis_add_library(euxis-core-cpp
     tests/test_resilience.cpp
     tests/test_router.cpp
     tests/test_swarm.cpp
+    tests/test_ws_client.cpp
+    tests/test_topology_grid.cpp
 )

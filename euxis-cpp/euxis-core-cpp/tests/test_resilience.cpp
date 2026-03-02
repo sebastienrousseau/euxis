@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <chrono>
+#include <thread>
+
 #include "euxis/core/resilience.hpp"
 
 namespace euxis::core {
@@ -55,6 +58,21 @@ TEST(CircuitBreakerTest, ResetClearsState) {
     cb.record_failure();
     EXPECT_TRUE(cb.is_open());
     cb.reset();
+    EXPECT_FALSE(cb.is_open());
+}
+
+// --- Coverage: lines 40-41 (circuit breaker recovery after timeout) ---
+TEST(CircuitBreakerTest, RecoverAfterTimeout) {
+    // Use very short timeout to test recovery path
+    CircuitBreaker cb(1, 0.001);  // threshold=1, timeout=1ms
+    cb.record_failure();
+    // is_open() may immediately recover with such short timeout,
+    // but we want to exercise the recovery branch in is_open()
+
+    // Wait enough for the recovery timeout to pass
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    // Now the breaker should have recovered (timeout elapsed)
     EXPECT_FALSE(cb.is_open());
 }
 

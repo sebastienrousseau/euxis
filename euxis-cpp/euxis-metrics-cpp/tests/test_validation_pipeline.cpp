@@ -108,5 +108,35 @@ TEST_F(ValidationPipelineTest, ValidateReportFailsUncited) {
     EXPECT_LT(result.pass_rate, 1.0);
 }
 
+TEST_F(ValidationPipelineTest, CheckCitationsWithNoCitations) {
+    // Claims that have no citations at all (covers line 79 — uncited path)
+    std::string text = "Throughput is 500MB and latency is 10ms with no evidence.";
+    auto claims = pipeline_->extract_quantitative_claims(text);
+    ASSERT_GE(claims.size(), 1);
+    auto result = pipeline_->check_citations(text, claims);
+    EXPECT_EQ(result.cited_claims, 0);
+    EXPECT_EQ(result.uncited_claims.size(), static_cast<size_t>(result.total_claims));
+    // check_forbidden_terms should also be called (covers line 105)
+    // This text has no forbidden terms, so the vector should be empty
+    EXPECT_TRUE(result.forbidden_terms_found.empty());
+}
+
+TEST_F(ValidationPipelineTest, CheckForbiddenTermsMultiple) {
+    // Exercise check_forbidden_terms directly with multiple hits (covers line 105)
+    auto terms = pipeline_->check_forbidden_terms(
+        "I think it seems likely that maybe the results are around 50%.");
+    // Should find: "seems", "likely", "I think", "maybe", "around"
+    EXPECT_GE(terms.size(), 4);
+}
+
+TEST_F(ValidationPipelineTest, CheckCitationsWithForbiddenTerms) {
+    // Combines citations check with forbidden terms (covers lines 79+105 together)
+    std::string text = "Response time is approximately 42ms. Perhaps memory is 256MB.";
+    auto claims = pipeline_->extract_quantitative_claims(text);
+    auto result = pipeline_->check_citations(text, claims);
+    // Should find forbidden terms: "approximately", "perhaps"
+    EXPECT_GE(result.forbidden_terms_found.size(), 1);
+}
+
 } // namespace
 } // namespace euxis::metrics

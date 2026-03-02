@@ -5,9 +5,12 @@
 #include <vector>
 #include <string>
 
+#include <iostream>
+
 namespace euxis::cli::cmd {
 
 int cmd_voice(Context& ctx, const std::vector<std::string>& args);
+int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input = std::cin);
 int cmd_tui(Context& ctx, const std::vector<std::string>& args);
 int cmd_polish(Context& ctx, const std::vector<std::string>& args);
 int cmd_kaizen(Context& ctx, const std::vector<std::string>& args);

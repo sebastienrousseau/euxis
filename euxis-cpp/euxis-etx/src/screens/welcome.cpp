@@ -34,7 +34,7 @@ public:
         layout->addWidget(logo);
 
         // Title
-        auto* title = new QLabel("Welcome to Euxis ETX", this);
+        auto* title = new QLabel(tr("Welcome to Euxis ETX"), this);
         title->setObjectName("welcome_title");
         QFont title_font;
         title_font.setPointSize(28);
@@ -45,7 +45,7 @@ public:
         layout->addWidget(title);
 
         // Subtitle
-        auto* subtitle = new QLabel("Production-grade Agentic Platform", this);
+        auto* subtitle = new QLabel(tr("Production-grade Agentic Platform"), this);
         subtitle->setObjectName("welcome_subtitle");
         QFont sub_font;
         sub_font.setPointSize(14);
@@ -58,7 +58,7 @@ public:
         layout->addSpacing(40);
 
         // Continue hint
-        auto* hint = new QLabel("Press Enter to continue", this);
+        auto* hint = new QLabel(tr("Press Enter to continue"), this);
         hint->setObjectName("welcome_hint");
         QFont hint_font;
         hint_font.setPointSize(12);

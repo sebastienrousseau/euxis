@@ -9,12 +9,14 @@ namespace euxis::etx {
 class ThemeEngine;
 class ETXConfig;
 class FleetRegistry;
+class ChatEngine;
 
 class EuxisApp : public QMainWindow {
     Q_OBJECT
 
 public:
     explicit EuxisApp(QWidget* parent = nullptr);
+    ~EuxisApp() override;
 
     void show_dashboard();
     void show_welcome();
@@ -40,11 +42,13 @@ private:
     void trigger_focus_transition();
     void suggest_calm_theme();
     void setup_shortcuts();
+    static auto screen_name_for(int index) -> QString;
 
     QStackedWidget* screen_stack_;
     ThemeEngine* theme_engine_;
     ETXConfig* config_;
     FleetRegistry* registry_;
+    ChatEngine* chat_engine_;
 };
 
 } // namespace euxis::etx

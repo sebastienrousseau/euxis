@@ -1,4 +1,6 @@
 #pragma once
+#include <QColor>
+#include <QHash>
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -16,6 +18,7 @@ public:
     [[nodiscard]] auto current_theme() const -> QString;
     [[nodiscard]] auto available_themes() const -> QStringList;
     [[nodiscard]] auto load_stylesheet(const QString& name) const -> QString;
+    [[nodiscard]] auto semantic_overrides() const -> QHash<QString, QColor>;
 
 signals:
     void theme_applied(const QString& name);

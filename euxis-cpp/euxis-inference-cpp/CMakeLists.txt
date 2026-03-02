@@ -15,5 +15,7 @@ euxis_add_library(euxis-inference-cpp
     tests/test_model_registry.cpp
     tests/test_quality_gate.cpp
     tests/test_llama_engine.cpp
+    tests/test_llama_engine_api.cpp
     tests/test_ollama_engine.cpp
+    tests/test_ollama_engine_api.cpp
 )

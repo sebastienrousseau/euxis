@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QMessageBox>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -25,7 +26,7 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("SettingsScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -39,7 +40,7 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
     });
 
     // Title
-    auto* title = new QLabel("Settings", widget);
+    auto* title = new QLabel(QCoreApplication::translate("SettingsScreen", "Settings"), widget);
     QFont title_font;
     title_font.setPointSize(20);
     title_font.setBold(true);
@@ -56,7 +57,7 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
 
     // Theme selector
     auto* theme_row = new QHBoxLayout();
-    auto* theme_label = new QLabel("Theme:", card);
+    auto* theme_label = new QLabel(QCoreApplication::translate("SettingsScreen", "Theme:"), card);
     theme_label->setFixedWidth(150);
     theme_label->setStyleSheet("font-weight: bold; font-size: 13px;");
     theme_row->addWidget(theme_label);
@@ -73,7 +74,7 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
 
     // Refresh interval
     auto* refresh_row = new QHBoxLayout();
-    auto* refresh_label = new QLabel("Refresh Interval:", card);
+    auto* refresh_label = new QLabel(QCoreApplication::translate("SettingsScreen", "Refresh Interval:"), card);
     refresh_label->setFixedWidth(150);
     refresh_label->setStyleSheet("font-weight: bold; font-size: 13px;");
     refresh_row->addWidget(refresh_label);
@@ -92,12 +93,12 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
 
     // Show tips
     auto* tips_row = new QHBoxLayout();
-    auto* tips_label = new QLabel("Show Tips:", card);
+    auto* tips_label = new QLabel(QCoreApplication::translate("SettingsScreen", "Show Tips:"), card);
     tips_label->setFixedWidth(150);
     tips_label->setStyleSheet("font-weight: bold; font-size: 13px;");
     tips_row->addWidget(tips_label);
 
-    auto* tips_check = new QCheckBox("Display helpful tips in the dashboard", card);
+    auto* tips_check = new QCheckBox(QCoreApplication::translate("SettingsScreen", "Display helpful tips in the dashboard"), card);
     tips_check->setObjectName("tips_check");
     tips_check->setChecked(config->show_tips());
     tips_check->setMinimumHeight(36);
@@ -111,7 +112,7 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
     auto* button_row = new QHBoxLayout();
     button_row->addStretch();
 
-    auto* save_btn = new QPushButton("Save Settings", widget);
+    auto* save_btn = new QPushButton(QCoreApplication::translate("SettingsScreen", "Save Settings"), widget);
     save_btn->setObjectName("save_button");
     save_btn->setCursor(Qt::PointingHandCursor);
     save_btn->setMinimumHeight(44);
@@ -130,8 +131,9 @@ QWidget* create_settings_screen(ThemeEngine* theme, ETXConfig* config,
         config->set_show_tips(tips_check->isChecked());
         theme->apply_theme(theme_combo->currentText());
 
-        QMessageBox::information(widget, "Settings Saved",
-            "Your settings have been saved successfully.");
+        QMessageBox::information(widget,
+            QCoreApplication::translate("SettingsScreen", "Settings Saved"),
+            QCoreApplication::translate("SettingsScreen", "Your settings have been saved successfully."));
     });
 
     layout->addStretch();

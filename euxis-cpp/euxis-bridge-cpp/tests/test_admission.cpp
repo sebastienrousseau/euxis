@@ -135,4 +135,148 @@ TEST_F(AdmissionTest, StagesTracked) {
     EXPECT_GE(result.stages_passed.size(), 3u);
 }
 
+TEST_F(AdmissionTest, EmptyRuntimeRejected) {
+    auto skill = make_valid_skill();
+    skill.runtime = "";
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill);
+    EXPECT_FALSE(result.admitted);
+
+    bool structure_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "structure") structure_failed = true;
+    }
+    EXPECT_TRUE(structure_failed);
+}
+
+TEST_F(AdmissionTest, EmptyEntrypointRejected) {
+    auto skill = make_valid_skill();
+    skill.entrypoint = "";
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill);
+    EXPECT_FALSE(result.admitted);
+
+    bool structure_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "structure") structure_failed = true;
+    }
+    EXPECT_TRUE(structure_failed);
+}
+
+TEST_F(AdmissionTest, EmptySourceDirRejected) {
+    auto skill = make_valid_skill();
+    skill.source_dir = "";
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill);
+    EXPECT_FALSE(result.admitted);
+
+    bool structure_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "structure") structure_failed = true;
+    }
+    EXPECT_TRUE(structure_failed);
+}
+
+TEST_F(AdmissionTest, SignatureRequiredNoPublicKeyPath) {
+    auto skill = make_valid_skill();
+    skill.signature_path = tmp_dir_ / "fake.sig";
+
+    SkillExecutionPolicy policy;
+    policy.require_signature = true;
+    // No public_key_path set
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill, policy);
+    EXPECT_FALSE(result.admitted);
+
+    bool sig_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "signature") sig_failed = true;
+    }
+    EXPECT_TRUE(sig_failed);
+}
+
+TEST_F(AdmissionTest, SignatureRequiredWithInvalidKeyPath) {
+    auto skill = make_valid_skill();
+    skill.signature_path = tmp_dir_ / "fake.sig";
+
+    SkillExecutionPolicy policy;
+    policy.require_signature = true;
+    policy.public_key_path = tmp_dir_ / "nonexistent.pub";
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill, policy);
+    EXPECT_FALSE(result.admitted);
+
+    bool sig_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "signature") sig_failed = true;
+    }
+    EXPECT_TRUE(sig_failed);
+}
+
+TEST_F(AdmissionTest, NonexistentSourceDirPassesStaticAnalysis) {
+    // Source dir doesn't exist on filesystem -> static analysis passes (no code to check)
+    BridgedSkill skill;
+    skill.name = "ghost-skill";
+    skill.runtime = "node";
+    skill.entrypoint = "/nonexistent/path/index.js";
+    skill.source_dir = tmp_dir_ / "nonexistent-dir";
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill);
+    // Structure should pass since fields are non-empty
+    // Static analysis should pass (no source to analyze)
+    // Check that static_analysis passed
+    bool analysis_passed = false;
+    for (const auto& s : result.stages_passed) {
+        if (s == "static_analysis") analysis_passed = true;
+    }
+    EXPECT_TRUE(analysis_passed);
+}
+
+TEST_F(AdmissionTest, CustomReputationThreshold) {
+    AdmissionPipeline pipeline(0.8);
+    auto skill = make_valid_skill();
+    auto result = pipeline.evaluate(skill);
+    // Should still work with custom threshold for structure/analysis/signature
+    EXPECT_TRUE(result.admitted);
+}
+
+// --- Coverage: lines 91-95 (verify_skill_signature path in check_signature) ---
+TEST_F(AdmissionTest, SignatureWithValidKeyButBadSignatureFile) {
+    auto skill = make_valid_skill();
+
+    // Create a fake signature file (wrong size)
+    auto sig_path = tmp_dir_ / "bad.sig";
+    std::ofstream sf(sig_path, std::ios::binary);
+    sf << "not-a-valid-64-byte-signature";
+    sf.close();
+    skill.signature_path = sig_path;
+
+    // Create a fake public key file (32 bytes)
+    auto key_path = tmp_dir_ / "test.pub";
+    std::ofstream kf(key_path, std::ios::binary);
+    std::array<char, 32> key_data{};
+    kf.write(key_data.data(), 32);
+    kf.close();
+
+    SkillExecutionPolicy policy;
+    policy.require_signature = true;
+    policy.public_key_path = key_path;
+
+    AdmissionPipeline pipeline;
+    auto result = pipeline.evaluate(skill, policy);
+    // verify_skill_signature should fail (bad sig size), so signature stage fails
+    EXPECT_FALSE(result.admitted);
+    bool sig_failed = false;
+    for (const auto& s : result.stages_failed) {
+        if (s == "signature") sig_failed = true;
+    }
+    EXPECT_TRUE(sig_failed);
+}
+
 }  // namespace euxis::bridge

@@ -49,4 +49,45 @@ TEST(PolicyTest, FilesystemPolicy) {
     EXPECT_EQ(fs.write_paths.size(), 2);
 }
 
+// --- Coverage: line 19 (to_json with public_key_path set) ---
+TEST(PolicyTest, ToJsonWithPublicKeyPath) {
+    SkillExecutionPolicy policy;
+    policy.public_key_path = "/tmp/pubkey.pem";
+
+    auto j = policy.to_json();
+    EXPECT_TRUE(j.contains("public_key_path"));
+    EXPECT_EQ(j["public_key_path"], "/tmp/pubkey.pem");
+}
+
+// --- Coverage: line 24 (to_json with write_paths) ---
+TEST(PolicyTest, ToJsonWithWritePaths) {
+    SkillExecutionPolicy policy;
+    policy.filesystem.read_only = false;
+    policy.filesystem.write_paths = {"/tmp", "/var/data"};
+
+    auto j = policy.to_json();
+    EXPECT_EQ(j["filesystem"]["write_paths"].size(), 2u);
+    EXPECT_EQ(j["filesystem"]["write_paths"][0], "/tmp");
+}
+
+// --- Coverage: line 32 (to_json with output_schema set) ---
+TEST(PolicyTest, ToJsonWithOutputSchema) {
+    SkillExecutionPolicy policy;
+    policy.output_schema = nlohmann::json{{"type", "object"}};
+
+    auto j = policy.to_json();
+    EXPECT_TRUE(j.contains("output_schema"));
+    EXPECT_EQ(j["output_schema"]["type"], "object");
+}
+
+// --- Coverage: line 35 (to_json with audit_log_path set) ---
+TEST(PolicyTest, ToJsonWithAuditLogPath) {
+    SkillExecutionPolicy policy;
+    policy.audit_log_path = "/var/log/audit.jsonl";
+
+    auto j = policy.to_json();
+    EXPECT_TRUE(j.contains("audit_log_path"));
+    EXPECT_EQ(j["audit_log_path"], "/var/log/audit.jsonl");
+}
+
 }  // namespace euxis::bridge

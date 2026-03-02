@@ -10,6 +10,7 @@
 #include <QShortcut>
 #include <QDateTime>
 #include <QProcess>
+#include <QCoreApplication>
 
 namespace euxis::etx {
 
@@ -21,7 +22,7 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
 
     // Back button
     auto* top_bar = new QHBoxLayout();
-    auto* back_btn = new QPushButton("< Back", widget);
+    auto* back_btn = new QPushButton(QCoreApplication::translate("ToolRunnerScreen", "< Back"), widget);
     back_btn->setCursor(Qt::PointingHandCursor);
     back_btn->setFixedWidth(100);
     top_bar->addWidget(back_btn);
@@ -35,7 +36,7 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
     });
 
     // Title (tool name placeholder)
-    auto* title = new QLabel("Tool Runner", widget);
+    auto* title = new QLabel(QCoreApplication::translate("ToolRunnerScreen", "Tool Runner"), widget);
     title->setObjectName("tool_runner_title");
     QFont title_font;
     title_font.setPointSize(20);
@@ -43,7 +44,7 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
     title->setFont(title_font);
     layout->addWidget(title);
 
-    auto* tool_name = new QLabel("Tool: euxis-bridge verify", widget);
+    auto* tool_name = new QLabel(QCoreApplication::translate("ToolRunnerScreen", "Tool: %1").arg("euxis-bridge verify"), widget);
     tool_name->setObjectName("tool_name_label");
     tool_name->setStyleSheet("color: #888; font-size: 13px;");
     layout->addWidget(tool_name);
@@ -75,31 +76,31 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
         " euxis-bridge verify --source clawshub --skill data-parser");
     output->appendPlainText(
         now.addSecs(-9).toString("[hh:mm:ss]") +
-        " Fetching manifest from ClawHub registry...");
+        QCoreApplication::translate("ToolRunnerScreen", " Fetching manifest from ClawHub registry..."));
     output->appendPlainText(
         now.addSecs(-7).toString("[hh:mm:ss]") +
-        " Downloaded SKILL.md (2.4 KB) and openclaw.json (1.1 KB)");
+        QCoreApplication::translate("ToolRunnerScreen", " Downloaded SKILL.md (2.4 KB) and openclaw.json (1.1 KB)"));
     output->appendPlainText(
         now.addSecs(-6).toString("[hh:mm:ss]") +
-        " Verifying signature: SHA-256 RSA-PKCS1-v1_5 ... OK");
+        QCoreApplication::translate("ToolRunnerScreen", " Verifying signature: SHA-256 RSA-PKCS1-v1_5 ... OK"));
     output->appendPlainText(
         now.addSecs(-5).toString("[hh:mm:ss]") +
-        " Verifying content hash: SHA-256 ... OK");
+        QCoreApplication::translate("ToolRunnerScreen", " Verifying content hash: SHA-256 ... OK"));
     output->appendPlainText(
         now.addSecs(-4).toString("[hh:mm:ss]") +
-        " WASM sandbox test: loading skill into Extism runtime...");
+        QCoreApplication::translate("ToolRunnerScreen", " WASM sandbox test: loading skill into Extism runtime..."));
     output->appendPlainText(
         now.addSecs(-3).toString("[hh:mm:ss]") +
-        " WASM sandbox test: execution completed (42ms, 0 violations)");
+        QCoreApplication::translate("ToolRunnerScreen", " WASM sandbox test: execution completed (42ms, 0 violations)"));
     output->appendPlainText(
         now.addSecs(-2).toString("[hh:mm:ss]") +
-        " Supply chain check: 0 known vulnerabilities in dependencies");
+        QCoreApplication::translate("ToolRunnerScreen", " Supply chain check: 0 known vulnerabilities in dependencies"));
     output->appendPlainText(
         now.addSecs(-1).toString("[hh:mm:ss]") +
-        " ClawHavoc threat scan: CLEAN (no malicious patterns detected)");
+        QCoreApplication::translate("ToolRunnerScreen", " ClawHavoc threat scan: CLEAN (no malicious patterns detected)"));
     output->appendPlainText(
         now.toString("[hh:mm:ss]") +
-        " RESULT: PASS — skill 'data-parser' verified for import");
+        QCoreApplication::translate("ToolRunnerScreen", " RESULT: PASS \u2014 skill 'data-parser' verified for import"));
 
     layout->addWidget(output, 1);
 
@@ -107,14 +108,14 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
     auto* button_row = new QHBoxLayout();
     button_row->addStretch();
 
-    auto* clear_btn = new QPushButton("Clear (Ctrl+L)", widget);
+    auto* clear_btn = new QPushButton(QCoreApplication::translate("ToolRunnerScreen", "Clear (Ctrl+L)"), widget);
     clear_btn->setObjectName("clear_button");
     clear_btn->setCursor(Qt::PointingHandCursor);
     clear_btn->setMinimumHeight(40);
     clear_btn->setMinimumWidth(130);
     button_row->addWidget(clear_btn);
 
-    auto* run_btn = new QPushButton("Run", widget);
+    auto* run_btn = new QPushButton(QCoreApplication::translate("ToolRunnerScreen", "Run"), widget);
     run_btn->setObjectName("run_button");
     run_btn->setCursor(Qt::PointingHandCursor);
     run_btn->setMinimumHeight(40);
@@ -136,12 +137,12 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
         QString cmd = tool_name->text().mid(6).trimmed(); // Strip "Tool: " prefix
 
         output->appendPlainText("");
-        output->appendPlainText(ts + " Running: " + cmd);
+        output->appendPlainText(ts + QCoreApplication::translate("ToolRunnerScreen", " Running: %1").arg(cmd));
 
         // Parse command into program and arguments
         QStringList parts = cmd.split(' ', Qt::SkipEmptyParts);
         if (parts.isEmpty()) {
-            output->appendPlainText(ts + " Error: no command specified");
+            output->appendPlainText(ts + QCoreApplication::translate("ToolRunnerScreen", " Error: no command specified"));
             return;
         }
 
@@ -163,13 +164,13 @@ QWidget* create_tool_runner_screen(QWidget* parent) {
         QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             output, [output, process](int exitCode, QProcess::ExitStatus) {
                 auto ts = QDateTime::currentDateTime().toString("[hh:mm:ss]");
-                output->appendPlainText(ts + QString(" Process exited with code %1").arg(exitCode));
+                output->appendPlainText(ts + QCoreApplication::translate("ToolRunnerScreen", " Process exited with code %1").arg(exitCode));
                 process->deleteLater();
             });
 
         process->start();
         if (!process->waitForStarted(3000)) {
-            output->appendPlainText(ts + " Error: Failed to start " + program);
+            output->appendPlainText(ts + QCoreApplication::translate("ToolRunnerScreen", " Error: Failed to start %1").arg(program));
         }
     });
 

@@ -6,6 +6,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "euxis/runtime/manifesto.hpp"
+
 namespace euxis::cli {
 
 /// Agent record from registry.
@@ -17,6 +19,7 @@ struct AgentInfo {
     std::vector<std::string> tags;
     std::vector<std::string> capabilities;
     std::string prompt_path;
+    std::optional<runtime::AgentManifesto> manifesto;
 };
 
 /// Squad record from squads.json.

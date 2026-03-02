@@ -81,3 +81,4 @@ add_subdirectory(euxis-gateway-cpp)   # all above + httplib, sodium
 add_subdirectory(euxis-cli-cpp)       # executable, links core/gateway/metrics/security
 add_subdirectory(euxis-bench-cpp)     # Depends on all above
 add_subdirectory(euxis-etx)           # Qt6 GUI, depends on all above
+add_subdirectory(tests-integration)   # Cross-package integration tests

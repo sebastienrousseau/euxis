@@ -1,9 +1,12 @@
 #include <euxis/bridge/platform.hpp>
 
 #include <cstdlib>
+#include <cstring>
+#include <string>
 
 #ifdef __linux__
 #include <sys/utsname.h>
+#include <unistd.h>
 #endif
 
 namespace euxis::bridge {
@@ -40,8 +43,23 @@ auto detect_platform() -> PlatformInfo {
 }
 
 auto has_nsjail() -> bool {
-    int result = std::system("which nsjail > /dev/null 2>&1");
-    return result == 0;
+    // Safe PATH search without invoking a shell
+    const char* path_env = std::getenv("PATH");
+    if (!path_env) return false;
+
+    std::string path_str(path_env);
+    std::string::size_type start = 0;
+    while (start < path_str.size()) {
+        auto end = path_str.find(':', start);
+        std::string dir = path_str.substr(start, end == std::string::npos ? end : end - start);
+        std::string candidate = dir + "/nsjail";
+#ifdef __linux__
+        if (access(candidate.c_str(), X_OK) == 0) return true;
+#endif
+        if (end == std::string::npos) break;
+        start = end + 1;
+    }
+    return false;
 }
 
 }  // namespace euxis::bridge

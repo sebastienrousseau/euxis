@@ -78,4 +78,12 @@ TEST(ReputationTest, HasTimestamp) {
     EXPECT_FALSE(rep->last_updated.empty());
 }
 
+TEST(ReputationTest, ScoreUnknownAuthorReturnsDefault) {
+    ReputationStore store;
+    // score() for a never-seen author returns 0.5 (covers line 52)
+    EXPECT_DOUBLE_EQ(store.score("completely-unknown-author"), 0.5);
+    // Verify that calling score() did NOT create an entry
+    EXPECT_EQ(store.get("completely-unknown-author"), std::nullopt);
+}
+
 }  // namespace euxis::bridge

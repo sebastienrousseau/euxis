@@ -1,4 +1,7 @@
 #include <euxis/etx/config.hpp>
+#include <QDir>
+#include <QStandardPaths>
+#include <cstdlib>
 
 namespace euxis::etx {
 
@@ -29,6 +32,21 @@ auto ETXConfig::show_tips() const -> bool {
 
 void ETXConfig::set_show_tips(bool show) {
     settings_.setValue("show_tips", show);
+}
+
+auto ETXConfig::euxis_home() -> QString {
+    if (const char* env = std::getenv("EUXIS_HOME")) {
+        return QString::fromUtf8(env);
+    }
+    return QDir::homePath() + "/.euxis";
+}
+
+auto ETXConfig::data_dir() -> QString {
+    return euxis_home() + "/euxis-data";
+}
+
+auto ETXConfig::runtime_dir() -> QString {
+    return euxis_home() + "/euxis-runtime";
 }
 
 } // namespace euxis::etx

@@ -29,4 +29,5 @@ euxis_add_library(euxis-gateway-cpp
     tests/test_routes.cpp
     tests/test_mcp.cpp
     tests/test_websocket.cpp
+    tests/test_state.cpp
 )

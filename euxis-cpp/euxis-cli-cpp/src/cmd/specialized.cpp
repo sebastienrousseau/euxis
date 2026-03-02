@@ -1,5 +1,6 @@
 #include "euxis/cli/cmd/specialized.hpp"
 #include "euxis/cli/config_loader.hpp"
+#include "euxis/cli/i18n.hpp"
 #include "euxis/cli/pii_filter.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
@@ -16,6 +17,9 @@
 #include <unistd.h>
 
 namespace euxis::cli::cmd {
+
+using euxis::cli::i18n::tr;
+
 namespace {
 
 namespace fs = std::filesystem;
@@ -38,7 +42,7 @@ auto scan_directory_listing(const fs::path& dir, int max_depth = 3) -> std::stri
     for (const auto& entry : fs::recursive_directory_iterator(
              dir, fs::directory_options::skip_permission_denied)) {
         if (count >= max_files) {
-            out << "  ... (truncated at " << max_files << " entries)\n";
+            out << "  ... (" << tr("truncated at") << " " << max_files << " " << tr("entries") << ")\n";
             break;
         }
         auto rel = fs::relative(entry.path(), dir);
@@ -48,7 +52,7 @@ auto scan_directory_listing(const fs::path& dir, int max_depth = 3) -> std::stri
         if (depth > max_depth) continue;
 
         if (entry.is_regular_file()) {
-            out << "  " << rel.string() << " (" << entry.file_size() << " bytes)\n";
+            out << "  " << rel.string() << " (" << entry.file_size() << " " << tr("bytes") << ")\n";
             ++count;
         } else if (entry.is_directory()) {
             out << "  " << rel.string() << "/\n";
@@ -63,13 +67,17 @@ auto scan_directory_listing(const fs::path& dir, int max_depth = 3) -> std::stri
 // --- voice ---
 
 int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
-    std::cout << term::bold("Voice Interface") << "\n\n";
+    return cmd_voice_ex(ctx, args, std::cin);
+}
+
+int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input) {
+    std::cout << term::bold(tr("Voice Interface")) << "\n\n";
 
     // Check for audio tools
     bool has_sox = Process::available("sox");
     bool has_ffmpeg = Process::available("ffmpeg");
-    std::cout << "  sox:    " << (has_sox ? "available" : "not found") << "\n"
-              << "  ffmpeg: " << (has_ffmpeg ? "available" : "not found") << "\n";
+    std::cout << "  sox:    " << (has_sox ? tr("available") : tr("not found")) << "\n"
+              << "  ffmpeg: " << (has_ffmpeg ? tr("available") : tr("not found")) << "\n";
 
     // Determine model selection
     std::string tier = "reason";
@@ -79,33 +87,35 @@ int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << "  Mode:   " << term::cyan("text fallback") << " (type 'exit' or 'quit' to stop)\n\n";
+    std::cout << "  " << tr("Mode:") << "   " << term::cyan(tr("text fallback")) << " (" << tr("type 'exit' or 'quit' to stop") << ")\n\n";
 
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
     auto model = router.route(tier, "voice conversation");
 
-    std::cout << "  Model:  " << model.model << "\n\n";
+    std::cout << "  " << tr("Model:") << "  " << model.model << "\n\n";
 
-    // Conversation loop: read from stdin line by line
+    // Conversation loop: read from provided input stream line by line
     std::string line;
     int turn = 0;
     while (true) {
-        std::cout << term::bold("you> ");
-        std::cout.flush();
+        if (&input == &std::cin) {
+            std::cout << term::bold(tr("you> "));
+            std::cout.flush();
+        }
 
-        if (!std::getline(std::cin, line)) {
+        if (!std::getline(input, line)) {
             // EOF
-            std::cout << "\n";
+            if (&input == &std::cin) std::cout << "\n";
             break;
         }
 
         // Trim whitespace
         auto trimmed = line;
-        while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t')) {
+        while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t' || trimmed.front() == '\r')) {
             trimmed.erase(trimmed.begin());
         }
-        while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t')) {
+        while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t' || trimmed.back() == '\r' || trimmed.back() == '\n')) {
             trimmed.pop_back();
         }
 
@@ -113,7 +123,7 @@ int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
 
         // Exit commands
         if (trimmed == "exit" || trimmed == "quit") {
-            std::cout << "\n" << term::icon_ok() << " Voice session ended.\n";
+            std::cout << "\n" << term::icon_ok() << " " << tr("Voice session ended.") << "\n";
             break;
         }
 
@@ -127,72 +137,82 @@ int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
 
         ++turn;
         int frame = 0;
-        term::spinner_frame(frame++, "Thinking...");
+        if (&input == &std::cin) {
+            term::spinner_frame(frame++, tr("Thinking..."));
+        }
         auto response = executor.execute(model, prompt);
-        term::spinner_clear();
+        if (&input == &std::cin) {
+            term::spinner_clear();
+        }
 
         if (response.success) {
-            std::cout << term::cyan("euxis> ") << response.output << "\n\n";
+            std::cout << term::cyan(tr("euxis> ")) << response.output << "\n\n";
         } else {
-            std::cerr << term::icon_fail() << " Error: " << response.error << "\n\n";
+            std::cerr << term::icon_fail() << " " << tr("Error:") << " " << response.error << "\n\n";
         }
     }
 
-    std::cout << turn << " turn(s) completed.\n";
+    std::cout << turn << " " << tr("turn(s) completed.") << "\n";
     return 0;
 }
 
 // --- tui ---
 
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
-    // Try to launch the full Qt GUI (euxis-etx)
-    // Search order: build dir, installed binary, PATH
-    std::vector<fs::path> search_paths = {
-        fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
-        fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
-    };
+    // If not in a terminal (e.g. during tests), don't try to launch GUI
+    if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
+        std::cout << term::icon_info() << " " << tr("Non-interactive mode detected, skipping GUI launch.") << "\n";
+    } else {
+        // Try to launch the full Qt GUI (euxis-etx)
+        // Search order: build dir, installed binary, PATH
+        std::vector<fs::path> search_paths = {
+            fs::path(ctx.euxis_home) / "build" / "euxis-etx" / "euxis-etx",
+            fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
+            fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
+        };
 
-    for (const auto& etx_path : search_paths) {
-        if (fs::exists(etx_path)) {
-            std::cout << term::icon_info() << " Launching ETX GUI...\n";
-            // Forward any args to the GUI
-            std::vector<std::string> etx_args = args;
-            auto result = Process::run(etx_path.string(), etx_args);
+        for (const auto& etx_path : search_paths) {
+            if (fs::exists(etx_path)) {
+                std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
+                // Forward any args to the GUI
+                std::vector<std::string> etx_args = args;
+                auto result = Process::run(etx_path.string(), etx_args);
+                return result.exit_code;
+            }
+        }
+
+        // Also check if euxis-etx is on PATH
+        if (Process::available("euxis-etx")) {
+            std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
+            auto result = Process::run("euxis-etx", args);
             return result.exit_code;
         }
     }
 
-    // Also check if euxis-etx is on PATH
-    if (Process::available("euxis-etx")) {
-        std::cout << term::icon_info() << " Launching ETX GUI...\n";
-        auto result = Process::run("euxis-etx", args);
-        return result.exit_code;
-    }
-
     // Fallback: text-based dashboard when GUI binary not available
-    std::cout << term::yellow("ETX GUI not found, showing text dashboard") << "\n";
-    std::cout << term::dim("(build euxis-etx or add it to PATH for the full GUI)") << "\n\n";
+    std::cout << term::yellow(tr("ETX GUI not found, showing text dashboard")) << "\n";
+    std::cout << term::dim(tr("(build euxis-etx or add it to PATH for the full GUI)")) << "\n\n";
 
-    std::cout << term::bold("Terminal Dashboard") << "\n\n";
+    std::cout << term::bold(tr("Terminal Dashboard")) << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
 
-    std::cout << "  Agents:    " << registry.agent_count() << "\n"
-              << "  Squads:    " << registry.list_squads().size() << "\n"
-              << "  Provider:  " << router.detect_provider() << "\n"
-              << "  Local:     " << (router.local_available() ? "yes" : "no") << "\n"
-              << "  Home:      " << ctx.euxis_home << "\n";
+    std::cout << "  " << tr("Agents:") << "    " << registry.agent_count() << "\n"
+              << "  " << tr("Squads:") << "    " << registry.list_squads().size() << "\n"
+              << "  " << tr("Provider:") << "  " << router.detect_provider() << "\n"
+              << "  " << tr("Local:") << "     " << (router.local_available() ? tr("yes") : tr("no")) << "\n"
+              << "  " << tr("Home:") << "      " << ctx.euxis_home << "\n";
 
     auto providers = router.available_providers();
-    std::cout << "  Available: ";
+    std::cout << "  " << tr("Available:") << " ";
     for (size_t i = 0; i < providers.size(); ++i) {
         if (i > 0) std::cout << ", ";
         std::cout << providers[i];
     }
     std::cout << "\n";
 
-    std::cout << "\n  " << term::bold("Runtime:") << "\n";
+    std::cout << "\n  " << term::bold(tr("Runtime:")) << "\n";
     for (const auto& dir : {"euxis-data", "euxis-runtime", "euxis-core"}) {
         auto path = fs::path(ctx.euxis_home) / dir;
         std::cout << "    " << (fs::is_directory(path) ? term::icon_ok() : term::icon_fail())
@@ -206,7 +226,7 @@ int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis polish <file> [--style formal|casual] [--dry-run]\n";
+        std::cerr << tr("Usage: euxis polish <file> [--style formal|casual] [--dry-run]") << "\n";
         return 2;
     }
 
@@ -222,7 +242,7 @@ int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
     }
 
     if (!fs::exists(file_path)) {
-        std::cerr << "File not found: " << file_path << "\n";
+        std::cerr << tr("File not found:") << " " << file_path << "\n";
         return 1;
     }
 
@@ -230,15 +250,15 @@ int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
     std::string content((std::istreambuf_iterator<char>(f)),
                          std::istreambuf_iterator<char>());
 
-    std::cout << term::bold("Polish: ") << file_path << "\n"
-              << "  Style:    " << style << "\n"
-              << "  Size:     " << content.size() << " bytes\n"
-              << "  Dry-run:  " << (dry_run ? "yes" : "no") << "\n";
+    std::cout << term::bold(tr("Polish:")) << " " << file_path << "\n"
+              << "  " << tr("Style:") << "    " << style << "\n"
+              << "  " << tr("Size:") << "     " << content.size() << " " << tr("bytes") << "\n"
+              << "  " << tr("Dry-run:") << "  " << (dry_run ? tr("yes") : tr("no")) << "\n";
 
     // PII check
     auto redacted = PiiFilter::redact(content);
     if (redacted != content) {
-        std::cout << "  " << term::icon_warn() << " PII detected and redacted before sending to provider\n";
+        std::cout << "  " << term::icon_warn() << " " << tr("PII detected and redacted before sending to provider") << "\n";
         content = redacted;
     }
 
@@ -258,31 +278,31 @@ int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
     auto model = router.route("reason", "polish text");
 
     int frame = 0;
-    term::spinner_frame(frame++, "Polishing...");
+    term::spinner_frame(frame++, tr("Polishing..."));
     auto response = executor.execute(model, prompt);
     term::spinner_clear();
 
     if (!response.success) {
-        std::cerr << term::icon_fail() << " Polish failed: " << response.error << "\n";
+        std::cerr << term::icon_fail() << " " << tr("Polish failed:") << " " << response.error << "\n";
         return 1;
     }
 
-    std::cout << "  Output:   " << response.output.size() << " bytes ("
+    std::cout << "  " << tr("Output:") << "   " << response.output.size() << " " << tr("bytes") << " ("
               << response.duration_ms << "ms)\n";
 
     if (dry_run) {
         // Print to stdout only
-        std::cout << "\n" << term::bold("--- Polished output ---") << "\n";
+        std::cout << "\n" << term::bold(tr("--- Polished output ---")) << "\n";
         std::cout << response.output << "\n";
-        std::cout << term::bold("--- End ---") << "\n";
+        std::cout << term::bold(tr("--- End ---")) << "\n";
     } else {
         // Write back to the file
         std::ofstream out(file_path);
         out << response.output;
-        std::cout << "  " << term::icon_ok() << " Written back to: " << file_path << "\n";
+        std::cout << "  " << term::icon_ok() << " " << tr("Written back to:") << " " << file_path << "\n";
     }
 
-    std::cout << term::icon_ok() << " Polish complete\n";
+    std::cout << term::icon_ok() << " " << tr("Polish complete") << "\n";
     return 0;
 }
 
@@ -296,7 +316,7 @@ int cmd_kaizen(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << term::bold("Kaizen - Continuous Improvement") << "\n\n";
+    std::cout << term::bold(tr("Kaizen - Continuous Improvement")) << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
     auto agents = registry.list_agents();
@@ -344,12 +364,12 @@ int cmd_kaizen(Context& ctx, const std::vector<std::string>& args) {
                   << "- With prompt: " << with_prompt << "/" << total << "\n";
 
     // Print local summary first
-    std::cout << "  Agents:        " << total << "\n"
-              << "  Squads:        " << squads.size() << "\n"
-              << "  With version:  " << with_version << "/" << total << "\n"
-              << "  With tags:     " << with_tags << "/" << total << "\n"
-              << "  With role:     " << with_role << "/" << total << "\n"
-              << "  With prompt:   " << with_prompt << "/" << total << "\n\n";
+    std::cout << "  " << tr("Agents:") << "        " << total << "\n"
+              << "  " << tr("Squads:") << "        " << squads.size() << "\n"
+              << "  " << tr("With version:") << "  " << with_version << "/" << total << "\n"
+              << "  " << tr("With tags:") << "     " << with_tags << "/" << total << "\n"
+              << "  " << tr("With role:") << "     " << with_role << "/" << total << "\n"
+              << "  " << tr("With prompt:") << "   " << with_prompt << "/" << total << "\n\n";
 
     // Build the kaizen prompt
     std::string system_prompt =
@@ -371,40 +391,40 @@ int cmd_kaizen(Context& ctx, const std::vector<std::string>& args) {
     auto model = router.route("reason", "kaizen analysis");
 
     int frame = 0;
-    term::spinner_frame(frame++, "Analyzing fleet...");
+    term::spinner_frame(frame++, tr("Analyzing fleet..."));
     auto response = executor.execute(model, prompt);
     term::spinner_clear();
 
     if (!response.success) {
-        std::cerr << term::icon_fail() << " Kaizen analysis failed: " << response.error << "\n";
+        std::cerr << term::icon_fail() << " " << tr("Kaizen analysis failed:") << " " << response.error << "\n";
 
         // Fall back to local heuristic suggestions
-        std::cout << term::bold("Local Suggestions (provider unavailable):") << "\n";
+        std::cout << term::bold(tr("Local Suggestions (provider unavailable):")) << "\n";
         if (with_version < total) {
             std::cout << "  " << term::icon_warn() << " [P1] " << (total - with_version)
-                      << " agent(s) missing version\n";
+                      << " " << tr("agent(s) missing version") << "\n";
         }
         if (with_tags < total) {
             std::cout << "  " << term::icon_warn() << " [P1] " << (total - with_tags)
-                      << " agent(s) missing tags\n";
+                      << " " << tr("agent(s) missing tags") << "\n";
         }
         if (with_role < total) {
             std::cout << "  " << term::icon_warn() << " [P0] " << (total - with_role)
-                      << " agent(s) missing role definition\n";
+                      << " " << tr("agent(s) missing role definition") << "\n";
         }
         if (with_prompt < total) {
             std::cout << "  " << term::icon_warn() << " [P0] " << (total - with_prompt)
-                      << " agent(s) missing prompt file\n";
+                      << " " << tr("agent(s) missing prompt file") << "\n";
         }
         if (with_version == total && with_tags == total &&
             with_role == total && with_prompt == total) {
-            std::cout << "  " << term::icon_ok() << " All agents meet quality baseline\n";
+            std::cout << "  " << term::icon_ok() << " " << tr("All agents meet quality baseline") << "\n";
         }
         return 0;
     }
 
     // Display the AI-generated suggestions
-    std::cout << term::bold("Kaizen Suggestions:") << "\n\n";
+    std::cout << term::bold(tr("Kaizen Suggestions:")) << "\n\n";
     std::cout << response.output << "\n\n";
     std::cout << "  (" << response.duration_ms << "ms)\n";
 
@@ -413,9 +433,9 @@ int cmd_kaizen(Context& ctx, const std::vector<std::string>& args) {
     auto project_dir = session.ensure_project_dirs("kaizen");
     auto output_path = fs::path(project_dir) / "output" / "kaizen-analysis.md";
     write_output_file(output_path, response.output);
-    std::cout << "  Saved to: " << output_path.string() << "\n";
+    std::cout << "  " << tr("Saved to:") << " " << output_path.string() << "\n";
 
-    std::cout << term::icon_ok() << " Kaizen analysis complete\n";
+    std::cout << term::icon_ok() << " " << tr("Kaizen analysis complete") << "\n";
     return 0;
 }
 
@@ -424,44 +444,44 @@ int cmd_kaizen(Context& ctx, const std::vector<std::string>& args) {
 int cmd_audit(Context& ctx, const std::vector<std::string>& args) {
     (void)args;
 
-    std::cout << term::bold("Security & Compliance Audit") << "\n\n";
+    std::cout << term::bold(tr("Security & Compliance Audit")) << "\n\n";
 
     int issues = 0;
 
     // 1. Check for sensitive files
-    std::cout << "  " << term::bold("Sensitive file scan:") << "\n";
+    std::cout << "  " << term::bold(tr("Sensitive file scan:")) << "\n";
     for (const auto& pattern : {".env", "credentials.json", "secrets.yaml", ".key"}) {
         auto path = fs::path(ctx.euxis_home) / pattern;
         if (fs::exists(path)) {
-            std::cout << "    " << term::icon_warn() << " Found: " << pattern << "\n";
+            std::cout << "    " << term::icon_warn() << " " << tr("Found:") << " " << pattern << "\n";
             ++issues;
         }
     }
     if (issues == 0) {
-        std::cout << "    " << term::icon_ok() << " No sensitive files in EUXIS_HOME root\n";
+        std::cout << "    " << term::icon_ok() << " " << tr("No sensitive files in EUXIS_HOME root") << "\n";
     }
 
     // 2. Check file permissions
-    std::cout << "  " << term::bold("Permissions:") << "\n";
+    std::cout << "  " << term::bold(tr("Permissions:")) << "\n";
     auto config_dir = fs::path(ctx.data_dir) / "config";
     if (fs::is_directory(config_dir)) {
         auto perms = fs::status(config_dir).permissions();
         bool world_readable = (perms & fs::perms::others_read) != fs::perms::none;
         if (world_readable) {
-            std::cout << "    " << term::icon_warn() << " config/ is world-readable\n";
+            std::cout << "    " << term::icon_warn() << " " << tr("config/ is world-readable") << "\n";
             ++issues;
         } else {
-            std::cout << "    " << term::icon_ok() << " config/ permissions OK\n";
+            std::cout << "    " << term::icon_ok() << " " << tr("config/ permissions OK") << "\n";
         }
     }
 
     // 3. PII filter status
-    std::cout << "  " << term::bold("PII protection:") << "\n";
+    std::cout << "  " << term::bold(tr("PII protection:")) << "\n";
     std::cout << "    " << (PiiFilter::enabled() ? term::icon_ok() : term::icon_warn())
-              << " Log sanitization: " << (PiiFilter::enabled() ? "enabled" : "disabled") << "\n";
+              << " " << tr("Log sanitization:") << " " << (PiiFilter::enabled() ? tr("enabled") : tr("disabled")) << "\n";
 
-    std::cout << "\n" << (issues == 0 ? term::green("Audit passed") :
-                          term::yellow(std::to_string(issues) + " finding(s)")) << "\n";
+    std::cout << "\n" << (issues == 0 ? term::green(tr("Audit passed")) :
+                          term::yellow(std::to_string(issues) + " " + tr("finding(s)"))) << "\n";
     return 0;
 }
 
@@ -472,13 +492,13 @@ int cmd_audit_run(Context& ctx, const std::vector<std::string>& args) {
         std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
 
-    std::cout << term::bold("Audit Run: ") << run_id << "\n\n";
+    std::cout << term::bold(tr("Audit Run:")) << " " << run_id << "\n\n";
 
     auto evidence_dir = fs::path(ctx.euxis_home) / "euxis-data" / "audit" / run_id;
     fs::create_directories(evidence_dir);
 
     // Collect evidence
-    std::cout << "  Collecting evidence...\n";
+    std::cout << "  " << tr("Collecting evidence...") << "\n";
 
     // Save system info
     {
@@ -510,11 +530,11 @@ int cmd_audit_run(Context& ctx, const std::vector<std::string>& args) {
         f << j.dump(2);
     }
 
-    std::cout << "  " << term::icon_ok() << " Evidence saved to: " << evidence_dir.string() << "\n";
+    std::cout << "  " << term::icon_ok() << " " << tr("Evidence saved to:") << " " << evidence_dir.string() << "\n";
 
     if (!args.empty() && args[0] == "--full") {
         // Run full audit
-        std::cout << "\n  Running full audit checks...\n";
+        std::cout << "\n  " << tr("Running full audit checks...") << "\n";
         cmd_audit(ctx, {});
     }
 
@@ -525,7 +545,7 @@ int cmd_audit_run(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_certify(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis certify <agent-id>\n";
+        std::cerr << tr("Usage: euxis certify <agent-id>") << "\n";
         return 2;
     }
 
@@ -534,30 +554,30 @@ int cmd_certify(Context& ctx, const std::vector<std::string>& args) {
     auto agent = registry.get_agent(agent_id);
 
     if (!agent) {
-        std::cerr << "Agent not found: " << agent_id << "\n";
+        std::cerr << tr("Agent not found:") << " " << agent_id << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Certify: ") << agent_id << "\n\n";
+    std::cout << term::bold(tr("Certify:")) << " " << agent_id << "\n\n";
     int score = 0;
     int max_score = 5;
 
     // 1. Has version
     bool has_version = !agent->version.empty();
     std::cout << "  " << (has_version ? term::icon_ok() : term::icon_fail())
-              << " Version defined\n";
+              << " " << tr("Version defined") << "\n";
     if (has_version) ++score;
 
     // 2. Has tags
     bool has_tags = !agent->tags.empty();
     std::cout << "  " << (has_tags ? term::icon_ok() : term::icon_fail())
-              << " Tags defined\n";
+              << " " << tr("Tags defined") << "\n";
     if (has_tags) ++score;
 
     // 3. Has role
     bool has_role = !agent->role.empty();
     std::cout << "  " << (has_role ? term::icon_ok() : term::icon_fail())
-              << " Role defined\n";
+              << " " << tr("Role defined") << "\n";
     if (has_role) ++score;
 
     // 4. Prompt file exists
@@ -566,20 +586,20 @@ int cmd_certify(Context& ctx, const std::vector<std::string>& args) {
         has_prompt = fs::exists(fs::path(ctx.euxis_home) / agent->prompt_path);
     }
     std::cout << "  " << (has_prompt ? term::icon_ok() : term::icon_fail())
-              << " Prompt file exists\n";
+              << " " << tr("Prompt file exists") << "\n";
     if (has_prompt) ++score;
 
     // 5. Has tier
     bool has_tier = !agent->tier.empty();
     std::cout << "  " << (has_tier ? term::icon_ok() : term::icon_fail())
-              << " Tier assigned\n";
+              << " " << tr("Tier assigned") << "\n";
     if (has_tier) ++score;
 
-    std::cout << "\n  Score: " << score << "/" << max_score << "\n";
+    std::cout << "\n  " << tr("Score:") << " " << score << "/" << max_score << "\n";
     if (score == max_score) {
-        std::cout << "  " << term::green("CERTIFIED") << "\n";
+        std::cout << "  " << term::green(tr("CERTIFIED")) << "\n";
     } else {
-        std::cout << "  " << term::yellow("NOT CERTIFIED — fix issues above") << "\n";
+        std::cout << "  " << term::yellow(tr("NOT CERTIFIED — fix issues above")) << "\n";
     }
 
     return score == max_score ? 0 : 1;
@@ -591,9 +611,9 @@ int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args) {
     auto audit_dir = fs::path(ctx.euxis_home) / "euxis-data" / "audit";
 
     if (args.empty() || args[0] == "list") {
-        std::cout << term::bold("Audit Evidence") << "\n\n";
+        std::cout << term::bold(tr("Audit Evidence")) << "\n\n";
         if (!fs::is_directory(audit_dir)) {
-            std::cout << "  No audit evidence found\n";
+            std::cout << "  " << tr("No audit evidence found") << "\n";
             return 0;
         }
         for (const auto& entry : fs::directory_iterator(audit_dir)) {
@@ -604,7 +624,7 @@ int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args) {
                     (void)f;
                 }
                 std::cout << "  " << entry.path().filename().string()
-                          << " (" << file_count << " files)\n";
+                          << " (" << file_count << " " << tr("files") << ")\n";
             }
         }
         return 0;
@@ -613,24 +633,24 @@ int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args) {
     if (args[0] == "verify" && args.size() >= 2) {
         auto run_dir = audit_dir / args[1];
         if (!fs::is_directory(run_dir)) {
-            std::cerr << "Audit run not found: " << args[1] << "\n";
+            std::cerr << tr("Audit run not found:") << " " << args[1] << "\n";
             return 1;
         }
 
-        std::cout << term::bold("Verifying: ") << args[1] << "\n";
+        std::cout << term::bold(tr("Verifying:")) << " " << args[1] << "\n";
         int files = 0;
         for (const auto& entry : fs::directory_iterator(run_dir)) {
             if (entry.is_regular_file()) {
                 ++files;
                 std::cout << "  " << term::icon_ok() << " " << entry.path().filename().string()
-                          << " (" << entry.file_size() << " bytes)\n";
+                          << " (" << entry.file_size() << " " << tr("bytes") << ")\n";
             }
         }
-        std::cout << "\n" << files << " evidence file(s) verified\n";
+        std::cout << "\n" << files << " " << tr("evidence file(s) verified") << "\n";
         return 0;
     }
 
-    std::cerr << "Usage: euxis evidence-verify <list|verify> [run-id]\n";
+    std::cerr << tr("Usage: euxis evidence-verify <list|verify> [run-id]") << "\n";
     return 2;
 }
 
@@ -638,7 +658,7 @@ int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis gym <agent-id> [--drills N]\n";
+        std::cerr << tr("Usage: euxis gym <agent-id> [--drills N]") << "\n";
         return 2;
     }
 
@@ -653,14 +673,14 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
     RegistryClient registry(ctx.data_dir);
     auto agent = registry.get_agent(agent_id);
     if (!agent) {
-        std::cerr << "Agent not found: " << agent_id << "\n";
+        std::cerr << tr("Agent not found:") << " " << agent_id << "\n";
         return 1;
     }
 
-    std::cout << term::bold("Agent Gym: ") << agent_id << "\n"
-              << "  Tier:   " << agent->tier << "\n"
-              << "  Role:   " << agent->role << "\n"
-              << "  Drills: " << drills << "\n\n";
+    std::cout << term::bold(tr("Agent Gym:")) << " " << agent_id << "\n"
+              << "  " << tr("Tier:") << "   " << agent->tier << "\n"
+              << "  " << tr("Role:") << "   " << agent->role << "\n"
+              << "  " << tr("Drills:") << " " << drills << "\n\n";
 
     // Load agent system prompt for context
     std::string agent_system_prompt;
@@ -718,7 +738,7 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
     for (int i = 0; i < actual_drills; ++i) {
         const auto& drill = drill_bank[static_cast<size_t>(i)];
 
-        std::cout << "  Drill " << (i + 1) << "/" << actual_drills
+        std::cout << "  " << tr("Drill") << " " << (i + 1) << "/" << actual_drills
                   << ": " << term::cyan(drill.name) << "\n";
 
         // Build drill prompt using the agent's own system prompt for role context
@@ -731,12 +751,12 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
         auto combined_prompt = ProviderExecutor::build_prompt(drill_system, drill.prompt);
 
         int frame = 0;
-        term::spinner_frame(frame++, "Running drill " + std::to_string(i + 1) + "...");
+        term::spinner_frame(frame++, tr("Running drill") + " " + std::to_string(i + 1) + "...");
         auto response = executor.execute(model, combined_prompt);
         term::spinner_clear();
 
         if (!response.success) {
-            std::cout << "    " << term::icon_fail() << " Failed: " << response.error << "\n";
+            std::cout << "    " << term::icon_fail() << " " << tr("Failed:") << " " << response.error << "\n";
             continue;
         }
 
@@ -773,26 +793,26 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
                            term::red(score_str);
 
         std::cout << "    " << (drill_score >= 2 ? term::icon_ok() : term::icon_warn())
-                  << " Score: " << score_color
-                  << " | " << response.output.size() << " chars"
+                  << " " << tr("Score:") << " " << score_color
+                  << " | " << response.output.size() << " " << tr("chars")
                   << " | " << response.duration_ms << "ms"
-                  << " | len:" << (length_ok ? "pass" : "FAIL")
-                  << " qual:" << (quality_ok ? "pass" : "FAIL")
-                  << " tone:" << (no_refusal ? "pass" : "FAIL")
+                  << " | len:" << (length_ok ? tr("pass") : tr("FAIL"))
+                  << " qual:" << (quality_ok ? tr("pass") : tr("FAIL"))
+                  << " tone:" << (no_refusal ? tr("pass") : tr("FAIL"))
                   << "\n";
     }
 
     // Summary
-    std::cout << "\n" << term::bold("Results:") << "\n"
-              << "  Total Score: " << total_score << "/" << max_score << "\n";
+    std::cout << "\n" << term::bold(tr("Results:")) << "\n"
+              << "  " << tr("Total Score:") << " " << total_score << "/" << max_score << "\n";
 
     double pct = max_score > 0 ? (100.0 * total_score / max_score) : 0.0;
     if (pct >= 80.0) {
-        std::cout << "  Grade: " << term::green("EXCELLENT") << "\n";
+        std::cout << "  " << tr("Grade:") << " " << term::green(tr("EXCELLENT")) << "\n";
     } else if (pct >= 60.0) {
-        std::cout << "  Grade: " << term::yellow("GOOD") << "\n";
+        std::cout << "  " << tr("Grade:") << " " << term::yellow(tr("GOOD")) << "\n";
     } else {
-        std::cout << "  Grade: " << term::red("NEEDS IMPROVEMENT") << "\n";
+        std::cout << "  " << tr("Grade:") << " " << term::red(tr("NEEDS IMPROVEMENT")) << "\n";
     }
 
     // Save results
@@ -807,8 +827,8 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
     results["percentage"] = pct;
     write_output_file(output_path, results.dump(2));
 
-    std::cout << "  Results saved to: " << output_path.string() << "\n";
-    std::cout << term::icon_ok() << " Training complete\n";
+    std::cout << "  " << tr("Results saved to:") << " " << output_path.string() << "\n";
+    std::cout << term::icon_ok() << " " << tr("Training complete") << "\n";
     return 0;
 }
 
@@ -816,7 +836,7 @@ int cmd_gym(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_replay(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << "Usage: euxis replay <session-log>\n";
+        std::cerr << tr("Usage: euxis replay <session-log>") << "\n";
         return 2;
     }
 
@@ -827,13 +847,13 @@ int cmd_replay(Context& ctx, const std::vector<std::string>& args) {
         if (fs::exists(alt)) {
             log_path = alt.string();
         } else {
-            std::cerr << "Log not found: " << log_path << "\n";
+            std::cerr << tr("Log not found:") << " " << log_path << "\n";
             return 1;
         }
     }
 
-    std::cout << term::bold("Session Replay") << "\n"
-              << "  Log: " << log_path << "\n\n";
+    std::cout << term::bold(tr("Session Replay")) << "\n"
+              << "  " << tr("Log:") << " " << log_path << "\n\n";
 
     std::ifstream f(log_path);
     std::string line;
@@ -852,7 +872,7 @@ int cmd_replay(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << "\n" << entries << " entries replayed\n";
+    std::cout << "\n" << entries << " " << tr("entries replayed") << "\n";
     return 0;
 }
 
@@ -869,7 +889,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << term::bold("Context Worker") << "\n\n";
+    std::cout << term::bold(tr("Context Worker")) << "\n\n";
 
     auto runtime_dir = fs::path(ctx.euxis_home) / "euxis-runtime";
     auto context_dir = runtime_dir / "context";
@@ -886,20 +906,20 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
             auto check = Process::run("kill", {"-0", existing_pid});
             if (check.exit_code == 0) {
                 std::cout << "  " << term::icon_warn()
-                          << " Context worker already running (PID " << existing_pid << ")\n";
+                          << " " << tr("Context worker already running (PID") << " " << existing_pid << ")\n";
                 return 1;
             }
             // Stale PID file, remove it
             fs::remove(pid_file);
         }
 
-        std::cout << "  Forking background context worker...\n";
+        std::cout << "  " << tr("Forking background context worker...") << "\n";
         fs::create_directories(runtime_dir);
         fs::create_directories(context_dir);
 
         pid_t pid = ::fork();
         if (pid < 0) {
-            std::cerr << term::icon_fail() << " fork() failed\n";
+            std::cerr << term::icon_fail() << " " << tr("fork() failed") << "\n";
             return 1;
         }
 
@@ -907,8 +927,8 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
             // Parent: write PID file and exit
             std::ofstream pf(pid_file);
             pf << pid;
-            std::cout << "  " << term::icon_ok() << " Context worker started (PID " << pid << ")\n";
-            std::cout << "  PID file: " << pid_file.string() << "\n";
+            std::cout << "  " << term::icon_ok() << " " << tr("Context worker started (PID") << " " << pid << ")\n";
+            std::cout << "  " << tr("PID file:") << " " << pid_file.string() << "\n";
             return 0;
         }
 
@@ -965,8 +985,8 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
     }
 
     // One-shot mode: gather context now
-    std::cout << "  Mode:  one-shot\n"
-              << "  Scope: " << context_scope << "\n\n";
+    std::cout << "  " << tr("Mode:") << "  " << tr("one-shot") << "\n"
+              << "  " << tr("Scope:") << " " << context_scope << "\n\n";
 
     fs::create_directories(context_dir);
 
@@ -974,7 +994,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
     auto project_root = fs::path(ctx.euxis_home);
     int summaries_written = 0;
 
-    std::cout << "  Scanning project directories...\n";
+    std::cout << "  " << tr("Scanning project directories...") << "\n";
     for (const auto& subdir : {"euxis-data", "euxis-runtime", "euxis-core", "euxis-cli-cpp"}) {
         auto scan_path = project_root / subdir;
         if (!fs::is_directory(scan_path)) continue;
@@ -987,7 +1007,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
             std::cout << "    " << term::icon_ok() << " " << subdir << "\n";
             ++summaries_written;
         } else {
-            std::cout << "    " << term::icon_skip() << " " << subdir << " (empty)\n";
+            std::cout << "    " << term::icon_skip() << " " << subdir << " (" << tr("empty") << ")\n";
         }
     }
 
@@ -1016,7 +1036,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
 
         auto agent_ctx_file = context_dir / "agents-context.json";
         write_output_file(agent_ctx_file, ctx_json.dump(2));
-        std::cout << "    " << term::icon_ok() << " Agent registry context\n";
+        std::cout << "    " << term::icon_ok() << " " << tr("Agent registry context") << "\n";
         ++summaries_written;
     }
 
@@ -1030,7 +1050,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
 
         auto prov_ctx_file = context_dir / "provider-context.json";
         write_output_file(prov_ctx_file, prov_json.dump(2));
-        std::cout << "    " << term::icon_ok() << " Provider context\n";
+        std::cout << "    " << term::icon_ok() << " " << tr("Provider context") << "\n";
         ++summaries_written;
     }
 
@@ -1045,7 +1065,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
 
         auto session_ctx_file = context_dir / "session-context.json";
         write_output_file(session_ctx_file, session_json.dump(2));
-        std::cout << "    " << term::icon_ok() << " Session context\n";
+        std::cout << "    " << term::icon_ok() << " " << tr("Session context") << "\n";
         ++summaries_written;
     }
 
@@ -1061,12 +1081,12 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    std::cout << "\n  Context files: " << file_count << "\n"
-              << "  Total size:    " << (total_size / 1024) << " KB\n"
-              << "  Written:       " << summaries_written << " summaries\n"
-              << "  Location:      " << context_dir.string() << "\n";
+    std::cout << "\n  " << tr("Context files:") << " " << file_count << "\n"
+              << "  " << tr("Total size:") << "    " << (total_size / 1024) << " KB\n"
+              << "  " << tr("Written:") << "       " << summaries_written << " " << tr("summaries") << "\n"
+              << "  " << tr("Location:") << "      " << context_dir.string() << "\n";
 
-    std::cout << "\n" << term::icon_ok() << " Context gathering complete\n";
+    std::cout << "\n" << term::icon_ok() << " " << tr("Context gathering complete") << "\n";
     return 0;
 }
 

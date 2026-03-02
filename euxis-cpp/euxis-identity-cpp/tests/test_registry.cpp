@@ -187,5 +187,19 @@ TEST_F(RegistryTest, PreservesCredentialsAndAttestations) {
     EXPECT_DOUBLE_EQ(resolved->attestations[0].confidence, 0.9);
 }
 
+TEST_F(RegistryTest, RegisterDuplicateReturnsFalseWithExistingData) {
+    // Exercises the duplicate registration path (line 34: agents_.contains(did))
+    auto id1 = make_identity("did:euxis:dup-check");
+    auto id2 = make_identity("did:euxis:dup-check");
+
+    EXPECT_TRUE(registry_->register_agent(std::move(id1)));
+    // Second registration with same DID must fail
+    EXPECT_FALSE(registry_->register_agent(std::move(id2)));
+    // Original registration should still be accessible
+    auto resolved = registry_->resolve("did:euxis:dup-check");
+    ASSERT_TRUE(resolved.has_value());
+    EXPECT_EQ(resolved->did, "did:euxis:dup-check");
+}
+
 } // namespace
 } // namespace euxis::identity

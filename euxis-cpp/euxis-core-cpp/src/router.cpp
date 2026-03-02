@@ -62,4 +62,48 @@ void FinOpsRouter::track_usage(const std::string& provider_name, int tokens) {
     }
 }
 
+void FinOpsRouter::track_session_usage(const std::string& session_id,
+                                        const std::string& agent_id,
+                                        const std::string& model,
+                                        int input_tokens, int output_tokens) {
+    int total = input_tokens + output_tokens;
+    double cost = 0.0;
+    // Estimate cost based on known providers
+    for (const auto& p : providers_) {
+        if (model.find(p.name) != std::string::npos) {
+            cost = (static_cast<double>(total) / 1000.0) * p.cost_per_1k_tokens;
+            break;
+        }
+    }
+    if (cost == 0.0) {
+        // Default estimate
+        cost = static_cast<double>(total) / 1000.0 * 0.001;
+    }
+
+    session_usage_[session_id].push_back({
+        .agent_id = agent_id,
+        .model = model,
+        .input_tokens = input_tokens,
+        .output_tokens = output_tokens,
+        .cost = cost,
+    });
+    current_spend_ += cost;
+}
+
+auto FinOpsRouter::session_cost(const std::string& session_id) const -> double {
+    auto it = session_usage_.find(session_id);
+    if (it == session_usage_.end()) return 0.0;
+
+    double total = 0.0;
+    for (const auto& r : it->second) {
+        total += r.cost;
+    }
+    return total;
+}
+
+auto FinOpsRouter::check_budget(const std::string& session_id,
+                                 double limit) const -> bool {
+    return session_cost(session_id) <= limit;
+}
+
 } // namespace euxis::core
