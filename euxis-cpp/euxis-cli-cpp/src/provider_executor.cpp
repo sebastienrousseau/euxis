@@ -136,17 +136,12 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                                        const std::string& prompt,
                                        int timeout,
                                        const std::optional<ResolvedAuth>& auth) -> ProviderResponse {
-    // Use provided auth token or fall back to legacy resolution
+    // Use provided auth token
     std::string token;
     bool is_oauth = false;
     if (auth.has_value()) {
         token = auth->token;
         is_oauth = auth->is_oauth;
-    } else {
-        token = resolve_anthropic_token();
-        if (!token.empty()) {
-            is_oauth = token.starts_with("sk-ant-oat");
-        }
     }
 
     if (!token.empty()) {
@@ -213,6 +208,9 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                 // If OAuth is rejected by the public API, we must fall back to the CLI
                 if (is_oauth && err_msg.find("OAuth authentication is currently not supported") != std::string::npos) {
                     spdlog::info("Anthropic API rejected OAuth token, falling back to 'claude' CLI");
+                    if (auth.has_value()) {
+                        auth_store_.report_failure(auth->profile_id, CooldownReason::UnsupportedMethod);
+                    }
                     goto fallback_to_cli;
                 }
 

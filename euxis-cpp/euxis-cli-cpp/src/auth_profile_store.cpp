@@ -432,6 +432,11 @@ auto AuthProfileStore::compute_cooldown_ms(CooldownReason reason, int consecutiv
         return std::min(ms, cap);
     }
 
+    if (reason == CooldownReason::UnsupportedMethod) {
+        // Permanent-ish failure for direct API (e.g. Claude Code token)
+        return 24LL * 3600 * 1000; // 24 hours
+    }
+
     // RateLimit / AuthError: 1m → 5m → 25m → 60m cap
     constexpr int64_t base = 60 * 1000;  // 1 minute
     constexpr int64_t cap = 60LL * 60 * 1000;  // 60 minutes
@@ -474,6 +479,7 @@ void AuthProfileStore::load_from_json(const nlohmann::json& j) {
             auto reason_str = val.value("reason", "rate_limit");
             if (reason_str == "auth") entry.reason = CooldownReason::AuthError;
             else if (reason_str == "billing") entry.reason = CooldownReason::BillingError;
+            else if (reason_str == "unsupported_method") entry.reason = CooldownReason::UnsupportedMethod;
             else entry.reason = CooldownReason::RateLimit;
             cooldowns_[key] = entry;
         }
@@ -517,6 +523,7 @@ auto AuthProfileStore::to_json() const -> nlohmann::json {
         switch (entry.reason) {
             case CooldownReason::AuthError: cj["reason"] = "auth"; break;
             case CooldownReason::BillingError: cj["reason"] = "billing"; break;
+            case CooldownReason::UnsupportedMethod: cj["reason"] = "unsupported_method"; break;
             default: cj["reason"] = "rate_limit"; break;
         }
         j["cooldowns"][key] = cj;

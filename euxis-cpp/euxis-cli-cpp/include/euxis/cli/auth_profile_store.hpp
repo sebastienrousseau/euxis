@@ -12,7 +12,7 @@
 namespace euxis::cli {
 
 enum class ProfileType { ApiKey, OAuth };
-enum class CooldownReason { RateLimit, AuthError, BillingError };
+enum class CooldownReason { RateLimit, AuthError, BillingError, UnsupportedMethod };
 
 struct AuthProfile {
     std::string id;        // "anthropic:user@example.com" or "openai:default"
