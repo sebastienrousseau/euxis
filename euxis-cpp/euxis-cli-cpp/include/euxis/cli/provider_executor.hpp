@@ -6,6 +6,8 @@
 #include <optional>
 #include <string>
 
+#include <functional>
+
 namespace euxis::cli {
 
 /// Result of a provider invocation.
@@ -28,7 +30,8 @@ public:
     [[nodiscard]] auto execute(const ModelSelection& selection,
                                 const std::string& prompt,
                                 int timeout_seconds = 120,
-                                std::optional<ResolvedAuth> auth = std::nullopt) -> ProviderResponse;
+                                std::optional<ResolvedAuth> auth = std::nullopt,
+                                std::function<void(const std::string&)> on_chunk = nullptr) -> ProviderResponse;
 
     /// Load an agent's system prompt from its prompt file (strips YAML frontmatter).
     [[nodiscard]] static auto load_agent_prompt(const std::string& euxis_home,
@@ -52,11 +55,14 @@ private:
     AuthProfileStore auth_store_;
 
     auto execute_claude(const std::string& model, const std::string& prompt,
-                        int timeout, const std::optional<ResolvedAuth>& auth) -> ProviderResponse;
-    auto execute_ollama(const std::string& model, const std::string& prompt, int timeout) -> ProviderResponse;
+                        int timeout, const std::optional<ResolvedAuth>& auth,
+                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    auto execute_ollama(const std::string& model, const std::string& prompt, int timeout,
+                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
     auto execute_api(const std::string& provider, const std::string& model,
                      const std::string& prompt, int timeout,
-                     const std::optional<ResolvedAuth>& auth) -> ProviderResponse;
+                     const std::optional<ResolvedAuth>& auth,
+                     std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
 };
 
 } // namespace euxis::cli

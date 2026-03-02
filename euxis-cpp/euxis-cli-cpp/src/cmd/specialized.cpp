@@ -192,13 +192,9 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     auto color_dim  = [](const std::string& s) { return term::rgb_fg(98, 114, 164, s); };  // Comment/Gray
     auto color_err  = [](const std::string& s) { return term::rgb_fg(255, 85, 85, s); };   // Red
 
-    // Silence background logs for a clean "Crush" look
     auto old_level = spdlog::get_level();
     spdlog::set_level(spdlog::level::warn);
 
-    std::cout << "\n  " << term::bold(term::rgb_fg(255, 121, 198, "EUXIS")) 
-              << " " << color_dim("v0.0.4") << "\n";
-    
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
@@ -207,43 +203,94 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     Session session(ctx.euxis_home);
     std::string memory_ctx = session.get_memory_context(active_agent);
 
-    // Initial setup info
-    auto model_info = router.route("code", "tui conversation");
-    std::cout << "  " << color_dim("Connected to ") << term::bold(model_info.model) << "\n"
-              << "  " << color_dim("Type ") << color_user("?") << color_dim(" for help") << "\n\n";
+    std::string tier = "code";
+    std::string initial_msg;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (args[i] == "--tier" && i + 1 < args.size()) {
+            tier = args[++i];
+        } else if (args[i].front() != '-') {
+            if (!initial_msg.empty()) initial_msg += " ";
+            initial_msg += args[i];
+        }
+    }
 
-    std::string line;
+    auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
 
-    while (true) {
-        // High-contrast, minimalist prompt
-        std::cout << "  " << color_user("› ");
-        std::cout.flush();
+    // Enter raw mode for full interactive loop
+    bool is_interactive = (&input == &std::cin);
+    if (is_interactive) {
+        term::enable_raw_mode();
+        std::cout << "\033[?1049h\033[H"; // Enter alternate screen
+    }
 
-        if (!std::getline(input, line)) {
+    std::string current_input;
+    bool running = true;
+    bool is_thinking = false;
+    std::string thinking_status = "Thinking...";
+    std::string ai_streaming_output;
+    std::string ai_error;
+
+    auto render = [&]() {
+        if (!is_interactive) return;
+        
+        // Clear screen and draw header
+        std::cout << "\033[H\033[2J";
+        std::cout << term::rgb_bg(98, 114, 164, term::rgb_fg(255,255,255, "  EUXIS TUI v0.0.4  │  " + active_agent + "  │  " + model_info.model + "  ")) << "\033[K\n";
+        
+        std::string separator;
+        for (int i = 0; i < 80; ++i) separator += "─";
+        std::cout << color_dim(separator) << "\n";
+
+        // Draw history
+        for (const auto& h : history) {
+            std::cout << color_user("› ") << h.first << "\n";
+            
+            std::istringstream stream{h.second};
+            std::string out_line;
+            while (std::getline(stream, out_line)) {
+                std::cout << "  " << out_line << "\n";
+            }
             std::cout << "\n";
-            break;
         }
 
-        auto trimmed = line;
-        while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t' || trimmed.front() == '\r')) trimmed.erase(trimmed.begin());
-        while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t' || trimmed.back() == '\r' || trimmed.back() == '\n')) trimmed.pop_back();
+        // Draw current state
+        if (is_thinking) {
+            std::cout << color_user("› ") << current_input << "\n";
+            static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
+            static int frame_idx = 0;
+            std::cout << "\n  " << color_ai(frames[(frame_idx++) % frames.size()] + " " + thinking_status) << "\n";
+        } else if (!ai_error.empty()) {
+            std::cout << color_user("› ") << current_input << "\n";
+            std::cout << "\n  " << color_err("Error: ") << ai_error << "\n\n";
+        } else if (!ai_streaming_output.empty()) {
+            std::cout << color_user("› ") << current_input << "\n\n";
+            std::cout << "  " << ai_streaming_output << "█\n";
+        } else {
+            std::cout << color_user("› ") << current_input << "\033[K";
+        }
+        std::cout.flush();
+    };
 
-        if (trimmed.empty()) continue;
+    if (!is_interactive) {
+        // Fallback to simple loop for tests
+        std::cout << "\n  " << term::bold(term::rgb_fg(255, 121, 198, "EUXIS")) << " " << color_dim("v0.0.4") << "\n";
+        std::cout << "  " << color_dim("Connected to ") << term::bold(model_info.model) << "\n\n";
+    }
 
-        // Command handling
+    auto process_command = [&](const std::string& trimmed) {
+        if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") {
+            running = false;
+            return true;
+        }
+        if (trimmed == "clear" || trimmed == "/clear") {
+            memory_ctx.clear();
+            history.clear();
+            return true;
+        }
         if (trimmed == "?" || trimmed == "/help") {
             print_tui_help(color_user);
-            continue;
-        }
-        if (trimmed == "/exit" || trimmed == "/quit" || trimmed == "exit" || trimmed == "quit") {
-            std::cout << "  " << color_dim("Bye!") << "\n\n";
-            break;
-        }
-        if (trimmed == "/clear") {
-            memory_ctx.clear();
-            std::cout << "  " << color_dim("Memory cleared.") << "\n\n";
-            continue;
+            return true;
         }
         if (trimmed == "/history") {
             std::cout << "\n";
@@ -251,87 +298,127 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 std::cout << "  " << color_user("User: ") << h.first << "\n"
                           << "  " << color_ai("AI:   ") << (h.second.size() > 60 ? h.second.substr(0, 57) + "..." : h.second) << "\n\n";
             }
-            continue;
+            return true;
         }
-        if (trimmed.starts_with("/agent ")) {
-            std::string target = trimmed.substr(7);
-            if (registry.get_agent(target)) {
-                active_agent = target;
-                memory_ctx = session.get_memory_context(active_agent);
-                std::cout << "  " << color_dim("Switched to ") << term::bold(active_agent) << "\n\n";
-            } else {
-                std::cout << "  " << color_err("Unknown agent: ") << target << "\n\n";
-            }
-            continue;
-        }
-
-        // Agent switch shortcut (@agent)
         if (trimmed.starts_with("@")) {
             auto space = trimmed.find(' ');
             std::string target = (space == std::string::npos) ? trimmed.substr(1) : trimmed.substr(1, space - 1);
             if (registry.get_agent(target)) {
                 active_agent = target;
                 memory_ctx = session.get_memory_context(active_agent);
-                std::cout << "  " << color_dim("Switched to ") << term::bold(active_agent) << "\n\n";
-                if (space == std::string::npos) continue;
-                trimmed = trimmed.substr(space + 1);
+                if (space == std::string::npos) return true;
+                // If there's a message after, don't return true, let it process the message
             }
         }
+        return false;
+    };
 
-        auto safe_input = PiiFilter::redact(trimmed);
-        std::string system_prompt = "You are Euxis. Be technical and brief.";
-        auto agent_info = registry.get_agent(active_agent);
-        if (agent_info && !agent_info->prompt_path.empty()) {
-            system_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent_info->prompt_path);
-        }
-        
-        std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
-
-        // --- Animated Execution ---
-        std::atomic<bool> done{false};
-        auto start = std::chrono::steady_clock::now();
-        
-        // Spin up the LLM request in a background thread
-        auto future = std::async(std::launch::async, [&]() {
-            auto res = executor.execute(model_info, full_prompt);
-            done = true;
-            return res;
-        });
-
-        // Spinner animation frames
-        static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-        int frame_idx = 0;
-        while (!done) {
-            std::cout << "  " << color_dim(frames[frame_idx % frames.size()] + " Thinking...") << "\r";
-            std::cout.flush();
-            std::this_thread::sleep_for(std::chrono::milliseconds(80));
-            frame_idx++;
-        }
-        
-        auto response = future.get();
-        auto end = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
-        std::cout << "\r\033[K"; // Clear indicator
-
-        if (response.success) {
-            // Stylized response block
-            std::cout << "\n  " << color_ai(active_agent) << " " << color_dim(std::to_string(duration) + "ms") << "\n";
-            
-            std::istringstream stream{response.output};
-            std::string out_line;
-            while (std::getline(stream, out_line)) {
-                std::cout << "  " << out_line << "\n";
+    if (!initial_msg.empty()) {
+        if (!process_command(initial_msg)) {
+            // Process initial message synchronously for simplicity
+            current_input = initial_msg;
+            is_thinking = true;
+            render();
+            auto safe_input = PiiFilter::redact(current_input);
+            std::string system_prompt = "You are Euxis. Be technical and brief.";
+            std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
+            auto response = executor.execute(model_info, full_prompt);
+            is_thinking = false;
+            if (response.success) {
+                history.push_back({current_input, response.output});
+                session.save_memory(active_agent, current_input, response.output);
+                memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
             }
-            std::cout << "\n";
-            
-            session.save_memory(active_agent, trimmed, response.output);
-            memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
-            if (memory_ctx.size() > 12000) memory_ctx = memory_ctx.substr(memory_ctx.size() - 12000);
-            history.push_back({trimmed, response.output});
+            current_input.clear();
+        }
+    }
+
+    while (running) {
+        render();
+
+        if (is_interactive) {
+            int c = term::read_key();
+            if (c > 0) {
+                if (c == 3 || c == 4) { // Ctrl-C or Ctrl-D
+                    running = false;
+                } else if (c == 127 || c == 8 || c == 1000) { // Backspace or Delete
+                    if (!current_input.empty()) current_input.pop_back();
+                } else if (c == '\r' || c == '\n') {
+                    if (current_input.empty()) continue;
+                    
+                    if (process_command(current_input)) {
+                        current_input.clear();
+                        continue;
+                    }
+
+                    // Execute LLM
+                    is_thinking = true;
+                    std::string user_msg = current_input;
+                    ai_error.clear();
+                    ai_streaming_output.clear();
+                    
+                    std::thread([&, user_msg]() {
+                        auto safe_input = PiiFilter::redact(user_msg);
+                        std::string system_prompt = "You are Euxis. Be technical and brief.";
+                        std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
+                        
+                        auto response = executor.execute(model_info, full_prompt);
+                        
+                        is_thinking = false;
+                        if (response.success) {
+                            // Stream visual effect
+                            for (char ch : response.output) {
+                                ai_streaming_output += ch;
+                                render();
+                                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                            }
+                            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                            history.push_back({user_msg, response.output});
+                            session.save_memory(active_agent, user_msg, response.output);
+                            memory_ctx += "\nUser: " + safe_input + "\nEuxis: " + response.output + "\n";
+                            ai_streaming_output.clear();
+                        } else {
+                            ai_error = response.error;
+                        }
+                        current_input.clear();
+                        render();
+                    }).detach();
+
+                    // Wait while thinking to prevent concurrent inputs in this simple model
+                    while (is_thinking || !ai_streaming_output.empty()) {
+                        render();
+                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    }
+                } else if (c >= 32 && c <= 126) {
+                    current_input += static_cast<char>(c);
+                }
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
         } else {
-            std::cout << "\n  " << color_err("Error: ") << response.error << "\n\n";
+            // Non-interactive fallback
+            std::string line;
+            if (!std::getline(input, line)) break;
+            auto trimmed = line;
+            while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t')) trimmed.erase(trimmed.begin());
+            while (!trimmed.empty() && (trimmed.back() == ' ' || trimmed.back() == '\t')) trimmed.pop_back();
+            if (trimmed.empty()) continue;
+            
+            if (process_command(trimmed)) continue;
+            
+            std::cout << color_user("› ") << trimmed << "\n";
+            auto response = executor.execute(model_info, trimmed);
+            if (response.success) {
+                std::cout << "  " << response.output << "\n\n";
+            } else {
+                std::cout << color_err("Error: ") << response.error << "\n\n";
+            }
         }
+    }
+
+    if (is_interactive) {
+        std::cout << "\033[?1049l"; // Exit alternate screen
+        term::disable_raw_mode();
     }
 
     spdlog::set_level(old_level);

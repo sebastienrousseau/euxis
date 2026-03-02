@@ -5774,6 +5774,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/bits/cxxabi_forced.h \
   /usr/include/c++/15.2.1/bits/cxxabi_init_exception.h \
   /usr/include/c++/15.2.1/bits/enable_special_members.h \
+  /usr/include/c++/15.2.1/bits/erase_if.h \
   /usr/include/c++/15.2.1/bits/exception.h \
   /usr/include/c++/15.2.1/bits/exception_defines.h \
   /usr/include/c++/15.2.1/bits/exception_ptr.h \
@@ -5785,6 +5786,8 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/bits/functexcept.h \
   /usr/include/c++/15.2.1/bits/functional_hash.h \
   /usr/include/c++/15.2.1/bits/hash_bytes.h \
+  /usr/include/c++/15.2.1/bits/hashtable.h \
+  /usr/include/c++/15.2.1/bits/hashtable_policy.h \
   /usr/include/c++/15.2.1/bits/invoke.h \
   /usr/include/c++/15.2.1/bits/ios_base.h \
   /usr/include/c++/15.2.1/bits/istream.tcc \
@@ -5800,10 +5803,13 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/bits/max_size_type.h \
   /usr/include/c++/15.2.1/bits/memory_resource.h \
   /usr/include/c++/15.2.1/bits/memoryfwd.h \
+  /usr/include/c++/15.2.1/bits/mofunc_impl.h \
   /usr/include/c++/15.2.1/bits/monostate.h \
   /usr/include/c++/15.2.1/bits/move.h \
+  /usr/include/c++/15.2.1/bits/move_only_function.h \
   /usr/include/c++/15.2.1/bits/nested_exception.h \
   /usr/include/c++/15.2.1/bits/new_allocator.h \
+  /usr/include/c++/15.2.1/bits/node_handle.h \
   /usr/include/c++/15.2.1/bits/ostream.h \
   /usr/include/c++/15.2.1/bits/ostream.tcc \
   /usr/include/c++/15.2.1/bits/ostream_insert.h \
@@ -5823,6 +5829,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/bits/shared_ptr_base.h \
   /usr/include/c++/15.2.1/bits/sstream.tcc \
   /usr/include/c++/15.2.1/bits/std_abs.h \
+  /usr/include/c++/15.2.1/bits/std_function.h \
   /usr/include/c++/15.2.1/bits/stl_algo.h \
   /usr/include/c++/15.2.1/bits/stl_algobase.h \
   /usr/include/c++/15.2.1/bits/stl_bvector.h \
@@ -5844,6 +5851,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/bits/unicode.h \
   /usr/include/c++/15.2.1/bits/uniform_int_dist.h \
   /usr/include/c++/15.2.1/bits/unique_ptr.h \
+  /usr/include/c++/15.2.1/bits/unordered_map.h \
   /usr/include/c++/15.2.1/bits/uses_allocator.h \
   /usr/include/c++/15.2.1/bits/uses_allocator_args.h \
   /usr/include/c++/15.2.1/bits/utility.h \
@@ -5877,6 +5885,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/ext/type_traits.h \
   /usr/include/c++/15.2.1/filesystem \
   /usr/include/c++/15.2.1/format \
+  /usr/include/c++/15.2.1/functional \
   /usr/include/c++/15.2.1/initializer_list \
   /usr/include/c++/15.2.1/iomanip \
   /usr/include/c++/15.2.1/ios \
@@ -5900,6 +5909,7 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/process.cpp.o: /home/seb/.euxis/e
   /usr/include/c++/15.2.1/tuple \
   /usr/include/c++/15.2.1/type_traits \
   /usr/include/c++/15.2.1/typeinfo \
+  /usr/include/c++/15.2.1/unordered_map \
   /usr/include/c++/15.2.1/vector \
   /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/atomic_word.h \
   /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++allocator.h \
@@ -7826,6 +7836,17 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: /home/seb/.euxis/
   /usr/include/bits/stdlib-float.h \
   /usr/include/bits/struct_mutex.h \
   /usr/include/bits/struct_rwlock.h \
+  /usr/include/bits/termios-baud.h \
+  /usr/include/bits/termios-c_cc.h \
+  /usr/include/bits/termios-c_cflag.h \
+  /usr/include/bits/termios-c_iflag.h \
+  /usr/include/bits/termios-c_lflag.h \
+  /usr/include/bits/termios-c_oflag.h \
+  /usr/include/bits/termios-cbaud.h \
+  /usr/include/bits/termios-misc.h \
+  /usr/include/bits/termios-struct.h \
+  /usr/include/bits/termios-tcflow.h \
+  /usr/include/bits/termios.h \
   /usr/include/bits/thread-shared-types.h \
   /usr/include/bits/time.h \
   /usr/include/bits/time64.h \
@@ -8024,7 +8045,9 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: /home/seb/.euxis/
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/single_threaded.h \
+  /usr/include/sys/ttydefaults.h \
   /usr/include/sys/types.h \
+  /usr/include/termios.h \
   /usr/include/time.h \
   /usr/include/unistd.h \
   /usr/include/wchar.h \
@@ -8033,6 +8056,28 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: /home/seb/.euxis/
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stddef.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/15.2.1/include/stdint.h
 
+
+/usr/include/termios.h:
+
+/usr/include/bits/termios.h:
+
+/usr/include/bits/termios-tcflow.h:
+
+/usr/include/bits/termios-struct.h:
+
+/usr/include/bits/termios-misc.h:
+
+/usr/include/bits/termios-c_oflag.h:
+
+/usr/include/bits/termios-c_iflag.h:
+
+/usr/include/bits/termios-c_cflag.h:
+
+/usr/include/bits/termios-c_cc.h:
+
+/usr/include/bits/termios-baud.h:
+
+/usr/include/bits/termios-cbaud.h:
 
 /usr/include/sys/ttydefaults.h:
 
@@ -9263,6 +9308,8 @@ _deps/httplib-src/httplib.h:
 /usr/include/nlohmann/detail/meta/std_fs.hpp:
 
 /usr/include/arpa/inet.h:
+
+/usr/include/bits/termios-c_lflag.h:
 
 /usr/include/arpa/nameser_compat.h:
 

@@ -24,7 +24,8 @@ ProviderExecutor::ProviderExecutor(const std::string& data_dir)
 auto ProviderExecutor::execute(const ModelSelection& selection,
                                 const std::string& prompt,
                                 int timeout_seconds,
-                                std::optional<ResolvedAuth> auth) -> ProviderResponse {
+                                std::optional<ResolvedAuth> auth,
+                                std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     auto start = std::chrono::steady_clock::now();
 
     // Standardise provider for auth resolution
@@ -38,18 +39,23 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
 
     ProviderResponse resp;
     if (selection.provider == "claude" || selection.provider == "anthropic") {
-        resp = execute_claude(selection.model, prompt, timeout_seconds, auth);
+        resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else if (selection.provider == "ollama") {
-        resp = execute_ollama(selection.model, prompt, timeout_seconds);
+        resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
     } else if (selection.provider == "openai" || selection.provider == "gemini") {
-        resp = execute_api(selection.provider, selection.model, prompt, timeout_seconds, auth);
+        resp = execute_api(selection.provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
         // Try as a generic CLI command
         if (Process::available(selection.provider)) {
             if (std::getenv("EUXIS_TEST_SKIP_BROWSER")) {
                 resp = {false, "", "CLI execution skipped due to EUXIS_TEST_SKIP_BROWSER", 1, 0.0, {}};
             } else {
-                auto result = Process::run_with_input(selection.provider, {prompt}, "", timeout_seconds);
+                ProcessResult result;
+                if (on_chunk) {
+                    result = Process::run_streaming(selection.provider, {prompt}, "", on_chunk, timeout_seconds);
+                } else {
+                    result = Process::run_with_input(selection.provider, {prompt}, "", timeout_seconds);
+                }
                 resp.output = result.stdout_output;
                 resp.error = result.stderr_output;
                 resp.exit_code = result.exit_code;
@@ -135,7 +141,8 @@ auto ProviderExecutor::classify_error(int http_status,
 auto ProviderExecutor::execute_claude(const std::string& model,
                                        const std::string& prompt,
                                        int timeout,
-                                       const std::optional<ResolvedAuth>& auth) -> ProviderResponse {
+                                       const std::optional<ResolvedAuth>& auth,
+                                       std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     // Use provided auth token
     std::string token;
     bool is_oauth = false;
@@ -268,7 +275,12 @@ fallback_to_cli:
     // If the user explicitly asks for a non-sonnet model, we might want to pass it, 
     // but the CLI is quite strict about model names.
 
-    auto result = Process::run("env", args, timeout);
+    ProcessResult result;
+    if (on_chunk) {
+        result = Process::run_streaming("env", args, "", on_chunk, timeout);
+    } else {
+        result = Process::run_with_input("env", args, "", timeout);
+    }
     
     // Some versions of Claude CLI might return non-zero even on success if they can't 
     // access some terminal features, but still print the response to stdout.
@@ -291,13 +303,19 @@ fallback_to_cli:
 
 auto ProviderExecutor::execute_ollama(const std::string& model,
                                        const std::string& prompt,
-                                       int timeout) -> ProviderResponse {
+                                       int timeout,
+                                       std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     if (!Process::available("ollama")) {
         return {false, "", "ollama not found on PATH", 127, 0.0, {}};
     }
 
     std::string m = model.empty() ? "qwen3:32b" : model;
-    auto result = Process::run_with_input("ollama", {"run", m}, prompt, timeout);
+    ProcessResult result;
+    if (on_chunk) {
+        result = Process::run_streaming("ollama", {"run", m}, prompt, on_chunk, timeout);
+    } else {
+        result = Process::run_with_input("ollama", {"run", m}, prompt, timeout);
+    }
     return {
         result.exit_code == 0,
         result.stdout_output,
@@ -309,11 +327,11 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
 }
 
 auto ProviderExecutor::execute_api(const std::string& provider,
-                                    const std::string& model,
-                                    const std::string& prompt,
-                                    int timeout,
-                                    const std::optional<ResolvedAuth>& auth) -> ProviderResponse {
-    if (!Process::available("curl")) {
+                                   const std::string& model,
+                                   const std::string& prompt,
+                                   int timeout,
+                                   const std::optional<ResolvedAuth>& auth,
+                                   std::function<void(const std::string&)> on_chunk) -> ProviderResponse {    if (!Process::available("curl")) {
         return {false, "", "curl not found (required for API calls)", 127, 0.0, {}};
     }
 
@@ -375,7 +393,12 @@ auto ProviderExecutor::execute_api(const std::string& provider,
     curl_args.push_back("-d");
     curl_args.push_back(body_str);
 
-    auto result = Process::run("curl", curl_args, timeout);
+    ProcessResult result;
+    if (on_chunk) {
+        result = Process::run_streaming("curl", curl_args, "", on_chunk, timeout);
+    } else {
+        result = Process::run("curl", curl_args, timeout);
+    }
     if (result.exit_code != 0) {
         return {false, "", "curl failed: " + result.stderr_output, result.exit_code, 0.0, {}};
     }

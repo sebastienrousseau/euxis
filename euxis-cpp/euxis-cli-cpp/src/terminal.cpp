@@ -159,4 +159,54 @@ auto rgb_bg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::stri
     return std::format("\033[48;2;{};{};{}m{}\033[0m", r, g, b, text);
 }
 
+// --- Raw Mode & Input ---
+#include <termios.h>
+
+static struct termios orig_termios;
+
+void enable_raw_mode() {
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    struct termios raw = orig_termios;
+    // Disable echo, canonical mode (line-by-line), and signals (Ctrl-C)
+    raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+    raw.c_iflag &= ~(IXON | ICRNL);
+    // Allow non-blocking reads or block until 1 char
+    raw.c_cc[VMIN] = 0; 
+    raw.c_cc[VTIME] = 1; // 100ms timeout for poll-like behavior
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+}
+
+void disable_raw_mode() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+}
+
+int read_key() {
+    char c = '\0';
+    if (read(STDIN_FILENO, &c, 1) != 1) return 0; // Timeout or nothing
+    
+    if (c == '\x1b') {
+        char seq[3];
+        if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
+        if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
+        
+        if (seq[0] == '[') {
+            if (seq[1] >= '0' && seq[1] <= '9') {
+                if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
+                if (seq[2] == '~') {
+                    if (seq[1] == '3') return 1000; // Delete
+                }
+            } else {
+                switch (seq[1]) {
+                    case 'A': return 1001; // Up
+                    case 'B': return 1002; // Down
+                    case 'C': return 1003; // Right
+                    case 'D': return 1004; // Left
+                }
+            }
+        }
+        return '\x1b';
+    }
+    return c;
+}
+
 } // namespace euxis::cli::terminal

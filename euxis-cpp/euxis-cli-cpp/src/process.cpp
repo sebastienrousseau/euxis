@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <functional>
 
 namespace euxis::cli {
 namespace {
@@ -191,6 +192,124 @@ auto Process::run_with_input(const std::string& program,
     ProcessResult result;
     result.stdout_output = read_fd(stdout_pipe[0], deadline);
     result.stderr_output = read_fd(stderr_pipe[0], deadline);
+    ::close(stdout_pipe[0]);
+    ::close(stderr_pipe[0]);
+
+    int status = reap_child(pid, deadline);
+    if (status == -1) {
+        result.exit_code = -1;
+        result.stderr_output += "\n[timeout after " + std::to_string(timeout_seconds) + "s]";
+    } else if (WIFEXITED(status)) {
+        result.exit_code = WEXITSTATUS(status);
+    } else if (WIFSIGNALED(status)) {
+        result.exit_code = 128 + WTERMSIG(status);
+    }
+
+    return result;
+}
+
+auto Process::run_streaming(const std::string& program,
+                            const std::vector<std::string>& args,
+                            const std::string& stdin_data,
+                            std::function<void(const std::string&)> on_chunk,
+                            int timeout_seconds) -> ProcessResult {
+    int stdin_pipe[2];
+    int stdout_pipe[2];
+    int stderr_pipe[2];
+    if (::pipe(stdin_pipe) != 0 || ::pipe(stdout_pipe) != 0 || ::pipe(stderr_pipe) != 0) {
+        return {-1, "", "pipe() failed"};
+    }
+
+    pid_t pid = ::fork();
+    if (pid < 0) {
+        ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
+        ::close(stdout_pipe[0]); ::close(stdout_pipe[1]);
+        ::close(stderr_pipe[0]); ::close(stderr_pipe[1]);
+        return {-1, "", "fork() failed"};
+    }
+
+    if (pid == 0) {
+        // Child
+        ::close(stdin_pipe[1]);
+        ::close(stdout_pipe[0]);
+        ::close(stderr_pipe[0]);
+        ::dup2(stdin_pipe[0], STDIN_FILENO);
+        ::dup2(stdout_pipe[1], STDOUT_FILENO);
+        ::dup2(stderr_pipe[1], STDERR_FILENO);
+        ::close(stdin_pipe[0]);
+        ::close(stdout_pipe[1]);
+        ::close(stderr_pipe[1]);
+
+        std::vector<const char*> argv;
+        argv.push_back(program.c_str());
+        for (const auto& a : args) argv.push_back(a.c_str());
+        argv.push_back(nullptr);
+
+        ::execvp(program.c_str(), const_cast<char* const*>(argv.data()));
+        ::_exit(127);
+    }
+
+    // Parent
+    ::close(stdin_pipe[0]);
+    ::close(stdout_pipe[1]);
+    ::close(stderr_pipe[1]);
+
+    if (!stdin_data.empty()) {
+        const char* data = stdin_data.data();
+        size_t remaining = stdin_data.size();
+        while (remaining > 0) {
+            auto written = ::write(stdin_pipe[1], data, remaining);
+            if (written <= 0) break;
+            data += written;
+            remaining -= static_cast<size_t>(written);
+        }
+    }
+    ::close(stdin_pipe[1]);
+
+    auto deadline = Clock::now() + std::chrono::seconds(timeout_seconds);
+    ProcessResult result;
+    
+    // Concurrent read using poll
+    bool stdout_open = true;
+    bool stderr_open = true;
+    while (stdout_open || stderr_open) {
+        int timeout_ms = ms_remaining(deadline);
+        if (timeout_ms <= 0) break;
+
+        std::array<pollfd, 2> pfds{};
+        int nfds = 0;
+        if (stdout_open) pfds[nfds++] = {stdout_pipe[0], POLLIN, 0};
+        if (stderr_open) pfds[nfds++] = {stderr_pipe[0], POLLIN, 0};
+
+        if (nfds == 0) break;
+
+        int pr = ::poll(pfds.data(), nfds, timeout_ms);
+        if (pr < 0) {
+            if (errno == EINTR) continue;
+            break;
+        }
+        if (pr == 0) break; // Timeout
+
+        for (int i = 0; i < nfds; ++i) {
+            if (pfds[i].revents & (POLLIN | POLLHUP | POLLERR)) {
+                std::array<char, 4096> buf{};
+                ssize_t n = ::read(pfds[i].fd, buf.data(), buf.size());
+                if (n > 0) {
+                    std::string chunk(buf.data(), static_cast<size_t>(n));
+                    if (pfds[i].fd == stdout_pipe[0]) {
+                        result.stdout_output += chunk;
+                        if (on_chunk) on_chunk(chunk);
+                    } else {
+                        result.stderr_output += chunk;
+                    }
+                } else {
+                    if (pfds[i].fd == stdout_pipe[0]) stdout_open = false;
+                    else stderr_open = false;
+                }
+            }
+        }
+    }
+
     ::close(stdout_pipe[0]);
     ::close(stderr_pipe[0]);
 

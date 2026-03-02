@@ -71,4 +71,9 @@ auto rgb_fg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::stri
 /// Apply 24-bit background color (falls back to plain text if truecolor unsupported).
 auto rgb_bg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::string;
 
+// --- Raw Mode & Input ---
+void enable_raw_mode();
+void disable_raw_mode();
+int read_key();
+
 } // namespace euxis::cli::terminal

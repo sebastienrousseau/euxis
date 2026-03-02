@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -26,6 +27,13 @@ public:
                                const std::vector<std::string>& args,
                                const std::string& stdin_data,
                                int timeout_seconds = 120) -> ProcessResult;
+
+    /// Run a command and stream stdout back via a callback in real-time.
+    static auto run_streaming(const std::string& program,
+                              const std::vector<std::string>& args,
+                              const std::string& stdin_data,
+                              std::function<void(const std::string&)> on_chunk,
+                              int timeout_seconds = 120) -> ProcessResult;
 
     /// Run a shell command string (via /bin/sh -c).
     static auto shell(const std::string& command,
