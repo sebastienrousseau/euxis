@@ -254,16 +254,13 @@ void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr,
     int cx = x;
     int cy = y;
     
-    // Proper UTF-8 decoding loop
     for (size_t i = 0; i < text.size(); ) {
         unsigned char c1 = static_cast<unsigned char>(text[i]);
         char32_t codepoint = ' ';
         size_t len = 1;
 
-        if (c1 < 0x80) {
-            codepoint = c1;
-            len = 1;
-        } else if ((c1 & 0xE0) == 0xC0) {
+        if (c1 < 0x80) { codepoint = c1; len = 1; }
+        else if ((c1 & 0xE0) == 0xC0) {
             if (i + 1 < text.size()) {
                 codepoint = ((c1 & 0x1F) << 6) | (static_cast<unsigned char>(text[i + 1]) & 0x3F);
                 len = 2;
@@ -281,17 +278,25 @@ void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr,
         }
 
         if (codepoint == '\n') {
-            cx = x;
-            cy++;
+            cx = x; cy++;
         } else {
-            if (cx >= width_) {
-                cx = 0;
-                cy++;
-            }
+            if (cx >= width_) { cx = 0; cy++; }
             if (cy >= height_) break;
             set_cell(cx++, cy, codepoint, fr, fg, fb, br, bg, bb, bold);
         }
         i += len;
+    }
+}
+
+void TerminalScreen::write_gradient(int x, int y, std::string_view text, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2) {
+    int len = static_cast<int>(text.size());
+    if (len == 0) return;
+    for (int i = 0; i < len; ++i) {
+        float t = static_cast<float>(i) / static_cast<float>(len);
+        uint8_t r = static_cast<uint8_t>(r1 + t * (r2 - r1));
+        uint8_t g = static_cast<uint8_t>(g1 + t * (g2 - g1));
+        uint8_t b = static_cast<uint8_t>(b1 + t * (b2 - b1));
+        set_cell(x + i, y, text[i], r, g, b, 0, 0, 0, true);
     }
 }
 

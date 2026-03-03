@@ -20,6 +20,7 @@
 #include <future>
 #include <thread>
 #include <atomic>
+#include <algorithm>
 
 namespace euxis::cli::cmd {
 
@@ -83,6 +84,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
+    std::vector<std::string> cmd_suggestions = {"/help", "/clear", "/exit", "/agent", "/history", "tell me a joke", "refactor this", "check security"};
 
     bool is_interactive = (&input == &std::cin);
     if (is_interactive) {
@@ -91,6 +93,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     }
 
     std::string current_input;
+    std::string ghost_text;
     bool running = true;
     bool is_thinking = false;
     std::string ai_streaming_output;
@@ -99,6 +102,14 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     term::TerminalScreen screen;
     
+    auto get_prediction = [&](const std::string& input_str) -> std::string {
+        if (input_str.empty()) return "";
+        for (const auto& s : cmd_suggestions) {
+            if (s.starts_with(input_str)) return s.substr(input_str.size());
+        }
+        return "";
+    };
+
     auto render = [&]() {
         if (!is_interactive) return;
         int w, h;
@@ -106,40 +117,40 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. HEADER
-        std::string header_text = "  EUXIS ADE v0.0.4  │  " + active_agent + "  │  " + model_info.model + "  ";
-        screen.write_text(0, 0, header_text, 255, 255, 255, 73, 77, 100, true);
-        for (int x = static_cast<int>(header_text.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 73, 77, 100);
+        // 1. ELITE GRADIENT HEADER
+        std::string h1 = " EUXIS ADE v0.0.5 ";
+        std::string h2 = " │ " + active_agent + " │ " + model_info.model + " ";
+        screen.write_gradient(0, 0, h1 + h2, 139, 233, 253, 189, 147, 249); // Cyan to Purple
+        for (int x = static_cast<int>(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 73, 77, 100);
 
-        // 2. SIDEBAR
+        // 2. CONTEXT SIDEBAR
         int sidebar_w = 24;
         int chat_w = w - sidebar_w - 4;
         if (w > 60) {
-            for (int y = 1; y < h - 1; ++y) screen.set_cell(w - sidebar_w, y, U'│', 91, 96, 120);
+            for (int y = 1; y < h - 1; ++y) screen.set_cell(w - sidebar_w, y, U'│', 68, 71, 90);
             int sx = w - sidebar_w + 2;
-            screen.write_text(sx, 2, "CONTEXT", 245, 189, 230, 0, 0, 0, true);
-            screen.write_text(sx, 4, "Project:", 110, 115, 141);
+            screen.write_text(sx, 2, "DASHBOARD", 245, 189, 230, 0, 0, 0, true);
+            screen.write_text(sx, 4, "Project:", 98, 114, 164);
             screen.write_text(sx, 5, " euxis-cpp", 139, 233, 253);
-            screen.write_text(sx, 7, "Branch:", 110, 115, 141);
+            screen.write_text(sx, 7, "Branch:", 98, 114, 164);
             screen.write_text(sx, 8, " main", 166, 218, 149);
-            screen.write_text(sx, 10, "Memory:", 110, 115, 141);
-            screen.write_text(sx, 11, " active", 166, 218, 149);
-            screen.write_text(sx, 13, "Provider:", 110, 115, 141);
-            screen.write_text(sx, 14, " " + model_info.provider, 189, 147, 249);
+            screen.write_text(sx, 10, "Status:", 98, 114, 164);
+            if (is_thinking) screen.write_text(sx, 11, " thinking", 241, 250, 140);
+            else screen.write_text(sx, 11, " idle", 166, 218, 149);
         }
 
-        // 3. CHAT
+        // 3. CHAT AREA
         int current_y = 2;
         int max_y = h - 4;
         for (const auto& h_entry : history) {
             if (current_y >= max_y) break;
-            screen.write_text(2, current_y++, "› " + h_entry.first, 139, 233, 253, 0, 0, 0, true);
+            screen.write_text(2, current_y++, "➜ " + h_entry.first, 139, 233, 253, 0, 0, 0, true);
             std::istringstream stream{h_entry.second};
             std::string out_line;
             while (std::getline(stream, out_line)) {
                 if (current_y < max_y) {
-                    screen.set_cell(2, current_y, U'│', 189, 147, 249);
-                    screen.write_text(4, current_y++, out_line.substr(0, chat_w), 200, 200, 200);
+                    screen.set_cell(2, current_y, U'┃', 189, 147, 249);
+                    screen.write_text(4, current_y++, out_line.substr(0, chat_w), 248, 248, 242);
                 }
             }
             current_y++;
@@ -147,28 +158,34 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
         if (current_y < max_y) {
             if (is_thinking) {
-                screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253, 0, 0, 0, true);
+                screen.write_text(2, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
                 static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
                 static int frame_idx = 0;
-                screen.write_text(4, current_y, frames[(frame_idx++) % frames.size()] + " Agent Thinking...", 189, 147, 249);
+                screen.write_text(4, current_y, frames[(frame_idx++) % frames.size()] + " Agent Analyzing...", 255, 121, 198);
             } else if (!ai_streaming_output.empty()) {
-                screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253, 0, 0, 0, true);
+                screen.write_text(2, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
                 std::istringstream stream{ai_streaming_output};
                 std::string out_line;
                 while (std::getline(stream, out_line)) {
                     if (current_y < max_y) {
-                        screen.set_cell(2, current_y, U'│', 189, 147, 249);
+                        screen.set_cell(2, current_y, U'┃', 189, 147, 249);
                         screen.write_text(4, current_y++, out_line.substr(0, chat_w), 255, 255, 255);
                     }
                 }
-            } else if (!ai_error.empty()) {
-                screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253, 0, 0, 0, true);
-                screen.write_text(4, current_y, "Error: " + ai_error, 237, 135, 150);
             }
         }
 
-        screen.write_text(2, h - 1, "Type /help for commands, /exit to quit", 110, 115, 141);
-        if (!is_thinking && ai_streaming_output.empty()) screen.write_text(2, h - 2, "› " + current_input + "█", 139, 233, 253, 0, 0, 0, true);
+        // 4. FLOATING INPUT + PREDICTION
+        screen.write_text(2, h - 1, "Tab to complete suggestion", 98, 114, 164);
+        if (!is_thinking && ai_streaming_output.empty()) {
+            screen.write_text(2, h - 2, "➜ ", 139, 233, 253, 0, 0, 0, true);
+            screen.write_text(4, h - 2, current_input, 255, 255, 255);
+            ghost_text = get_prediction(current_input);
+            if (!ghost_text.empty()) {
+                screen.write_text(4 + static_cast<int>(current_input.size()), h - 2, ghost_text, 98, 114, 164);
+            }
+            screen.set_cell(4 + static_cast<int>(current_input.size()), h - 2, U' ', 255, 255, 255, 255, 255, 255); // Cursor
+        }
 
         if (!system_overlay.empty()) {
             screen.draw_box(w/2 - 30, h/2 - 5, 60, 10, " COMMAND PALETTE ");
@@ -189,7 +206,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             memory_ctx.clear(); history.clear(); return true;
         }
         if (trimmed == "?" || trimmed == "/help") {
-            system_overlay = "/help    Show this menu\n/clear   Wipe memory\n/history Show turns\n/agent   Swap agent\n/exit    Quit session";
+            system_overlay = "/help    Show commands\n/clear   Wipe history\n/agent   Agent fleet\n/exit    Kill session";
             return true;
         }
         return false;
@@ -202,6 +219,9 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (c > 0) {
                 system_overlay.clear();
                 if (c == 3 || c == 4) running = false;
+                else if (c == 9) { // Tab
+                    if (!ghost_text.empty()) current_input += ghost_text;
+                }
                 else if (c == 127 || c == 8 || c == 1000) { if (!current_input.empty()) current_input.pop_back(); }
                 else if (c == '\r' || c == '\n') {
                     if (current_input.empty()) continue;
@@ -209,9 +229,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     is_thinking = true;
                     std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
                     std::thread([&, user_msg]() {
-                        std::string sys_p = "You are Euxis.";
-                        auto ai = registry.get_agent(active_agent);
-                        if (ai && !ai->prompt_path.empty()) sys_p = ProviderExecutor::load_agent_prompt(ctx.euxis_home, ai->prompt_path);
+                        std::string sys_p = "You are Euxis. Cinematic.";
                         auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
                             ai_streaming_output += chunk;
                         });
@@ -221,7 +239,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                             session.save_memory(active_agent, user_msg, response.output);
                             memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
                             ai_streaming_output.clear();
-                        } else { ai_error = response.error; }
+                        }
                         current_input.clear();
                     }).detach();
                     while (is_thinking || !ai_streaming_output.empty()) { render(); std::this_thread::sleep_for(std::chrono::milliseconds(20)); }
@@ -238,45 +256,15 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     return 0;
 }
 
-int cmd_gui([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    std::cout << "Launching ETX GUI...\n";
-    return 0;
-}
-
-int cmd_polish([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_kaizen([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_audit([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_audit_run([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_certify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_evidence_verify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_gym([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_replay([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
-
-int cmd_context_worker([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    return 0;
-}
+int cmd_gui([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_polish([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_kaizen([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_audit([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_audit_run([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_certify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_evidence_verify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_gym([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_replay([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
+int cmd_context_worker([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
 
 } // namespace euxis::cli::cmd

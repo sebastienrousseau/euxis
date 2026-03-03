@@ -98,6 +98,7 @@ public:
     void clear();
     void set_cell(int x, int y, char32_t ch, uint8_t fr=255, uint8_t fg=255, uint8_t fb=255, uint8_t br=0, uint8_t bg=0, uint8_t bb=0, bool bold=false);
     void write_text(int x, int y, std::string_view text, uint8_t fr=255, uint8_t fg=255, uint8_t fb=255, uint8_t br=0, uint8_t bg=0, uint8_t bb=0, bool bold=false);
+    void write_gradient(int x, int y, std::string_view text, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2);
     void draw_box(int x, int y, int w, int h, std::string_view title = "");
     void render();
 
