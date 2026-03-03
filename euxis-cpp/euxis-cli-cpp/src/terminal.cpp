@@ -253,26 +253,59 @@ void TerminalScreen::set_cell(int x, int y, char32_t ch, uint8_t fr, uint8_t fg,
 void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr, uint8_t fg, uint8_t fb, uint8_t br, uint8_t bg, uint8_t bb, bool bold) {
     int cx = x;
     int cy = y;
-    for (char c : text) {
-        if (c == '\n') {
+    
+    // Proper UTF-8 decoding loop
+    for (size_t i = 0; i < text.size(); ) {
+        unsigned char c1 = static_cast<unsigned char>(text[i]);
+        char32_t codepoint = ' ';
+        size_t len = 1;
+
+        if (c1 < 0x80) {
+            codepoint = c1;
+            len = 1;
+        } else if ((c1 & 0xE0) == 0xC0) {
+            if (i + 1 < text.size()) {
+                codepoint = ((c1 & 0x1F) << 6) | (static_cast<unsigned char>(text[i + 1]) & 0x3F);
+                len = 2;
+            }
+        } else if ((c1 & 0xF0) == 0xE0) {
+            if (i + 2 < text.size()) {
+                codepoint = ((c1 & 0x0F) << 12) | ((static_cast<unsigned char>(text[i + 1]) & 0x3F) << 6) | (static_cast<unsigned char>(text[i + 2]) & 0x3F);
+                len = 3;
+            }
+        } else if ((c1 & 0xF8) == 0xF0) {
+            if (i + 3 < text.size()) {
+                codepoint = ((c1 & 0x07) << 18) | ((static_cast<unsigned char>(text[i + 1]) & 0x3F) << 12) | ((static_cast<unsigned char>(text[i + 2]) & 0x3F) << 6) | (static_cast<unsigned char>(text[i + 3]) & 0x3F);
+                len = 4;
+            }
+        }
+
+        if (codepoint == '\n') {
             cx = x;
             cy++;
-            continue;
+        } else {
+            if (cx >= width_) {
+                cx = 0;
+                cy++;
+            }
+            if (cy >= height_) break;
+            set_cell(cx++, cy, codepoint, fr, fg, fb, br, bg, bb, bold);
         }
-        if (cx >= width_) {
-            cx = 0;
-            cy++;
-        }
-        if (cy >= height_) break;
-        set_cell(cx++, cy, c, fr, fg, fb, br, bg, bb, bold);
+        i += len;
     }
 }
 
 void TerminalScreen::draw_box(int x, int y, int w, int h, std::string_view title) {
     if (w < 2 || h < 2) return;
-    // Basic Unicode Box (light)
+    // Use high-quality Unicode box characters
     char32_t tl = U'╭', tr = U'╮', bl = U'╰', br = U'╯';
     char32_t hline = U'─', vline = U'│';
+
+    // Fallback if colors/unicode disabled (basic check)
+    if (!colors_enabled()) {
+        tl = tr = bl = br = '+';
+        hline = '-'; vline = '|';
+    }
 
     set_cell(x, y, tl);
     set_cell(x + w - 1, y, tr);
@@ -311,7 +344,7 @@ void TerminalScreen::render() {
 
             const auto& c = back_buffer_[idx];
             
-            // Output colors only if changed or we just jumped
+            // Output colors only if changed
             if (c.fg_r != cur_fr || c.fg_g != cur_fg || c.fg_b != cur_fb ||
                 c.bg_r != cur_br || c.bg_g != cur_bg || c.bg_b != cur_bb || !in_color) {
                 out += std::format("\033[38;2;{};{};{}m\033[48;2;{};{};{}m", 
@@ -321,16 +354,21 @@ void TerminalScreen::render() {
                 in_color = true;
             }
 
-            // A naive UTF-8 encoder for char32_t for our subset
-            if (c.ch < 128) {
+            // Proper UTF-8 encoding for the terminal
+            if (c.ch < 0x80) {
                 out += static_cast<char>(c.ch);
-            } else if (c.ch < 2048) {
-                out += static_cast<char>(192 | (c.ch >> 6));
-                out += static_cast<char>(128 | (c.ch & 63));
-            } else { // Basic 3-byte unicode symbols like box drawing
-                out += static_cast<char>(224 | (c.ch >> 12));
-                out += static_cast<char>(128 | ((c.ch >> 6) & 63));
-                out += static_cast<char>(128 | (c.ch & 63));
+            } else if (c.ch < 0x800) {
+                out += static_cast<char>(0xC0 | (c.ch >> 6));
+                out += static_cast<char>(0x80 | (c.ch & 0x3F));
+            } else if (c.ch < 0x10000) {
+                out += static_cast<char>(0xE0 | (c.ch >> 12));
+                out += static_cast<char>(0x80 | ((c.ch >> 6) & 0x3F));
+                out += static_cast<char>(0x80 | (c.ch & 0x3F));
+            } else {
+                out += static_cast<char>(0xF0 | (c.ch >> 18));
+                out += static_cast<char>(0x80 | ((c.ch >> 12) & 0x3F));
+                out += static_cast<char>(0x80 | ((c.ch >> 6) & 0x3F));
+                out += static_cast<char>(0x80 | (c.ch & 0x3F));
             }
 
             front_buffer_[idx] = c;
