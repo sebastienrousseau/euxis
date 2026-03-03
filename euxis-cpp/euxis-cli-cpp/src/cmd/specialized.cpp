@@ -206,13 +206,17 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             }
             out = oss.str();
         }
-        else if (trimmed.starts_with("/model ")) {
-            std::string new_tier = trimmed.substr(7);
-            model_info = router.route(new_tier, "model switch");
-            out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
+        else if (trimmed.starts_with("/model")) {
+            if (trimmed == "/model") {
+                out = "Available Tiers:\n - routine (Fast/Local)\n - data    (Structured)\n - code    (Programming)\n - reason  (Complex Logic)\n\nUsage: /model <tier>";
+            } else {
+                std::string new_tier = trimmed.substr(7);
+                model_info = router.route(new_tier, "model switch");
+                out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
+            }
         }
         else if (trimmed == "/help") {
-            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show session history\n /clear         Wipe session\n /exit          Quit";
+            out = "Commands:\n /model <tier>  Switch AI (code|reason|data|routine)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show session history\n /clear         Wipe session\n /exit          Quit";
         }
         else if (trimmed == "/history") {
             std::ostringstream oss;
@@ -266,7 +270,9 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             int c = term::read_key();
             if (c > 0) {
                 if (c == 3 || c == 4) running = false;
-                else if (c == 9) { if (!ghost_text.empty()) current_input += ghost_text; }
+                else if (c == 9 || c == 1003) { // Tab or Right Arrow
+                    if (!ghost_text.empty()) current_input += ghost_text;
+                }
                 else if (c == 127 || c == 8 || c == 1000) { if (!current_input.empty()) current_input.pop_back(); }
                 else if (c == '\r' || c == '\n') {
                     if (current_input.empty()) continue;
