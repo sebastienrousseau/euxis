@@ -161,19 +161,6 @@ int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istrea
     return 0;
 }
 
-// --- Help Menu ---
-namespace {
-void print_tui_help(const std::function<std::string(const std::string&)>& color_user) {
-    std::cout << "\n  " << terminal::bold("COMMANDS") << "\n"
-              << "  " << color_user("?") << " or " << color_user("/help") << "    Show this help menu\n"
-              << "  " << color_user("/exit") << " or " << color_user("/quit") << "  Exit the session\n"
-              << "  " << color_user("/clear") << "           Clear context memory\n"
-              << "  " << color_user("/history") << "         Show session history\n"
-              << "  " << color_user("/agent <id>") << "     Switch to a different agent\n"
-              << "  " << color_user("@<id> <msg>") << "     Message a specific agent\n\n";
-}
-} // namespace
-
 // --- tui ---
 
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
@@ -230,6 +217,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     std::string thinking_status = "Thinking...";
     std::string ai_streaming_output;
     std::string ai_error;
+    std::string system_overlay; // Persist help/history here
 
     auto render = [&]() {
         if (!is_interactive) return;
@@ -252,6 +240,11 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 std::cout << "  " << out_line << "\n";
             }
             std::cout << "\n";
+        }
+
+        // Draw system overlay (Help/History) if active
+        if (!system_overlay.empty()) {
+            std::cout << system_overlay << "\n";
         }
 
         // Draw current state
@@ -279,6 +272,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     }
 
     auto process_command = [&](const std::string& trimmed) {
+        system_overlay.clear(); // Clear old overlay on any new command
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") {
             running = false;
             return true;
@@ -286,18 +280,31 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (trimmed == "clear" || trimmed == "/clear") {
             memory_ctx.clear();
             history.clear();
+            system_overlay = "  " + color_dim("Memory cleared.");
             return true;
         }
         if (trimmed == "?" || trimmed == "/help") {
-            print_tui_help(color_user);
+            std::ostringstream oss;
+            oss << "\n  " << term::bold("COMMANDS") << "\n"
+                << "  " << color_user("?") << " or " << color_user("/help") << "    Show this help menu\n"
+                << "  " << color_user("/exit") << "           Exit the session\n"
+                << "  " << color_user("/clear") << "          Clear context memory\n"
+                << "  " << color_user("/history") << "        Show session history\n"
+                << "  " << color_user("/agent <id>") << "    Switch to a different agent\n"
+                << "  " << color_user("@<id> <msg>") << "    Message a specific agent\n"
+                << "  " << color_dim("Press any key to hide this menu.") << "\n";
+            system_overlay = oss.str();
             return true;
         }
         if (trimmed == "/history") {
-            std::cout << "\n";
+            std::ostringstream oss;
+            oss << "\n";
             for (const auto& h : history) {
-                std::cout << "  " << color_user("User: ") << h.first << "\n"
-                          << "  " << color_ai("AI:   ") << (h.second.size() > 60 ? h.second.substr(0, 57) + "..." : h.second) << "\n\n";
+                oss << "  " << color_user("User: ") << h.first << "\n"
+                    << "  " << color_ai("AI:   ") << (h.second.size() > 60 ? h.second.substr(0, 57) + "..." : h.second) << "\n\n";
             }
+            if (history.empty()) oss << "  " << color_dim("No history in this session yet.") << "\n";
+            system_overlay = oss.str();
             return true;
         }
         if (trimmed.starts_with("@")) {
@@ -339,6 +346,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (is_interactive) {
             int c = term::read_key();
             if (c > 0) {
+                system_overlay.clear(); // Any keypress hides help/history menu
                 if (c == 3 || c == 4) { // Ctrl-C or Ctrl-D
                     running = false;
                 } else if (c == 127 || c == 8 || c == 1000) { // Backspace or Delete
