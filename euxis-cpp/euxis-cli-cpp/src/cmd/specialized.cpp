@@ -31,10 +31,13 @@ namespace fs = std::filesystem;
 namespace term = terminal;
 
 std::string synthesize_description(const AgentInfo& a) {
-    if (a.manifesto && !a.manifesto->identity.description.empty()) return a.manifesto->identity.description;
-    // Fallback synthesis
-    std::string d = "Expert " + a.role + " operating at the " + a.tier + " tier. Specialized in autonomous task execution and domain-specific problem solving.";
-    if (d.size() > 150) d = d.substr(0, 147) + "...";
+    std::string d;
+    if (a.manifesto && !a.manifesto->identity.description.empty()) {
+        d = a.manifesto->identity.description;
+    } else {
+        d = "Specialized " + a.role + " (" + a.tier + ") for autonomous operations.";
+    }
+    if (d.size() > 75) d = d.substr(0, 72) + "...";
     return d;
 }
 } // namespace
