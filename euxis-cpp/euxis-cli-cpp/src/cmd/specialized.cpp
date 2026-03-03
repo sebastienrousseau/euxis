@@ -227,10 +227,25 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     std::cout << "\n";
 
                     std::atomic<bool> is_thinking{true};
-                    std::thread spinner_thread([&]() {
+                    auto start_time = std::chrono::steady_clock::now();
+                    
+                    std::thread spinner_thread([&, start_time]() {
                         static const std::vector<std::string> f = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
+                        static const std::vector<std::string> phrases = {
+                            "Compiling brilliance",
+                            "Synthesizing consciousness",
+                            "Researching codebase patterns",
+                            "Analyzing neural pathways",
+                            "Doing research on memes",
+                            "Optimizing agent response"
+                        };
+                        std::string phrase = phrases[rand() % phrases.size()];
                         int i = 0; while (is_thinking) {
-                            std::cout << "\r\033[K  " << tokyo_magenta(f[(i++) % 10]) << " " << tokyo_dim("researching codebase...");
+                            auto now = std::chrono::steady_clock::now();
+                            auto secs = std::chrono::duration_cast<std::chrono::seconds>(now - start_time).count();
+                            std::cout << "\r\033[K  " << tokyo_magenta(f[(i++) % 10]) << " " 
+                                      << tokyo_text(phrase + "… ") 
+                                      << tokyo_dim("(esc to cancel, " + std::to_string(secs) + "s)");
                             std::cout.flush(); std::this_thread::sleep_for(std::chrono::milliseconds(80));
                         }
                     });
@@ -240,14 +255,31 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     
                     bool first = true; bool need_p = false;
                     auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
+                        if (!is_thinking) return; // Dropped if cancelled
                         if (first) { is_thinking = false; spinner_thread.join(); std::cout << "\r\033[K" << " " << term::bold(tokyo_magenta("◆ Euxis")) << "  " << tokyo_dim(model_info.model) << "\n"; first = false; need_p = true; }
                         for (char ch : chunk) { if (need_p) { std::cout << tokyo_magenta(" ┃  "); need_p = false; } std::cout << tokyo_text(std::string(1, ch)); if (ch == '\n') need_p = true; }
                         std::cout.flush(); std::this_thread::sleep_for(std::chrono::milliseconds(2));
                     });
 
-                    if (first) { is_thinking = false; spinner_thread.join(); std::cout << "\r\033[K" << " " << term::bold(tokyo_magenta("◆ Euxis")) << "  " << tokyo_dim(model_info.model) << "\n"; }
-                    if (response.success) { history.push_back({user_msg, response.output}); memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n"; std::cout << "\n\n"; }
-                    else std::cout << tokyo_error(" ┃  Error: " + response.error) << "\n\n";
+                    // Wait while thinking to allow Esc-cancellation
+                    while (is_thinking) {
+                        int k = term::read_key();
+                        if (k == 27) { // ESC pressed
+                            is_thinking = false;
+                            spinner_thread.join();
+                            std::cout << "\r\033[K  " << tokyo_error("⚠ Request cancelled by user.\n\n");
+                            break; 
+                        }
+                        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                    }
+
+                    if (!first && response.success) { // Only finish if we actually started printing
+                        std::cout << "\n\n";
+                        history.push_back({user_msg, response.output});
+                        memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
+                    } else if (!response.success && !first) {
+                        std::cout << tokyo_error(" ┃  Error: " + response.error) << "\n\n";
+                    }
                 } else if (c >= 32 && c <= 126) current_input += (char)c;
             } else std::this_thread::sleep_for(std::chrono::milliseconds(5));
         } else {
