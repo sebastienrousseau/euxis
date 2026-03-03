@@ -189,34 +189,38 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
         
-        std::string out;
-        if (trimmed == "/about") { out = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nAgentic Orchestrator [C++23]"; }
-        else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
-        else if (trimmed == "/fleet") {
+        // --- NATIVE SCROLLBACK COMMANDS ---
+        if (trimmed == "/fleet") {
             auto agents = registry.list_agents();
-            std::ostringstream oss;
-            oss << "Active Fleet (" << agents.size() << " agents):\n";
+            std::cout << "\r\033[K" << term::bold(term::cyan("  ➜ /fleet")) << "\n";
+            std::cout << "  Active Fleet (" << agents.size() << " agents):\n";
             for (size_t i = 0; i < agents.size(); ++i) {
                 std::string desc = agents[i].role;
+                // Try to get detailed description if available
                 if (agents[i].manifesto && !agents[i].manifesto->identity.description.empty()) {
                     desc = agents[i].manifesto->identity.description;
                 }
                 if (desc.size() > 150) desc = desc.substr(0, 147) + "...";
-                oss << std::format(" {:2d}. {:<15} - {}\n", i + 1, agents[i].id, desc);
+                std::cout << std::format("  {:2d}. {:<15} - {}\n", i + 1, term::cyan(agents[i].id), desc);
             }
-            out = oss.str();
+            std::cout << "\n";
+            return true;
         }
+
+        std::string out;
+        if (trimmed == "/about") { out = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nAgentic Orchestrator [C++23]"; }
+        else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
         else if (trimmed.starts_with("/model")) {
             if (trimmed == "/model") {
                 out = "Available Tiers:\n - routine (Fast/Local)\n - data    (Structured)\n - code    (Programming)\n - reason  (Complex Logic)\n\nUsage: /model <tier>";
             } else {
-                std::string new_tier = trimmed.substr(7);
+                std::string new_tier = (trimmed.size() > 7) ? trimmed.substr(7) : "";
                 model_info = router.route(new_tier, "model switch");
                 out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
             }
         }
         else if (trimmed == "/help") {
-            out = "Commands:\n /model <tier>  Switch AI (code|reason|data|routine)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show session history\n /clear         Wipe session\n /exit          Quit";
+            out = "Commands:\n /model <tier>  Switch AI (code|reason|data|routine)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
         }
         else if (trimmed == "/history") {
             std::ostringstream oss;
