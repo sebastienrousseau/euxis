@@ -97,10 +97,23 @@ void get_terminal_size(int& w, int& h) {
     else { w=ws.ws_col; h=ws.ws_row; }
 }
 
-TerminalScreen::TerminalScreen() { get_terminal_size(width_, height_); front_buffer_.assign(width_*height_, Cell{.ch=0xFFFFFFFF}); back_buffer_.resize(width_*height_); }
+TerminalScreen::TerminalScreen() { 
+    get_terminal_size(width_, height_); 
+    front_buffer_.assign(width_*height_, Cell{.ch=0xFFFFFFFF}); 
+    back_buffer_.resize(width_*height_); 
+}
+
 TerminalScreen::~TerminalScreen() { std::printf("\033[?25h"); }
-void TerminalScreen::resize(int w, int h) { if(w==width_&&h==height_)return; width_=w; height_=h; front_buffer_.assign(w*h, Cell{.ch=0xFFFFFFFF}); back_buffer_.assign(w*h, Cell{}); }
+
+void TerminalScreen::resize(int w, int h) { 
+    if(w==width_&&h==height_)return; 
+    width_=w; height_=h; 
+    front_buffer_.assign(w*h, Cell{.ch=0xFFFFFFFF}); 
+    back_buffer_.assign(w*h, Cell{}); 
+}
+
 void TerminalScreen::clear() { for(auto& c:back_buffer_) c = Cell{}; }
+
 void TerminalScreen::set_cell(int x, int y, char32_t ch, uint8_t fr, uint8_t fg, uint8_t fb, uint8_t br, uint8_t bg, uint8_t bb, bool bld) {
     if(x<0||x>=width_||y<0||y>=height_)return;
     back_buffer_[y*width_+x] = {ch, fr, fg, fb, br, bg, bb, bld};
@@ -114,7 +127,7 @@ void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr,
         if(c1<0x80){cp=c1;len=1;}
         else if((c1&0xE0)==0xC0 && i+1<text.size()){cp=((c1&0x1F)<<6)|((unsigned char)text[i+1]&0x3F);len=2;}
         else if((c1&0xF0)==0xE0 && i+2<text.size()){cp=((c1&0x0F)<<12)|(((unsigned char)text[i+1]&0x3F)<<6)|((unsigned char)text[i+2]&0x3F);len=3;}
-        else if((c1&0xF8)==0xF0 && i+3<text.size()){cp=((c1&0x07)<<18)|(((unsigned char)text[i+1]&0x3F)<<12)|(((unsigned char)text[i+2]&0x3F)<<6)|((unsigned char)text[i+3]&0x3F);len=4;}
+        else if((c1&0xF8)==0xF0 && i+3<text.size()){cp=((c1&0x07)<<18)|(((unsigned char)text[i+1]&0x3F)<<12)|(((unsigned char)text[i+2]&0x3F)<<6)|(((unsigned char)text[i+3]&0x3F));len=4;}
         if(cp=='\n'){cx=x;cy++;}
         else { if(cx>=width_){cx=0;cy++;} if(cy>=height_)break; set_cell(cx++,cy,cp,fr,fg,fb,br,bg,bb,bld); }
         i+=len;
@@ -129,7 +142,7 @@ void TerminalScreen::write_gradient(int x, int y, std::string_view text, uint8_t
         if(c1<0x80){cp=c1;len=1;}
         else if((c1&0xE0)==0xC0 && i+1<text.size()){cp=((c1&0x1F)<<6)|((unsigned char)text[i+1]&0x3F);len=2;}
         else if((c1&0xF0)==0xE0 && i+2<text.size()){cp=((c1&0x0F)<<12)|(((unsigned char)text[i+1]&0x3F)<<6)|((unsigned char)text[i+2]&0x3F);len=3;}
-        else if((c1&0xF8)==0xF0 && i+3<text.size()){cp=((c1&0x07)<<18)|(((unsigned char)text[i+1]&0x3F)<<12)|(((unsigned char)text[i+2]&0x3F)<<6)|((unsigned char)text[i+3]&0x3F);len=4;}
+        else if((c1&0xF8)==0xF0 && i+3<text.size()){cp=((c1&0x07)<<18)|(((unsigned char)text[i+1]&0x3F)<<12)|(((unsigned char)text[i+2]&0x3F)<<6)|(((unsigned char)text[i+3]&0x3F));len=4;}
         cps.push_back(cp); i+=len;
     }
     for(size_t i=0;i<cps.size();++i) {

@@ -121,64 +121,65 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. TOP BAR (Sapphire to Mauve Gradient)
+        // 1. TOP STATUS BAR (Catppuccin Macchiato)
         std::string h1 = " EUXIS ADE v0.0.6 ";
         std::string h2 = " │ agent:" + active_agent + " │ " + model_info.model + " ";
-        screen.write_gradient(0, 0, h1 + h2, 145, 215, 227, 198, 160, 246);
+        screen.write_gradient(0, 0, h1 + h2, 145, 215, 227, 198, 160, 246); // Sky to Mauve
         for (int x = (int)(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 54, 58, 79);
 
-        // 2. BOTTOM UNIT (Mantle Background)
-        std::string f_txt = " Tab:autocomplete │ /help:commands ";
-        screen.write_text(w - (int)f_txt.size() - 4, h - 1, f_txt, 110, 115, 141, 30, 32, 48);
-        for(int x=0; x < w - (int)f_txt.size() - 4; ++x) screen.set_cell(x, h-1, ' ', 0,0,0, 30,32,48);
+        // 2. CHAT AREA (Top-Down, Dense Flow)
+        int current_y = 2;
+        int max_y = h - 4;
+        
+        // Render only the most recent turns that fit the screen top-down
+        size_t start_idx = (history.size() > 5) ? history.size() - 5 : 0;
+        for (size_t i = start_idx; i < history.size(); ++i) {
+            const auto& h_entry = history[i];
+            if (current_y >= max_y) break;
+            screen.write_text(4, current_y++, "➜ " + h_entry.first, 125, 196, 228, 0, 0, 0, true); // Sapphire User
+            
+            std::istringstream stream{h_entry.second};
+            std::string out_line;
+            while (std::getline(stream, out_line)) {
+                if (current_y < max_y) {
+                    screen.set_cell(4, current_y, U'│', 198, 160, 246); // Mauve Accent
+                    screen.write_text(6, current_y++, out_line.substr(0, w-10), 202, 211, 245);
+                }
+            }
+            current_y++;
+        }
 
-        // Input Prompt (Sapphire)
+        // Active Turn
+        if (current_y < max_y) {
+            if (is_thinking) {
+                screen.write_text(4, current_y++, "➜ " + current_input, 125, 196, 228, 0, 0, 0, true);
+                static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
+                static int f_idx = 0;
+                screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " " + thinking_phrase, 245, 189, 230);
+            } else if (!ai_streaming_output.empty() || !ai_error.empty()) {
+                screen.write_text(4, current_y++, "➜ " + current_input, 125, 196, 228, 0, 0, 0, true);
+                std::istringstream stream{ai_streaming_output.empty() ? "Error: " + ai_error : ai_streaming_output};
+                std::string out_line;
+                while (std::getline(stream, out_line)) {
+                    if (current_y < max_y) {
+                        screen.set_cell(4, current_y, U'│', 198, 160, 246);
+                        screen.write_text(6, current_y++, out_line.substr(0, w-10), 202, 211, 245);
+                    }
+                }
+            }
+        }
+
+        // 3. SOLID BOTTOM COMMAND BAR
+        std::string footer_txt = " Tab:complete suggest │ /help:commands ";
+        screen.write_text(w - (int)footer_txt.size() - 4, h - 1, footer_txt, 110, 115, 141, 30, 32, 48);
+        for(int x=0; x < w - (int)footer_txt.size() - 4; ++x) screen.set_cell(x, h-1, ' ', 0,0,0, 30,32,48);
+
+        // Sticky Input docked to bottom bar
         screen.write_text(4, h - 2, "➜ ", 125, 196, 228, 0, 0, 0, true);
         screen.write_text(7, h - 2, current_input, 202, 211, 245);
         ghost_text = get_prediction(current_input);
         if (!ghost_text.empty()) screen.write_text(7 + (int)current_input.size(), h - 2, ghost_text, 110, 115, 141);
-        screen.set_cell(7 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 202, 211, 245);
-
-        // 3. CHAT AREA
-        int current_y = h - 4;
-        
-        if (is_thinking) {
-            static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-            static int f_idx = 0;
-            screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " " + thinking_phrase, 245, 189, 230);
-            current_y -= 2;
-            screen.write_text(6, current_y++, "➜ " + current_input, 125, 196, 228, 0, 0, 0, true);
-            current_y -= 2;
-        } else if (!ai_streaming_output.empty() || !ai_error.empty()) {
-            std::vector<std::string> lines;
-            std::istringstream stream{ai_streaming_output.empty() ? "Error: " + ai_error : ai_streaming_output};
-            std::string l; while(std::getline(stream, l)) lines.push_back(l);
-            std::reverse(lines.begin(), lines.end());
-            for(const auto& line : lines) {
-                if (current_y < 2) break;
-                screen.set_cell(6, current_y, U'│', 198, 160, 246); // Mauve Accent
-                screen.write_text(8, current_y--, line.substr(0, w-12), 202, 211, 245);
-            }
-            current_y--;
-            screen.write_text(6, current_y--, "➜ " + current_input, 125, 196, 228, 0, 0, 0, true);
-        }
-
-        for (auto it = history.rbegin(); it != history.rend(); ++it) {
-            if (current_y < 2) break;
-            std::vector<std::string> lines;
-            std::istringstream stream{it->second};
-            std::string l; while(std::getline(stream, l)) lines.push_back(l);
-            std::reverse(lines.begin(), lines.end());
-            for(const auto& line : lines) {
-                if (current_y < 2) break;
-                screen.set_cell(6, current_y, U'│', 198, 160, 246); // Mauve
-                screen.write_text(8, current_y--, line.substr(0, w-12), 184, 192, 224);
-            }
-            current_y--;
-            if (current_y < 2) break;
-            screen.write_text(6, current_y--, "➜ " + it->first, 125, 196, 228, 0, 0, 0, true);
-            current_y--;
-        }
+        screen.set_cell(7 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 202, 211, 245); // Software Cursor
 
         if (!system_overlay.empty()) {
             screen.draw_box(w/2 - 30, h/2 - 5, 60, 10, "SYSTEM");
@@ -195,16 +196,18 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
         if (trimmed == "/about") { system_overlay = "EUXIS ADE v0.0.6\nCatppuccin Macchiato Edition\nC++23 Agentic Engine"; return true; }
-        if (trimmed == "/auth") { system_overlay = "Auth:\n - claude (active)\n - gemini (detect)\n - ollama"; return true; }
-        if (trimmed == "/commands") { system_overlay = "Commands:\n /about, /auth, /help, /clear, /exit\n /agents, /agent, /combos"; return true; }
+        if (trimmed == "/auth") { system_overlay = "Authentication Profiles:\n - claude (active)\n - gemini (detected)\n - local (ollama)"; return true; }
+        if (trimmed == "/commands") { system_overlay = "System:\n /about, /auth, /help, /clear, /exit\nFleet:\n /agents, /agent, /combos, /playbook"; return true; }
         if (trimmed == "/agents") {
             auto agents = registry.list_agents();
-            std::string out = "Fleet:\n";
-            for (const auto& a : agents) out += " - " + a.id + "\n";
+            std::string out = "Available Agents:\n";
+            for (const auto& a : agents) out += " - " + a.id + " (" + a.role + ")\n";
             system_overlay = out; return true;
         }
+        if (trimmed == "/combos") { system_overlay = "Agent Combos:\n - dev-squad (arch+code)\n - audit-squad (sec+docs)"; return true; }
+        if (trimmed == "/playbook") { system_overlay = "Active Playbooks:\n - euxis-standard-v2\n - security-first-audit"; return true; }
         if (trimmed == "/history") {
-            std::string out = "History:\n";
+            std::string out = "Session History:\n";
             for (const auto& h : history) out += " - " + h.first.substr(0, 40) + "...\n";
             system_overlay = out; return true;
         }
@@ -236,7 +239,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     if (process_command(current_input)) { current_input.clear(); continue; }
                     is_thinking = true;
                     static const std::vector<std::string> phrases = {
-                        "exploring codebase...", "analyzing files...", "synthesizing response...", "querying agent..."
+                        "exploring codebase...", "analyzing files...", "synthesizing response...", "querying agent...", "doing research on memes..."
                     };
                     thinking_phrase = phrases[rand() % phrases.size()];
                     std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
