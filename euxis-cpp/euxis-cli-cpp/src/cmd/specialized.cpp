@@ -29,18 +29,39 @@ using euxis::cli::i18n::tr;
 namespace {
 namespace fs = std::filesystem;
 namespace term = terminal;
+
+[[maybe_unused]] void write_output_file(const fs::path& path, const std::string& content) {
+    fs::create_directories(path.parent_path());
+    std::ofstream f(path);
+    f << content;
+}
+
+[[maybe_unused]] auto scan_directory_listing(const fs::path& dir, int max_depth = 3) -> std::string {
+    std::ostringstream out;
+    if (!fs::is_directory(dir)) return {};
+    int count = 0;
+    constexpr int max_files = 200;
+    for (const auto& entry : fs::recursive_directory_iterator(dir, fs::directory_options::skip_permission_denied)) {
+        if (count >= max_files) {
+            out << "  ... (" << tr("truncated at") << " " << max_files << " " << tr("entries") << ")\n";
+            break;
+        }
+        auto rel = fs::relative(entry.path(), dir);
+        int depth = 0;
+        for (auto it = rel.begin(); it != rel.end(); ++it) ++depth;
+        if (depth > max_depth) continue;
+        if (entry.is_regular_file()) { out << "  " << rel.string() << " (" << entry.file_size() << " " << tr("bytes") << ")\n"; ++count; } 
+        else if (entry.is_directory()) { out << "  " << rel.string() << "/\n"; ++count; }
+    }
+    return out.str();
+}
 } // namespace
 
 // --- voice ---
-int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
-    return cmd_voice_ex(ctx, args, std::cin);
-}
-
+int cmd_voice(Context& ctx, const std::vector<std::string>& args) { return cmd_voice_ex(ctx, args, std::cin); }
 int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input) {
     std::string tier = "reason";
-    for (size_t i = 0; i < args.size(); ++i) {
-        if (args[i] == "--tier" && i + 1 < args.size()) tier = args[++i];
-    }
+    for (size_t i = 0; i < args.size(); ++i) { if (args[i] == "--tier" && i + 1 < args.size()) tier = args[++i]; }
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
     auto model = router.route(tier, "voice conversation");
@@ -89,21 +110,28 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     };
 
     bool is_interactive = (&input == &std::cin);
+    
+    // Tokyo Dark Theme Lambdas
+    auto tokyo_cyan    = [](const std::string& s) { return term::rgb_fg(56, 168, 157, s); };
+    auto tokyo_magenta = [](const std::string& s) { return term::rgb_fg(164, 133, 221, s); };
+    auto tokyo_blue    = [](const std::string& s) { return term::rgb_fg(113, 153, 238, s); };
+    auto tokyo_text    = [](const std::string& s) { return term::rgb_fg(169, 177, 214, s); };
+    auto tokyo_dim     = [](const std::string& s) { return term::rgb_fg(68, 75, 106, s); };
+    auto tokyo_error   = [](const std::string& s) { return term::rgb_fg(247, 118, 142, s); };
+
     if (is_interactive) {
         term::enable_raw_mode();
-        std::cout << "\033[?1049h\033[H\033[2J\033[?25l";
+        std::cout << "\n";
+        std::cout << "  " << term::bold(tokyo_magenta("EUXIS ADE")) << tokyo_dim(" v0.0.7") << "\n";
+        std::cout << "  " << tokyo_dim("Engine: ") << tokyo_blue("C++23 Native Stream") << "\n";
+        std::cout << "  " << tokyo_dim("Theme:  ") << tokyo_text("Tokyo Dark Elite") << "\n";
+        std::cout << "  " << tokyo_dim("Press Tab or Right Arrow to autocomplete. /help for commands.") << "\n\n";
     }
 
     std::string current_input;
     std::string ghost_text;
     bool running = true;
-    bool is_thinking = false;
-    std::string thinking_phrase = "analyzing...";
-    std::string ai_streaming_output;
-    std::string ai_error;
 
-    term::TerminalScreen screen;
-    
     auto get_prediction = [&](const std::string& input_str) -> std::string {
         if (input_str.empty()) return "";
         for (const auto& s : cmd_suggestions) {
@@ -112,129 +140,88 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         return "";
     };
 
-    auto render = [&]() {
+    auto draw_prompt = [&]() {
         if (!is_interactive) return;
-        int w, h;
-        term::get_terminal_size(w, h);
-        screen.resize(w, h);
-        screen.clear();
-
-        // 1. HEADER (Tokyo Dark Gradient)
-        std::string h1 = " EUXIS ADE v0.0.6 ";
-        std::string h2 = " │ agent:" + active_agent + " │ " + model_info.model + " ";
-        screen.write_gradient(0, 0, h1 + h2, 113, 153, 238, 164, 133, 221);
-        for (int x = (int)(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 26, 27, 42);
-
-        // 2. CHAT AREA
-        int current_y = 2;
-        int max_y = h - 4;
-        
-        // Show as many turns as possible that fit top-down
-        size_t start_idx = 0;
-        // Basic heuristic to avoid scrolling issues in the simple renderer
-        if (history.size() > 20) start_idx = history.size() - 20;
-
-        for (size_t i = start_idx; i < history.size(); ++i) {
-            const auto& h_entry = history[i];
-            if (current_y >= max_y) break;
-            
-            bool is_cmd = h_entry.first.starts_with("/");
-            screen.write_text(4, current_y++, "➜ " + h_entry.first, 56, 168, 157, 0, 0, 0, true);
-            std::istringstream stream{h_entry.second};
-            std::string out_line;
-            while (std::getline(stream, out_line)) {
-                if (current_y < max_y) {
-                    if (is_cmd) screen.set_cell(4, current_y, U'┃', 68, 75, 106);
-                    else screen.set_cell(4, current_y, U'┃', 164, 133, 221);
-                    screen.write_text(6, current_y++, out_line.substr(0, w-10), 169, 177, 214);
-                }
-            }
-            current_y++;
-        }
-
-        if (current_y < max_y) {
-            if (is_thinking) {
-                screen.write_text(4, current_y++, "➜ " + current_input, 56, 168, 157, 0, 0, 0, true);
-                static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-                static int f_idx = 0;
-                screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " " + thinking_phrase, 164, 133, 221);
-            } else if (!ai_streaming_output.empty() || !ai_error.empty()) {
-                screen.write_text(4, current_y++, "➜ " + current_input, 56, 168, 157, 0, 0, 0, true);
-                std::istringstream stream{ai_streaming_output.empty() ? "Error: " + ai_error : ai_streaming_output};
-                std::string out_line;
-                while (std::getline(stream, out_line)) {
-                    if (current_y < max_y) {
-                        screen.set_cell(4, current_y, U'┃', 164, 133, 221);
-                        screen.write_text(6, current_y++, out_line.substr(0, w-10), 169, 177, 214);
-                    }
-                }
-            }
-        }
-
-        // 3. FOOTER
-        std::string f_hint = " Tab:autocomplete │ /model:switch │ /help:all ";
-        screen.write_text(w - (int)f_hint.size() - 4, h - 1, f_hint, 68, 75, 106, 26, 27, 42);
-        for(int x=0; x < w - (int)f_hint.size() - 4; ++x) screen.set_cell(x, h - 1, ' ', 0, 0, 0, 26, 27, 42);
-
-        screen.write_text(4, h - 2, "➜ ", 56, 168, 157, 0, 0, 0, true);
-        screen.write_text(7, h - 2, current_input, 169, 177, 214);
+        std::cout << "\r\033[K"; // Clear line
+        std::cout << term::bold(tokyo_cyan(" ➜  ")) << tokyo_text(current_input);
         ghost_text = get_prediction(current_input);
-        if (!ghost_text.empty()) screen.write_text(7 + (int)current_input.size(), h - 2, ghost_text, 68, 75, 106);
-        screen.set_cell(7 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 169, 177, 214);
-
-        screen.render();
+        if (!ghost_text.empty()) {
+            std::cout << tokyo_dim(ghost_text);
+            std::cout << "\033[" << ghost_text.size() << "D"; // Move cursor back
+        }
+        std::cout.flush();
     };
 
     auto process_command = [&](const std::string& trimmed) {
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
-        if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
+        if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); std::cout << "\r\033[K  " << tokyo_dim("Session history wiped.\n\n"); return true; }
         
-        // --- NATIVE SCROLLBACK COMMANDS ---
+        std::cout << "\r\033[K"; // Clear prompt before output
+
+        if (trimmed == "/about") {
+            std::cout << " " << term::bold(tokyo_blue("◆ About EUXIS")) << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("Version:   0.0.7") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("Engine:    C++23 Agentic Orchestrator") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("Theme:     Tokyo Dark Elite") << "\n\n";
+            return true;
+        }
+        if (trimmed == "/auth") {
+            std::cout << " " << term::bold(tokyo_blue("◆ Active Profiles")) << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("- claude (Anthropic API)") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("- gemini (Google AI)") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_text("- local  (Llama 3)") << "\n\n";
+            return true;
+        }
         if (trimmed == "/fleet") {
             auto agents = registry.list_agents();
-            std::cout << "\r\033[K" << term::bold(term::cyan("  ➜ /fleet")) << "\n";
-            std::cout << "  Active Fleet (" << agents.size() << " agents):\n";
+            std::cout << " " << term::bold(tokyo_blue("◆ Active Fleet")) << " " << tokyo_dim(std::to_string(agents.size()) + " agents") << "\n";
             for (size_t i = 0; i < agents.size(); ++i) {
                 std::string desc = agents[i].role;
-                // Try to get detailed description if available
                 if (agents[i].manifesto && !agents[i].manifesto->identity.description.empty()) {
                     desc = agents[i].manifesto->identity.description;
                 }
-                if (desc.size() > 150) desc = desc.substr(0, 147) + "...";
-                std::cout << std::format("  {:2d}. {:<15} - {}\n", i + 1, term::cyan(agents[i].id), desc);
+                if (desc.size() > 90) desc = desc.substr(0, 87) + "...";
+                std::cout << tokyo_dim(" ┃  ") << std::format("{:2d}. ", i + 1) << term::bold(tokyo_cyan(std::format("{:<16}", agents[i].id))) << " " << tokyo_text(desc) << "\n";
             }
             std::cout << "\n";
             return true;
         }
-
-        std::string out;
-        if (trimmed == "/about") { out = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nAgentic Orchestrator [C++23]"; }
-        else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
-        else if (trimmed.starts_with("/model")) {
+        if (trimmed.starts_with("/model")) {
             if (trimmed == "/model") {
-                out = "Available Tiers:\n - routine (Fast/Local)\n - data    (Structured)\n - code    (Programming)\n - reason  (Complex Logic)\n\nUsage: /model <tier>";
+                std::cout << " " << term::bold(tokyo_blue("◆ Available Tiers")) << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<10}", "routine")) << tokyo_text("Fast / Local inference") << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<10}", "data")) << tokyo_text("Structured / Extraction tasks") << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<10}", "code")) << tokyo_text("Software engineering") << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<10}", "reason")) << tokyo_text("Complex logic and architecture") << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_text("\n")
+                          << tokyo_dim(" ┃  ") << tokyo_text("Usage: /model <tier>") << "\n\n";
             } else {
-                std::string new_tier = (trimmed.size() > 7) ? trimmed.substr(7) : "";
+                std::string new_tier = trimmed.size() > 7 ? trimmed.substr(7) : "";
                 model_info = router.route(new_tier, "model switch");
-                out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
+                std::cout << " " << term::bold(tokyo_blue("◆ Model Switched")) << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_text("Provider: ") << tokyo_cyan(model_info.provider) << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_text("Model:    ") << tokyo_cyan(model_info.model) << "\n\n";
             }
+            return true;
         }
-        else if (trimmed == "/help") {
-            out = "Commands:\n /model <tier>  Switch AI (code|reason|data|routine)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
+        if (trimmed == "/help") {
+            std::cout << " " << term::bold(tokyo_blue("◆ Commands")) << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/model <tier>")) << tokyo_text("Switch AI capability tier") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/agent <id>")) << tokyo_text("Switch personality/role") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/fleet")) << tokyo_text("List all available agents") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/history")) << tokyo_text("View current session history") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/clear")) << tokyo_text("Wipe session context") << "\n"
+                      << tokyo_dim(" ┃  ") << tokyo_cyan(std::format("{:<15}", "/exit")) << tokyo_text("End session") << "\n\n";
+            return true;
         }
-        else if (trimmed == "/history") {
-            std::ostringstream oss;
-            oss << "Session History (" << history.size() << " turns):\n";
+        if (trimmed == "/history") {
+            std::cout << " " << term::bold(tokyo_blue("◆ Session History")) << " " << tokyo_dim(std::to_string(history.size()) + " turns") << "\n";
             for (const auto& h : history) {
                 std::string summary = h.first;
-                if (summary.size() > 40) summary = summary.substr(0, 37) + "...";
-                oss << " - " << summary << "\n";
+                if (summary.size() > 50) summary = summary.substr(0, 47) + "...";
+                std::cout << tokyo_dim(" ┃  ") << tokyo_text(summary) << "\n";
             }
-            out = oss.str();
-        }
-        
-        if (!out.empty()) {
-            history.push_back({trimmed, out});
+            std::cout << "\n";
             return true;
         }
 
@@ -247,10 +234,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             bool found = false;
             try {
                 size_t idx = std::stoul(target);
-                if (idx > 0 && idx <= agents.size()) {
-                    target = agents[idx - 1].id;
-                    found = true;
-                }
+                if (idx > 0 && idx <= agents.size()) { target = agents[idx - 1].id; found = true; }
             } catch (...) {}
 
             if (!found && registry.get_agent(target)) found = true;
@@ -258,18 +242,26 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (found) {
                 active_agent = target;
                 memory_ctx = session.get_memory_context(active_agent);
-                history.push_back({trimmed, "Switched agent to: " + active_agent});
+                std::cout << " " << term::bold(tokyo_blue("◆ Agent Switched")) << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_text("Active: ") << tokyo_cyan(active_agent) << "\n\n";
                 return true;
             } else {
-                history.push_back({trimmed, "Unknown agent: " + target + ". Use /fleet to see available agents."});
+                std::cout << " " << term::bold(tokyo_error("◆ Error")) << "\n"
+                          << tokyo_dim(" ┃  ") << tokyo_text("Unknown agent: " + target + ". Use /fleet to see available.") << "\n\n";
                 return true;
             }
         }
         return false;
     };
 
+    if (!initial_msg.empty()) {
+        if (!process_command(initial_msg)) {
+            // Handled directly below in input loop for interactive
+        }
+    }
+
     while (running) {
-        render();
+        draw_prompt();
         if (is_interactive) {
             int c = term::read_key();
             if (c > 0) {
@@ -280,37 +272,83 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 else if (c == 127 || c == 8 || c == 1000) { if (!current_input.empty()) current_input.pop_back(); }
                 else if (c == '\r' || c == '\n') {
                     if (current_input.empty()) continue;
-                    if (process_command(current_input)) { current_input.clear(); continue; }
-                    is_thinking = true;
-                    static const std::vector<std::string> phrases = {
-                        "exploring codebase...", "analyzing patterns...", "synthesizing response...", "querying agent...", "doing research on memes..."
-                    };
-                    thinking_phrase = phrases[rand() % phrases.size()];
-                    std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
-                    std::thread([&, user_msg]() {
-                        auto ai = registry.get_agent(active_agent);
-                        std::string sys_p = (ai && !ai->prompt_path.empty()) ? ProviderExecutor::load_agent_prompt(ctx.euxis_home, ai->prompt_path) : "You are Euxis.";
-                        auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
-                            ai_streaming_output += chunk;
-                        });
+                    std::string user_msg = current_input;
+                    current_input.clear();
+                    
+                    if (process_command(user_msg)) continue;
+                    
+                    std::cout << "\r\033[K" << " " << term::bold(tokyo_cyan("● You")) << "  " << tokyo_dim(active_agent) << "\n";
+                    std::istringstream u_stream(user_msg);
+                    std::string u_line;
+                    while (std::getline(u_stream, u_line)) {
+                        std::cout << tokyo_dim(" ┃  ") << tokyo_text(u_line) << "\n";
+                    }
+                    std::cout << "\n";
+
+                    std::atomic<bool> is_thinking{true};
+                    std::thread spinner_thread([&]() {
+                        static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
+                        static const std::vector<std::string> phrases = {
+                            "exploring codebase...", "analyzing patterns...", "synthesizing response...", "doing research..."
+                        };
+                        std::string phrase = phrases[rand() % phrases.size()];
+                        int i = 0;
+                        while (is_thinking) {
+                            std::cout << "\r\033[K  " << tokyo_magenta(frames[(i++) % frames.size()]) << " " << tokyo_dim(phrase);
+                            std::cout.flush();
+                            std::this_thread::sleep_for(std::chrono::milliseconds(80));
+                        }
+                    });
+
+                    auto ai = registry.get_agent(active_agent);
+                    std::string sys_p = (ai && !ai->prompt_path.empty()) ? ProviderExecutor::load_agent_prompt(ctx.euxis_home, ai->prompt_path) : "You are Euxis.";
+                    
+                    bool first_chunk = true;
+                    bool need_prefix = false;
+                    auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
+                        if (first_chunk) {
+                            is_thinking = false;
+                            spinner_thread.join();
+                            std::cout << "\r\033[K" << " " << term::bold(tokyo_magenta("◆ Euxis")) << "  " << tokyo_dim(model_info.model) << "\n";
+                            std::cout << tokyo_magenta(" ┃  ");
+                            first_chunk = false;
+                        }
+                        for (char ch : chunk) {
+                            if (need_prefix) { std::cout << tokyo_magenta(" ┃  "); need_prefix = false; }
+                            std::cout << tokyo_text(std::string(1, ch));
+                            if (ch == '\n') need_prefix = true;
+                        }
+                        std::cout.flush();
+                        std::this_thread::sleep_for(std::chrono::milliseconds(2)); // Cinematic streaming
+                    });
+
+                    if (first_chunk) {
                         is_thinking = false;
-                        if (response.success) {
-                            history.push_back({user_msg, response.output});
-                            memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
-                            ai_streaming_output.clear();
-                        } else ai_error = response.error;
-                        current_input.clear();
-                    }).detach();
-                    while (is_thinking || !ai_streaming_output.empty()) { render(); std::this_thread::sleep_for(std::chrono::milliseconds(30)); }
+                        spinner_thread.join();
+                        std::cout << "\r\033[K" << " " << term::bold(tokyo_magenta("◆ Euxis")) << "  " << tokyo_dim(model_info.model) << "\n";
+                    }
+
+                    if (response.success) {
+                        history.push_back({user_msg, response.output});
+                        memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
+                        std::cout << "\n\n";
+                    } else {
+                        std::cout << tokyo_error(" ┃  Error: " + response.error) << "\n\n";
+                    }
+
                 } else if (c >= 32 && c <= 126) current_input += (char)c;
-            } else std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            } else std::this_thread::sleep_for(std::chrono::milliseconds(5));
         } else {
             std::string l; if (!std::getline(input, l)) break;
             auto res = executor.execute(model_info, l);
             if (res.success) std::cout << res.output << "\n";
         }
     }
-    if (is_interactive) { std::cout << "\033[?1049l\033[?25h"; term::disable_raw_mode(); }
+    
+    if (is_interactive) {
+        std::cout << "\r\033[K\n";
+        term::disable_raw_mode();
+    }
     spdlog::set_level(old_level);
     return 0;
 }
