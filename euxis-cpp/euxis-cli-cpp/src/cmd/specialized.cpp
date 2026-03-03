@@ -123,23 +123,8 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.write_gradient(0, 0, h1 + h2, 139, 233, 253, 189, 147, 249); // Cyan to Purple
         for (int x = static_cast<int>(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 73, 77, 100);
 
-        // 2. CONTEXT SIDEBAR
-        int sidebar_w = 24;
-        int chat_w = w - sidebar_w - 4;
-        if (w > 60) {
-            for (int y = 1; y < h - 1; ++y) screen.set_cell(w - sidebar_w, y, U'│', 68, 71, 90);
-            int sx = w - sidebar_w + 2;
-            screen.write_text(sx, 2, "DASHBOARD", 245, 189, 230, 0, 0, 0, true);
-            screen.write_text(sx, 4, "Project:", 98, 114, 164);
-            screen.write_text(sx, 5, " euxis-cpp", 139, 233, 253);
-            screen.write_text(sx, 7, "Branch:", 98, 114, 164);
-            screen.write_text(sx, 8, " main", 166, 218, 149);
-            screen.write_text(sx, 10, "Status:", 98, 114, 164);
-            if (is_thinking) screen.write_text(sx, 11, " thinking", 241, 250, 140);
-            else screen.write_text(sx, 11, " idle", 166, 218, 149);
-        }
-
-        // 3. CHAT AREA
+        // 2. CHAT AREA (Full Width)
+        int chat_w = w - 6;
         int current_y = 2;
         int max_y = h - 4;
         for (const auto& h_entry : history) {
