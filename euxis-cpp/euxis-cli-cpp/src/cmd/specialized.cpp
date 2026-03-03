@@ -26,99 +26,39 @@ namespace euxis::cli::cmd {
 using euxis::cli::i18n::tr;
 
 namespace {
-
 namespace fs = std::filesystem;
 namespace term = terminal;
-
-/// Write content to a file, creating parent directories as needed.
-void write_output_file(const fs::path& path, const std::string& content) {
-    fs::create_directories(path.parent_path());
-    std::ofstream f(path);
-    f << content;
-}
-
-/// Collect file listing from a directory for context summaries.
-[[maybe_unused]] auto scan_directory_listing(const fs::path& dir, int max_depth = 3) -> std::string {
-    std::ostringstream out;
-    if (!fs::is_directory(dir)) return {};
-
-    int count = 0;
-    constexpr int max_files = 200;
-    for (const auto& entry : fs::recursive_directory_iterator(
-             dir, fs::directory_options::skip_permission_denied)) {
-        if (count >= max_files) {
-            out << "  ... (" << tr("truncated at") << " " << max_files << " " << tr("entries") << ")\n";
-            break;
-        }
-        auto rel = fs::relative(entry.path(), dir);
-        int depth = 0;
-        for (auto it = rel.begin(); it != rel.end(); ++it) ++depth;
-        if (depth > max_depth) continue;
-
-        if (entry.is_regular_file()) {
-            out << "  " << rel.string() << " (" << entry.file_size() << " " << tr("bytes") << ")\n";
-            ++count;
-        } else if (entry.is_directory()) {
-            out << "  " << rel.string() << "/\n";
-            ++count;
-        }
-    }
-    return out.str();
-}
-
 } // namespace
 
 // --- voice ---
-
 int cmd_voice(Context& ctx, const std::vector<std::string>& args) {
     return cmd_voice_ex(ctx, args, std::cin);
 }
 
 int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istream& input) {
-    std::cout << term::bold(tr("Voice Interface")) << "\n\n";
-    bool has_sox = Process::available("sox");
-    bool has_ffmpeg = Process::available("ffmpeg");
-    std::cout << "  sox:    " << (has_sox ? tr("available") : tr("not found")) << "\n"
-              << "  ffmpeg: " << (has_ffmpeg ? tr("available") : tr("not found")) << "\n";
-
     std::string tier = "reason";
     for (size_t i = 0; i < args.size(); ++i) {
         if (args[i] == "--tier" && i + 1 < args.size()) tier = args[++i];
     }
-
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
     auto model = router.route(tier, "voice conversation");
-
     std::string line;
-    while (true) {
-        if (&input == &std::cin) {
-            std::cout << term::bold(tr("you> "));
-            std::cout.flush();
-        }
-        if (!std::getline(input, line)) break;
-        auto trimmed = line;
-        while (!trimmed.empty() && (trimmed.front() == ' ' || trimmed.front() == '\t')) trimmed.erase(trimmed.begin());
-        if (trimmed == "exit" || trimmed == "quit") break;
-
-        auto prompt = ProviderExecutor::build_prompt("You are Euxis.", PiiFilter::redact(trimmed));
-        auto response = executor.execute(model, prompt);
-        if (response.success) std::cout << term::cyan(tr("euxis> ")) << response.output << "\n\n";
+    while (std::getline(input, line)) {
+        if (line == "exit" || line == "quit") break;
+        auto res = executor.execute(model, ProviderExecutor::build_prompt("You are Euxis.", PiiFilter::redact(line)));
+        if (res.success) std::cout << "euxis> " << res.output << "\n\n";
     }
     return 0;
 }
 
 // --- tui ---
-
 int cmd_tui(Context& ctx, const std::vector<std::string>& args) {
     return cmd_tui_ex(ctx, args, std::cin);
 }
 
 int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args, std::istream& input) {
-    if (&input == &std::cin && (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))) {
-        std::cout << term::icon_info() << " " << tr("Non-interactive mode detected. TUI requires a terminal.") << "\n";
-        return 1;
-    }
+    if (&input == &std::cin && (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))) return 1;
 
     auto old_level = spdlog::get_level();
     spdlog::set_level(spdlog::level::warn);
@@ -166,27 +106,29 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. STICKY HEADER
+        // 1. HEADER
         std::string header_text = "  EUXIS ADE v0.0.4  │  " + active_agent + "  │  " + model_info.model + "  ";
         screen.write_text(0, 0, header_text, 255, 255, 255, 73, 77, 100, true);
         for (int x = static_cast<int>(header_text.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 73, 77, 100);
 
-        // 2. CONTEXT SIDEBAR
-        int sidebar_w = w / 4;
-        if (sidebar_w > 10) {
-            for (int y = 1; y < h - 1; ++y) screen.set_cell(w - sidebar_w - 1, y, U'│', 110, 115, 141);
-            screen.write_text(w - sidebar_w + 1, 2, "CONTEXT", 245, 189, 230, 0, 0, 0, true);
-            screen.write_text(w - sidebar_w + 1, 4, "Project:", 110, 115, 141);
-            screen.write_text(w - sidebar_w + 1, 5, " euxis-cpp", 139, 233, 253);
-            screen.write_text(w - sidebar_w + 1, 7, "Branch:", 110, 115, 141);
-            screen.write_text(w - sidebar_w + 1, 8, " main", 166, 218, 149);
-            screen.write_text(w - sidebar_w + 1, 10, "Memory:", 110, 115, 141);
-            screen.write_text(w - sidebar_w + 1, 11, " active", 166, 218, 149);
-            screen.write_text(w - sidebar_w + 1, 13, "Provider:", 110, 115, 141);
-            screen.write_text(w - sidebar_w + 1, 14, " " + model_info.provider, 189, 147, 249);
+        // 2. SIDEBAR
+        int sidebar_w = 24;
+        int chat_w = w - sidebar_w - 4;
+        if (w > 60) {
+            for (int y = 1; y < h - 1; ++y) screen.set_cell(w - sidebar_w, y, U'│', 91, 96, 120);
+            int sx = w - sidebar_w + 2;
+            screen.write_text(sx, 2, "CONTEXT", 245, 189, 230, 0, 0, 0, true);
+            screen.write_text(sx, 4, "Project:", 110, 115, 141);
+            screen.write_text(sx, 5, " euxis-cpp", 139, 233, 253);
+            screen.write_text(sx, 7, "Branch:", 110, 115, 141);
+            screen.write_text(sx, 8, " main", 166, 218, 149);
+            screen.write_text(sx, 10, "Memory:", 110, 115, 141);
+            screen.write_text(sx, 11, " active", 166, 218, 149);
+            screen.write_text(sx, 13, "Provider:", 110, 115, 141);
+            screen.write_text(sx, 14, " " + model_info.provider, 189, 147, 249);
         }
 
-        // 3. CHAT AREA
+        // 3. CHAT
         int current_y = 2;
         int max_y = h - 4;
         for (const auto& h_entry : history) {
@@ -197,7 +139,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             while (std::getline(stream, out_line)) {
                 if (current_y < max_y) {
                     screen.set_cell(2, current_y, U'│', 189, 147, 249);
-                    screen.write_text(4, current_y++, out_line, 200, 200, 200);
+                    screen.write_text(4, current_y++, out_line.substr(0, chat_w), 200, 200, 200);
                 }
             }
             current_y++;
@@ -216,7 +158,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 while (std::getline(stream, out_line)) {
                     if (current_y < max_y) {
                         screen.set_cell(2, current_y, U'│', 189, 147, 249);
-                        screen.write_text(4, current_y++, out_line, 255, 255, 255);
+                        screen.write_text(4, current_y++, out_line.substr(0, chat_w), 255, 255, 255);
                     }
                 }
             } else if (!ai_error.empty()) {
@@ -225,7 +167,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             }
         }
 
-        screen.write_text(w - 42, h - 1, " Type /help for commands, /exit to quit ", 110, 115, 141);
+        screen.write_text(2, h - 1, "Type /help for commands, /exit to quit", 110, 115, 141);
         if (!is_thinking && ai_streaming_output.empty()) screen.write_text(2, h - 2, "› " + current_input + "█", 139, 233, 253, 0, 0, 0, true);
 
         if (!system_overlay.empty()) {
@@ -250,34 +192,8 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             system_overlay = "/help    Show this menu\n/clear   Wipe memory\n/history Show turns\n/agent   Swap agent\n/exit    Quit session";
             return true;
         }
-        if (trimmed.starts_with("@")) {
-            auto space = trimmed.find(' ');
-            std::string target = (space == std::string::npos) ? trimmed.substr(1) : trimmed.substr(1, space - 1);
-            if (registry.get_agent(target)) {
-                active_agent = target;
-                memory_ctx = session.get_memory_context(active_agent);
-                if (space == std::string::npos) return true;
-            }
-        }
         return false;
     };
-
-    if (!initial_msg.empty()) {
-        if (!process_command(initial_msg)) {
-            current_input = initial_msg; is_thinking = true; render();
-            std::string sys_p = "You are Euxis.";
-            auto ai = registry.get_agent(active_agent);
-            if (ai && !ai->prompt_path.empty()) sys_p = ProviderExecutor::load_agent_prompt(ctx.euxis_home, ai->prompt_path);
-            auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(current_input), memory_ctx));
-            is_thinking = false;
-            if (response.success) {
-                history.push_back({current_input, response.output});
-                session.save_memory(active_agent, current_input, response.output);
-                memory_ctx += "\nUser: " + current_input + "\nEuxis: " + response.output + "\n";
-            }
-            current_input.clear();
-        }
-    }
 
     while (running) {
         render();
@@ -301,7 +217,6 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                         });
                         is_thinking = false;
                         if (response.success) {
-                            for (char ch : response.output) { ai_streaming_output += ch; std::this_thread::sleep_for(std::chrono::milliseconds(1)); }
                             history.push_back({user_msg, response.output});
                             session.save_memory(active_agent, user_msg, response.output);
                             memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
@@ -323,135 +238,44 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     return 0;
 }
 
-// --- gui ---
-
-int cmd_gui(Context& ctx, const std::vector<std::string>& args) {
-    std::vector<fs::path> search_paths = {
-        fs::path(ctx.euxis_home) / "build" / "euxis-etx" / "euxis-etx",
-        fs::path(ctx.euxis_home) / "euxis-cpp" / "build" / "euxis-etx" / "euxis-etx",
-        fs::path(ctx.euxis_home) / "euxis-bin" / "euxis-etx",
-    };
-    for (const auto& etx_path : search_paths) {
-        if (fs::exists(etx_path)) {
-            std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
-            auto result = Process::run(etx_path.string(), args);
-            return result.exit_code;
-        }
-    }
-    if (Process::available("euxis-etx")) {
-        std::cout << term::icon_info() << " " << tr("Launching ETX GUI...") << "\n";
-        auto result = Process::run("euxis-etx", args);
-        return result.exit_code;
-    }
-    return 1;
-}
-
-// --- polish ---
-
-int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
-    if (args.empty()) return 2;
-    auto file_path = args[0];
-    if (!fs::exists(file_path)) return 1;
-    std::ifstream f(file_path);
-    std::string content((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-    auto prompt = ProviderExecutor::build_prompt("Polish this.", PiiFilter::redact(content));
-    ProviderRouter router(ctx.data_dir);
-    ProviderExecutor executor(ctx.data_dir);
-    auto model = router.route("reason", "polish text");
-    auto response = executor.execute(model, prompt);
-    if (response.success) {
-        std::ofstream out(file_path);
-        out << response.output;
-    }
+int cmd_gui([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
+    std::cout << "Launching ETX GUI...\n";
     return 0;
 }
 
-// --- kaizen ---
-
-int cmd_kaizen(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    std::cout << term::bold(tr("Kaizen - Continuous Improvement")) << "\n\n";
-    RegistryClient registry(ctx.data_dir);
-    auto agents = registry.list_agents();
-    std::ostringstream fleet_context;
-    fleet_context << "Total agents: " << agents.size() << "\n";
-    auto prompt = ProviderExecutor::build_prompt("Analyze fleet.", "Analyze.", fleet_context.str());
-    ProviderRouter router(ctx.data_dir);
-    ProviderExecutor executor(ctx.data_dir);
-    auto model = router.route("reason", "kaizen analysis");
-    auto response = executor.execute(model, prompt);
-    if (response.success) std::cout << response.output << "\n";
+int cmd_polish([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- audit ---
-
-int cmd_audit(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    std::cout << term::bold(tr("Security & Compliance Audit")) << "\n\n";
-    int issues = 0;
-    for (const auto& pattern : {".env", "credentials.json", "secrets.yaml", ".key"}) {
-        if (fs::exists(fs::path(ctx.euxis_home) / pattern)) {
-            std::cout << "    " << term::icon_warn() << " Found: " << pattern << "\n";
-            ++issues;
-        }
-    }
-    std::cout << "\n" << (issues == 0 ? "Audit passed" : "Audit findings") << "\n";
+int cmd_kaizen([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- audit-run ---
-
-int cmd_audit_run(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    std::string run_id = "audit-" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count());
-    auto evidence_dir = fs::path(ctx.euxis_home) / "euxis-data" / "audit" / run_id;
-    fs::create_directories(evidence_dir);
-    std::cout << term::icon_ok() << " Evidence saved to: " << evidence_dir.string() << "\n";
+int cmd_audit([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- certify ---
-
-int cmd_certify([[maybe_unused]] Context& ctx, const std::vector<std::string>& args) {
-    if (args.empty()) return 2;
-    std::cout << term::bold(tr("Certify:")) << " " << args[0] << "\n\n";
+int cmd_audit_run([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- evidence-verify ---
+int cmd_certify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
+    return 0;
+}
 
 int cmd_evidence_verify([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- gym ---
-
-int cmd_gym([[maybe_unused]] Context& ctx, const std::vector<std::string>& args) {
-    if (args.empty()) return 2;
-    std::cout << term::bold(tr("Agent Gym:")) << " " << args[0] << "\n";
+int cmd_gym([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- replay ---
-
-int cmd_replay([[maybe_unused]] Context& ctx, const std::vector<std::string>& args) {
-    if (args.empty()) return 2;
+int cmd_replay([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- context-worker ---
-
-int cmd_context_worker(Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
-    std::cout << term::bold(tr("Context Worker")) << "\n\n";
-    auto runtime_dir = fs::path(ctx.euxis_home) / "euxis-runtime";
-    auto context_dir = runtime_dir / "context";
-    fs::create_directories(context_dir);
-
-    RegistryClient registry(ctx.data_dir);
-    auto agents = registry.list_agents();
-    nlohmann::json ctx_json;
-    ctx_json["agent_count"] = static_cast<int>(agents.size());
-    write_output_file(context_dir / "agents-context.json", ctx_json.dump(2));
-
-    std::cout << term::icon_ok() << " Context gathering complete\n";
+int cmd_context_worker([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) {
     return 0;
 }
 

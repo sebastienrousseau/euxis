@@ -224,7 +224,7 @@ void get_terminal_size(int& width, int& height) {
 
 TerminalScreen::TerminalScreen() {
     get_terminal_size(width_, height_);
-    front_buffer_.resize(width_ * height_);
+    front_buffer_.assign(width_ * height_, Cell{.ch = 0xFFFFFFFF}); // Dirty state forces full draw
     back_buffer_.resize(width_ * height_);
 }
 
@@ -234,7 +234,7 @@ void TerminalScreen::resize(int w, int h) {
     if (w == width_ && h == height_) return;
     width_ = w;
     height_ = h;
-    front_buffer_.assign(w * h, Cell{});
+    front_buffer_.assign(w * h, Cell{.ch = 0xFFFFFFFF}); // Dirty state
     back_buffer_.assign(w * h, Cell{});
 }
 
