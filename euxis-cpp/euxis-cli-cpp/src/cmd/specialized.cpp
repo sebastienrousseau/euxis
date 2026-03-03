@@ -125,10 +125,15 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.write_gradient(0, 0, h1 + h2, 113, 153, 238, 164, 133, 221);
         for (int x = (int)(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 26, 27, 42);
 
-        // 2. CHAT AREA (Dense top-down flow)
+        // 2. CHAT AREA
         int current_y = 2;
         int max_y = h - 4;
-        size_t start_idx = (history.size() > 12) ? history.size() - 12 : 0;
+        
+        // Show as many turns as possible that fit top-down
+        size_t start_idx = 0;
+        // Basic heuristic to avoid scrolling issues in the simple renderer
+        if (history.size() > 20) start_idx = history.size() - 20;
+
         for (size_t i = start_idx; i < history.size(); ++i) {
             const auto& h_entry = history[i];
             if (current_y >= max_y) break;
@@ -189,10 +194,17 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
         else if (trimmed == "/fleet") {
             auto agents = registry.list_agents();
-            out = "Active Fleet:\n";
+            std::ostringstream oss;
+            oss << "Active Fleet (" << agents.size() << " agents):\n";
             for (size_t i = 0; i < agents.size(); ++i) {
-                out += std::format(" {:2d}. {} ({})\n", i + 1, agents[i].id, agents[i].role);
+                std::string desc = agents[i].role;
+                if (agents[i].manifesto && !agents[i].manifesto->identity.description.empty()) {
+                    desc = agents[i].manifesto->identity.description;
+                }
+                if (desc.size() > 150) desc = desc.substr(0, 147) + "...";
+                oss << std::format(" {:2d}. {:<15} - {}\n", i + 1, agents[i].id, desc);
             }
+            out = oss.str();
         }
         else if (trimmed.starts_with("/model ")) {
             std::string new_tier = trimmed.substr(7);
@@ -200,9 +212,18 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
         }
         else if (trimmed == "/help") {
-            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
+            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show session history\n /clear         Wipe session\n /exit          Quit";
         }
-        else if (trimmed == "/history") { out = "Session History: " + std::to_string(history.size()) + " turns completed."; }
+        else if (trimmed == "/history") {
+            std::ostringstream oss;
+            oss << "Session History (" << history.size() << " turns):\n";
+            for (const auto& h : history) {
+                std::string summary = h.first;
+                if (summary.size() > 40) summary = summary.substr(0, 37) + "...";
+                oss << " - " << summary << "\n";
+            }
+            out = oss.str();
+        }
         
         if (!out.empty()) {
             history.push_back({trimmed, out});
@@ -216,8 +237,6 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             
             auto agents = registry.list_agents();
             bool found = false;
-            
-            // Try numeric index first
             try {
                 size_t idx = std::stoul(target);
                 if (idx > 0 && idx <= agents.size()) {
@@ -226,9 +245,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 }
             } catch (...) {}
 
-            if (!found && registry.get_agent(target)) {
-                found = true;
-            }
+            if (!found && registry.get_agent(target)) found = true;
 
             if (found) {
                 active_agent = target;
