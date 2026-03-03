@@ -21,6 +21,7 @@
 #include <thread>
 #include <atomic>
 #include <algorithm>
+#include <map>
 
 namespace euxis::cli::cmd {
 
@@ -30,15 +31,48 @@ namespace {
 namespace fs = std::filesystem;
 namespace term = terminal;
 
-std::string synthesize_description(const AgentInfo& a) {
-    std::string d;
-    if (a.manifesto && !a.manifesto->identity.description.empty()) {
-        d = a.manifesto->identity.description;
-    } else {
-        d = "Specialized " + a.role + " (" + a.tier + ") for autonomous operations.";
+// Shared cache for AI-generated descriptions
+std::map<std::string, std::string> g_ai_descriptions;
+std::atomic<bool> g_profiling_done{false};
+
+void run_background_profiler(Context& ctx, const RegistryClient& registry, const ProviderRouter& router, ProviderExecutor& executor) {
+    auto agents = registry.list_agents();
+    if (agents.empty()) { g_profiling_done = true; return; }
+
+    // 1. Gather minimal project context
+    std::string project_ctx = "Project: Euxis ADE\n";
+    if (fs::exists(fs::path(ctx.euxis_home) / "README.md")) {
+        std::ifstream f(fs::path(ctx.euxis_home) / "README.md");
+        std::string line; int count = 0;
+        while (std::getline(f, line) && count++ < 50) project_ctx += line + "\n";
     }
-    if (d.size() > 75) d = d.substr(0, 72) + "...";
-    return d;
+
+    auto model = router.route("reason", "fleet profiling");
+
+    for (const auto& a : agents) {
+        std::string prompt = std::format(
+            "Based on this project context:\n{}\n\nGenerate a professional, ONE-SENTENCE description (max 75 chars) for the agent: '{}' (role: {}, tier: {}).\nReturn ONLY the description.",
+            project_ctx, a.id, a.role, a.tier
+        );
+        
+        auto res = executor.execute(model, prompt);
+        if (res.success) {
+            std::string d = res.output;
+            if (d.size() > 75) d = d.substr(0, 72) + "...";
+            g_ai_descriptions[a.id] = d;
+        }
+    }
+    g_profiling_done = true;
+}
+
+std::string get_agent_description(const AgentInfo& a) {
+    if (g_ai_descriptions.contains(a.id)) return g_ai_descriptions[a.id];
+    if (a.manifesto && !a.manifesto->identity.description.empty()) {
+        std::string d = a.manifesto->identity.description;
+        if (d.size() > 75) d = d.substr(0, 72) + "...";
+        return d;
+    }
+    return "Specialized " + a.role + " (" + a.tier + ") agent.";
 }
 } // namespace
 
@@ -78,6 +112,9 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     Session session(ctx.euxis_home);
     std::string memory_ctx = session.get_memory_context(active_agent);
 
+    // Start AI Fleet Profiler in background
+    std::thread(run_background_profiler, std::ref(ctx), std::ref(registry), std::ref(router), std::ref(executor)).detach();
+
     std::string tier = "code";
     std::string initial_msg;
     for (size_t i = 0; i < args.size(); ++i) {
@@ -104,7 +141,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     if (is_interactive) {
         term::enable_raw_mode();
         std::cout << "\n  " << term::bold(tokyo_magenta("EUXIS ADE")) << tokyo_dim(" v0.0.7") << "\n";
-        std::cout << "  " << tokyo_dim("Interactive Pager and Fleet Explorer enabled.\n\n");
+        std::cout << "  " << tokyo_dim("AI Fleet Profiling active in background…\n\n");
     }
 
     std::string current_input;
@@ -144,19 +181,21 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (selected < scroll_top) scroll_top = selected;
             if (selected >= scroll_top + view_h) scroll_top = selected - view_h + 1;
 
-            browser_screen.write_gradient(0, 0, " EUXIS FLEET EXPLORER │ Use Up/Down to navigate, Enter to select, Esc to cancel ", 113, 153, 238, 164, 133, 221);
+            std::string header = std::format(" EUXIS FLEET EXPLORER │ {} agents │ {} ", agents.size(), g_profiling_done ? "Profiling complete" : "AI profiling agents…");
+            browser_screen.write_gradient(0, 0, header, 113, 153, 238, 164, 133, 221);
             
             for (int i = 0; i < view_h && (scroll_top + i) < (int)agents.size(); ++i) {
                 int idx = scroll_top + i;
                 bool is_sel = (idx == selected);
                 int y = 2 + i;
                 
+                std::string desc = get_agent_description(agents[idx]);
                 if (is_sel) {
                     browser_screen.write_text(2, y, "➜ " + agents[idx].id, 56, 168, 157, 26, 27, 42, true);
-                    browser_screen.write_text(20, y, synthesize_description(agents[idx]), 169, 177, 214, 26, 27, 42);
+                    browser_screen.write_text(20, y, desc, 169, 177, 214, 26, 27, 42);
                 } else {
                     browser_screen.write_text(4, y, agents[idx].id, 113, 153, 238);
-                    browser_screen.write_text(20, y, synthesize_description(agents[idx]), 68, 75, 106);
+                    browser_screen.write_text(20, y, desc, 68, 75, 106);
                 }
             }
 
@@ -171,21 +210,20 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             browser_screen.render();
             
             int k = term::read_key();
-            if (k == 1001) { if (selected > 0) selected--; } // Up
-            else if (k == 1002) { if (selected < (int)agents.size() - 1) selected++; } // Down
+            if (k == 1001) { if (selected > 0) selected--; } 
+            else if (k == 1002) { if (selected < (int)agents.size() - 1) selected++; } 
             else if (k == '\r' || k == '\n') {
                 active_agent = agents[selected].id;
                 memory_ctx = session.get_memory_context(active_agent);
                 choosing = false;
                 std::cout << "\033[H\033[2J\r  " << tokyo_dim("Switched to ") << term::bold(tokyo_cyan(active_agent)) << "\n\n";
-            } else if (k == 27 || k == 'q') choosing = false; // Esc or q
+            } else if (k == 27 || k == 'q') choosing = false; 
         }
     };
 
     auto process_command = [&](const std::string& trimmed) {
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); std::cout << "\r\033[K  " << tokyo_dim("History wiped.\n\n"); return true; }
-        
         if (trimmed == "/fleet") { run_fleet_browser(); return true; }
         
         std::string out;
@@ -203,7 +241,13 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (trimmed.starts_with("/agent ") || trimmed.starts_with("@")) {
             size_t start = trimmed.starts_with("@") ? 1 : 7;
             std::string target = trimmed.substr(start);
-            if (registry.get_agent(target)) {
+            
+            auto agents = registry.list_agents();
+            bool found = false;
+            try { size_t idx = std::stoul(target); if (idx > 0 && idx <= agents.size()) { target = agents[idx - 1].id; found = true; } } catch (...) {}
+            if (!found && registry.get_agent(target)) found = true;
+
+            if (found) {
                 active_agent = target; memory_ctx = session.get_memory_context(active_agent);
                 std::cout << "\r\033[K  " << tokyo_dim("Switched to ") << term::bold(tokyo_cyan(active_agent)) << "\n\n";
                 return true;
@@ -231,24 +275,13 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
                     std::atomic<bool> is_thinking{true};
                     auto start_time = std::chrono::steady_clock::now();
-                    
                     std::thread spinner_thread([&, start_time]() {
                         static const std::vector<std::string> f = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-                        static const std::vector<std::string> phrases = {
-                            "Compiling brilliance",
-                            "Synthesizing consciousness",
-                            "Researching codebase patterns",
-                            "Analyzing neural pathways",
-                            "Doing research on memes",
-                            "Optimizing agent response"
-                        };
+                        static const std::vector<std::string> phrases = { "Compiling brilliance", "Synthesizing consciousness", "Researching patterns" };
                         std::string phrase = phrases[rand() % phrases.size()];
                         int i = 0; while (is_thinking) {
-                            auto now = std::chrono::steady_clock::now();
-                            auto secs = std::chrono::duration_cast<std::chrono::seconds>(now - start_time).count();
-                            std::cout << "\r\033[K  " << tokyo_magenta(f[(i++) % 10]) << " " 
-                                      << tokyo_text(phrase + "… ") 
-                                      << tokyo_dim("(esc to cancel, " + std::to_string(secs) + "s)");
+                            auto now = std::chrono::steady_clock::now(); auto secs = std::chrono::duration_cast<std::chrono::seconds>(now - start_time).count();
+                            std::cout << "\r\033[K  " << tokyo_magenta(f[(i++) % 10]) << " " << tokyo_text(phrase + "… ") << tokyo_dim("(esc to cancel, " + std::to_string(secs) + "s)");
                             std::cout.flush(); std::this_thread::sleep_for(std::chrono::milliseconds(80));
                         }
                     });
@@ -258,31 +291,19 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     
                     bool first = true; bool need_p = false;
                     auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
-                        if (!is_thinking) return; // Dropped if cancelled
+                        if (!is_thinking) return;
                         if (first) { is_thinking = false; spinner_thread.join(); std::cout << "\r\033[K" << " " << term::bold(tokyo_magenta("◆ Euxis")) << "  " << tokyo_dim(model_info.model) << "\n"; first = false; need_p = true; }
                         for (char ch : chunk) { if (need_p) { std::cout << tokyo_magenta(" ┃  "); need_p = false; } std::cout << tokyo_text(std::string(1, ch)); if (ch == '\n') need_p = true; }
                         std::cout.flush(); std::this_thread::sleep_for(std::chrono::milliseconds(2));
                     });
 
-                    // Wait while thinking to allow Esc-cancellation
                     while (is_thinking) {
                         int k = term::read_key();
-                        if (k == 27) { // ESC pressed
-                            is_thinking = false;
-                            spinner_thread.join();
-                            std::cout << "\r\033[K  " << tokyo_error("⚠ Request cancelled by user.\n\n");
-                            break; 
-                        }
+                        if (k == 27) { is_thinking = false; spinner_thread.join(); std::cout << "\r\033[K  " << tokyo_error("⚠ Request cancelled by user.\n\n"); break; }
                         std::this_thread::sleep_for(std::chrono::milliseconds(20));
                     }
-
-                    if (!first && response.success) { // Only finish if we actually started printing
-                        std::cout << "\n\n";
-                        history.push_back({user_msg, response.output});
-                        memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
-                    } else if (!response.success && !first) {
-                        std::cout << tokyo_error(" ┃  Error: " + response.error) << "\n\n";
-                    }
+                    if (!first && response.success) { history.push_back({user_msg, response.output}); memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n"; std::cout << "\n\n"; }
+                    else if (!response.success && !first) std::cout << tokyo_error(" ┃  Error: " + response.error) << "\n\n";
                 } else if (c >= 32 && c <= 126) current_input += (char)c;
             } else std::this_thread::sleep_for(std::chrono::milliseconds(5));
         } else {
