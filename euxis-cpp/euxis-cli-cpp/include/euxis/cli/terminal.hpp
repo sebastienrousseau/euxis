@@ -75,5 +75,40 @@ auto rgb_bg(uint8_t r, uint8_t g, uint8_t b, std::string_view text) -> std::stri
 void enable_raw_mode();
 void disable_raw_mode();
 int read_key();
+void get_terminal_size(int& width, int& height);
+
+// --- Double-Buffered Screen ---
+struct Cell {
+    char32_t ch{' '};
+    uint8_t fg_r{255}, fg_g{255}, fg_b{255};
+    uint8_t bg_r{0}, bg_g{0}, bg_b{0};
+    bool bold{false};
+    bool operator==(const Cell& o) const {
+        return ch == o.ch && fg_r == o.fg_r && fg_g == o.fg_g && fg_b == o.fg_b &&
+               bg_r == o.bg_r && bg_g == o.bg_g && bg_b == o.bg_b && bold == o.bold;
+    }
+};
+
+class TerminalScreen {
+public:
+    TerminalScreen();
+    ~TerminalScreen();
+
+    void resize(int w, int h);
+    void clear();
+    void set_cell(int x, int y, char32_t ch, uint8_t fr=255, uint8_t fg=255, uint8_t fb=255, uint8_t br=0, uint8_t bg=0, uint8_t bb=0, bool bold=false);
+    void write_text(int x, int y, std::string_view text, uint8_t fr=255, uint8_t fg=255, uint8_t fb=255, uint8_t br=0, uint8_t bg=0, uint8_t bb=0, bool bold=false);
+    void draw_box(int x, int y, int w, int h, std::string_view title = "");
+    void render();
+
+    int width() const { return width_; }
+    int height() const { return height_; }
+
+private:
+    int width_{0};
+    int height_{0};
+    std::vector<Cell> front_buffer_;
+    std::vector<Cell> back_buffer_;
+};
 
 } // namespace euxis::cli::terminal

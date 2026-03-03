@@ -190,4 +190,10 @@ euxis-cli-cpp/CMakeFiles/euxis-cli-lib.dir/src/terminal.cpp.o: \
  /usr/include/bits/termios-c_oflag.h /usr/include/bits/termios-c_cflag.h \
  /usr/include/bits/termios-cbaud.h /usr/include/bits/termios-c_lflag.h \
  /usr/include/bits/termios-tcflow.h /usr/include/bits/termios-misc.h \
- /usr/include/bits/termios-baud.h /usr/include/sys/ttydefaults.h
+ /usr/include/bits/termios-baud.h /usr/include/sys/ttydefaults.h \
+ /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h \
+ /usr/include/asm/ioctls.h /usr/include/asm-generic/ioctls.h \
+ /usr/include/linux/ioctl.h /usr/include/asm/ioctl.h \
+ /usr/include/asm-generic/ioctl.h /usr/include/linux/sockios.h \
+ /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
+ /usr/include/bits/ioctl-types.h

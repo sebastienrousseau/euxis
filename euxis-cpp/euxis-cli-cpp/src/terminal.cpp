@@ -209,4 +209,137 @@ int read_key() {
     return c;
 }
 
+#include <sys/ioctl.h>
+
+void get_terminal_size(int& width, int& height) {
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1 || w.ws_col == 0) {
+        width = 80;
+        height = 24;
+    } else {
+        width = w.ws_col;
+        height = w.ws_row;
+    }
+}
+
+TerminalScreen::TerminalScreen() {
+    get_terminal_size(width_, height_);
+    front_buffer_.resize(width_ * height_);
+    back_buffer_.resize(width_ * height_);
+}
+
+TerminalScreen::~TerminalScreen() {}
+
+void TerminalScreen::resize(int w, int h) {
+    if (w == width_ && h == height_) return;
+    width_ = w;
+    height_ = h;
+    front_buffer_.assign(w * h, Cell{});
+    back_buffer_.assign(w * h, Cell{});
+}
+
+void TerminalScreen::clear() {
+    for (auto& c : back_buffer_) {
+        c = Cell{};
+    }
+}
+
+void TerminalScreen::set_cell(int x, int y, char32_t ch, uint8_t fr, uint8_t fg, uint8_t fb, uint8_t br, uint8_t bg, uint8_t bb, bool bold) {
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) return;
+    int idx = y * width_ + x;
+    back_buffer_[idx] = {ch, fr, fg, fb, br, bg, bb, bold};
+}
+
+void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr, uint8_t fg, uint8_t fb, uint8_t br, uint8_t bg, uint8_t bb, bool bold) {
+    int cx = x;
+    int cy = y;
+    for (char c : text) {
+        if (c == '\n') {
+            cx = x;
+            cy++;
+            continue;
+        }
+        if (cx >= width_) {
+            cx = 0;
+            cy++;
+        }
+        if (cy >= height_) break;
+        set_cell(cx++, cy, c, fr, fg, fb, br, bg, bb, bold);
+    }
+}
+
+void TerminalScreen::draw_box(int x, int y, int w, int h, std::string_view title) {
+    if (w < 2 || h < 2) return;
+    // Basic Unicode Box (light)
+    char32_t tl = U'╭', tr = U'╮', bl = U'╰', br = U'╯';
+    char32_t hline = U'─', vline = U'│';
+
+    set_cell(x, y, tl);
+    set_cell(x + w - 1, y, tr);
+    set_cell(x, y + h - 1, bl);
+    set_cell(x + w - 1, y + h - 1, br);
+
+    for (int i = 1; i < w - 1; ++i) {
+        set_cell(x + i, y, hline);
+        set_cell(x + i, y + h - 1, hline);
+    }
+    for (int i = 1; i < h - 1; ++i) {
+        set_cell(x, y + i, vline);
+        set_cell(x + w - 1, y + i, vline);
+    }
+
+    if (!title.empty()) {
+        write_text(x + 2, y, " " + std::string(title) + " ", 139, 233, 253, 0, 0, 0, true);
+    }
+}
+
+void TerminalScreen::render() {
+    std::string out;
+    out.reserve(width_ * height_ * 10);
+
+    bool in_color = false;
+    uint8_t cur_fr = 255, cur_fg = 255, cur_fb = 255;
+    uint8_t cur_br = 0, cur_bg = 0, cur_bb = 0;
+
+    for (int y = 0; y < height_; ++y) {
+        for (int x = 0; x < width_; ++x) {
+            int idx = y * width_ + x;
+            if (front_buffer_[idx] == back_buffer_[idx]) continue; // No change
+
+            // Move cursor
+            out += std::format("\033[{};{}H", y + 1, x + 1);
+
+            const auto& c = back_buffer_[idx];
+            
+            // Output colors only if changed or we just jumped
+            if (c.fg_r != cur_fr || c.fg_g != cur_fg || c.fg_b != cur_fb ||
+                c.bg_r != cur_br || c.bg_g != cur_bg || c.bg_b != cur_bb || !in_color) {
+                out += std::format("\033[38;2;{};{};{}m\033[48;2;{};{};{}m", 
+                                   c.fg_r, c.fg_g, c.fg_b, c.bg_r, c.bg_g, c.bg_b);
+                cur_fr = c.fg_r; cur_fg = c.fg_g; cur_fb = c.fg_b;
+                cur_br = c.bg_r; cur_bg = c.bg_g; cur_bb = c.bg_b;
+                in_color = true;
+            }
+
+            // A naive UTF-8 encoder for char32_t for our subset
+            if (c.ch < 128) {
+                out += static_cast<char>(c.ch);
+            } else if (c.ch < 2048) {
+                out += static_cast<char>(192 | (c.ch >> 6));
+                out += static_cast<char>(128 | (c.ch & 63));
+            } else { // Basic 3-byte unicode symbols like box drawing
+                out += static_cast<char>(224 | (c.ch >> 12));
+                out += static_cast<char>(128 | ((c.ch >> 6) & 63));
+                out += static_cast<char>(128 | (c.ch & 63));
+            }
+
+            front_buffer_[idx] = c;
+        }
+    }
+    
+    if (!out.empty()) {
+        ::write(STDOUT_FILENO, out.data(), out.size());
+    }
+}
+
 } // namespace euxis::cli::terminal

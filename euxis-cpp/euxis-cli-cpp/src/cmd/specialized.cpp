@@ -219,50 +219,76 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     std::string ai_error;
     std::string system_overlay; // Persist help/history here
 
+    // Double-buffered terminal engine
+    term::TerminalScreen screen;
+    
     auto render = [&]() {
         if (!is_interactive) return;
         
-        // Clear screen and draw header
-        std::cout << "\033[H\033[2J";
-        std::cout << term::rgb_bg(98, 114, 164, term::rgb_fg(255,255,255, "  EUXIS TUI v0.0.4  │  " + active_agent + "  │  " + model_info.model + "  ")) << "\033[K\n";
-        
-        std::string separator;
-        for (int i = 0; i < 80; ++i) separator += "─";
-        std::cout << color_dim(separator) << "\n";
+        screen.resize(screen.width(), screen.height()); // Ensure size matches if window resized (simplified for now)
+        screen.clear();
 
-        // Draw history
+        // 1. Header
+        screen.write_text(0, 0, "  EUXIS TUI v0.0.4  │  " + active_agent + "  │  " + model_info.model + "  ", 255, 255, 255, 98, 114, 164, true);
+        
+        std::string separator(screen.width(), '-'); // ASCII fallback for simplicity in the basic buffer for now
+        screen.write_text(0, 1, separator, 98, 114, 164);
+
+        int current_y = 2;
+
+        // 2. History
         for (const auto& h : history) {
-            std::cout << color_user("› ") << h.first << "\n";
+            screen.write_text(2, current_y++, "› " + h.first, 139, 233, 253);
             
             std::istringstream stream{h.second};
             std::string out_line;
             while (std::getline(stream, out_line)) {
-                std::cout << "  " << out_line << "\n";
+                if (current_y < screen.height() - 5) { // Leave room for input
+                    screen.write_text(2, current_y++, out_line, 200, 200, 200);
+                }
             }
-            std::cout << "\n";
+            current_y++;
         }
 
-        // Draw system overlay (Help/History) if active
+        // 3. System Overlay (if active)
         if (!system_overlay.empty()) {
-            std::cout << system_overlay << "\n";
+            std::istringstream stream{system_overlay};
+            std::string out_line;
+            int box_y = current_y;
+            int box_h = 0;
+            while (std::getline(stream, out_line)) box_h++;
+            
+            screen.draw_box(4, box_y, 60, box_h + 2, "Menu");
+            
+            stream.clear();
+            stream.seekg(0);
+            int txt_y = box_y + 1;
+            while (std::getline(stream, out_line)) {
+                screen.write_text(6, txt_y++, out_line, 255, 255, 255);
+            }
+            current_y += box_h + 3;
         }
 
-        // Draw current state
+        // 4. Current State / Input
+        current_y = std::min(current_y, screen.height() - 4); // Keep input near bottom
+
         if (is_thinking) {
-            std::cout << color_user("› ") << current_input << "\n";
+            screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253);
             static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
             static int frame_idx = 0;
-            std::cout << "\n  " << color_ai(frames[(frame_idx++) % frames.size()] + " " + thinking_status) << "\n";
+            screen.write_text(2, current_y, frames[(frame_idx++) % frames.size()] + " " + thinking_status, 189, 147, 249);
         } else if (!ai_error.empty()) {
-            std::cout << color_user("› ") << current_input << "\n";
-            std::cout << "\n  " << color_err("Error: ") << ai_error << "\n\n";
+            screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253);
+            screen.write_text(2, current_y, "Error: " + ai_error, 255, 85, 85);
         } else if (!ai_streaming_output.empty()) {
-            std::cout << color_user("› ") << current_input << "\n\n";
-            std::cout << "  " << ai_streaming_output << "█\n";
+            screen.write_text(2, current_y++, "› " + current_input, 139, 233, 253);
+            screen.write_text(2, current_y, ai_streaming_output + "█", 200, 200, 200);
         } else {
-            std::cout << color_user("› ") << current_input << "\033[K";
+            screen.write_text(2, current_y, "› " + current_input + "█", 139, 233, 253);
         }
-        std::cout.flush();
+
+        // Flush buffer to terminal
+        screen.render();
     };
 
     if (!is_interactive) {
