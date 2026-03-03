@@ -84,7 +84,10 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
-    std::vector<std::string> cmd_suggestions = {"/help", "/clear", "/exit", "/agent", "tell me a joke", "refactor code", "check security"};
+    std::vector<std::string> cmd_suggestions = {
+        "/about", "/auth", "/commands", "/agents", "/agent ", "/combos", "/playbook",
+        "/help", "/clear", "/exit", "/history"
+    };
 
     bool is_interactive = (&input == &std::cin);
     if (is_interactive) {
@@ -117,34 +120,32 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. ELITE TOP BAR (One-line compact)
+        // 1. ELITE TOP BAR
         std::string h1 = " EUXIS ADE v0.0.6 ";
         std::string h2 = " │ agent:" + active_agent + " │ " + model_info.model + " ";
         screen.write_gradient(0, 0, h1 + h2, 139, 233, 253, 189, 147, 249);
-        for (int x = static_cast<int>(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 54, 58, 79);
+        for (int x = (int)(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 54, 58, 79);
 
-        // 2. BOTTOM UNIT (Unified Prompt & Help)
-        std::string footer_txt = " Tab:complete suggest │ /help:commands ";
-        screen.write_text(w - (int)footer_txt.size() - 2, h - 1, footer_txt, 110, 115, 141, 30, 32, 48, false);
-        for(int x=0; x < w - (int)footer_txt.size() - 2; ++x) screen.set_cell(x, h-1, ' ', 0,0,0, 30,32,48);
+        // 2. BOTTOM UNIT
+        std::string f_txt = " Tab:autocomplete │ /help:commands ";
+        screen.write_text(w - (int)f_txt.size() - 4, h - 1, f_txt, 110, 115, 141, 30, 32, 48);
+        for(int x=0; x < w - (int)f_txt.size() - 4; ++x) screen.set_cell(x, h-1, ' ', 0,0,0, 30,32,48);
 
-        // Input Line
-        screen.write_text(2, h - 2, "➜ ", 139, 233, 253, 0, 0, 0, true);
-        screen.write_text(5, h - 2, current_input, 255, 255, 255);
+        screen.write_text(4, h - 2, "➜ ", 139, 233, 253, 0, 0, 0, true);
+        screen.write_text(7, h - 2, current_input, 255, 255, 255);
         ghost_text = get_prediction(current_input);
-        if (!ghost_text.empty()) screen.write_text(5 + (int)current_input.size(), h - 2, ghost_text, 110, 115, 141);
-        screen.set_cell(5 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 255, 255, 255); // Software Cursor
+        if (!ghost_text.empty()) screen.write_text(7 + (int)current_input.size(), h - 2, ghost_text, 110, 115, 141);
+        screen.set_cell(7 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 255, 255, 255);
 
-        // 3. CHAT AREA (Anchored to bottom prompt)
-        int current_y = h - 4; // Start just above input unit
+        // 3. CHAT AREA (Dense, bottom-aligned)
+        int current_y = h - 4;
         
-        // Render Active Turn (Streaming or Thinking)
         if (is_thinking) {
             static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
             static int f_idx = 0;
-            screen.write_text(4, current_y, frames[(f_idx++/2)%10] + " analyzing...", 245, 189, 230);
+            screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " analyzing...", 245, 189, 230);
             current_y -= 2;
-            screen.write_text(4, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
+            screen.write_text(6, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
             current_y -= 2;
         } else if (!ai_streaming_output.empty() || !ai_error.empty()) {
             std::vector<std::string> lines;
@@ -153,34 +154,32 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             std::reverse(lines.begin(), lines.end());
             for(const auto& line : lines) {
                 if (current_y < 2) break;
-                screen.set_cell(4, current_y, U'│', 189, 147, 249);
-                screen.write_text(6, current_y--, line.substr(0, w-10), 202, 211, 245);
+                screen.set_cell(6, current_y, U'│', 189, 147, 249);
+                screen.write_text(8, current_y--, line.substr(0, w-12), 202, 211, 245);
             }
             current_y--;
-            screen.write_text(4, current_y--, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
+            screen.write_text(6, current_y--, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
         }
 
-        // Render History (Bottom-up)
         for (auto it = history.rbegin(); it != history.rend(); ++it) {
             if (current_y < 2) break;
             std::vector<std::string> lines;
             std::istringstream stream{it->second};
             std::string l; while(std::getline(stream, l)) lines.push_back(l);
             std::reverse(lines.begin(), lines.end());
-            
             for(const auto& line : lines) {
                 if (current_y < 2) break;
-                screen.set_cell(4, current_y, U'│', 189, 147, 249);
-                screen.write_text(6, current_y--, line.substr(0, w-10), 184, 192, 224);
+                screen.set_cell(6, current_y, U'│', 189, 147, 249);
+                screen.write_text(8, current_y--, line.substr(0, w-12), 184, 192, 224);
             }
             current_y--;
             if (current_y < 2) break;
-            screen.write_text(4, current_y--, "➜ " + it->first, 139, 233, 253, 0, 0, 0, true);
+            screen.write_text(6, current_y--, "➜ " + it->first, 139, 233, 253, 0, 0, 0, true);
             current_y--;
         }
 
         if (!system_overlay.empty()) {
-            screen.draw_box(w/2 - 30, h/2 - 5, 60, 10, "COMMANDS");
+            screen.draw_box(w/2 - 30, h/2 - 5, 60, 10, "SYSTEM");
             std::istringstream stream{system_overlay};
             std::string out_line;
             int txt_y = h/2 - 3;
@@ -193,7 +192,33 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         system_overlay.clear();
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
-        if (trimmed == "?" || trimmed == "/help") { system_overlay = "/help    Commands\n/clear   Clean Memory\n/agent   Change Agent\n/exit    Kill Session"; return true; }
+        if (trimmed == "/about") { system_overlay = "EUXIS ADE v0.0.6\nHigh-Performance Agentic Environment\nC++23 Engine\nDracula Palette (AAA)"; return true; }
+        if (trimmed == "/auth") { system_overlay = "Authentication Profiles:\n - claude (active)\n - gemini (detected)\n - local (ollama)"; return true; }
+        if (trimmed == "/commands") { system_overlay = "System:\n /about, /auth, /help, /clear, /exit\nFleet:\n /agents, /agent, /combos, /playbook"; return true; }
+        if (trimmed == "/agents") {
+            auto agents = registry.list_agents();
+            std::string out = "Available Agents:\n";
+            for (const auto& a : agents) out += " - " + a.id + " (" + a.role + ")\n";
+            system_overlay = out; return true;
+        }
+        if (trimmed == "/combos") { system_overlay = "Agent Combos:\n - dev-squad (arch+code)\n - audit-squad (sec+docs)"; return true; }
+        if (trimmed == "/playbook") { system_overlay = "Active Playbooks:\n - euxis-standard-v2\n - security-first-audit"; return true; }
+        if (trimmed == "/history") {
+            std::string out = "Session History:\n";
+            for (const auto& h : history) out += " - " + h.first.substr(0, 40) + "...\n";
+            system_overlay = out; return true;
+        }
+        if (trimmed == "?" || trimmed == "/help") { system_overlay = "/commands Show all\n/agents   List fleet\n/agent    Switch active\n/clear    Wipe memory\n/exit     Kill Session"; return true; }
+        if (trimmed.starts_with("/agent ") || trimmed.starts_with("@")) {
+            size_t start = trimmed.starts_with("@") ? 1 : 7;
+            auto space = trimmed.find(' ', start);
+            std::string target = (space == std::string::npos) ? trimmed.substr(start) : trimmed.substr(start, space - start);
+            if (registry.get_agent(target)) {
+                active_agent = target;
+                memory_ctx = session.get_memory_context(active_agent);
+                if (space == std::string::npos) return true;
+            }
+        }
         return false;
     };
 
@@ -227,7 +252,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     }).detach();
                     while (is_thinking || !ai_streaming_output.empty()) { render(); std::this_thread::sleep_for(std::chrono::milliseconds(30)); }
                 } else if (c >= 32 && c <= 126) current_input += (char)c;
-            } else std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            } else std::this_thread::sleep_for(std::chrono::milliseconds(10));
         } else {
             std::string l; if (!std::getline(input, l)) break;
             auto res = executor.execute(model_info, l);
