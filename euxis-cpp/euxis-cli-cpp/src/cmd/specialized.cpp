@@ -85,7 +85,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
     std::vector<std::string> cmd_suggestions = {
-        "/help", "/model ", "/agents", "/agent ", "/auth", "/clear", "/exit", "/quit", "/about", "/history"
+        "/help", "/model ", "/fleet", "/agent ", "/auth", "/clear", "/exit", "/quit", "/about", "/history"
     };
 
     bool is_interactive = (&input == &std::cin);
@@ -187,10 +187,12 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         std::string out;
         if (trimmed == "/about") { out = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nAgentic Orchestrator [C++23]"; }
         else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
-        else if (trimmed == "/agents") {
+        else if (trimmed == "/fleet") {
             auto agents = registry.list_agents();
-            out = "Available Fleet:\n";
-            for (const auto& a : agents) out += " - " + a.id + " (" + a.role + ")\n";
+            out = "Active Fleet:\n";
+            for (size_t i = 0; i < agents.size(); ++i) {
+                out += std::format(" {:2d}. {} ({})\n", i + 1, agents[i].id, agents[i].role);
+            }
         }
         else if (trimmed.starts_with("/model ")) {
             std::string new_tier = trimmed.substr(7);
@@ -198,7 +200,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
         }
         else if (trimmed == "/help") {
-            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id>    Switch personality\n /agents        List fleet\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
+            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id|num> Switch personality\n /fleet         List all agents\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
         }
         else if (trimmed == "/history") { out = "Session History: " + std::to_string(history.size()) + " turns completed."; }
         
@@ -211,11 +213,31 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             size_t start = trimmed.starts_with("@") ? 1 : 7;
             auto space = trimmed.find(' ', start);
             std::string target = (space == std::string::npos) ? trimmed.substr(start) : trimmed.substr(start, space - start);
-            if (registry.get_agent(target)) {
+            
+            auto agents = registry.list_agents();
+            bool found = false;
+            
+            // Try numeric index first
+            try {
+                size_t idx = std::stoul(target);
+                if (idx > 0 && idx <= agents.size()) {
+                    target = agents[idx - 1].id;
+                    found = true;
+                }
+            } catch (...) {}
+
+            if (!found && registry.get_agent(target)) {
+                found = true;
+            }
+
+            if (found) {
                 active_agent = target;
                 memory_ctx = session.get_memory_context(active_agent);
                 history.push_back({trimmed, "Switched agent to: " + active_agent});
-                if (space == std::string::npos) return true;
+                return true;
+            } else {
+                history.push_back({trimmed, "Unknown agent: " + target + ". Use /fleet to see available agents."});
+                return true;
             }
         }
         return false;
