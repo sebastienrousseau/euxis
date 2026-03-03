@@ -84,12 +84,12 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
-    std::vector<std::string> cmd_suggestions = {"/help", "/clear", "/exit", "/agent", "/history", "tell me a joke", "refactor this", "check security"};
+    std::vector<std::string> cmd_suggestions = {"/help", "/clear", "/exit", "/agent", "/history", "tell me a joke", "refactor code", "analyze project", "check security", "optimize performance"};
 
     bool is_interactive = (&input == &std::cin);
     if (is_interactive) {
         term::enable_raw_mode();
-        std::cout << "\033[?1049h\033[H\033[2J";
+        std::cout << "\033[?1049h\033[H\033[2J\033[?25l";
     }
 
     std::string current_input;
@@ -105,7 +105,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     auto get_prediction = [&](const std::string& input_str) -> std::string {
         if (input_str.empty()) return "";
         for (const auto& s : cmd_suggestions) {
-            if (s.starts_with(input_str)) return s.substr(input_str.size());
+            if (s.size() > input_str.size() && s.substr(0, input_str.size()) == input_str) return s.substr(input_str.size());
         }
         return "";
     };
@@ -120,22 +120,26 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         // 1. ELITE GRADIENT HEADER
         std::string h1 = " EUXIS ADE v0.0.5 ";
         std::string h2 = " │ " + active_agent + " │ " + model_info.model + " ";
-        screen.write_gradient(0, 0, h1 + h2, 139, 233, 253, 189, 147, 249); // Cyan to Purple
-        for (int x = static_cast<int>(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 73, 77, 100);
+        std::string header_full = h1 + h2;
+        screen.write_gradient(0, 0, header_full, 139, 233, 253, 189, 147, 249);
+        for (int x = static_cast<int>(header_full.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 68, 71, 90);
 
-        // 2. CHAT AREA (Full Width)
-        int chat_w = w - 6;
+        // 2. CHAT AREA
         int current_y = 2;
         int max_y = h - 4;
-        for (const auto& h_entry : history) {
+        
+        size_t start_idx = (history.size() > 5) ? history.size() - 5 : 0;
+        for (size_t i = start_idx; i < history.size(); ++i) {
+            const auto& h_entry = history[i];
             if (current_y >= max_y) break;
             screen.write_text(2, current_y++, "➜ " + h_entry.first, 139, 233, 253, 0, 0, 0, true);
+            
             std::istringstream stream{h_entry.second};
             std::string out_line;
             while (std::getline(stream, out_line)) {
                 if (current_y < max_y) {
                     screen.set_cell(2, current_y, U'┃', 189, 147, 249);
-                    screen.write_text(4, current_y++, out_line.substr(0, chat_w), 248, 248, 242);
+                    screen.write_text(4, current_y++, out_line.substr(0, w - 6), 248, 248, 242);
                 }
             }
             current_y++;
@@ -145,8 +149,8 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (is_thinking) {
                 screen.write_text(2, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
                 static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-                static int frame_idx = 0;
-                screen.write_text(4, current_y, frames[(frame_idx++) % frames.size()] + " Agent Analyzing...", 255, 121, 198);
+                static int f_idx = 0;
+                screen.write_text(4, current_y, frames[(f_idx++ / 2) % 10] + " Agent Analyzing...", 255, 121, 198);
             } else if (!ai_streaming_output.empty()) {
                 screen.write_text(2, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
                 std::istringstream stream{ai_streaming_output};
@@ -154,22 +158,25 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                 while (std::getline(stream, out_line)) {
                     if (current_y < max_y) {
                         screen.set_cell(2, current_y, U'┃', 189, 147, 249);
-                        screen.write_text(4, current_y++, out_line.substr(0, chat_w), 255, 255, 255);
+                        screen.write_text(4, current_y++, out_line.substr(0, w - 6), 255, 255, 255);
                     }
                 }
+            } else if (!ai_error.empty()) {
+                screen.write_text(2, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
+                screen.write_text(4, current_y, "Error: " + ai_error, 255, 85, 85);
             }
         }
 
-        // 4. FLOATING INPUT + PREDICTION
-        screen.write_text(2, h - 1, "Tab to complete suggestion", 98, 114, 164);
+        // 3. FOOTER
+        std::string footer_hint = " Tab to complete suggest │ /help for commands ";
+        screen.write_text(w - (int)footer_hint.size() - 2, h - 1, footer_hint, 98, 114, 164);
+        
         if (!is_thinking && ai_streaming_output.empty()) {
             screen.write_text(2, h - 2, "➜ ", 139, 233, 253, 0, 0, 0, true);
             screen.write_text(4, h - 2, current_input, 255, 255, 255);
             ghost_text = get_prediction(current_input);
-            if (!ghost_text.empty()) {
-                screen.write_text(4 + static_cast<int>(current_input.size()), h - 2, ghost_text, 98, 114, 164);
-            }
-            screen.set_cell(4 + static_cast<int>(current_input.size()), h - 2, U' ', 255, 255, 255, 255, 255, 255); // Cursor
+            if (!ghost_text.empty()) screen.write_text(4 + (int)current_input.size(), h - 2, ghost_text, 98, 114, 164);
+            screen.set_cell(4 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 255, 255, 255); // Cursor
         }
 
         if (!system_overlay.empty()) {
@@ -184,16 +191,9 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
 
     auto process_command = [&](const std::string& trimmed) {
         system_overlay.clear();
-        if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") {
-            running = false; return true;
-        }
-        if (trimmed == "clear" || trimmed == "/clear") {
-            memory_ctx.clear(); history.clear(); return true;
-        }
-        if (trimmed == "?" || trimmed == "/help") {
-            system_overlay = "/help    Show commands\n/clear   Wipe history\n/agent   Agent fleet\n/exit    Kill session";
-            return true;
-        }
+        if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
+        if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
+        if (trimmed == "?" || trimmed == "/help") { system_overlay = "/help    Commands\n/clear   Clean Memory\n/agent   Change Agent\n/exit    Kill Session"; return true; }
         return false;
     };
 
@@ -204,9 +204,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (c > 0) {
                 system_overlay.clear();
                 if (c == 3 || c == 4) running = false;
-                else if (c == 9) { // Tab
-                    if (!ghost_text.empty()) current_input += ghost_text;
-                }
+                else if (c == 9) { if (!ghost_text.empty()) current_input += ghost_text; }
                 else if (c == 127 || c == 8 || c == 1000) { if (!current_input.empty()) current_input.pop_back(); }
                 else if (c == '\r' || c == '\n') {
                     if (current_input.empty()) continue;
@@ -214,21 +212,19 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     is_thinking = true;
                     std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
                     std::thread([&, user_msg]() {
-                        std::string sys_p = "You are Euxis. Cinematic.";
-                        auto response = executor.execute(model_info, ProviderExecutor::build_prompt(sys_p, PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
+                        auto response = executor.execute(model_info, ProviderExecutor::build_prompt("You are Euxis.", PiiFilter::redact(user_msg), memory_ctx), 120, std::nullopt, [&](const std::string& chunk){
                             ai_streaming_output += chunk;
                         });
                         is_thinking = false;
                         if (response.success) {
                             history.push_back({user_msg, response.output});
-                            session.save_memory(active_agent, user_msg, response.output);
                             memory_ctx += "\nUser: " + user_msg + "\nEuxis: " + response.output + "\n";
                             ai_streaming_output.clear();
-                        }
+                        } else ai_error = response.error;
                         current_input.clear();
                     }).detach();
-                    while (is_thinking || !ai_streaming_output.empty()) { render(); std::this_thread::sleep_for(std::chrono::milliseconds(20)); }
-                } else if (c >= 32 && c <= 126) current_input += static_cast<char>(c);
+                    while (is_thinking || !ai_streaming_output.empty()) { render(); std::this_thread::sleep_for(std::chrono::milliseconds(30)); }
+                } else if (c >= 32 && c <= 126) current_input += (char)c;
             } else std::this_thread::sleep_for(std::chrono::milliseconds(5));
         } else {
             std::string l; if (!std::getline(input, l)) break;
@@ -236,7 +232,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (res.success) std::cout << res.output << "\n";
         }
     }
-    if (is_interactive) { std::cout << "\033[?1049l"; term::disable_raw_mode(); }
+    if (is_interactive) { std::cout << "\033[?1049l\033[?25h"; term::disable_raw_mode(); }
     spdlog::set_level(old_level);
     return 0;
 }
