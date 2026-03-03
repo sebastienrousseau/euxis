@@ -85,8 +85,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     auto model_info = router.route(tier, initial_msg.empty() ? "tui conversation" : initial_msg);
     std::vector<std::pair<std::string, std::string>> history;
     std::vector<std::string> cmd_suggestions = {
-        "/about", "/auth", "/commands", "/agents", "/agent ", "/combos", "/playbook",
-        "/help", "/clear", "/exit", "/quit", "/history"
+        "/help", "/model ", "/agents", "/agent ", "/auth", "/clear", "/exit", "/quit", "/about", "/history"
     };
 
     bool is_interactive = (&input == &std::cin);
@@ -102,7 +101,6 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     std::string thinking_phrase = "analyzing...";
     std::string ai_streaming_output;
     std::string ai_error;
-    std::string system_overlay;
 
     term::TerminalScreen screen;
     
@@ -121,25 +119,28 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. TOP BAR (Tokyo Dark Gradient)
+        // 1. HEADER (Tokyo Dark Gradient)
         std::string h1 = " EUXIS ADE v0.0.6 ";
         std::string h2 = " │ agent:" + active_agent + " │ " + model_info.model + " ";
         screen.write_gradient(0, 0, h1 + h2, 113, 153, 238, 164, 133, 221);
         for (int x = (int)(h1.size() + h2.size()); x < w; ++x) screen.set_cell(x, 0, ' ', 255, 255, 255, 26, 27, 42);
 
-        // 2. CHAT AREA (Top-Down, Dense)
+        // 2. CHAT AREA (Dense top-down flow)
         int current_y = 2;
         int max_y = h - 4;
-        size_t start_idx = (history.size() > 15) ? history.size() - 15 : 0;
+        size_t start_idx = (history.size() > 12) ? history.size() - 12 : 0;
         for (size_t i = start_idx; i < history.size(); ++i) {
             const auto& h_entry = history[i];
             if (current_y >= max_y) break;
+            
+            bool is_cmd = h_entry.first.starts_with("/");
             screen.write_text(4, current_y++, "➜ " + h_entry.first, 56, 168, 157, 0, 0, 0, true);
             std::istringstream stream{h_entry.second};
             std::string out_line;
             while (std::getline(stream, out_line)) {
                 if (current_y < max_y) {
-                    screen.set_cell(4, current_y, U'┃', 164, 133, 221);
+                    if (is_cmd) screen.set_cell(4, current_y, U'┃', 68, 75, 106);
+                    else screen.set_cell(4, current_y, U'┃', 164, 133, 221);
                     screen.write_text(6, current_y++, out_line.substr(0, w-10), 169, 177, 214);
                 }
             }
@@ -165,8 +166,8 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             }
         }
 
-        // 3. STICKY DOCKED FOOTER
-        std::string f_hint = " Tab:autocomplete │ /help:commands ";
+        // 3. FOOTER
+        std::string f_hint = " Tab:autocomplete │ /model:switch │ /help:all ";
         screen.write_text(w - (int)f_hint.size() - 4, h - 1, f_hint, 68, 75, 106, 26, 27, 42);
         for(int x=0; x < w - (int)f_hint.size() - 4; ++x) screen.set_cell(x, h - 1, ' ', 0, 0, 0, 26, 27, 42);
 
@@ -176,50 +177,36 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (!ghost_text.empty()) screen.write_text(7 + (int)current_input.size(), h - 2, ghost_text, 68, 75, 106);
         screen.set_cell(7 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 169, 177, 214);
 
-        // 4. CENTERED SYSTEM MODAL
-        if (!system_overlay.empty()) {
-            std::vector<std::string> lines;
-            std::istringstream stream{system_overlay};
-            std::string line;
-            int max_lw = 0;
-            while (std::getline(stream, line)) {
-                lines.push_back(line);
-                max_lw = std::max(max_lw, (int)line.size());
-            }
-            int box_w = std::min(w - 10, max_lw + 8);
-            int box_h = std::min(h - 6, (int)lines.size() + 2);
-            int box_x = (w - box_w) / 2;
-            int box_y = (h - box_h) / 2;
-
-            screen.draw_box(box_x, box_y, box_w, box_h, " SYSTEM ");
-            for (int i = 0; i < (int)lines.size() && (i + 1) < box_h; ++i) {
-                screen.write_text(box_x + 3, box_y + 1 + i, lines[i].substr(0, box_w - 6), 169, 177, 214);
-            }
-        }
         screen.render();
     };
 
     auto process_command = [&](const std::string& trimmed) {
-        system_overlay.clear();
         if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") { running = false; return true; }
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
-        if (trimmed == "/about") { system_overlay = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nHigh-Performance C++23 Engine"; return true; }
-        if (trimmed == "/auth") { system_overlay = "Profiles:\n - claude (active)\n - gemini\n - local"; return true; }
-        if (trimmed == "/agents") {
+        
+        std::string out;
+        if (trimmed == "/about") { out = "EUXIS ADE v0.0.6\nTokyo Dark Edition\nAgentic Orchestrator [C++23]"; }
+        else if (trimmed == "/auth") { out = "Active Profiles:\n - claude (Anthropic API)\n - gemini (Google AI)\n - local (Llama 3)"; }
+        else if (trimmed == "/agents") {
             auto agents = registry.list_agents();
-            std::string out = "Fleet:\n";
-            for (const auto& a : agents) out += " - " + a.id + "\n";
-            system_overlay = out; return true;
+            out = "Available Fleet:\n";
+            for (const auto& a : agents) out += " - " + a.id + " (" + a.role + ")\n";
         }
-        if (trimmed == "/history") {
-            std::string out = "History:\n";
-            for (const auto& h : history) out += " - " + h.first.substr(0, 40) + "...\n";
-            system_overlay = out; return true;
+        else if (trimmed.starts_with("/model ")) {
+            std::string new_tier = trimmed.substr(7);
+            model_info = router.route(new_tier, "model switch");
+            out = "Switched to " + model_info.provider + " (" + model_info.model + ")";
         }
-        if (trimmed == "?" || trimmed == "/help" || trimmed == "/commands") { 
-            system_overlay = "Commands:\n /about    /agents\n /auth     /agent\n /clear    /history\n /exit     /commands"; 
-            return true; 
+        else if (trimmed == "/help") {
+            out = "Commands:\n /model <tier>  Switch AI (code|reason|data)\n /agent <id>    Switch personality\n /agents        List fleet\n /history       Show turn count\n /clear         Wipe session\n /exit          Quit";
         }
+        else if (trimmed == "/history") { out = "Session History: " + std::to_string(history.size()) + " turns completed."; }
+        
+        if (!out.empty()) {
+            history.push_back({trimmed, out});
+            return true;
+        }
+
         if (trimmed.starts_with("/agent ") || trimmed.starts_with("@")) {
             size_t start = trimmed.starts_with("@") ? 1 : 7;
             auto space = trimmed.find(' ', start);
@@ -227,6 +214,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             if (registry.get_agent(target)) {
                 active_agent = target;
                 memory_ctx = session.get_memory_context(active_agent);
+                history.push_back({trimmed, "Switched agent to: " + active_agent});
                 if (space == std::string::npos) return true;
             }
         }
@@ -238,7 +226,6 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (is_interactive) {
             int c = term::read_key();
             if (c > 0) {
-                system_overlay.clear();
                 if (c == 3 || c == 4) running = false;
                 else if (c == 9) { if (!ghost_text.empty()) current_input += ghost_text; }
                 else if (c == 127 || c == 8 || c == 1000) { if (!current_input.empty()) current_input.pop_back(); }
@@ -247,7 +234,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     if (process_command(current_input)) { current_input.clear(); continue; }
                     is_thinking = true;
                     static const std::vector<std::string> phrases = {
-                        "exploring codebase...", "analyzing patterns...", "synthesizing response...", "doing research..."
+                        "exploring codebase...", "analyzing patterns...", "synthesizing response...", "querying agent...", "doing research on memes..."
                     };
                     thinking_phrase = phrases[rand() % phrases.size()];
                     std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
