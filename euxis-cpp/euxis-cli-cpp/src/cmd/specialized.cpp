@@ -86,7 +86,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     std::vector<std::pair<std::string, std::string>> history;
     std::vector<std::string> cmd_suggestions = {
         "/about", "/auth", "/commands", "/agents", "/agent ", "/combos", "/playbook",
-        "/help", "/clear", "/exit", "/history"
+        "/help", "/clear", "/exit", "/quit", "/history"
     };
 
     bool is_interactive = (&input == &std::cin);
@@ -99,6 +99,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     std::string ghost_text;
     bool running = true;
     bool is_thinking = false;
+    std::string thinking_phrase = "analyzing...";
     std::string ai_streaming_output;
     std::string ai_error;
     std::string system_overlay;
@@ -143,7 +144,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (is_thinking) {
             static const std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
             static int f_idx = 0;
-            screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " analyzing...", 245, 189, 230);
+            screen.write_text(6, current_y, frames[(f_idx++/2)%10] + " " + thinking_phrase, 245, 189, 230);
             current_y -= 2;
             screen.write_text(6, current_y++, "➜ " + current_input, 139, 233, 253, 0, 0, 0, true);
             current_y -= 2;
@@ -194,7 +195,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         if (trimmed == "clear" || trimmed == "/clear") { memory_ctx.clear(); history.clear(); return true; }
         if (trimmed == "/about") { system_overlay = "EUXIS ADE v0.0.6\nHigh-Performance Agentic Environment\nC++23 Engine\nDracula Palette (AAA)"; return true; }
         if (trimmed == "/auth") { system_overlay = "Authentication Profiles:\n - claude (active)\n - gemini (detected)\n - local (ollama)"; return true; }
-        if (trimmed == "/commands") { system_overlay = "System:\n /about, /auth, /help, /clear, /exit\nFleet:\n /agents, /agent, /combos, /playbook"; return true; }
+        if (trimmed == "/commands") { system_overlay = "System:\n /about, /auth, /help, /clear, /exit, /quit\nFleet:\n /agents, /agent, /combos, /playbook"; return true; }
         if (trimmed == "/agents") {
             auto agents = registry.list_agents();
             std::string out = "Available Agents:\n";
@@ -235,6 +236,14 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
                     if (current_input.empty()) continue;
                     if (process_command(current_input)) { current_input.clear(); continue; }
                     is_thinking = true;
+                    static const std::vector<std::string> phrases = {
+                        "analyzing project structure...",
+                        "doing research on the codebase...",
+                        "querying agent knowledge...",
+                        "synthesizing response...",
+                        "optimizing performance metrics..."
+                    };
+                    thinking_phrase = phrases[rand() % phrases.size()];
                     std::string user_msg = current_input; ai_error.clear(); ai_streaming_output.clear();
                     std::thread([&, user_msg]() {
                         auto ai = registry.get_agent(active_agent);
