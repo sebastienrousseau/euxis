@@ -89,7 +89,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
     bool is_interactive = (&input == &std::cin);
     if (is_interactive) {
         term::enable_raw_mode();
-        std::cout << "\033[?1049h\033[H\033[2J\033[?25l";
+        std::cout << "\033[?1049h\033[H\033[2J";
     }
 
     std::string current_input;
@@ -117,7 +117,7 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         screen.resize(w, h);
         screen.clear();
 
-        // 1. ELITE GRADIENT HEADER
+        // 1. HEADER
         std::string h1 = " EUXIS ADE v0.0.5 ";
         std::string h2 = " │ " + active_agent + " │ " + model_info.model + " ";
         std::string header_full = h1 + h2;
@@ -127,13 +127,11 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
         // 2. CHAT AREA
         int current_y = 2;
         int max_y = h - 4;
-        
         size_t start_idx = (history.size() > 5) ? history.size() - 5 : 0;
         for (size_t i = start_idx; i < history.size(); ++i) {
             const auto& h_entry = history[i];
             if (current_y >= max_y) break;
             screen.write_text(2, current_y++, "➜ " + h_entry.first, 139, 233, 253, 0, 0, 0, true);
-            
             std::istringstream stream{h_entry.second};
             std::string out_line;
             while (std::getline(stream, out_line)) {
@@ -176,7 +174,8 @@ int cmd_tui_ex(Context& ctx, [[maybe_unused]] const std::vector<std::string>& ar
             screen.write_text(4, h - 2, current_input, 255, 255, 255);
             ghost_text = get_prediction(current_input);
             if (!ghost_text.empty()) screen.write_text(4 + (int)current_input.size(), h - 2, ghost_text, 98, 114, 164);
-            screen.set_cell(4 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 255, 255, 255); // Cursor
+            // Software cursor (inverted space)
+            screen.set_cell(4 + (int)current_input.size(), h - 2, U' ', 255, 255, 255, 255, 255, 255);
         }
 
         if (!system_overlay.empty()) {
