@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeuxis-scripts-cpp.a "CMakeFiles/euxis-scripts-cpp.dir/src/tech_debt.cpp.o" "CMakeFiles/euxis-scripts-cpp.dir/src/docs_quality.cpp.o"
-/usr/bin/ranlib libeuxis-scripts-cpp.a

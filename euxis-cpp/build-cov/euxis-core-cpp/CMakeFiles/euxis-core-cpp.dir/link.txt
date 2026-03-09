@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeuxis-core-cpp.a "CMakeFiles/euxis-core-cpp.dir/src/resilience.cpp.o" "CMakeFiles/euxis-core-cpp.dir/src/router.cpp.o" "CMakeFiles/euxis-core-cpp.dir/src/swarm.cpp.o" "CMakeFiles/euxis-core-cpp.dir/src/ws_client.cpp.o" "CMakeFiles/euxis-core-cpp.dir/src/topology_grid.cpp.o"
-/usr/bin/ranlib libeuxis-core-cpp.a

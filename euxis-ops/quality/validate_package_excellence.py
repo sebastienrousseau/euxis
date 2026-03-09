@@ -79,9 +79,9 @@ def main() -> int:
 
         # Minimal usability/security baselines.
         readme_exists = (pkg_root / "README.md").exists()
-        has_manifest = any((pkg_root / filename).exists() for filename in ("pyproject.toml", "Cargo.toml", "package.json"))
+        has_manifest = any((pkg_root / filename).exists() for filename in ("pyproject.toml", "Cargo.toml", "package.json", "vcpkg.json", "CMakeLists.txt"))
         if kind not in {"runtime-data", "ops"} and not has_manifest:
-            pkg_errors.append("no package manifest found (pyproject/Cargo/package.json)")
+            pkg_errors.append("no package manifest found (pyproject/Cargo/package.json/vcpkg.json/CMakeLists.txt)")
         if kind not in {"runtime-data", "ops", "rust"} and not readme_exists:
             pkg_errors.append("README.md missing")
 

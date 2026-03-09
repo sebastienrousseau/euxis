@@ -9,6 +9,22 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(cmake/EuxisDefaults.cmake)
 include(cmake/EuxisPackage.cmake)
 include(FetchContent)
+include(CheckIPOSupported)
+
+# --- Ultimate Performance Optimizations ---
+if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Enable Link Time Optimization (LTO / IPO)
+    check_ipo_supported(RESULT lto_supported OUTPUT error)
+    if(lto_supported)
+        message(STATUS "LTO supported and enabled for maximum performance")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+
+    # Architecture-specific optimizations (AVX2, BMI2, etc. if available on host)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        add_compile_options(-march=native -O3 -flto)
+    endif()
+endif()
 
 # --- Dependency resolution (vcpkg or system) ---
 

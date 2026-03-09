@@ -1,9 +1,0 @@
-<RCC>
-  <qresource prefix="/">
-    <file alias="resources/styles/liquid-glass.qss">/home/seb/.euxis/euxis-cpp/euxis-etx/resources/styles/liquid-glass.qss</file>
-    <file alias="resources/styles/calm.qss">/home/seb/.euxis/euxis-cpp/euxis-etx/resources/styles/calm.qss</file>
-    <file alias="resources/styles/focused.qss">/home/seb/.euxis/euxis-cpp/euxis-etx/resources/styles/focused.qss</file>
-    <file alias="resources/icons/euxis-logo.svg">/home/seb/.euxis/euxis-cpp/euxis-etx/resources/icons/euxis-logo.svg</file>
-  </qresource>
-</RCC>
-

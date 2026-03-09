@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,-z,relro -Wl,-z,now -pie --coverage -Wl,--dependency-file=CMakeFiles/euxis-security-cpp_tests.dir/link.d "CMakeFiles/euxis-security-cpp_tests.dir/tests/test_policy.cpp.o" "CMakeFiles/euxis-security-cpp_tests.dir/tests/test_governance.cpp.o" -o euxis-security-cpp_tests  libeuxis-security-cpp.a /usr/lib/libgtest_main.so.1.17.0 /usr/lib/libgtest.so.1.17.0

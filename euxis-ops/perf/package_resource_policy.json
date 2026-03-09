@@ -16,6 +16,86 @@
       "current": {"p95_ms": 170, "memory_mb": 190, "cpu_pct": 60},
       "target_q2_2026": {"p95_ms": 140, "memory_mb": 160, "cpu_pct": 50},
       "target_q4_2026": {"p95_ms": 110, "memory_mb": 130, "cpu_pct": 40}
+    },
+    "euxis-crypto-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-bridge-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-memory-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-identity-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-inference-cpp": {
+      "current": {"p95_ms": 100, "memory_mb": 256, "cpu_pct": 80},
+      "target_q2_2026": {"p95_ms": 80, "memory_mb": 192, "cpu_pct": 70},
+      "target_q4_2026": {"p95_ms": 60, "memory_mb": 128, "cpu_pct": 60}
+    },
+    "euxis-a2a-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-security-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-scripts-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-runtime-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-metrics-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-core-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-adapters-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-gateway-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-cli-cpp": {
+      "current": {"p95_ms": 100, "memory_mb": 128, "cpu_pct": 40},
+      "target_q2_2026": {"p95_ms": 80, "memory_mb": 96, "cpu_pct": 35},
+      "target_q4_2026": {"p95_ms": 60, "memory_mb": 64, "cpu_pct": 30}
+    },
+    "euxis-bench-cpp": {
+      "current": {"p95_ms": 50, "memory_mb": 64, "cpu_pct": 30},
+      "target_q2_2026": {"p95_ms": 40, "memory_mb": 48, "cpu_pct": 25},
+      "target_q4_2026": {"p95_ms": 30, "memory_mb": 32, "cpu_pct": 20}
+    },
+    "euxis-etx": {
+      "current": {"p95_ms": 150, "memory_mb": 512, "cpu_pct": 60},
+      "target_q2_2026": {"p95_ms": 120, "memory_mb": 384, "cpu_pct": 50},
+      "target_q4_2026": {"p95_ms": 90, "memory_mb": 256, "cpu_pct": 40}
     }
   }
 }

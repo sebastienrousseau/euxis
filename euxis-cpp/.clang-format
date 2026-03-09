@@ -1,6 +1,6 @@
 BasedOnStyle: Google
 Language: Cpp
-Standard: c++23
+Standard: Latest
 ColumnLimit: 100
 IndentWidth: 4
 TabWidth: 4

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeuxis-identity-cpp.a "CMakeFiles/euxis-identity-cpp.dir/src/did.cpp.o" "CMakeFiles/euxis-identity-cpp.dir/src/credentials.cpp.o" "CMakeFiles/euxis-identity-cpp.dir/src/attestation.cpp.o" "CMakeFiles/euxis-identity-cpp.dir/src/registry.cpp.o" "CMakeFiles/euxis-identity-cpp.dir/src/erc8004.cpp.o"
-/usr/bin/ranlib libeuxis-identity-cpp.a

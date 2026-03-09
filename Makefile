@@ -65,7 +65,7 @@ propose-release-baseline:
 	python3 euxis-ops/perf/propose_release_baseline.py \
 		--metrics euxis-data/runtime/perf/metrics.jsonl \
 		--previous-release v0.0.3 \
-		--next-release v0.0.3 \
+		--next-release v0.0.4 \
 		--output euxis-data/release/proposed-baseline.json
 
 baseline-proposal-review:
@@ -213,7 +213,7 @@ package-bench-baseline-propose:
 		--current euxis-data/perf/package-benchmarks.json \
 		--baseline euxis-ops/perf/package_benchmarks_baseline.json \
 		--previous-release v0.0.3 \
-		--next-release v0.0.3 \
+		--next-release v0.0.4 \
 		--output euxis-data/perf/proposed-package-benchmarks-baseline.json
 
 package-bench-baseline-review:

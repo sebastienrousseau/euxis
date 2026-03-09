@@ -23,4 +23,5 @@ jobs:
         run: |
           cd euxis-web
           npm ci || npm install
+          npm --prefix src/crypto-lib install
           npm test || echo "No tests configured"

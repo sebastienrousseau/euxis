@@ -25,12 +25,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'euxis-web/package*.json'
+          cache-dependency-path: |
+            euxis-web/package-lock.json
+            euxis-web/src/crypto-lib/package-lock.json
 
       - name: Install dependencies
         working-directory: euxis-web
         run: |
           npm ci --audit-level moderate
+          npm --prefix src/crypto-lib ci --audit-level moderate
 
       - name: Run npm audit
         working-directory: euxis-web

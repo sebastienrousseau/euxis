@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeuxis-runtime-cpp.a "CMakeFiles/euxis-runtime-cpp.dir/src/validator.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/lifecycle.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/tool_registry.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/session_store.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/agent_session.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/manifesto.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/tool_manifest.cpp.o" "CMakeFiles/euxis-runtime-cpp.dir/src/interaction.cpp.o"
-/usr/bin/ranlib libeuxis-runtime-cpp.a

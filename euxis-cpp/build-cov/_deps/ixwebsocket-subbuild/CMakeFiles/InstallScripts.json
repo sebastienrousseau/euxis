@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/seb/.euxis/euxis-cpp/build-cov/_deps/ixwebsocket-subbuild/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

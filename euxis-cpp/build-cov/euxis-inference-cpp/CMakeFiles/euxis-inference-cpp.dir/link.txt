@@ -1,2 +1,0 @@
-/usr/bin/ar qc libeuxis-inference-cpp.a "CMakeFiles/euxis-inference-cpp.dir/src/config.cpp.o" "CMakeFiles/euxis-inference-cpp.dir/src/model_registry.cpp.o" "CMakeFiles/euxis-inference-cpp.dir/src/quality_gate.cpp.o" "CMakeFiles/euxis-inference-cpp.dir/src/llama_engine.cpp.o" "CMakeFiles/euxis-inference-cpp.dir/src/ollama_engine.cpp.o"
-/usr/bin/ranlib libeuxis-inference-cpp.a
