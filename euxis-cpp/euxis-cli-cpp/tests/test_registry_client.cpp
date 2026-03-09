@@ -327,11 +327,11 @@ protected:
 
         const char* schema =
             "CREATE TABLE agents ("
-            "  agent_id TEXT PRIMARY KEY,"
+            "  id TEXT PRIMARY KEY,"
             "  role TEXT,"
             "  version TEXT,"
             "  tier TEXT,"
-            "  prompt_path TEXT"
+            "  path TEXT"
             ");"
             "CREATE TABLE tags ("
             "  tag_id INTEGER PRIMARY KEY,"
@@ -340,7 +340,7 @@ protected:
             "CREATE TABLE agent_tags ("
             "  agent_id TEXT,"
             "  tag_id INTEGER,"
-            "  FOREIGN KEY(agent_id) REFERENCES agents(agent_id),"
+            "  FOREIGN KEY(agent_id) REFERENCES agents(id),"
             "  FOREIGN KEY(tag_id) REFERENCES tags(tag_id)"
             ");"
             "INSERT INTO agents VALUES('sql-agent-1', 'coder', '1.0', 'code', 'prompts/sql1.md');"

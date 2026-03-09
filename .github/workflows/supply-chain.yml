@@ -9,11 +9,10 @@ on:
 permissions:
   contents: read
   id-token: write
-  attestations: write
 
 jobs:
-  sbom-and-attestation:
-    name: SBOM, Attestation, and Signature
+  sbom-and-signature:
+    name: SBOM and Signature
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +23,6 @@ jobs:
           path: .
           format: spdx-json
           output-file: sbom.spdx.json
-
-      - name: Build provenance attestation
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-path: sbom.spdx.json
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3

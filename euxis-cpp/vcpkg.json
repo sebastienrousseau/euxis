@@ -1,6 +1,7 @@
 {
   "name": "euxis",
   "version": "0.0.3",
+  "builtin-baseline": "d36306e1dc09cb9864db77fddf3ecf0611919bc2",
   "dependencies": [
     "libsodium",
     "nlohmann-json",

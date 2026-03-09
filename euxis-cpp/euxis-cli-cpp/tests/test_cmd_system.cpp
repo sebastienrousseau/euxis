@@ -93,9 +93,9 @@ TEST_F(SystemCmdTest, VerifyWithAgents) {
     });
     std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
 
-    // Create the prompt file with required fields
-    std::filesystem::create_directories(ctx_.euxis_home + "/agents");
-    std::ofstream(ctx_.euxis_home + "/agents/a1.md")
+    // Create the prompt file with required fields in the data dir
+    std::filesystem::create_directories(ctx_.data_dir + "/agents");
+    std::ofstream(ctx_.data_dir + "/agents/a1.md")
         << "agent_id: a1\nrole: r1\nversion: 1.0";
 
     auto code = cmd_verify(ctx_, {});
@@ -242,8 +242,8 @@ TEST_F(SystemCmdTest, VerifyWithPromptMissingFields) {
     std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
 
     // Create prompt file with only agent_id but missing role and version
-    std::filesystem::create_directories(ctx_.euxis_home + "/agents");
-    std::ofstream(ctx_.euxis_home + "/agents/partial.md")
+    std::filesystem::create_directories(ctx_.data_dir + "/agents");
+    std::ofstream(ctx_.data_dir + "/agents/partial.md")
         << "agent_id: partial-agent";
 
     auto code = cmd_verify(ctx_, {});
@@ -273,8 +273,8 @@ TEST_F(SystemCmdTest, VerifyAllWithAgents) {
     });
     std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
 
-    std::filesystem::create_directories(ctx_.euxis_home + "/agents");
-    std::ofstream(ctx_.euxis_home + "/agents/va.md")
+    std::filesystem::create_directories(ctx_.data_dir + "/agents");
+    std::ofstream(ctx_.data_dir + "/agents/va.md")
         << "agent_id: va\nrole: test\nversion: 1.0";
 
     auto code = cmd_verify_all(ctx_, {});

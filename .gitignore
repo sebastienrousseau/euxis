@@ -266,3 +266,7 @@ target/
 euxis-runtime/data/projects/.euxis/
 euxis-data/gateway/
 euxis-data/release/workspace-topology.json
+euxis-cpp/build-cov/
+euxis-cpp/build-cov-final/
+euxis-cpp/build-release/
+euxis-data/agents/descriptions.json

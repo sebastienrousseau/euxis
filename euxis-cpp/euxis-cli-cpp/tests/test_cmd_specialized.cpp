@@ -11,6 +11,7 @@ namespace {
 class SpecializedCmdTest : public ::testing::Test {
 protected:
     void SetUp() override {
+        setenv("EUXIS_TEST_MOCK_EXECUTION", "1", 1);
         ctx_.euxis_home = "/tmp/euxis_test_spec_" + std::to_string(getpid());
         ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
         std::filesystem::create_directories(ctx_.data_dir + "/agents");
@@ -25,6 +26,7 @@ protected:
     }
 
     void TearDown() override {
+        unsetenv("EUXIS_TEST_MOCK_EXECUTION");
         std::filesystem::remove_all(ctx_.euxis_home);
     }
 

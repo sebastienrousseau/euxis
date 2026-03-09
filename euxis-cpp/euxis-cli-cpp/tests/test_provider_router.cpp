@@ -104,11 +104,11 @@ TEST(ProviderRouterTest, ModelFallbackChainGPT) {
     ProviderRouter router("/tmp/euxis_nonexistent");
     auto chain = router.model_fallback_chain("gpt-4o");
     EXPECT_FALSE(chain.empty());
-    bool has_anthropic = false;
+    bool has_claude = false;
     for (const auto& m : chain) {
-        if (m.provider == "anthropic") has_anthropic = true;
+        if (m.provider == "claude") has_claude = true;
     }
-    EXPECT_TRUE(has_anthropic);
+    EXPECT_TRUE(has_claude);
 }
 
 TEST(ProviderRouterTest, ModelFallbackChainGemini) {
@@ -122,11 +122,11 @@ TEST(ProviderRouterTest, ModelFallbackChainUnknown) {
     auto chain = router.model_fallback_chain("unknown-model");
     EXPECT_FALSE(chain.empty());
     // Generic fallback should include anthropic
-    bool has_anthropic = false;
+    bool has_claude = false;
     for (const auto& m : chain) {
-        if (m.provider == "anthropic") has_anthropic = true;
+        if (m.provider == "claude") has_claude = true;
     }
-    EXPECT_TRUE(has_anthropic);
+    EXPECT_TRUE(has_claude);
 }
 
 TEST(ProviderRouterTest, AnalyzeTaskSecurity) {
