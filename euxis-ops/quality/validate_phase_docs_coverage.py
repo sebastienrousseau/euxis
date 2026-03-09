@@ -16,7 +16,6 @@ DEFAULT_ARTIFACTS = [
     "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
     "euxis-cpp/euxis-core-cpp/src/router.cpp",
     "euxis-cpp/euxis-core-cpp/src/swarm.cpp",
-    ".github/workflows/cross-platform-ci.yml",
     "euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp",
     "euxis-cpp/euxis-core-cpp/tests/test_router.cpp",
     "euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp",

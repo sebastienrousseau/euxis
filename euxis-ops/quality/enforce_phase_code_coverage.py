@@ -20,6 +20,10 @@ COVERAGE_TARGETS: list[str] = []
 
 
 def main() -> int:
+    if not TESTS and not COVERAGE_TARGETS:
+        print("No Python coverage targets defined (skipping check)")
+        return 0
+
     # Keep package excellence checks deterministic by removing transient pytest caches.
     for cache_dir in REPO_ROOT.glob("**/.pytest_cache"):
         if cache_dir.is_dir():

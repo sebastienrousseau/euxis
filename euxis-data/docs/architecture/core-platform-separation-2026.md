@@ -8,6 +8,8 @@ This document tracks the implementation of the 2026 architecture hardening roadm
   - Contract header: `euxis-cpp/euxis-core-cpp/include/euxis/core/contracts.hpp`
 - Platform type adapters are co-located in the core header:
   - `euxis-cpp/euxis-core-cpp/include/euxis/core/types.hpp`
+- Agent routing logic:
+  - `euxis-cpp/euxis-core-cpp/src/router.cpp`
 - Gateway transport is now HTTP-only (WebSocket adapter removed).
 - CI guardrail: `euxis-ops/architecture/check_boundaries.py`.
 - Guardrail blocks direct `subprocess`/network imports in pure core logic.
@@ -16,10 +18,12 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 
 ## Phase 2: Cross-platform parity
 
-- GitHub Actions matrix for Linux/macOS/Windows: `.github/workflows/cross-platform-ci.yml`.
+- GitHub Actions matrix for Linux/macOS: `.github/workflows/cpp.yml`.
 - Platform normalization tests:
   - `euxis-cpp/euxis-core-cpp/tests/test_platform_adapter.cpp`
   - `euxis-cpp/euxis-core-cpp/tests/test_contracts.cpp`
+  - `euxis-cpp/euxis-core-cpp/tests/test_router.cpp`
+  - `euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp`
   - Includes OS mapping and WSL environment detection coverage.
 
 ## Phase 3: Supply chain integrity

@@ -16,13 +16,18 @@
     ".github",
     ".hypothesis",
     ".venv",
+    ".claude",
+    "build",
     "euxis-bin",
     "euxis-cpp",
     "euxis-data",
     "euxis-examples",
     "euxis-ops",
     "euxis-policy",
-    "euxis.egg-info"
+    "euxis-runtime",
+    "euxis.egg-info",
+    "hooks",
+    "metrics"
   ],
   "deprecated_workspace_dirs": [
     "bin",

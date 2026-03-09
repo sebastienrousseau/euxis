@@ -134,8 +134,8 @@ def _scan_file(path: Path) -> list[str]:
 
 def main() -> int:
     if not CORE_ROOT.exists():
-        print(f"Core path not found: {CORE_ROOT}", file=sys.stderr)
-        return 2
+        print(f"Core path not found: {CORE_ROOT} (skipping Python-specific check)", file=sys.stderr)
+        return 0
 
     errors: list[str] = []
     for file_path in CORE_ROOT.rglob("*.py"):

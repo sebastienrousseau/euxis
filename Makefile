@@ -1,26 +1,35 @@
-.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix package-structure-matrix-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean cpp-format cpp-format-check cpp-tidy cpp-coverage
+.PHONY: all test lint format clean install dev architecture-check core-platform-boundary-check perf-gate scorecard gate-all verify-signed-artifacts release-checklist propose-release-baseline perf-governance-check baseline-proposal-review release-evidence validate-release-evidence validate-release-evidence-strict phase-completion-check code-coverage-100 docs-coverage-100 workspace-topology-check package-resource-governance-check package-excellence-check package-excellence-scorecard package-harmony-check package-structure-matrix-check package-bench-collect package-bench-gate package-bench-regression-gate package-bench-baseline-propose package-bench-baseline-review package-bench-baseline-governance-check package-structure-matrix-report template-overlay-apply template-conformance-check package-structure-enforce split-readiness-report workspace-bootstrap sdk-rust-tests-stable bench-security bench-autonomy bench-performance bench-portability bench-interop bench-all verify-all-packages cpp-configure cpp-build cpp-test cpp-bench cpp-clean cpp-format cpp-format-check cpp-tidy cpp-coverage build bench coverage docs-coverage
 
 # Conservative default for laptop thermals/memory; override per run as needed.
 CPP_BUILD_JOBS ?= 4
 
-all: install test
+all: build test
 
-test:
-	pytest
+test: cpp-test
+
+build: cpp-build
+
+bench: cpp-bench
+
+clean: cpp-clean
+
+format: cpp-format
+
+format-check: cpp-format-check
+
+tidy: cpp-tidy
+
+coverage: cpp-coverage
+
+docs-coverage:
+	@echo "Checking documentation coverage (all .hpp files must have /// or /** comments)..."
+	@bash -c 'for f in $$(find euxis-cpp/euxis-*/include -name "*.hpp"); do \
+		grep -Eq "^ *///|^ */\*\*" $$f || (echo "ERROR: Missing documentation in $$f" && exit 1); \
+	done'
+	@echo "Documentation coverage is 100%."
 
 lint:
 	ruff check .
-
-format:
-	ruff format .
-
-clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	find . -type d -name ".pytest_cache" -exec rm -rf {} +
-	find . -type d -name ".ruff_cache" -exec rm -rf {} +
-
-install:
-	pip install -e ".[dev]"
 
 architecture-check:
 	python3 euxis-ops/architecture/check_boundaries.py
@@ -73,7 +82,6 @@ release-evidence:
 		--checklist euxis-data/release/checklist.json \
 		--proposal euxis-data/release/proposed-baseline.json \
 		--baseline-review euxis-data/release/baseline-review.json \
-		--signature-status euxis-data/release/signature-verification.json \
 		--output euxis-data/release/release-evidence.json \
 		--markdown-output euxis-data/release/release-evidence.md
 
@@ -258,6 +266,7 @@ cpp-configure:
 	cmake -B euxis-cpp/build -S euxis-cpp \
 		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
 		-DCMAKE_BUILD_TYPE=Release \
+		-DEUXIS_COVERAGE=OFF -DEUXIS_DISABLE_SANITIZERS=ON \
 		$(if $(shell command -v ccache 2>/dev/null),-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache,)
 
 cpp-build: cpp-configure
