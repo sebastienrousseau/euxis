@@ -20,6 +20,23 @@ add_library(euxis-cli-lib STATIC
   src/cmd/infra.cpp
   src/cmd/dev.cpp
   src/cmd/specialized.cpp
+  src/tui/color_system.cpp
+  src/tui/event_loop.cpp
+  src/tui/platform_linux.cpp
+  src/tui/platform_macos.cpp
+  src/tui/platform_wsl.cpp
+  src/tui/layout.cpp
+  src/tui/focus_manager.cpp
+  src/tui/keybindings.cpp
+  src/tui/palette.cpp
+  src/tui/syntax.cpp
+  src/tui/collapsible.cpp
+  src/tui/diff_view.cpp
+  src/tui/workspace.cpp
+  src/tui/chat_widget.cpp
+  src/tui/context_sidebar.cpp
+  src/tui/swarm_view.cpp
+  src/tui/text_utils.cpp
 )
 target_include_directories(euxis-cli-lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -62,6 +79,19 @@ add_executable(euxis-cli-cpp_tests
   tests/test_box.cpp
   tests/test_cli_provider.cpp
   tests/test_i18n.cpp
+  tests/test_color_system.cpp
+  tests/test_event_loop.cpp
+  tests/test_platform.cpp
+  tests/test_layout.cpp
+  tests/test_keybindings.cpp
+  tests/test_palette.cpp
+  tests/test_syntax.cpp
+  tests/test_collapsible.cpp
+  tests/test_diff_view.cpp
+  tests/test_workspace.cpp
+  tests/test_context_sidebar.cpp
+  tests/test_swarm_view.cpp
+  tests/test_text_utils.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib

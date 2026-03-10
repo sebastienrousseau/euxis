@@ -1,3 +1,5 @@
+/// @file
+/// @brief Gateway websocket
 #pragma once
 
 #include <functional>

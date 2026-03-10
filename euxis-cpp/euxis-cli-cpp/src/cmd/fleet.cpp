@@ -410,11 +410,13 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
 
 int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
-        std::cerr << tr("Usage: euxis playbook <manifest.json>") << "\n";
+        std::cerr << tr("Usage: euxis playbook <manifest.json> [goal]") << "\n";
         return 2;
     }
 
     auto manifest_path = args[0];
+    std::string goal = (args.size() > 1) ? args[1] : "Audit and improve the codebase";
+
     if (!fs::exists(manifest_path)) {
         std::cerr << tr("Manifest not found: ") << manifest_path << "\n";
         return 1;
@@ -432,12 +434,30 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::cout << term::bold(tr("Executing Playbook")) << "\n"
               << "  " << tr("Source:") << " " << manifest_path << "\n";
 
-    if (!manifest.contains("steps") || !manifest["steps"].is_array()) {
-        std::cerr << tr("Manifest missing 'steps' array") << "\n";
+    nlohmann::json steps;
+    if (manifest.contains("steps") && manifest["steps"].is_array()) {
+        steps = manifest["steps"];
+    } else if (manifest.contains("phases") && manifest["phases"].is_array()) {
+        // Map phases to a flat steps array for backward compatibility with executor
+        for (const auto& phase : manifest["phases"]) {
+            std::string phase_name = phase.value("name", "Phase");
+            if (phase.contains("delegates") && phase["delegates"].is_array()) {
+                for (const auto& d : phase["delegates"]) {
+                    nlohmann::json step;
+                    step["name"] = phase_name + " / " + d.value("agent", "delegate");
+                    step["agent"] = d.value("agent", "");
+                    step["task"] = d.value("task_template", "");
+                    steps.push_back(step);
+                }
+            }
+        }
+    }
+
+    if (steps.empty()) {
+        std::cerr << tr("Manifest missing 'steps' or 'phases' array") << "\n";
         return 1;
     }
 
-    const auto& steps = manifest["steps"];
     std::cout << "  " << tr("Steps:") << "  " << steps.size() << "\n\n";
 
     RegistryClient registry(ctx.data_dir);
@@ -454,6 +474,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         std::string name = step.value("name", "step-" + std::to_string(i + 1));
         std::string agent_id = step.value("agent", "");
         std::string step_task = step.value("task", manifest.value("task", ""));
+        
+        // Simple interpolation for ${goal}
+        size_t pos = 0;
+        while ((pos = step_task.find("${goal}", pos)) != std::string::npos) {
+            step_task.replace(pos, 7, goal);
+            pos += goal.length();
+        }
 
         std::cout << "  [" << (i + 1) << "/" << steps.size() << "] "
                   << term::cyan(name) << " (" << tr("agent:") << " " << agent_id << ")\n";

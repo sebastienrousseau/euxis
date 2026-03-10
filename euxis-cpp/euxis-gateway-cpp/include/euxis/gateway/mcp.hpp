@@ -1,3 +1,5 @@
+/// @file
+/// @brief Gateway MCP
 #pragma once
 
 #include <functional>

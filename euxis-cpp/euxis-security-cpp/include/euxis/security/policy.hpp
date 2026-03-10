@@ -1,3 +1,5 @@
+/// @file
+/// @brief declarative security policy for the agent framework.
 #pragma once
 
 #include <expected>
@@ -9,10 +11,12 @@
 
 namespace euxis::security {
 
+/// @brief exception thrown when security policy validation or merging fails.
 class PolicyError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+/// @brief configuration for framework-level security controls.
 struct SecurityPolicy {
     std::string auth_mode{"token"};
     bool require_https{false};
@@ -29,9 +33,11 @@ struct SecurityPolicy {
     [[nodiscard]] static auto from_json(const nlohmann::json& j) -> SecurityPolicy;
 };
 
+/// @brief Validate that an authentication mode is supported.
 auto validate_auth_mode(const std::string& mode)
     -> std::expected<std::string, PolicyError>;
 
+/// @brief Merge a baseline policy with JSON overrides.
 auto merge_policy(const nlohmann::json& overrides = nlohmann::json::object())
     -> std::expected<SecurityPolicy, PolicyError>;
 

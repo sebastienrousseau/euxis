@@ -1,11 +1,17 @@
 #include "euxis/core/ws_client.hpp"
 
+#include <chrono>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <thread>
+
 #include <ixwebsocket/IXWebSocket.h>
 #include <spdlog/spdlog.h>
 
 namespace euxis::core {
 
-WebSocketClient::WebSocketClient(const std::string& url)
+WebSocketClient::WebSocketClient(const std::string& url) // NOLINT
     : url_(url), ws_(std::make_unique<ix::WebSocket>()) {
     ws_->setUrl(url_);
 }
@@ -24,7 +30,7 @@ void WebSocketClient::connect() {
             } else if (msg->type == ix::WebSocketMessageType::Message) {
                 try {
                     auto response = nlohmann::json::parse(msg->str);
-                    std::lock_guard lock(response_mutex_);
+                    const std::scoped_lock lock(response_mutex_);
                     last_response_ = std::move(response);
                     response_cv_.notify_one();
                 } catch (...) {
@@ -58,7 +64,7 @@ auto WebSocketClient::send_and_wait(
     const nlohmann::json& message,
     std::chrono::milliseconds timeout) -> std::optional<nlohmann::json> {
     {
-        std::lock_guard lock(response_mutex_);
+        const std::scoped_lock lock(response_mutex_);
         last_response_.reset();
     }
 

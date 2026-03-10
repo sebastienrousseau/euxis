@@ -17,12 +17,43 @@ auto CliProvider::route(const std::string& agent_tier,
         .model = selection.model,
         .tier = tier_label(selection.tier),
         .estimated_cost_per_1m = selection.estimated_cost_per_1m,
+        .parameters = nlohmann::json::object()
+    };
+}
+
+auto CliProvider::execute(const std::string& model,
+                          const std::string& prompt,
+                          int timeout_ms,
+                          const std::optional<std::vector<std::string>>&,
+                          std::function<void(const std::string&)>) -> runtime::ProviderResponse {
+    
+    // Create a minimal selection based on model name
+    ModelSelection selection{
+        .provider = "auto",
+        .model = model,
+        .tier = Tier::Code,
+        .estimated_cost_per_1m = 0.0,
+    };
+
+    auto auth = auth_store_.resolve(selection.provider);
+    auto response = executor_.execute(selection, prompt, timeout_ms / 1000,
+                                       auth ? std::optional{*auth} : std::nullopt);
+
+    return runtime::ProviderResponse{
+        .success = response.success,
+        .output = response.output,
+        .error = response.error,
+        .input_tokens = 0,
+        .output_tokens = 0,
+        .duration_ms = response.duration_ms
     };
 }
 
 auto CliProvider::execute(const runtime::ModelSpec& spec,
                           const std::string& prompt,
-                          int timeout_seconds) -> runtime::ProviderResult {
+                          int timeout_ms,
+                          const std::optional<std::vector<std::string>>&,
+                          std::function<void(const std::string&)>) -> runtime::ProviderResponse {
     ModelSelection selection{
         .provider = spec.provider,
         .model = spec.model,
@@ -30,16 +61,17 @@ auto CliProvider::execute(const runtime::ModelSpec& spec,
         .estimated_cost_per_1m = spec.estimated_cost_per_1m,
     };
 
-    // Try with auth profile rotation
     auto auth = auth_store_.resolve(spec.provider);
-    auto response = executor_.execute(selection, prompt, timeout_seconds,
+    auto response = executor_.execute(selection, prompt, timeout_ms / 1000,
                                        auth ? std::optional{*auth} : std::nullopt);
 
-    return runtime::ProviderResult{
+    return runtime::ProviderResponse{
         .success = response.success,
         .output = response.output,
         .error = response.error,
-        .duration_ms = response.duration_ms,
+        .input_tokens = 0,
+        .output_tokens = 0,
+        .duration_ms = response.duration_ms
     };
 }
 

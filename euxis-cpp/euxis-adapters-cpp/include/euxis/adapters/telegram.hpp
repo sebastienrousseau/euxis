@@ -1,3 +1,5 @@
+/// @file
+/// @brief Telegram adapter
 #pragma once
 
 #include <atomic>

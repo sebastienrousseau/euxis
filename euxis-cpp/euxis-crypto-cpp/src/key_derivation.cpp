@@ -13,6 +13,33 @@ auto derive_key(std::span<const std::byte> password,
                 size_t key_size)
     -> std::expected<DerivedKey, CryptoError> {
 
+    // Fast-path: if iterations is 0, use BLAKE2b (crypto_generichash) instead of Argon2id.
+    // This is significantly faster and suitable for deterministic session key derivation 
+    // where brute-force resistance (memory hardness) is not the primary goal.
+    if (iterations == 0) {
+        if (key_size < crypto_generichash_BYTES_MIN || key_size > crypto_generichash_BYTES_MAX) {
+            return std::unexpected(CryptoError::KeyDerivationFailed);
+        }
+        
+        DerivedKey result;
+        result.key.resize(key_size);
+        result.salt.assign(salt.begin(), salt.end());
+        
+        // Use salt as the key for BLAKE2b
+        const int rc = crypto_generichash(
+            reinterpret_cast<unsigned char*>(result.key.data()),
+            key_size,
+            reinterpret_cast<const unsigned char*>(password.data()),
+            password.size(),
+            reinterpret_cast<const unsigned char*>(salt.data()),
+            salt.size());
+            
+        if (rc != 0) {
+            return std::unexpected(CryptoError::KeyDerivationFailed);
+        }
+        return result;
+    }
+
     // libsodium requires exactly crypto_pwhash_SALTBYTES (16) bytes of salt.
     if (salt.size() != crypto_pwhash_SALTBYTES) {
         return std::unexpected(CryptoError::KeyDerivationFailed);

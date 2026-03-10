@@ -1,3 +1,5 @@
+/// @file
+/// @brief A2A server handler for incoming agent requests.
 #pragma once
 
 #include <string>
@@ -6,26 +8,19 @@
 
 #include <nlohmann/json.hpp>
 
-#include "euxis/a2a/agent_card.hpp"
-#include "euxis/a2a/task.hpp"
+#include "agent_card.hpp"
+#include "task.hpp"
 
 namespace euxis::a2a {
 
-/// Server-side handler for incoming A2A JSON-RPC requests.
-///
-/// Dispatches the following methods:
-///   "agent/card"          -> returns this agent's card
-///   "task/create"         -> creates a new task (with optional initial message)
-///   "task/get"            -> retrieves a task by ID
-///   "task/cancel"         -> transitions a task to Cancelled
-///   "capabilities/list"   -> returns the agent's capabilities
-///   Unknown methods       -> returns a JSON error object
+/// @brief Dispatches and handles A2A JSON-RPC requests.
 class A2AServerHandler {
 public:
+    /// @brief Construct handler with an agent identity card.
     explicit A2AServerHandler(AgentCard card);
 
-    /// Handle an incoming JSON-RPC request and return the response payload.
-    [[nodiscard]] auto handle_request(std::string_view method, const nlohmann::json& params)
+    /// @brief Primary entry point for processing A2A requests.
+    auto handle_request(std::string_view method, const nlohmann::json& params)
         -> nlohmann::json;
 
 private:

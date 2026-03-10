@@ -1,3 +1,5 @@
+/// @file
+/// @brief CLI omnigraph
 #pragma once
 
 #include <string>

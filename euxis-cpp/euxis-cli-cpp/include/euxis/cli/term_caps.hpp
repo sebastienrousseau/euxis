@@ -11,6 +11,9 @@ struct TermCaps {
     bool sixel{false};
     bool kitty{false};
     bool unicode{true};
+    bool no_color{false};
+    bool iterm2{false};
+    bool wsl{false};
 };
 
 /// Detect terminal capabilities from ioctl + environment variables.

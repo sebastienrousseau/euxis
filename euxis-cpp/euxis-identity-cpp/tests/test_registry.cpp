@@ -29,7 +29,9 @@ protected:
         randombytes_buf(pub_key.data(), pub_key.size());
         return AgentIdentity{
             .did = std::move(did),
-            .public_key = {pub_key.begin(), pub_key.end()},
+            .name = "Test Agent",
+            .role = "tester",
+            .public_key = {reinterpret_cast<char*>(pub_key.data()), pub_key.size()},
             .credentials = {},
             .attestations = {},
             .created_at = "2026-03-01T00:00:00Z",

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Infra commands
 #pragma once
 
 #include "euxis/cli/command.hpp"

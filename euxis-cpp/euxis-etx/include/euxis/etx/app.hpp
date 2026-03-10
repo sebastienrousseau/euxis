@@ -1,3 +1,5 @@
+/// @file
+/// @brief ETX app
 #pragma once
 #include <QMainWindow>
 #include <QStackedWidget>

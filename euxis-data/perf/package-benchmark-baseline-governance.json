@@ -1,9 +1,9 @@
 {
   "status": "ok",
   "previous_release": "v0.0.3",
-  "next_release": "v0.0.3",
+  "next_release": "v0.0.4",
   "threshold_percent": 25.0,
-  "package_count": 14,
-  "flagged_packages_count": 11,
-  "proposal_sha256": "61a2934b6ef1f85fdbb0be576dd066e0c95b31f77f8fcc9d75fcc1e130e067da"
+  "package_count": 18,
+  "flagged_packages_count": 7,
+  "proposal_sha256": "8e17094e4f078da509f4828c10e5ffe76c994c7a1c2ab6668404fb41466a1ecc"
 }

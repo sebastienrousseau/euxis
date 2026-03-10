@@ -10,29 +10,38 @@
 
 namespace euxis::crypto {
 
-/// Result of a key derivation operation, containing both the derived key and
-/// the salt that was used (so the caller can persist it for later re-derivation).
+/**
+ * @brief Result of a key derivation operation.
+ */
 struct DerivedKey {
-    std::vector<std::byte> key;
-    std::vector<std::byte> salt;
+    std::vector<std::byte> key;  ///< The actual derived bytes.
+    std::vector<std::byte> salt; ///< The salt used (for persistence).
 };
 
-/// Derive a key from `password` using Argon2id (via libsodium's crypto_pwhash).
-///
-/// @param password  Raw password bytes.
-/// @param salt      Salt bytes. Must be exactly crypto_pwhash_SALTBYTES (16) bytes.
-/// @param iterations  Argon2id opslimit. Defaults to 100'000 (mapped to
-///                    crypto_pwhash_OPSLIMIT_SENSITIVE when >= 100'000, otherwise
-///                    used directly clamped to libsodium's minimum).
-/// @param key_size  Desired key length in bytes. Defaults to 32.
+/**
+ * @brief Derive a key from a password or seed.
+ * 
+ * Supports two modes:
+ * 1. Argon2id (iterations > 0): Slow, memory-hard hashing for passwords.
+ * 2. BLAKE2b (iterations == 0): Fast FastPath for deterministic session keys.
+ *
+ * @param password Raw password or seed bytes.
+ * @param salt Salt bytes. Argon2id requires exactly 16 bytes.
+ * @param iterations Use 0 for high-performance BLAKE2b FastPath.
+ * @param key_size Desired output length in bytes.
+ * @return std::expected<DerivedKey, CryptoError> The derived key or error.
+ */
 [[nodiscard]] auto derive_key(std::span<const std::byte> password,
                               std::span<const std::byte> salt,
                               uint32_t iterations = 100'000,
                               size_t key_size = 32)
     -> std::expected<DerivedKey, CryptoError>;
 
-/// Generate a cryptographically-secure random key of the given size.
-/// Uses libsodium's `randombytes_buf`.
+/**
+ * @brief Generate a cryptographically-secure random key.
+ * @param size Desired key length.
+ * @return std::vector<std::byte> Random bytes.
+ */
 [[nodiscard]] auto generate_key(size_t size = 32) -> std::vector<std::byte>;
 
 } // namespace euxis::crypto

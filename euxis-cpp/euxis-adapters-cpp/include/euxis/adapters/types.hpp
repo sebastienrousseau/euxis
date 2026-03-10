@@ -1,3 +1,5 @@
+/// @file
+/// @brief Types for adapters
 #pragma once
 
 #include <string>

@@ -261,6 +261,7 @@ target/
 *.profdata
 *.gcda
 *.gcno
+*.gcov
 
 # Application specific cache 
 euxis-runtime/data/projects/.euxis/

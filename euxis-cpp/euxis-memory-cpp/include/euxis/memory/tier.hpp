@@ -1,3 +1,5 @@
+/// @file
+/// @brief Memory tier
 #pragma once
 
 #include <cstdint>

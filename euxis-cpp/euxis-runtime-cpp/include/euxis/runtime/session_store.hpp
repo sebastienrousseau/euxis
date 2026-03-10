@@ -1,14 +1,20 @@
+/// @file
+/// @brief Persistent storage for agent conversation sessions.
 #pragma once
 
 #include <expected>
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace euxis::runtime {
 
+/// @brief roles in a conversation.
 enum class Role { User, Assistant, System };
 
-struct ConversationMessage {
+/// @brief A single message in a session.
+struct SessionMessage {
     Role role;
     std::string content;
     std::string agent_id;
@@ -17,30 +23,38 @@ struct ConversationMessage {
     double duration_ms{0.0};
 };
 
+/// @brief Point-in-time state of a conversation branch.
 struct SessionSnapshot {
     std::string session_id;
     std::string branch_id;
     std::string agent_id;
-    std::vector<ConversationMessage> messages;
+    std::vector<SessionMessage> messages;
 };
 
-/// Abstract session persistence interface.
+/// @brief Abstract interface for session persistence.
 class ISessionStore {
 public:
     virtual ~ISessionStore() = default;
 
+    /// @brief Persist a session snapshot.
     virtual auto save(const SessionSnapshot& snapshot)
         -> std::expected<void, std::string> = 0;
 
-    virtual auto load(const std::string& session_id,
-                      const std::string& branch = "main")
+    /// @brief Load a session snapshot.
+    virtual auto load(const std::string& session_id, const std::string& branch = "main")
         -> std::expected<SessionSnapshot, std::string> = 0;
 
+    /// @brief List all branches for a given session.
     virtual auto list_branches(const std::string& session_id)
         -> std::vector<std::string> = 0;
 
-    virtual auto compact(const std::string& session_id, size_t keep_last_n = 20)
+    /// @brief Truncate session history.
+    virtual auto compact(const std::string& session_id, size_t keep_last_n)
         -> std::expected<void, std::string> = 0;
 };
+
+/// @brief Factory function to create a default filesystem-based session store.
+auto make_session_store(const std::string& base_dir)
+    -> std::unique_ptr<ISessionStore>;
 
 } // namespace euxis::runtime

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Fleet commands
 #pragma once
 
 #include "euxis/cli/command.hpp"

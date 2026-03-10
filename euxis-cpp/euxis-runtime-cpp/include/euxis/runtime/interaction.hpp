@@ -1,6 +1,7 @@
+/// @file
+/// @brief orchestration of multi-agent interactions and workflows.
 #pragma once
 
-#include <functional>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -10,24 +11,34 @@
 #include <nlohmann/json.hpp>
 
 #include "agent_session.hpp"
+#include "provider.hpp"
+#include "session_store.hpp"
 
 namespace euxis::runtime {
 
-enum class InteractionPattern {
-    Sequential,
-    Parallel,
-    SharedScratchpad,
-    EvaluatorLoop,
-    SupervisorWorker,
+/// @brief Result of a multi-agent interaction workflow.
+struct InteractionResult {
+    bool success{false};
+    std::string output;
+    std::vector<std::string> agent_outputs;
+    double total_duration_ms{0.0};
+    int rounds{0};
 };
 
-/// Thread-safe shared scratchpad for multi-agent communication.
+/// @brief thread-safe shared memory space for agents in an interaction.
 class Scratchpad {
 public:
+    /// @brief write a value to the scratchpad.
     void write(const std::string& key, const nlohmann::json& value,
-               const std::string& writer);
-    [[nodiscard]] auto read(const std::string& key) const -> std::optional<nlohmann::json>;
-    [[nodiscard]] auto read_all() const -> nlohmann::json;
+               const std::string& writer = "");
+    
+    /// @brief Read a value from the scratchpad.
+    auto read(const std::string& key) const -> std::optional<nlohmann::json>;
+    
+    /// @brief Get all values in the scratchpad as a JSON object.
+    auto read_all() const -> nlohmann::json;
+    
+    /// @brief reset the scratchpad.
     void clear();
 
 private:
@@ -35,56 +46,51 @@ private:
     std::map<std::string, nlohmann::json> data_;
 };
 
-struct InteractionResult {
-    bool success{false};
-    std::string output;
-    std::vector<std::string> agent_outputs;
-    int rounds{0};
-    double total_duration_ms{0.0};
-};
-
+/// @brief Configuration for a quality evaluation gate.
 struct EvaluationGateConfig {
     std::string evaluator_agent_id;
     std::string evaluation_prompt;
-    int max_retries{3};
+    int max_retries{2};
     double min_quality_score{0.7};
 };
 
+/// @brief configuration for supervisor-worker orchestration patterns.
 struct SupervisorConfig {
     std::string supervisor_agent_id;
     std::vector<std::string> worker_agent_ids;
     std::string decomposition_prompt;
     std::string aggregation_prompt;
-    bool parallel_workers{true};
+    int parallel_workers{3};
 };
 
-/// Orchestrates multi-agent interaction patterns.
+/// @brief Orchestrates agents through complex patterns (sequential, parallel, etc).
 class InteractionOrchestrator {
 public:
-    explicit InteractionOrchestrator(IProvider* provider, ISessionStore* store);
+    /// @brief Construct orchestrator with a provider and session store.
+    InteractionOrchestrator(IProvider* provider, ISessionStore* store);
 
-    [[nodiscard]] auto run_sequential(
-        const std::vector<std::string>& agent_ids,
-        const std::string& task) -> InteractionResult;
+    /// @brief run agents in a linear sequence (pipeline).
+    auto run_sequential(const std::vector<std::string>& agent_ids,
+                        const std::string& task) -> InteractionResult;
 
-    [[nodiscard]] auto run_parallel(
-        const std::vector<std::string>& agent_ids,
-        const std::string& task) -> InteractionResult;
+    /// @brief run multiple agents in parallel on the same task.
+    auto run_parallel(const std::vector<std::string>& agent_ids,
+                      const std::string& task) -> InteractionResult;
 
-    [[nodiscard]] auto run_scratchpad(
-        const std::vector<std::string>& agent_ids,
-        const std::string& task,
-        Scratchpad& scratchpad,
-        int max_rounds = 3) -> InteractionResult;
+    /// @brief run agents using a shared scratchpad for collaboration.
+    auto run_scratchpad(const std::vector<std::string>& agent_ids,
+                        const std::string& task,
+                        Scratchpad& scratchpad,
+                        int max_rounds = 3) -> InteractionResult;
 
-    [[nodiscard]] auto run_with_evaluator(
-        const std::string& worker_agent_id,
-        const std::string& task,
-        const EvaluationGateConfig& gate) -> InteractionResult;
+    /// @brief run an agent and evaluate its output using another agent.
+    auto run_with_evaluator(const std::string& worker_agent_id,
+                            const std::string& task,
+                            const EvaluationGateConfig& gate) -> InteractionResult;
 
-    [[nodiscard]] auto run_supervisor_worker(
-        const SupervisorConfig& config,
-        const std::string& task) -> InteractionResult;
+    /// @brief run a hierarchical supervisor-worker workflow.
+    auto run_supervisor_worker(const SupervisorConfig& config,
+                               const std::string& task) -> InteractionResult;
 
 private:
     IProvider* provider_;

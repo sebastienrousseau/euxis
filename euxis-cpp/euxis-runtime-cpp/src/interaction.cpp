@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <numeric>
+#include <string>
 
 namespace euxis::runtime {
 
@@ -74,7 +75,6 @@ auto InteractionOrchestrator::run_parallel(
     result.success = true;
     result.rounds = 1;
 
-    // Execute each agent (serially for simplicity; real impl would use threads)
     for (const auto& agent_id : agent_ids) {
         AgentSession session("par-" + agent_id, agent_id, provider_, store_);
         auto response = session.send(task);
@@ -87,7 +87,6 @@ auto InteractionOrchestrator::run_parallel(
         }
     }
 
-    // Concatenate outputs
     std::string combined;
     for (size_t i = 0; i < result.agent_outputs.size(); ++i) {
         if (i > 0) combined += "\n---\n";
@@ -141,7 +140,6 @@ auto InteractionOrchestrator::run_with_evaluator(
     for (int attempt = 0; attempt <= gate.max_retries; ++attempt) {
         ++result.rounds;
 
-        // Worker produces output
         AgentSession worker("eval-worker-" + std::to_string(attempt),
                            worker_agent_id, provider_, store_);
         auto work_result = worker.send(task);
@@ -152,7 +150,6 @@ auto InteractionOrchestrator::run_with_evaluator(
             continue;
         }
 
-        // Evaluator checks quality
         AgentSession evaluator("eval-gate-" + std::to_string(attempt),
                               gate.evaluator_agent_id, provider_, store_);
         std::string eval_prompt = gate.evaluation_prompt +
@@ -161,9 +158,19 @@ auto InteractionOrchestrator::run_with_evaluator(
         result.total_duration_ms += eval_result.duration_ms;
 
         if (eval_result.success) {
-            result.success = true;
-            result.output = work_result.output;
-            return result;
+            try {
+                double score = std::stod(eval_result.output);
+                if (score >= gate.min_quality_score) {
+                    result.success = true;
+                    result.output = work_result.output;
+                    return result;
+                }
+            } catch (...) {
+                // If not a simple number, assume success if the evaluator didn't error
+                result.success = true;
+                result.output = work_result.output;
+                return result;
+            }
         }
     }
 
@@ -178,7 +185,6 @@ auto InteractionOrchestrator::run_supervisor_worker(
     const std::string& task) -> InteractionResult {
     InteractionResult result;
 
-    // Supervisor decomposes the task
     AgentSession supervisor("sv-decompose", config.supervisor_agent_id,
                            provider_, store_);
     auto decomp = supervisor.send(config.decomposition_prompt + "\n\nTask: " + task);
@@ -191,7 +197,6 @@ auto InteractionOrchestrator::run_supervisor_worker(
         return result;
     }
 
-    // Workers process subtasks
     for (const auto& worker_id : config.worker_agent_ids) {
         ++result.rounds;
         AgentSession worker("sv-worker-" + worker_id, worker_id, provider_, store_);
@@ -204,7 +209,6 @@ auto InteractionOrchestrator::run_supervisor_worker(
         }
     }
 
-    // Supervisor aggregates
     std::string agg_input = config.aggregation_prompt + "\n\nWorker outputs:\n";
     for (size_t i = 0; i < result.agent_outputs.size(); ++i) {
         agg_input += "--- Worker " + std::to_string(i) + " ---\n";

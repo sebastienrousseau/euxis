@@ -1,27 +1,36 @@
 #pragma once
 
 #include <expected>
+#include <memory>
 #include <string>
-#include <string_view>
 
-#include <nlohmann/json.hpp>
-
-#include "euxis/a2a/agent_card.hpp"
+#include "message.hpp"
 
 namespace euxis::a2a {
 
-/// Abstract transport layer for A2A protocol communication.
-class A2ATransport {
+/**
+ * @brief Error types for A2A transport layer operations.
+ */
+enum class TransportError {
+    ConnectionFailed,   ///< Unable to establish network connection.
+    Timeout,            ///< Target did not respond in time.
+    ProtocolError,      ///< Invalid message format or unexpected response.
+    AuthFailed,         ///< Invalid or missing credentials.
+};
+
+/**
+ * @brief Base interface for A2A communication channels.
+ */
+class ITransport {
 public:
-    virtual ~A2ATransport() = default;
+    virtual ~ITransport() = default;
 
-    /// Send a JSON-RPC style request to a remote agent.
-    [[nodiscard]] virtual auto send(std::string_view method, const nlohmann::json& params)
-        -> std::expected<nlohmann::json, std::string> = 0;
-
-    /// Discover a remote agent by fetching its agent card.
-    [[nodiscard]] virtual auto discover(std::string_view url)
-        -> std::expected<AgentCard, std::string> = 0;
+    /**
+     * @brief Send an A2A message and wait for the response.
+     * @param msg The message to send.
+     * @return std::expected<Message, TransportError> The reply or error.
+     */
+    virtual auto send(const Message& msg) -> std::expected<Message, TransportError> = 0;
 };
 
 } // namespace euxis::a2a

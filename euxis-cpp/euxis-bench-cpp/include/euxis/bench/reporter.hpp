@@ -1,3 +1,5 @@
+/// @file
+/// @brief Bench reporter
 #pragma once
 
 #include <filesystem>

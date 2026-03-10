@@ -1,3 +1,5 @@
+/// @file
+/// @brief Dev commands
 #pragma once
 
 #include "euxis/cli/command.hpp"

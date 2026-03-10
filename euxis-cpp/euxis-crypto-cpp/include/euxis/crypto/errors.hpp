@@ -1,32 +1,29 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 namespace euxis::crypto {
 
+/**
+ * @brief Error codes for the crypto module.
+ */
 enum class CryptoError {
-    InvalidKeySize,
-    InvalidIVSize,
-    EncryptionFailed,
-    DecryptionFailed,
-    AuthenticationFailed,
-    InvalidSignature,
-    KeyDerivationFailed
+    InvalidKeySize,      ///< Key buffer was not exactly 32 bytes.
+    InvalidIVSize,       ///< IV buffer was not exactly 12 bytes.
+    EncryptionFailed,    ///< AES-GCM encryption routine failed.
+    DecryptionFailed,    ///< Authentication tag mismatch or corrupt ciphertext.
+    AuthenticationFailed, ///< MAC verification failed during decryption.
+    InvalidSignature,    ///< Signature verification failed.
+    KeyGenerationFailed, ///< Secure random key generation failed.
+    KeyDerivationFailed, ///< Argon2id or BLAKE2b derivation failed.
+    InvalidInput,        ///< Buffer size mismatch or null data.
 };
 
-/// Human-readable description of a CryptoError value.
-[[nodiscard]] constexpr std::string_view to_string(CryptoError e) noexcept {
-    switch (e) {
-    case CryptoError::InvalidKeySize:       return "Invalid key size";
-    case CryptoError::InvalidIVSize:        return "Invalid IV size";
-    case CryptoError::EncryptionFailed:     return "Encryption failed";
-    case CryptoError::DecryptionFailed:     return "Decryption failed";
-    case CryptoError::AuthenticationFailed: return "Authentication failed";
-    case CryptoError::InvalidSignature:     return "Invalid signature";
-    case CryptoError::KeyDerivationFailed:  return "Key derivation failed";
-    }
-    return "Unknown crypto error";
-}
+/**
+ * @brief Convert a CryptoError enum to a human-readable string.
+ * @param error The error code.
+ * @return std::string The descriptive string.
+ */
+[[nodiscard]] auto to_string(CryptoError error) -> std::string;
 
 } // namespace euxis::crypto

@@ -47,6 +47,7 @@ Engine::Engine(const std::string& euxis_home) {
 void Engine::register_commands() {
     // System (7)
     commands_.push_back({"doctor",                 tr("System"),         tr("Run installation diagnostics"),        cmd::cmd_doctor});
+    commands_.push_back({"fix",                    tr("System"),         tr("Autonomous environment self-repair"),  cmd::cmd_fix});
     commands_.push_back({"health",                 tr("System"),         tr("Fleet integrity check (10-point)"),    cmd::cmd_health});
     commands_.push_back({"verify",                 tr("System"),         tr("Verify agent prompt integrity"),       cmd::cmd_verify});
     commands_.push_back({"lint",                   tr("System"),         tr("Lint agent prompts and configs"),      cmd::cmd_lint});

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Memory store
 #pragma once
 
 #include <array>

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Security errors
 #pragma once
 
 #include <stdexcept>

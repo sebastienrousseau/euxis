@@ -1,37 +1,53 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <expected>
 #include <span>
+#include <string>
+#include <vector>
 
 #include "errors.hpp"
-#include "types.hpp"
 
 namespace euxis::crypto {
 
-/// Encrypt `data` with AES-256-GCM using the given 32-byte key.
-/// A random 12-byte IV (nonce) is generated internally via `randombytes_buf`.
-/// The returned ciphertext includes the 16-byte auth tag appended by libsodium.
+/** @brief Result of a successful encryption. */
+struct EncryptionResult {
+    std::vector<std::byte> ciphertext;
+    std::array<std::byte, 12> iv;
+    std::string algorithm;
+
+    /** @brief Encodes IV + Ciphertext as Base64. */
+    [[nodiscard]] std::string to_base64() const;
+};
+
+/** @brief Result of a successful decryption. */
+struct DecryptionResult {
+    std::vector<std::byte> plaintext;
+    std::string algorithm;
+
+    /** @brief Convienence helper to get plaintext as UTF-8 string. */
+    [[nodiscard]] std::string to_string() const;
+};
+
+/** @brief Encrypt data using AES-256-GCM. */
 [[nodiscard]] auto encrypt(std::span<const std::byte> data,
                            std::span<const std::byte, 32> key)
     -> std::expected<EncryptionResult, CryptoError>;
 
-/// Decrypt AES-256-GCM ciphertext (with appended auth tag) using the given key
-/// and 12-byte IV that was used during encryption.
+/** @brief Decrypt data using AES-256-GCM. */
 [[nodiscard]] auto decrypt(std::span<const std::byte> ciphertext,
                            std::span<const std::byte, 32> key,
                            std::span<const std::byte, 12> iv)
     -> std::expected<DecryptionResult, CryptoError>;
 
-/// Encrypt `data` with AES-256-GCM using the given key and additional
-/// authenticated data (AAD). The AAD is authenticated but NOT encrypted.
+/** @brief Authenticated encryption with Additional Authenticated Data (AAD). */
 [[nodiscard]] auto encrypt_aad(std::span<const std::byte> data,
                                std::span<const std::byte, 32> key,
                                std::span<const std::byte> aad)
     -> std::expected<EncryptionResult, CryptoError>;
 
-/// Decrypt AES-256-GCM ciphertext that was encrypted with AAD.
-/// The same AAD must be provided for authentication to succeed.
+/** @brief Authenticated decryption with Additional Authenticated Data (AAD). */
 [[nodiscard]] auto decrypt_aad(std::span<const std::byte> ciphertext,
                                std::span<const std::byte, 32> key,
                                std::span<const std::byte, 12> iv,

@@ -15,27 +15,33 @@ auto now_epoch() -> double {
         .count();
 }
 
-// Use std::random_device directly for cryptographically safe jitter
-thread_local std::random_device secure_rng;
+// Use a function to ensure exception safety during thread_local initialization
+auto get_secure_rng() -> std::random_device& {
+    thread_local std::random_device rng;
+    return rng;
+}
 
 } // namespace
 
 auto RetryPolicy::sleep_duration(int attempt) const -> double {
-    double raw =
+    const double raw =
         std::min(base_delay_seconds * std::pow(2.0, std::max(0, attempt - 1)),
                  max_delay_seconds);
-    double jitter = raw * jitter_ratio;
+    const double jitter = raw * jitter_ratio;
     std::uniform_real_distribution<double> dist(-jitter, jitter);
-    return std::max(0.0, raw + dist(secure_rng));
+    return std::max(0.0, raw + dist(get_secure_rng()));
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 CircuitBreaker::CircuitBreaker(int failure_threshold,
                                double recovery_timeout_seconds)
     : failure_threshold_(failure_threshold),
       recovery_timeout_seconds_(recovery_timeout_seconds) {}
 
 auto CircuitBreaker::is_open() -> bool {
-    if (!opened_at_) return false;
+    if (!opened_at_) {
+        return false;
+    }
     if ((now_epoch() - *opened_at_) >= recovery_timeout_seconds_) {
         reset();
         return false;

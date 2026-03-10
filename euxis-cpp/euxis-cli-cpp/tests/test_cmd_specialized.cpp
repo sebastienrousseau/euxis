@@ -289,7 +289,9 @@ TEST_F(SpecializedCmdTest, TuiTextDashboardWithRuntime) {
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-data");
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-core");
-    auto code = cmd_tui(ctx_, {});
+    // Use cmd_tui_ex with a custom stream to bypass isatty() check
+    std::istringstream input("");
+    auto code = cmd_tui_ex(ctx_, {}, input);
     EXPECT_EQ(code, 0);
 }
 

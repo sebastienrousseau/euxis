@@ -1,24 +1,26 @@
+/// @file
+/// @brief Pipeline for validating generated reports against evidentiary standards.
 #pragma once
 
-#include <regex>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 #include "evidence.hpp"
 
 namespace euxis::metrics {
 
+/// @brief A potential claim extracted from raw text.
 struct ExtractedClaim {
     std::string matched_text;
-    double value{0.0};
-    std::string unit;
+    int position_start;
+    int position_end;
     std::string context;
-    int position_start{0};
-    int position_end{0};
+    std::optional<double> value;
+    std::optional<std::string> unit;
 };
 
+/// @brief Result of a citation and forbidden term scan.
 struct CitationCheckResult {
     int total_claims{0};
     int cited_claims{0};
@@ -26,6 +28,7 @@ struct CitationCheckResult {
     std::vector<std::string> forbidden_terms_found;
 };
 
+/// @brief Unified validation result for a report.
 struct ValidationResult {
     bool passed{false};
     int total_claims{0};
@@ -35,27 +38,33 @@ struct ValidationResult {
     std::vector<std::string> issues;
 };
 
+/// @brief Orchestrates the extraction and verification of claims within a text body.
 class ValidationPipeline {
 public:
-    explicit ValidationPipeline(
-        EvidenceFramework* framework = nullptr,
-        double pass_threshold = 0.8);
+    /// @brief Construct pipeline with an optional evidence framework and pass threshold.
+    explicit ValidationPipeline(EvidenceFramework* framework = nullptr,
+                                 double pass_threshold = 0.8);
 
+    /// @brief run full validation on a report text.
+    auto validate_report(const std::string& text) -> ValidationResult;
+
+    /// @brief Identify quantitative statements in text.
     auto extract_quantitative_claims(const std::string& text)
         -> std::vector<ExtractedClaim>;
-
+    
+    /// @brief Verify that extracted claims carry proper citations.
     auto check_citations(const std::string& text,
                          const std::vector<ExtractedClaim>& claims)
         -> CitationCheckResult;
-
+    
+    /// @brief scan for prohibited or biased terminology.
     auto check_forbidden_terms(const std::string& text)
         -> std::vector<std::string>;
-
-    auto validate_report(const std::string& text) -> ValidationResult;
 
 private:
     EvidenceFramework* framework_;
     double pass_threshold_;
+
     std::vector<std::string> quantitative_patterns_;
     std::vector<std::string> citation_patterns_;
     std::vector<std::string> forbidden_terms_;

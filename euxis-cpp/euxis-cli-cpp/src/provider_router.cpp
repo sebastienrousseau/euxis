@@ -28,7 +28,7 @@ auto tier_label(Tier t) -> std::string {
 auto parse_tier(const std::string& s) -> Tier {
     if (s == "routine") return Tier::Routine;
     if (s == "data")    return Tier::Data;
-    if (s == "reason")  return Tier::Reason;
+    if (s == "reason" || s == "core")  return Tier::Reason;
     return Tier::Code;
 }
 

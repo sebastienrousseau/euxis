@@ -1,3 +1,5 @@
+/// @file
+/// @brief ETX theme
 #pragma once
 #include <QColor>
 #include <QHash>

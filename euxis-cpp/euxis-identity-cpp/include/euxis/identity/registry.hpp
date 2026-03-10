@@ -1,50 +1,52 @@
+/// @file
+/// @brief Registry for managing agent identities and credentials.
 #pragma once
 
-#include <cstddef>
+#include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
-#include <nlohmann/json.hpp>
-
-#include "attestation.hpp"
+#include "did.hpp"
 #include "credentials.hpp"
+#include "attestation.hpp"
 
 namespace euxis::identity {
 
-/// Full identity record for an agent in the registry, including DID,
-/// public key, credentials, attestations, and arbitrary metadata.
+/// @brief Unified identity record for an agent in the registry.
 struct AgentIdentity {
     std::string did;
-    std::vector<std::byte> public_key;
+    std::string name;
+    std::string role;
+    std::string public_key;
     std::vector<VerifiableCredential> credentials;
     std::vector<Attestation> attestations;
     std::string created_at;
     nlohmann::json metadata;
 };
 
-/// Abstract identity registry interface for agent lifecycle management.
+/// @brief Abstract interface for identity persistence and resolution.
 class IdentityRegistry {
 public:
     virtual ~IdentityRegistry() = default;
-
-    /// Register an agent identity. Returns false if the DID already exists.
+    
+    /// @brief Store a new agent identity.
     virtual auto register_agent(AgentIdentity identity) -> bool = 0;
-
-    /// Resolve a DID to the full agent identity, or std::nullopt if not found.
+    
+    /// @brief resolve an identity by its DID.
     virtual auto resolve(std::string_view did) -> std::optional<AgentIdentity> = 0;
-
-    /// List all registered agent identities.
+    
+    /// @brief List all identities in the registry.
     virtual auto list_agents() -> std::vector<AgentIdentity> = 0;
-
-    /// Revoke an agent's identity by DID. Returns false if the DID was not found.
+    
+    /// @brief Remove an identity from the registry.
     virtual auto revoke(std::string_view did) -> bool = 0;
 };
 
-/// In-memory implementation of the identity registry backed by a hash map.
-class InMemoryIdentityRegistry final : public IdentityRegistry {
+/// @brief volatile in-memory implementation of the identity registry.
+class InMemoryIdentityRegistry : public IdentityRegistry {
 public:
     auto register_agent(AgentIdentity identity) -> bool override;
     auto resolve(std::string_view did) -> std::optional<AgentIdentity> override;
@@ -52,7 +54,7 @@ public:
     auto revoke(std::string_view did) -> bool override;
 
 private:
-    std::unordered_map<std::string, AgentIdentity> agents_;
+    std::map<std::string, AgentIdentity> agents_;
 };
 
 } // namespace euxis::identity

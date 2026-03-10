@@ -24,13 +24,7 @@ AgentSession::AgentSession(std::string session_id,
 
 auto AgentSession::send(const std::string& message) -> ProviderResult {
     // Record user message
-    messages_.push_back({
-        .role = Role::User,
-        .content = message,
-        .agent_id = agent_id_,
-        .model = {},
-        .timestamp = {},
-    });
+    messages_.emplace_back(Role::User, message, agent_id_, "", "", 0.0);
     emit(SessionEvent::MessageSent, message);
 
     // Build context and execute
@@ -38,17 +32,13 @@ auto AgentSession::send(const std::string& message) -> ProviderResult {
     auto result = provider_->execute(current_model_, prompt);
 
     // Record assistant response
-    messages_.push_back({
-        .role = Role::Assistant,
-        .content = result.output,
-        .agent_id = agent_id_,
-        .model = current_model_.model,
-        .timestamp = {},
-        .duration_ms = result.duration_ms,
-    });
+    messages_.emplace_back(Role::Assistant, result.output, agent_id_, 
+                          current_model_.model, "", result.duration_ms);
     emit(SessionEvent::ResponseReceived, result.output);
 
-    return result;
+    ProviderResult final_res;
+    static_cast<ProviderResponse&>(final_res) = result;
+    return final_res;
 }
 
 void AgentSession::register_tool(ToolDeclaration decl, ToolHandler handler) {
@@ -94,11 +84,17 @@ auto AgentSession::compact(size_t keep_n) -> std::expected<void, std::string> {
 
 auto AgentSession::save() -> std::expected<void, std::string> {
     if (!store_) return std::unexpected("No session store configured");
+    
+    std::vector<SessionMessage> session_messages;
+    for (const auto& m : messages_) {
+        session_messages.push_back(m);
+    }
+
     SessionSnapshot snap{
         .session_id = session_id_,
         .branch_id = branch_id_,
         .agent_id = agent_id_,
-        .messages = messages_,
+        .messages = std::move(session_messages),
     };
     auto result = store_->save(snap);
     if (result.has_value())
@@ -112,7 +108,10 @@ auto AgentSession::load(const std::string& branch) -> std::expected<void, std::s
     if (!result.has_value()) return std::unexpected(result.error());
 
     branch_id_ = result->branch_id;
-    messages_ = std::move(result->messages);
+    messages_.clear();
+    for (const auto& m : result->messages) {
+        messages_.emplace_back(m);
+    }
     emit(SessionEvent::SessionLoaded);
     return {};
 }

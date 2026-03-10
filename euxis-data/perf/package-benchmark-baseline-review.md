@@ -1,20 +1,16 @@
 # Package Baseline Proposal Review
 
 - Previous release: `v0.0.3`
-- Next release: `v0.0.3`
-- Proposal SHA-256: `61a2934b6ef1f85fdbb0be576dd066e0c95b31f77f8fcc9d75fcc1e130e067da`
+- Next release: `v0.0.4`
+- Proposal SHA-256: `8e17094e4f078da509f4828c10e5ffe76c994c7a1c2ab6668404fb41466a1ecc`
 - Threshold: `25.00%`
 - Manual review required: `yes`
 
 ## Flagged Packages
-- `euxis-bridge`: wall_p95_delta_percent=73.500%, cpu_ms_p95_delta_percent=75.897%
-- `euxis-cli`: wall_p95_delta_percent=-40.940%, cpu_ms_p95_delta_percent=-40.875%
-- `euxis-core`: wall_p95_delta_percent=-46.628%, cpu_ms_p95_delta_percent=-46.226%
-- `euxis-crypto`: wall_p95_delta_percent=63.105%, cpu_ms_p95_delta_percent=65.684%
-- `euxis-docs`: wall_p95_delta_percent=-42.492%, cpu_ms_p95_delta_percent=-42.161%
-- `euxis-gateway`: wall_p95_delta_percent=-43.448%, cpu_ms_p95_delta_percent=-43.468%
-- `euxis-metrics`: wall_p95_delta_percent=-46.558%, cpu_ms_p95_delta_percent=-46.043%
-- `euxis-runtime`: wall_p95_delta_percent=-32.067%, cpu_ms_p95_delta_percent=-32.282%
-- `euxis-scripts`: wall_p95_delta_percent=-43.139%, cpu_ms_p95_delta_percent=-42.553%
-- `euxis-sdk`: wall_p95_delta_percent=215.431%, cpu_ms_p95_delta_percent=220.973%
-- `euxis-web`: wall_p95_delta_percent=-29.187%, cpu_ms_p95_delta_percent=-26.702%
+- `euxis-adapters-cpp`: wall_p95_delta_percent=37.500%, cpu_ms_p95_delta_percent=33.333%
+- `euxis-bridge-cpp`: wall_p95_delta_percent=33.333%, cpu_ms_p95_delta_percent=50.000%
+- `euxis-cli-cpp`: cpu_ms_p95_delta_percent=-28.571%
+- `euxis-identity-cpp`: cpu_ms_p95_delta_percent=-42.857%
+- `euxis-runtime-cpp`: wall_p95_delta_percent=-30.000%
+- `euxis-scripts-cpp`: cpu_ms_p95_delta_percent=-28.571%
+- `euxis-web`: wall_p95_delta_percent=-29.286%, cpu_ms_p95_delta_percent=-30.000%

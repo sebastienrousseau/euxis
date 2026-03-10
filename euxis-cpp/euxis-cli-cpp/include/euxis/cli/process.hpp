@@ -39,6 +39,10 @@ public:
     static auto shell(const std::string& command,
                       int timeout_seconds = 30) -> ProcessResult;
 
+    /// Run a shell command string interactively (connects to parent terminal).
+    /// Returns 0 on success, or the exit code.
+    static auto shell_interactive(const std::string& command) -> int;
+
     /// Search PATH for an executable. Returns the full path or nullopt.
     static auto which(const std::string& name) -> std::optional<std::string>;
 

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Whatsapp adapter
 #pragma once
 
 #include <mutex>

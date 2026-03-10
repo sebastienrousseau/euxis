@@ -1,3 +1,5 @@
+/// @file
+/// @brief Slack adapter
 #pragma once
 
 #include <mutex>

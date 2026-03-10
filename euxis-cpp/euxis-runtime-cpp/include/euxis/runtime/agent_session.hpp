@@ -1,74 +1,99 @@
 #pragma once
 
+#include <expected>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "provider.hpp"
 #include "session_store.hpp"
-#include "tool.hpp"
 
 namespace euxis::runtime {
 
-/// Lifecycle events emitted by AgentSession.
+/** @brief Type for tool execution handlers. */
+using ToolHandler = std::function<std::expected<nlohmann::json, std::string>(const nlohmann::json&)>;
+
+/** @brief Declaration of a tool's identity and parameters. */
+struct ToolDeclaration {
+    std::string name;
+    std::string description;
+    nlohmann::json input_schema;
+};
+
+/** @brief Interface for managing and invoking agent tools. */
+class IToolRegistry {
+public:
+    virtual ~IToolRegistry() = default;
+    virtual void register_tool(ToolDeclaration decl, ToolHandler handler) = 0;
+    virtual auto invoke(const std::string& name, const nlohmann::json& input)
+        -> std::expected<nlohmann::json, std::string> = 0;
+    virtual auto list_tools() const -> std::vector<ToolDeclaration> = 0;
+    virtual void remove_tool(const std::string& name) = 0;
+};
+
+/** @brief Internal message type for active conversations. */
+struct ConversationMessage : public SessionMessage {
+    ConversationMessage() = default;
+    ConversationMessage(Role r, std::string c, std::string a, std::string m, std::string t, double d)
+        : SessionMessage{r, std::move(c), std::move(a), std::move(m), std::move(t), d} {}
+    
+    ConversationMessage(const SessionMessage& other) : SessionMessage(other) {}
+    ConversationMessage& operator=(const SessionMessage& other) {
+        SessionMessage::operator=(other);
+        return *this;
+    }
+};
+
+/** @brief Result of an LLM provider execution. */
+struct ProviderResult : public ProviderResponse {};
+
+/** @brief Events emitted during a session's lifecycle. */
 enum class SessionEvent {
     MessageSent,
     ResponseReceived,
-    ToolInvoked,
     ModelSwitched,
-    SessionSaved,
-    SessionLoaded,
     BranchCreated,
+    SessionSaved,
+    SessionLoaded
 };
 
-using SessionEventHandler = std::function<void(SessionEvent, const std::string& detail)>;
+/** @brief Callback type for session event listeners. */
+using SessionEventHandler = std::function<void(SessionEvent, const std::string&)>;
 
-/// Unified agent session managing conversation, tools, provider, and persistence.
+/**
+ * @brief Manages a single active agent interaction session.
+ */
 class AgentSession {
 public:
     AgentSession(std::string session_id,
                  std::string agent_id,
                  IProvider* provider,
-                 ISessionStore* store);
+                 ISessionStore* store = nullptr);
 
-    /// Send a user message and get the assistant response.
     auto send(const std::string& message) -> ProviderResult;
 
-    /// Register a custom tool.
     void register_tool(ToolDeclaration decl, ToolHandler handler);
-
-    /// Remove a registered tool.
     void remove_tool(const std::string& name);
 
-    /// Set the system prompt for this session.
     void set_system_prompt(const std::string& prompt);
-
-    /// Append additional system context.
     void append_system_context(const std::string& context);
 
-    /// Switch the underlying model.
     auto switch_model(const ModelSpec& spec) -> bool;
-
-    /// Create a conversation branch.
     void branch(const std::string& name);
 
-    /// Compact conversation history, keeping last N messages.
-    auto compact(size_t keep_n = 20) -> std::expected<void, std::string>;
-
-    /// Persist the current session state.
+    auto compact(size_t keep_n) -> std::expected<void, std::string>;
     auto save() -> std::expected<void, std::string>;
-
-    /// Load a session from the store.
     auto load(const std::string& branch = "main") -> std::expected<void, std::string>;
 
-    /// Subscribe to lifecycle events.
     void on_event(SessionEventHandler handler);
 
-    [[nodiscard]] auto session_id() const -> const std::string&;
-    [[nodiscard]] auto agent_id() const -> const std::string&;
-    [[nodiscard]] auto messages() const -> const std::vector<ConversationMessage>&;
-    [[nodiscard]] auto current_branch() const -> const std::string&;
+    auto session_id() const -> const std::string&;
+    auto agent_id() const -> const std::string&;
+    auto messages() const -> const std::vector<ConversationMessage>&;
+    auto current_branch() const -> const std::string&;
 
 private:
     std::string session_id_;
@@ -76,14 +101,16 @@ private:
     std::string branch_id_{"main"};
     std::string system_prompt_;
     std::string system_context_;
+    
     IProvider* provider_;
     ISessionStore* store_;
     std::unique_ptr<IToolRegistry> tools_;
+    ModelSpec current_model_;
+    
     std::vector<ConversationMessage> messages_;
     std::vector<SessionEventHandler> event_handlers_;
-    ModelSpec current_model_;
 
-    void emit(SessionEvent event, const std::string& detail = {});
+    void emit(SessionEvent event, const std::string& detail = "");
     auto build_context() const -> std::string;
 };
 

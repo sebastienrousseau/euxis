@@ -330,6 +330,15 @@ auto Process::shell(const std::string& command, int timeout_seconds) -> ProcessR
     return run("/bin/sh", {"-c", command}, timeout_seconds);
 }
 
+auto Process::shell_interactive(const std::string& command) -> int {
+    // system() connects the command to the parent's stdin/stdout/stderr
+    int status = std::system(command.c_str());
+    if (WIFEXITED(status)) {
+        return WEXITSTATUS(status);
+    }
+    return -1;
+}
+
 auto Process::which(const std::string& name) -> std::optional<std::string> {
     const char* path_env = std::getenv("PATH");
     if (!path_env) return std::nullopt;

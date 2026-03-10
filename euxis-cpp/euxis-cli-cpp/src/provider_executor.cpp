@@ -26,11 +26,19 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
                                 int timeout_seconds,
                                 std::optional<ResolvedAuth> auth,
                                 std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    if (std::getenv("EUXIS_TEST_MOCK_EXECUTION")) {
+        if (on_chunk) on_chunk("mocked response chunk");
+        return {true, "mocked response for " + prompt, "", 0, 10.0, {}};
+    }
+    
     auto start = std::chrono::steady_clock::now();
 
     // Standardise provider for auth resolution
     std::string effective_provider = selection.provider;
     if (effective_provider == "anthropic") effective_provider = "claude";
+
+    spdlog::debug("Executing request: provider={}, model={}, effective_provider={}", 
+                  selection.provider, selection.model, effective_provider);
 
     // Resolve auth if not provided
     if (!auth.has_value()) {
@@ -38,12 +46,12 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     }
 
     ProviderResponse resp;
-    if (selection.provider == "claude" || selection.provider == "anthropic") {
+    if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
-    } else if (selection.provider == "ollama") {
+    } else if (effective_provider == "ollama") {
         resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
-    } else if (selection.provider == "openai" || selection.provider == "gemini") {
-        resp = execute_api(selection.provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
+    } else if (effective_provider == "openai" || effective_provider == "gemini") {
+        resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
         // Try as a generic CLI command
         if (Process::available(selection.provider)) {
@@ -143,12 +151,27 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                                        int timeout,
                                        const std::optional<ResolvedAuth>& auth,
                                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    // Use provided auth token
     std::string token;
     bool is_oauth = false;
+    
     if (auth.has_value()) {
         token = auth->token;
         is_oauth = auth->is_oauth;
+    } else {
+        const char* key = std::getenv("ANTHROPIC_API_KEY");
+        if (key && key[0]) {
+            token = key;
+            is_oauth = false;
+        } else {
+            token = resolve_anthropic_token();
+            is_oauth = !token.empty();
+        }
+    }
+
+    // If we have an OAuth token (from CLI import) and the 'claude' CLI is available,
+    // go DIRECTLY to the CLI fallback. The public API often rejects these tokens.
+    if (is_oauth && Process::available("claude")) {
+        goto fallback_to_cli;
     }
 
     if (!token.empty()) {
@@ -158,7 +181,13 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         body["model"] = m;
         body["max_tokens"] = 4096;
         
-        // Anthropic Prompt Caching: Mark the initial system/context blocks as cacheable
+        // Enable thinking for reasoning models
+        if (m.find("opus") != std::string::npos || m.find("sonnet") != std::string::npos) {
+            body["thinking"] = {{"type", "enabled"}, {"budget_tokens", 2048}};
+            body["max_tokens"] = 8192; 
+        }
+
+        // Anthropic Prompt Caching
         nlohmann::json messages = nlohmann::json::array();
         nlohmann::json first_msg;
         first_msg["role"] = "user";
@@ -166,44 +195,111 @@ auto ProviderExecutor::execute_claude(const std::string& model,
             {{"type", "text"}, {"text", prompt}, {"cache_control", {{"type", "ephemeral"}}}}
         });
         messages.push_back(first_msg);
-        
         body["messages"] = messages;
 
-        std::string body_str = body.dump();
+        std::string auth_header = is_oauth ? ("Authorization: Bearer " + token) : ("x-api-key: " + token);
 
-        // Determine auth header based on token type
-        std::string auth_header;
-        if (is_oauth) {
-            auth_header = "Authorization: Bearer " + token;
+        // --- Streaming path: use Anthropic SSE when on_chunk is provided ---
+        if (on_chunk) {
+            body["stream"] = true;
+            std::string body_str = body.dump();
+
+            std::vector<std::string> curl_args = {
+                "-s", "-S", "-N",
+                "https://api.anthropic.com/v1/messages",
+                "-H", "Content-Type: application/json",
+                "-H", "anthropic-version: 2023-06-01",
+                "-H", "anthropic-beta: output-128k-2025-02-19",
+                "-H", auth_header,
+                "-d", body_str
+            };
+
+            std::string full_content;
+            std::string sse_buffer;
+            bool got_error = false;
+            std::string error_msg;
+
+            auto sse_parser = [&](const std::string& chunk) {
+                sse_buffer += chunk;
+                // Process complete SSE lines
+                size_t pos = 0;
+                while (pos < sse_buffer.size()) {
+                    auto nl = sse_buffer.find('\n', pos);
+                    if (nl == std::string::npos) break;
+                    std::string line = sse_buffer.substr(pos, nl - pos);
+                    pos = nl + 1;
+                    // Remove trailing \r
+                    if (!line.empty() && line.back() == '\r') line.pop_back();
+
+                    if (line.starts_with("data: ")) {
+                        std::string data = line.substr(6);
+                        if (data == "[DONE]") continue;
+                        try {
+                            auto j = nlohmann::json::parse(data);
+                            if (j.value("type", "") == "content_block_delta" && j.contains("delta")) {
+                                std::string text;
+                                if (j["delta"].contains("text")) text = j["delta"]["text"].get<std::string>();
+                                else if (j["delta"].contains("thinking")) text = j["delta"]["thinking"].get<std::string>();
+                                
+                                if (!text.empty()) {
+                                    full_content += text;
+                                    on_chunk(text);
+                                }
+                            } else if (j.value("type", "") == "error") {
+                                got_error = true;
+                                error_msg = j["error"].value("message", j.dump());
+                            }
+                        } catch (...) {}
+                    }
+                }
+                sse_buffer = sse_buffer.substr(pos);
+            };
+
+            auto result = Process::run_streaming("curl", curl_args, "", sse_parser, timeout);
+            if (result.exit_code != 0) {
+                return {false, "", "API call failed: " + result.stderr_output, result.exit_code, 0.0, {}};
+            }
+            if (got_error) {
+                if (is_oauth && error_msg.find("OAuth authentication is currently not supported") != std::string::npos) {
+                    spdlog::info("Anthropic API rejected OAuth token, falling back to 'claude' CLI");
+                    if (auth.has_value()) {
+                        auth_store_.report_failure(auth->profile_id, CooldownReason::UnsupportedMethod);
+                    }
+                    goto fallback_to_cli;
+                }
+                return {false, "", "Anthropic API: " + error_msg, 1, 0.0, {}};
+            }
+            if (full_content.empty()) {
+                return {false, "", "No content in streaming response", 1, 0.0, {}};
+            }
+            return {true, full_content, "", 0, 0.0, {}};
         } else {
-            auth_header = "x-api-key: " + token;
-        }
+            // Non-streaming path
+            std::vector<std::string> curl_args = {
+                "-s", "-S", "-w", "\n%{http_code}",
+                "https://api.anthropic.com/v1/messages",
+                "-H", "Content-Type: application/json",
+                "-H", "anthropic-version: 2023-06-01",
+                "-H", "anthropic-beta: output-128k-2025-02-19",
+                "-H", auth_header,
+                "-d", body.dump()
+            };
 
-        std::vector<std::string> curl_args = {
-            "-s", "-S", "-w", "\n%{http_code}",
-            "https://api.anthropic.com/v1/messages",
-            "-H", "Content-Type: application/json",
-            "-H", "anthropic-version: 2023-06-01",
-            "-H", auth_header,
-            "-d", body_str
-        };
+            auto result = Process::run("curl", curl_args, timeout);
+            if (result.exit_code != 0) {
+                return {false, "", "curl failed: " + result.stderr_output, result.exit_code, 0.0, {}};
+            }
 
-        auto result = Process::run("curl", curl_args, timeout);
-        if (result.exit_code != 0) {
-            return {false, "", "API call failed: " + result.stderr_output, result.exit_code, 0.0, {}};
-        }
+            // Extract HTTP status from last line
+            std::string output = result.stdout_output;
+            int http_status = 0;
+            auto last_nl = output.rfind('\n');
+            if (last_nl != std::string::npos) {
+                try { http_status = std::stoi(output.substr(last_nl + 1)); }
+                catch (...) {}
+                output = output.substr(0, last_nl);
+            }
 
-        // Extract HTTP status from last line
-        std::string output = result.stdout_output;
-        int http_status = 0;
-        auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) {
-            try { http_status = std::stoi(output.substr(last_nl + 1)); }
-            catch (...) {}
-            output = output.substr(0, last_nl);
-        }
-
-        try {
             auto resp_json = nlohmann::json::parse(output);
 
             // Check for API errors
@@ -242,9 +338,6 @@ auto ProviderExecutor::execute_claude(const std::string& model,
             }
 
             return {false, output, "No content in API response", 1, 0.0, {}};
-        } catch (const std::exception& e) {
-            spdlog::warn("Failed to parse Anthropic response: {}", e.what());
-            return {false, output, "JSON parse error: " + std::string(e.what()), 1, 0.0, {}};
         }
     }
 
@@ -259,27 +352,116 @@ fallback_to_cli:
         return {false, "", "No Anthropic auth found. Set ANTHROPIC_API_KEY or sign in via Claude Code.", 1, 0.0, {}};
     }
 
-    std::vector<std::string> args = {
-        "-u", "CLAUDECODE", 
-        "-u", "CLAUDE_CODE_ENTRYPOINT",
-        "-u", "CLAUDE_MODEL",
-        "-u", "ANTHROPIC_MODEL",
-        "-u", "MODEL",
-        "claude", "-p", prompt, "--output-format", "text"
-    };
-    
-    // Map Euxis aliases to Claude Code internal aliases if necessary
-    // or just omit the model if we're falling back, as the CLI handles defaults well.
-    // For now, if the fallback triggers, we just use the CLI's default model 
-    // to avoid compatibility issues across different versions of Claude Code.
-    // If the user explicitly asks for a non-sonnet model, we might want to pass it, 
-    // but the CLI is quite strict about model names.
+    std::string m = model;
+    if (m.find("opus") != std::string::npos) m = "opus";
+    else if (m.find("sonnet") != std::string::npos) m = "sonnet";
+    else if (m.find("haiku") != std::string::npos) m = "haiku";
+    else m = "sonnet";
 
+    std::string stdbuf_cmd = "stdbuf";
+    if (!Process::available(stdbuf_cmd)) stdbuf_cmd = ""; // Fallback if stdbuf not on PATH
+
+    std::vector<std::string> args;
+    if (!stdbuf_cmd.empty()) {
+        args = {"-u", "CLAUDE_CODE_ENTRYPOINT", "-u", "CLAUDE_MODEL", "-u", "ANTHROPIC_MODEL", "-u", "MODEL",
+                "stdbuf", "-oL", "-eL", "claude"};
+    } else {
+        args = {"-u", "CLAUDE_CODE_ENTRYPOINT", "-u", "CLAUDE_MODEL", "-u", "ANTHROPIC_MODEL", "-u", "MODEL",
+                "claude"};
+    }
+    
+    args.insert(args.end(), {"--model", m, "--permission-mode", "dontAsk", "--no-chrome", "-p", "--", prompt, 
+                             "--output-format", "stream-json", "--include-partial-messages", "--verbose", "--no-session-persistence"});
+    
     ProcessResult result;
     if (on_chunk) {
-        result = Process::run_streaming("env", args, "", on_chunk, timeout);
+        std::string json_buffer;
+        auto stream_parser = [&](const std::string& chunk) {
+            if (chunk.empty()) return;
+            json_buffer += chunk;
+            
+            while (!json_buffer.empty()) {
+                size_t brace_pos = json_buffer.find('{');
+                if (brace_pos == std::string::npos) {
+                    // No brace found: stream everything we have as raw text immediately
+                    on_chunk(json_buffer);
+                    json_buffer.clear();
+                    break;
+                }
+                
+                // If there's text before the brace, stream it as raw text immediately
+                if (brace_pos > 0) {
+                    on_chunk(json_buffer.substr(0, brace_pos));
+                    json_buffer.erase(0, brace_pos);
+                    brace_pos = 0;
+                }
+                
+                // Robust brace matcher that respects strings and escapes
+                int depth = 0;
+                bool in_string = false;
+                bool escaped = false;
+                size_t end_pos = std::string::npos;
+                
+                for (size_t i = 0; i < json_buffer.size(); ++i) {
+                    char c = json_buffer[i];
+                    if (escaped) { escaped = false; continue; }
+                    if (c == '\\') { escaped = true; continue; }
+                    if (c == '"') { in_string = !in_string; continue; }
+                    
+                    if (!in_string) {
+                        if (c == '{') depth++;
+                        else if (c == '}') {
+                            depth--;
+                            if (depth == 0) { end_pos = i; break; }
+                        }
+                    }
+                }
+                
+                if (end_pos == std::string::npos) break; // Incomplete object
+                
+                std::string line = json_buffer.substr(0, end_pos + 1);
+                json_buffer.erase(0, end_pos + 1);
+                
+                try {
+                    auto j = nlohmann::json::parse(line);
+                    if (j.value("type", "") == "stream_event") {
+                        auto& ev = j["event"];
+                        if (ev.value("type", "") == "content_block_delta" && ev.contains("delta")) {
+                            std::string text;
+                            if (ev["delta"].contains("text")) text = ev["delta"]["text"].get<std::string>();
+                            else if (ev["delta"].contains("thinking")) text = ev["delta"]["thinking"].get<std::string>();
+                            if (!text.empty()) on_chunk(text);
+                        }
+                    }
+                } catch (...) {
+                    // Not valid JSON after all, stream it as raw text
+                    on_chunk(line);
+                }
+            }
+        };
+        result = Process::run_streaming("env", args, "", stream_parser, timeout);
     } else {
-        result = Process::run_with_input("env", args, "", timeout);
+        // Non-streaming fallback: use plain text
+        std::vector<std::string> plain_args = args;
+        // Revert to text format for simple execution
+        // args[11] is -p, so we need to find its index
+        size_t p_idx = 0;
+        for (size_t i = 0; i < plain_args.size(); ++i) {
+            if (plain_args[i] == "-p") { p_idx = i; break; }
+        }
+        
+        // Remove stream-specific flags that come AFTER the prompt
+        // Since we used "--" before prompt, prompt is at p_idx + 2
+        if (p_idx + 3 < plain_args.size()) {
+            plain_args.erase(plain_args.begin() + p_idx + 3, plain_args.end());
+        }
+        
+        // Change output format to text
+        for (size_t i = 0; i < plain_args.size(); ++i) {
+            if (plain_args[i] == "stream-json") plain_args[i] = "text";
+        }
+        
+        result = Process::run_with_input("env", plain_args, "", timeout);
     }
     
     // Some versions of Claude CLI might return non-zero even on success if they can't 
@@ -331,13 +513,15 @@ auto ProviderExecutor::execute_api(const std::string& provider,
                                    const std::string& prompt,
                                    int timeout,
                                    const std::optional<ResolvedAuth>& auth,
-                                   std::function<void(const std::string&)> on_chunk) -> ProviderResponse {    if (!Process::available("curl")) {
+                                   std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    if (!Process::available("curl")) {
         return {false, "", "curl not found (required for API calls)", 127, 0.0, {}};
     }
 
     std::string url;
     std::string auth_header;
     nlohmann::json body;
+    bool is_oauth = false;
 
     if (provider == "openai") {
         std::string token;
@@ -356,7 +540,6 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         body["messages"] = nlohmann::json::array({{{"role", "user"}, {"content", prompt}}});
     } else if (provider == "gemini") {
         std::string token;
-        bool is_oauth = false;
         if (auth.has_value()) {
             token = auth->token;
             is_oauth = auth->is_oauth;
@@ -426,6 +609,15 @@ auto ProviderExecutor::execute_api(const std::string& provider,
                 err_msg = resp_json["error"].dump();
             }
 
+            // If Gemini API fails with auth error, fallback to CLI
+            if (provider == "gemini" && is_oauth && (http_status == 401 || http_status == 403 || err_msg.find("authentication") != std::string::npos)) {
+                spdlog::info("Gemini API rejected OAuth token, falling back to 'gemini' CLI");
+                if (auth.has_value()) {
+                    auth_store_.report_failure(auth->profile_id, CooldownReason::UnsupportedMethod);
+                }
+                goto fallback_to_gemini_cli;
+            }
+
             ProviderResponse resp;
             resp.success = false;
             resp.error = provider + " API: " + err_msg;
@@ -443,6 +635,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         return {true, content, "", 0, 0.0, {}};
     } catch (const std::exception& e) {
         spdlog::warn("Failed to parse {} response: {}", provider, e.what());
+        if (provider == "gemini" && is_oauth) goto fallback_to_gemini_cli;
         ProviderResponse resp;
         resp.success = false;
         resp.output = output;
@@ -451,6 +644,23 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         resp.failure_reason = classify_error(http_status, output);
         return resp;
     }
+
+fallback_to_gemini_cli:
+    if (provider == "gemini") {
+        if (!Process::available("gemini")) {
+            return {false, "", "No Gemini auth available. Set GEMINI_API_KEY or sign in via Gemini CLI.", 1, 0.0, {}};
+        }
+        std::vector<std::string> args = {"gemini", "-p", prompt, "-o", "text"};
+        ProcessResult result;
+        if (on_chunk) {
+            result = Process::run_streaming("env", args, "", on_chunk, timeout);
+        } else {
+            result = Process::run_with_input("env", args, "", timeout);
+        }
+        bool success = (result.exit_code == 0) || (!result.stdout_output.empty() && result.exit_code != 127);
+        return { success, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {} };
+    }
+    return {false, "", "Unsupported API provider: " + provider, 1, 0.0, {}};
 }
 
 auto ProviderExecutor::load_agent_prompt(const std::string& euxis_home,

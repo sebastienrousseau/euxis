@@ -1,21 +1,32 @@
+/// @file
+/// @brief Validation of runtime directory structure and data integrity.
 #pragma once
 
 #include <filesystem>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
-#include "errors.hpp"
-
 namespace euxis::runtime {
 
+/// @brief exception thrown when runtime validation fails.
+class RuntimeValidationError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+/// @brief Performs exhaustive checks on the runtime filesystem and state files.
 class RuntimeValidator {
 public:
+    /// @brief Construct validator targeting a runtime root.
     explicit RuntimeValidator(std::filesystem::path runtime_root);
 
-    /// Run all validation checks.  Throws RuntimeValidationError on failure.
+    /// @brief run all validation checks. Throws RuntimeValidationError on failure.
     void validate() const;
+
+private:
+    std::filesystem::path root_;
 
     void ensure_required_files() const;
     void validate_perf_metrics() const;
@@ -23,10 +34,7 @@ public:
     void validate_lifecycle_state_files() const;
     void validate_manifest() const;
 
-private:
-    std::filesystem::path root_;
-
-    [[nodiscard]] auto read_jsonl(const std::filesystem::path& path) const
+    auto read_jsonl(const std::filesystem::path& path) const
         -> std::vector<nlohmann::json>;
 
     void assert_keys(const std::vector<nlohmann::json>& records,
@@ -34,7 +42,7 @@ private:
                      const std::string& context) const;
 };
 
-/// Convenience free-function.
+/// @brief Top-level helper to validate a runtime layout.
 void validate_runtime_layout(const std::filesystem::path& runtime_root);
 
 } // namespace euxis::runtime

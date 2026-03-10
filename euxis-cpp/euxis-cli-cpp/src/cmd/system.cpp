@@ -85,7 +85,23 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         checks.push_back({tr("Shell"), shell != nullptr, shell ? shell : tr("not set")});
     }
 
-    // 3. Required dependencies
+    // 3. Required dependencies (and system locks first)
+    {
+        static const std::vector<std::pair<std::string, std::string>> locks = {
+            {"/var/lib/pacman/db.lck", "sudo rm /var/lib/pacman/db.lck"},
+            {"/var/lib/dpkg/lock-frontend", "sudo rm /var/lib/dpkg/lock-frontend"},
+            {"/var/lib/apt/lists/lock", "sudo rm /var/lib/apt/lists/lock"}
+        };
+
+        for (const auto& [path, fix] : locks) {
+            if (fs::exists(path)) {
+                checks.push_back({tr("stale lock: ") + path, false, tr("lock exists")});
+                ++failures;
+                fixable.push_back(fix);
+            }
+        }
+    }
+
     static const std::vector<std::pair<std::string, bool>> deps = {
         {"git", true}, {"sqlite3", true}, {"jq", false}, {"python3", false},
         {"pandoc", false}, {"docker", false}
@@ -108,13 +124,28 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     }
 
     // 5. Core directories
-    for (const auto& dir : {"euxis-data", "euxis-data/agents", "euxis-data/config"}) {
+    static const std::vector<std::string> core_dirs = {
+        "euxis-data", 
+        "euxis-data/agents", 
+        "euxis-data/config",
+        "euxis-runtime",
+        "euxis-runtime/memory",
+        "euxis-runtime/memory/cortex",
+        "euxis-runtime/memory/cortex/db",
+        "euxis-runtime/data",
+        "euxis-runtime/data/bus",
+        "euxis-runtime/data/bus/pipes",
+        "euxis-runtime/context",
+        "euxis-runtime/metrics"
+    };
+
+    for (const auto& dir : core_dirs) {
         auto path = fs::path(ctx.euxis_home) / dir;
         bool exists = fs::is_directory(path);
         checks.push_back({std::string(tr("dir: ")) + dir, exists, exists ? tr("ok") : tr("missing")});
         if (!exists) {
             ++failures;
-            fixable.push_back(std::string("mkdir -p ") + path.string());
+            fixable.push_back(std::string("mkdir -p \"") + path.string() + "\"");
         }
     }
 
@@ -126,22 +157,29 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         bool has_db = fs::exists(db_path);
         checks.push_back({"registry.json", has_json, has_json ? tr("ok") : tr("missing")});
         checks.push_back({"registry.db", has_db, has_db ? tr("ok") : tr("optional, missing")});
-        if (!has_json) ++failures;
+        if (!has_json) {
+            ++failures;
+            // No simple auto-fix for missing registry, but we can suggest re-running install
+            fixable.push_back(tr("Run install.sh to restore default registry"));
+        }
     }
 
-    // 7. Providers
-    static const std::vector<std::string> providers = {
-        "claude", "gemini", "openai", "ollama", "goose"
+    // 7. Providers & Tools
+    static const std::vector<std::pair<std::string, std::string>> tools = {
+        {"claude", "npm install -g @anthropic-ai/claude-code"},
+        {"gemini", "npm install -g @google/gemini-cli"},
+        {"openai", tr("Set OPENAI_API_KEY")},
+        {"ollama", "https://ollama.com/download"},
+        {"shellcheck", "sudo pacman -S --noconfirm shellcheck # (or your pkg manager)"}
     };
-    int provider_count = 0;
-    for (const auto& p : providers) {
-        bool found = Process::available(p);
-        if (found) ++provider_count;
-        checks.push_back({tr("provider: ") + p, found, found ? tr("available") : tr("not found")});
-    }
-    if (provider_count == 0) {
-        checks.push_back({tr("providers"), false, tr("no providers available")});
-        ++failures;
+
+    for (const auto& [name, fix] : tools) {
+        bool found = Process::available(name);
+        checks.push_back({tr("tool: ") + name, found, found ? tr("available") : tr("not found")});
+        if (!found) {
+            ++failures;
+            fixable.push_back(fix);
+        }
     }
 
     // 8. Terminal
@@ -187,10 +225,23 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         std::cout << "\n" << term::bold(tr("Auto-fix:")) << "\n";
         for (const auto& cmd : fixable) {
             if (cmd.starts_with("mkdir")) {
-                std::cout << "  " << tr("Running:") << " " << cmd << "\n";
-                Process::shell(cmd);
+                std::cout << "  " << tr("Proposing:") << " " << term::cyan(cmd) << " [y/N] ";
+                std::string response;
+                std::getline(std::cin, response);
+                if (response == "y" || response == "Y") {
+                    std::cout << "  " << tr("Running...") << "\n";
+                    Process::shell(cmd);
+                }
+            } else if (cmd.find("install") != std::string::npos || cmd.find("pacman") != std::string::npos || cmd.find("sudo") != std::string::npos) {
+                std::cout << "  " << tr("Proposing to run:") << " " << term::cyan(cmd) << " [y/N] ";
+                std::string response;
+                std::getline(std::cin, response);
+                if (response == "y" || response == "Y") {
+                    std::cout << "  " << tr("Executing command...") << "\n";
+                    Process::shell_interactive(cmd);
+                }
             } else {
-                std::cout << "  " << tr("Install:") << " " << cmd << " " << tr("(manual)") << "\n";
+                std::cout << "  " << tr("Manual fix required:") << " " << term::yellow(cmd) << "\n";
             }
         }
     } else if (!fixable.empty()) {
@@ -209,6 +260,10 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     }
 
     return failures > 0 ? 1 : 0;
+}
+
+int cmd_fix(Context& ctx, const std::vector<std::string>& /*args*/) {
+    return cmd_doctor(ctx, {"--fix"});
 }
 
 // --- health ---
@@ -254,7 +309,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
         int missing = 0;
         for (const auto& a : agents) {
             if (!a.prompt_path.empty()) {
-                auto full_path = fs::path(ctx.euxis_home) / a.prompt_path;
+                auto full_path = fs::path(ctx.data_dir) / a.prompt_path;
                 if (!fs::exists(full_path)) ++missing;
             }
         }
@@ -352,7 +407,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
             if (a.prompt_path.empty()) {
                 ++orphans;
             } else {
-                auto full_path = fs::path(ctx.euxis_home) / a.prompt_path;
+                auto full_path = fs::path(ctx.data_dir) / a.prompt_path;
                 if (!fs::exists(full_path)) ++orphans;
             }
         }
@@ -431,7 +486,7 @@ int cmd_verify(Context& ctx, const std::vector<std::string>& /*args*/) {
 
         // Check prompt file exists
         if (!agent.prompt_path.empty()) {
-            auto full = fs::path(ctx.euxis_home) / agent.prompt_path;
+            auto full = fs::path(ctx.data_dir) / agent.prompt_path;
             if (!fs::exists(full)) {
                 ok = false;
                 detail = tr("prompt file missing");

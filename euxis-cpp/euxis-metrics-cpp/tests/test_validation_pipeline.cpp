@@ -26,21 +26,21 @@ TEST_F(ValidationPipelineTest, ExtractPercentageClaims) {
     auto claims = pipeline_->extract_quantitative_claims(
         "The success rate is 95.5% across all tests.");
     ASSERT_GE(claims.size(), 1);
-    EXPECT_DOUBLE_EQ(claims[0].value, 95.5);
+    EXPECT_DOUBLE_EQ(*claims[0].value, 95.5);
 }
 
 TEST_F(ValidationPipelineTest, ExtractTimingClaims) {
     auto claims = pipeline_->extract_quantitative_claims(
         "Response time: 42ms under load.");
     ASSERT_GE(claims.size(), 1);
-    EXPECT_DOUBLE_EQ(claims[0].value, 42.0);
+    EXPECT_DOUBLE_EQ(*claims[0].value, 42.0);
 }
 
 TEST_F(ValidationPipelineTest, ExtractSizeClaims) {
     auto claims = pipeline_->extract_quantitative_claims(
         "Memory usage peaked at 256MB.");
     ASSERT_GE(claims.size(), 1);
-    EXPECT_DOUBLE_EQ(claims[0].value, 256.0);
+    EXPECT_DOUBLE_EQ(*claims[0].value, 256.0);
 }
 
 TEST_F(ValidationPipelineTest, NoClaimsInPlainText) {

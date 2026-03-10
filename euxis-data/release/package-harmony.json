@@ -13,59 +13,59 @@
     "examples": []
   },
   "python_complexity": {
-    "max_function_complexity": 80,
-    "functions_over_30": 4,
-    "functions_over_40": 3,
+    "max_function_complexity": 3,
+    "functions_over_30": 0,
+    "functions_over_40": 0,
     "top_functions": [
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
-        "function": "build_app",
-        "complexity": 80
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "encrypt",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/mesh.py",
-        "function": "setup_mesh",
-        "complexity": 63
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "decrypt",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
-        "function": "voice_stream",
-        "complexity": 50
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "hash_data",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/protocol_test.py",
-        "function": "minimal_validate",
-        "complexity": 40
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "sign",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/server.py",
-        "function": "handle_frame",
-        "complexity": 30
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "verify",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/auth.py",
-        "function": "setup_auth",
-        "complexity": 25
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "update_config",
+        "complexity": 3
       },
       {
-        "file": "/home/seb/.euxis/euxis-tui/src/tui/__main__.py",
-        "function": "run_audit",
-        "complexity": 24
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "rotate_keys",
+        "complexity": 2
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/routers/orchestrator.py",
-        "function": "setup_orchestrator",
-        "complexity": 23
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "register_encryption_algorithm",
+        "complexity": 1
       },
       {
-        "file": "/home/seb/.euxis/euxis-scripts/check_tech_debt.py",
-        "function": "check_debt",
-        "complexity": 20
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "register_hash_algorithm",
+        "complexity": 1
       },
       {
-        "file": "/home/seb/.euxis/euxis-gateway/src/gateway/mcp.py",
-        "function": "handle_connection",
-        "complexity": 18
+        "file": "/home/seb/.euxis/euxis-web/src/crypto-lib/src/core/service.py",
+        "function": "register_signature_algorithm",
+        "complexity": 1
       }
     ]
   },

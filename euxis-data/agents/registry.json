@@ -876,7 +876,7 @@
     },
     {
       "id": "automator",
-      "path": "fleet/automator.txt",
+      "path": "agents/prompts/fleet/automator.txt",
       "tier": "fleet",
       "version": "v0.0.3",
       "activation": "on-demand",
@@ -889,7 +889,7 @@
     },
     {
       "id": "compliance",
-      "path": "fleet/compliance.txt",
+      "path": "agents/prompts/fleet/compliance.txt",
       "tier": "fleet",
       "version": "v0.0.3",
       "activation": "on-demand",
@@ -902,7 +902,7 @@
     },
     {
       "id": "social",
-      "path": "fleet/social.txt",
+      "path": "agents/prompts/fleet/social.txt",
       "tier": "fleet",
       "version": "v0.0.3",
       "activation": "on-demand",

@@ -11,10 +11,11 @@ namespace euxis::cli {
 
 // Default fallback chains
 static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
-    {"claude",  {"openai", "gemini", "ollama"}},
-    {"openai",  {"claude", "gemini", "ollama"}},
-    {"gemini",  {"claude", "openai", "ollama"}},
-    {"ollama",  {"claude", "openai", "gemini"}},
+    {"claude",    {"openai", "gemini", "ollama"}},
+    {"anthropic", {"openai", "gemini", "ollama"}},
+    {"openai",    {"claude", "gemini", "ollama"}},
+    {"gemini",    {"claude", "openai", "ollama"}},
+    {"ollama",    {"claude", "openai", "gemini"}},
 };
 
 AuthProfileStore::AuthProfileStore(const std::string& data_dir)
@@ -249,8 +250,16 @@ void AuthProfileStore::auto_import_gemini_oauth() {
             access_token = creds["access_token"].get<std::string>();
         if (creds.contains("refresh_token"))
             refresh_token = creds["refresh_token"].get<std::string>();
-        if (creds.contains("expires_at"))
-            expires_at = static_cast<int64_t>(creds["expires_at"].get<double>() * 1000);
+
+        // Handle both "expiry_date" (ms) and "expires_at" (s)
+        if (creds.contains("expiry_date")) {
+            auto val = creds["expiry_date"];
+            if (val.is_number()) expires_at = val.get<int64_t>();
+        } else if (creds.contains("expires_at")) {
+            auto val = creds["expires_at"];
+            if (val.is_number()) expires_at = static_cast<int64_t>(val.get<double>() * 1000);
+        }
+
         if (creds.contains("email"))
             email = creds["email"].get<std::string>();
 
@@ -364,6 +373,8 @@ auto AuthProfileStore::pick_best(const std::string& provider) const
     -> std::optional<ResolvedAuth> {
     // Gather eligible profiles
     std::vector<const AuthProfile*> candidates;
+    bool has_cli_import = false;
+
     for (const auto& p : profiles_) {
         if (p.provider != provider) continue;
         if (is_cooled_down(p.id)) continue;
@@ -373,10 +384,22 @@ auto AuthProfileStore::pick_best(const std::string& provider) const
             if (now_ms() >= p.expires_at) continue;
         }
 
+        if (p.source == "claude_code_import" || p.source == "gemini_import") {
+            has_cli_import = true;
+        }
+
         candidates.push_back(&p);
     }
 
     if (candidates.empty()) return std::nullopt;
+
+    // "CLI-first" policy: if we have a CLI-imported auth, ignore ephemeral 'env' keys
+    // to avoid accidentally using a global API key when the user is signed in via CLI.
+    if (has_cli_import) {
+        std::erase_if(candidates, [](const AuthProfile* p) {
+            return p->source == "env";
+        });
+    }
 
     // Session pin check
     if (!session_pin_.empty()) {
@@ -392,11 +415,16 @@ auto AuthProfileStore::pick_best(const std::string& provider) const
         }
     }
 
-    // Sort: OAuth first, then oldest-used first (round-robin)
+    // Sort: CLI Imports > other OAuth > ApiKey > everything else
     std::sort(candidates.begin(), candidates.end(),
         [](const AuthProfile* a, const AuthProfile* b) {
+            bool a_cli = (a->source == "claude_code_import" || a->source == "gemini_import");
+            bool b_cli = (b->source == "claude_code_import" || b->source == "gemini_import");
+            if (a_cli != b_cli) return a_cli;
+
             // OAuth > ApiKey
             if (a->type != b->type) return a->type == ProfileType::OAuth;
+            
             // Oldest used first
             return a->last_used_at < b->last_used_at;
         });

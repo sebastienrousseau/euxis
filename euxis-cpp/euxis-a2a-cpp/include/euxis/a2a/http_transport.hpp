@@ -1,25 +1,30 @@
+/// @file
+/// @brief HTTP implementation of the A2A transport protocol.
 #pragma once
 
+#include <expected>
 #include <string>
 #include <string_view>
 
-#include "euxis/a2a/transport.hpp"
+#include <nlohmann/json.hpp>
+
+#include "agent_card.hpp"
 
 namespace euxis::a2a {
 
-/// HTTP-based A2A transport using cpp-httplib.
-///
-/// - send() POSTs a JSON-RPC payload to the configured base URL.
-/// - discover() fetches {url}/.well-known/agent.json and parses as AgentCard.
-class HttpA2ATransport final : public A2ATransport {
+/// @brief Transport layer using HTTP for agent-to-agent communication.
+class HttpA2ATransport {
 public:
+    /// @brief Construct transport with a target base URL.
     explicit HttpA2ATransport(std::string base_url);
 
-    [[nodiscard]] auto send(std::string_view method, const nlohmann::json& params)
-        -> std::expected<nlohmann::json, std::string> override;
+    /// @brief Send a JSON-RPC request over HTTP.
+    auto send(std::string_view method, const nlohmann::json& params)
+        -> std::expected<nlohmann::json, std::string>;
 
-    [[nodiscard]] auto discover(std::string_view url)
-        -> std::expected<AgentCard, std::string> override;
+    /// @brief Attempt to discover an agent card at a URL.
+    static auto discover(std::string_view url)
+        -> std::expected<AgentCard, std::string>;
 
 private:
     std::string base_url_;

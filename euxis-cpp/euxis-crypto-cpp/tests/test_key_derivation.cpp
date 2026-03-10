@@ -208,5 +208,26 @@ TEST_F(KeyDerivationTest, SameOpslimitBucketSameKey) {
     EXPECT_EQ(dk1->key, dk2->key);
 }
 
+// ---------------------------------------------------------------------------
+// Fast-path (iterations=0) uses BLAKE2b
+// ---------------------------------------------------------------------------
+TEST_F(KeyDerivationTest, FastPathZeroIterations) {
+    const auto password = as_bytes("session-password");
+    const auto salt = random_salt();
+
+    auto dk1 = derive_key(password, salt, /*iterations=*/0);
+    auto dk2 = derive_key(password, salt, /*iterations=*/0);
+    ASSERT_TRUE(dk1.has_value()) << to_string(dk1.error());
+    ASSERT_TRUE(dk2.has_value()) << to_string(dk2.error());
+
+    EXPECT_EQ(dk1->key, dk2->key);
+    EXPECT_EQ(dk1->key.size(), 32u);
+    
+    // Fast path should be different from Argon2 path
+    auto dk_slow = derive_key(password, salt, /*iterations=*/1);
+    ASSERT_TRUE(dk_slow.has_value());
+    EXPECT_NE(dk1->key, dk_slow->key);
+}
+
 } // namespace
 } // namespace euxis::crypto

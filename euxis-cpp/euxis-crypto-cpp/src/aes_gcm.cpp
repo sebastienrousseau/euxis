@@ -54,6 +54,7 @@ auto encrypt(std::span<const std::byte> data,
 
     EncryptionResult result;
     generate_iv(result.iv);
+    result.algorithm = "AES-256-GCM";
 
     // Output buffer: plaintext + crypto_aead_aes256gcm_ABYTES (16) tag
     const auto ct_len = data.size() + crypto_aead_aes256gcm_ABYTES;
@@ -126,6 +127,7 @@ auto encrypt_aad(std::span<const std::byte> data,
 
     EncryptionResult result;
     generate_iv(result.iv);
+    result.algorithm = "AES-256-GCM";
 
     const auto ct_len = data.size() + crypto_aead_aes256gcm_ABYTES;
     result.ciphertext.resize(ct_len);

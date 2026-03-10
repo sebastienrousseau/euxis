@@ -1,6 +1,7 @@
+/// @file
+/// @brief A2A task management and lifecycle.
 #pragma once
 
-#include <cstdint>
 #include <expected>
 #include <string>
 #include <string_view>
@@ -8,12 +9,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include "euxis/a2a/message.hpp"
+#include "message.hpp"
 
 namespace euxis::a2a {
 
-/// Task lifecycle states per A2A v0.2.
-enum class TaskStatus : uint8_t {
+/// @brief Status of an A2A task.
+enum class TaskStatus {
     Pending,
     Active,
     Completed,
@@ -21,41 +22,8 @@ enum class TaskStatus : uint8_t {
     Cancelled
 };
 
-/// Convert a TaskStatus to its string representation.
-[[nodiscard]] constexpr auto status_string(TaskStatus s) -> std::string_view;
-
-/// An A2A task representing a unit of work delegated to a remote agent.
-struct A2ATask {
-    std::string id;
-    TaskStatus status = TaskStatus::Pending;
-    std::vector<A2AMessage> messages;
-    std::vector<Artifact> artifacts;
-    std::vector<TaskStatus> history;
-    std::string created_at;
-    std::string updated_at;
-
-    /// Serialise to JSON.
-    [[nodiscard]] nlohmann::json to_json() const;
-};
-
-/// Create a new task with a unique ID and optional initial message.
-[[nodiscard]] auto create_task(std::string_view message = "") -> A2ATask;
-
-/// Transition a task to a new status, enforcing the A2A state machine.
-///
-/// Valid transitions:
-///   Pending  -> Active, Cancelled, Failed
-///   Active   -> Completed, Failed, Cancelled
-///   Completed, Failed, Cancelled are terminal (no transitions allowed).
-///
-/// On success, the old status is pushed to history and updated_at is refreshed.
-[[nodiscard]] auto transition_task(A2ATask& task, TaskStatus new_status)
-    -> std::expected<void, std::string>;
-
-// ---------------------------------------------------------------------------
-// constexpr implementation
-// ---------------------------------------------------------------------------
-constexpr auto status_string(TaskStatus s) -> std::string_view {
+/// @brief Convert TaskStatus to string.
+[[nodiscard]] constexpr auto status_string(TaskStatus s) -> std::string_view {
     switch (s) {
         case TaskStatus::Pending:   return "pending";
         case TaskStatus::Active:    return "active";
@@ -65,5 +33,25 @@ constexpr auto status_string(TaskStatus s) -> std::string_view {
     }
     return "unknown";
 }
+
+/// @brief A multi-step task involving one or more agents.
+struct A2ATask {
+    std::string id;
+    TaskStatus status;
+    std::string created_at;
+    std::string updated_at;
+    std::vector<A2AMessage> messages;
+    std::vector<Artifact> artifacts;
+    std::vector<TaskStatus> history;
+
+    [[nodiscard]] nlohmann::json to_json() const;
+};
+
+/// @brief Factory function to create a new task.
+[[nodiscard]] auto create_task(std::string_view message = "") -> A2ATask;
+
+/// @brief Move a task to a new state.
+auto transition_task(A2ATask& task, TaskStatus new_status)
+    -> std::expected<void, std::string>;
 
 } // namespace euxis::a2a

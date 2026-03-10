@@ -1,3 +1,5 @@
+/// @file
+/// @brief Gateway state
 #pragma once
 
 #include <filesystem>

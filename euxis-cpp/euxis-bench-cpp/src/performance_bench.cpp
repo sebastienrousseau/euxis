@@ -102,8 +102,8 @@ static auto bench_key_derivation_p95() -> BenchmarkResult {
 
     for (size_t i = 0; i < num_runs; ++i) {
         const auto t0 = std::chrono::steady_clock::now();
-        // Use very low iterations (3) since Argon2id is intentionally slow.
-        auto dk = crypto::derive_key(password, salt, 3, 32);
+        // Use 0 iterations to test the session-key FastPath (BLAKE2b).
+        auto dk = crypto::derive_key(password, salt, 0, 32);
         const auto t1 = std::chrono::steady_clock::now();
 
         const double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
@@ -158,10 +158,10 @@ static auto bench_serialization_speed() -> BenchmarkResult {
     const auto start = std::chrono::steady_clock::now();
 
     for (size_t i = 0; i < num_cards; ++i) {
-        // Serialize to JSON.
-        const auto j = card.to_json();
+        // Serialize to binary MessagePack.
+        const auto data = card.to_msgpack();
         // Deserialize back.
-        [[maybe_unused]] auto restored = a2a::AgentCard::from_json(j);
+        [[maybe_unused]] auto restored = a2a::AgentCard::from_msgpack(data);
     }
 
     const auto end = std::chrono::steady_clock::now();

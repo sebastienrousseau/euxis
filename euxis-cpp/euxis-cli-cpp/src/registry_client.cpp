@@ -86,20 +86,39 @@ auto RegistryClient::parse_agent(const nlohmann::json& j) -> AgentInfo {
     return a;
 }
 
+void RegistryClient::resolve_prompt_path(AgentInfo& a) const {
+    if (a.prompt_path.empty()) return;
+    if (a.prompt_path[0] == '/') return;
+
+    std::vector<std::string> prefixes = {"", "euxis-data/agents/", "agents/"};
+    for (const auto& prefix : prefixes) {
+        auto p = std::filesystem::path(impl_->data_dir) / prefix / a.prompt_path;
+        if (std::filesystem::exists(p)) {
+            a.prompt_path = (std::filesystem::path(prefix) / a.prompt_path).string();
+            return;
+        }
+    }
+}
+
 auto RegistryClient::list_agents() const -> std::vector<AgentInfo> {
+    std::vector<AgentInfo> agents;
     if (impl_->db) {
-        std::vector<AgentInfo> agents;
-        const char* sql = "SELECT agent_id, role, version, tier, prompt_path FROM agents ORDER BY agent_id";
+        const char* sql = "SELECT id, role, version, tier, path FROM agents ORDER BY id";
         sqlite3_stmt* stmt = nullptr;
         if (sqlite3_prepare_v2(impl_->db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
             while (sqlite3_step(stmt) == SQLITE_ROW) {
                 AgentInfo a;
                 a.id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                a.role = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-                a.version = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-                a.tier = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+                auto* role_col = sqlite3_column_text(stmt, 1);
+                if (role_col) a.role = reinterpret_cast<const char*>(role_col);
+                auto* ver_col = sqlite3_column_text(stmt, 2);
+                if (ver_col) a.version = reinterpret_cast<const char*>(ver_col);
+                auto* tier_col = sqlite3_column_text(stmt, 3);
+                if (tier_col) a.tier = reinterpret_cast<const char*>(tier_col);
                 auto* path_col = sqlite3_column_text(stmt, 4);
                 if (path_col) a.prompt_path = reinterpret_cast<const char*>(path_col);
+                
+                resolve_prompt_path(a);
                 agents.push_back(std::move(a));
             }
             sqlite3_finalize(stmt);
@@ -107,23 +126,31 @@ auto RegistryClient::list_agents() const -> std::vector<AgentInfo> {
         }
         if (stmt) sqlite3_finalize(stmt);
     }
-    return list_agents_json();
+    
+    agents = list_agents_json();
+    for (auto& a : agents) resolve_prompt_path(a);
+    return agents;
 }
 
 auto RegistryClient::get_agent(const std::string& agent_id) const -> std::optional<AgentInfo> {
     if (impl_->db) {
-        const char* sql = "SELECT agent_id, role, version, tier, prompt_path FROM agents WHERE agent_id = ?";
+        const char* sql = "SELECT id, role, version, tier, path FROM agents WHERE id = ?";
         sqlite3_stmt* stmt = nullptr;
         if (sqlite3_prepare_v2(impl_->db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
             sqlite3_bind_text(stmt, 1, agent_id.c_str(), -1, SQLITE_TRANSIENT);
             if (sqlite3_step(stmt) == SQLITE_ROW) {
                 AgentInfo a;
                 a.id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-                a.role = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-                a.version = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-                a.tier = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+                auto* role_col = sqlite3_column_text(stmt, 1);
+                if (role_col) a.role = reinterpret_cast<const char*>(role_col);
+                auto* ver_col = sqlite3_column_text(stmt, 2);
+                if (ver_col) a.version = reinterpret_cast<const char*>(ver_col);
+                auto* tier_col = sqlite3_column_text(stmt, 3);
+                if (tier_col) a.tier = reinterpret_cast<const char*>(tier_col);
                 auto* path_col = sqlite3_column_text(stmt, 4);
                 if (path_col) a.prompt_path = reinterpret_cast<const char*>(path_col);
+                
+                resolve_prompt_path(a);
                 sqlite3_finalize(stmt);
                 return a;
             }
@@ -136,7 +163,9 @@ auto RegistryClient::get_agent(const std::string& agent_id) const -> std::option
     if (impl_->registry_json.contains("agents") && impl_->registry_json["agents"].is_array()) {
         for (const auto& j : impl_->registry_json["agents"]) {
             if (j.value("agent_id", j.value("id", "")) == agent_id) {
-                return parse_agent(j);
+                auto a = parse_agent(j);
+                resolve_prompt_path(a);
+                return a;
             }
         }
     }
@@ -147,8 +176,8 @@ auto RegistryClient::find_by_tag(const std::string& tag) const -> std::vector<Ag
     if (impl_->db) {
         std::vector<AgentInfo> agents;
         const char* sql =
-            "SELECT a.agent_id, a.role, a.version, a.tier, a.prompt_path "
-            "FROM agents a JOIN agent_tags at ON a.agent_id = at.agent_id "
+            "SELECT a.id, a.role, a.version, a.tier, a.path "
+            "FROM agents a JOIN agent_tags at ON a.id = at.agent_id "
             "JOIN tags t ON at.tag_id = t.tag_id WHERE t.name = ?";
         sqlite3_stmt* stmt = nullptr;
         if (sqlite3_prepare_v2(impl_->db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
@@ -223,6 +252,45 @@ auto RegistryClient::list_squads() const -> std::vector<SquadInfo> {
 auto RegistryClient::get_squad(const std::string& squad_id) const -> std::optional<SquadInfo> {
     for (const auto& s : list_squads()) {
         if (s.id == squad_id) return s;
+    }
+    return std::nullopt;
+}
+
+// --- Playbook queries ---
+
+auto RegistryClient::list_playbooks() const -> std::vector<PlaybookInfo> {
+    std::vector<PlaybookInfo> result;
+    auto pb_dir = std::filesystem::path(impl_->data_dir) / "config" / "playbooks";
+    if (!std::filesystem::exists(pb_dir)) {
+        // Try fallback location
+        pb_dir = std::filesystem::path(impl_->data_dir) / "euxis-data" / "config" / "playbooks";
+    }
+
+    if (std::filesystem::exists(pb_dir)) {
+        for (const auto& entry : std::filesystem::directory_iterator(pb_dir)) {
+            if (entry.path().extension() == ".json") {
+                try {
+                    std::ifstream f(entry.path());
+                    auto j = nlohmann::json::parse(f);
+                    PlaybookInfo pb;
+                    pb.id = j.value("id", entry.path().stem().string());
+                    pb.name = j.value("name", pb.id);
+                    pb.description = j.value("description", "");
+                    pb.file_path = entry.path().string();
+                    result.push_back(std::move(pb));
+                } catch (...) {}
+            }
+        }
+    }
+    std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {
+        return a.id < b.id;
+    });
+    return result;
+}
+
+auto RegistryClient::get_playbook(const std::string& playbook_id) const -> std::optional<PlaybookInfo> {
+    for (const auto& pb : list_playbooks()) {
+        if (pb.id == playbook_id) return pb;
     }
     return std::nullopt;
 }

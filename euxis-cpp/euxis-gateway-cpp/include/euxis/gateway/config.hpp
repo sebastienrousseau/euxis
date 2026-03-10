@@ -1,3 +1,5 @@
+/// @file
+/// @brief Gateway config
 #pragma once
 
 #include <string>

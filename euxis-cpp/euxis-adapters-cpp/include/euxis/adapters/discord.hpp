@@ -1,3 +1,5 @@
+/// @file
+/// @brief Discord adapter
 #pragma once
 
 #include <mutex>

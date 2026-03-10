@@ -17,4 +17,5 @@ euxis_add_library(euxis-a2a-cpp
     tests/test_message.cpp
     tests/test_server.cpp
     tests/test_http_transport.cpp
+    tests/test_agent_card_binary.cpp
 )

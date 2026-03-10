@@ -31,6 +31,14 @@ struct SquadInfo {
     std::vector<std::string> members;
 };
 
+/// Playbook record.
+struct PlaybookInfo {
+    std::string id;
+    std::string name;
+    std::string description;
+    std::string file_path;
+};
+
 /// SQLite + JSON agent/squad registry client.
 class RegistryClient {
 public:
@@ -55,6 +63,10 @@ public:
     [[nodiscard]] auto list_squads() const -> std::vector<SquadInfo>;
     [[nodiscard]] auto get_squad(const std::string& squad_id) const -> std::optional<SquadInfo>;
 
+    // --- Playbook queries ---
+    [[nodiscard]] auto list_playbooks() const -> std::vector<PlaybookInfo>;
+    [[nodiscard]] auto get_playbook(const std::string& playbook_id) const -> std::optional<PlaybookInfo>;
+
     // --- Registry health ---
     [[nodiscard]] auto has_sqlite() const -> bool;
     [[nodiscard]] auto has_json() const -> bool;
@@ -66,6 +78,8 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
+
+    void resolve_prompt_path(AgentInfo& a) const;
 
     // JSON fallback
     [[nodiscard]] auto list_agents_json() const -> std::vector<AgentInfo>;

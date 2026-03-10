@@ -20,4 +20,5 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_manifesto.cpp
     tests/test_tool_manifest.cpp
     tests/test_interaction.cpp
+    tests/test_interaction_extended.cpp
 )

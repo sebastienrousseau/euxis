@@ -1,7 +1,10 @@
 #include "euxis/cli/term_caps.hpp"
 
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
+#include <string>
 #include <string_view>
 
 #include <langinfo.h>
@@ -44,6 +47,32 @@ auto detect() -> TermCaps {
     const char* sixel_env = std::getenv("SIXEL_SUPPORT");
     if (sixel_env && std::string_view(sixel_env) == "1") {
         tc.sixel = true;
+    }
+
+    // NO_COLOR / CLICOLOR detection
+    tc.no_color = (std::getenv("NO_COLOR") != nullptr);
+    if (!tc.no_color) {
+        const char* cc = std::getenv("CLICOLOR");
+        if (cc && std::string_view(cc) == "0") tc.no_color = true;
+    }
+
+    // iTerm2 detection
+    const char* term_program = std::getenv("TERM_PROGRAM");
+    if (term_program && std::string_view(term_program) == "iTerm.app") {
+        tc.iterm2 = true;
+    }
+
+    // WSL detection
+    if (std::getenv("WSL_DISTRO_NAME") != nullptr) {
+        tc.wsl = true;
+    } else {
+        std::ifstream proc_ver("/proc/version");
+        if (proc_ver.is_open()) {
+            std::string line;
+            std::getline(proc_ver, line);
+            for (auto& ch : line) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+            tc.wsl = (line.find("microsoft") != std::string::npos);
+        }
     }
 
     // Unicode detection

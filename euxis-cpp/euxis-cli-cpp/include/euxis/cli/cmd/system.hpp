@@ -1,3 +1,5 @@
+/// @file
+/// @brief System commands
 #pragma once
 
 #include "euxis/cli/command.hpp"
@@ -8,6 +10,7 @@
 namespace euxis::cli::cmd {
 
 int cmd_doctor(Context& ctx, const std::vector<std::string>& args);
+int cmd_fix(Context& ctx, const std::vector<std::string>& args);
 int cmd_health(Context& ctx, const std::vector<std::string>& args);
 int cmd_verify(Context& ctx, const std::vector<std::string>& args);
 int cmd_lint(Context& ctx, const std::vector<std::string>& args);

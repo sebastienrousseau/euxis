@@ -1,3 +1,5 @@
+/// @file
+/// @brief ETX config
 #pragma once
 #include <QSettings>
 #include <QString>

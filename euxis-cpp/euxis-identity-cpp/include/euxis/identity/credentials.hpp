@@ -1,7 +1,8 @@
+/// @file
+/// @brief Verifiable Credential (VC) support for agent claims.
 #pragma once
 
 #include <chrono>
-#include <cstddef>
 #include <span>
 #include <string>
 #include <string_view>
@@ -11,24 +12,22 @@
 
 namespace euxis::identity {
 
-/// A single claim within a verifiable credential.
+/// @brief A single statement/claim made about a subject.
 struct Claim {
     std::string type;
     std::string value;
     std::string scope;
 };
 
-/// Cryptographic proof attached to a verifiable credential.
-/// Uses HMAC-SHA256 via libsodium for signature generation.
+/// @brief Cryptographic proof attached to a verifiable credential.
 struct Proof {
-    std::string type = "HmacSha256Signature2026";
+    std::string type;
     std::string created;
     std::string verification_method;
     std::string proof_value;
 };
 
-/// A W3C Verifiable Credential binding claims to a subject,
-/// signed by an issuer using HMAC-SHA256.
+/// @brief A W3C-compliant Verifiable Credential.
 struct VerifiableCredential {
     std::string id;
     std::string issuer_did;
@@ -38,24 +37,19 @@ struct VerifiableCredential {
     std::string issued_at;
     std::string expires_at;
 
-    /// Serialise the credential to a JSON object.
-    [[nodiscard]] nlohmann::json to_json() const;
+    [[nodiscard]] auto to_json() const -> nlohmann::json;
 };
 
-/// Issue a verifiable credential from an issuer to a subject with the given
-/// claims. The proof is generated using HMAC-SHA256 with the issuer's key.
-/// The credential expires after `ttl` seconds from issuance.
+/// @brief Sign and issue a new verifiable credential.
 [[nodiscard]] auto issue_credential(
     std::string_view issuer_did,
     std::span<const std::byte> issuer_key,
     std::string_view subject_did,
     std::vector<Claim> claims,
-    std::chrono::seconds ttl = std::chrono::seconds{3600}
+    std::chrono::seconds ttl = std::chrono::hours(24)
 ) -> VerifiableCredential;
 
-/// Verify the HMAC-SHA256 proof on a credential using the issuer's key.
-/// Returns true if the proof is valid, false otherwise.
-/// Uses constant-time comparison via sodium_memcmp.
+/// @brief Cryptographically verify a credential's proof.
 [[nodiscard]] auto verify_credential(
     const VerifiableCredential& credential,
     std::span<const std::byte> issuer_key

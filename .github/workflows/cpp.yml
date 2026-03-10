@@ -10,6 +10,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: lukka/run-vcpkg@v11
         with:
+          vcpkgDirectory: ${{ github.workspace }}/vcpkg
+          vcpkgGitCommitId: 'd36306e1dc09cb9864db77fddf3ecf0611919bc2'
           vcpkgJsonGlob: 'euxis-cpp/vcpkg.json'
       - name: Build
         run: make cpp-build

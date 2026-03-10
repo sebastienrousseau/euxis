@@ -1,8 +1,16 @@
 #include "euxis/core/swarm.hpp"
 #include "euxis/core/ws_client.hpp"
 
+#include <cstdint>
+#include <exception>
+#include <format>
 #include <future>
+#include <mutex>
 #include <random>
+#include <string>
+#include <vector>
+
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
 namespace euxis::core {
@@ -11,9 +19,7 @@ namespace {
 auto generate_run_id() -> std::string {
     std::random_device rd;
     std::uniform_int_distribution<uint32_t> dist;
-    char buf[16];
-    std::snprintf(buf, sizeof(buf), "run_%08x", dist(rd));
-    return buf;
+    return std::format("run_{:08x}", dist(rd));
 }
 
 /// Derive the WebSocket URL from an HTTP gateway URL.
@@ -39,10 +45,10 @@ auto derive_ws_url(const std::string& gateway_url) -> std::string {
             port_str = port_str.substr(0, slash);
         }
         try {
-            int port = std::stoi(port_str) + 1;
+            const int port = std::stoi(port_str) + 1;
             ws_url = ws_url.substr(0, colon + 1) + std::to_string(port);
-        } catch (...) {
-            // Leave as-is
+        } catch (const std::exception& e) {
+            spdlog::warn("Failed to derive WS port from {}: {}", port_str, e.what());
         }
     }
     return ws_url;
@@ -50,6 +56,7 @@ auto derive_ws_url(const std::string& gateway_url) -> std::string {
 
 } // namespace
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 SwarmOrchestrator::SwarmOrchestrator(const std::string& gateway_url,
                                      const std::string& token)
     : gateway_url_(gateway_url),
@@ -77,14 +84,14 @@ auto SwarmOrchestrator::execute_playbook(const nlohmann::json& playbook,
 
 void SwarmOrchestrator::execute_phase(const nlohmann::json& phase,
                                       const std::string& goal) {
-    auto name = phase.value("name", "Unknown Phase");
-    auto mode = phase.value("mode", "sequential");
+    const auto name = phase.value("name", "Unknown Phase");
+    const auto mode = phase.value("mode", "sequential");
     spdlog::info("Executing phase: {} (mode: {})", name, mode);
 
     std::vector<SwarmTask> tasks;
     for (const auto& d : phase.value("delegates", nlohmann::json::array())) {
         std::string content = d.value("task_template", "");
-        auto pos = content.find("${goal}");
+        const auto pos = content.find("${goal}");
         if (pos != std::string::npos) {
             content.replace(pos, 7, goal);
         }
@@ -127,7 +134,7 @@ void SwarmOrchestrator::execute_phase_parallel(
 }
 
 void SwarmOrchestrator::run_task(SwarmTask& task) {
-    auto provider = router_.select_provider(task.complexity);
+    const auto provider = router_.select_provider(task.complexity);
     spdlog::info("Dispatching task to agent {} via {}...",
                  task.agent_id, provider);
     task.status = "running";
@@ -141,7 +148,7 @@ void SwarmOrchestrator::run_task(SwarmTask& task) {
     }
 
     // Non-simulation: dispatch via WebSocket to gateway
-    auto ws_url = derive_ws_url(gateway_url_);
+    const auto ws_url = derive_ws_url(gateway_url_);
     WebSocketClient client(ws_url);
     client.connect();
 
@@ -152,7 +159,7 @@ void SwarmOrchestrator::run_task(SwarmTask& task) {
         return;
     }
 
-    nlohmann::json dispatch_msg = {
+    const nlohmann::json dispatch_msg = {
         {"type", "dispatch"},
         {"agent", task.agent_id},
         {"task", task.task_template},
@@ -174,12 +181,12 @@ void SwarmOrchestrator::run_task(SwarmTask& task) {
 
 void SwarmOrchestrator::record_task(const SwarmTask& task,
                                      const std::string& provider) {
-    std::lock_guard lock(history_mutex_);
+    const std::scoped_lock lock(history_mutex_);
     history_.push_back({
         {"agent", task.agent_id},
         {"provider", provider},
         {"task", task.task_template},
-        {"result", *task.result},
+        {"result", task.result.value_or("")},
     });
 }
 

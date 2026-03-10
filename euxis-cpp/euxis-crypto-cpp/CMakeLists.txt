@@ -3,6 +3,7 @@ euxis_add_library(euxis-crypto-cpp
     src/aes_gcm.cpp
     src/key_derivation.cpp
     src/ed25519.cpp
+    src/errors.cpp
   DEPS
     unofficial-sodium::sodium
     nlohmann_json::nlohmann_json

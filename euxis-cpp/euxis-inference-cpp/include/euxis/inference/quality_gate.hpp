@@ -1,39 +1,39 @@
+/// @file
+/// @brief Automated quality evaluation for LLM responses.
 #pragma once
 
 #include <string_view>
+#include <vector>
 
 namespace euxis::inference {
 
-/// Scores returned by the quality gate.
+/// @brief Scorecard representing the quality metrics of a response.
 struct QualityScore {
-    float coherence;         // 0.0-1.0
-    float relevance;         // 0.0-1.0
-    float repetition_ratio;  // 0.0-1.0 (lower is better)
+    float coherence;
+    float relevance;
+    float repetition_ratio;
     bool passed;
 };
 
-/// Lightweight heuristic quality gate for local inference output.
-///
-/// - Coherence: ratio of sentences with >3 words.
-/// - Relevance: word-level Jaccard similarity between prompt and response.
-/// - Repetition: ratio of repeated bigrams to total bigrams.
+/// @brief Evaluates LLM responses against safety and quality standards.
 class QualityGate {
 public:
-    explicit QualityGate(float min_coherence = 0.3f,
-                         float max_repetition = 0.5f);
+    /// @brief Construct gate with specific thresholds.
+    explicit QualityGate(float min_coherence = 0.5f,
+                         float max_repetition = 0.3f);
 
-    /// Evaluate a prompt/response pair and return a quality score.
-    [[nodiscard]] auto evaluate(std::string_view prompt,
-                                std::string_view response) -> QualityScore;
-
-private:
-    float min_coherence_;
-    float max_repetition_;
+    /// @brief Run full quality evaluation on a prompt/response pair.
+    auto evaluate(std::string_view prompt,
+                  std::string_view response) -> QualityScore;
 
     auto compute_coherence(std::string_view text) -> float;
     auto compute_relevance(std::string_view prompt,
                            std::string_view response) -> float;
     auto compute_repetition(std::string_view text) -> float;
+
+private:
+    float min_coherence_;
+    float max_repetition_;
 };
 
 } // namespace euxis::inference

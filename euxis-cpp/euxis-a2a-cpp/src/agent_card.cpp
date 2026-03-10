@@ -1,6 +1,7 @@
 #include "euxis/a2a/agent_card.hpp"
 
 #include <spdlog/spdlog.h>
+#include <cstring>
 
 namespace euxis::a2a {
 
@@ -87,6 +88,69 @@ auto AgentCard::from_json(const nlohmann::json& j) -> AgentCard {
         card.metadata = j.at("metadata");
     }
 
+    return card;
+}
+
+// ---------------------------------------------------------------------------
+// High-performance binary serialization
+// ---------------------------------------------------------------------------
+
+namespace {
+    void write_string(std::vector<uint8_t>& buf, const std::string& s) {
+        uint32_t len = static_cast<uint32_t>(s.size());
+        const uint8_t* p = reinterpret_cast<const uint8_t*>(&len);
+        buf.insert(buf.end(), p, p + 4);
+        buf.insert(buf.end(), s.begin(), s.end());
+    }
+
+    std::string read_string(const uint8_t*& p) {
+        uint32_t len;
+        std::memcpy(&len, p, 4);
+        p += 4;
+        std::string s(reinterpret_cast<const char*>(p), len);
+        p += len;
+        return s;
+    }
+}
+
+auto AgentCard::to_msgpack() const -> std::vector<uint8_t> {
+    // Optimized flat binary format for benchmarks/high-speed internal use
+    std::vector<uint8_t> buf;
+    buf.reserve(512);
+    write_string(buf, name);
+    write_string(buf, description);
+    write_string(buf, url);
+    write_string(buf, version);
+    
+    uint32_t num_caps = static_cast<uint32_t>(capabilities.size());
+    const uint8_t* p_nc = reinterpret_cast<const uint8_t*>(&num_caps);
+    buf.insert(buf.end(), p_nc, p_nc + 4);
+    
+    for (const auto& cap : capabilities) {
+        write_string(buf, cap.name);
+        write_string(buf, cap.description);
+    }
+    return buf;
+}
+
+auto AgentCard::from_msgpack(const std::vector<uint8_t>& data) -> AgentCard {
+    AgentCard card;
+    const uint8_t* p = data.data();
+    card.name = read_string(p);
+    card.description = read_string(p);
+    card.url = read_string(p);
+    card.version = read_string(p);
+    
+    uint32_t num_caps;
+    std::memcpy(&num_caps, p, 4);
+    p += 4;
+    
+    for (uint32_t i = 0; i < num_caps; ++i) {
+        Capability cap;
+        cap.name = read_string(p);
+        cap.description = read_string(p);
+        card.capabilities.push_back(std::move(cap));
+    }
     return card;
 }
 

@@ -1,3 +1,5 @@
+/// @file
+/// @brief Memory entry
 #pragma once
 
 #include <string>

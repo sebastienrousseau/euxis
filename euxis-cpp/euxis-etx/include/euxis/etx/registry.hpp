@@ -1,3 +1,5 @@
+/// @file
+/// @brief ETX registry
 #pragma once
 #include <QObject>
 #include <QString>

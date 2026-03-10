@@ -1,6 +1,10 @@
 #include "euxis/core/router.hpp"
 
 #include <algorithm>
+#include <string>
+#include <vector>
+
+#include <spdlog/spdlog.h>
 
 namespace euxis::core {
 
@@ -18,7 +22,9 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     spdlog::info("Routing task (complexity: {}, priority: {})",
                  task_complexity, priority);
 
-    if (task_complexity == "low") return "ollama";
+    if (task_complexity == "low") {
+        return "ollama";
+    }
 
     if (priority == "speed") {
         auto it = std::ranges::min_element(
@@ -36,9 +42,9 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     std::string best = "ollama";
     double best_score = -100.0;
     for (const auto& p : providers_) {
-        double cost_factor = p.cost_per_1k_tokens * 100.0;
-        double latency_factor = static_cast<double>(p.avg_latency_ms) / 1000.0;
-        double score = (p.reliability_score * 10.0) -
+        const double cost_factor = p.cost_per_1k_tokens * 100.0;
+        const double latency_factor = static_cast<double>(p.avg_latency_ms) / 1000.0;
+        const double score = (p.reliability_score * 10.0) -
                        (cost_factor * 5.0) - (latency_factor * 2.0);
         if (score > best_score) {
             best_score = score;
@@ -53,7 +59,7 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
 void FinOpsRouter::track_usage(const std::string& provider_name, int tokens) {
     for (const auto& p : providers_) {
         if (p.name == provider_name) {
-            double cost =
+            const double cost =
                 (static_cast<double>(tokens) / 1000.0) * p.cost_per_1k_tokens;
             current_spend_ += cost;
             spdlog::info("Current session spend: ${:.4f}", current_spend_);
@@ -66,7 +72,7 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
                                         const std::string& agent_id,
                                         const std::string& model,
                                         int input_tokens, int output_tokens) {
-    int total = input_tokens + output_tokens;
+    const int total = input_tokens + output_tokens;
     double cost = 0.0;
     // Estimate cost based on known providers
     for (const auto& p : providers_) {
@@ -91,8 +97,10 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
 }
 
 auto FinOpsRouter::session_cost(const std::string& session_id) const -> double {
-    auto it = session_usage_.find(session_id);
-    if (it == session_usage_.end()) return 0.0;
+    const auto it = session_usage_.find(session_id);
+    if (it == session_usage_.end()) {
+        return 0.0;
+    }
 
     double total = 0.0;
     for (const auto& r : it->second) {

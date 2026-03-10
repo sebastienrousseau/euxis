@@ -1,27 +1,26 @@
+/// @file
+/// @brief Local LLM inference engine using Ollama.
 #pragma once
 
-#include <cstdint>
 #include <expected>
 #include <string>
 #include <string_view>
 
 #include <nlohmann/json.hpp>
 
-#include "engine.hpp"
+#include "llama_engine.hpp"
 
 namespace euxis::inference {
 
-/// Ollama REST API inference engine.
-///
-/// Communicates with a running Ollama daemon over HTTP (default localhost:11434).
-/// Uses cpp-httplib for all HTTP requests.
+/// @brief Inference engine that communicates with a local Ollama server.
 class OllamaEngine final : public InferenceEngine {
 public:
-    explicit OllamaEngine(std::string host = "localhost",
-                          uint16_t port = 11434);
+    /// @brief Construct engine with server coordinates.
+    explicit OllamaEngine(std::string host = "localhost", uint16_t port = 11434);
 
-    [[nodiscard]] auto generate(std::string_view prompt,
-                                uint32_t max_tokens = 512)
+    /// @brief Generate text completion using Ollama.
+    auto generate(std::string_view prompt,
+                  uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;
 
     [[nodiscard]] auto supports_model(std::string_view name) -> bool override;
@@ -31,10 +30,8 @@ private:
     std::string host_;
     uint16_t port_;
 
-    /// Issue a POST/GET to the Ollama API and parse the JSON response.
     auto make_request(const std::string& endpoint,
-                      const nlohmann::json& body)
-        -> std::expected<nlohmann::json, std::string>;
+                      const nlohmann::json& body) -> std::expected<nlohmann::json, std::string>;
 };
 
 } // namespace euxis::inference

@@ -5,6 +5,14 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <string_view>
+
+#if defined(__unix__) || defined(__APPLE__)
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 namespace euxis::cli {
 
@@ -54,13 +62,52 @@ auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::str
     return agent_dir.string();
 }
 
-auto Session::get_memory_context(const std::string& agent_id, int lines) const -> std::string {
+auto Session::get_memory_context(const std::string& agent_id, int max_lines) const -> std::string {
     auto project = project_name();
     auto memory_path = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" /
                        project / agent_id / "memory.md";
 
     if (!std::filesystem::exists(memory_path)) return {};
 
+#if defined(__unix__) || defined(__APPLE__)
+    // Zero-copy mmap implementation
+    int fd = ::open(memory_path.c_str(), O_RDONLY);
+    if (fd == -1) return {};
+
+    struct stat sb;
+    if (::fstat(fd, &sb) == -1 || sb.st_size == 0) {
+        ::close(fd);
+        return {};
+    }
+
+    void* mapped = ::mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    ::close(fd); // Can close immediately after mmap
+
+    if (mapped == MAP_FAILED) return {};
+
+    std::string_view data(static_cast<const char*>(mapped), sb.st_size);
+    std::vector<std::string_view> all_lines;
+    size_t pos = 0;
+    while (pos < data.size()) {
+        size_t end = data.find('\n', pos);
+        if (end == std::string_view::npos) {
+            all_lines.push_back(data.substr(pos));
+            break;
+        }
+        all_lines.push_back(data.substr(pos, end - pos));
+        pos = end + 1;
+    }
+
+    std::ostringstream out;
+    int start = std::max(0, static_cast<int>(all_lines.size()) - max_lines);
+    for (int i = start; i < static_cast<int>(all_lines.size()); ++i) {
+        out << all_lines[static_cast<size_t>(i)] << "\n";
+    }
+
+    ::munmap(mapped, sb.st_size);
+    return out.str();
+#else
+    // Fallback for non-UNIX
     std::ifstream f(memory_path);
     std::vector<std::string> all_lines;
     std::string line;
@@ -69,11 +116,12 @@ auto Session::get_memory_context(const std::string& agent_id, int lines) const -
     }
 
     std::ostringstream out;
-    int start = std::max(0, static_cast<int>(all_lines.size()) - lines);
+    int start = std::max(0, static_cast<int>(all_lines.size()) - max_lines);
     for (int i = start; i < static_cast<int>(all_lines.size()); ++i) {
         out << all_lines[static_cast<size_t>(i)] << "\n";
     }
     return out.str();
+#endif
 }
 
 void Session::save_memory(const std::string& agent_id, const std::string& user_msg, const std::string& assistant_msg) const {

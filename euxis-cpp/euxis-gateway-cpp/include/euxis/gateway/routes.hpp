@@ -1,3 +1,5 @@
+/// @file
+/// @brief Gateway routes
 #pragma once
 
 #pragma GCC diagnostic push
