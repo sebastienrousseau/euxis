@@ -9,14 +9,15 @@ TEST(FinOpsRouterTest, SelectionLogic) {
     // Low complexity path
     EXPECT_EQ(r.select_provider("low"), "ollama");
     
-    // Speed priority
+    // Speed priority - groq (50ms) should win
     EXPECT_EQ(r.select_provider("high", "speed"), "groq");
     
-    // Cost priority
+    // Cost priority - ollama (0.0) should win
     EXPECT_EQ(r.select_provider("high", "cost"), "ollama");
     
-    // Balanced weighted scoring
-    EXPECT_FALSE(r.select_provider("high", "balanced").empty());
+    // Balanced weighted scoring - verify it returns a valid hardcoded provider
+    auto best = r.select_provider("high", "balanced");
+    EXPECT_TRUE(best == "ollama" || best == "groq" || best == "anthropic" || best == "openai");
 }
 
 TEST(FinOpsRouterTest, UsageTracking) {

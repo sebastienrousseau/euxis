@@ -71,12 +71,39 @@ TEST_F(SessionStoreTest, FileOpenFailures) {
     EXPECT_FALSE(store_->load("nonexistent", "main").has_value());
 }
 
-TEST_F(SessionStoreTest, CorruptedMessagePack) {
-    auto dir = tmp_ / "corrupt";
+TEST_F(SessionStoreTest, ListBranchesFiltering) {
+    auto dir = tmp_ / "filter-test";
     std::filesystem::create_directories(dir);
-    std::ofstream(dir / "main.msgp", std::ios::binary) << "not msgpack";
     
-    EXPECT_FALSE(store_->load("corrupt", "main").has_value());
+    // Create valid and invalid files
+    std::ofstream(dir / "main.msgp") << "data";
+    std::ofstream(dir / "experiment.msgp") << "data";
+    std::ofstream(dir / "notes.txt") << "text";
+    std::ofstream(dir / "backup.msgp.bak") << "backup";
+    
+    auto branches = store_->list_branches("filter-test");
+    EXPECT_EQ(branches.size(), 2u);
+    EXPECT_TRUE(std::ranges::find(branches, "main") != branches.end());
+    EXPECT_TRUE(std::ranges::find(branches, "experiment") != branches.end());
+    EXPECT_TRUE(std::ranges::find(branches, "notes") == branches.end());
+}
+
+TEST_F(SessionStoreTest, CorruptedMessagePackDetailed) {
+    auto dir = tmp_ / "corrupt-detail";
+    std::filesystem::create_directories(dir);
+    auto path = dir / "main.msgp";
+    
+    // Invalid msgpack start byte
+    std::ofstream f(path, std::ios::binary);
+    uint8_t invalid_byte = 0xc1; // Reserved in msgpack
+    f.write(reinterpret_cast<const char*>(&invalid_byte), 1);
+    f.close();
+
+    auto result = store_->load("corrupt-detail", "main");
+    EXPECT_FALSE(result.has_value());
+    if (!result) {
+        EXPECT_EQ(result.error(), "MessagePack decoding failed");
+    }
 }
 
 TEST_F(SessionStoreTest, ListBranchesEmpty) {
