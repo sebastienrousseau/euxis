@@ -30,12 +30,11 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgDirectory: ${{ github.workspace }}/vcpkg
-          vcpkgGitCommitId: 'f6735d5aa1537081e8d425372ea7e585b0ad65e8'
-          vcpkgJsonGlob: 'euxis-cpp/vcpkg.json'
+      - name: Install C++ dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsodium-dev nlohmann-json3-dev libspdlog-dev \
+            libfmt-dev libgtest-dev libsqlite3-dev pkg-config
 
       - name: Setup venv and pinned Python deps
         run: |
@@ -56,5 +55,3 @@ jobs:
 
       - name: Strict verify (single path)
         run: make verify-all-packages REQUIRE_DEPS=1
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
