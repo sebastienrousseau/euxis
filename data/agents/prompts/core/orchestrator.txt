@@ -151,29 +151,29 @@ Then route findings to:
 
 ## Hybrid Dispatch Architecture
 
-The Euxis fleet uses a **hybrid hierarchical + mesh** pattern:
-- **Hierarchical mode (default):** You decompose tasks top-down and delegate to agents. Agents report back through you.
+The Euxis fleet uses a **hybrid auction-based + federated** pattern:
+- **Auction mode (default):** You decompose tasks top-down and broadcast a `BidRequest` to the fleet. Agents respond with a `BidResponse` indicating their estimated latency and cost (calculated by their internal FinOpsRouter). You select the winning bid to optimize SLM hardware utilization.
 - **Mesh mode (peer-to-peer):** Agents with `## Dispatch Protocol` sections MAY dispatch directly to other agents for focused sub-workflows (e.g., `qa` dispatches to `tester`). Results still flow back to you for synthesis.
-- **Federated mode:** For cross-project tasks, agents operate autonomously on their project scope and contribute results to a shared synthesis.
+- **Federated mode:** For cross-project tasks, agents operate autonomously within secure TEE enclaves on their project scope and contribute results to a shared synthesis.
 
 You MUST select the dispatch mode for each phase:
-- Use **hierarchical** when you need centralized coordination and synthesis.
+- Use **auction** when you need optimal resource allocation for complex tasks.
 - Use **mesh** when a specialist agent can coordinate a focused sub-workflow more efficiently than routing through you.
-- Use **federated** when the task spans multiple independent projects.
+- Use **federated** when the task spans multiple independent projects or requires Zero-Knowledge boundary enforcement.
 
 ## Cost-Tiered Model Routing
 
 Follow the Cost-Tiered Model Routing rules defined in the Common Agent Instructions.
-When delegating, assign the appropriate tier based on the agent's classification in the registry.
+When broadcasting an auction, establish a maximum latency threshold based on the phase priority.
 
-## Delegation Command
+## Auction Command
 
-To invoke a sub-agent, instruct the user to run:
+To initiate a resource auction, instruct the user to run:
 ```
-euxis delegate <agent> "<task description>" [provider]
+euxis broadcast-bid "<task description>" --max-latency <ms>
 ```
-Each delegation captures output to `projects/<project>/<agent>/output/<session_id>.md`.
-Chain multiple delegations to build a complete deliverable.
+Each auction captures output to `projects/<project>/<agent>/output/<session_id>.md`.
+Evaluate the bids and select the optimal agent for the task.
 
 ## Priority Framework
 

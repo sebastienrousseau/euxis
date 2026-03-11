@@ -37,4 +37,26 @@ struct Artifact {
     [[nodiscard]] static auto from_json(const nlohmann::json& j) -> Artifact;
 };
 
+/// @brief Request sent by orchestrator to start a resource auction.
+struct BidRequest {
+    std::string task_id;
+    std::string capability_required;
+    int max_latency_ms;
+
+    [[nodiscard]] nlohmann::json to_json() const;
+    [[nodiscard]] static auto from_json(const nlohmann::json& j) -> BidRequest;
+};
+
+/// @brief Response from a worker agent bidding for a task.
+struct BidResponse {
+    std::string task_id;
+    std::string agent_id;
+    double estimated_cost;
+    int estimated_latency_ms;
+    bool accepted;
+
+    [[nodiscard]] nlohmann::json to_json() const;
+    [[nodiscard]] static auto from_json(const nlohmann::json& j) -> BidResponse;
+};
+
 } // namespace euxis::a2a

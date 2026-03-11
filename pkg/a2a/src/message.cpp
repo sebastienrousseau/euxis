@@ -70,4 +70,46 @@ auto Artifact::from_json(const nlohmann::json& j) -> Artifact {
     return art;
 }
 
+// ---------------------------------------------------------------------------
+// BidRequest
+// ---------------------------------------------------------------------------
+nlohmann::json BidRequest::to_json() const {
+    return {
+        {"task_id", task_id},
+        {"capability_required", capability_required},
+        {"max_latency_ms", max_latency_ms}
+    };
+}
+
+auto BidRequest::from_json(const nlohmann::json& j) -> BidRequest {
+    BidRequest req;
+    req.task_id = j.value("task_id", "");
+    req.capability_required = j.value("capability_required", "");
+    req.max_latency_ms = j.value("max_latency_ms", 5000);
+    return req;
+}
+
+// ---------------------------------------------------------------------------
+// BidResponse
+// ---------------------------------------------------------------------------
+nlohmann::json BidResponse::to_json() const {
+    return {
+        {"task_id", task_id},
+        {"agent_id", agent_id},
+        {"estimated_cost", estimated_cost},
+        {"estimated_latency_ms", estimated_latency_ms},
+        {"accepted", accepted}
+    };
+}
+
+auto BidResponse::from_json(const nlohmann::json& j) -> BidResponse {
+    BidResponse res;
+    res.task_id = j.value("task_id", "");
+    res.agent_id = j.value("agent_id", "");
+    res.estimated_cost = j.value("estimated_cost", 0.0);
+    res.estimated_latency_ms = j.value("estimated_latency_ms", 0);
+    res.accepted = j.value("accepted", false);
+    return res;
+}
+
 } // namespace euxis::a2a
