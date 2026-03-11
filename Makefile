@@ -15,6 +15,7 @@ format: cpp-format
 
 cpp-configure:
 	cmake -B build/cmake-build -S . \
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 		$(if $(VCPKG_ROOT),-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake,) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DEUXIS_COVERAGE=OFF -DEUXIS_DISABLE_SANITIZERS=ON

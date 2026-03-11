@@ -42,6 +42,27 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
     add_library(nlohmann_json::nlohmann_json ALIAS nlohmann_json)
 endif()
 
+# inja (Jinja2 for C++)
+set(INJA_USE_EMBEDDED_JSON OFF CACHE BOOL "" FORCE)
+set(BUILD_BENCHMARK OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    inja
+    GIT_REPOSITORY https://github.com/pantor/inja.git
+    GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(inja)
+
+# yaml-cpp
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    yaml-cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG        0.8.0
+)
+FetchContent_MakeAvailable(yaml-cpp)
+
 # spdlog (Use latest stable)
 FetchContent_Declare(
     spdlog
@@ -112,8 +133,10 @@ add_subdirectory(pkg/runtime)
 add_subdirectory(pkg/metrics)
 add_subdirectory(pkg/network)
 add_subdirectory(pkg/core)
+add_subdirectory(pkg/publisher)
 add_subdirectory(pkg/adapters)
 add_subdirectory(cmd/gateway)
 add_subdirectory(cmd/cli)
+add_subdirectory(cmd/publisher)
 add_subdirectory(pkg/bench)
 add_subdirectory(cmd/etx)

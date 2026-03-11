@@ -1,0 +1,11 @@
+euxis_add_library(euxis-publisher-cpp
+  SOURCES
+    src/publisher.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+    inja
+    yaml-cpp
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_publisher.cpp
+)
