@@ -123,7 +123,7 @@ int cmd_voice_ex(Context& ctx, const std::vector<std::string>& args, std::istrea
         if (trimmed.empty()) continue;
 
         // Exit commands
-        if (trimmed == "exit" || trimmed == "quit") {
+        if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") {
             std::cout << "\n" << term::icon_ok() << " " << tr("Voice session ended.") << "\n";
             break;
         }
@@ -255,7 +255,7 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
         if (trimmed.empty()) continue;
 
         // Commands
-        if (trimmed == "exit" || trimmed == "quit") {
+        if (trimmed == "exit" || trimmed == "quit" || trimmed == "/exit" || trimmed == "/quit") {
             std::cout << "\n" << term::icon_ok() << " " << term::dim("Session ended.") << "\n";
             break;
         }
