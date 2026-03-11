@@ -168,12 +168,8 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         }
     }
 
-    // If we have an OAuth token (from CLI import) and the 'claude' CLI is available,
-    // go DIRECTLY to the CLI fallback. The public API often rejects these tokens.
-    if (is_oauth && Process::available("claude")) {
-        goto fallback_to_cli;
-    }
-
+    // If we have an OAuth token, we ALWAYS use the native API path (curl).
+    // The 'claude' CLI is too memory-heavy for large repositories.
     if (!token.empty()) {
         std::string m = model.empty() ? "claude-sonnet-4-6" : model;
 
@@ -315,15 +311,6 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                     ? resp_json["error"]["message"].get<std::string>()
                     : resp_json["error"].dump();
 
-                // If OAuth is rejected by the public API, we must fall back to the CLI
-                if (is_oauth && err_msg.find("OAuth authentication is currently not supported") != std::string::npos) {
-                    spdlog::info("Anthropic API rejected OAuth token, falling back to 'claude' CLI");
-                    if (auth.has_value()) {
-                        auth_store_.report_failure(auth->profile_id, CooldownReason::UnsupportedMethod);
-                    }
-                    goto fallback_to_cli;
-                }
-
                 ProviderResponse resp;
                 resp.success = false;
                 resp.error = "Anthropic API: " + err_msg;
@@ -348,154 +335,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         }
     }
 
-fallback_to_cli:
-    // In tests, skip the CLI fallback if we want to avoid browser popups
-    if (std::getenv("EUXIS_TEST_SKIP_BROWSER")) {
-        return {false, "", "Anthropic API failed and CLI fallback skipped due to EUXIS_TEST_SKIP_BROWSER", 1, 0.0, {}};
-    }
-
-    // Fallback: try claude CLI with env vars stripped
-    if (!Process::available("claude")) {
-        return {false, "", "No Anthropic auth found. Set ANTHROPIC_API_KEY or sign in via Claude Code.", 1, 0.0, {}};
-    }
-
-    std::string m = model;
-    if (m.find("opus") != std::string::npos) m = "opus";
-    else if (m.find("sonnet") != std::string::npos) m = "sonnet";
-    else if (m.find("haiku") != std::string::npos) m = "haiku";
-    else m = "sonnet";
-
-    std::string stdbuf_cmd = "stdbuf";
-    if (!Process::available(stdbuf_cmd)) stdbuf_cmd = ""; // Fallback if stdbuf not on PATH
-
-    std::vector<std::string> args;
-    if (!stdbuf_cmd.empty()) {
-        args = {"-u", "CLAUDE_CODE_ENTRYPOINT", "-u", "CLAUDE_MODEL", "-u", "ANTHROPIC_MODEL", "-u", "MODEL",
-                "stdbuf", "-oL", "-eL", "claude"};
-    } else {
-        args = {"-u", "CLAUDE_CODE_ENTRYPOINT", "-u", "CLAUDE_MODEL", "-u", "ANTHROPIC_MODEL", "-u", "MODEL",
-                "claude"};
-    }
-    
-    args.insert(args.end(), {"--model", m, "--permission-mode", "dontAsk", "--no-chrome", "-p", "--", prompt, 
-                             "--output-format", "stream-json", "--include-partial-messages", "--verbose", "--no-session-persistence"});
-    
-    ProcessResult result;
-    if (on_chunk) {
-        std::string json_buffer;
-        auto stream_parser = [&](const std::string& chunk) {
-            if (chunk.empty()) return;
-            
-            // Performance: Prevent OOM by capping accumulated buffer
-            static size_t accumulated = 0;
-            accumulated += chunk.size();
-            if (accumulated > 100 * 1024 * 1024) [[unlikely]] {
-                return; // Stop processing to avoid crash
-            }
-
-            json_buffer += chunk;
-            
-            while (!json_buffer.empty()) {
-                size_t brace_pos = json_buffer.find('{');
-                if (brace_pos == std::string::npos) {
-                    // No brace found: stream everything we have as raw text immediately
-                    on_chunk(json_buffer);
-                    json_buffer.clear();
-                    break;
-                }
-                
-                // If there's text before the brace, stream it as raw text immediately
-                if (brace_pos > 0) {
-                    on_chunk(json_buffer.substr(0, brace_pos));
-                    json_buffer.erase(0, brace_pos);
-                    brace_pos = 0;
-                }
-                
-                // Robust brace matcher that respects strings and escapes
-                int depth = 0;
-                bool in_string = false;
-                bool escaped = false;
-                size_t end_pos = std::string::npos;
-                
-                for (size_t i = 0; i < json_buffer.size(); ++i) {
-                    char c = json_buffer[i];
-                    if (escaped) { escaped = false; continue; }
-                    if (c == '\\') { escaped = true; continue; }
-                    if (c == '"') { in_string = !in_string; continue; }
-                    
-                    if (!in_string) {
-                        if (c == '{') depth++;
-                        else if (c == '}') {
-                            depth--;
-                            if (depth == 0) { end_pos = i; break; }
-                        }
-                    }
-                }
-                
-                if (end_pos == std::string::npos) break; // Incomplete object
-                
-                std::string line = json_buffer.substr(0, end_pos + 1);
-                json_buffer.erase(0, end_pos + 1);
-                
-                try {
-                    auto j = nlohmann::json::parse(line);
-                    if (j.value("type", "") == "stream_event") {
-                        auto& ev = j["event"];
-                        if (ev.value("type", "") == "content_block_delta" && ev.contains("delta")) {
-                            std::string text;
-                            if (ev["delta"].contains("text")) text = ev["delta"]["text"].get<std::string>();
-                            else if (ev["delta"].contains("thinking")) text = ev["delta"]["thinking"].get<std::string>();
-                            if (!text.empty()) on_chunk(text);
-                        }
-                    }
-                } catch (...) {
-                    // Not valid JSON after all, stream it as raw text
-                    on_chunk(line);
-                }
-            }
-        };
-        result = Process::run_streaming("env", args, "", stream_parser, timeout);
-    } else {
-        // Non-streaming fallback: use plain text
-        std::vector<std::string> plain_args = args;
-        // Revert to text format for simple execution
-        // args[11] is -p, so we need to find its index
-        size_t p_idx = 0;
-        for (size_t i = 0; i < plain_args.size(); ++i) {
-            if (plain_args[i] == "-p") { p_idx = i; break; }
-        }
-        
-        // Remove stream-specific flags that come AFTER the prompt
-        // Since we used "--" before prompt, prompt is at p_idx + 2
-        if (p_idx + 3 < plain_args.size()) {
-            plain_args.erase(plain_args.begin() + p_idx + 3, plain_args.end());
-        }
-        
-        // Change output format to text
-        for (size_t i = 0; i < plain_args.size(); ++i) {
-            if (plain_args[i] == "stream-json") plain_args[i] = "text";
-        }
-        
-        result = Process::run_with_input("env", plain_args, "", timeout);
-    }
-    
-    // Some versions of Claude CLI might return non-zero even on success if they can't 
-    // access some terminal features, but still print the response to stdout.
-    bool success = (result.exit_code == 0) || (!result.stdout_output.empty() && result.exit_code != 127);
-    
-    std::string err = result.stderr_output;
-    if (err.empty() && !success) {
-        err = "Claude CLI failed with exit code " + std::to_string(result.exit_code);
-    }
-    
-    return {
-        success,
-        result.stdout_output,
-        err,
-        result.exit_code,
-        0.0,
-        {}
-    };
+    return {false, "", "No Anthropic auth found. Set ANTHROPIC_API_KEY.", 1, 0.0, {}};
 }
 
 auto ProviderExecutor::execute_ollama(const std::string& model,

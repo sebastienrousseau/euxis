@@ -9,6 +9,7 @@
 #include <poll.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <functional>
 
@@ -26,8 +27,22 @@ auto ms_remaining(TimePoint deadline) -> int {
     return static_cast<int>(std::min<long long>(ms, 2'000'000'000LL));
 }
 
+/// Apply resource limits to the child process to prevent OOM (137)
+void apply_resource_limits() {
+    struct rlimit mem_limit;
+    // Set memory limit to 512MB
+    mem_limit.rlim_cur = 512 * 1024 * 1024;
+    mem_limit.rlim_max = 512 * 1024 * 1024;
+    
+#ifdef RLIMIT_AS
+    ::setrlimit(RLIMIT_AS, &mem_limit);
+#endif
+#ifdef RLIMIT_DATA
+    ::setrlimit(RLIMIT_DATA, &mem_limit);
+#endif
+}
+
 /// Read all data from a file descriptor, respecting a deadline.
-/// Uses poll() for thread-safe timeout instead of alarm().
 auto read_fd(int fd, TimePoint deadline) -> std::string {
     std::string result;
     std::array<char, 4096> buf{};
@@ -88,6 +103,7 @@ auto Process::run(const std::string& program,
 
     if (pid == 0) {
         // Child
+        apply_resource_limits();
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
         ::dup2(stdout_pipe[1], STDOUT_FILENO);
@@ -150,6 +166,7 @@ auto Process::run_with_input(const std::string& program,
 
     if (pid == 0) {
         // Child
+        apply_resource_limits();
         ::close(stdin_pipe[1]);
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
@@ -230,6 +247,7 @@ auto Process::run_streaming(const std::string& program,
 
     if (pid == 0) {
         // Child
+        apply_resource_limits();
         ::close(stdin_pipe[1]);
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
