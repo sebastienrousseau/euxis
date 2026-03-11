@@ -29,12 +29,11 @@ auto CircuitBreaker::is_open() -> bool {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!opened_at_) return false;
     
-    // Check if recovery timeout has passed
-    auto now = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                   std::chrono::system_clock::now().time_since_epoch())
-                   .count());
+    // High-resolution check for recovery timeout
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration<double>(now - *opened_at_).count();
     
-    if (now - *opened_at_ >= recovery_timeout_seconds_) {
+    if (elapsed >= recovery_timeout_seconds_) {
         // Half-open state: allow a trial
         return false;
     }
@@ -52,9 +51,7 @@ void CircuitBreaker::record_failure() {
     std::lock_guard<std::mutex> lock(mutex_);
     failure_count_++;
     if (failure_count_ >= failure_threshold_) {
-        opened_at_ = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                         std::chrono::system_clock::now().time_since_epoch())
-                         .count());
+        opened_at_ = std::chrono::steady_clock::now();
     }
 }
 

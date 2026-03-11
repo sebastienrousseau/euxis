@@ -43,7 +43,7 @@ private:
     int failure_threshold_;
     double recovery_timeout_seconds_;
     int failure_count_{0};
-    std::optional<double> opened_at_;
+    std::optional<std::chrono::steady_clock::time_point> opened_at_;
 };
 
 inline auto get_default_breaker() -> CircuitBreaker& {
