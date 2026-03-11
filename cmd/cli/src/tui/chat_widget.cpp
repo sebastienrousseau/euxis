@@ -13,11 +13,18 @@ ChatWidget::ChatWidget() {
 
 void ChatWidget::add_message(ChatMessage msg) {
     messages_.push_back(std::move(msg));
+    
+    // Performance: Enforce a memory bound (Sliding Window)
+    // Prevents OOM (Exit code 137) during long-lived sessions
+    if (messages_.size() > 100) [[unlikely]] {
+        messages_.erase(messages_.begin());
+    }
+    
     scroll_offset_ = 0;
 }
 
 void ChatWidget::append_to_last(const std::string& chunk) {
-    if (!messages_.empty()) {
+    if (!messages_.empty()) [[likely]] {
         messages_.back().content += chunk;
     }
 }
@@ -44,7 +51,7 @@ Size ChatWidget::preferred_size() const { return {80, 20}; }
 void ChatWidget::render(terminal::TerminalScreen& screen, Rect area) {
     if (area.empty()) return;
 
-    // Calculate total height of the flow with word wrapping
+    // Pre-calculate line wrapping and cache it if possible (Simplified for now)
     std::vector<int> heights;
     int total_h = 0;
     int content_width = area.w - 7;
@@ -65,21 +72,17 @@ void ChatWidget::render(terminal::TerminalScreen& screen, Rect area) {
             }
 
             if (in_code_block) {
-                std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
-                h += std::max(1, (int)wrapped.size());
+                // Optimization: Rough line count for code blocks
+                h++;
             } else if (raw_line.starts_with("#")) {
-                std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
-                h += (int)wrapped.size();
+                h += 1;
             } else if (raw_line.starts_with("- ") || raw_line.starts_with("* ") || (raw_line.size() > 2 && std::isdigit(raw_line[0]) && raw_line[1] == '.')) {
-                std::string bullet = raw_line.substr(0, raw_line.find(' ') + 1);
-                std::string text = raw_line.substr(bullet.size());
-                std::vector<std::string> wrapped = wrap_text(text, content_width - (int)bullet.size());
-                h += (int)wrapped.size();
+                h += 1;
             } else if (raw_line.empty()) {
                 h++;
             } else {
-                std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
-                h += (int)wrapped.size();
+                // Heuristic: estimate wrapped height to avoid expensive string splitting on every frame
+                h += static_cast<int>(std::max(1UL, (raw_line.size() + content_width - 1) / content_width));
             }
         }
         
@@ -95,6 +98,7 @@ void ChatWidget::render(terminal::TerminalScreen& screen, Rect area) {
     int current_y = area.y - current_scroll;
     for (size_t i = 0; i < messages_.size(); ++i) {
         int h = heights[i];
+        // Only render visible messages
         if (current_y + h > area.y && current_y < area.y + area.h) {
             render_message(screen, messages_[i], current_y, area);
         } else {
@@ -131,16 +135,14 @@ bool ChatWidget::handle_event(const Event& event) {
 }
 
 void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMessage& msg, int& y, Rect area) const {
-    // Tokyo Night Palette (Glow-like)
-    uint8_t user_r = 122, user_g = 162, user_b = 247;    // Blue
-    uint8_t agent_r = 187, agent_g = 154, agent_b = 247; // Purple
-    uint8_t header_r = 255, header_g = 158, header_b = 100; // Orange (Headers)
-    uint8_t code_r = 158, code_g = 206, code_b = 106;   // Green (Code Blocks)
-    uint8_t text_r = 169, text_g = 177, text_b = 214;   // Default text
-    uint8_t muted_r = 68, muted_g = 75, muted_b = 106;  // Muted/Comments
-    uint8_t bullet_r = 255, bullet_g = 158, bullet_b = 100; // Orange bullets
+    uint8_t user_r = 122, user_g = 162, user_b = 247;
+    uint8_t agent_r = 187, agent_g = 154, agent_b = 247;
+    uint8_t header_r = 255, header_g = 158, header_b = 100;
+    uint8_t code_r = 158, code_g = 206, code_b = 106;
+    uint8_t text_r = 169, text_g = 177, text_b = 214;
+    uint8_t muted_r = 68, muted_g = 75, muted_b = 106;
+    uint8_t bullet_r = 255, bullet_g = 158, bullet_b = 100;
 
-    // Prefix & Role
     if (y >= area.y && y < area.y + area.h) {
         std::string prefix = msg.is_user ? "➜  " : "◈  ";
         uint8_t pr = msg.is_user ? user_r : agent_r;
@@ -156,7 +158,6 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
     }
     y++;
 
-    // Message Content with basic Markdown
     int content_width = area.w - 7;
     if (content_width <= 0) return;
 
@@ -177,21 +178,13 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         }
 
         if (in_code_block) {
-            std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
-            if (wrapped.empty()) { // Handle empty lines in code block
-                if (y >= area.y && y < area.y + area.h) {
-                    screen.write_text(area.x + 5, y, "", code_r, code_g, code_b);
-                }
-                y++;
+            if (y >= area.y && y < area.y + area.h) {
+                std::string line = raw_line;
+                if (line.size() > (size_t)content_width) line = line.substr(0, content_width);
+                screen.write_text(area.x + 5, y, line, code_r, code_g, code_b);
             }
-            for (const auto& wl : wrapped) {
-                if (y >= area.y && y < area.y + area.h) {
-                    screen.write_text(area.x + 5, y, wl, code_r, code_g, code_b);
-                }
-                y++;
-            }
+            y++;
         } else if (raw_line.starts_with("#")) {
-            // Header
             std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
             for (const auto& wl : wrapped) {
                 if (y >= area.y && y < area.y + area.h) {
@@ -200,7 +193,6 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
                 y++;
             }
         } else if (raw_line.starts_with("- ") || raw_line.starts_with("* ") || (raw_line.size() > 2 && std::isdigit(raw_line[0]) && raw_line[1] == '.')) {
-            // List item
             std::string bullet = raw_line.substr(0, raw_line.find(' ') + 1);
             std::string text = raw_line.substr(bullet.size());
             std::vector<std::string> wrapped = wrap_text(text, content_width - (int)bullet.size());
@@ -219,7 +211,6 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         } else if (raw_line.empty()) {
             y++;
         } else {
-            // Paragraph
             std::vector<std::string> wrapped = wrap_text(raw_line, content_width);
             for (const auto& wl : wrapped) {
                 if (y >= area.y && y < area.y + area.h) {
@@ -230,7 +221,6 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         }
     }
 
-    // Thinking Indicator
     if (msg.is_thinking) {
         if (y >= area.y && y < area.y + area.h) {
             screen.write_text(area.x + 5, y, "⠋ thinking...", muted_r, muted_g, muted_b);
@@ -238,7 +228,7 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         y++;
     }
     
-    y++; // Extra spacing
+    y++; 
 }
 
 } // namespace euxis::cli::tui

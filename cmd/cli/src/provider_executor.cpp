@@ -220,6 +220,13 @@ auto ProviderExecutor::execute_claude(const std::string& model,
             std::string error_msg;
 
             auto sse_parser = [&](const std::string& chunk) {
+                // Performance: Prevent OOM by capping accumulated buffer
+                if (full_content.size() > 100 * 1024 * 1024) [[unlikely]] {
+                    got_error = true;
+                    error_msg = "Memory safety guard: response exceeded 100MB";
+                    return;
+                }
+
                 sse_buffer += chunk;
                 // Process complete SSE lines
                 size_t pos = 0;
@@ -378,6 +385,14 @@ fallback_to_cli:
         std::string json_buffer;
         auto stream_parser = [&](const std::string& chunk) {
             if (chunk.empty()) return;
+            
+            // Performance: Prevent OOM by capping accumulated buffer
+            static size_t accumulated = 0;
+            accumulated += chunk.size();
+            if (accumulated > 100 * 1024 * 1024) [[unlikely]] {
+                return; // Stop processing to avoid crash
+            }
+
             json_buffer += chunk;
             
             while (!json_buffer.empty()) {
