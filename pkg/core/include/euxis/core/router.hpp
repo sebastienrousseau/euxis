@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -60,6 +61,7 @@ private:
     double current_spend_{0.0};
     size_t session_limit_{100};
     std::vector<ProviderMetrics> providers_;
+    std::unordered_map<std::string, size_t> name_to_provider_; ///< O(1) provider lookup index
     std::map<std::string, std::vector<SessionUsageRecord>> session_usage_;
     std::deque<std::string> session_order_;
 };

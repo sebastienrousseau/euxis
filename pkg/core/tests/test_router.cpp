@@ -34,6 +34,17 @@ TEST(FinOpsRouterTest, BalancedSelection) {
     EXPECT_FALSE(provider.empty());
 }
 
+TEST(FinOpsRouterTest, ProviderIndexLookup) {
+    FinOpsRouter r;
+    // track_usage uses the name_to_provider_ index internally
+    r.track_usage("groq", 1000);
+    EXPECT_GT(r.current_spend(), 0.0);
+    
+    double spend_before = r.current_spend();
+    r.track_usage("unknown", 1000);
+    EXPECT_DOUBLE_EQ(r.current_spend(), spend_before);
+}
+
 TEST(FinOpsRouterTest, TrackUsageUnknownProvider) {
     FinOpsRouter r;
     double before = r.current_spend();
@@ -107,6 +118,34 @@ TEST(FinOpsRouterTest, MultipleSessionUsageAccumulates) {
     double cost = r.session_cost("sess-1");
     // Two entries, cost should be positive
     EXPECT_GT(cost, 0.0);
+}
+
+TEST(FinOpsRouterTest, SessionEviction) {
+    FinOpsRouter r;
+    // Create 100 sessions
+    for (int i = 0; i < 100; ++i) {
+        r.track_session_usage("s-" + std::to_string(i), "a", "ollama", 1, 1);
+    }
+    EXPECT_GT(r.session_cost("s-0"), 0.0);
+    
+    // Add 101st session, should evict s-0
+    r.track_session_usage("s-100", "a", "ollama", 1, 1);
+    EXPECT_DOUBLE_EQ(r.session_cost("s-0"), 0.0);
+    EXPECT_GT(r.session_cost("s-100"), 0.0);
+}
+
+TEST(FinOpsRouterTest, SessionLRURefresh) {
+    FinOpsRouter r;
+    // Fill up
+    for (int i = 0; i < 100; ++i) r.track_session_usage("s-" + std::to_string(i), "a", "ollama", 1, 1);
+    
+    // Use s-0 again, it should move to the back of the eviction queue
+    r.track_session_usage("s-0", "a", "ollama", 1, 1);
+    
+    // Add new session, should NOT evict s-0 now, it should evict s-1
+    r.track_session_usage("s-new", "a", "ollama", 1, 1);
+    EXPECT_GT(r.session_cost("s-0"), 0.0);
+    EXPECT_DOUBLE_EQ(r.session_cost("s-1"), 0.0);
 }
 
 } // namespace
