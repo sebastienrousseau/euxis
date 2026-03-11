@@ -90,6 +90,25 @@ auto OllamaEngine::generate(std::string_view prompt,
 }
 
 // ---------------------------------------------------------------------------
+// episodic_generate
+// ---------------------------------------------------------------------------
+auto OllamaEngine::episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+                                     std::string_view system_prompt,
+                                     uint32_t max_tokens)
+    -> std::expected<InferenceResult, std::string> {
+    
+    std::string prompt = std::string(system_prompt) + "\n\n";
+    for (auto msg : episodes) {
+        prompt += std::format("[{}] {}\n", 
+            (msg.role == euxis::runtime::Role::User ? "User" : "Assistant"),
+            msg.content);
+    }
+    prompt += "\nAssistant: ";
+
+    return generate(prompt, max_tokens);
+}
+
+// ---------------------------------------------------------------------------
 // supports_model — ask Ollama for its model list
 // ---------------------------------------------------------------------------
 auto OllamaEngine::supports_model(std::string_view name) -> bool {

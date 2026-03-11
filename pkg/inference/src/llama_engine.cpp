@@ -173,6 +173,25 @@ auto LlamaEngine::generate(std::string_view prompt,
 }
 
 // ---------------------------------------------------------------------------
+// episodic_generate
+// ---------------------------------------------------------------------------
+auto LlamaEngine::episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+                                    std::string_view system_prompt,
+                                    uint32_t max_tokens)
+    -> std::expected<InferenceResult, std::string> {
+    
+    std::string prompt = std::string(system_prompt) + "\n\n";
+    for (auto msg : episodes) {
+        prompt += std::format("[{}] {}\n", 
+            (msg.role == euxis::runtime::Role::User ? "User" : "Assistant"),
+            msg.content);
+    }
+    prompt += "\nAssistant: ";
+
+    return generate(prompt, max_tokens);
+}
+
+// ---------------------------------------------------------------------------
 // supports_model — GET /v1/models, fall back to config match
 // ---------------------------------------------------------------------------
 auto LlamaEngine::supports_model(std::string_view name) -> bool {

@@ -140,5 +140,16 @@ TEST(OllamaEngineTest, HealthStructure) {
     EXPECT_TRUE(h.contains("status"));
 }
 
+TEST(OllamaEngineTest, EpisodicGenerateFailsGracefully) {
+    OllamaEngine engine("localhost", 19999);
+    
+    auto get_episodes = []() -> std::generator<euxis::runtime::SessionMessage> {
+        co_yield {.role = euxis::runtime::Role::User, .content = "Hello", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}};
+    };
+
+    auto result = engine.episodic_generate(get_episodes(), "System prompt", 32);
+    ASSERT_FALSE(result.has_value());
+}
+
 } // anonymous namespace
 } // namespace euxis::inference

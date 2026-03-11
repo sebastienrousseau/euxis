@@ -6,6 +6,7 @@ euxis_add_library(euxis-inference-cpp
     src/llama_engine.cpp
     src/ollama_engine.cpp
   DEPS
+    euxis-runtime-cpp
     unofficial-sodium::sodium
     nlohmann_json::nlohmann_json
     spdlog::spdlog

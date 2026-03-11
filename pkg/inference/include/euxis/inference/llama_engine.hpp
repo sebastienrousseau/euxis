@@ -7,10 +7,12 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <generator>
 
 #include <nlohmann/json.hpp>
 
 #include "config.hpp"
+#include "euxis/runtime/session_store.hpp"
 
 namespace euxis::inference {
 
@@ -31,6 +33,12 @@ public:
     /// @brief generate a completion from a prompt.
     virtual auto generate(std::string_view prompt,
                           uint32_t max_tokens = 512)
+        -> std::expected<InferenceResult, std::string> = 0;
+
+    /// @brief generate a completion using a stream of episodic context.
+    virtual auto episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+                                   std::string_view system_prompt,
+                                   uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> = 0;
 
     /// @brief check if this engine can run a specific model.
@@ -56,6 +64,11 @@ public:
     /// @brief Generate completion using local weights.
     auto generate(std::string_view prompt,
                   uint32_t max_tokens = 512)
+        -> std::expected<InferenceResult, std::string> override;
+
+    auto episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+                           std::string_view system_prompt,
+                           uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;
 
     [[nodiscard]] auto supports_model(std::string_view name) -> bool override;

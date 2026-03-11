@@ -200,5 +200,18 @@ TEST(LlamaEngineTest, GenerateAfterHealthCheck) {
     ASSERT_FALSE(r.has_value());
 }
 
+TEST(LlamaEngineTest, EpisodicGenerateFailsGracefully) {
+    LocalModelConfig cfg;
+    cfg.model_name = "episodic-test";
+    LlamaEngine engine(cfg);
+    
+    auto get_episodes = []() -> std::generator<euxis::runtime::SessionMessage> {
+        co_yield {.role = euxis::runtime::Role::Assistant, .content = "Trace", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}};
+    };
+
+    auto result = engine.episodic_generate(get_episodes(), "System prompt", 32);
+    ASSERT_FALSE(result.has_value());
+}
+
 } // anonymous namespace
 } // namespace euxis::inference
