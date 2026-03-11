@@ -18,6 +18,7 @@ Welcome to the Euxis project! We appreciate your interest in contributing. This 
   - [Shell Scripts](#shell-scripts)
   - [Python](#python)
   - [Copyright Headers](#copyright-headers)
+- [Repository Standards](#repository-standards)
 - [Commit Message Format](#commit-message-format)
 - [Pull Request Checklist](#pull-request-checklist)
 - [Review Process](#review-process)
@@ -222,6 +223,23 @@ All source files must include a copyright header. Use the following format:
 # Copyright (c) YEAR The Euxis Authors
 # SPDX-License-Identifier: Apache-2.0
 ```
+
+## Repository Standards
+
+### Naming Conventions
+- **Directories & Files**: `kebab-case` (e.g., `network-client.cpp`).
+- **C++ Namespaces**: `euxis::[module]` (e.g., `euxis::network`).
+- **Headers**: Use `.hpp` for C++ headers, `.h` for C-compatible headers.
+
+### Directory Roles
+- `/libs`: Compiled shared/static logic. Must not contain a `main()`.
+- `/apps`: Entry points. Thin wrappers around `libs`.
+- `/platform`: The ONLY place where `#ifdef _WIN32` or `#ifdef __APPLE__` is allowed.
+- `/data`: Read-only schemas and documentation.
+
+### The Gold Rule
+No circular dependencies. If `Lib A` needs `Lib B` and `Lib B` needs `Lib A`,
+extract the shared logic into a new `Lib C` or move it to `core`.
 
 ## Commit Message Format
 

@@ -1,1 +1,0 @@
-{"policy_version": "2026-02-28", "stages": {"current": {"p95_budget_ms": 100000}, "target_q2_2026": {"p95_budget_ms": 120000}, "target_q4_2026": {"p95_budget_ms": 90000}}}

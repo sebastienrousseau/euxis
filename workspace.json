@@ -1,0 +1,34 @@
+{
+  "schema_version": "2026.1",
+  "workspace": "euxis",
+  "packages": [
+    "libs/core",
+    "libs/network",
+    "libs/crypto",
+    "libs/memory",
+    "libs/identity",
+    "libs/inference",
+    "libs/a2a",
+    "libs/security",
+    "libs/runtime",
+    "libs/metrics",
+    "libs/adapters",
+    "libs/bridge",
+    "libs/bench",
+    "apps/cli",
+    "apps/gateway",
+    "apps/etx",
+    "tools/scripts-cpp"
+  ],
+  "platform_support": [
+    "macos",
+    "linux",
+    "wsl",
+    "windows"
+  ],
+  "consistency_contract": {
+    "docs_required": true,
+    "tests_required": true,
+    "strict_naming": true
+  }
+}

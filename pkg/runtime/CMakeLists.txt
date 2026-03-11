@@ -1,0 +1,25 @@
+euxis_add_library(euxis-runtime-cpp
+  SOURCES
+    src/validator.cpp
+    src/lifecycle.cpp
+    src/tool_registry.cpp
+    src/session_store.cpp
+    src/agent_session.cpp
+    src/manifesto.cpp
+    src/tool_manifest.cpp
+    src/interaction.cpp
+    src/platform.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_validator.cpp
+    tests/test_lifecycle.cpp
+    tests/test_tool_registry.cpp
+    tests/test_session_store.cpp
+    tests/test_agent_session.cpp
+    tests/test_manifesto.cpp
+    tests/test_tool_manifest.cpp
+    tests/test_interaction.cpp
+    tests/test_interaction_extended.cpp
+)

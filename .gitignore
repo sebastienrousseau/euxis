@@ -210,6 +210,15 @@ quality-gates.json
 *.msi
 *.exe
 
+# Only allow the build/ folder if it contains tracked configuration
+!/build/
+/build/*/
+!/build/cmake/
+!/build/vcpkg.json
+!/build/vcpkg-configuration.json
+!/build/.clang-format
+!/build/.clang-tidy
+
 # ============================================================================
 # SECURITY-SENSITIVE (NEVER COMMIT)
 # ============================================================================

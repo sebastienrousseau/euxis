@@ -1,0 +1,13 @@
+euxis_add_library(euxis-network-cpp
+  SOURCES
+    src/ws_client.cpp
+    src/topology_grid.cpp
+    src/resilience.cpp
+  DEPS
+    ixwebsocket::ixwebsocket
+    spdlog::spdlog
+  TEST_SOURCES
+    tests/test_ws_client.cpp
+    tests/test_topology_grid.cpp
+    tests/test_resilience.cpp
+)
