@@ -75,7 +75,9 @@
       "Bash(python3 -c \"\nimport json\nwith open\\('build-cov/coverage.json'\\) as f:\n    data = json.load\\(f\\)\n\n# Files between 85-99% — just need a few more lines covered\nfor finfo in sorted\\(data['files'], key=lambda f: -sum\\(1 for l in f['lines'] if l.get\\('count',0\\)>0\\)/max\\(1,len\\(f['lines']\\)\\)\\):\n    path = finfo['file']\n    lines_data = finfo['lines']\n    total = len\\(lines_data\\)\n    covered = sum\\(1 for l in lines_data if l.get\\('count', 0\\) > 0\\)\n    if total == 0: continue\n    pct = covered * 100.0 / total\n    if pct >= 100.0: continue\n    if pct < 85.0: continue\n    \n    # Show uncovered line numbers\n    uncov_lines = [l['line_number'] for l in lines_data if l.get\\('count', 0\\) == 0]\n    print\\(f'{pct:.1f}% {path} — uncovered lines: {uncov_lines}'\\)\n\" 2>&1)",
       "Bash(/home/seb/.euxis/euxis-cpp/build-cov/euxis-bench-cpp/euxis-bench-cpp_tests --gtest_filter=\"BenchRunnerTest.ZeroDurationAutoFilled\" 2>&1 | tail -15)",
       "Bash(/home/seb/.euxis/euxis-cpp/build-cov/euxis-core-cpp/euxis-core-cpp_tests --gtest_filter=\"CircuitBreakerTest.RecoverAfterTimeout\" 2>&1 | tail -15)",
-      "Bash(./build-cov/euxis-gateway-cpp/euxis-gateway-cpp_tests 2>&1 | grep -B3 \"FAILED\" | head -15)"
+      "Bash(./build-cov/euxis-gateway-cpp/euxis-gateway-cpp_tests 2>&1 | grep -B3 \"FAILED\" | head -15)",
+      "Bash(ctest --test-dir euxis-cpp/build --output-on-failure 2>&1)",
+      "Bash(ls -la /home/seb/.euxis/euxis-examples/ 2>/dev/null && ls /home/seb/.euxis/euxis-examples/*/ 2>/dev/null | head -40)"
     ]
   }
 }
