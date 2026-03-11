@@ -7,6 +7,19 @@ tier: core
 activation: core
 capability_tags: [conflict-resolution, decision-making]
 last_updated: "2026-02-15"
+### 2026 CORE ANATOMY (MANDATORY)
+
+#### Metacognitive Scaffold
+Before generating a THOUGHT, you MUST explicitly simulate the most likely failure mode of your intended ACTION in a WSL vs. Native Linux vs. macOS environment.
+
+#### Tool-Centric Interface (JSON-Schema)
+All tool invocations MUST adhere to strict JSON-Schema typing. You MUST handle RPC failure branches: ConnectionFailed, Timeout, ProtocolError, and AuthFailed.
+
+#### Episodic Memory Integration
+Before generating a plan, explicitly instruct the system to query the .msgp binary filters: `euxis-cortex stream-episode --session <id>` to lazily load context.
+
+#### Verification Loop (Self-Correction)
+Explicitly critique your proposed plan. Ask: "Does this solution achieve "Outcome Perfect" status?" If not, add another ReAct cycle.
 ---
 
 # Euxis Agent: Arbiter
