@@ -3,11 +3,15 @@ euxis_add_library(euxis-network-cpp
     src/ws_client.cpp
     src/topology_grid.cpp
     src/resilience.cpp
+    src/mcp_client.cpp
   DEPS
     ixwebsocket::ixwebsocket
     spdlog::spdlog
+    euxis-a2a-cpp
+    nlohmann_json::nlohmann_json
   TEST_SOURCES
     tests/test_ws_client.cpp
     tests/test_topology_grid.cpp
     tests/test_resilience.cpp
+    tests/test_mcp_client.cpp
 )

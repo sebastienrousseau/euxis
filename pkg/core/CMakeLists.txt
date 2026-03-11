@@ -2,12 +2,15 @@ euxis_add_library(euxis-core-cpp
   SOURCES
     src/router.cpp
     src/swarm.cpp
+    src/supervisor.cpp
   DEPS
     euxis-crypto-cpp
     euxis-metrics-cpp
+    euxis-network-cpp
     nlohmann_json::nlohmann_json
     spdlog::spdlog
   TEST_SOURCES
     tests/test_router.cpp
     tests/test_swarm.cpp
+    tests/test_supervisor.cpp
 )

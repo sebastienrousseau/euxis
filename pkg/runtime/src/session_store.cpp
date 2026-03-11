@@ -7,6 +7,13 @@
 
 #include <nlohmann/json.hpp>
 
+#ifndef _WIN32
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+
 namespace euxis::runtime {
 
 namespace {
@@ -131,6 +138,30 @@ public:
         auto path = base_dir_ / session_id / (branch + ".msgp");
         if (!std::filesystem::exists(path)) [[unlikely]] return std::unexpected("Session not found");
 
+#ifndef _WIN32
+        int fd = open(path.c_str(), O_RDONLY);
+        if (fd != -1) {
+            struct stat sb;
+            if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
+                void* mapped = mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+                if (mapped != MAP_FAILED) {
+                    try {
+                        std::span<const uint8_t> data(static_cast<const uint8_t*>(mapped), sb.st_size);
+                        auto snap = snapshot_from_json(nlohmann::json::from_msgpack(data), session_id, branch);
+                        munmap(mapped, sb.st_size);
+                        close(fd);
+                        return snap;
+                    } catch (...) {
+                        munmap(mapped, sb.st_size);
+                        close(fd);
+                        return std::unexpected("MessagePack decoding failed");
+                    }
+                }
+            }
+            close(fd);
+        }
+#endif
+        // Fallback for Windows or mmap failure
         std::ifstream f(path, std::ios::binary);
         if (!f.is_open()) return std::unexpected("Failed to open binary stream");
 

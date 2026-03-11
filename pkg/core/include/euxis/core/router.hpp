@@ -54,6 +54,9 @@ public:
     [[nodiscard]] auto check_budget(const std::string& session_id,
                                      double limit) const -> bool;
 
+    void set_session_limit(size_t limit) { session_limit_ = limit; }
+    [[nodiscard]] size_t get_session_limit() const { return session_limit_; }
+
 private:
     void enforce_limits();
 
