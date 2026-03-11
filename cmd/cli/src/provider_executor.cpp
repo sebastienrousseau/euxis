@@ -46,20 +46,7 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     } else if (effective_provider == "openai" || effective_provider == "gemini") {
         resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
-        if (Process::available(selection.provider)) {
-            ProcessResult result;
-            if (on_chunk) {
-                result = Process::run_streaming(selection.provider, {prompt}, "", on_chunk, timeout_seconds);
-            } else {
-                result = Process::run_with_input(selection.provider, {prompt}, "", timeout_seconds);
-            }
-            resp.output = result.stdout_output;
-            resp.error = result.stderr_output;
-            resp.exit_code = result.exit_code;
-            resp.success = result.exit_code == 0;
-        } else {
-            resp = {false, "", "Unknown provider: " + selection.provider, 1, 0.0, {}};
-        }
+        resp = {false, "", "Unknown provider: " + selection.provider, 1, 0.0, {}};
     }
 
     if (auth.has_value()) {
@@ -117,80 +104,82 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         is_oauth = !token.empty();
     }
 
-    // ARCHITECTURAL PIVOT: If OAuth is detected, use the resource-bound CLI bridge.
-    // The Anthropic Public API (curl) rejected these tokens previously.
-    if (is_oauth && Process::available("claude")) {
-        goto fallback_to_cli;
-    }
+    // USE RESOURCE-BOUND CLI BRIDGE IF OAUTH
+    // Claude Code often blocks public API access for OAuth tokens.
+    if (is_oauth) {
+        std::string claude_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
+        if (!std::filesystem::exists(claude_path)) claude_path = "claude"; // Fallback to PATH
 
-    if (!token.empty()) {
-        std::string m = model.empty() ? "claude-3-5-sonnet-20241022" : model;
-        nlohmann::json body;
-        body["model"] = m;
-        body["max_tokens"] = 4096;
-        body["messages"] = nlohmann::json::array({{{"role", "user"}, {"content", prompt}}});
-
-        std::string auth_header = "x-api-key: " + token;
-
+        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "-p", "--", prompt};
         if (on_chunk) {
-            body["stream"] = true;
-            auto sse_parser = [&](const std::string& chunk) {
-                static std::string full_content;
-                static std::string sse_buffer;
-                if (full_content.size() > 100 * 1024 * 1024) return;
-                sse_buffer += chunk;
-                size_t pos = 0;
-                while (pos < sse_buffer.size()) {
-                    auto nl = sse_buffer.find('\n', pos);
-                    if (nl == std::string::npos) break;
-                    std::string line = sse_buffer.substr(pos, nl - pos);
-                    pos = nl + 1;
-                    if (line.starts_with("data: ")) {
-                        std::string data = line.substr(6);
-                        if (data == "[DONE]") continue;
-                        try {
-                            auto j = nlohmann::json::parse(data);
-                            if (j.value("type", "") == "content_block_delta") {
-                                std::string text = j["delta"].value("text", "");
-                                if (!text.empty()) { full_content += text; on_chunk(text); }
-                            }
-                        } catch (...) {}
-                    }
-                }
-                sse_buffer = sse_buffer.substr(pos);
-            };
-
-            auto result = Process::run_streaming("curl", {"-s", "-S", "-N", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, "", sse_parser, timeout);
-            if (result.exit_code != 0) return {false, "", "API failed: " + result.stderr_output, result.exit_code, 0.0, {}};
-            return {true, "Stream complete", "", 0, 0.0, {}};
+            auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
+            return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
         } else {
-            auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, timeout);
-            if (result.exit_code != 0) return {false, "", "curl failed", result.exit_code, 0.0, {}};
-            std::string output = result.stdout_output;
-            int status = 0;
-            auto last_nl = output.rfind('\n');
-            if (last_nl != std::string::npos) { status = std::stoi(output.substr(last_nl + 1)); output = output.substr(0, last_nl); }
-            try {
-                auto j = nlohmann::json::parse(output);
-                if (j.contains("error")) return {false, "", j["error"].dump(), 1, 0.0, classify_error(status, output)};
-                std::string content;
-                for (const auto& b : j["content"]) if (b.contains("text")) content += b["text"].get<std::string>();
-                return {true, content, "", 0, 0.0, {}};
-            } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+            auto result = Process::run("env", args, timeout);
+            return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
         }
     }
 
-fallback_to_cli:
-    if (!Process::available("claude")) return {false, "", "No Anthropic auth found.", 1, 0.0, {}};
-    
-    // HARDENED CLI BRIDGE: Use the external CLI but with the 512MB RAM cap from process.cpp
-    std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", "claude", "--model", "sonnet", "--permission-mode", "dontAsk", "-p", "--", prompt};
+    if (token.empty()) {
+        return {false, "", "No Anthropic auth found. Set ANTHROPIC_API_KEY.", 1, 0.0, {}};
+    }
+
+    std::string m = model.empty() ? "claude-3-5-sonnet-20241022" : model;
+    nlohmann::json body;
+    body["model"] = m;
+    body["max_tokens"] = 4096;
+    body["messages"] = nlohmann::json::array({{{"role", "user"}, {"content", prompt}}});
+
+    std::string auth_header = "x-api-key: " + token;
+
     if (on_chunk) {
-        auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
-        return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
+        body["stream"] = true;
+        auto sse_parser = [&](const std::string& chunk) {
+            static std::string full_content;
+            static std::string sse_buffer;
+            if (full_content.size() > 100 * 1024 * 1024) return;
+            sse_buffer += chunk;
+            size_t pos = 0;
+            while (pos < sse_buffer.size()) {
+                auto nl = sse_buffer.find('\n', pos);
+                if (nl == std::string::npos) break;
+                std::string line = sse_buffer.substr(pos, nl - pos);
+                pos = nl + 1;
+                if (line.starts_with("data: ")) {
+                    std::string data = line.substr(6);
+                    if (data == "[DONE]") continue;
+                    try {
+                        auto j = nlohmann::json::parse(data);
+                        if (j.value("type", "") == "content_block_delta") {
+                            std::string text = j["delta"].value("text", "");
+                            if (!text.empty()) { full_content += text; on_chunk(text); }
+                        }
+                    } catch (...) {}
+                }
+            }
+            sse_buffer = sse_buffer.substr(pos);
+        };
+
+        auto result = Process::run_streaming("curl", {"-s", "-S", "-N", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, "", sse_parser, timeout);
+        if (result.exit_code != 0) return {false, "", "API failed: " + result.stderr_output, result.exit_code, 0.0, {}};
+        return {true, "Stream complete", "", 0, 0.0, {}};
     } else {
-        auto result = Process::run("env", args, timeout);
-        return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
+        auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, timeout);
+        if (result.exit_code != 0) return {false, "", "curl failed", result.exit_code, 0.0, {}};
+        std::string output = result.stdout_output;
+        int status = 0;
+        auto last_nl = output.rfind('\n');
+        if (last_nl != std::string::npos) { status = std::stoi(output.substr(last_nl + 1)); output = output.substr(0, last_nl); }
+        try {
+            auto resp_json = nlohmann::json::parse(output);
+            if (resp_json.contains("error")) {
+                std::string api_err = resp_json["error"].dump();
+                return {false, "", "Anthropic API: " + api_err, 1, 0.0, classify_error(status, output)};
+            }
+            std::string content;
+            for (const auto& b : resp_json["content"]) if (b.contains("text")) content += b["text"].get<std::string>();
+            return {true, content, "", 0, 0.0, {}};
+        } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
     }
 }
 
@@ -198,11 +187,13 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
                                        const std::string& prompt,
                                        int timeout,
                                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    if (!Process::available("ollama")) return {false, "", "ollama not found on PATH", 127, 0.0, {}};
+    std::string ollama_path = "/home/seb/.local/share/mise/shims/ollama";
+    if (!std::filesystem::exists(ollama_path)) ollama_path = "ollama";
+
     std::string m = model.empty() ? "qwen2.5-coder:32b" : model;
     ProcessResult result;
-    if (on_chunk) result = Process::run_streaming("ollama", {"run", m}, prompt, on_chunk, timeout);
-    else result = Process::run_with_input("ollama", {"run", m}, prompt, timeout);
+    if (on_chunk) result = Process::run_streaming(ollama_path, {"run", m}, prompt, on_chunk, timeout);
+    else result = Process::run_with_input(ollama_path, {"run", m}, prompt, timeout);
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
 }
 
@@ -212,7 +203,6 @@ auto ProviderExecutor::execute_api(const std::string& provider,
                                    int timeout,
                                    const std::optional<ResolvedAuth>& auth,
                                    std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    if (!Process::available("curl")) return {false, "", "curl not found", 127, 0.0, {}};
     std::string url, auth_header;
     nlohmann::json body;
     if (provider == "openai") {

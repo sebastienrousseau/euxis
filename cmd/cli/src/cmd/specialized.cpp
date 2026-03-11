@@ -314,8 +314,8 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
             std::cout << term::dim("  \xe2\xa0\x8b Complex task detected. Activating Euxis Swarm Orchestrator...");
             std::cout.flush();
             
-            // Execute the 'verify-everything' playbook autonomously
-            std::vector<std::string> swarm_args = {"verify-everything", "--goal", safe_input};
+            // Use the base name; cmd_playbook will resolve it via data/config/playbooks/
+            std::vector<std::string> swarm_args = {"verify-everything", safe_input};
             std::cout << "\r\033[K"; // Clear line
             
             int swarm_res = cmd_playbook(ctx, swarm_args);
