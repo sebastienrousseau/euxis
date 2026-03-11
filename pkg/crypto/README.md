@@ -1,34 +1,36 @@
-# euxis-crypto-cpp
+# Euxis Crypto C++
 
-C++23 cryptographic primitives — AES-256-GCM, Ed25519, key derivation via libsodium.
+The `euxis::crypto` module enforces the cryptographic backbone of the Agent OS. It provides secure primitives for identity verification, message signing, and zero-knowledge memory encryption.
 
-## Overview
+## Native Cryptographic Primitives
 
-euxis-crypto-cpp provides the foundational cryptographic operations used across the Euxis C++ stack. It wraps libsodium to deliver authenticated encryption (AES-256-GCM with additional authenticated data), Ed25519 digital signatures, and Argon2id key derivation. All sensitive memory is securely erased via sodium_memzero on destruction.
+The module is a strict, memory-safe wrapper around `libsodium`.
 
-## Dependencies
+* **Precondition**: The `libsodium` library must be correctly provisioned by the build system.
+* **Postcondition**: Exposes deterministic, side-channel resistant operations.
 
-- libsodium
-- nlohmann-json
+For symmetric authenticated encryption, use AES-256-GCM. For asymmetric signatures, use Ed25519. Key derivation employs Argon2id for maximum resistance against GPU-based brute forcing.
 
-## Building
+## Ed25519 Signature Enforcement
 
-```bash
-# From the euxis-cpp root
-cmake -B build -S .
-cmake --build build --target euxis-crypto-cpp
+Every command mutating the Agent OS state must be cryptographically signed.
+
+* **SFINAE**: Substitution Failure Is Not An Error — Template resolution mechanism.
+
+Dispatch signature verification requests to the `verify_signature` method.
+
+```cpp
+auto valid = verify_signature(payload, signature, public_key);
+if (!valid) {
+    // Escalate to sentinel-identity agent
+}
 ```
 
-## Testing
+## Memory Safety
 
-```bash
-ctest --test-dir build -R euxis-crypto-cpp_tests
-```
+Never construct cryptographic buffers using standard `std::string` allocations without explicit memory wiping upon destruction.
 
-## API
+* **RAII**: Resource-bound lifetime management — Ensure sensitive key material is zeroes out when the scope ends.
+* **std::span**: Bounds-checked memory view — Safe non-owning array views.
 
-- **aes_gcm.hpp** -- AES-256-GCM authenticated encryption and decryption with AAD support.
-- **ed25519.hpp** -- Ed25519 key generation, signing, and signature verification.
-- **key_derivation.hpp** -- Argon2id key derivation and random key generation.
-- **types.hpp** -- Shared type aliases (SecureBytes, KeyPair, Nonce).
-- **errors.hpp** -- Exception hierarchy for cryptographic operation failures.
+Use `std::span` when passing binary buffers into encryption routines to prevent out-of-bounds reads and writes.

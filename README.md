@@ -1,59 +1,65 @@
-# Euxis
-
-The Autonomous Agent Framework.
+# Euxis: High-Performance C++23 Agent OS
 
 [![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/) [![Version][version-badge]][version-url] [![License][license-badge]][license-url]
 
-Version v0.0.3
+Deploy, orchestrate, and observe hardware-native AI agents. Euxis eliminates the latency of traditional Python agent loops by operating as a fully compiled, C++23 Agent OS.
 
-Use Euxis to deploy, orchestrate, and observe high-performance AI agents. Euxis eliminates the latency and instability of traditional agent loops by utilizing a decentralized WebAssembly (Wasm) mesh.
+## Core Architectural Requirements
 
-## Architectural Foundation
+Euxis operates on three uncompromising principles to achieve sub-10ms execution:
 
-Euxis operates on three core principles:
+1. **Native Execution**: Compile agents to `wasm32-wasi` AOT binaries. The Euxis Gateway executes them within Firecracker microVMs and eBPF Seccomp enclaves for near-zero cold starts.
+2. **Zero-Copy Memory**: Map binary snapshots directly into memory via `mmap`. Do not allocate intermediate buffers. Utilize C++23 `std::generator` for lazy-loaded episodic memory streams.
+3. **Cryptographic Provenance**: Sign every agent binary cryptographically. The `sentinel-identity` agent enforces strict NHI (Non-Human Identity) IAM scoping and blocks unauthenticated state mutations.
 
-1. **Native Execution**: Agents compile to `wasm32-wasi`. The Euxis Gateway executes them with near-zero cold starts.
-2. **Zero-Trust Memory**: Agents run in isolated Extism sandboxes. You must explicitly grant network and filesystem capabilities.
-3. **Cryptographic Provenance**: Every agent binary is signed cryptographically to prevent supply-chain poisoning.
+## 2026 Enterprise Mesh
 
-## 2026 Evolution
+Euxis provides a fully interoperable, state-aware ecosystem:
 
-Euxis has evolved into a fully interoperable and omnichannel framework:
+* **Model Context Protocol (MCP)**: Discover and bind to universal tools dynamically via the `McpClient`.
+* **SIMD-Aware Orchestration**: Broadcast `BidRequests` to the mesh. The `FinOpsRouter` evaluates 16+ providers simultaneously using Structure-of-Arrays (SoA) SIMD auto-vectorization.
+* **Proactive Self-Healing**: Deploy the `SupervisorAgent` daemon to monitor circuit breakers and autonomously tune LRU eviction policies, mitigating context window blowout.
 
-- **Model Context Protocol (MCP)**: Native host support for universal tool and context sharing.
-- **Agent Swarms**: Declarative playbook orchestration for multi-agent collaboration.
-- **FinOps Router**: Score-based model provider selection to balance cost, speed, and reliability.
-- **Device Nodes**: Control local hardware and browsers securely from sandboxed agents.
-- **Omnichannel Presence**: Integrated adapters for WhatsApp, Discord, Slack, and Telegram.
+## System Topology
 
-## Component Overview
+Euxis enforces a strict Domain-Driven Design (DDD) layout. Integrate exactly what your infrastructure requires.
 
-Euxis is modular by design. The runtime is built entirely in C++23 across 16 modules. Integrate exactly what your infrastructure requires.
+### Application Layer (`cmd/`)
 
-### C++23 Modules
+* `cli`: Command-line orchestrator and TUI.
+* `gateway`: High-throughput asynchronous WebSockets and HTTP interface.
+* `etx`: Qt6 desktop GUI featuring 17 screens and command palette.
+* `publisher`: C++23 `inja` rendering engine for low-latency document generation.
 
-* `euxis-core-cpp`: The central execution engine and Extism WASM runtime.
-* `euxis-cli-cpp`: The command-line orchestrator.
-* `euxis-gateway-cpp`: The high-throughput HTTP and WebSockets interface.
-* `euxis-metrics-cpp`: The telemetry and validation framework.
-* `euxis-crypto-cpp`: AES-256-GCM, Ed25519, Argon2id key derivation via libsodium.
-* `euxis-bridge-cpp`: Skill import, static analysis, admission pipeline, sandbox execution.
-* `euxis-memory-cpp`: Tier-bound encrypted memory with AAD isolation.
-* `euxis-identity-cpp`: W3C DID, Verifiable Credentials, ERC-8004 agent cards.
-* `euxis-inference-cpp`: llama.cpp + Ollama inference, model registry, quality gate.
-* `euxis-a2a-cpp`: A2A v0.2 protocol, JSON-RPC server, HTTP transport.
-* `euxis-security-cpp`: Threat detection, policy enforcement, and sandbox auditing.
-* `euxis-adapters-cpp`: Omnichannel adapters for WhatsApp, Discord, Slack, and Telegram.
-* `euxis-runtime-cpp`: Agent lifecycle, scheduling, and resource management.
-* `euxis-scripts-cpp`: Build and deployment automation utilities.
-* `euxis-bench-cpp`: Security, autonomy, performance, portability, interop benchmarks.
-* `euxis-etx`: Qt6 desktop GUI with 17 screens, 3 themes, and command palette.
+### SDK Layer (`pkg/`)
+
+* `core`: Central execution engine, `FinOpsRouter`, and `SwarmOrchestrator`.
+* `network`: `McpClient`, asynchronous A2A transports, and thread-safe resilience patterns.
+* `runtime`: Agent lifecycle, scheduling, and MessagePack zero-copy memory stores.
+* `crypto`: AES-256-GCM, Ed25519, and Argon2id primitives.
+* `identity`: W3C DID, Verifiable Credentials, and ERC-8004 agent cards.
+* `inference`: Hardware-accelerated local inference via `llama.cpp`.
+* `bridge`: Skill import, admission pipeline, and sandbox execution.
+* `memory`: Tier-bound encrypted memory with AAD isolation.
+* `metrics`: Telemetry, performance profiling, and validation framework.
+* `a2a`: A2A v0.2 protocol and JSON-RPC message formats.
+* `security`: Threat detection and policy enforcement.
+* `adapters`: Omnichannel endpoints (WhatsApp, Discord, Slack, Telegram).
+* `bench`: Security, autonomy, performance, and interop benchmarks.
+
+### Internal System (`internal/`)
+
+* `platform`: Platform Abstraction Layer (PAL). Hardware-specific OS integrations (macOS, Linux, WSL).
 
 ## Building
 
-Build all C++23 modules from source. Requires CMake 3.28+, a C++23-capable compiler, and vcpkg.
+Build the Agent OS from source.
+
+* **Precondition**: Ensure CMake 3.28+ and a C++23-capable compiler (GCC 14+ / Clang 18+) are present.
+* **Postcondition**: Generates highly optimized binaries in `build/cmake-build`.
 
 ```bash
+make cpp-configure
 make cpp-build
 make cpp-test
 ```

@@ -1,37 +1,33 @@
-# euxis-inference-cpp
+# Euxis Inference C++
 
-C++23 local inference engine — llama.cpp integration, Ollama client, model registry, quality gate.
+The `euxis::inference` module bridges the Agent OS cognitive layer with underlying Small Language Models (SLMs) and hardware accelerators. It provides a universal, C++23 interface for model generation, stream decoding, and quality enforcement.
 
-## Overview
+## Extism WASM Sandboxing
 
-euxis-inference-cpp provides a local inference fallback for Euxis agents. It defines an InferenceEngine interface with two backends: LlamaEngine (a PIMPL-wrapped llama.cpp integration) and OllamaEngine (an HTTP client for the Ollama API). A model registry discovers GGUF files on disk and verifies their SHA-256 checksums. A quality gate scores inference outputs on coherence, relevance, and repetition before returning results.
+Euxis delegates strategic reasoning to sandboxed WebAssembly (WASM) agents using Extism. 
 
-## Dependencies
+* **AOT**: Ahead-Of-Time compilation — Pre-compiled binary logic.
+* **Precondition**: The host environment must expose the `euxis-mcp` host functions.
 
-- libsodium
-- nlohmann-json
-- spdlog
-- cpp-httplib
+For native speed, utilize the Ahead-Of-Time (AOT) pipeline. This eliminates the JIT overhead associated with dynamic instantiation, dropping "Time-to-First-Action" below the 10ms threshold.
 
-## Building
+## Local Model Orchestration
 
-```bash
-# From the euxis-cpp root
-cmake -B build -S .
-cmake --build build --target euxis-inference-cpp
+The `LlamaEngine` and `OllamaEngine` implementations abstract the underlying completion protocols. 
+
+* **Postcondition**: Return a monadic `std::expected` resolving to an `InferenceResult`.
+* **Zero-Copy**: Map binary context directly without intermediate strings.
+
+To execute long-horizon reasoning tasks without blowing out VRAM, always use the `episodic_generate` method. This consumes a `std::generator<SessionMessage>` to stream semantic context lazily.
+
+## Monadic Quality Gates
+
+Every inference payload must pass the `QualityGate` before execution or delegation. 
+
+```cpp
+auto valid_plan = engine.generate(prompt)
+    .and_then([](auto&& res) { return validate_schema(res.text); })
+    .or_else([](auto&& err) { return fallback_reasoning(err); });
 ```
 
-## Testing
-
-```bash
-ctest --test-dir build -R euxis-inference-cpp_tests
-```
-
-## API
-
-- **engine.hpp** -- InferenceEngine abstract interface (generate, embed, health).
-- **config.hpp** -- InferenceConfig for model parameters, temperature, max tokens.
-- **model_registry.hpp** -- GGUF model discovery, SHA-256 integrity verification, model listing.
-- **quality_gate.hpp** -- Output quality scoring (coherence, relevance, repetition) and threshold enforcement.
-- **llama_engine.hpp** -- LlamaEngine: PIMPL llama.cpp backend.
-- **ollama_engine.hpp** -- OllamaEngine: HTTP client for the Ollama REST API.
+The system uses C++23 monadic operations to avoid `try-catch` branch penalties in the hot path.

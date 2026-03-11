@@ -1,35 +1,35 @@
-# euxis-identity-cpp
+# Euxis Identity C++
 
-C++23 W3C DID, Verifiable Credentials, attestations, identity registry, and ERC-8004 agent cards.
+The `euxis::identity` module establishes the strict cryptographic identity layer for the Euxis Agent OS. It implements Non-Human Identity (NHI) governance, Verifiable Credentials, and ERC-8004 agent cards.
 
-## Overview
+## Cryptographic Provenance
 
-euxis-identity-cpp provides decentralized identity primitives for Euxis agents. It supports W3C DID document creation and resolution, HMAC-SHA256 Verifiable Credentials issuance and verification, agent attestations, and a pluggable identity registry (with an InMemoryIdentityRegistry default). It also generates ERC-8004-compliant agent cards for on-chain identity registration.
+Every agent interacting within the OS must possess a provable, mathematically sound identity.
 
-## Dependencies
+* **Precondition**: An agent must present a valid `AgentCard` signed by the root authority.
+* **Postcondition**: Grants the agent an ephemeral authorization token for execution.
 
-- libsodium
-- nlohmann-json
-- spdlog
+Use the `W3C DID` specification to model agent identities. The system enforces Ed25519 signature checks on all incoming requests to prevent impersonation or man-in-the-middle escalation.
 
-## Building
+## Agent Card Validation
 
-```bash
-# From the euxis-cpp root
-cmake -B build -S .
-cmake --build build --target euxis-identity-cpp
+The `ERC-8004` standard defines the core metadata for autonomous entities.
+
+* **Type Erasure**: Hiding concrete implementations — Decouple identity structures from physical transports.
+* **std::span**: Bounds-checked memory view — Safe memory buffer operations.
+
+When an agent requests entry to a swarm, execute the `verify_attestation` method. The module relies on C++23 `std::expected` to propagate parsing or cryptographic failures deterministically.
+
+```cpp
+auto valid = registry.verify_attestation(card_payload)
+    .and_then([](auto&& card) { return check_revocation(card); })
+    .or_else([](auto&& err) { return reject_agent(err); });
 ```
 
-## Testing
+## NHI Governance
 
-```bash
-ctest --test-dir build -R euxis-identity-cpp_tests
-```
+Agents are inherently untrusted. The identity module maps directly into the `internal/platform` eBPF/KVM sandboxing logic.
 
-## API
+* **UB**: Undefined Behavior — Issuing a capability token without a validated DID.
 
-- **did.hpp** -- W3C DID document creation, serialization, and resolution.
-- **credentials.hpp** -- HMAC-SHA256 Verifiable Credentials issuance and verification.
-- **attestation.hpp** -- Agent attestation creation and validation.
-- **registry.hpp** -- IdentityRegistry interface and InMemoryIdentityRegistry implementation.
-- **erc8004.hpp** -- ERC-8004 agent card generation and JSON serialization.
+Always scope the agent's memory and networking access to the exact bounds defined within its verifiable credential. Do not grant implicit permissions.

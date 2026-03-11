@@ -1,37 +1,35 @@
-# euxis-a2a-cpp
+# Euxis A2A C++
 
-C++23 A2A v0.2 protocol implementation — agent cards, task management, JSON-RPC server, HTTP transport.
+The `euxis::a2a` module provides the Agent-to-Agent (A2A) messaging substrate for the Euxis Agent OS. It implements the Auction-Based Agentic Mesh protocols, replacing static hierarchical delegation with decentralized resource bidding.
 
-## Overview
+## Agent-to-Agent Messaging
 
-euxis-a2a-cpp implements the Google A2A v0.2 protocol for agent-to-agent communication. It provides AgentCard construction with camelCase JSON serialization, A2ATask management with state machine enforcement (submitted, working, input-required, completed, canceled, failed), strongly-typed A2AMessage and Artifact types, an A2AServerHandler for JSON-RPC method dispatch, and an HttpA2ATransport that discovers remote agents via /.well-known/agent.json.
+The A2A protocol enforces standard schema boundaries across all fleet communications.
 
-## Dependencies
+* **Precondition**: Connecting agents must hold verified ERC-8004 credentials.
+* **Postcondition**: Grants duplex message passing over the `WebSocketA2ATransport`.
 
-- euxis-identity-cpp
-- nlohmann-json
-- spdlog
-- cpp-httplib
+Use the `A2AMessage` format to encapsulate requests. The `WebSocketA2ATransport` maps asynchronous responses to correlation IDs using `std::mutex` and condition variables, ensuring thread-safe concurrency.
 
-## Building
+## Decentralized Auction Bidding
 
-```bash
-# From the euxis-cpp root
-cmake -B build -S .
-cmake --build build --target euxis-a2a-cpp
+The `BidRequest` and `BidResponse` structures implement the decentralized task market.
+
+* **SoA**: Structure of Arrays — Enable SIMD optimization.
+* **RAII**: Resource-bound lifetime management.
+
+```cpp
+auto res = transport.send(bid_request)
+    .and_then([](auto&& response) { return evaluate_bid(response); })
+    .or_else([](auto&& err) { return fallback_delegate(err); });
 ```
 
-## Testing
+Utilize C++23 monadic chains to coordinate fleet auctions. Orchestrator nodes evaluate incoming bids via the SIMD-optimized `FinOpsRouter` to ensure optimal SLM execution.
 
-```bash
-ctest --test-dir build -R euxis-a2a-cpp_tests
-```
+## Artifact Exchange
 
-## API
+Agents pass complex state blocks via base64 encoded payloads in the `Artifact` struct.
 
-- **agent_card.hpp** -- AgentCard definition with camelCase JSON serialization and capability declaration.
-- **task.hpp** -- A2ATask with state machine enforcement and history tracking.
-- **message.hpp** -- A2AMessage and Artifact types for task communication.
-- **transport.hpp** -- Transport interface for sending and receiving A2A messages.
-- **server.hpp** -- A2AServerHandler: JSON-RPC dispatch for tasks/send, tasks/get, tasks/cancel.
-- **http_transport.hpp** -- HttpA2ATransport: HTTP client with /.well-known/agent.json discovery.
+* **std::span**: Bounds-checked memory view.
+
+When transmitting large payloads, utilize `std::span` to slice and encode raw binary memory without incurring `std::string` reallocation overhead.
