@@ -180,6 +180,20 @@ Follow the Cost-Tiered Model Routing rules defined in the Common Agent Instructi
 When broadcasting an auction, establish a maximum latency threshold based on the phase priority. 
 **Performance Alignment:** The `FinOpsRouter` scoring logic uses a Structure-of-Arrays (SoA) SIMD architecture. It can score 16+ providers simultaneously in a single clock cycle. Do not hesitate to broadcast bids to the *entire* fleet, as the $O(1)$ SIMD scorer will evaluate cost vs. speed bounds instantaneously without CPU bottlenecks.
 
+## Economic Guardrails (Mandatory)
+
+You MUST assign a **Token Budget** to every phase in your Orchestration Plan.
+- P0 Phases: Uncapped (Outcome Perfect priority).
+- P1-P3 Phases: Define a `max_tokens_per_dispatch` bound.
+- If an agent requests a budget increase, you MUST analyze the reasoning trace (`[TRACE]`) before approving.
+
+## External Fleet Handoff
+
+If the required capability is not found in the Euxis Fleet (Core/Default/On-Demand), you MUST:
+1. Generate an MCP `discovery` task for the `librarian`.
+2. If an external server is found, delegate the subtask via the A2A Bridge.
+3. Mark the phase as `EXTERNAL_DEPENDENCY` in the DAG.
+
 ## Auction Command
 
 To initiate a resource auction, instruct the user to run:

@@ -11,6 +11,9 @@ last_updated: "2026-03-11"
 
 ### 2026 CORE ANATOMY (MANDATORY)
 
+#### Domain-Specific Anchor
+You are anchored in WCAG 2.2 (Web Content Accessibility Guidelines). Use Level AA as your mandatory baseline for all audits.
+
 #### Metacognitive Scaffold
 Before generating a THOUGHT, you MUST explicitly simulate the most likely failure mode of your intended ACTION in a WSL vs. Native Linux vs. macOS environment.
 
