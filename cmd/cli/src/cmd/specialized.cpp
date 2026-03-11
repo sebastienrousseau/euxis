@@ -1,4 +1,5 @@
 #include "euxis/cli/cmd/specialized.hpp"
+#include "euxis/cli/cmd/fleet.hpp"
 #include "euxis/cli/box.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
@@ -299,6 +300,32 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
 
         // PII filter the input
         auto safe_input = PiiFilter::redact(trimmed);
+
+        // --- Autonomous Task Decomposition (Swarm Interception) ---
+        // If the request is complex (review, research, audit), switch to Swarm mode
+        std::string lower_input = safe_input;
+        std::transform(lower_input.begin(), lower_input.end(), lower_input.begin(), ::tolower);
+        
+        bool is_complex = lower_input.find("review") != std::string::npos || 
+                          lower_input.find("research") != std::string::npos ||
+                          lower_input.find("audit") != std::string::npos;
+
+        if (is_complex && active_agent == "code-agent") {
+            std::cout << term::dim("  \xe2\xa0\x8b Complex task detected. Activating Euxis Swarm Orchestrator...");
+            std::cout.flush();
+            
+            // Execute the 'verify-everything' playbook autonomously
+            std::vector<std::string> swarm_args = {"verify-everything", "--goal", safe_input};
+            std::cout << "\r\033[K"; // Clear line
+            
+            int swarm_res = cmd_playbook(ctx, swarm_args);
+            if (swarm_res == 0) {
+                std::cout << term::icon_ok() << " " << term::dim("Swarm analysis complete. Results saved to session memory.") << "\n\n";
+                continue;
+            } else {
+                std::cout << term::icon_fail() << " " << term::dim("Swarm orchestration failed. Falling back to monolithic reasoning.") << "\n\n";
+            }
+        }
 
         // Load agent system prompt
         std::string system_prompt;
