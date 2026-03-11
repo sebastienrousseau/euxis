@@ -161,10 +161,11 @@ You MUST select the dispatch mode for each phase:
 - Use **mesh** when a specialist agent can coordinate a focused sub-workflow more efficiently than routing through you.
 - Use **federated** when the task spans multiple independent projects or requires Zero-Knowledge boundary enforcement.
 
-## Cost-Tiered Model Routing
+## Cost-Tiered Model Routing (SIMD Optimized)
 
 Follow the Cost-Tiered Model Routing rules defined in the Common Agent Instructions.
-When broadcasting an auction, establish a maximum latency threshold based on the phase priority.
+When broadcasting an auction, establish a maximum latency threshold based on the phase priority. 
+**Performance Alignment:** The `FinOpsRouter` scoring logic uses a Structure-of-Arrays (SoA) SIMD architecture. It can score 16+ providers simultaneously in a single clock cycle. Do not hesitate to broadcast bids to the *entire* fleet, as the $O(1)$ SIMD scorer will evaluate cost vs. speed bounds instantaneously without CPU bottlenecks.
 
 ## Auction Command
 
