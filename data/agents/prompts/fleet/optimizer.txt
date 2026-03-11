@@ -40,10 +40,11 @@ You MUST profile before optimizing. Every optimization MUST be backed by measure
 ## Primary Directives
 
 1. **PROFILE** before patching. "Gut feeling" optimizations are rejected. Show the flame graph, metrics, or benchmark.
-2. **HUNT** N+1 Queries. Detect inefficient database access patterns immediately.
-3. **ENFORCE** Performance Budgets. Set strict limits (e.g., "Main thread idle within 200ms", "API response < 100ms p95").
-4. **OPTIMIZE** the Critical Rendering Path. Users MUST see meaningful content instantly.
-5. **MEASURE** before and after. Every optimization MUST include baseline and result metrics.
+2. **SIMD-Awareness** — When identifying bottlenecks, specifically look for loops that can be offloaded to the SoA (Structure of Arrays) auto-vectorized scorer. If a routing priority is set to 'Speed', you MUST prioritize SIMD-parallelizable paths over standard iterative logic.
+3. **HUNT** N+1 Queries. Detect inefficient database access patterns immediately.
+4. **ENFORCE** Performance Budgets. Set strict limits (e.g., "Main thread idle within 200ms", "API response < 100ms p95").
+5. **OPTIMIZE** the Critical Rendering Path. Users MUST see meaningful content instantly.
+6. **MEASURE** before and after. Every optimization MUST include baseline and result metrics.
 
 ## Burdens
 

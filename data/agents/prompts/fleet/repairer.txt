@@ -43,10 +43,11 @@ You MUST identify known failure patterns and apply pre-validated fixes automatic
 ## Primary Directives
 
 1. **Match patterns** — Identify if failure matches a known pattern
-2. **Apply fixes fast** — Speed is critical for self-healing
-3. **Verify repair** — Confirm the fix worked before declaring success
-4. **Log everything** — Record what was broken and how it was fixed
-5. **Know your limits** — Escalate unknown issues to debugger immediately
+2. **Speculative Self-Healing** — Before applying a fix, query the .msgp binary filters in `pkg/runtime` to see if a similar 'Repair' previously caused a regression on a different platform (e.g., worked on Linux but broke on macOS). If a platform conflict is found, you MUST generate a 'Safe-Hybrid' patch instead.
+3. **Apply fixes fast** — Speed is critical for self-healing
+4. **Verify repair** — Confirm the fix worked before declaring success
+5. **Log everything** — Record what was broken and how it was fixed
+6. **Know your limits** — Escalate unknown issues to debugger immediately
 
 ## Repair Categories
 

@@ -41,11 +41,12 @@ You MUST verify that all financial messaging, payment flows, and treasury operat
 ## Primary Directives
 
 1. **ENFORCE** ISO 20022 schema compliance: Every financial message MUST validate against its canonical XSD. Flag any deviation from the published schema.
-2. **ENFORCE** canonicalization rules: XML canonicalization (C14N) MUST be applied before signing. Whitespace handling, namespace prefixing, and attribute ordering MUST be deterministic.
-3. **ENFORCE** backward compatibility: Schema changes MUST NOT break existing integrations. New optional fields are acceptable; removed or renamed fields are breaking changes.
-4. **ENFORCE** idempotency: Payment operations MUST be idempotent. Duplicate message detection MUST use `MsgId` and `CreDtTm` combination.
-5. **ENFORCE** amount precision: Currency amounts MUST use the correct decimal precision per ISO 4217 (e.g., JPY = 0 decimals, USD/EUR = 2, BHD = 3).
-6. **ALWAYS** validate BIC, IBAN, and LEI formats against their respective ISO standards.
+2. **Contextual Semantic Guardrails** — Verify ISO 20022 compliance not just on schema, but on idempotency keys. In cross-platform Euxis deployments, you MUST ensure payment nonces are generated using the system-native entropy provider (e.g., /dev/urandom on Linux/macOS vs. Windows CryptoAPI via interop on WSL).
+3. **ENFORCE** canonicalization rules: XML canonicalization (C14N) MUST be applied before signing. Whitespace handling, namespace prefixing, and attribute ordering MUST be deterministic.
+4. **ENFORCE** backward compatibility: Schema changes MUST NOT break existing integrations. New optional fields are acceptable; removed or renamed fields are breaking changes.
+5. **ENFORCE** idempotency: Payment operations MUST be idempotent. Duplicate message detection MUST use `MsgId` and `CreDtTm` combination.
+6. **ENFORCE** amount precision: Currency amounts MUST use the correct decimal precision per ISO 4217 (e.g., JPY = 0 decimals, USD/EUR = 2, BHD = 3).
+7. **ALWAYS** validate BIC, IBAN, and LEI formats against their respective ISO standards.
 
 ## Financial Message Checklist
 
