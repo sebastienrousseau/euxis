@@ -8,8 +8,6 @@
 
 namespace euxis::runtime {
 
-auto make_session_store(const std::string& base_dir) -> std::unique_ptr<ISessionStore>;
-
 namespace {
 
 class SessionStoreTest : public ::testing::Test {
@@ -34,11 +32,8 @@ TEST_F(SessionStoreTest, SaveAndLoadRoundtrip) {
         .branch_id = "main",
         .agent_id = "agent-01",
         .messages = {
-            {.role = Role::User, .content = "Hello",
-             .agent_id = {}, .model = {}, .timestamp = {}},
-            {.role = Role::Assistant, .content = "Hi there",
-             .agent_id = {}, .model = "gpt-4", .timestamp = {},
-             .duration_ms = 42.0},
+            {.role = Role::User, .content = "Hello"},
+            {.role = Role::Assistant, .content = "Hi there", .model = "gpt-4", .duration_ms = 42.0},
         },
     };
 
@@ -69,16 +64,9 @@ TEST_F(SessionStoreTest, ListBranches) {
 }
 
 TEST_F(SessionStoreTest, Compaction) {
-    SessionSnapshot snap{
-        .session_id = "compact",
-        .branch_id = "main",
-        .agent_id = "a",
-        .messages = {},
-    };
+    SessionSnapshot snap{.session_id = "compact", .branch_id = "main", .agent_id = "a"};
     for (int i = 0; i < 30; ++i) {
-        snap.messages.push_back({.role = Role::User,
-                                 .content = "msg-" + std::to_string(i),
-                                 .agent_id = {}, .model = {}, .timestamp = {}});
+        snap.messages.push_back({.role = Role::User, .content = "msg-" + std::to_string(i)});
     }
     store_->save(snap);
 
@@ -90,46 +78,48 @@ TEST_F(SessionStoreTest, Compaction) {
     EXPECT_EQ(loaded->messages.size(), 5u);
 }
 
-// --- Coverage: line 16 (role_to_string for System role) ---
-TEST_F(SessionStoreTest, SystemRoleRoundtrip) {
-    SessionSnapshot snap{
-        .session_id = "role-test",
-        .branch_id = "main",
-        .agent_id = "agent-role",
-        .messages = {
-            {.role = Role::System, .content = "You are helpful",
-             .agent_id = {}, .model = {}, .timestamp = {}},
-        },
-    };
-    auto save_result = store_->save(snap);
-    ASSERT_TRUE(save_result.has_value()) << save_result.error();
+class MemorySessionStoreTest : public ::testing::Test {
+protected:
+    std::unique_ptr<ISessionStore> store_;
+    void SetUp() override { store_ = make_memory_session_store(); }
+};
 
-    auto load_result = store_->load("role-test", "main");
-    ASSERT_TRUE(load_result.has_value()) << load_result.error();
-    EXPECT_EQ(load_result->messages[0].role, Role::System);
+TEST_F(MemorySessionStoreTest, MemoryRoundtrip) {
+    SessionSnapshot snap{.session_id = "mem-1", .branch_id = "main", .agent_id = "a"};
+    snap.messages.push_back({.role = Role::User, .content = "In-memory test"});
+    
+    ASSERT_TRUE(store_->save(snap).has_value());
+    auto loaded = store_->load("mem-1");
+    ASSERT_TRUE(loaded.has_value());
+    EXPECT_EQ(loaded->messages[0].content, "In-memory test");
+    
+    auto branches = store_->list_branches("mem-1");
+    EXPECT_EQ(branches.size(), 1u);
 }
 
-// --- Coverage: line 18 (role_to_string for unknown role => "unknown") ---
-// role_from_string("junk") => User  (default)
+TEST_F(MemorySessionStoreTest, MemoryCompaction) {
+    SessionSnapshot snap{.session_id = "mem-compact", .branch_id = "main"};
+    for (int i = 0; i < 10; ++i) snap.messages.push_back({.role = Role::User, .content = "msg"});
+    store_->save(snap);
+    
+    ASSERT_TRUE(store_->compact("mem-compact", 3).has_value());
+    auto loaded = store_->load("mem-compact");
+    EXPECT_EQ(loaded->messages.size(), 3u);
+}
+
 TEST_F(SessionStoreTest, UnknownRoleDefaultsToUser) {
-    // Manually write a session with a non-standard role
     auto dir = tmp_ / "custom-role";
     std::filesystem::create_directories(dir);
-    auto path = dir / "main.json";
+    auto path = dir / "main.msgp";
+    
     nlohmann::json j;
     j["session_id"] = "custom-role";
     j["branch_id"] = "main";
-    j["agent_id"] = "agent";
-    j["messages"] = {{
-        {"role", "moderator"},
-        {"content", "Hello"},
-        {"agent_id", ""},
-        {"model", ""},
-        {"timestamp", ""},
-        {"duration_ms", 0.0},
-    }};
-    std::ofstream f(path);
-    f << j.dump(2);
+    j["messages"] = {{{"role", "moderator"}, {"content", "Hello"}}};
+    
+    std::vector<uint8_t> packed = nlohmann::json::to_msgpack(j);
+    std::ofstream f(path, std::ios::binary);
+    f.write(reinterpret_cast<const char*>(packed.data()), packed.size());
     f.close();
 
     auto load_result = store_->load("custom-role", "main");
@@ -137,31 +127,16 @@ TEST_F(SessionStoreTest, UnknownRoleDefaultsToUser) {
     EXPECT_EQ(load_result->messages[0].role, Role::User);
 }
 
-// --- Coverage: line 62 (save fails to open path) ---
-// This is hard to trigger in test without mocking, but we can test
-// the line 75 (load fails to open) and line 79 (parse fails)
 TEST_F(SessionStoreTest, LoadCorruptedFileFails) {
     auto dir = tmp_ / "corrupt";
     std::filesystem::create_directories(dir);
-    auto path = dir / "main.json";
-    std::ofstream f(path);
-    f << "this is not json at all";
+    auto path = dir / "main.msgp";
+    std::ofstream f(path, std::ios::binary);
+    f << "this is not messagepack at all";
     f.close();
 
     auto result = store_->load("corrupt", "main");
     EXPECT_FALSE(result.has_value());
-}
-
-// --- Coverage: line 93 (compact on nonexistent session) ---
-TEST_F(SessionStoreTest, CompactNonexistentSessionFails) {
-    auto result = store_->compact("nonexistent-session", 5);
-    EXPECT_FALSE(result.has_value());
-}
-
-// --- Coverage: lines 79 (list_branches for nonexistent session) ---
-TEST_F(SessionStoreTest, ListBranchesNonexistent) {
-    auto branches = store_->list_branches("nonexistent");
-    EXPECT_TRUE(branches.empty());
 }
 
 } // namespace

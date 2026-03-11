@@ -57,4 +57,8 @@ public:
 auto make_session_store(const std::string& base_dir)
     -> std::unique_ptr<ISessionStore>;
 
+/// @brief Factory function to create a high-performance in-memory session store (Stateless Scaling).
+auto make_memory_session_store()
+    -> std::unique_ptr<ISessionStore>;
+
 } // namespace euxis::runtime
