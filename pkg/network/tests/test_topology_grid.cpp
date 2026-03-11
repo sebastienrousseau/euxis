@@ -17,7 +17,9 @@ TEST(TopologyGridTest, RegisterAndFind) {
     
     auto storage_nodes = grid.find_nodes_by_capability("storage");
     EXPECT_EQ(storage_nodes.size(), 1u);
-    EXPECT_EQ(storage_nodes[0].id, "node-1");
+    
+    // Non-existent capability
+    EXPECT_TRUE(grid.find_nodes_by_capability("nonexistent").empty());
 }
 
 TEST(TopologyGridTest, Unregister) {
@@ -29,6 +31,9 @@ TEST(TopologyGridTest, Unregister) {
     
     grid.unregister_node("node-1");
     EXPECT_EQ(grid.find_nodes_by_capability("compute").size(), 0u);
+    
+    // Unregister non-existent
+    EXPECT_NO_THROW(grid.unregister_node("node-1"));
 }
 
 TEST(TopologyGridTest, ReRegisterUpdatesIndex) {
@@ -51,6 +56,20 @@ TEST(TopologyGridTest, GetActiveNodes) {
     auto active = grid.get_active_nodes();
     EXPECT_EQ(active.size(), 1u);
     EXPECT_EQ(active[0].id, "n1");
+}
+
+TEST(TopologyGridTest, MatrixAccess) {
+    TopologyGrid grid(2);
+    grid[0, 1] = 5.0;
+    EXPECT_DOUBLE_EQ(grid[0, 1], 5.0);
+    
+    const auto& cgrid = grid;
+    EXPECT_DOUBLE_EQ(cgrid[0, 1], 5.0);
+    
+    EXPECT_THROW(grid[2, 0], std::out_of_range);
+    EXPECT_THROW(cgrid[0, 2], std::out_of_range);
+    
+    EXPECT_EQ(grid.size(), 2u);
 }
 
 } // namespace

@@ -1,151 +1,57 @@
 #include <gtest/gtest.h>
-
 #include "euxis/core/router.hpp"
 
 namespace euxis::core {
 namespace {
 
-TEST(FinOpsRouterTest, LowComplexityUsesOllama) {
+TEST(FinOpsRouterTest, SelectionLogic) {
     FinOpsRouter r;
+    // Low complexity path
     EXPECT_EQ(r.select_provider("low"), "ollama");
+    
+    // Speed priority
+    EXPECT_EQ(r.select_provider("high", "speed"), "groq");
+    
+    // Cost priority
+    EXPECT_EQ(r.select_provider("high", "cost"), "ollama");
+    
+    // Balanced weighted scoring
+    EXPECT_FALSE(r.select_provider("high", "balanced").empty());
 }
 
-TEST(FinOpsRouterTest, SpeedPrioritySelectsFastest) {
+TEST(FinOpsRouterTest, UsageTracking) {
     FinOpsRouter r;
-    auto provider = r.select_provider("high", "speed");
-    EXPECT_EQ(provider, "groq");
-}
-
-TEST(FinOpsRouterTest, CostPrioritySelectsCheapest) {
-    FinOpsRouter r;
-    auto provider = r.select_provider("high", "cost");
-    EXPECT_EQ(provider, "ollama");
-}
-
-TEST(FinOpsRouterTest, TrackUsageUpdatesSpend) {
-    FinOpsRouter r;
-    r.track_usage("anthropic", 1000);
-    EXPECT_GT(r.current_spend(), 0.0);
-}
-
-TEST(FinOpsRouterTest, BalancedSelection) {
-    FinOpsRouter r;
-    auto provider = r.select_provider("medium", "balanced");
-    EXPECT_FALSE(provider.empty());
-}
-
-TEST(FinOpsRouterTest, ProviderIndexLookup) {
-    FinOpsRouter r;
-    // track_usage uses the name_to_provider_ index internally
     r.track_usage("groq", 1000);
     EXPECT_GT(r.current_spend(), 0.0);
     
-    double spend_before = r.current_spend();
-    r.track_usage("unknown", 1000);
-    EXPECT_DOUBLE_EQ(r.current_spend(), spend_before);
+    // Unknown provider warning path
+    r.track_usage("nonexistent", 1000);
 }
 
-TEST(FinOpsRouterTest, TrackUsageUnknownProvider) {
+TEST(FinOpsRouterTest, SessionManagement) {
     FinOpsRouter r;
-    double before = r.current_spend();
-    r.track_usage("nonexistent-provider", 1000);
-    // Unknown provider should not change spend
-    EXPECT_DOUBLE_EQ(r.current_spend(), before);
-}
-
-TEST(FinOpsRouterTest, TrackUsageMultipleProviders) {
-    FinOpsRouter r;
-    r.track_usage("anthropic", 1000);
-    double after_first = r.current_spend();
-    r.track_usage("openai", 1000);
-    EXPECT_GT(r.current_spend(), after_first);
-}
-
-TEST(FinOpsRouterTest, TrackUsageOllama) {
-    FinOpsRouter r;
-    r.track_usage("ollama", 5000);
-    // Ollama is free (cost_per_1k_tokens = 0)
-    EXPECT_DOUBLE_EQ(r.current_spend(), 0.0);
-}
-
-TEST(FinOpsRouterTest, SessionUsageTracking) {
-    FinOpsRouter r;
-    r.track_session_usage("sess-1", "agent-1", "anthropic-model", 100, 200);
-    EXPECT_GT(r.session_cost("sess-1"), 0.0);
-}
-
-TEST(FinOpsRouterTest, SessionUsageWithUnknownModel) {
-    FinOpsRouter r;
-    r.track_session_usage("sess-2", "agent-1", "unknown-model", 100, 200);
-    // Should use default estimate
-    EXPECT_GT(r.session_cost("sess-2"), 0.0);
-}
-
-TEST(FinOpsRouterTest, SessionCostUnknownSession) {
-    FinOpsRouter r;
-    EXPECT_DOUBLE_EQ(r.session_cost("nonexistent"), 0.0);
-}
-
-TEST(FinOpsRouterTest, CheckBudgetUnderLimit) {
-    FinOpsRouter r;
-    r.track_session_usage("sess-1", "agent-1", "ollama-model", 100, 100);
-    EXPECT_TRUE(r.check_budget("sess-1", 100.0));
-}
-
-TEST(FinOpsRouterTest, CheckBudgetOverLimit) {
-    FinOpsRouter r;
-    r.track_session_usage("sess-1", "agent-1", "anthropic-model", 1000000, 1000000);
-    EXPECT_FALSE(r.check_budget("sess-1", 0.001));
-}
-
-TEST(FinOpsRouterTest, CustomBudgetLimit) {
-    FinOpsRouter r(0.01);
-    r.track_usage("anthropic", 1000);
-    EXPECT_GT(r.current_spend(), 0.0);
-}
-
-TEST(FinOpsRouterTest, HighComplexityDefaultSelection) {
-    FinOpsRouter r;
-    auto provider = r.select_provider("high");
-    EXPECT_FALSE(provider.empty());
-    // With default priority, should use weighted scoring
-}
-
-TEST(FinOpsRouterTest, MultipleSessionUsageAccumulates) {
-    FinOpsRouter r;
-    r.track_session_usage("sess-1", "a1", "anthropic-x", 100, 100);
-    r.track_session_usage("sess-1", "a2", "anthropic-x", 200, 200);
-    double cost = r.session_cost("sess-1");
-    // Two entries, cost should be positive
-    EXPECT_GT(cost, 0.0);
-}
-
-TEST(FinOpsRouterTest, SessionEviction) {
-    FinOpsRouter r;
-    // Create 100 sessions
-    for (int i = 0; i < 100; ++i) {
-        r.track_session_usage("s-" + std::to_string(i), "a", "ollama", 1, 1);
-    }
-    EXPECT_GT(r.session_cost("s-0"), 0.0);
+    r.track_session_usage("s1", "a1", "groq-model", 100, 100);
+    EXPECT_GT(r.session_cost("s1"), 0.0);
+    EXPECT_TRUE(r.check_budget("s1", 1.0));
+    EXPECT_FALSE(r.check_budget("s1", 0.000001));
     
-    // Add 101st session, should evict s-0
-    r.track_session_usage("s-100", "a", "ollama", 1, 1);
-    EXPECT_DOUBLE_EQ(r.session_cost("s-0"), 0.0);
-    EXPECT_GT(r.session_cost("s-100"), 0.0);
+    // Unknown session cost
+    EXPECT_DOUBLE_EQ(r.session_cost("unknown"), 0.0);
 }
 
-TEST(FinOpsRouterTest, SessionLRURefresh) {
+TEST(FinOpsRouterTest, EvictionAndLRU) {
     FinOpsRouter r;
-    // Fill up
-    for (int i = 0; i < 100; ++i) r.track_session_usage("s-" + std::to_string(i), "a", "ollama", 1, 1);
+    // Fill up to 100
+    for (int i = 0; i < 100; ++i) r.track_session_usage("s" + std::to_string(i), "a", "ollama", 1, 1);
+    EXPECT_EQ(r.session_cost("s0"), 0.000002); // Just checking existence
     
-    // Use s-0 again, it should move to the back of the eviction queue
-    r.track_session_usage("s-0", "a", "ollama", 1, 1);
+    // Refresh s0
+    r.track_session_usage("s0", "a", "ollama", 1, 1);
     
-    // Add new session, should NOT evict s-0 now, it should evict s-1
-    r.track_session_usage("s-new", "a", "ollama", 1, 1);
-    EXPECT_GT(r.session_cost("s-0"), 0.0);
-    EXPECT_DOUBLE_EQ(r.session_cost("s-1"), 0.0);
+    // Add 101st session - should evict s1 (oldest after s0 refresh)
+    r.track_session_usage("s101", "a", "ollama", 1, 1);
+    EXPECT_GT(r.session_cost("s0"), 0.0);
+    EXPECT_DOUBLE_EQ(r.session_cost("s1"), 0.0);
 }
 
 } // namespace

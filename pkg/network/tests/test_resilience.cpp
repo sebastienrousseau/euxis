@@ -13,26 +13,41 @@ TEST(RetryPolicyTest, DefaultValues) {
     EXPECT_DOUBLE_EQ(p.base_delay_seconds, 0.05);
 }
 
-TEST(RetryPolicyTest, SleepDurationBounded) {
-    RetryPolicy p{.max_attempts = 5, .max_delay_seconds = 1.0};
-    for (int i = 1; i <= 5; ++i) {
-        auto d = p.sleep_duration(i);
-        EXPECT_GE(d, 0.0);
-    }
+TEST(RetryPolicyTest, SleepDurationCapping) {
+    RetryPolicy p{.max_delay_seconds = 0.5, .jitter_ratio = 0.0};
+    // 0.05 * 2^10 is way over 0.5
+    EXPECT_DOUBLE_EQ(p.sleep_duration(10), 0.5);
+    EXPECT_DOUBLE_EQ(p.sleep_duration(1), 0.0);
 }
 
-TEST(CircuitBreakerTest, StartsClose) {
-    CircuitBreaker cb;
+TEST(CircuitBreakerTest, BasicFlow) {
+    CircuitBreaker cb(2, 0.1);
     EXPECT_FALSE(cb.is_open());
-}
-
-TEST(CircuitBreakerTest, OpensAfterThreshold) {
-    CircuitBreaker cb(3, 10.0);
-    cb.record_failure();
+    
     cb.record_failure();
     EXPECT_FALSE(cb.is_open());
+    
     cb.record_failure();
     EXPECT_TRUE(cb.is_open());
+    
+    cb.record_success();
+    EXPECT_FALSE(cb.is_open());
+}
+
+TEST(CircuitBreakerTest, Reset) {
+    CircuitBreaker cb(1);
+    cb.record_failure();
+    EXPECT_TRUE(cb.is_open());
+    cb.reset();
+    EXPECT_FALSE(cb.is_open());
+}
+
+TEST(CircuitBreakerTest, RecoverAfterTimeout) {
+    CircuitBreaker cb(1, 0.05); 
+    cb.record_failure();
+    EXPECT_TRUE(cb.is_open());
+    std::this_thread::sleep_for(std::chrono::milliseconds(60));
+    EXPECT_FALSE(cb.is_open());
 }
 
 TEST(CircuitBreakerTest, ConcurrentFailureRecording) {
@@ -40,24 +55,29 @@ TEST(CircuitBreakerTest, ConcurrentFailureRecording) {
     std::vector<std::thread> threads;
     for (int i = 0; i < 10; ++i) {
         threads.emplace_back([&cb]() {
-            for (int j = 0; j < 100; ++j) {
-                cb.record_failure();
-            }
+            for (int j = 0; j < 100; ++j) cb.record_failure();
         });
     }
     for (auto& t : threads) t.join();
-    
-    // If it was not thread-safe, failure_count_ might be less than 1000
-    // and thus not open. With 1000 records, it should be exactly on the threshold.
     EXPECT_TRUE(cb.is_open());
 }
 
-TEST(CircuitBreakerTest, RecoverAfterTimeout) {
-    CircuitBreaker cb(1, 0.1); 
-    cb.record_failure();
-    EXPECT_TRUE(cb.is_open());
-    std::this_thread::sleep_for(std::chrono::milliseconds(150));
-    EXPECT_FALSE(cb.is_open());
+TEST(ResilienceTest, DefaultBreaker) {
+    auto& b1 = get_default_breaker();
+    auto& b2 = get_default_breaker();
+    EXPECT_EQ(&b1, &b2);
+}
+
+// Internal implementation of run_with_resilience for testing coverage
+// (since it's a template in the header, we test it via a concrete instantiation)
+TEST(ResilienceTest, RunWithResilienceSuccess) {
+    int calls = 0;
+    auto res = run_with_resilience([&]() {
+        calls++;
+        return 42;
+    });
+    EXPECT_EQ(res, 42);
+    EXPECT_EQ(calls, 1);
 }
 
 } // namespace
