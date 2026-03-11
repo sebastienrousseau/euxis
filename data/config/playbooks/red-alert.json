@@ -3,6 +3,12 @@
   "id": "red-alert",
   "name": "Red Alert",
   "description": "Emergency response. Quality first, fix fast, then reassess.",
+  "crisis_management": {
+    "kill_switch_enabled": true,
+    "rollback_threshold_ms": 5000,
+    "max_retries": 1,
+    "nhi_iam_scope": "emergency_responder"
+  },
   "phases": [
     {
       "phase": 1,

@@ -4,6 +4,12 @@
   "name": "Verify Everything",
   "description": "Six-gate verification: Docs → Intent → Structure → Execution → Quality → Truth. Docs first, reviewer last, nothing ships unverified.",
   "restart_policy": "from_failed_gate",
+  "crisis_management": {
+    "kill_switch_enabled": true,
+    "rollback_threshold_ms": 10000,
+    "max_retries": 0,
+    "nhi_iam_scope": "auditor_readonly"
+  },
   "phases": [
     {
       "phase": 0,
