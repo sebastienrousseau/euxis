@@ -264,7 +264,7 @@ verify-signed-artifacts:
 # C++23 targets
 cpp-configure:
 	cmake -B euxis-cpp/build -S euxis-cpp \
-		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
+		$(if $(VCPKG_ROOT),-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake,) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DEUXIS_COVERAGE=OFF -DEUXIS_DISABLE_SANITIZERS=ON \
 		$(if $(shell command -v ccache 2>/dev/null),-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache,)
@@ -296,7 +296,7 @@ cpp-tidy: cpp-build
 # C++ code coverage (requires lcov; run after cpp-test)
 cpp-coverage:
 	cmake -B euxis-cpp/build -S euxis-cpp \
-		-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake \
+		$(if $(VCPKG_ROOT),-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake,) \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DEUXIS_COVERAGE=ON -DEUXIS_DISABLE_SANITIZERS=ON \
 		$(if $(shell command -v ccache 2>/dev/null),-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache,)

@@ -1,5 +1,5 @@
 use crate::euxis_sdk::core::error::{Error, Result};
-use crate::euxis_sdk::core::types::{MCPResult, ToolCallRequest, MCPContent};
+use crate::euxis_sdk::core::types::{MCPResult, ToolCallRequest};
 use extism_pdk::*;
 use rmp_serde;
 

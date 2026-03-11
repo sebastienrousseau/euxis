@@ -44,7 +44,7 @@ void FileTree::render(terminal::TerminalScreen& screen, Rect area) {
         std::string icon = entry.is_dir ? (entry.expanded ? "▾ " : "▸ ") : "  ";
         std::string line = indent + icon + entry.name;
 
-        if (static_cast<int>(line.size()) > area.w) line = line.substr(0, area.w);
+        if (static_cast<int>(line.size()) > area.w) line.resize(static_cast<size_t>(area.w));
 
         if (is_sel) {
             screen.write_text(area.x, y, line, sel_r, sel_g, sel_b, 26, 27, 42, true);
@@ -107,7 +107,7 @@ void AgentList::render(terminal::TerminalScreen& screen, Rect area) {
     for (int i = 0; i < static_cast<int>(agents_.size()) && i + 1 < area.h; ++i) {
         const auto& a = agents_[i];
         std::string line = (a.active ? "[*] " : "[ ] ") + a.id;
-        if (static_cast<int>(line.size()) > area.w) line = line.substr(0, area.w);
+        if (static_cast<int>(line.size()) > area.w) line.resize(static_cast<size_t>(area.w));
 
         if (a.active) {
             screen.write_text(area.x, area.y + 1 + i, line, accent_r, accent_g, accent_b);
