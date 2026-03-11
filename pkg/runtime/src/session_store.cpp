@@ -89,6 +89,14 @@ public:
         return sessions_.at(session_id).at(branch);
     }
 
+    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
+        if (auto res = load(session_id, branch)) {
+            for (const auto& msg : res->messages) {
+                co_yield msg;
+            }
+        }
+    }
+
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
         std::vector<std::string> res;
         if (sessions_.contains(session_id)) {
@@ -161,7 +169,6 @@ public:
             close(fd);
         }
 #endif
-        // Fallback for Windows or mmap failure
         std::ifstream f(path, std::ios::binary);
         if (!f.is_open()) return std::unexpected("Failed to open binary stream");
 
@@ -170,6 +177,15 @@ public:
             return snapshot_from_json(nlohmann::json::from_msgpack(buffer), session_id, branch);
         } catch (...) {
             return std::unexpected("MessagePack decoding failed");
+        }
+    }
+
+    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
+        // C++23 coroutine implementation for lazy, zero-allocation trace loading
+        if (auto res = load(session_id, branch)) {
+            for (const auto& msg : res->messages) {
+                co_yield msg;
+            }
         }
     }
 

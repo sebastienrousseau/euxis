@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <generator>
 
 namespace euxis::runtime {
 
@@ -43,6 +44,10 @@ public:
     /// @brief Load a session snapshot.
     virtual auto load(const std::string& session_id, const std::string& branch = "main")
         -> std::expected<SessionSnapshot, std::string> = 0;
+
+    /// @brief Lazily stream session episodes for long-horizon reasoning.
+    virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")
+        -> std::generator<SessionMessage> = 0;
 
     /// @brief List all branches for a given session.
     virtual auto list_branches(const std::string& session_id)
