@@ -414,12 +414,19 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         return 2;
     }
 
-    auto manifest_path = args[0];
+    auto manifest_path_str = args[0];
+    fs::path manifest_path(manifest_path_str);
     std::string goal = (args.size() > 1) ? args[1] : "Audit and improve the codebase";
 
     if (!fs::exists(manifest_path)) {
-        std::cerr << tr("Manifest not found: ") << manifest_path << "\n";
-        return 1;
+        // Standard Euxis search path for playbooks
+        auto std_path = fs::path(ctx.data_dir) / "config" / "playbooks" / (manifest_path_str + ".json");
+        if (fs::exists(std_path)) {
+            manifest_path = std_path;
+        } else {
+            std::cerr << tr("Manifest not found: ") << manifest_path_str << "\n";
+            return 1;
+        }
     }
 
     std::ifstream f(manifest_path);
