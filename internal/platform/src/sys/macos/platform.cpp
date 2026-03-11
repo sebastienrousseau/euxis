@@ -1,5 +1,6 @@
 #include "euxis/cli/tui/platform.hpp"
 #include <euxis/runtime/platform.hpp>
+
 #include <cstdlib>
 
 namespace euxis::cli::tui {
@@ -21,7 +22,6 @@ bool MacOSPlatform::open_url(std::string_view url) const {
 }
 
 bool MacOSPlatform::supports_truecolor() const {
-    // Terminal.app only does 256 color. iTerm2/Kitty/Alacritty do truecolor.
     const char* term_program = std::getenv("TERM_PROGRAM");
     if (term_program) {
         std::string_view tp(term_program);

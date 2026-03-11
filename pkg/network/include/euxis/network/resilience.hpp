@@ -5,7 +5,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
-
+#include <thread>
 #include <mutex>
 
 /** @namespace euxis::network
@@ -22,11 +22,6 @@ struct RetryPolicy {
     double max_delay_seconds{1.0};   ///< Maximum cap for delay between retries.
     double jitter_ratio{0.1};        ///< Randomness factor to prevent thundering herd.
 
-    /**
-     * @brief Calculate the sleep duration for a specific attempt.
-     * @param attempt The 1-based attempt count.
-     * @return double Sleep duration in seconds.
-     */
     [[nodiscard]] auto sleep_duration(int attempt) const -> double;
 };
 
@@ -35,24 +30,12 @@ struct RetryPolicy {
  */
 class CircuitBreaker {
 public:
-    /**
-     * @brief Construct a new Circuit Breaker.
-     * @param failure_threshold Number of consecutive failures before opening.
-     * @param recovery_timeout_seconds Seconds to wait in Open state before attempting reset.
-     */
     explicit CircuitBreaker(int failure_threshold = 5,
                             double recovery_timeout_seconds = 10.0);
 
-    /** @brief Returns true if the circuit is currently open (blocking). */
     [[nodiscard]] auto is_open() -> bool;
-    
-    /** @brief Signals a successful operation, resetting failure counters. */
     void record_success();
-    
-    /** @brief Signals an operational failure, potentially opening the circuit. */
     void record_failure();
-    
-    /** @brief Force-resets the breaker to Closed state. */
     void reset();
 
 private:
@@ -63,10 +46,6 @@ private:
     std::optional<double> opened_at_;
 };
 
-/**
- * @brief Helper to get a shared default circuit breaker.
- * @return CircuitBreaker& Static shared instance.
- */
 inline auto get_default_breaker() -> CircuitBreaker& {
     static CircuitBreaker breaker;
     return breaker;
@@ -74,18 +53,39 @@ inline auto get_default_breaker() -> CircuitBreaker& {
 
 /**
  * @brief Higher-order function to execute an operation with resilience patterns.
- * 
- * @tparam F Type of the callable operation.
- * @param operation The code to execute.
- * @param retry The retry policy to apply.
- * @param breaker Reference to a circuit breaker to use.
- * @return decltype(operation()) The result of the operation.
- * @throws std::runtime_error if retries are exhausted or circuit is open.
  */
 template <typename F>
 auto run_with_resilience(F&& operation,
                          const RetryPolicy& retry = {},
                          CircuitBreaker& breaker = get_default_breaker())
-    -> decltype(operation());
+    -> decltype(operation()) {
+    
+    if (breaker.is_open()) {
+        throw std::runtime_error("Circuit breaker is OPEN");
+    }
+
+    std::exception_ptr last_exception;
+    for (int attempt = 1; attempt <= retry.max_attempts; ++attempt) {
+        try {
+            auto result = operation();
+            breaker.record_success();
+            return result;
+        } catch (...) {
+            last_exception = std::current_exception();
+            breaker.record_failure();
+            
+            if (attempt < retry.max_attempts) {
+                double delay = retry.sleep_duration(attempt);
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(static_cast<long long>(delay * 1000)));
+            }
+        }
+    }
+
+    if (last_exception) {
+        std::rethrow_exception(last_exception);
+    }
+    throw std::runtime_error("Retries exhausted without exception");
+}
 
 } // namespace euxis::network

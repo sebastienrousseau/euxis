@@ -21,9 +21,10 @@ auto McpClient::send_rpc(const std::string& method, const nlohmann::json& params
     }
 
     // Convert JSON-RPC to A2A Message format
-    euxis::a2a::Message msg;
-    msg.payload = rpc_req.dump();
-    msg.id = std::to_string(request_id_);
+    euxis::a2a::A2AMessage msg;
+    msg.role = "system";
+    msg.created_at = "";
+    msg.parts.push_back({.type = "text", .content = rpc_req.dump(), .mime_type = std::nullopt});
 
     auto response = transport_->send(msg);
     if (!response) {
@@ -31,7 +32,8 @@ auto McpClient::send_rpc(const std::string& method, const nlohmann::json& params
     }
 
     try {
-        auto res_json = nlohmann::json::parse(response->payload);
+        if (response->parts.empty()) return std::unexpected("Empty response from MCP server");
+        auto res_json = nlohmann::json::parse(response->parts[0].content);
         if (res_json.contains("error")) {
             return std::unexpected("MCP Server Error: " + res_json["error"].dump());
         }
@@ -50,7 +52,6 @@ auto McpClient::initialize() -> std::expected<nlohmann::json, std::string> {
     
     auto res = send_rpc("initialize", params);
     if (res) {
-        // Send initialized notification as per protocol
         auto _ = send_rpc("notifications/initialized");
     }
     return res;

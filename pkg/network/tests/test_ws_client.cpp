@@ -13,7 +13,7 @@ TEST(WebSocketClientTest, BasicConstruction) {
 TEST(WebSocketClientTest, MethodsNoThrow) {
     WebSocketClient client("ws://localhost:9999");
     EXPECT_NO_THROW(client.connect());
-    EXPECT_NO_THROW(client.send("test"));
+    EXPECT_NO_THROW(client.send(std::string("test")));
 }
 
 TEST(WebSocketClientTest, SetOnMessage) {

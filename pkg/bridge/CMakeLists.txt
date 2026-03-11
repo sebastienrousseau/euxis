@@ -11,6 +11,7 @@ euxis_add_library(euxis-bridge-cpp
     src/provenance.cpp
     src/audit.cpp
     src/executor.cpp
+    src/platform.cpp
   DEPS
     euxis-crypto-cpp
     euxis-runtime-cpp

@@ -12,10 +12,10 @@ namespace euxis::a2a {
  * @brief Error types for A2A transport layer operations.
  */
 enum class TransportError {
-    ConnectionFailed,   ///< Unable to establish network connection.
-    Timeout,            ///< Target did not respond in time.
-    ProtocolError,      ///< Invalid message format or unexpected response.
-    AuthFailed,         ///< Invalid or missing credentials.
+    ConnectionFailed,
+    Timeout,
+    ProtocolError,
+    AuthFailed,
 };
 
 /**
@@ -28,9 +28,9 @@ public:
     /**
      * @brief Send an A2A message and wait for the response.
      * @param msg The message to send.
-     * @return std::expected<Message, TransportError> The reply or error.
+     * @return std::expected<A2AMessage, TransportError> The reply or error.
      */
-    virtual auto send(const Message& msg) -> std::expected<Message, TransportError> = 0;
+    virtual auto send(const A2AMessage& msg) -> std::expected<A2AMessage, TransportError> = 0;
 };
 
 } // namespace euxis::a2a

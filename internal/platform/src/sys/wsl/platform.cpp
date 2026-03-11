@@ -1,5 +1,6 @@
 #include "euxis/cli/tui/platform.hpp"
 #include <euxis/runtime/platform.hpp>
+
 #include <cstdlib>
 
 namespace euxis::cli::tui {
@@ -27,7 +28,6 @@ bool WSLPlatform::open_url(std::string_view url) const {
 }
 
 bool WSLPlatform::supports_truecolor() const {
-    // Windows Terminal supports truecolor; legacy ConHost does not.
     const char* wt = std::getenv("WT_SESSION");
     if (wt) return true;
 

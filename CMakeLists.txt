@@ -14,7 +14,7 @@ include(EuxisPackage)
 include(FetchContent)
 include(CheckIPOSupported)
 
-# --- Performance Optimizations (Moved to root build logic) ---
+# --- Performance Optimizations ---
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     check_ipo_supported(RESULT lto_supported OUTPUT error)
     if(lto_supported)
@@ -26,41 +26,75 @@ if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     endif()
 endif()
 
-# --- Dependency resolution ---
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(GTest CONFIG REQUIRED)
+# Disable warnings-as-errors for external dependencies that might trigger modern compiler diagnostics
+set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
+
+# --- Unified Dependency Resolution via FetchContent ---
+
+# nlohmann_json
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG        v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+if(NOT TARGET nlohmann_json::nlohmann_json)
+    add_library(nlohmann_json::nlohmann_json ALIAS nlohmann_json)
+endif()
+
+# spdlog (Use latest stable)
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG        v1.15.0
+)
+FetchContent_MakeAvailable(spdlog)
+
+# googletest
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        v1.14.0
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+if(NOT TARGET GTest::gtest_main)
+    add_library(GTest::gtest_main ALIAS gtest_main)
+endif()
+
+# ixwebsocket (With specific patch for missing cstdint in some versions)
+FetchContent_Declare(
+    ixwebsocket
+    GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+    GIT_TAG        v11.4.4
+)
+set(USE_TLS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(ixwebsocket)
+if(NOT TARGET ixwebsocket::ixwebsocket)
+    add_library(ixwebsocket::ixwebsocket ALIAS ixwebsocket)
+endif()
+
+# httplib
+FetchContent_Declare(
+    httplib
+    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+    GIT_TAG        v0.18.7
+)
+set(HTTPLIB_REQUIRE_OPENSSL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(httplib)
+if(NOT TARGET httplib::httplib)
+    add_library(httplib::httplib ALIAS httplib)
+endif()
+
+# SQLite3
 find_package(SQLite3 REQUIRED)
 
+# Libsodium
 find_package(unofficial-sodium CONFIG QUIET)
 if(NOT unofficial-sodium_FOUND)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
     add_library(unofficial-sodium::sodium ALIAS PkgConfig::SODIUM)
-endif()
-
-find_package(httplib CONFIG QUIET)
-if(NOT httplib_FOUND)
-    FetchContent_Declare(
-        httplib
-        GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-        GIT_TAG        v0.18.7
-        GIT_SHALLOW    TRUE
-    )
-    set(HTTPLIB_REQUIRE_OPENSSL OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(httplib)
-endif()
-
-find_package(ixwebsocket CONFIG QUIET)
-if(NOT ixwebsocket_FOUND)
-    FetchContent_Declare(
-        ixwebsocket
-        GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
-        GIT_TAG        v9.9.0
-        GIT_SHALLOW    TRUE
-    )
-    set(USE_TLS OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(ixwebsocket)
 endif()
 
 enable_testing()

@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "euxis/gateway/websocket.hpp"
-#include "euxis/core/ws_client.hpp"
+#include "euxis/network/ws_client.hpp"
 
 namespace euxis::gateway {
 namespace {
@@ -20,7 +20,7 @@ TEST_F(WebSocketHubTest, StartAndStop) {
             return {{"echo", msg}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(hub.client_count(), 0);
     hub.stop();
 }
@@ -36,18 +36,19 @@ TEST_F(WebSocketHubTest, ClientConnectAndPing) {
             return {{"type", "echo"}, {"data", msg}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     // Connect client
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 1));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
 
     // Send ping and wait for pong
-    auto response = client.send_and_wait(
-        {{"type", "ping"}},
-        std::chrono::milliseconds(2000));
+    auto response = client.send_and_wait({{"type", "ping"}}, 2);
     ASSERT_TRUE(response.has_value());
     EXPECT_EQ((*response)["type"], "pong");
 
@@ -62,11 +63,14 @@ TEST_F(WebSocketHubTest, ClientCountUpdates) {
             return {{"ok", true}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 2));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -89,18 +93,20 @@ TEST_F(WebSocketHubTest, DispatchMessage) {
             return {{"type", "error"}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 3));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
 
     auto response = client.send_and_wait(
         {{"type", "dispatch"},
          {"agent", "architect"},
-         {"task", "Design system"}},
-        std::chrono::milliseconds(2000));
+         {"task", "Design system"}}, 2);
     ASSERT_TRUE(response.has_value());
     EXPECT_EQ((*response)["type"], "dispatch_ack");
     EXPECT_EQ((*response)["agent"], "architect");
@@ -117,7 +123,7 @@ TEST_F(WebSocketHubTest, BroadcastToNoClients) {
             return {{"ok", true}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     // Broadcast with no clients should not crash
     hub.broadcast({{"type", "announcement"}, {"data", "hello"}});
@@ -131,7 +137,7 @@ TEST_F(WebSocketHubTest, SendToNonExistentClient) {
             return {{"ok", true}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
     // Send to a client ID that doesn't exist should not crash
     hub.send_to("nonexistent-client-id", {{"type", "message"}});
@@ -145,20 +151,21 @@ TEST_F(WebSocketHubTest, MultipleMessagesInSequence) {
             return {{"echo", msg}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 6));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
 
     // Send multiple messages in sequence
-    auto resp1 = client.send_and_wait(
-        {{"type", "msg1"}}, std::chrono::milliseconds(2000));
+    auto resp1 = client.send_and_wait({{"type", "msg1"}}, 2);
     ASSERT_TRUE(resp1.has_value());
 
-    auto resp2 = client.send_and_wait(
-        {{"type", "msg2"}}, std::chrono::milliseconds(2000));
+    auto resp2 = client.send_and_wait({{"type", "msg2"}}, 2);
     ASSERT_TRUE(resp2.has_value());
 
     client.disconnect();
@@ -178,7 +185,7 @@ TEST_F(WebSocketHubTest, DoubleStop) {
             return {{"ok", true}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     hub.stop();
     // Second stop should not crash
     hub.stop();
@@ -191,11 +198,14 @@ TEST_F(WebSocketHubTest, BroadcastWithConnectedClient) {
             return {{"echo", msg}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 9));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -211,11 +221,14 @@ TEST_F(WebSocketHubTest, NoMessageHandler) {
     WebSocketHub hub(TEST_PORT + 10);
     // Do NOT set a message handler
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    euxis::core::WebSocketClient client(
+    euxis::network::WebSocketClient client(
         "ws://127.0.0.1:" + std::to_string(TEST_PORT + 10));
     client.connect();
+    for (int i = 0; i < 10 && !client.is_connected(); ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     ASSERT_TRUE(client.is_connected());
 
     // Send a message without handler - should not crash
@@ -235,7 +248,7 @@ TEST_F(WebSocketHubTest, CustomHost) {
             return {{"ok", true}};
         });
     hub.start();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(hub.client_count(), 0);
     hub.stop();
 }

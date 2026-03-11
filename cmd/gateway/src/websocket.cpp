@@ -18,10 +18,12 @@ void WebSocketHub::start() {
     server_ = std::make_unique<ix::WebSocketServer>(port_, host_);
 
     server_->setOnConnectionCallback(
-        [this](std::shared_ptr<ix::WebSocket> ws,
-               std::shared_ptr<ix::ConnectionState> state,
-               std::unique_ptr<ix::ConnectionInfo> /*info*/) {
+        [this](std::weak_ptr<ix::WebSocket> ws_weak,
+               std::shared_ptr<ix::ConnectionState> state) {
             auto client_id = state->getId();
+            
+            auto ws = ws_weak.lock();
+            if (!ws) return;
 
             {
                 std::lock_guard lock(clients_mutex_);
@@ -30,8 +32,7 @@ void WebSocketHub::start() {
             spdlog::info("WS client connected: {}", client_id);
 
             ws->setOnMessageCallback(
-                [this, client_id, ws_weak = std::weak_ptr(ws)](
-                    const ix::WebSocketMessagePtr& msg) {
+                [this, client_id, ws_weak](const ix::WebSocketMessagePtr& msg) {
                     if (msg->type == ix::WebSocketMessageType::Close) {
                         spdlog::info("WS client disconnected: {}", client_id);
                         std::lock_guard lock(clients_mutex_);

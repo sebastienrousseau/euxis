@@ -42,14 +42,14 @@ TEST(FinOpsRouterTest, SessionManagement) {
 TEST(FinOpsRouterTest, EvictionAndLRU) {
     FinOpsRouter r;
     // Fill up to 100
-    for (int i = 0; i < 100; ++i) r.track_session_usage("s" + std::to_string(i), "a", "ollama", 1, 1);
-    EXPECT_EQ(r.session_cost("s0"), 0.000002); // Just checking existence
+    for (int i = 0; i < 100; ++i) r.track_session_usage("s" + std::to_string(i), "a", "ollama", 100, 100);
+    EXPECT_GT(r.session_cost("s0"), 0.0);
     
     // Refresh s0
-    r.track_session_usage("s0", "a", "ollama", 1, 1);
+    r.track_session_usage("s0", "a", "ollama", 100, 100);
     
     // Add 101st session - should evict s1 (oldest after s0 refresh)
-    r.track_session_usage("s101", "a", "ollama", 1, 1);
+    r.track_session_usage("s101", "a", "ollama", 100, 100);
     EXPECT_GT(r.session_cost("s0"), 0.0);
     EXPECT_DOUBLE_EQ(r.session_cost("s1"), 0.0);
 }

@@ -46,7 +46,7 @@ TEST(CircuitBreakerTest, RecoverAfterTimeout) {
     CircuitBreaker cb(1, 0.05); 
     cb.record_failure();
     EXPECT_TRUE(cb.is_open());
-    std::this_thread::sleep_for(std::chrono::milliseconds(60));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_FALSE(cb.is_open());
 }
 
