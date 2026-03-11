@@ -22,6 +22,7 @@ struct SessionMessage {
     std::string model;
     std::string timestamp;
     double duration_ms{0.0};
+    std::string decision_trace_hash; ///< Cryptographic hash of the intermediate CoT AST
 };
 
 /// @brief Point-in-time state of a conversation branch.

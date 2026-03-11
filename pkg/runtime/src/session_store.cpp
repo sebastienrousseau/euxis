@@ -48,6 +48,7 @@ auto snapshot_to_json(const SessionSnapshot& snapshot) -> nlohmann::json {
             {"model", msg.model},
             {"timestamp", msg.timestamp},
             {"duration_ms", msg.duration_ms},
+            {"decision_trace_hash", msg.decision_trace_hash},
         });
     }
     return j;
@@ -67,6 +68,7 @@ auto snapshot_from_json(const nlohmann::json& j, std::string_view session_id, st
             .model = msg_j.value("model", ""),
             .timestamp = msg_j.value("timestamp", ""),
             .duration_ms = msg_j.value("duration_ms", 0.0),
+            .decision_trace_hash = msg_j.value("decision_trace_hash", ""),
         });
     }
     return snap;

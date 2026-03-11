@@ -32,9 +32,9 @@ TEST_F(SessionStoreTest, SaveAndLoadRoundtrip) {
         .branch_id = "main",
         .agent_id = "agent-01",
         .messages = {
-            {.role = Role::User, .content = "Hello", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0},
-            {.role = Role::System, .content = "System init", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0},
-            {.role = Role::Assistant, .content = "Hi there", .agent_id = {}, .model = "gpt-4", .timestamp = {}, .duration_ms = 42.0},
+            {.role = Role::User, .content = "Hello", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}},
+            {.role = Role::System, .content = "System init", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}},
+            {.role = Role::Assistant, .content = "Hi there", .agent_id = {}, .model = "gpt-4", .timestamp = {}, .duration_ms = 42.0, .decision_trace_hash = {}},
         },
     };
 
@@ -136,8 +136,8 @@ TEST_F(MemorySessionStoreTest, AllPaths) {
 
 TEST_F(MemorySessionStoreTest, EpisodicStreaming) {
     SessionSnapshot snap{.session_id = "stream-test", .branch_id = "main", .agent_id = {}, .messages = {}};
-    snap.messages.push_back({.role = Role::User, .content = "ep1", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0});
-    snap.messages.push_back({.role = Role::Assistant, .content = "ep2", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0});
+    snap.messages.push_back({.role = Role::User, .content = "ep1", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}});
+    snap.messages.push_back({.role = Role::Assistant, .content = "ep2", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}});
     store_->save(snap);
     
     int count = 0;
