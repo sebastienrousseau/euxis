@@ -54,5 +54,13 @@ TEST(FinOpsRouterTest, EvictionAndLRU) {
     EXPECT_DOUBLE_EQ(r.session_cost("s1"), 0.0);
 }
 
+TEST(FinOpsRouterTest, EmptyProviderScoring) {
+    // We can't easily empty the providers since they are set in constructor,
+    // but we can test the default fallback if no match is found.
+    FinOpsRouter r;
+    // Balanced selection should return something default (ollama) even if weird input
+    EXPECT_FALSE(r.select_provider("medium", "unknown_priority").empty());
+}
+
 } // namespace
 } // namespace euxis::core

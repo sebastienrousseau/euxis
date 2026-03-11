@@ -11,6 +11,16 @@
 namespace euxis::core {
 
 /**
+ * @brief Performance and cost metrics for an AI model provider.
+ */
+struct ProviderMetrics {
+    std::string name;           ///< Unique identifier for the provider (e.g. "groq").
+    double cost_per_1k_tokens;  ///< Estimated cost in USD per 1000 tokens.
+    int avg_latency_ms;         ///< Historic average response time in milliseconds.
+    double reliability_score;   ///< Normalized 0.0-1.0 success rate.
+};
+
+/**
  * @brief Recorded usage data for a single agent session.
  */
 struct SessionUsageRecord {

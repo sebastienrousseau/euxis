@@ -68,11 +68,7 @@ TEST_F(SessionStoreTest, UnknownRoleDefaultsToUser) {
 }
 
 TEST_F(SessionStoreTest, FileOpenFailures) {
-    // Attempt to load from a non-existent file
     EXPECT_FALSE(store_->load("nonexistent", "main").has_value());
-
-    // Instead of forcing a directory conflict which behaves differently on OSes,
-    // we test the nonexistent path case which is handled by std::filesystem::exists.
 }
 
 TEST_F(SessionStoreTest, CorruptedMessagePack) {
@@ -109,6 +105,27 @@ TEST_F(MemorySessionStoreTest, AllPaths) {
     EXPECT_EQ(store_->list_branches("s2").size(), 0u);
     
     EXPECT_FALSE(store_->compact("s2", 5).has_value());
+}
+
+TEST_F(MemorySessionStoreTest, EpisodicStreaming) {
+    SessionSnapshot snap{.session_id = "stream-test", .branch_id = "main", .agent_id = {}, .messages = {}};
+    snap.messages.push_back({.role = Role::User, .content = "ep1", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0});
+    snap.messages.push_back({.role = Role::Assistant, .content = "ep2", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0});
+    store_->save(snap);
+    
+    int count = 0;
+    for (auto msg : store_->stream_episodes("stream-test")) {
+        count++;
+        if (count == 1) { EXPECT_EQ(msg.content, "ep1"); }
+        if (count == 2) { EXPECT_EQ(msg.content, "ep2"); }
+    }
+    EXPECT_EQ(count, 2);
+    
+    int empty_count = 0;
+    for (auto _ [[maybe_unused]] : store_->stream_episodes("nonexistent")) {
+        empty_count++;
+    }
+    EXPECT_EQ(empty_count, 0);
 }
 
 } // namespace
