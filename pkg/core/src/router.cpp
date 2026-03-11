@@ -10,15 +10,20 @@
 namespace euxis::core {
 
 FinOpsRouter::FinOpsRouter(double budget_limit) : budget_limit_(budget_limit) {
-    providers_ = {
+    // Legacy struct init to populate SoA
+    std::vector<ProviderMetrics> initial_providers = {
         {"ollama", 0.000, 150, 0.95},
         {"groq", 0.0001, 50, 0.98},
         {"anthropic", 0.015, 800, 0.99},
         {"openai", 0.010, 600, 0.99},
     };
     
-    for (size_t i = 0; i < providers_.size(); ++i) {
-        name_to_provider_[providers_[i].name] = i;
+    for (size_t i = 0; i < initial_providers.size(); ++i) {
+        p_names_.push_back(initial_providers[i].name);
+        p_costs_.push_back(initial_providers[i].cost_per_1k_tokens);
+        p_latencies_.push_back(initial_providers[i].avg_latency_ms);
+        p_reliabilities_.push_back(initial_providers[i].reliability_score);
+        name_to_provider_[initial_providers[i].name] = i;
     }
 }
 
@@ -29,32 +34,46 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     }
 
     if (priority == "speed") {
-        auto it = std::ranges::min_element(providers_, {}, &ProviderMetrics::avg_latency_ms);
-        return it->name;
+        auto it = std::min_element(p_latencies_.begin(), p_latencies_.end());
+        return p_names_[std::distance(p_latencies_.begin(), it)];
     }
 
     if (priority == "cost") {
-        auto it = std::ranges::min_element(providers_, {}, &ProviderMetrics::cost_per_1k_tokens);
-        return it->name;
+        auto it = std::min_element(p_costs_.begin(), p_costs_.end());
+        return p_names_[std::distance(p_costs_.begin(), it)];
     }
 
-    std::string best = "ollama";
-    double best_score = -100.0;
-    for (const auto& p : providers_) {
-        const double score = (p.reliability_score * 10.0) - (p.cost_per_1k_tokens * 500.0) - (static_cast<double>(p.avg_latency_ms) / 500.0);
-        if (score > best_score) {
-            best_score = score;
-            best = p.name;
+    // Branchless SIMD-optimized scoring loop over SoA arrays
+    const size_t n = p_names_.size();
+    if (n == 0) return "ollama";
+
+    std::vector<double> scores(n);
+    
+    // Hardware-aware optimization: tell GCC to auto-vectorize this loop
+#pragma GCC ivdep
+    for (size_t i = 0; i < n; ++i) {
+        scores[i] = (p_reliabilities_[i] * 10.0) - 
+                    (p_costs_[i] * 500.0) - 
+                    (static_cast<double>(p_latencies_[i]) / 500.0);
+    }
+
+    double best_score = -1000000.0;
+    size_t best_idx = 0;
+    for (size_t i = 0; i < n; ++i) {
+        if (scores[i] > best_score) {
+            best_score = scores[i];
+            best_idx = i;
         }
     }
-    return best;
+
+    return p_names_[best_idx];
 }
 
 void FinOpsRouter::track_usage(const std::string& provider_name, int tokens) {
     auto it = name_to_provider_.find(provider_name);
     if (it != name_to_provider_.end()) [[likely]] {
-        const auto& p = providers_[it->second];
-        current_spend_ += (static_cast<double>(tokens) / 1000.0) * p.cost_per_1k_tokens;
+        const double cost_per_1k = p_costs_[it->second];
+        current_spend_ += (static_cast<double>(tokens) / 1000.0) * cost_per_1k;
     } else [[unlikely]] {
         spdlog::warn("Attempted to track usage for unknown provider: {}", provider_name);
     }
@@ -69,7 +88,7 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
 
     for (const auto& [name, idx] : name_to_provider_) {
         if (model.find(name) != std::string::npos) [[likely]] {
-            cost = (static_cast<double>(total) / 1000.0) * providers_[idx].cost_per_1k_tokens;
+            cost = (static_cast<double>(total) / 1000.0) * p_costs_[idx];
             break;
         }
     }
