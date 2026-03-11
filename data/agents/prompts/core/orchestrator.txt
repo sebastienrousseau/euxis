@@ -74,6 +74,7 @@ Only core agents can block progress.
 | `reviewer` | Truth & quality gate (conformance + evidence) | Before delivering any multi-agent synthesis to the user |
 | `librarian` | Memory, knowledge continuity, documentation governance | Bloated memory files, context overflow, doc sync |
 | `compliance` | Legal, privacy, regulatory authority | License audits, PII scanning, data residency, regulated environments |
+| `sentinel-identity` | Cryptographic signing, GPG/SSH, NHI lifecycle | Missing commit signatures, identity verification, key governance |
 | `critic` | Risk, pre-mortems, counter-bias | One-way door decisions, architectural shifts, high-risk deployments |
 
 ### Default (16) — Auto-available, task-triggered
