@@ -70,6 +70,7 @@ TEST_F(PublisherTest, LoadYamlFailure) {
     Publisher pub(tmp_root_);
     auto res = pub.load_data(tmp_root_ / "nonexistent.yaml");
     EXPECT_FALSE(res.has_value());
+    EXPECT_TRUE(res.error().find("YAML I/O failure") != std::string::npos);
 }
 
 TEST_F(PublisherTest, RenderLatex) {
@@ -102,7 +103,7 @@ TEST_F(PublisherTest, DocumentNotFound) {
     Publisher pub(tmp_root_);
     auto res = pub.render("nonexistent");
     EXPECT_FALSE(res.has_value());
-    EXPECT_TRUE(res.error().find("not found in meta.yaml") != std::string::npos);
+    EXPECT_TRUE(res.error().find("Missing metadata entry") != std::string::npos);
 }
 
 TEST_F(PublisherTest, MetaYamlMissing) {
@@ -130,7 +131,7 @@ TEST_F(PublisherTest, InjaRenderingFailure) {
     Publisher pub(tmp_root_);
     auto res = pub.render("test-doc");
     EXPECT_FALSE(res.has_value());
-    EXPECT_TRUE(res.error().find("Inja rendering failed") != std::string::npos);
+    EXPECT_TRUE(res.error().find("Inja Engine Error") != std::string::npos);
 }
 
 TEST_F(PublisherTest, BuildPdfSuccess) {
@@ -150,7 +151,7 @@ TEST_F(PublisherTest, UnsupportedFormat) {
     Publisher pub(tmp_root_);
     auto res = pub.render("test-doc", static_cast<OutputFormat>(99));
     EXPECT_FALSE(res.has_value());
-    EXPECT_TRUE(res.error().find("Format not implemented") != std::string::npos);
+    EXPECT_TRUE(res.error().find("Unsupported output format") != std::string::npos);
 }
 
 } // namespace
