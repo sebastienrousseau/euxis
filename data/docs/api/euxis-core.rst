@@ -33,7 +33,7 @@ The core shell libraries are located in ``euxis-bin/lib/``:
 Configuration
 -------------
 
-Agent definitions are stored in ``euxis-data/agents/``:
+Agent definitions are stored in ``data/agents/``:
 
 - ``registry.json`` - Agent registry with metadata
 - ``registry.db`` - SQLite database for fast lookups

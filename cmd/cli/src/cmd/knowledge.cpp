@@ -23,7 +23,7 @@ namespace term = terminal;
 
 /// Return the path to the cortex entries.json file, creating parent dirs if needed.
 auto cortex_entries_path(const std::string& euxis_home) -> fs::path {
-    auto dir = fs::path(euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto dir = fs::path(euxis_home) / "data/runtime" / "memory" / "cortex";
     if (!fs::is_directory(dir)) {
         fs::create_directories(dir);
     }
@@ -69,7 +69,7 @@ int cmd_cortex(Context& ctx, const std::vector<std::string>& args) {
     auto entries_path = cortex_entries_path(ctx.euxis_home);
 
     if (args[0] == "stats") {
-        auto db_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "memory" / "cortex" / "db";
+        auto db_dir = fs::path(ctx.euxis_home) / "data/runtime" / "memory" / "cortex" / "db";
         auto entries = load_cortex_entries(entries_path);
         auto entry_count = static_cast<int>(entries.size());
 
@@ -241,7 +241,7 @@ int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
         return 2;
     }
 
-    auto graph_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx.euxis_home) / "data/runtime" / "memory" / "cortex";
 
     if (args[0] == "show") {
         std::cout << term::bold(tr("Knowledge Graph")) << "\n";

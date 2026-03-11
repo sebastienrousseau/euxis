@@ -125,18 +125,18 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
 
     // 5. Core directories
     static const std::vector<std::string> core_dirs = {
-        "euxis-data", 
-        "euxis-data/agents", 
-        "euxis-data/config",
-        "euxis-runtime",
-        "euxis-runtime/memory",
-        "euxis-runtime/memory/cortex",
-        "euxis-runtime/memory/cortex/db",
-        "euxis-runtime/data",
-        "euxis-runtime/data/bus",
-        "euxis-runtime/data/bus/pipes",
-        "euxis-runtime/context",
-        "euxis-runtime/metrics"
+        "data", 
+        "data/agents", 
+        "data/config",
+        "data/runtime",
+        "data/runtime/memory",
+        "data/runtime/memory/cortex",
+        "data/runtime/memory/cortex/db",
+        "data/runtime/data",
+        "data/runtime/data/bus",
+        "data/runtime/data/bus/pipes",
+        "data/runtime/context",
+        "data/runtime/metrics"
     };
 
     for (const auto& dir : core_dirs) {
@@ -337,7 +337,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
 
     // 5. Core directories
     {
-        bool ok = fs::is_directory(fs::path(ctx.euxis_home) / "euxis-data");
+        bool ok = fs::is_directory(fs::path(ctx.euxis_home) / "data");
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_fail())
                       << " " << tr("Data directory") << "\n";
@@ -367,7 +367,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
 
     // 8. Bus pipes
     {
-        auto bus_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+        auto bus_dir = fs::path(ctx.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
         int pipe_count = 0;
         if (fs::is_directory(bus_dir)) {
             for (const auto& entry : fs::directory_iterator(bus_dir)) {
@@ -382,7 +382,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
 
     // 9. Cortex check
     {
-        auto cortex_db = fs::path(ctx.euxis_home) / "euxis-runtime" / "memory" / "cortex" / "db";
+        auto cortex_db = fs::path(ctx.euxis_home) / "data/runtime" / "memory" / "cortex" / "db";
         bool ok = fs::is_directory(cortex_db);
         if (!silent) {
             std::cout << "  " << (ok ? term::icon_ok() : term::icon_warn())
@@ -662,7 +662,7 @@ int cmd_cross_platform_verify(Context& ctx, const std::vector<std::string>& /*ar
 
     // Check line endings
     {
-        auto sample = fs::path(ctx.euxis_home) / "euxis-data" / "agents" / "registry.json";
+        auto sample = fs::path(ctx.euxis_home) / "data" / "agents" / "registry.json";
         if (fs::exists(sample)) {
             std::ifstream f(sample, std::ios::binary);
             std::string content((std::istreambuf_iterator<char>(f)),

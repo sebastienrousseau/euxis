@@ -16,7 +16,7 @@
       "Bash(find /home/seb/.euxis -path \"*euxis-*/tests*/__pycache__\" -not -path \"*/.venv/*\" -type d -exec rm -rf {} + 2>/dev/null; echo \"pycache cleared\")",
       "Bash(find /home/seb/.euxis -path \"*euxis-*/tests*/__pycache__\" -not -path \"*/.venv/*\" -type d -exec rm -rf {} + 2>/dev/null; .venv/bin/pytest --tb=short --no-header -q 2>&1 | tail -40)",
       "Bash(make bench-all 2>&1)",
-      "Bash(git add \\\\\n  euxis-ops/benchmarks/runner.py \\\\\n  euxis-ops/benchmarks/autonomy_bench.py \\\\\n  euxis-ops/benchmarks/interop_bench.py \\\\\n  euxis-ops/benchmarks/performance_bench.py \\\\\n  euxis-ops/benchmarks/portability_bench.py \\\\\n  euxis-ops/benchmarks/security_bench.py \\\\\n  euxis-data/perf/benchmark-results.json)",
+      "Bash(git add \\\\\n  euxis-ops/benchmarks/runner.py \\\\\n  euxis-ops/benchmarks/autonomy_bench.py \\\\\n  euxis-ops/benchmarks/interop_bench.py \\\\\n  euxis-ops/benchmarks/performance_bench.py \\\\\n  euxis-ops/benchmarks/portability_bench.py \\\\\n  euxis-ops/benchmarks/security_bench.py \\\\\n  data/perf/benchmark-results.json)",
       "Bash(script -qc \"/home/seb/.euxis/euxis-cli/bin/euxis --help 2>&1 | head -8\" /dev/null 2>/dev/null | cat -v | head -8)",
       "Bash(script -qc \"/home/seb/.euxis/euxis-cli/bin/euxis --help\" /dev/null 2>/dev/null | cat -v | head -10)",
       "Bash(git grep -l 'v0\\\\.0\\\\.2' | xargs sed -i 's/v0\\\\.0\\\\.2/v0.0.3/g')",

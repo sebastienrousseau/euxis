@@ -90,7 +90,7 @@ void RegistryClient::resolve_prompt_path(AgentInfo& a) const {
     if (a.prompt_path.empty()) return;
     if (a.prompt_path[0] == '/') return;
 
-    std::vector<std::string> prefixes = {"", "euxis-data/agents/", "agents/"};
+    std::vector<std::string> prefixes = {"", "data/agents/", "agents/"};
     for (const auto& prefix : prefixes) {
         auto p = std::filesystem::path(impl_->data_dir) / prefix / a.prompt_path;
         if (std::filesystem::exists(p)) {
@@ -263,7 +263,7 @@ auto RegistryClient::list_playbooks() const -> std::vector<PlaybookInfo> {
     auto pb_dir = std::filesystem::path(impl_->data_dir) / "config" / "playbooks";
     if (!std::filesystem::exists(pb_dir)) {
         // Try fallback location
-        pb_dir = std::filesystem::path(impl_->data_dir) / "euxis-data" / "config" / "playbooks";
+        pb_dir = std::filesystem::path(impl_->data_dir) / "data" / "config" / "playbooks";
     }
 
     if (std::filesystem::exists(pb_dir)) {

@@ -18,7 +18,7 @@ auto euxis_home() -> std::filesystem::path {
 } // namespace
 
 auto gateway_data_dir() -> std::filesystem::path {
-    auto dir = euxis_home() / "euxis-data" / "gateway";
+    auto dir = euxis_home() / "data" / "gateway";
     std::filesystem::create_directories(dir);
     return dir;
 }

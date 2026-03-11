@@ -219,7 +219,7 @@
         "pyproject_bytes": 1410
       }
     },
-    "euxis-runtime": {
+    "data/runtime": {
       "samples": 1,
       "wall_ms": {
         "p50": 0.21,
@@ -519,7 +519,7 @@
       "cpu_ms_p95_delta_percent": -52.139,
       "memory_p95_delta_percent": -3.936
     },
-    "euxis-runtime": {
+    "data/runtime": {
       "wall_p95_delta_percent": -50.119,
       "cpu_ms_p95_delta_percent": -50.971,
       "memory_p95_delta_percent": -3.936

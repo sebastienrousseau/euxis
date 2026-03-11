@@ -15,7 +15,7 @@ protected:
     void SetUp() override {
         setenv("EUXIS_TEST_MOCK_EXECUTION", "1", 1);
         ctx_.euxis_home = "/tmp/euxis_test_fleet_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         fs::create_directories(ctx_.data_dir + "/agents");
 
         // Create a test registry with agents
@@ -156,7 +156,7 @@ TEST_F(FleetCmdTest, AgentInfoNoArgs) {
 TEST_F(FleetCmdTest, AgentBootstrapCreates) {
     auto code = cmd_agent_bootstrap(ctx_, {"new-agent", "--tier", "routine"});
     EXPECT_EQ(code, 0);
-    auto path = fs::path(ctx_.euxis_home) / "euxis-data" / "agents" / "prompts" / "fleet" / "new-agent.md";
+    auto path = fs::path(ctx_.euxis_home) / "data" / "agents" / "prompts" / "fleet" / "new-agent.md";
     EXPECT_TRUE(fs::exists(path));
 }
 

@@ -201,7 +201,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--json-output",
-        default="euxis-data/release/package-harmony.json",
+        default="data/release/package-harmony.json",
     )
     args = parser.parse_args()
 

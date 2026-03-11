@@ -18,7 +18,7 @@ Recommended local layout (one folder per repo):
   euxis-adapters/
   euxis-security/
   euxis-metrics/
-  euxis-data/
+  data/
   euxis-web/
   euxis-cpp/
 ```

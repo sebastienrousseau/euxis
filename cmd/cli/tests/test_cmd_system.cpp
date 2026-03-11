@@ -13,7 +13,7 @@ class SystemCmdTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ctx_.euxis_home = "/tmp/euxis_test_sys_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         std::filesystem::create_directories(ctx_.data_dir + "/agents");
         std::filesystem::create_directories(ctx_.data_dir + "/config");
     }
@@ -175,9 +175,9 @@ TEST_F(SystemCmdTest, DoctorVerbose) {
 TEST_F(SystemCmdTest, HealthWithBusAndCortexDirs) {
     // Create runtime directories
     std::filesystem::create_directories(
-        ctx_.euxis_home + "/euxis-runtime/data/bus/pipes");
+        ctx_.euxis_home + "/data/runtime/data/bus/pipes");
     std::filesystem::create_directories(
-        ctx_.euxis_home + "/euxis-runtime/memory/cortex/db");
+        ctx_.euxis_home + "/data/runtime/memory/cortex/db");
 
     auto code = cmd_health(ctx_, {});
     EXPECT_GE(code, 0);
@@ -214,7 +214,7 @@ TEST_F(SystemCmdTest, DoctorFixWithMissingDirs) {
 
 // --- Coverage: health with bus pipes directory ---
 TEST_F(SystemCmdTest, HealthWithBusPipes) {
-    auto bus_dir = ctx_.euxis_home + "/euxis-runtime/data/bus/pipes";
+    auto bus_dir = ctx_.euxis_home + "/data/runtime/data/bus/pipes";
     std::filesystem::create_directories(bus_dir);
     std::ofstream(bus_dir + "/test-pipe") << "data";
 
@@ -224,7 +224,7 @@ TEST_F(SystemCmdTest, HealthWithBusPipes) {
 
 // --- Coverage: health with cortex DB directory ---
 TEST_F(SystemCmdTest, HealthWithCortexDb) {
-    auto cortex_dir = ctx_.euxis_home + "/euxis-runtime/memory/cortex/db";
+    auto cortex_dir = ctx_.euxis_home + "/data/runtime/memory/cortex/db";
     std::filesystem::create_directories(cortex_dir);
     std::ofstream(cortex_dir + "/test.db") << "db data";
 

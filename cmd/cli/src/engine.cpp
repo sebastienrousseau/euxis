@@ -38,7 +38,7 @@ Engine::Engine(const std::string& euxis_home) {
                     .string();
         }
     }
-    ctx_.data_dir = (std::filesystem::path(ctx_.euxis_home) / "euxis-data").string();
+    ctx_.data_dir = (std::filesystem::path(ctx_.euxis_home) / "data").string();
     ctx_.no_color = !terminal::colors_enabled();
 
     register_commands();

@@ -14,21 +14,21 @@ from pathlib import Path
 REQUIRED_FILES = {
     "phase1": [
         "euxis-ops/architecture/check_boundaries.py",
-        "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
-        "euxis-cpp/euxis-core-cpp/src/router.cpp",
-        "euxis-cpp/euxis-core-cpp/src/swarm.cpp",
+        "pkg/core/src/resilience.cpp",
+        "pkg/core/src/router.cpp",
+        "pkg/core/src/swarm.cpp",
     ],
     "phase2": [
-        "euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp",
-        "euxis-cpp/euxis-core-cpp/tests/test_router.cpp",
-        "euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp",
+        "pkg/core/tests/test_resilience.cpp",
+        "pkg/core/tests/test_router.cpp",
+        "pkg/core/tests/test_swarm.cpp",
     ],
     "phase3": [
         ".github/workflows/supply-chain.yml",
         "euxis-ops/supply_chain/verify_signed_artifacts.sh",
     ],
     "phase4": [
-        "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
+        "pkg/core/src/resilience.cpp",
         "euxis-ops/perf/check_perf_budget.py",
         "euxis-ops/perf/validate_perf_governance.py",
     ],

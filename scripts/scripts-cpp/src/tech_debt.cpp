@@ -11,7 +11,7 @@ constexpr int kMaxTodos = 13;
 
 const std::vector<std::string> kSearchDirs{
     "euxis-adapters", "euxis-cli", "euxis-core", "euxis-crypto",
-    "euxis-gateway", "euxis-metrics", "euxis-runtime", "euxis-security",
+    "euxis-gateway", "euxis-metrics", "data/runtime", "euxis-security",
     "euxis-tui",
 };
 

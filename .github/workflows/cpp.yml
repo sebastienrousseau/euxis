@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cpp-benchmark-${{ matrix.os }}
-          path: euxis-data/perf/cpp-benchmark-results.json
+          path: data/perf/cpp-benchmark-results.json
           if-no-files-found: ignore
       - name: Upload test results
         if: failure()

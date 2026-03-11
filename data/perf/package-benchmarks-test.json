@@ -218,7 +218,7 @@
         "pyproject_bytes": 1410
       }
     },
-    "euxis-runtime": {
+    "data/runtime": {
       "samples": 1,
       "wall_ms": {
         "p50": 0.21,

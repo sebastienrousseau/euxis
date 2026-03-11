@@ -1,6 +1,6 @@
 site_name: Euxis Documentation
 site_url: https://docs.euxis.co
-repo_url: https://github.com/euxis/euxis-data
+repo_url: https://github.com/euxis/data
 
 theme:
   name: material

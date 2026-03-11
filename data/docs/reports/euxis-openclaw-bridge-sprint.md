@@ -47,8 +47,8 @@ OpenClaw pattern:
 - Installation/config/memory pathways are highly filesystem-centric for local-first operation.
 
 Euxis pattern:
-- Canonical runtime persistence under `~/.euxis/euxis-runtime` and `~/.euxis/euxis-data` with stricter policy separation.
-- Gateway session artifacts and identities persist under `~/.euxis/euxis-data/gateway/...`.
+- Canonical runtime persistence under `~/.euxis/data/runtime` and `~/.euxis/data` with stricter policy separation.
+- Gateway session artifacts and identities persist under `~/.euxis/data/gateway/...`.
 
 Bridge decision:
 - Import OpenClaw JSON/JSONL/Markdown memory into Euxis canonical stores with provenance metadata and hash verification.

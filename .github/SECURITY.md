@@ -63,7 +63,7 @@ If you discover a security vulnerability, please report it responsibly:
 
 | Severity | Description | Examples |
 |----------|-------------|----------|
-| **Critical** | Immediate risk to euxis-data/systems | RCE, SQLi, credential exposure |
+| **Critical** | Immediate risk to data/systems | RCE, SQLi, credential exposure |
 | **High** | Significant security impact | XSS, privilege escalation, sensitive data leak |
 | **Medium** | Moderate security risk | DoS, information disclosure |
 | **Low** | Minor security concern | Security headers, weak algorithms |

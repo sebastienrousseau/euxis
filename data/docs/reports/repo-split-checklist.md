@@ -26,7 +26,7 @@
 5. [ ] `euxis-adapters`
 6. [ ] `euxis-tui`
 7. [ ] `euxis-metrics`
-8. [ ] `euxis-data`
+8. [ ] `data`
 9. [ ] `euxis-crypto`
 10. [ ] `euxis-web`
 

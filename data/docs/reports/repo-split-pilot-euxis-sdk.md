@@ -6,7 +6,7 @@ Pilot extraction of `euxis-sdk` into a standalone repository while preserving wo
 
 ## Manifest
 
-- Source manifest: `euxis-data/release/repo-split-manifests/euxis-sdk.json`
+- Source manifest: `data/release/repo-split-manifests/euxis-sdk.json`
 
 ## Steps
 

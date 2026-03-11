@@ -44,7 +44,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--standards", default="euxis-ops/quality/package_standards.json")
-    parser.add_argument("--json-output", default="euxis-data/release/core-platform-boundaries.json")
+    parser.add_argument("--json-output", default="data/release/core-platform-boundaries.json")
     args = parser.parse_args()
 
     root = Path(args.repo_root).resolve()

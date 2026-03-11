@@ -1,7 +1,7 @@
 # Repository Split — Monolith to Modular (v0.0.3)
 
 ## Executive Summary
-Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, euxis-data/runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.
+Split Euxis into a small set of purpose-built repos that mirror today’s module boundaries: core runtime, gateway+adapters, CLI tools, TUI, agents/prompts, security policy, data/runtime/memory/metrics data tooling, and docs. This structure preserves developer velocity by keeping tightly-coupled surfaces together (CLI + core libs, Gateway + adapters) while enabling independent releases for UI, gateway, and tooling.
 
 ---
 
@@ -46,8 +46,8 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 - `agents/registry.json` and `agents/squads.json` provide agent metadata (consumed by CLI and TUI).
 
 ### Data Flow (runtime)
-- Gateway writes session, approvals, audit, transcripts to `~/.euxis/euxis-data/runtime/gateway/*` via `api/src/gateway/utils.py`.
-- Cortex memory stored under `~/.euxis/euxis-data/runtime/memory/cortex` and accessed by `euxis-bin/euxis-cortex` and `euxis-bin/euxis-graph`.
+- Gateway writes session, approvals, audit, transcripts to `~/.euxis/data/runtime/gateway/*` via `api/src/gateway/utils.py`.
+- Cortex memory stored under `~/.euxis/data/runtime/memory/cortex` and accessed by `euxis-bin/euxis-cortex` and `euxis-bin/euxis-graph`.
 - Metrics recorded under `~/.euxis/metrics/events.jsonl` and consumed by metrics tooling.
 
 ### Tests & Coverage
@@ -127,7 +127,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
    - **Build/deploy:** Python tool distribution.
    - **Migration complexity:** Medium.
 
-8. **`euxis-data`**
+8. **`data`**
    - **Purpose:** documentation + ADRs.
    - **Contents:** `docs/`, `mkdocs.yml`.
    - **Public interface:** docs site.
@@ -174,8 +174,8 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 - `euxis-core` exports agent registry and shell libs (public API is filesystem-based entrypoints).
 
 ### Data Ownership
-- Gateway owns `~/.euxis/euxis-data/runtime/gateway/*`.
-- Memory owns `~/.euxis/euxis-data/runtime/memory/cortex/*`.
+- Gateway owns `~/.euxis/data/runtime/gateway/*`.
+- Memory owns `~/.euxis/data/runtime/memory/cortex/*`.
 - Metrics owns `~/.euxis/metrics/events.jsonl`.
 
 ---
@@ -211,7 +211,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 6. **Extract `euxis-metrics`**
    - Move `metrics/src/metrics/` and keep optional core schema references.
 
-7. **Extract `euxis-data`**
+7. **Extract `data`**
    - Move `docs/` and doc tooling config.
 
 8. **Extract crypto packages**
@@ -228,7 +228,7 @@ Use `git filter-repo --path` per repo to preserve history. Example:
 1. **Import path breakage** — mitigate with contract tests and staged extraction.
 2. **Gateway/adapters coupling** — keep together initially, split later.
 3. **CLI/core coupling** — use packaged core with release gating.
-4. **Docs drift** — centralize docs in `euxis-data` and automate sync.
+4. **Docs drift** — centralize docs in `data` and automate sync.
 5. **CI fragmentation** — replicate certify gates per repo.
 6. **Version drift** — use Renovate/Dependabot for cross-repo bumps.
 7. **Secrets handling** — define standard env var contract for all repos.
@@ -260,7 +260,7 @@ Use `git filter-repo --path` per repo to preserve history. Example:
    |
 [euxis-security] ----> [euxis-gateway]
 [euxis-adapters] ----> [euxis-gateway]
-[euxis-data]
+[data]
 [euxis-crypto]
 [euxis-web]
 ```
@@ -307,7 +307,7 @@ cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path security --force
 
 # Docs
-mkdir -p ${TMPDIR:-/tmp}/euxis-data && cd ${TMPDIR:-/tmp}/euxis-data
+mkdir -p ${TMPDIR:-/tmp}/data && cd ${TMPDIR:-/tmp}/data
 cp -R ${EUXIS_HOME}/.git .
 git filter-repo --path docs --path mkdocs.yml --force
 
@@ -392,6 +392,6 @@ git -C ~/dev/euxis-core worktree add ../euxis-cli
 - **euxis-tui** — Textual UI application for fleet management.
 - **euxis-security** — approval and allowlist policy defaults.
 - **euxis-metrics** — observability tooling and fleet metrics schemas.
-- **euxis-data** — documentation and ADRs.
+- **data** — documentation and ADRs.
 - **euxis-crypto** — Python crypto utilities.
 - **euxis-web** — TypeScript crypto packages.

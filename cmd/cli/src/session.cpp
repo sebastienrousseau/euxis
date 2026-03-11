@@ -43,7 +43,7 @@ auto Session::euxis_home() const -> std::string {
 
 auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::string {
     auto project = project_name();
-    auto base = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" / project;
+    auto base = std::filesystem::path(euxis_home_) / "data" / "projects" / project;
     auto agent_dir = base / agent_id;
     auto output_dir = agent_dir / "output";
 
@@ -64,7 +64,7 @@ auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::str
 
 auto Session::get_memory_context(const std::string& agent_id, int max_lines) const -> std::string {
     auto project = project_name();
-    auto memory_path = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" /
+    auto memory_path = std::filesystem::path(euxis_home_) / "data" / "projects" /
                        project / agent_id / "memory.md";
 
     if (!std::filesystem::exists(memory_path)) return {};
@@ -126,7 +126,7 @@ auto Session::get_memory_context(const std::string& agent_id, int max_lines) con
 
 void Session::save_memory(const std::string& agent_id, const std::string& user_msg, const std::string& assistant_msg) const {
     auto project = project_name();
-    auto agent_dir = std::filesystem::path(euxis_home_) / "euxis-data" / "projects" / project / agent_id;
+    auto agent_dir = std::filesystem::path(euxis_home_) / "data" / "projects" / project / agent_id;
     std::filesystem::create_directories(agent_dir);
     
     auto memory_path = agent_dir / "memory.md";

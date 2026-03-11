@@ -8,7 +8,7 @@ namespace euxis::cli {
 /// Shared context passed to every command handler.
 struct Context {
     std::string euxis_home;
-    std::string data_dir;   // euxis-data/
+    std::string data_dir;   // data/
     bool no_color{false};
     bool json_output{false};
     bool verbose{false};

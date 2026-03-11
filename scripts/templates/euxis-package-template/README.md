@@ -12,7 +12,7 @@ This template defines the canonical structure for a new `euxis-*` package with:
 1. Copy this directory to your new package path, for example `euxis-<name>`.
 2. Replace `euxis_template` with your module name (usually `euxis_<name>`).
 3. Update `pyproject.toml` package metadata.
-4. Add a module page at `euxis-data/docs/modules/euxis-<name>.md`.
+4. Add a module page at `data/docs/modules/euxis-<name>.md`.
 5. Register the package in `euxis-ops/quality/package_standards.json`.
 
 ## Canonical Structure

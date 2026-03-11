@@ -4,12 +4,12 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 
 ## Phase 1: Core Boundary Enforcement
 
-- Core contracts are defined in `euxis-cpp/euxis-core-cpp/include/euxis/core/`.
-  - Contract header: `euxis-cpp/euxis-core-cpp/include/euxis/core/contracts.hpp`
+- Core contracts are defined in `pkg/core/include/euxis/core/`.
+  - Contract header: `pkg/core/include/euxis/core/contracts.hpp`
 - Platform type adapters are co-located in the core header:
-  - `euxis-cpp/euxis-core-cpp/include/euxis/core/types.hpp`
+  - `pkg/core/include/euxis/core/types.hpp`
 - Agent routing logic:
-  - `euxis-cpp/euxis-core-cpp/src/router.cpp`
+  - `pkg/core/src/router.cpp`
 - Gateway transport is now HTTP-only (WebSocket adapter removed).
 - CI guardrail: `euxis-ops/architecture/check_boundaries.py`.
 - Guardrail blocks direct `subprocess`/network imports in pure core logic.
@@ -20,10 +20,10 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 
 - GitHub Actions matrix for Linux/macOS: `.github/workflows/cpp.yml`.
 - Platform normalization tests:
-  - `euxis-cpp/euxis-core-cpp/tests/test_platform_adapter.cpp`
-  - `euxis-cpp/euxis-core-cpp/tests/test_contracts.cpp`
-  - `euxis-cpp/euxis-core-cpp/tests/test_router.cpp`
-  - `euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp`
+  - `pkg/core/tests/test_platform_adapter.cpp`
+  - `pkg/core/tests/test_contracts.cpp`
+  - `pkg/core/tests/test_router.cpp`
+  - `pkg/core/tests/test_swarm.cpp`
   - Includes OS mapping and WSL environment detection coverage.
 
 ## Phase 3: Supply chain integrity
@@ -47,10 +47,10 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 ## Phase 4: Resilience and performance
 
 - Resilience primitives:
-  - `euxis-cpp/euxis-core-cpp/src/resilience.cpp`
-  - `euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp`
+  - `pkg/core/src/resilience.cpp`
+  - `pkg/core/tests/test_resilience.cpp`
 - Runtime concurrency uses `std::jthread` (dedicated concurrency module removed):
-  - `euxis-cpp/euxis-core-cpp/src/swarm.cpp`
+  - `pkg/core/src/swarm.cpp`
 - Performance budget gate:
   - `euxis-ops/perf/check_perf_budget.py`
   - Policy file: `euxis-ops/perf/perf_policy.json` (`current`, `target_q2_2026`, `target_q4_2026`)
@@ -66,21 +66,21 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 - Scorecard generator:
   - `euxis-ops/eval/scorecard.py`
 - Sample metrics:
-  - `euxis-data/scorecard/metrics.sample.json`
+  - `data/scorecard/metrics.sample.json`
 - Gate output:
-  - `euxis-data/scorecard/latest.json`
+  - `data/scorecard/latest.json`
 - Release checklist gate:
   - `euxis-ops/release/generate_checklist.py`
   - Fails if p95 regresses by >10% vs `euxis-ops/perf/release_baseline.json`.
 - Baseline proposal helper:
   - `euxis-ops/perf/propose_release_baseline.py`
-  - Generates `euxis-data/release/proposed-baseline.json` for next release review.
+  - Generates `data/release/proposed-baseline.json` for next release review.
 - Baseline proposal review:
   - `euxis-ops/release/review_baseline_proposal.py`
   - Flags suspicious baseline drift (default >20%) for manual review.
 - Release evidence bundle:
   - `euxis-ops/release/aggregate_release_evidence.py`
-  - Generates `euxis-data/release/release-evidence.json` as a single gate artifact.
+  - Generates `data/release/release-evidence.json` as a single gate artifact.
 - Release evidence validator:
   - `euxis-ops/release/validate_release_evidence.py`
   - Enforces minimum score thresholds and checklist/baseline-review integrity.

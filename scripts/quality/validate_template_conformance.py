@@ -14,7 +14,7 @@ def main() -> int:
     parser.add_argument("--standards", default="euxis-ops/quality/package_standards.json")
     parser.add_argument(
         "--json-output",
-        default="euxis-data/release/template-conformance.json",
+        default="data/release/template-conformance.json",
     )
     args = parser.parse_args()
 

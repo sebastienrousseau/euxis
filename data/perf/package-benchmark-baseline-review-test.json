@@ -30,7 +30,7 @@
       "wall_p95_delta_percent=-52.658%",
       "cpu_ms_p95_delta_percent=-52.139%"
     ],
-    "euxis-runtime": [
+    "data/runtime": [
       "wall_p95_delta_percent=-50.119%",
       "cpu_ms_p95_delta_percent=-50.971%"
     ],

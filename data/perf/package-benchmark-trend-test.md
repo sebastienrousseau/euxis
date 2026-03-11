@@ -15,7 +15,7 @@ Threshold: `10.00%` regression
 | `euxis-identity` | +10.79% | +9.94% | -3.94% | warning |
 | `euxis-inference` | +11.74% | +11.37% | -3.94% | warning |
 | `euxis-metrics` | -52.66% | -52.14% | -3.94% | ok |
-| `euxis-runtime` | -50.12% | -50.97% | -3.94% | ok |
+| `data/runtime` | -50.12% | -50.97% | -3.94% | ok |
 | `euxis-scripts` | -61.28% | -59.90% | -3.94% | ok |
 | `euxis-sdk` | +178.79% | +184.42% | -3.94% | warning |
 | `euxis-security` | -12.46% | -10.99% | -3.94% | ok |

@@ -799,9 +799,9 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 | Installation | `~/.euxis/` |
 | Executables | `~/.euxis/euxis-bin/` (optional symlinks in `~/.local/bin/`) |
 | Configuration | `~/.euxis/config/` |
-| Cortex Database | `~/.euxis/euxis-data/runtime/memory/cortex/db/` |
-| Agent Outputs | `~/.euxis/euxis-data/runtime/projects/` |
-| Logs | `~/.euxis/euxis-data/runtime/logs/` |
+| Cortex Database | `~/.euxis/data/runtime/memory/cortex/db/` |
+| Agent Outputs | `~/.euxis/data/runtime/projects/` |
+| Logs | `~/.euxis/data/runtime/logs/` |
 
 **Environment Variables:**
 

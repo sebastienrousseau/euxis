@@ -663,7 +663,7 @@ int cmd_audit_run(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << term::bold(tr("Audit Run:")) << " " << run_id << "\n\n";
 
-    auto evidence_dir = fs::path(ctx.euxis_home) / "euxis-data" / "audit" / run_id;
+    auto evidence_dir = fs::path(ctx.euxis_home) / "data" / "audit" / run_id;
     fs::create_directories(evidence_dir);
 
     // Collect evidence
@@ -777,7 +777,7 @@ int cmd_certify(Context& ctx, const std::vector<std::string>& args) {
 // --- evidence-verify ---
 
 int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args) {
-    auto audit_dir = fs::path(ctx.euxis_home) / "euxis-data" / "audit";
+    auto audit_dir = fs::path(ctx.euxis_home) / "data" / "audit";
 
     if (args.empty() || args[0] == "list") {
         std::cout << term::bold(tr("Audit Evidence")) << "\n\n";
@@ -1012,7 +1012,7 @@ int cmd_replay(Context& ctx, const std::vector<std::string>& args) {
     auto log_path = args[0];
     if (!fs::exists(log_path)) {
         // Try relative to runtime
-        auto alt = fs::path(ctx.euxis_home) / "euxis-data" / "runtime" / log_path;
+        auto alt = fs::path(ctx.euxis_home) / "data" / "runtime" / log_path;
         if (fs::exists(alt)) {
             log_path = alt.string();
         } else {
@@ -1060,7 +1060,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << term::bold(tr("Context Worker")) << "\n\n";
 
-    auto runtime_dir = fs::path(ctx.euxis_home) / "euxis-runtime";
+    auto runtime_dir = fs::path(ctx.euxis_home) / "data/runtime";
     auto context_dir = runtime_dir / "context";
 
     // Daemon mode: fork a background process
@@ -1116,7 +1116,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
             auto project_root = fs::path(ctx.euxis_home);
 
             // Scan key directories
-            for (const auto& subdir : {"euxis-data", "euxis-core", "euxis-cli-cpp"}) {
+            for (const auto& subdir : {"data", "euxis-core", "euxis-cli-cpp"}) {
                 auto scan_path = project_root / subdir;
                 if (!fs::is_directory(scan_path)) continue;
 
@@ -1164,7 +1164,7 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
     int summaries_written = 0;
 
     std::cout << "  " << tr("Scanning project directories...") << "\n";
-    for (const auto& subdir : {"euxis-data", "euxis-runtime", "euxis-core", "euxis-cli-cpp"}) {
+    for (const auto& subdir : {"data", "data/runtime", "euxis-core", "euxis-cli-cpp"}) {
         auto scan_path = project_root / subdir;
         if (!fs::is_directory(scan_path)) continue;
 

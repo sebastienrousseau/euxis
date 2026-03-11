@@ -16,7 +16,7 @@ class InfraCmdTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ctx_.euxis_home = "/tmp/euxis_test_infra_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         fs::create_directories(ctx_.data_dir + "/config");
         fs::create_directories(ctx_.data_dir + "/agents");
     }
@@ -42,7 +42,7 @@ TEST_F(InfraCmdTest, BusUsage) {
 
 TEST_F(InfraCmdTest, BusStatusWithDirectory) {
     // Create bus directory with a pipe file
-    auto bus_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
     fs::create_directories(bus_dir);
     std::ofstream(bus_dir / "test-pipe") << "message1\n";
 
@@ -51,7 +51,7 @@ TEST_F(InfraCmdTest, BusStatusWithDirectory) {
 }
 
 TEST_F(InfraCmdTest, BusStatusVerbose) {
-    auto bus_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
     fs::create_directories(bus_dir);
     std::ofstream(bus_dir / "test-pipe") << "message1\n";
 
@@ -64,7 +64,7 @@ TEST_F(InfraCmdTest, BusPublish) {
     auto code = cmd_bus(ctx_, {"publish", "test-pipe", "hello world"});
     EXPECT_EQ(code, 0);
 
-    auto bus_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
     EXPECT_TRUE(fs::exists(bus_dir / "test-pipe"));
 }
 
@@ -74,7 +74,7 @@ TEST_F(InfraCmdTest, BusSubscribeNonexistent) {
 }
 
 TEST_F(InfraCmdTest, BusSubscribeExisting) {
-    auto bus_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
     fs::create_directories(bus_dir);
     std::ofstream(bus_dir / "test-pipe") << "line1\nline2\n";
 
@@ -88,7 +88,7 @@ TEST_F(InfraCmdTest, BusCleanNoBusDir) {
 }
 
 TEST_F(InfraCmdTest, BusCleanWithPipes) {
-    auto bus_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
     fs::create_directories(bus_dir);
     std::ofstream(bus_dir / "recent-pipe") << "data\n";
 
@@ -136,7 +136,7 @@ TEST_F(InfraCmdTest, DaemonStopNotRunning) {
 
 TEST_F(InfraCmdTest, DaemonStatusWithStalePid) {
     // Create a stale PID file with a non-existent PID
-    auto pid_dir = fs::path(ctx_.euxis_home) / "euxis-runtime";
+    auto pid_dir = fs::path(ctx_.euxis_home) / "data/runtime";
     fs::create_directories(pid_dir);
     std::ofstream(pid_dir / "daemon.pid") << "999999999";
 
@@ -146,7 +146,7 @@ TEST_F(InfraCmdTest, DaemonStatusWithStalePid) {
 }
 
 TEST_F(InfraCmdTest, DaemonStopWithStalePid) {
-    auto pid_dir = fs::path(ctx_.euxis_home) / "euxis-runtime";
+    auto pid_dir = fs::path(ctx_.euxis_home) / "data/runtime";
     fs::create_directories(pid_dir);
     auto pid_file = pid_dir / "daemon.pid";
     std::ofstream(pid_file) << "999999999";
@@ -336,7 +336,7 @@ TEST_F(InfraCmdTest, OptimizeRuns) {
 }
 
 TEST_F(InfraCmdTest, OptimizeWithCacheDir) {
-    auto cache_dir = fs::path(ctx_.euxis_home) / "euxis-data" / "runtime" / "provider-usage";
+    auto cache_dir = fs::path(ctx_.euxis_home) / "data" / "runtime" / "provider-usage";
     fs::create_directories(cache_dir);
     // Write some cache files
     std::ofstream(cache_dir / "usage1.json") << R"({"calls": 100})";
@@ -456,7 +456,7 @@ TEST_F(InfraCmdTest, DeployWithMixedSuccess) {
 
 // --- Coverage: optimize with large cache dir (lines 513-515) ---
 TEST_F(InfraCmdTest, OptimizeWithLargeCacheDir) {
-    auto cache_dir = fs::path(ctx_.euxis_home) / "euxis-data" / "runtime" / "provider-usage";
+    auto cache_dir = fs::path(ctx_.euxis_home) / "data" / "runtime" / "provider-usage";
     fs::create_directories(cache_dir);
     // Create a large cache file (simulate > 100MB by writing many files)
     for (int i = 0; i < 10; ++i) {
@@ -470,7 +470,7 @@ TEST_F(InfraCmdTest, OptimizeWithLargeCacheDir) {
 
 // --- Coverage: daemon start with stale PID file (lines 278-289) ---
 TEST_F(InfraCmdTest, DaemonStartWithStalePid) {
-    auto pid_dir = fs::path(ctx_.euxis_home) / "euxis-runtime";
+    auto pid_dir = fs::path(ctx_.euxis_home) / "data/runtime";
     fs::create_directories(pid_dir);
     std::ofstream(pid_dir / "daemon.pid") << "999999999";
 

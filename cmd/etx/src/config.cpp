@@ -42,11 +42,11 @@ auto ETXConfig::euxis_home() -> QString {
 }
 
 auto ETXConfig::data_dir() -> QString {
-    return euxis_home() + "/euxis-data";
+    return euxis_home() + "/data";
 }
 
 auto ETXConfig::runtime_dir() -> QString {
-    return euxis_home() + "/euxis-runtime";
+    return euxis_home() + "/data/runtime";
 }
 
 } // namespace euxis::etx

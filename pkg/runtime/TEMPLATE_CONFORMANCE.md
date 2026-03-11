@@ -10,7 +10,7 @@
 
 ## Documentation
 
-- Module docs page: `euxis-data/docs/modules/euxis-runtime-cpp.md`
+- Module docs page: `data/docs/modules/euxis-runtime-cpp.md`
 
 ## Tests
 

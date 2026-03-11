@@ -12,11 +12,11 @@ All workspace packages are covered:
 - `euxis-metrics`
 - `euxis-adapters`
 - `euxis-security`
-- `euxis-runtime`
+- `data/runtime`
 - `euxis-scripts`
 - `euxis-sdk`
 - `euxis-web`
-- `euxis-data`
+- `data`
 - `euxis-cpp/*` (C++23 modules)
 
 ## Enforcement Artifacts
@@ -39,7 +39,7 @@ All workspace packages are covered:
 - Package structure matrix generator/checker: `euxis-ops/quality/render_package_structure_matrix.py`
 - Package harmony validator (duplicates + complexity + structure): `euxis-ops/quality/validate_package_harmony.py`
 - Package harmony baseline limits: `euxis-ops/quality/package_harmony_baseline.json`
-- Generated matrix doc: `euxis-data/docs/architecture/package-structure-matrix.md`
+- Generated matrix doc: `data/docs/architecture/package-structure-matrix.md`
 
 ## Resource Governance
 

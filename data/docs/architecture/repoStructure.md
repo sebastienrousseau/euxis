@@ -16,10 +16,10 @@ This document captures the target split for functional repositories to reduce co
 - `euxis-metrics`
 - `euxis-adapters`
 - `euxis-security`
-- `euxis-runtime`
+- `data/runtime`
 - `euxis-scripts`
 - `euxis-sdk`
-- `euxis-data`
+- `data`
 - `euxis-cpp` (contains crypto, bridge, memory, identity, inference, a2a, bench, etx)
 
 ## Migration Notes

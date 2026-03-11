@@ -20,11 +20,11 @@
     "build",
     "euxis-bin",
     "euxis-cpp",
-    "euxis-data",
+    "data",
     "euxis-examples",
     "euxis-ops",
     "euxis-policy",
-    "euxis-runtime",
+    "data/runtime",
     "euxis.egg-info",
     "hooks",
     "metrics"

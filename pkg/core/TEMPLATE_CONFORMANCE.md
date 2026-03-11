@@ -10,11 +10,11 @@
 
 ## Documentation
 
-- Module docs page: `euxis-data/docs/modules/euxis-core-cpp.md`
+- Module docs page: `data/docs/modules/euxis-core-cpp.md`
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-core-cpp/tests`
+- Test paths: `pkg/core/tests`
 
 ## Core vs Platform Separation
 

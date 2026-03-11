@@ -14,7 +14,7 @@ class DevCmdTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ctx_.euxis_home = "/tmp/euxis_test_dev_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         fs::create_directories(ctx_.data_dir + "/agents");
     }
 
@@ -228,7 +228,7 @@ TEST_F(DevCmdTest, SyncDocsWithDocsDir) {
     EXPECT_EQ(code, 0);
 
     // Check output directory was created
-    auto output_dir = fs::path(ctx_.euxis_home) / "euxis-data" / "docs";
+    auto output_dir = fs::path(ctx_.euxis_home) / "data" / "docs";
     EXPECT_TRUE(fs::exists(output_dir / "README.md"));
     EXPECT_TRUE(fs::exists(output_dir / "guide.md"));
 }
@@ -325,7 +325,7 @@ TEST_F(DevCmdTest, TestInfraWithAllDirs) {
     std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
 
     // Create runtime and core dirs
-    fs::create_directories(ctx_.euxis_home + "/euxis-runtime");
+    fs::create_directories(ctx_.euxis_home + "/data/runtime");
     fs::create_directories(ctx_.euxis_home + "/euxis-core");
 
     auto code = cmd_test_infra(ctx_, {});

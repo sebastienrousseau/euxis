@@ -12,7 +12,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--standards", default="euxis-ops/quality/package_standards.json")
-    parser.add_argument("--output-dir", default="euxis-data/release/repo-split-manifests")
+    parser.add_argument("--output-dir", default="data/release/repo-split-manifests")
     args = parser.parse_args()
 
     root = Path(args.repo_root).resolve()

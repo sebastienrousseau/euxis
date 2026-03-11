@@ -14,7 +14,7 @@ class KnowledgeCmdTest : public ::testing::Test {
 protected:
     void SetUp() override {
         ctx_.euxis_home = "/tmp/euxis_test_know_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         fs::create_directories(ctx_.data_dir + "/config");
     }
 
@@ -49,7 +49,7 @@ TEST_F(KnowledgeCmdTest, CortexStatsJson) {
 }
 
 TEST_F(KnowledgeCmdTest, CortexStatsWithDbFiles) {
-    auto db_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex" / "db";
+    auto db_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex" / "db";
     fs::create_directories(db_dir);
     std::ofstream(db_dir / "data1.db") << "some data";
     std::ofstream(db_dir / "data2.db") << "more data";
@@ -173,7 +173,7 @@ TEST_F(KnowledgeCmdTest, GraphShow) {
 }
 
 TEST_F(KnowledgeCmdTest, GraphShowWithDirectory) {
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "entries.json") << R"({"key":"val"})";
 
@@ -197,7 +197,7 @@ TEST_F(KnowledgeCmdTest, GraphQueryNoDirFound) {
 }
 
 TEST_F(KnowledgeCmdTest, GraphQueryNoMatches) {
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "data.txt") << "some random content\n";
 
@@ -206,7 +206,7 @@ TEST_F(KnowledgeCmdTest, GraphQueryNoMatches) {
 }
 
 TEST_F(KnowledgeCmdTest, GraphQueryWithMatches) {
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "data.txt") << "line with keyword here\nno match\nanother keyword line\n";
 
@@ -216,7 +216,7 @@ TEST_F(KnowledgeCmdTest, GraphQueryWithMatches) {
 
 TEST_F(KnowledgeCmdTest, GraphQueryWithMatchesJson) {
     ctx_.json_output = true;
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "data.txt") << "found it\n";
 
@@ -230,7 +230,7 @@ TEST_F(KnowledgeCmdTest, GraphExportNoData) {
 }
 
 TEST_F(KnowledgeCmdTest, GraphExportSuccess) {
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "entries.json") << R"({"key":"val"})";
 
@@ -485,7 +485,7 @@ TEST_F(KnowledgeCmdTest, SlashUsageInvalid) {
 
 // --- Coverage: line 40 (load_cortex_entries file open failure) ---
 TEST_F(KnowledgeCmdTest, CortexStatsWithUnreadableEntries) {
-    auto cortex_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto cortex_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(cortex_dir);
     // Create entries.json as a directory (will fail to open as file)
     fs::create_directories(cortex_dir / "entries.json");
@@ -498,7 +498,7 @@ TEST_F(KnowledgeCmdTest, CortexStatsWithUnreadableEntries) {
 
 // --- Coverage: lines 49-50 (non-object JSON in cortex entries) ---
 TEST_F(KnowledgeCmdTest, CortexStatsWithNonObjectJson) {
-    auto cortex_dir = fs::path(ctx_.euxis_home) / "euxis-runtime" / "memory" / "cortex";
+    auto cortex_dir = fs::path(ctx_.euxis_home) / "data/runtime" / "memory" / "cortex";
     fs::create_directories(cortex_dir);
     // Write a JSON array instead of object
     std::ofstream(cortex_dir / "entries.json") << "[1, 2, 3]";
@@ -509,7 +509,7 @@ TEST_F(KnowledgeCmdTest, CortexStatsWithNonObjectJson) {
 
 // --- Coverage: line 327 (graph export without output arg) ---
 TEST_F(KnowledgeCmdTest, GraphExportDefaultOutput) {
-    auto graph_dir = fs::path(ctx_.euxis_home) / "euxis-data" / "knowledge" / "graph";
+    auto graph_dir = fs::path(ctx_.euxis_home) / "data" / "knowledge" / "graph";
     fs::create_directories(graph_dir);
     std::ofstream(graph_dir / "node1.json") << "{}";
 

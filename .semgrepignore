@@ -46,7 +46,7 @@
 **/tsconfig.json
 
 # Data and runtime directories
-**/euxis-runtime/**
+**/data/runtime/**
 **/*.db
 **/*.sqlite
 **/*.jsonl

@@ -13,7 +13,7 @@ protected:
     void SetUp() override {
         setenv("EUXIS_TEST_MOCK_EXECUTION", "1", 1);
         ctx_.euxis_home = "/tmp/euxis_test_spec_" + std::to_string(getpid());
-        ctx_.data_dir = ctx_.euxis_home + "/euxis-data";
+        ctx_.data_dir = ctx_.euxis_home + "/data";
         std::filesystem::create_directories(ctx_.data_dir + "/agents");
 
         // Create test registry
@@ -102,7 +102,7 @@ TEST_F(SpecializedCmdTest, ReplayUsage) {
 }
 
 TEST_F(SpecializedCmdTest, ContextWorkerRuns) {
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/runtime");
     auto code = cmd_context_worker(ctx_, {});
     EXPECT_EQ(code, 0);
 }
@@ -210,8 +210,8 @@ TEST_F(SpecializedCmdTest, ReplayPlainTextLines) {
 }
 
 TEST_F(SpecializedCmdTest, ContextWorkerWithScope) {
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-data");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/runtime");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data");
     auto code = cmd_context_worker(ctx_, {"--scope", "project"});
     EXPECT_EQ(code, 0);
 }
@@ -286,8 +286,8 @@ TEST_F(SpecializedCmdTest, VoiceWithWhitespaceTrimming) {
 // --- Coverage: tui text-based dashboard fallback path ---
 TEST_F(SpecializedCmdTest, TuiTextDashboardWithRuntime) {
     // Ensure no ETX binary exists; exercises full text dashboard fallback
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-data");
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/runtime");
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-core");
     // Use cmd_tui_ex with a custom stream to bypass isatty() check
     std::istringstream input("");
@@ -411,16 +411,16 @@ TEST_F(SpecializedCmdTest, GymWithReasonTierAgent) {
 
 // --- Coverage: context-worker with different scope options ---
 TEST_F(SpecializedCmdTest, ContextWorkerWithGlobalScope) {
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-data");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/runtime");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data");
     auto code = cmd_context_worker(ctx_, {"--scope", "global"});
     EXPECT_EQ(code, 0);
 }
 
 TEST_F(SpecializedCmdTest, ContextWorkerWithFullContent) {
     // Create multiple directories that will be scanned
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-runtime");
-    std::filesystem::create_directories(ctx_.euxis_home + "/euxis-data/agents");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/runtime");
+    std::filesystem::create_directories(ctx_.euxis_home + "/data/agents");
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-core");
     std::filesystem::create_directories(ctx_.euxis_home + "/euxis-cli-cpp");
 
@@ -439,7 +439,7 @@ TEST_F(SpecializedCmdTest, ContextWorkerWithFullContent) {
     EXPECT_EQ(code, 0);
 
     // Verify context files were created
-    auto context_dir = std::filesystem::path(ctx_.euxis_home) / "euxis-runtime" / "context";
+    auto context_dir = std::filesystem::path(ctx_.euxis_home) / "data/runtime" / "context";
     EXPECT_TRUE(std::filesystem::is_directory(context_dir));
 }
 

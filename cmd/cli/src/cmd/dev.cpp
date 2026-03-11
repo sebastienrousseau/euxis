@@ -310,7 +310,7 @@ int cmd_sync_docs(Context& ctx, const std::vector<std::string>& /*args*/) {
     std::cout << term::bold(tr("Sync Documentation")) << "\n\n";
 
     auto docs_dir = fs::path(ctx.euxis_home) / "docs";
-    auto output_dir = fs::path(ctx.euxis_home) / "euxis-data" / "docs";
+    auto output_dir = fs::path(ctx.euxis_home) / "data" / "docs";
     auto man_dir = output_dir / "man";
 
     if (!fs::is_directory(docs_dir)) {
@@ -394,7 +394,7 @@ int cmd_test_infra(Context& ctx, const std::vector<std::string>& args) {
 
     std::vector<InfraTest> tests = {
         {tr("EUXIS_HOME exists"), "dir:" + ctx.euxis_home},
-        {tr("euxis-data exists"), "dir:" + ctx.data_dir},
+        {tr("data exists"), "dir:" + ctx.data_dir},
         {"registry.json", "file:" + ctx.data_dir + "/agents/registry.json"},
         {tr("git available"), "cmd:git"},
         {tr("sqlite3 available"), "cmd:sqlite3"},

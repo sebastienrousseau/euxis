@@ -13,7 +13,7 @@ Mode: `blocking`
 | `euxis-docs` | +0.00% | +0.00% | +0.00% | ok |
 | `euxis-gateway` | +0.00% | +0.00% | +0.00% | ok |
 | `euxis-metrics` | +0.00% | +0.00% | +0.00% | ok |
-| `euxis-runtime` | +0.00% | +0.00% | +0.00% | ok |
+| `data/runtime` | +0.00% | +0.00% | +0.00% | ok |
 | `euxis-scripts` | +0.00% | +0.00% | +0.00% | ok |
 | `euxis-sdk` | +0.00% | +0.00% | +0.00% | ok |
 | `euxis-security` | +0.00% | +0.00% | +0.00% | ok |

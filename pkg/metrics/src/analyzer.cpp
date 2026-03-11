@@ -15,10 +15,10 @@ namespace {
 
 auto default_metrics_dir() -> std::filesystem::path {
     const char* home = std::getenv("EUXIS_HOME");
-    if (home) return std::filesystem::path(home) / "euxis-runtime" / "metrics";
+    if (home) return std::filesystem::path(home) / "data/runtime" / "metrics";
     const char* user_home = std::getenv("HOME");
     return std::filesystem::path(user_home ? user_home : "/tmp") /
-           ".euxis" / "euxis-runtime" / "metrics";
+           ".euxis" / "data/runtime" / "metrics";
 }
 
 auto now_iso() -> std::string {

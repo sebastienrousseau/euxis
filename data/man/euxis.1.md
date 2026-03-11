@@ -214,16 +214,16 @@ Search for agents:
 **~/.euxis/**
 :   Main installation directory
 
-**~/.euxis/euxis-data/agents/registry.json**
+**~/.euxis/data/agents/registry.json**
 :   Agent registry
 
-**~/.euxis/euxis-data/agents/squads.json**
+**~/.euxis/data/agents/squads.json**
 :   Squad and combo definitions
 
-**~/.euxis/euxis-data/config/playbooks/**
+**~/.euxis/data/config/playbooks/**
 :   Playbook definitions
 
-**~/.euxis/euxis-data/runtime/projects/**
+**~/.euxis/data/runtime/projects/**
 :   Project data and agent outputs
 
 # EXIT STATUS

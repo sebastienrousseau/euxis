@@ -106,14 +106,14 @@ TEST_F(FleetRegistryDefaultTest, InvalidDirFallsBackToDefaults) {
     EXPECT_NE(reg.find("code-agent"), nullptr);
 }
 
-// Test with real data (skip if euxis-data is not available)
+// Test with real data (skip if data is not available)
 class FleetRegistryRealDataTest : public ::testing::Test {
 protected:
     void SetUp() override {
         data_dir_ = ETXConfig::data_dir();
         QDir dir(data_dir_ + "/agents");
         if (!dir.exists()) {
-            GTEST_SKIP() << "euxis-data not available at " << data_dir_.toStdString();
+            GTEST_SKIP() << "data not available at " << data_dir_.toStdString();
         }
     }
     QString data_dir_;

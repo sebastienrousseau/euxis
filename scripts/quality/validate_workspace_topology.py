@@ -26,7 +26,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--json-output",
-        default="euxis-data/release/workspace-topology.json",
+        default="data/release/workspace-topology.json",
     )
     args = parser.parse_args()
 

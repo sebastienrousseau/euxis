@@ -32,7 +32,7 @@ Once the manifest and prompt file are ready, you can register the agent using th
 euxis agent register /path/to/my-agent.json
 ```
 
-This commands reads the manifest, copies the metadata into the plugin directory (`~/.euxis/euxis-data/config/plugins/`), and activates the agent in your local installation.
+This commands reads the manifest, copies the metadata into the plugin directory (`~/.euxis/data/config/plugins/`), and activates the agent in your local installation.
 
 ## Managing Plugins
 

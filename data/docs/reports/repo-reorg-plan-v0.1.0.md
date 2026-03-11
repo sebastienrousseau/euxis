@@ -11,7 +11,7 @@ Reorganize the monorepo into modular, self-contained top-level folders with expl
 - `euxis-bin/`: CLI entrypoints and shell/Python tooling (`euxis-*`, lint, certify, hooks, lib/).
 - `config/`: config schemas, templates, branding, playbooks, patterns.
 - `crypto/src/crypto_lib/`: Python crypto library code.
-- `euxis-data/runtime/`: runtime data (bus, lifecycle, perf, registry pool).
+- `data/runtime/`: runtime data (bus, lifecycle, perf, registry pool).
 - `deploy/`: Dockerfiles and deployment compose files.
 - `docs/`: documentation, reference, ADRs, guides, reports.
 - `metrics/src/metrics/`: metrics collection, aggregation, verification, dashboard schemas.
@@ -38,7 +38,7 @@ api/src/gateway/     # Gateway server, adapters, protocol utilities
 cli/         # Command-line entrypoints and shell libs
 ui/src/tui/         # ETX Textual UI
 adapters/src/adapters/    # Channel adapters (Slack, Telegram, WebChat)
-euxis-data/runtime/memory/      # Cortex + memory persistence
+data/runtime/memory/      # Cortex + memory persistence
 euxis-policy/    # Approvals, allowlists, audit, Guard logic
 metrics/src/metrics/     # Metrics collection, aggregation, dashboards
 config/      # Config schemas and defaults
@@ -83,9 +83,9 @@ tests/       # Cross-module integration tests only
 - **Contains**: `adapters/src/adapters/*`.
 - **Depends on**: `api/src/gateway/`, `core/`.
 
-### `euxis-data/runtime/memory/`
+### `data/runtime/memory/`
 - **Purpose**: Cortex storage and memory flows.
-- **Contains**: `euxis-data/runtime/memory/cortex/` schema + related tools.
+- **Contains**: `data/runtime/memory/cortex/` schema + related tools.
 - **Depends on**: `core/`.
 
 ### `euxis-policy/`
@@ -109,7 +109,7 @@ tests/       # Cross-module integration tests only
 - `euxis-ops/gateway_*` → `api/src/gateway/`
 - `adapters/src/adapters/*` → `adapters/src/adapters/`
 - `config/gateway.json` → `euxis-policy/gateway.json`
-- `euxis-data/runtime/cortex/*` → `euxis-data/runtime/memory/cortex/*`
+- `data/runtime/cortex/*` → `data/runtime/memory/cortex/*`
 - `api/src/gateway/webchat/*` → `api/src/gateway/webchat/*`
 - `api/src/gateway/utils.py` → `api/src/gateway/utils.py`
 - `api/src/gateway/server.py` → `api/src/gateway/server.py`

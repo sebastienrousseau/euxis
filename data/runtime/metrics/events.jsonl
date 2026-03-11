@@ -19,3 +19,5 @@
 {"event_type": "Agent:DelegationStarted", "timestamp": "2026-02-16T21:36:03.835554+00:00", "properties": {"correlation_id": "metrics-d783fd7d570b", "delegating_agent": "architect", "target_agent": "reviewer", "delegation_reason": "scope_boundary", "priority": "P1"}}
 {"event_type": "Agent:DelegationCompleted", "timestamp": "2026-02-16T21:36:03.935907+00:00", "properties": {"correlation_id": "metrics-d783fd7d570b", "delegating_agent": "architect", "target_agent": "reviewer", "total_duration_ms": 2500, "handoff_successful": true, "quality_score": 0.92}}
 {"event_type": "Agent:ConflictDetected", "timestamp": "2026-02-16T21:36:03.937992+00:00", "properties": {"correlation_id": "metrics-08eba63b8df6", "agents": ["architect", "reviewer"], "conflict_type": "recommendation", "resolution_method": "evidence"}}
+{"event_type":"fallback-event","properties":null,"timestamp":1773248474.8646653}
+{"event_type":"Agent:TaskStarted","properties":{"agent_id":"agent-fb","correlation_id":"metrics-5f44d498ad3d","priority":"medium","session_id":"session-fb","task_type":"general"},"timestamp":"2026-03-11T17:01:16+00:00"}

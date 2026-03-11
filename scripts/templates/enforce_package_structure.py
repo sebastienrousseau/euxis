@@ -26,7 +26,7 @@ def _module_dir(root: Path, pkg: dict) -> Path | None:
     explicit_module_map = {
         "euxis-cli": "cli",
         "euxis-gateway": "gateway",
-        "euxis-runtime": "runtime",
+        "data/runtime": "runtime",
         "euxis-docs": "euxis_docs",
     }
     mapped = explicit_module_map.get(pkg_name)
@@ -57,7 +57,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--standards", default="euxis-ops/quality/package_standards.json")
-    parser.add_argument("--json-output", default="euxis-data/release/structure-enforcement.json")
+    parser.add_argument("--json-output", default="data/release/structure-enforcement.json")
     args = parser.parse_args()
 
     root = Path(args.repo_root).resolve()

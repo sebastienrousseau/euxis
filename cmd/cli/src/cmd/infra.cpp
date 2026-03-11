@@ -48,7 +48,7 @@ void daemon_main_loop(const std::string& euxis_home, const std::string& data_dir
     auto last_health  = clock::now();
     auto last_cleanup = clock::now();
 
-    auto log_dir = fs::path(euxis_home) / "euxis-runtime" / "logs";
+    auto log_dir = fs::path(euxis_home) / "data/runtime" / "logs";
     fs::create_directories(log_dir);
 
     auto write_log = [&](const std::string& msg) {
@@ -93,7 +93,7 @@ void daemon_main_loop(const std::string& euxis_home, const std::string& data_dir
         if (now - last_cleanup >= cleanup_interval) {
             last_cleanup = now;
 
-            auto bus_dir = fs::path(euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+            auto bus_dir = fs::path(euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
             if (fs::is_directory(bus_dir)) {
                 int removed = 0;
                 auto fs_now = fs::file_time_type::clock::now();
@@ -112,7 +112,7 @@ void daemon_main_loop(const std::string& euxis_home, const std::string& data_dir
             }
 
             // Clean stale context files
-            auto ctx_dir = fs::path(euxis_home) / "euxis-runtime" / "context";
+            auto ctx_dir = fs::path(euxis_home) / "data/runtime" / "context";
             if (fs::is_directory(ctx_dir)) {
                 int ctx_removed = 0;
                 auto fs_now = fs::file_time_type::clock::now();
@@ -171,7 +171,7 @@ int cmd_gateway(Context& /*ctx*/, const std::vector<std::string>& args) {
 // --- bus ---
 
 int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
-    auto bus_dir = fs::path(ctx.euxis_home) / "euxis-runtime" / "data" / "bus" / "pipes";
+    auto bus_dir = fs::path(ctx.euxis_home) / "data/runtime" / "data" / "bus" / "pipes";
 
     if (args.empty() || args[0] == "status") {
         std::cout << term::bold(tr("Message Bus Status")) << "\n\n";
@@ -253,7 +253,7 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
 // --- daemon ---
 
 int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
-    auto pid_file = fs::path(ctx.euxis_home) / "euxis-runtime" / "daemon.pid";
+    auto pid_file = fs::path(ctx.euxis_home) / "data/runtime" / "daemon.pid";
 
     if (args.empty() || args[0] == "status") {
         if (fs::exists(pid_file)) {
@@ -501,7 +501,7 @@ int cmd_optimize(Context& ctx, const std::vector<std::string>& args) {
     }
 
     // 2. Cache directory size
-    auto cache_dir = fs::path(ctx.euxis_home) / "euxis-data" / "runtime" / "provider-usage";
+    auto cache_dir = fs::path(ctx.euxis_home) / "data" / "runtime" / "provider-usage";
     if (fs::is_directory(cache_dir)) {
         size_t cache_size = 0;
         for (const auto& entry : fs::recursive_directory_iterator(cache_dir)) {

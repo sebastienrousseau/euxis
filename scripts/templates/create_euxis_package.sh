@@ -39,5 +39,5 @@ done < <(find "${target_dir}" -type f)
 echo "created package scaffold at ${target_dir}"
 echo "next:"
 echo "  1) add ${pkg_name} into euxis-ops/quality/package_standards.json"
-echo "  2) add module doc page under euxis-data/docs/modules/"
+echo "  2) add module doc page under data/docs/modules/"
 echo "  3) wire stable tests script + CI workflow if needed"

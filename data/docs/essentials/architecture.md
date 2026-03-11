@@ -691,8 +691,8 @@ make cpp-bench    # Run benchmark suites against performance targets
 │   ├── patterns/                # Validation patterns
 │   ├── playbooks/               # Playbook definitions
 │   └── templates/               # Prompt templates
-├── euxis-data/runtime/                         # Runtime data (bus, lifecycle, projects)
-├── euxis-data/runtime/memory/                  # Cortex storage
+├── data/runtime/                         # Runtime data (bus, lifecycle, projects)
+├── data/runtime/memory/                  # Cortex storage
 ├── metrics/src/metrics/                      # Fleet metrics
 ├── euxis-policy/                     # Approval policies
 │   ├── lifecycle/               # Agent state files

@@ -13,12 +13,12 @@ from pathlib import Path
 
 DEFAULT_ARTIFACTS = [
     "euxis-ops/architecture/check_boundaries.py",
-    "euxis-cpp/euxis-core-cpp/src/resilience.cpp",
-    "euxis-cpp/euxis-core-cpp/src/router.cpp",
-    "euxis-cpp/euxis-core-cpp/src/swarm.cpp",
-    "euxis-cpp/euxis-core-cpp/tests/test_resilience.cpp",
-    "euxis-cpp/euxis-core-cpp/tests/test_router.cpp",
-    "euxis-cpp/euxis-core-cpp/tests/test_swarm.cpp",
+    "pkg/core/src/resilience.cpp",
+    "pkg/core/src/router.cpp",
+    "pkg/core/src/swarm.cpp",
+    "pkg/core/tests/test_resilience.cpp",
+    "pkg/core/tests/test_router.cpp",
+    "pkg/core/tests/test_swarm.cpp",
     ".github/workflows/supply-chain.yml",
     "euxis-ops/supply_chain/verify_signed_artifacts.sh",
     "euxis-ops/perf/check_perf_budget.py",
@@ -33,7 +33,7 @@ DEFAULT_ARTIFACTS = [
 ]
 
 DEFAULT_DOCS = [
-    "euxis-data/docs/architecture/core-platform-separation-2026.md",
+    "data/docs/architecture/core-platform-separation-2026.md",
 ]
 
 

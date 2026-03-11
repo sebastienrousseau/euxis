@@ -174,7 +174,7 @@ int cmd_agent_bootstrap(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    auto prompt_dir = fs::path(ctx.euxis_home) / "euxis-data" / "agents" / "prompts" / "fleet";
+    auto prompt_dir = fs::path(ctx.euxis_home) / "data" / "agents" / "prompts" / "fleet";
     fs::create_directories(prompt_dir);
     auto prompt_path = prompt_dir / (agent_id + ".md");
 

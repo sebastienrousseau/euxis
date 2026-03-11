@@ -7,7 +7,7 @@
 
 namespace euxis::cli {
 
-/// Load JSON configuration files from euxis-data/.
+/// Load JSON configuration files from data/.
 class ConfigLoader {
 public:
     explicit ConfigLoader(const std::string& data_dir);
