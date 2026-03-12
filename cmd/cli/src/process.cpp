@@ -30,9 +30,9 @@ auto ms_remaining(TimePoint deadline) -> int {
 /// Apply resource limits to the child process to prevent OOM (137)
 void apply_resource_limits() {
     struct rlimit mem_limit;
-    // Set memory limit to 512MB
-    mem_limit.rlim_cur = 512 * 1024 * 1024;
-    mem_limit.rlim_max = 512 * 1024 * 1024;
+    // Set memory limit to 2GB (Node.js floor for large indexing)
+    mem_limit.rlim_cur = 2048LL * 1024 * 1024;
+    mem_limit.rlim_max = 2048LL * 1024 * 1024;
     
 #ifdef RLIMIT_AS
     ::setrlimit(RLIMIT_AS, &mem_limit);
