@@ -104,14 +104,12 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         is_oauth = !token.empty();
     }
 
-    // USE RESOURCE-BOUND CLI BRIDGE IF OAUTH
-    // Claude Code often blocks public API access for OAuth tokens.
     if (is_oauth) {
         std::string claude_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
-        if (!std::filesystem::exists(claude_path)) claude_path = "claude"; // Fallback to PATH
+        if (!std::filesystem::exists(claude_path)) claude_path = "claude";
 
-        // PERFORMANCE: Add --ignore to prevent indexing of massive .git and build artifacts
-        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "--ignore", ".git,build,_deps", "-p", "--", prompt};
+        // Remove unknown '--ignore' flag. Claude Code uses .claudeignore.
+        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
         if (on_chunk) {
             auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
             return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
@@ -206,6 +204,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
                                    std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     std::string url, auth_header;
     nlohmann::json body;
+    
     if (provider == "openai") {
         std::string token = auth.has_value() ? auth->token : (std::getenv("OPENAI_API_KEY") ? std::getenv("OPENAI_API_KEY") : "");
         if (token.empty()) return {false, "", "No OpenAI auth", 1, 0.0, {}};
@@ -216,7 +215,18 @@ auto ProviderExecutor::execute_api(const std::string& provider,
     } else if (provider == "gemini") {
         std::string token = auth.has_value() ? auth->token : (std::getenv("GEMINI_API_KEY") ? std::getenv("GEMINI_API_KEY") : "");
         if (token.empty()) return {false, "", "No Gemini auth", 1, 0.0, {}};
-        url = "https://generativelanguage.googleapis.com/v1beta/models/" + (model.empty() ? "gemini-2.0-flash-lite" : model) + ":generateContent?key=" + token;
+        
+        bool use_oauth = auth.has_value() && auth->is_oauth;
+        std::string m = model.empty() ? "gemini-2.0-flash-lite" : model;
+        
+        if (use_oauth) {
+            // Google Vertex / OAuth endpoint
+            url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent";
+            auth_header = "Authorization: Bearer " + token;
+        } else {
+            // Standard API Key endpoint
+            url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + token;
+        }
         body["contents"] = nlohmann::json::array({{{"parts", nlohmann::json::array({{{"text", prompt}}})}}});
     }
     

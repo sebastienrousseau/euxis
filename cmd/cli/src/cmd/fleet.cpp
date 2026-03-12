@@ -510,9 +510,15 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         bool is_doomed_oauth = (model.provider == "claude" && auth.has_value() && auth->is_oauth);
         
         if (is_doomed_oauth || (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id))) {
-            std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to gemini (OOM/Auth prevention)\n");
-            model.provider = "gemini";
-            model.model = "gemini-2.0-flash-lite";
+            if (router.local_available()) {
+                std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to ollama (Local-First Resilience)\n");
+                model.provider = "ollama";
+                model.model = "qwen2.5-coder:32b";
+            } else {
+                std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to gemini (Cloud Fallback)\n");
+                model.provider = "gemini";
+                model.model = "gemini-2.0-flash-lite";
+            }
         }
 
         // Load agent system prompt
