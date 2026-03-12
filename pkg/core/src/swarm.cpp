@@ -86,11 +86,9 @@ void SwarmOrchestrator::execute_phase(const nlohmann::json& phase,
         });
     }
 
-    if (mode == "parallel") {
-        execute_phase_parallel(tasks);
-    } else {
-        execute_phase_sequential(tasks);
-    }
+    // Force sequential mode for all phases to prevent parallel CLI OOM (137)
+    // In the 2026 Agent OS, we prioritize Stability over speculative speed.
+    execute_phase_sequential(tasks);
 }
 
 void SwarmOrchestrator::execute_phase_sequential(std::vector<SwarmTask>& tasks) {
