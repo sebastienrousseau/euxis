@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <nlohmann/json.hpp>
 
@@ -82,6 +83,7 @@ public:
 
     // Cooldown query
     [[nodiscard]] auto cooldown_remaining_ms(const std::string& profile_id) const -> int64_t;
+    [[nodiscard]] auto is_cooled_down(const std::string& id) const -> bool;
 
 private:
     std::string data_dir_;
@@ -102,7 +104,6 @@ private:
     std::string session_pin_;
 
     [[nodiscard]] auto pick_best(const std::string& provider) const -> std::optional<ResolvedAuth>;
-    [[nodiscard]] auto is_cooled_down(const std::string& id) const -> bool;
     [[nodiscard]] auto now_ms() const -> int64_t;
     [[nodiscard]] auto compute_cooldown_ms(CooldownReason reason, int consecutive) const -> int64_t;
 

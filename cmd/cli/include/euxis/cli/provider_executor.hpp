@@ -50,6 +50,8 @@ public:
     [[nodiscard]] static auto classify_error(int http_status,
                                               const std::string& body) -> std::optional<CooldownReason>;
 
+    [[nodiscard]] auto auth_store() -> AuthProfileStore& { return auth_store_; }
+
 private:
     std::string data_dir_;
     AuthProfileStore auth_store_;
