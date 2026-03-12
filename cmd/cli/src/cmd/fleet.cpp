@@ -502,20 +502,17 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto tier = agent ? agent->tier : "code";
         auto model = router.route(tier, step_task);
 
-        // --- Outcome Perfect Fallback ---
-        // If the primary provider (e.g. claude) is in cooldown (Auth failure),
-        // autonomously switch to a fallback (gemini or ollama)
+        // --- Outcome Perfect Pre-emptive Fallback ---
+        // 2026-03-12: The Anthropic API rejects OAuth tokens, and the CLI bridge
+        // OOMs on large repo indexing. If we detect this doomed combination,
+        // autonomously pivot to Gemini or Ollama immediately.
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
-        if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
-            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Attempting fallback...");
-            if (model.provider == "claude") {
-                model.provider = "gemini";
-                model.model = "gemini-2.0-flash-lite";
-            } else {
-                model.provider = "ollama";
-                model.model = "qwen2.5-coder:32b";
-            }
-            std::cout << term::dim(" switched to " + model.provider) << "\n";
+        bool is_doomed_oauth = (model.provider == "claude" && auth.has_value() && auth->is_oauth);
+        
+        if (is_doomed_oauth || (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id))) {
+            std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to gemini (OOM/Auth prevention)\n");
+            model.provider = "gemini";
+            model.model = "gemini-2.0-flash-lite";
         }
 
         // Load agent system prompt
