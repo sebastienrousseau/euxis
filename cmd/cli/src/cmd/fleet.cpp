@@ -502,24 +502,22 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto tier = agent ? agent->tier : "code";
         auto model = router.route(tier, step_task);
 
-        // --- Outcome Perfect Pre-emptive Fallback ---
-        // 2026-03-13: Anthropic OAuth tokens are rejected by the public API, 
-        // and the CLI bridge OOMs during indexing. Pivot pre-emptively.
+        // --- Provider Diversity Logic ---
+        // Instead of pivoting everything to Ollama, we now utilize the full fleet.
+        // We only pivot if a provider is ACTUALLY in cooldown from a previous failure.
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
-        bool is_doomed_oauth = (model.provider == "claude" && auth.has_value() && auth->is_oauth);
         
-        if (is_doomed_oauth || (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id))) {
-            if (router.local_available()) {
-                std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to ollama (Local-First Resilience)\n");
-                model.provider = "ollama";
-                model.model = "qwen2.5-coder:7b";
-            } else {
-                std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to gemini (Cloud Fallback)\n");
+        if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
+            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to fallback...\n");
+            if (model.provider == "claude") {
                 model.provider = "gemini";
                 model.model = "gemini-2.0-flash-lite";
+            } else {
+                model.provider = "ollama";
+                model.model = "qwen2.5-coder:7b";
             }
         }
-
+        
         // Load agent system prompt
         std::string system_prompt;
         if (agent && !agent->prompt_path.empty()) {
