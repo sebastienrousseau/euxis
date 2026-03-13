@@ -1,0 +1,11 @@
+.git
+build
+_deps
+dist
+node_modules
+*.o
+*.a
+*.so
+build/
+cmake-build/
+data/runtime/

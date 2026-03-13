@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 using euxis::cli::i18n::tr;
 
@@ -475,6 +476,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // Track step outputs keyed by step name for dependency resolution
     std::unordered_map<std::string, std::string> step_outputs;
     int failures = 0;
+    std::string session_failover_provider;
 
     for (size_t i = 0; i < steps.size(); ++i) {
         const auto& step = steps[i];
@@ -502,22 +504,22 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto tier = agent ? agent->tier : "code";
         auto model = router.route(tier, step_task);
 
-        // --- Provider Diversity Logic ---
-        // Instead of pivoting everything to Ollama, we now utilize the full fleet.
-        // We only pivot if a provider is ACTUALLY in cooldown from a previous failure.
-        auto auth = executor.auth_store().resolve_with_fallback(model.provider);
-        
-        if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
-            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to fallback...\n");
-            if (model.provider == "claude") {
-                model.provider = "gemini";
-                model.model = "gemini-2.0-flash-lite";
-            } else {
-                model.provider = "ollama";
-                model.model = "qwen2.5-coder:7b";
-            }
+        // --- Session-Wide Failover Logic ---
+        if (!session_failover_provider.empty()) {
+            model.provider = session_failover_provider;
+            if (model.provider == "gemini") model.model = "gemini-2.0-flash-lite";
+            else if (model.provider == "ollama") model.model = "qwen2.5-coder:7b";
         }
-        
+
+        // --- Provider Cooldown Check ---
+        auto auth = executor.auth_store().resolve_with_fallback(model.provider);
+        if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
+            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to failover...\n");
+            if (model.provider == "claude") model.provider = "gemini";
+            else model.provider = "ollama";
+            session_failover_provider = model.provider;
+        }
+
         // Load agent system prompt
         std::string system_prompt;
         if (agent && !agent->prompt_path.empty()) {
@@ -560,6 +562,20 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         } else {
             std::cerr << "    " << term::icon_fail() << " " << name << ": "
                       << response.error << "\n";
+            
+            if (!response.output.empty()) {
+                std::cout << term::dim("    (Partial output captured)") << "\n";
+            }
+            
+            // Trigger failover for the rest of the session if a provider crashes
+            if (session_failover_provider.empty()) {
+                if (model.provider == "claude") session_failover_provider = "gemini";
+                else if (model.provider == "gemini") session_failover_provider = "ollama";
+                if (!session_failover_provider.empty()) {
+                    std::cout << term::dim("    \xe2\x9a\xa0  Detected crash. Pivoting to " + session_failover_provider + " for remaining steps.\n");
+                }
+            }
+            
             ++failures;
         }
     }
