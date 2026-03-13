@@ -84,12 +84,15 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     } else if (provider == "gemini") {
         args = {"ask", prompt};
     } else if (provider == "opencode") {
-        args = {"chat", "-p", prompt};
+        args = {"chat", "--no-interaction", "-p", prompt};
     } else if (provider == "aider") {
-        args = {"--message", prompt};
+        args = {"--message", prompt, "--no-auto-commits"};
     } else if (provider == "sgpt") {
-        args = {prompt};
+        const char* ok = std::getenv("OPENAI_API_KEY");
+        if (ok) args = {std::format("OPENAI_API_KEY={}", ok), "sgpt", prompt};
+        else args = {"sgpt", prompt};
     } else if (provider == "kiro") {
+
         args = {"chat", prompt};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
