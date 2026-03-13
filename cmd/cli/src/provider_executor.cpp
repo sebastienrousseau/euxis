@@ -76,33 +76,39 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         const std::string& prompt,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    std::string binary_path = provider;
-    std::vector<std::string> args;
+    
+    // --- STRATEGIC PIVOT: Shell-Aware Execution ---
+    // Use 'bash -c' to ensure we inherit aliases and exported env vars (like OPENAI_API_KEY).
+    std::string full_command;
+    std::string escaped_prompt = prompt;
+    // Basic escape for shell safety
+    size_t p = 0;
+    while ((p = escaped_prompt.find('"', p)) != std::string::npos) {
+        escaped_prompt.insert(p, "\\");
+        p += 2;
+    }
 
     if (provider == "claude") {
-        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
+        full_command = std::format("claude --model sonnet --permission-mode dontAsk --no-session-persistence -p -- \"{}\"", escaped_prompt);
     } else if (provider == "gemini") {
-        args = {"ask", prompt};
+        full_command = std::format("gemini ask \"{}\"", escaped_prompt);
     } else if (provider == "opencode") {
-        args = {"chat", "--no-interaction", "-p", prompt};
+        full_command = std::format("opencode chat -p \"{}\"", escaped_prompt);
     } else if (provider == "aider") {
-        args = {"--message", prompt, "--no-auto-commits"};
+        full_command = std::format("aider --message \"{}\" --no-auto-commits", escaped_prompt);
     } else if (provider == "sgpt") {
-        const char* ok = std::getenv("OPENAI_API_KEY");
-        if (ok) args = {std::format("OPENAI_API_KEY={}", ok), "sgpt", prompt};
-        else args = {"sgpt", prompt};
+        full_command = std::format("sgpt \"{}\"", escaped_prompt);
     } else if (provider == "kiro") {
-
-        args = {"chat", prompt};
+        full_command = std::format("kiro chat \"{}\"", escaped_prompt);
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
 
     ProcessResult result;
     if (on_chunk) {
-        result = Process::run_streaming(binary_path, args, "", on_chunk, timeout);
+        result = Process::run_streaming("/bin/bash", {"-c", full_command}, "", on_chunk, timeout);
     } else {
-        result = Process::run(binary_path, args, timeout);
+        result = Process::run("/bin/bash", {"-c", full_command}, timeout);
     }
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
