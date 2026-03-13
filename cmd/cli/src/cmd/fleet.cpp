@@ -513,7 +513,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
             if (router.local_available()) {
                 std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to ollama (Local-First Resilience)\n");
                 model.provider = "ollama";
-                model.model = "qwen2.5-coder:32b";
+                model.model = "qwen2.5-coder:7b";
             } else {
                 std::cout << term::dim("    \xe2\x9a\xa0  Stability Guard: pivoting from " + model.provider + " to gemini (Cloud Fallback)\n");
                 model.provider = "gemini";

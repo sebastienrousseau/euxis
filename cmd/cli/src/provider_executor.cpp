@@ -189,7 +189,7 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     // Faster, more robust error reporting, and no model-pull deadlocks.
     if (!Process::available("curl")) return {false, "", "curl not found", 127, 0.0, {}};
     
-    std::string m = model.empty() ? "llama3" : model;
+    std::string m = model.empty() ? "qwen2.5-coder:7b" : model;
     nlohmann::json body;
     body["model"] = m;
     body["prompt"] = prompt;
