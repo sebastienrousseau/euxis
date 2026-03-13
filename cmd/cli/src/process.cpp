@@ -30,8 +30,13 @@ auto ms_remaining(TimePoint deadline) -> int {
 /// Apply resource limits to the child process to prevent OOM (137)
 void apply_resource_limits() {
     // 2026-03-13: Decommissioned setrlimit calls. 
-    // Node.js/V8 initialization is incompatible with RLIMIT_DATA/AS in containerized or mise environments.
-    // We rely on host-level cgroups and the OS OOM killer for safety.
+}
+
+/// Apply environment variables to the child process.
+void apply_env_vars(const std::map<std::string, std::string>& env_vars) {
+    for (const auto& [key, value] : env_vars) {
+        ::setenv(key.c_str(), value.c_str(), 1);
+    }
 }
 
 /// Read all data from a file descriptor, respecting a deadline.
@@ -62,11 +67,9 @@ auto reap_child(pid_t pid, TimePoint deadline) -> int {
         if (w < 0) return -1;
 
         if (Clock::now() >= deadline) {
-            // Graceful shutdown first
             ::kill(pid, SIGTERM);
             ::usleep(200'000);  // 200ms grace
             if (::waitpid(pid, &status, WNOHANG) > 0) return status;
-            // Force kill
             ::kill(pid, SIGKILL);
             ::waitpid(pid, &status, 0);
             return status;
@@ -79,7 +82,8 @@ auto reap_child(pid_t pid, TimePoint deadline) -> int {
 
 auto Process::run(const std::string& program,
                   const std::vector<std::string>& args,
-                  int timeout_seconds) -> ProcessResult {
+                  int timeout_seconds,
+                  const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdout_pipe[2];
     int stderr_pipe[2];
     if (::pipe(stdout_pipe) != 0 || ::pipe(stderr_pipe) != 0) {
@@ -99,8 +103,8 @@ auto Process::run(const std::string& program,
     }
 
     if (pid == 0) {
-        // Child
         apply_resource_limits();
+        apply_env_vars(env_vars);
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
         ::dup2(stdout_pipe[1], STDOUT_FILENO);
@@ -112,7 +116,6 @@ auto Process::run(const std::string& program,
         ::_exit(127);
     }
 
-    // Parent
     ::close(stdout_pipe[1]);
     ::close(stderr_pipe[1]);
 
@@ -140,7 +143,8 @@ auto Process::run(const std::string& program,
 auto Process::run_with_input(const std::string& program,
                               const std::vector<std::string>& args,
                               const std::string& stdin_data,
-                              int timeout_seconds) -> ProcessResult {
+                              int timeout_seconds,
+                              const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdin_pipe[2];
     int stdout_pipe[2];
     int stderr_pipe[2];
@@ -162,8 +166,8 @@ auto Process::run_with_input(const std::string& program,
     }
 
     if (pid == 0) {
-        // Child
         apply_resource_limits();
+        apply_env_vars(env_vars);
         ::close(stdin_pipe[1]);
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
@@ -178,12 +182,10 @@ auto Process::run_with_input(const std::string& program,
         ::_exit(127);
     }
 
-    // Parent
     ::close(stdin_pipe[0]);
     ::close(stdout_pipe[1]);
     ::close(stderr_pipe[1]);
 
-    // Write stdin data then close to signal EOF
     if (!stdin_data.empty()) {
         const char* data = stdin_data.data();
         size_t remaining = stdin_data.size();
@@ -221,7 +223,8 @@ auto Process::run_streaming(const std::string& program,
                             const std::vector<std::string>& args,
                             const std::string& stdin_data,
                             std::function<void(const std::string&)> on_chunk,
-                            int timeout_seconds) -> ProcessResult {
+                            int timeout_seconds,
+                            const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdin_pipe[2];
     int stdout_pipe[2];
     int stderr_pipe[2];
@@ -243,8 +246,8 @@ auto Process::run_streaming(const std::string& program,
     }
 
     if (pid == 0) {
-        // Child
         apply_resource_limits();
+        apply_env_vars(env_vars);
         ::close(stdin_pipe[1]);
         ::close(stdout_pipe[0]);
         ::close(stderr_pipe[0]);
@@ -259,7 +262,6 @@ auto Process::run_streaming(const std::string& program,
         ::_exit(127);
     }
 
-    // Parent
     ::close(stdin_pipe[0]);
     ::close(stdout_pipe[1]);
     ::close(stderr_pipe[1]);
@@ -279,7 +281,6 @@ auto Process::run_streaming(const std::string& program,
     auto deadline = Clock::now() + std::chrono::seconds(timeout_seconds);
     ProcessResult result;
     
-    // Concurrent read using poll
     bool stdout_open = true;
     bool stderr_open = true;
     while (stdout_open || stderr_open) {
@@ -341,7 +342,6 @@ auto Process::shell(const std::string& command, int timeout_seconds) -> ProcessR
 }
 
 auto Process::shell_interactive(const std::string& command) -> int {
-    // system() connects the command to the parent's stdin/stdout/stderr
     int status = std::system(command.c_str());
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);

@@ -38,6 +38,14 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         auth = auth_store_.resolve_with_fallback(effective_provider);
     }
 
+    // --- STRATEGIC PIVOT: Ollama Always Uses REST API ---
+    if (effective_provider == "ollama") {
+        auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
+        auto elapsed = std::chrono::steady_clock::now() - start;
+        resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
+        return resp;
+    }
+
     bool use_cli_bridge = auth.has_value() && auth->is_oauth;
 
     ProviderResponse resp;
@@ -47,8 +55,6 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
     } else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
-    } else if (effective_provider == "ollama") {
-        resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
     } else if (effective_provider == "openai" || (effective_provider == "gemini")) {
         resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
@@ -74,39 +80,50 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     
-    // --- PREMIUM TECH BRIDGE: Login-Preserving Shell ---
-    // We use 'bash -l -c' to ensure all user profiles, paths, and mise shims are active.
-    // We pass the prompt via STDIN to handle massive multi-line inputs safely.
-    std::string full_command;
-    
-    // Inject API Keys ONLY if they are found in the environment
-    std::string auth_prefix;
-    if (const char* ok = std::getenv("OPENAI_API_KEY")) auth_prefix += std::format("export OPENAI_API_KEY={}; ", ok);
-    if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) auth_prefix += std::format("export ANTHROPIC_API_KEY={}; ", ak);
-    if (const char* gk = std::getenv("GEMINI_API_KEY")) auth_prefix += std::format("export GEMINI_API_KEY={}; ", gk);
+    // --- SOVEREIGN ENVIRONMENT BRIDGE ---
+    // Pass prompt via STDIN for reliability.
+    // Inject API Keys natively into the process environment block.
+    std::string binary;
+    std::vector<std::string> args;
+    std::map<std::string, std::string> env_vars;
+
+    if (const char* ok = std::getenv("OPENAI_API_KEY")) env_vars["OPENAI_API_KEY"] = ok;
+    if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
+    if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
 
     if (provider == "claude") {
-        full_command = auth_prefix + "claude --model sonnet --permission-mode dontAsk --no-session-persistence -p -- -";
+        binary = "claude";
+        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", "-"};
     } else if (provider == "gemini") {
-        full_command = auth_prefix + "gemini ask -";
+        binary = "gemini";
+        args = {"ask", "-"};
     } else if (provider == "opencode") {
-        full_command = auth_prefix + "opencode run -";
+        binary = "opencode";
+        args = {"run", "-"};
     } else if (provider == "aider") {
-        full_command = auth_prefix + "aider --message - --no-auto-commits";
+        binary = "aider";
+        args = {"--message", "-", "--no-auto-commits"};
     } else if (provider == "sgpt") {
-        full_command = auth_prefix + "sgpt -";
+        binary = "sgpt";
+        args = {"-"}; 
     } else if (provider == "kiro") {
-        full_command = auth_prefix + "kiro chat -";
+        binary = "kiro";
+        args = {"chat", "-"};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
 
     ProcessResult result;
-    // Using run_with_input to pass the prompt via STDIN to the shell command
     if (on_chunk) {
-        result = Process::run_streaming("/bin/bash", {"-l", "-c", full_command}, prompt, on_chunk, timeout);
+        result = Process::run_streaming(binary, args, prompt, on_chunk, timeout, env_vars);
     } else {
-        result = Process::run_with_input("/bin/bash", {"-l", "-c", full_command}, prompt, timeout);
+        result = Process::run_with_input(binary, args, prompt, timeout, env_vars);
+    }
+
+    if (result.exit_code != 0) {
+        if (result.stderr_output.find("OPENAI_API_KEY") != std::string::npos) {
+            return {false, "", "Auth Failure: OPENAI_API_KEY is missing or invalid for " + provider, result.exit_code, 0.0, {}};
+        }
     }
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
