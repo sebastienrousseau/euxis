@@ -13,9 +13,12 @@ FinOpsRouter::FinOpsRouter(double budget_limit) : budget_limit_(budget_limit) {
     // Legacy struct init to populate SoA
     std::vector<ProviderMetrics> initial_providers = {
         {"ollama", 0.000, 150, 0.95},
-        {"groq", 0.0001, 50, 0.98},
-        {"anthropic", 0.015, 800, 0.99},
-        {"openai", 0.010, 600, 0.99},
+        {"claude", 0.015, 800, 0.99},
+        {"gemini", 0.005, 400, 0.98},
+        {"opencode", 0.010, 600, 0.97},
+        {"aider", 0.012, 700, 0.98},
+        {"sgpt", 0.008, 300, 0.96},
+        {"kiro", 0.015, 500, 0.99},
     };
     
     for (size_t i = 0; i < initial_providers.size(); ++i) {
@@ -29,8 +32,16 @@ FinOpsRouter::FinOpsRouter(double budget_limit) : budget_limit_(budget_limit) {
 
 auto FinOpsRouter::select_provider(const std::string& task_complexity,
                                    const std::string& priority) -> std::string {
+    const size_t n = p_names_.size();
+    if (n == 0) return "ollama";
+
     if (task_complexity == "low") [[likely]] {
         return "ollama";
+    }
+
+    if (priority == "swarm") {
+        static size_t rr_counter = 0;
+        return p_names_[(rr_counter++) % n];
     }
 
     if (priority == "speed") {
@@ -44,9 +55,6 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     }
 
     // Branchless SIMD-optimized scoring loop over SoA arrays
-    const size_t n = p_names_.size();
-    if (n == 0) return "ollama";
-
     std::vector<double> scores(n);
     
     // Hardware-aware optimization: tell GCC to auto-vectorize this loop

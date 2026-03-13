@@ -1,5 +1,7 @@
 #pragma once
 
+#include "euxis/core/router.hpp"
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -41,7 +43,9 @@ public:
 
     /// Get the model for a specific agent + task combination.
     [[nodiscard]] auto route(const std::string& agent_tier,
-                             const std::string& task) const -> ModelSelection;
+                             const std::string& prompt,
+                             const std::string& priority = "") const -> ModelSelection;
+
 
     /// Check if local inference (Ollama) is available.
     [[nodiscard]] auto local_available() const -> bool;
@@ -66,6 +70,8 @@ private:
         std::string reason;
     };
     TierModels models_;
+
+    std::unique_ptr<euxis::core::FinOpsRouter> router_;
 
     void load_config();
     void load_env_overrides();

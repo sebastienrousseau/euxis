@@ -485,6 +485,10 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     };
     check_auth("claude", "claude login");
     check_auth("gemini", "gemini login");
+    check_auth("opencode", "opencode login");
+    check_auth("aider", "pip install aider-chat");
+    check_auth("sgpt", "pip install shell-gpt");
+    check_auth("kiro", "kiro login");
     check_auth("ollama", "ollama serve");
     std::cout << "\n";
 
@@ -520,7 +524,8 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
         auto agent = registry.get_agent(agent_id);
         auto tier = agent ? agent->tier : "code";
-        auto model = router.route(tier, step_task);
+        // USE SWARM PRIORITY FOR DIVERSITY
+        auto model = router.route(tier, step_task, "swarm");
 
         // Pre-emptive fallback logic logic for UI consistency
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
