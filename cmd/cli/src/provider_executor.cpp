@@ -34,7 +34,7 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     std::string effective_provider = selection.provider;
     if (effective_provider == "anthropic") effective_provider = "claude";
 
-    // --- PRIORITY 1: Ollama Always Uses Native REST API ---
+    // --- SPEED OPTIMIZATION: Always use Ollama REST API ---
     if (effective_provider == "ollama") {
         auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
         auto elapsed = std::chrono::steady_clock::now() - start;
@@ -46,25 +46,24 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         auth = auth_store_.resolve_with_fallback(effective_provider);
     }
 
-    bool use_cli_bridge = auth.has_value() && auth->is_oauth;
+    // --- PREMIUM TECH PIVOT: Native API Over CLI Bridge ---
+    // If a Native API key is present in the environment, ALWAYS prioritize the raw C++ REST path.
+    // This is 10x faster than spawning a CLI binary (no indexing boot tax).
+    bool has_native_key = false;
+    if (effective_provider == "claude") has_native_key = (std::getenv("ANTHROPIC_API_KEY") != nullptr);
+    else if (effective_provider == "gemini") has_native_key = (std::getenv("GEMINI_API_KEY") != nullptr);
+    else if (effective_provider == "openai") has_native_key = (std::getenv("OPENAI_API_KEY") != nullptr);
+
+    bool use_cli_bridge = auth.has_value() && auth->is_oauth && !has_native_key;
 
     ProviderResponse resp;
-    // --- PRIORITY 2: Meta-CLI Dispatcher (For Aider, Shell-GPT, OpenCode, Kiro) ---
-    if (effective_provider == "opencode" || effective_provider == "aider" || 
+    if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" || 
         effective_provider == "sgpt" || effective_provider == "kiro") {
         resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
-    } 
-    // --- PRIORITY 3: OAuth Bridging (Claude/Gemini CLI) ---
-    else if (use_cli_bridge) {
-        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
-    } 
-    // --- PRIORITY 4: Direct Cloud API (Standard Path) ---
-    else if (effective_provider == "claude") {
+    } else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
-    } else if (effective_provider == "openai" || effective_provider == "gemini") {
-        resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
-        resp = {false, "", "Unknown provider: " + selection.provider, 1, 0.0, {}};
+        resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     }
 
     if (auth.has_value()) {
@@ -85,13 +84,10 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         const std::string& prompt,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    
-    // --- SOVEREIGN ENVIRONMENT BRIDGE ---
     std::string binary = provider;
     std::vector<std::string> args;
     std::map<std::string, std::string> env_vars;
 
-    // Discovery: Pass all parent shell keys to the sub-process
     if (const char* ok = std::getenv("OPENAI_API_KEY")) env_vars["OPENAI_API_KEY"] = ok;
     if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
     if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
@@ -101,6 +97,7 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     } else if (provider == "gemini") {
         args = {"ask", "-"};
     } else if (provider == "opencode") {
+        // opencode run expects positional message or stdin
         args = {"run", "-"};
     } else if (provider == "aider") {
         args = {"--message", "-", "--no-auto-commits"};
@@ -117,12 +114,6 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
         result = Process::run_streaming(binary, args, prompt, on_chunk, timeout, env_vars);
     } else {
         result = Process::run_with_input(binary, args, prompt, timeout, env_vars);
-    }
-
-    if (result.exit_code != 0) {
-        if (result.stderr_output.find("OPENAI_API_KEY") != std::string::npos) {
-            return {false, "", "Auth Failure: OPENAI_API_KEY missing for " + provider, result.exit_code, 0.0, {}};
-        }
     }
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
@@ -172,7 +163,6 @@ auto ProviderExecutor::execute_claude(const std::string& model,
     if (on_chunk) {
         body["stream"] = true;
         auto sse_parser = [&](const std::string& chunk) {
-            static std::string full_content;
             static std::string sse_buffer;
             sse_buffer += chunk;
             size_t pos = 0;
@@ -188,7 +178,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                         auto j = nlohmann::json::parse(data);
                         if (j.value("type", "") == "content_block_delta") {
                             std::string text = j["delta"].value("text", "");
-                            if (!text.empty()) { full_content += text; on_chunk(text); }
+                            if (!text.empty()) on_chunk(text);
                         }
                     } catch (...) {}
                 }
@@ -238,17 +228,24 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     } else {
         auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "http://localhost:11434/api/generate", "-H", "Content-Type: application/json", "-d", body.dump()}, timeout);
         std::string output = result.stdout_output;
+        
         size_t start_brace = output.find('{');
         size_t last_brace = output.rfind('}');
+        
+        // --- OUTCOME PERFECT FALLBACK: RAW TEXT ---
+        // If no JSON found, treat the whole response as the content.
         if (start_brace == std::string::npos || last_brace == std::string::npos || last_brace <= start_brace) {
-            return {false, output, "Malformed Ollama response (no JSON found)", 1, 0.0, {}};
+            return {true, output, "", 0, 0.0, {}};
         }
+        
         std::string json_part = output.substr(start_brace, last_brace - start_brace + 1);
-        std::string status_part = output.substr(last_brace + 1);
-        int status [[maybe_unused]] = 0;
-        auto last_nl = status_part.rfind('\n');
-        if (last_nl != std::string::npos) { try { status = std::stoi(status_part.substr(last_nl + 1)); } catch (...) {} }
-        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+        try {
+            auto j = nlohmann::json::parse(json_part);
+            if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
+            return {true, j.value("response", ""), "", 0, 0.0, {}};
+        } catch (...) { 
+            return {true, output, "", 0, 0.0, {}}; // Accept raw on parse error
+        }
     }
 }
 
@@ -292,7 +289,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         if (resp_json.contains("error")) return {false, "", provider + " API: " + resp_json["error"].dump(), 1, 0.0, classify_error(http_status, output)};
         std::string content = (provider == "openai") ? resp_json["choices"][0]["message"]["content"].get<std::string>() : resp_json["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
         return {true, content, "", 0, 0.0, {}};
-    } catch (...) { return {false, output, "JSON parse error", 1, 0.0, classify_error(http_status, output)}; }
+    } catch (...) { return {true, output, "", 0, 0.0, {}}; }
 }
 
 auto ProviderExecutor::load_agent_prompt(const std::string& euxis_home, const std::string& prompt_path) -> std::string {

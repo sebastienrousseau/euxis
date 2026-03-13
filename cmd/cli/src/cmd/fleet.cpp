@@ -116,24 +116,22 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     ProviderExecutor executor(ctx.data_dir);
     Session session(ctx.euxis_home);
 
-    // --- SYSTEM INITIALIZATION PROBE (PRIORITIZED) ---
+    // --- SYSTEM INITIALIZATION PROBE ---
     std::cout << "\n" << term::bold(term::cyan("  === SYSTEM INITIALIZATION ===")) << "\n";
     auto check_auth = [&](const std::string& provider, const std::string& reauth_cmd) {
         auto auth = executor.auth_store().resolve_with_fallback(provider);
+        bool has_key = (provider == "openai" && std::getenv("OPENAI_API_KEY")) ||
+                       (provider == "claude" && std::getenv("ANTHROPIC_API_KEY")) ||
+                       (provider == "gemini" && std::getenv("GEMINI_API_KEY"));
         
-        bool has_native_key = false;
-        if (provider == "openai") has_native_key = (std::getenv("OPENAI_API_KEY") != nullptr);
-        else if (provider == "claude") has_native_key = (std::getenv("ANTHROPIC_API_KEY") != nullptr);
-        else if (provider == "gemini") has_native_key = (std::getenv("GEMINI_API_KEY") != nullptr);
-
-        if (has_native_key) {
-            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::green("(Native API Key Found)") << "\n";
+        if (has_key) {
+            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::green("(Native API Key Active)") << "\n";
         } else if (auth && !auth->token.empty()) {
             std::cout << "    " << term::icon_ok() << " " << provider << " " << term::blue("(OAuth Session Active)") << "\n";
         } else if (Process::available(provider)) {
-            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Binary found, assuming CLI auth)") << "\n";
+            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Binary found, CLI auth preserved)") << "\n";
         } else {
-            std::cout << "    " << term::icon_warn() << " " << provider << " " << term::dim("(Not Configured -> Run: `") << term::yellow(reauth_cmd) << term::dim("`)") << "\n";
+            std::cout << "    " << term::icon_warn() << " " << provider << " " << term::dim("(Not Configured -> ") << term::yellow(reauth_cmd) << term::dim(")") << "\n";
         }
     };
     check_auth("claude", "claude login");
@@ -175,7 +173,6 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto model = router.route(tier, step_task, "swarm");
 
         plans.push_back({name, agent_id, step_task, depends, model});
-        
         std::string tier_color = (tier == "reason") ? term::magenta(tier) : term::cyan(tier);
         manifest_rows.push_back({{name, agent_id, tier_color, model.provider, model.model}});
     }
@@ -184,16 +181,22 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     term::print_table({tr("Step Name"), tr("Agent"), tr("Tier"), tr("Provider"), tr("Model")}, manifest_rows);
     std::cout << "\n" << term::bold(term::cyan("  === CONCURRENT SWARM EXECUTION ===")) << "\n";
 
-    // --- CONCURRENT EXECUTION ENGINE ---
-    const int total_resource_slots = 4;
+    // --- HIGH-PERFORMANCE SWARM ENGINE ---
+    // Increase to 8 slots for 2026 workstation-grade parallelism.
+    const int total_resource_slots = 8;
     int used_slots = 0;
     int completed_count = 0;
     int failures = 0;
 
     auto get_weight = [](const std::string& provider) {
-        if (provider == "claude" || provider == "gemini" || provider == "openai") return 4;
+        // Only cloud CLIs are "heavy" due to indexing overhead. Native APIs are light.
+        bool has_key = (provider == "openai" && std::getenv("OPENAI_API_KEY")) ||
+                       (provider == "claude" && std::getenv("ANTHROPIC_API_KEY")) ||
+                       (provider == "gemini" && std::getenv("GEMINI_API_KEY"));
+        
+        if (!has_key && (provider == "claude" || provider == "gemini")) return 4;
         if (provider == "aider" || provider == "opencode") return 2;
-        return 1;
+        return 1; // Native APIs, sgpt, ollama are light.
     };
 
     std::mutex mtx;
@@ -262,7 +265,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                             failures++;
                             if (response.exit_code == 137 || response.exit_code == 143) {
                                 session_failover_provider = "ollama";
-                                std::cout << term::dim("    \xe2\x9a\xa0  Systemic failure. Pivoting to local ollama.\n");
+                                std::cout << term::dim("    \xe2\x9a\xa0  Resource failure. Pivoting to local ollama.\n");
                             }
                         }
                         
@@ -283,17 +286,17 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     }
 
     auto elapsed = std::chrono::steady_clock::now() - start_time;
-    double total_s = std::chrono::duration<double>(elapsed).count();
+    double total_ms = std::chrono::duration<double, std::milli>(elapsed).count();
 
     std::cout << "\n" << term::bold(term::cyan("  === SWARM SUMMARY ===")) << "\n";
     std::cout << "    " << tr("Status:") << "   " << (failures == 0 ? term::green(tr("Success")) : term::red(tr("Partial Failure"))) << "\n";
-    std::cout << "    " << tr("Time:") << "     " << term::format_duration(total_s * 1000.0) << "\n";
+    std::cout << "    " << tr("Time:") << "     " << term::bold(term::format_duration(total_ms)) << " (Outcome Perfect Standard: < 60s)\n";
     std::cout << "    " << tr("Steps:") << "    " << completed_count << "/" << plans.size() << "\n\n";
 
     return (failures > 0) ? 1 : 0;
 }
 
-// --- boilerplate remaining commands ---
+// --- boilerplate ---
 int cmd_dispatch([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
 int cmd_council([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
 int cmd_loop([[maybe_unused]] Context& ctx, [[maybe_unused]] const std::vector<std::string>& args) { return 0; }
