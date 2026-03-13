@@ -77,29 +77,33 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     
-    // --- STRATEGIC PIVOT: Shell-Aware Execution ---
-    // Use 'bash -c' to ensure we inherit aliases and exported env vars (like OPENAI_API_KEY).
     std::string full_command;
     std::string escaped_prompt = prompt;
-    // Basic escape for shell safety
+    // Shell escape
     size_t p = 0;
     while ((p = escaped_prompt.find('"', p)) != std::string::npos) {
         escaped_prompt.insert(p, "\\");
         p += 2;
     }
 
+    // AUTH INJECTION: Prepend discovered keys to command string
+    std::string auth_prefix;
+    if (const char* ok = std::getenv("OPENAI_API_KEY")) auth_prefix += std::format("OPENAI_API_KEY={} ", ok);
+    if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) auth_prefix += std::format("ANTHROPIC_API_KEY={} ", ak);
+    if (const char* gk = std::getenv("GEMINI_API_KEY")) auth_prefix += std::format("GEMINI_API_KEY={} ", gk);
+
     if (provider == "claude") {
-        full_command = std::format("claude --model sonnet --permission-mode dontAsk --no-session-persistence -p -- \"{}\"", escaped_prompt);
+        full_command = std::format("{}claude --model sonnet --permission-mode dontAsk --no-session-persistence -p -- \"{}\"", auth_prefix, escaped_prompt);
     } else if (provider == "gemini") {
-        full_command = std::format("gemini ask \"{}\"", escaped_prompt);
+        full_command = std::format("{}gemini ask \"{}\"", auth_prefix, escaped_prompt);
     } else if (provider == "opencode") {
-        full_command = std::format("opencode chat -p \"{}\"", escaped_prompt);
+        full_command = std::format("{}opencode chat --no-interaction -p \"{}\"", auth_prefix, escaped_prompt);
     } else if (provider == "aider") {
-        full_command = std::format("aider --message \"{}\" --no-auto-commits", escaped_prompt);
+        full_command = std::format("{}aider --message \"{}\" --no-auto-commits", auth_prefix, escaped_prompt);
     } else if (provider == "sgpt") {
-        full_command = std::format("sgpt \"{}\"", escaped_prompt);
+        full_command = std::format("{}sgpt \"{}\"", auth_prefix, escaped_prompt);
     } else if (provider == "kiro") {
-        full_command = std::format("kiro chat \"{}\"", escaped_prompt);
+        full_command = std::format("{}kiro chat \"{}\"", auth_prefix, escaped_prompt);
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
