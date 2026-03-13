@@ -507,17 +507,17 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         // --- Session-Wide Failover Logic ---
         if (!session_failover_provider.empty()) {
             model.provider = session_failover_provider;
-            if (model.provider == "gemini") model.model = "gemini-2.0-flash-lite";
-            else if (model.provider == "ollama") model.model = "qwen2.5-coder:7b";
+            if (model.provider == "ollama") model.model = "qwen2.5-coder:7b";
+            else if (model.provider == "gemini") model.model = "gemini-2.0-flash-lite";
         }
 
         // --- Provider Cooldown Check ---
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
         if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
-            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to failover...\n");
-            if (model.provider == "claude") model.provider = "gemini";
-            else model.provider = "ollama";
-            session_failover_provider = model.provider;
+            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to local failover...\n");
+            model.provider = "ollama";
+            model.model = "qwen2.5-coder:7b";
+            session_failover_provider = "ollama";
         }
 
         // Load agent system prompt
@@ -569,11 +569,8 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
             
             // Trigger failover for the rest of the session if a provider crashes
             if (session_failover_provider.empty()) {
-                if (model.provider == "claude") session_failover_provider = "gemini";
-                else if (model.provider == "gemini") session_failover_provider = "ollama";
-                if (!session_failover_provider.empty()) {
-                    std::cout << term::dim("    \xe2\x9a\xa0  Detected crash. Pivoting to " + session_failover_provider + " for remaining steps.\n");
-                }
+                session_failover_provider = "ollama";
+                std::cout << term::dim("    \xe2\x9a\xa0  Detected crash. Pivoting to local ollama for remaining steps.\n");
             }
             
             ++failures;
