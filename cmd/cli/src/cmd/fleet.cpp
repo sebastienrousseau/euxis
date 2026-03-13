@@ -503,9 +503,8 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto model = router.route(tier, step_task);
 
         // --- Outcome Perfect Pre-emptive Fallback ---
-        // 2026-03-12: The Anthropic API rejects OAuth tokens, and the CLI bridge
-        // OOMs on large repo indexing. If we detect this doomed combination,
-        // autonomously pivot to Gemini or Ollama immediately.
+        // 2026-03-13: Anthropic OAuth tokens are rejected by the public API, 
+        // and the CLI bridge OOMs during indexing. Pivot pre-emptively.
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
         bool is_doomed_oauth = (model.provider == "claude" && auth.has_value() && auth->is_oauth);
         

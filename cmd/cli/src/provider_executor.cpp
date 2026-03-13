@@ -108,7 +108,8 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string claude_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
         if (!std::filesystem::exists(claude_path)) claude_path = "claude";
 
-        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "--ignore", ".git,build,_deps", "-p", "--", prompt};
+        // PERFORMANCE: Claude Code uses .claudeignore for repository filtering.
+        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
         if (on_chunk) {
             auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
             return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
