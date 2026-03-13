@@ -34,11 +34,7 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     std::string effective_provider = selection.provider;
     if (effective_provider == "anthropic") effective_provider = "claude";
 
-    if (!auth.has_value()) {
-        auth = auth_store_.resolve_with_fallback(effective_provider);
-    }
-
-    // --- STRATEGIC PIVOT: Ollama Always Uses REST API ---
+    // --- PRIORITY 1: Ollama Always Uses Native REST API ---
     if (effective_provider == "ollama") {
         auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
         auto elapsed = std::chrono::steady_clock::now() - start;
@@ -46,16 +42,26 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         return resp;
     }
 
+    if (!auth.has_value()) {
+        auth = auth_store_.resolve_with_fallback(effective_provider);
+    }
+
     bool use_cli_bridge = auth.has_value() && auth->is_oauth;
 
     ProviderResponse resp;
-    // --- Meta-CLI Dispatcher ---
-    if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" || 
+    // --- PRIORITY 2: Meta-CLI Dispatcher (For Aider, Shell-GPT, OpenCode, Kiro) ---
+    if (effective_provider == "opencode" || effective_provider == "aider" || 
         effective_provider == "sgpt" || effective_provider == "kiro") {
         resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
-    } else if (effective_provider == "claude") {
+    } 
+    // --- PRIORITY 3: OAuth Bridging (Claude/Gemini CLI) ---
+    else if (use_cli_bridge) {
+        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
+    } 
+    // --- PRIORITY 4: Direct Cloud API (Standard Path) ---
+    else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
-    } else if (effective_provider == "openai" || (effective_provider == "gemini")) {
+    } else if (effective_provider == "openai" || effective_provider == "gemini") {
         resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
         resp = {false, "", "Unknown provider: " + selection.provider, 1, 0.0, {}};
@@ -81,33 +87,26 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
     
     // --- SOVEREIGN ENVIRONMENT BRIDGE ---
-    // Pass prompt via STDIN for reliability.
-    // Inject API Keys natively into the process environment block.
-    std::string binary;
+    std::string binary = provider;
     std::vector<std::string> args;
     std::map<std::string, std::string> env_vars;
 
+    // Discovery: Pass all parent shell keys to the sub-process
     if (const char* ok = std::getenv("OPENAI_API_KEY")) env_vars["OPENAI_API_KEY"] = ok;
     if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
     if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
 
     if (provider == "claude") {
-        binary = "claude";
         args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", "-"};
     } else if (provider == "gemini") {
-        binary = "gemini";
         args = {"ask", "-"};
     } else if (provider == "opencode") {
-        binary = "opencode";
         args = {"run", "-"};
     } else if (provider == "aider") {
-        binary = "aider";
         args = {"--message", "-", "--no-auto-commits"};
     } else if (provider == "sgpt") {
-        binary = "sgpt";
         args = {"-"}; 
     } else if (provider == "kiro") {
-        binary = "kiro";
         args = {"chat", "-"};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
@@ -122,7 +121,7 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
 
     if (result.exit_code != 0) {
         if (result.stderr_output.find("OPENAI_API_KEY") != std::string::npos) {
-            return {false, "", "Auth Failure: OPENAI_API_KEY is missing or invalid for " + provider, result.exit_code, 0.0, {}};
+            return {false, "", "Auth Failure: OPENAI_API_KEY missing for " + provider, result.exit_code, 0.0, {}};
         }
     }
 
