@@ -82,9 +82,16 @@ auto ProviderExecutor::resolve_anthropic_token() -> std::string {
     return {};
 }
 
-auto ProviderExecutor::classify_error(int http_status, [[maybe_unused]] const std::string& body) -> std::optional<CooldownReason> {
+auto ProviderExecutor::classify_error(int http_status, const std::string& body) -> std::optional<CooldownReason> {
     if (http_status == 429) return CooldownReason::RateLimit;
     if (http_status == 401 || http_status == 403) return CooldownReason::AuthError;
+    
+    // Catch scope errors in the body
+    if (body.find("SCOPE_INSUFFICIENT") != std::string::npos || 
+        body.find("PERMISSION_DENIED") != std::string::npos) {
+        return CooldownReason::AuthError;
+    }
+    
     return std::nullopt;
 }
 
@@ -108,7 +115,6 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string claude_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
         if (!std::filesystem::exists(claude_path)) claude_path = "claude";
 
-        // PERFORMANCE: Claude Code uses .claudeignore for repository filtering.
         std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
         if (on_chunk) {
             auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
@@ -168,7 +174,10 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string output = result.stdout_output;
         int status = 0;
         auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) { status = std::stoi(output.substr(last_nl + 1)); output = output.substr(0, last_nl); }
+        if (last_nl != std::string::npos) {
+            try { status = std::stoi(output.substr(last_nl + 1)); } catch (...) {}
+            output = output.substr(0, last_nl);
+        }
         try {
             auto resp_json = nlohmann::json::parse(output);
             if (resp_json.contains("error")) {
@@ -186,8 +195,6 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
                                        const std::string& prompt,
                                        int timeout,
                                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    // --- STRATEGIC PIVOT: Native API Path for Ollama ---
-    // Faster, more robust error reporting, and no model-pull deadlocks.
     if (!Process::available("curl")) return {false, "", "curl not found", 127, 0.0, {}};
     
     std::string m = model.empty() ? "qwen2.5-coder:7b" : model;
@@ -221,11 +228,22 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     } else {
         auto result = Process::run("curl", curl_args, timeout);
         std::string output = result.stdout_output;
-        auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) output = output.substr(0, last_nl);
         
+        // ROBUST PARSER: Find the last JSON object and the status code
+        size_t last_brace = output.rfind('}');
+        if (last_brace == std::string::npos) return {false, output, "Malformed Ollama response", 1, 0.0, {}};
+        
+        std::string json_part = output.substr(0, last_brace + 1);
+        std::string status_part = output.substr(last_brace + 1);
+        
+        int status = 0;
+        auto last_nl = status_part.rfind('\n');
+        if (last_nl != std::string::npos) {
+            try { status = std::stoi(status_part.substr(last_nl + 1)); } catch (...) {}
+        }
+
         try {
-            auto j = nlohmann::json::parse(output);
+            auto j = nlohmann::json::parse(json_part);
             if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
             return {true, j.value("response", ""), "", 0, 0.0, {}};
         } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
@@ -285,7 +303,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         if (resp_json.contains("error")) return {false, "", provider + " API: " + resp_json["error"].dump(), 1, 0.0, classify_error(http_status, output)};
         std::string content = (provider == "openai") ? resp_json["choices"][0]["message"]["content"].get<std::string>() : resp_json["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
         return {true, content, "", 0, 0.0, {}};
-    } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+    } catch (...) { return {false, output, "JSON parse error", 1, 0.0, classify_error(http_status, output)}; }
 }
 
 auto ProviderExecutor::load_agent_prompt(const std::string& euxis_home, const std::string& prompt_path) -> std::string {
