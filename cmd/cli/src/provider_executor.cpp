@@ -82,9 +82,9 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     if (provider == "claude") {
         args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
     } else if (provider == "gemini") {
-        args = {prompt};
+        args = {"ask", prompt};
     } else if (provider == "opencode") {
-        args = {"-p", prompt};
+        args = {"chat", "-p", prompt};
     } else if (provider == "aider") {
         args = {"--message", prompt};
     } else if (provider == "sgpt") {

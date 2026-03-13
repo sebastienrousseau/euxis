@@ -541,12 +541,18 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     term::print_table({tr("Step Name"), tr("Assigned Agent"), tr("Router Provider"), tr("Execution Model")}, manifest_rows);
     std::cout << "\n" << term::bold(term::cyan("  === CONCURRENT SWARM EXECUTION ===")) << "\n";
 
-    // --- Resource Arbiter (Concurrency Control) ---
-    // Cap concurrency to 4 to prevent Node.js CLI bridges from saturating RAM
-    const int max_concurrency = 4;
-    int active_tasks = 0;
+    // --- Resource Arbiter (Weighted Concurrency) ---
+    // Heavily limit memory-intensive CLIs while allowing local parallelism.
+    const int total_resource_slots = 4;
+    int used_slots = 0;
     int completed_count = 0;
     int failures = 0;
+
+    auto get_weight = [](const std::string& provider) {
+        if (provider == "claude" || provider == "gemini") return 4; // Only 1 heavy at a time
+        if (provider == "aider" || provider == "opencode") return 2;
+        return 1; // ollama, sgpt, kiro are light
+    };
 
     std::mutex mtx;
     std::condition_variable cv;
@@ -573,9 +579,10 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                 }
             }
 
-            if (deps_met && active_tasks < max_concurrency) {
+            int weight = get_weight(plans[i].model.provider);
+            if (deps_met && (used_slots + weight) <= total_resource_slots) {
                 started[i] = true;
-                active_tasks++;
+                used_slots += weight;
                 launched_any = true;
 
                 // Launch Thread
@@ -636,7 +643,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
                         completed.insert(plan.name);
                         completed_count++;
-                        active_tasks--;
+                        used_slots -= weight;
                     }
                     cv.notify_all();
                 }).detach();
