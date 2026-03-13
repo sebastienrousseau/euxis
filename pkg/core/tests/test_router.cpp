@@ -9,20 +9,21 @@ TEST(FinOpsRouterTest, SelectionLogic) {
     // Low complexity path
     EXPECT_EQ(r.select_provider("low"), "ollama");
     
-    // Speed priority - groq (50ms) should win
-    EXPECT_EQ(r.select_provider("high", "speed"), "groq");
+    // Speed priority - ollama (150ms) is the current fastest in the list
+    EXPECT_EQ(r.select_provider("high", "speed"), "ollama");
     
     // Cost priority - ollama (0.0) should win
     EXPECT_EQ(r.select_provider("high", "cost"), "ollama");
     
     // Balanced weighted scoring - verify it returns a valid hardcoded provider
     auto best = r.select_provider("high", "balanced");
-    EXPECT_TRUE(best == "ollama" || best == "groq" || best == "anthropic" || best == "openai");
+    EXPECT_TRUE(best == "ollama" || best == "claude" || best == "gemini" || best == "opencode" || best == "aider" || best == "sgpt" || best == "kiro");
 }
 
 TEST(FinOpsRouterTest, UsageTracking) {
     FinOpsRouter r;
-    r.track_usage("groq", 1000);
+    // Use a known provider from the current implementation
+    r.track_usage("claude", 1000);
     EXPECT_GT(r.current_spend(), 0.0);
     
     // Unknown provider warning path
@@ -31,7 +32,8 @@ TEST(FinOpsRouterTest, UsageTracking) {
 
 TEST(FinOpsRouterTest, SessionManagement) {
     FinOpsRouter r;
-    r.track_session_usage("s1", "a1", "groq-model", 100, 100);
+    // Use a known provider model name pattern
+    r.track_session_usage("s1", "a1", "claude-model", 100, 100);
     EXPECT_GT(r.session_cost("s1"), 0.0);
     EXPECT_TRUE(r.check_budget("s1", 1.0));
     EXPECT_FALSE(r.check_budget("s1", 0.000001));
@@ -42,7 +44,7 @@ TEST(FinOpsRouterTest, SessionManagement) {
 
 TEST(FinOpsRouterTest, EvictionAndLRU) {
     FinOpsRouter r;
-    // Fill up to 100
+    // Fill up to 100 (session_limit_ defaults to 100)
     for (int i = 0; i < 100; ++i) r.track_session_usage("s" + std::to_string(i), "a", "ollama", 100, 100);
     EXPECT_GT(r.session_cost("s0"), 0.0);
     
@@ -56,8 +58,6 @@ TEST(FinOpsRouterTest, EvictionAndLRU) {
 }
 
 TEST(FinOpsRouterTest, EmptyProviderScoring) {
-    // We can't easily empty the providers since they are set in constructor,
-    // but we can test the default fallback if no match is found.
     FinOpsRouter r;
     // Balanced selection should return something default (ollama) even if weird input
     EXPECT_FALSE(r.select_provider("medium", "unknown_priority").empty());
