@@ -86,6 +86,11 @@ auto Process::run(const std::string& program,
         return {-1, "", "pipe() failed"};
     }
 
+    std::vector<const char*> argv;
+    argv.push_back(program.c_str());
+    for (const auto& a : args) argv.push_back(a.c_str());
+    argv.push_back(nullptr);
+
     pid_t pid = ::fork();
     if (pid < 0) {
         ::close(stdout_pipe[0]); ::close(stdout_pipe[1]);
@@ -102,11 +107,6 @@ auto Process::run(const std::string& program,
         ::dup2(stderr_pipe[1], STDERR_FILENO);
         ::close(stdout_pipe[1]);
         ::close(stderr_pipe[1]);
-
-        std::vector<const char*> argv;
-        argv.push_back(program.c_str());
-        for (const auto& a : args) argv.push_back(a.c_str());
-        argv.push_back(nullptr);
 
         ::execvp(program.c_str(), const_cast<char* const*>(argv.data()));
         ::_exit(127);
@@ -148,6 +148,11 @@ auto Process::run_with_input(const std::string& program,
         return {-1, "", "pipe() failed"};
     }
 
+    std::vector<const char*> argv;
+    argv.push_back(program.c_str());
+    for (const auto& a : args) argv.push_back(a.c_str());
+    argv.push_back(nullptr);
+
     pid_t pid = ::fork();
     if (pid < 0) {
         ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
@@ -168,11 +173,6 @@ auto Process::run_with_input(const std::string& program,
         ::close(stdin_pipe[0]);
         ::close(stdout_pipe[1]);
         ::close(stderr_pipe[1]);
-
-        std::vector<const char*> argv;
-        argv.push_back(program.c_str());
-        for (const auto& a : args) argv.push_back(a.c_str());
-        argv.push_back(nullptr);
 
         ::execvp(program.c_str(), const_cast<char* const*>(argv.data()));
         ::_exit(127);
@@ -229,6 +229,11 @@ auto Process::run_streaming(const std::string& program,
         return {-1, "", "pipe() failed"};
     }
 
+    std::vector<const char*> argv;
+    argv.push_back(program.c_str());
+    for (const auto& a : args) argv.push_back(a.c_str());
+    argv.push_back(nullptr);
+
     pid_t pid = ::fork();
     if (pid < 0) {
         ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
@@ -249,11 +254,6 @@ auto Process::run_streaming(const std::string& program,
         ::close(stdin_pipe[0]);
         ::close(stdout_pipe[1]);
         ::close(stderr_pipe[1]);
-
-        std::vector<const char*> argv;
-        argv.push_back(program.c_str());
-        for (const auto& a : args) argv.push_back(a.c_str());
-        argv.push_back(nullptr);
 
         ::execvp(program.c_str(), const_cast<char* const*>(argv.data()));
         ::_exit(127);

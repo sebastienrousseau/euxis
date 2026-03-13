@@ -8,10 +8,14 @@
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
 
+#include <condition_variable>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mutex>
+#include <thread>
 #include <unordered_map>
+#include <unordered_set>
 
 using euxis::cli::i18n::tr;
 
@@ -420,7 +424,6 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::string goal = (args.size() > 1) ? args[1] : "Audit and improve the codebase";
 
     if (!fs::exists(manifest_path)) {
-        // Standard Euxis search path for playbooks
         auto std_path = fs::path(ctx.data_dir) / "config" / "playbooks" / (manifest_path_str + ".json");
         if (fs::exists(std_path)) {
             manifest_path = std_path;
@@ -439,14 +442,10 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         return 1;
     }
 
-    std::cout << term::bold(tr("Executing Playbook")) << "\n"
-              << "  " << tr("Source:") << " " << manifest_path << "\n";
-
     nlohmann::json steps;
     if (manifest.contains("steps") && manifest["steps"].is_array()) {
         steps = manifest["steps"];
     } else if (manifest.contains("phases") && manifest["phases"].is_array()) {
-        // Map phases to a flat steps array for backward compatibility with executor
         for (const auto& phase : manifest["phases"]) {
             std::string phase_name = phase.value("name", "Phase");
             if (phase.contains("delegates") && phase["delegates"].is_array()) {
@@ -455,6 +454,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                     step["name"] = phase_name + " / " + d.value("agent", "delegate");
                     step["agent"] = d.value("agent", "");
                     step["task"] = d.value("task_template", "");
+                    if (d.contains("depends")) step["depends"] = d["depends"];
                     steps.push_back(step);
                 }
             }
@@ -466,124 +466,193 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         return 1;
     }
 
-    std::cout << "  " << tr("Steps:") << "  " << steps.size() << "\n\n";
-
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
     Session session(ctx.euxis_home);
 
-    // Track step outputs keyed by step name for dependency resolution
-    std::unordered_map<std::string, std::string> step_outputs;
-    int failures = 0;
-    std::string session_failover_provider;
+    // --- Sub-10ms Auto-Import Verification (The Probe) ---
+    std::cout << "\n" << term::bold(term::cyan("  === SYSTEM INITIALIZATION ===")) << "\n";
+    auto check_auth = [&](const std::string& provider, const std::string& reauth_cmd) {
+        auto auth = executor.auth_store().resolve_with_fallback(provider);
+        if (auth && !auth->token.empty()) {
+            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Valid Session Detected)") << "\n";
+        } else if (Process::available(provider)) {
+            std::cout << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Local/CLI available)") << "\n";
+        } else {
+            std::cout << "    " << term::icon_warn() << " " << provider << " " << term::dim("(Unavailable -> Run: `") << term::yellow(reauth_cmd) << term::dim("`)") << "\n";
+        }
+    };
+    check_auth("claude", "claude login");
+    check_auth("gemini", "gemini login");
+    check_auth("ollama", "ollama serve");
+    std::cout << "\n";
+
+    // --- Prepare Pre-Flight Manifest ---
+    struct StepPlan {
+        std::string name;
+        std::string agent;
+        std::string task;
+        std::vector<std::string> depends;
+        ModelSelection model;
+    };
+    std::vector<StepPlan> plans;
+
+    std::cout << term::bold(term::cyan("  === PRE-FLIGHT MANIFEST ===")) << "\n";
+    std::vector<term::TableRow> manifest_rows;
 
     for (size_t i = 0; i < steps.size(); ++i) {
         const auto& step = steps[i];
         std::string name = step.value("name", "step-" + std::to_string(i + 1));
-        std::string agent_id = step.value("agent", "");
+        std::string agent_id = step.value("agent", "code-agent");
         std::string step_task = step.value("task", manifest.value("task", ""));
         
-        // Simple interpolation for ${goal}
         size_t pos = 0;
         while ((pos = step_task.find("${goal}", pos)) != std::string::npos) {
             step_task.replace(pos, 7, goal);
             pos += goal.length();
         }
 
-        std::cout << "  [" << (i + 1) << "/" << steps.size() << "] "
-                  << term::cyan(name) << " (" << tr("agent:") << " " << agent_id << ")\n";
-
-        if (agent_id.empty()) {
-            std::cerr << "    " << term::icon_fail() << " " << tr("Step missing 'agent' field") << "\n";
-            ++failures;
-            continue;
+        std::vector<std::string> depends;
+        if (step.contains("depends") && step["depends"].is_array()) {
+            for (const auto& d : step["depends"]) depends.push_back(d.get<std::string>());
         }
 
         auto agent = registry.get_agent(agent_id);
         auto tier = agent ? agent->tier : "code";
         auto model = router.route(tier, step_task);
 
-        // --- Session-Wide Failover Logic ---
-        if (!session_failover_provider.empty()) {
-            model.provider = session_failover_provider;
-            if (model.provider == "ollama") model.model = "qwen2.5-coder:7b";
-            else if (model.provider == "gemini") model.model = "gemini-2.0-flash-lite";
-        }
-
-        // --- Provider Cooldown Check ---
+        // Pre-emptive fallback logic logic for UI consistency
         auto auth = executor.auth_store().resolve_with_fallback(model.provider);
         if (auth.has_value() && executor.auth_store().is_cooled_down(auth->profile_id)) {
-            std::cout << term::dim("    \xe2\x9a\xa0  " + model.provider + " is in cooldown. Switching to local failover...\n");
             model.provider = "ollama";
             model.model = "qwen2.5-coder:7b";
-            session_failover_provider = "ollama";
         }
 
-        // Load agent system prompt
-        std::string system_prompt;
-        if (agent && !agent->prompt_path.empty()) {
-            system_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent->prompt_path);
-        }
+        plans.push_back({name, agent_id, step_task, depends, model});
+        manifest_rows.push_back({{name, agent_id, model.provider, model.model}});
+    }
+    
+    term::print_table({tr("Step Name"), tr("Assigned Agent"), tr("Router Provider"), tr("Execution Model")}, manifest_rows);
+    std::cout << "\n" << term::bold(term::cyan("  === CONCURRENT SWARM EXECUTION ===")) << "\n";
 
-        // Build context from dependency outputs
-        std::string context;
-        if (step.contains("depends") && step["depends"].is_array()) {
-            for (const auto& dep : step["depends"]) {
-                std::string dep_name = dep.get<std::string>();
-                auto it = step_outputs.find(dep_name);
-                if (it != step_outputs.end()) {
-                    if (!context.empty()) context += "\n\n---\n\n";
-                    context += "## Output from " + dep_name + "\n\n" + it->second;
+    // --- Resource Arbiter (Concurrency Control) ---
+    // Cap concurrency to 4 to prevent Node.js CLI bridges from saturating RAM
+    const int max_concurrency = 4;
+    int active_tasks = 0;
+    int completed_count = 0;
+    int failures = 0;
+
+    std::mutex mtx;
+    std::condition_variable cv;
+    std::unordered_set<std::string> completed;
+    std::unordered_map<std::string, std::string> step_outputs;
+    std::vector<bool> started(plans.size(), false);
+    std::string session_failover_provider;
+
+    auto start_time = std::chrono::steady_clock::now();
+
+    while (completed_count < (int)plans.size()) {
+        std::unique_lock<std::mutex> lock(mtx);
+        bool launched_any = false;
+
+        for (size_t i = 0; i < plans.size(); ++i) {
+            if (started[i]) continue;
+
+            // Check if dependencies are met
+            bool deps_met = true;
+            for (const auto& d : plans[i].depends) {
+                if (completed.find(d) == completed.end()) {
+                    deps_met = false;
+                    break;
                 }
             }
+
+            if (deps_met && active_tasks < max_concurrency) {
+                started[i] = true;
+                active_tasks++;
+                launched_any = true;
+
+                // Launch Thread
+                std::thread([&, i, plan = plans[i]]() {
+                    // Build context
+                    std::string context;
+                    {
+                        std::lock_guard<std::mutex> lk(mtx);
+                        for (const auto& d : plan.depends) {
+                            context += "## Output from " + d + "\n\n" + step_outputs[d] + "\n\n---\n\n";
+                        }
+                    }
+
+                    {
+                        std::lock_guard<std::mutex> lk(mtx);
+                        std::cout << "  " << term::icon_info() << " " << tr("Starting ") << term::bold(plan.name) 
+                                  << term::dim(" (" + plan.model.provider + ")") << "\n";
+                    }
+
+                    ModelSelection active_model = plan.model;
+                    {
+                        std::lock_guard<std::mutex> lk(mtx);
+                        if (!session_failover_provider.empty()) {
+                            active_model.provider = session_failover_provider;
+                            if (active_model.provider == "ollama") active_model.model = "qwen2.5-coder:7b";
+                            else if (active_model.provider == "gemini") active_model.model = "gemini-2.0-flash-lite";
+                        }
+                    }
+
+                    auto agent = registry.get_agent(plan.agent);
+                    std::string sys_prompt;
+                    if (agent && !agent->prompt_path.empty()) {
+                        sys_prompt = ProviderExecutor::load_agent_prompt(ctx.euxis_home, agent->prompt_path);
+                    }
+                    auto combined_prompt = ProviderExecutor::build_prompt(sys_prompt, plan.task, context);
+
+                    auto response = executor.execute(active_model, combined_prompt);
+
+                    {
+                        std::lock_guard<std::mutex> lk(mtx);
+                        if (response.success) {
+                            step_outputs[plan.name] = response.output;
+                            std::cout << "    " << term::icon_ok() << " " << term::bold(plan.name) << " "
+                                      << term::dim(std::format("[{} chars, {}]", response.output.size(), term::format_duration(response.duration_ms))) << "\n";
+                        } else {
+                            std::cerr << "    " << term::icon_fail() << " " << term::bold(plan.name) << ": "
+                                      << response.error << " (Exit Code: " << response.exit_code << ")\n";
+                            failures++;
+                            if (session_failover_provider.empty()) {
+                                session_failover_provider = "ollama";
+                                std::cout << term::dim("    \xe2\x9a\xa0  Detected crash. Pivoting to local ollama for remaining steps.\n");
+                            }
+                        }
+                        
+                        auto project_dir = session.ensure_project_dirs(plan.agent);
+                        auto output_path = fs::path(project_dir) / "output" / ("playbook-" + plan.name + ".md");
+                        write_output_file(output_path, response.output);
+
+                        completed.insert(plan.name);
+                        completed_count++;
+                        active_tasks--;
+                    }
+                    cv.notify_all();
+                }).detach();
+            }
         }
 
-        auto combined_prompt = ProviderExecutor::build_prompt(system_prompt, step_task, context);
-
-        // Invoke provider
-        int frame = 0;
-        term::spinner_frame(frame++, tr("Running ") + name + "...");
-        auto response = executor.execute(model, combined_prompt);
-        term::spinner_clear();
-
-        if (response.success) {
-            step_outputs[name] = response.output;
-
-            // Write output to session dir
-            auto project_dir = session.ensure_project_dirs(agent_id);
-            auto output_path = fs::path(project_dir) / "output"
-                               / ("playbook-" + name + ".md");
-            write_output_file(output_path, response.output);
-
-            std::cout << "    " << term::icon_ok() << " "
-                      << response.output.size() << " " << tr("chars") << ", "
-                      << term::format_duration(response.duration_ms) << "\n";
-        } else {
-            std::cerr << "    " << term::icon_fail() << " " << name << ": "
-                      << response.error << " (Exit Code: " << response.exit_code << ")\n";
-            
-            if (!response.output.empty()) {
-                std::cout << term::dim("    (Partial output captured)") << "\n";
-            }
-            
-            // Trigger failover for the rest of the session if a provider crashes
-            if (session_failover_provider.empty()) {
-                session_failover_provider = "ollama";
-                std::cout << term::dim("    \xe2\x9a\xa0  Detected crash. Pivoting to local ollama for remaining steps.\n");
-            }
-            
-            ++failures;
+        if (!launched_any && completed_count < (int)plans.size()) {
+            cv.wait(lock);
         }
     }
+
+    auto elapsed = std::chrono::steady_clock::now() - start_time;
+    double total_ms = std::chrono::duration<double, std::milli>(elapsed).count();
 
     std::cout << "\n";
     if (failures > 0) {
-        std::cout << term::icon_warn() << " " << tr("Playbook finished with ")
-                  << failures << tr(" failure(s)") << "\n";
+        std::cout << term::icon_warn() << " " << term::bold(tr("Playbook finished with "))
+                  << failures << term::bold(tr(" failure(s) in ")) << term::format_duration(total_ms) << "\n";
         return 1;
     }
-    std::cout << term::icon_ok() << " " << tr("Playbook complete") << "\n";
+    std::cout << term::icon_ok() << " " << term::bold(tr("Playbook complete in ")) << term::format_duration(total_ms) << "\n";
     return 0;
 }
 
