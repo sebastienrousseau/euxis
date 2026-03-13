@@ -29,19 +29,9 @@ auto ms_remaining(TimePoint deadline) -> int {
 
 /// Apply resource limits to the child process to prevent OOM (137)
 void apply_resource_limits() {
-    struct rlimit mem_limit;
-    // Set physical data limit to 4GB
-    mem_limit.rlim_cur = 4096LL * 1024 * 1024;
-    mem_limit.rlim_max = 4096LL * 1024 * 1024;
-    
-#ifdef RLIMIT_DATA
-    ::setrlimit(RLIMIT_DATA, &mem_limit);
-#endif
-#ifdef RLIMIT_RSS
-    ::setrlimit(RLIMIT_RSS, &mem_limit);
-#endif
-    // Note: We avoid RLIMIT_AS here because Node.js/V8 requires large virtual address space
-    // for its segmented tables, even if physical residency is low.
+    // 2026-03-13: Decommissioned setrlimit calls. 
+    // Node.js/V8 initialization is incompatible with RLIMIT_DATA/AS in containerized or mise environments.
+    // We rely on host-level cgroups and the OS OOM killer for safety.
 }
 
 /// Read all data from a file descriptor, respecting a deadline.

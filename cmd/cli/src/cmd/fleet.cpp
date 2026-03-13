@@ -561,7 +561,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                       << term::format_duration(response.duration_ms) << "\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << name << ": "
-                      << response.error << "\n";
+                      << response.error << " (Exit Code: " << response.exit_code << ")\n";
             
             if (!response.output.empty()) {
                 std::cout << term::dim("    (Partial output captured)") << "\n";

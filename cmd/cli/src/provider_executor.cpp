@@ -76,34 +76,30 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         const std::string& prompt,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    std::string binary_path;
+    std::string binary_path = provider;
     std::vector<std::string> args;
 
     if (provider == "claude") {
-        binary_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
-        if (!std::filesystem::exists(binary_path)) binary_path = "claude";
-        args = {"-u", "CLAUDE_CODE_ENTRYPOINT", binary_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
+        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
     } else if (provider == "gemini") {
-        binary_path = "/home/seb/.local/share/mise/installs/npm-google-gemini-cli/0.31.0/bin/gemini";
-        if (!std::filesystem::exists(binary_path)) binary_path = "gemini";
-        args = {binary_path, prompt};
+        args = {prompt};
     } else if (provider == "opencode") {
-        args = {"opencode", "-p", prompt};
+        args = {"-p", prompt};
     } else if (provider == "aider") {
-        args = {"aider", "--message", prompt};
+        args = {"--message", prompt};
     } else if (provider == "sgpt") {
-        args = {"sgpt", prompt};
+        args = {prompt};
     } else if (provider == "kiro") {
-        args = {"kiro", "chat", prompt};
+        args = {"chat", prompt};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
 
     ProcessResult result;
     if (on_chunk) {
-        result = Process::run_streaming("env", args, "", on_chunk, timeout);
+        result = Process::run_streaming(binary_path, args, "", on_chunk, timeout);
     } else {
-        result = Process::run("env", args, timeout);
+        result = Process::run(binary_path, args, timeout);
     }
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
@@ -219,30 +215,17 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     } else {
         auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "http://localhost:11434/api/generate", "-H", "Content-Type: application/json", "-d", body.dump()}, timeout);
         std::string output = result.stdout_output;
-        
-        // --- GREEDY JSON FALLBACK ---
-        // Find the first { and the last } to capture only the JSON body
         size_t start_brace = output.find('{');
         size_t last_brace = output.rfind('}');
-        
         if (start_brace == std::string::npos || last_brace == std::string::npos || last_brace <= start_brace) {
             return {false, output, "Malformed Ollama response (no JSON found)", 1, 0.0, {}};
         }
-        
         std::string json_part = output.substr(start_brace, last_brace - start_brace + 1);
         std::string status_part = output.substr(last_brace + 1);
-        
         int status [[maybe_unused]] = 0;
         auto last_nl = status_part.rfind('\n');
-        if (last_nl != std::string::npos) {
-            try { status = std::stoi(status_part.substr(last_nl + 1)); } catch (...) {}
-        }
-
-        try {
-            auto j = nlohmann::json::parse(json_part);
-            if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
-            return {true, j.value("response", ""), "", 0, 0.0, {}};
-        } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+        if (last_nl != std::string::npos) { try { status = std::stoi(status_part.substr(last_nl + 1)); } catch (...) {} }
+        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
     }
 }
 
