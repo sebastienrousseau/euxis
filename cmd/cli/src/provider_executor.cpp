@@ -108,8 +108,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string claude_path = "/home/seb/.local/share/mise/installs/npm-anthropic-ai-claude-code/2.1.63/bin/claude";
         if (!std::filesystem::exists(claude_path)) claude_path = "claude";
 
-        // Remove unknown '--ignore' flag. Claude Code uses .claudeignore.
-        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
+        std::vector<std::string> args = {"-u", "CLAUDE_CODE_ENTRYPOINT", claude_path, "--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "--ignore", ".git,build,_deps", "-p", "--", prompt};
         if (on_chunk) {
             auto result = Process::run_streaming("env", args, "", on_chunk, timeout);
             return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
@@ -186,14 +185,50 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
                                        const std::string& prompt,
                                        int timeout,
                                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    std::string ollama_path = "/home/seb/.local/share/mise/shims/ollama";
-    if (!std::filesystem::exists(ollama_path)) ollama_path = "ollama";
+    // --- STRATEGIC PIVOT: Native API Path for Ollama ---
+    // Faster, more robust error reporting, and no model-pull deadlocks.
+    if (!Process::available("curl")) return {false, "", "curl not found", 127, 0.0, {}};
+    
+    std::string m = model.empty() ? "llama3" : model;
+    nlohmann::json body;
+    body["model"] = m;
+    body["prompt"] = prompt;
+    body["stream"] = (on_chunk != nullptr);
 
-    std::string m = model.empty() ? "qwen2.5-coder:32b" : model;
-    ProcessResult result;
-    if (on_chunk) result = Process::run_streaming(ollama_path, {"run", m}, prompt, on_chunk, timeout);
-    else result = Process::run_with_input(ollama_path, {"run", m}, prompt, timeout);
-    return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
+    std::vector<std::string> curl_args = {
+        "-s", "-S", "-w", "\n%{http_code}",
+        "http://localhost:11434/api/generate",
+        "-H", "Content-Type: application/json",
+        "-d", body.dump()
+    };
+
+    if (on_chunk) {
+        auto sse_parser = [&](const std::string& chunk) {
+            std::istringstream stream(chunk);
+            std::string line;
+            while (std::getline(stream, line)) {
+                if (line.empty()) continue;
+                try {
+                    auto j = nlohmann::json::parse(line);
+                    std::string text = j.value("response", "");
+                    if (!text.empty()) on_chunk(text);
+                } catch (...) {}
+            }
+        };
+        auto result = Process::run_streaming("curl", curl_args, "", sse_parser, timeout);
+        return {result.exit_code == 0, "Stream complete", result.stderr_output, result.exit_code, 0.0, {}};
+    } else {
+        auto result = Process::run("curl", curl_args, timeout);
+        std::string output = result.stdout_output;
+        auto last_nl = output.rfind('\n');
+        if (last_nl != std::string::npos) output = output.substr(0, last_nl);
+        
+        try {
+            auto j = nlohmann::json::parse(output);
+            if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
+            return {true, j.value("response", ""), "", 0, 0.0, {}};
+        } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+    }
 }
 
 auto ProviderExecutor::execute_api(const std::string& provider,
@@ -220,11 +255,9 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         std::string m = model.empty() ? "gemini-2.0-flash-lite" : model;
         
         if (use_oauth) {
-            // Google Vertex / OAuth endpoint
             url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent";
             auth_header = "Authorization: Bearer " + token;
         } else {
-            // Standard API Key endpoint
             url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + token;
         }
         body["contents"] = nlohmann::json::array({{{"parts", nlohmann::json::array({{{"text", prompt}}})}}});
