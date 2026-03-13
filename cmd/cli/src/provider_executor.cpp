@@ -52,7 +52,6 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     // --- META-CLI DISPATCHER ---
     if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" || 
         effective_provider == "sgpt" || effective_provider == "kiro") {
-        // High-Complexity Tasks receive 300s headroom
         resp = execute_via_cli(effective_provider, selection.model, prompt, 300, on_chunk);
     } else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
@@ -87,30 +86,35 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
     if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
 
-    // --- SPEED OPTIMIZATION: Disable Indexing ---
+    // --- REFINED ARGUMENT MAPPING ---
     if (provider == "claude") {
-        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", "-"};
+        binary = "claude";
+        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
     } else if (provider == "gemini") {
-        args = {"ask", "-"};
+        binary = "gemini";
+        args = {"ask", prompt};
     } else if (provider == "opencode") {
-        // Force non-interactive, no-indexing mode for Opencode
-        args = {"run", "--no-index", "-"};
+        binary = "opencode";
+        args = {"run", prompt};
     } else if (provider == "aider") {
-        // Force no-git and no-auto-commit to bypass 90s indexing lag
-        args = {"--message", "-", "--no-git", "--no-auto-commits", "--light-mode"};
+        binary = "aider";
+        args = {"--message", prompt, "--no-git", "--no-auto-commits", "--light-mode"};
     } else if (provider == "sgpt") {
-        args = {"-"}; 
+        binary = "sgpt";
+        args = {prompt}; 
     } else if (provider == "kiro") {
-        args = {"chat", "-"};
+        binary = "kiro";
+        args = {"chat", prompt};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
 
     ProcessResult result;
+    // We pivot back to direct argument passing for CLIs that don't support stdin pipes correctly.
     if (on_chunk) {
-        result = Process::run_streaming(binary, args, prompt, on_chunk, timeout, env_vars);
+        result = Process::run_streaming(binary, args, "", on_chunk, timeout, env_vars);
     } else {
-        result = Process::run_with_input(binary, args, prompt, timeout, env_vars);
+        result = Process::run(binary, args, timeout, env_vars);
     }
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
