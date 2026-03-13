@@ -34,7 +34,7 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
     std::string effective_provider = selection.provider;
     if (effective_provider == "anthropic") effective_provider = "claude";
 
-    // --- SPEED OPTIMIZATION: Always use Ollama REST API ---
+    // --- PRIORITY 1: Ollama Native REST ---
     if (effective_provider == "ollama") {
         auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
         auto elapsed = std::chrono::steady_clock::now() - start;
@@ -46,20 +46,14 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         auth = auth_store_.resolve_with_fallback(effective_provider);
     }
 
-    // --- PREMIUM TECH PIVOT: Native API Over CLI Bridge ---
-    // If a Native API key is present in the environment, ALWAYS prioritize the raw C++ REST path.
-    // This is 10x faster than spawning a CLI binary (no indexing boot tax).
-    bool has_native_key = false;
-    if (effective_provider == "claude") has_native_key = (std::getenv("ANTHROPIC_API_KEY") != nullptr);
-    else if (effective_provider == "gemini") has_native_key = (std::getenv("GEMINI_API_KEY") != nullptr);
-    else if (effective_provider == "openai") has_native_key = (std::getenv("OPENAI_API_KEY") != nullptr);
-
-    bool use_cli_bridge = auth.has_value() && auth->is_oauth && !has_native_key;
+    bool use_cli_bridge = auth.has_value() && auth->is_oauth;
 
     ProviderResponse resp;
+    // --- META-CLI DISPATCHER ---
     if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" || 
         effective_provider == "sgpt" || effective_provider == "kiro") {
-        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
+        // High-Complexity Tasks receive 300s headroom
+        resp = execute_via_cli(effective_provider, selection.model, prompt, 300, on_chunk);
     } else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
@@ -84,6 +78,7 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         const std::string& prompt,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    
     std::string binary = provider;
     std::vector<std::string> args;
     std::map<std::string, std::string> env_vars;
@@ -92,15 +87,17 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
     if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
 
+    // --- SPEED OPTIMIZATION: Disable Indexing ---
     if (provider == "claude") {
         args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", "-"};
     } else if (provider == "gemini") {
         args = {"ask", "-"};
     } else if (provider == "opencode") {
-        // opencode run expects positional message or stdin
-        args = {"run", "-"};
+        // Force non-interactive, no-indexing mode for Opencode
+        args = {"run", "--no-index", "-"};
     } else if (provider == "aider") {
-        args = {"--message", "-", "--no-auto-commits"};
+        // Force no-git and no-auto-commit to bypass 90s indexing lag
+        args = {"--message", "-", "--no-git", "--no-auto-commits", "--light-mode"};
     } else if (provider == "sgpt") {
         args = {"-"}; 
     } else if (provider == "kiro") {
@@ -228,24 +225,13 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     } else {
         auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "http://localhost:11434/api/generate", "-H", "Content-Type: application/json", "-d", body.dump()}, timeout);
         std::string output = result.stdout_output;
-        
         size_t start_brace = output.find('{');
         size_t last_brace = output.rfind('}');
-        
-        // --- OUTCOME PERFECT FALLBACK: RAW TEXT ---
-        // If no JSON found, treat the whole response as the content.
         if (start_brace == std::string::npos || last_brace == std::string::npos || last_brace <= start_brace) {
             return {true, output, "", 0, 0.0, {}};
         }
-        
         std::string json_part = output.substr(start_brace, last_brace - start_brace + 1);
-        try {
-            auto j = nlohmann::json::parse(json_part);
-            if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
-            return {true, j.value("response", ""), "", 0, 0.0, {}};
-        } catch (...) { 
-            return {true, output, "", 0, 0.0, {}}; // Accept raw on parse error
-        }
+        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (...) { return {true, output, "", 0, 0.0, {}}; }
     }
 }
 
