@@ -35,6 +35,20 @@ auto icon_warn() -> std::string { return yellow("⚠"); }
 auto icon_skip() -> std::string { return dim("↷"); }
 auto icon_info() -> std::string { return blue("ℹ"); }
 
+auto format_duration(double ms) -> std::string {
+    if (ms < 1.0) return std::format("{:.2f}µs", ms * 1000.0);
+    if (ms < 1000.0) return std::format("{:.1f}ms", ms);
+    
+    double seconds = ms / 1000.0;
+    if (seconds < 60.0) return std::format("{:.2f}s", seconds);
+    
+    double minutes = seconds / 60.0;
+    if (minutes < 60.0) return std::format("{:.1f}min", minutes);
+    
+    double hours = minutes / 60.0;
+    return std::format("{:.1f}h", hours);
+}
+
 void spinner_frame(int frame, std::string_view message) {
     static const char* frames[] = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
     std::fprintf(stderr, "\r%s %.*s", frames[frame % 10], (int)message.size(), message.data());

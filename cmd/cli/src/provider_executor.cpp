@@ -38,9 +38,6 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         auth = auth_store_.resolve_with_fallback(effective_provider);
     }
 
-    // --- STRATEGIC PIVOT: Universal CLI Passthrough ---
-    // If we detect OAuth (passthrough), we use the CLI Bridge instead of raw API.
-    // This avoids 403 Scope errors and 401 Auth errors.
     bool use_cli_bridge = auth.has_value() && auth->is_oauth;
 
     ProviderResponse resp;
@@ -54,6 +51,9 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
     } else if (effective_provider == "openai" || (effective_provider == "gemini" && !use_cli_bridge)) {
         resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
+    } else if (effective_provider == "opencode" || effective_provider == "aider" || 
+               effective_provider == "sgpt" || effective_provider == "kiro") {
+        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
     } else {
         resp = {false, "", "Unknown provider or missing auth: " + selection.provider, 1, 0.0, {}};
     }
@@ -86,8 +86,15 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
     } else if (provider == "gemini") {
         binary_path = "/home/seb/.local/share/mise/installs/npm-google-gemini-cli/0.31.0/bin/gemini";
         if (!std::filesystem::exists(binary_path)) binary_path = "gemini";
-        // Gemini CLI uses direct prompt as argument or stdin
         args = {binary_path, prompt};
+    } else if (provider == "opencode") {
+        args = {"opencode", "-p", prompt};
+    } else if (provider == "aider") {
+        args = {"aider", "--message", prompt};
+    } else if (provider == "sgpt") {
+        args = {"sgpt", prompt};
+    } else if (provider == "kiro") {
+        args = {"kiro", "chat", prompt};
     } else {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
@@ -133,7 +140,6 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                                        int timeout,
                                        const std::optional<ResolvedAuth>& auth,
                                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    // Non-OAuth (API Key) path remains high-speed direct API
     std::string token = auth.has_value() ? auth->token : resolve_anthropic_token();
     if (token.empty()) return {false, "", "No Anthropic auth found.", 1, 0.0, {}};
 
@@ -213,10 +219,30 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
     } else {
         auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "http://localhost:11434/api/generate", "-H", "Content-Type: application/json", "-d", body.dump()}, timeout);
         std::string output = result.stdout_output;
+        
+        // --- GREEDY JSON FALLBACK ---
+        // Find the first { and the last } to capture only the JSON body
+        size_t start_brace = output.find('{');
         size_t last_brace = output.rfind('}');
-        if (last_brace == std::string::npos) return {false, output, "Malformed Ollama response", 1, 0.0, {}};
-        std::string json_part = output.substr(0, last_brace + 1);
-        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+        
+        if (start_brace == std::string::npos || last_brace == std::string::npos || last_brace <= start_brace) {
+            return {false, output, "Malformed Ollama response (no JSON found)", 1, 0.0, {}};
+        }
+        
+        std::string json_part = output.substr(start_brace, last_brace - start_brace + 1);
+        std::string status_part = output.substr(last_brace + 1);
+        
+        int status [[maybe_unused]] = 0;
+        auto last_nl = status_part.rfind('\n');
+        if (last_nl != std::string::npos) {
+            try { status = std::stoi(status_part.substr(last_nl + 1)); } catch (...) {}
+        }
+
+        try {
+            auto j = nlohmann::json::parse(json_part);
+            if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}};
+            return {true, j.value("response", ""), "", 0, 0.0, {}};
+        } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
     }
 }
 

@@ -35,6 +35,9 @@ auto icon_warn() -> std::string;
 auto icon_skip() -> std::string;
 auto icon_info() -> std::string;
 
+/// Returns a human-readable duration string (ms, s, min, h).
+auto format_duration(double ms) -> std::string;
+
 // --- Spinner ---
 
 /// Print a spinner frame to stderr. Call repeatedly with incrementing frame.

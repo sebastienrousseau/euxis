@@ -388,7 +388,7 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
 
             std::cout << "    " << term::icon_ok() << " "
                       << response.output.size() << " " << tr("chars") << ", "
-                      << response.duration_ms << "ms\n";
+                      << term::format_duration(response.duration_ms) << "\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << aid << ": "
                       << response.error << "\n";
@@ -558,7 +558,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
             std::cout << "    " << term::icon_ok() << " "
                       << response.output.size() << " " << tr("chars") << ", "
-                      << response.duration_ms << "ms\n";
+                      << term::format_duration(response.duration_ms) << "\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << name << ": "
                       << response.error << "\n";
@@ -662,7 +662,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 
             std::cout << "    " << term::icon_ok() << " "
                       << response.output.size() << " " << tr("chars") << ", "
-                      << response.duration_ms << "ms\n";
+                      << term::format_duration(response.duration_ms) << "\n";
         } else {
             std::cerr << "    " << term::icon_fail() << " " << aid << ": "
                       << response.error << "\n";
