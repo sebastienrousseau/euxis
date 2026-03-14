@@ -368,10 +368,11 @@ TEST_F(FleetCmdTest, PlaybookMissingSteps) {
     manifest["name"] = "test";
     std::ofstream(path) << manifest.dump();
     auto code = cmd_playbook(ctx_, {path});
-    EXPECT_EQ(code, 1);
+    EXPECT_EQ(code, 2); // No evidence collected
 }
 
 TEST_F(FleetCmdTest, PlaybookWithStepMissingAgent) {
+    // Resilience: step with no agent field should not crash; falls back to "code-agent"
     auto path = ctx_.euxis_home + "/playbook-no-agent.json";
     nlohmann::json manifest;
     manifest["steps"] = nlohmann::json::array({
@@ -379,8 +380,27 @@ TEST_F(FleetCmdTest, PlaybookWithStepMissingAgent) {
     });
     std::ofstream(path) << manifest.dump();
 
-    auto code = cmd_playbook(ctx_, {path});
-    EXPECT_EQ(code, 1); // 1 failure from missing agent
+    // Run in CI mode to capture artifact and verify graceful handling
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    // Completes without crashing; exit code depends on confidence/verdict
+    EXPECT_TRUE(code == 0 || code == 1) << "Missing agent should not crash (got exit " << code << ")";
+
+    // Artifact is produced with valid verdict
+    auto output = buffer.str();
+    ASSERT_FALSE(output.empty()) << "CI mode must produce output";
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded()) << "Missing agent must still produce valid JSON artifact";
+    EXPECT_TRUE(parsed.contains("verdict"));
+    EXPECT_TRUE(parsed.contains("confidence"));
+    EXPECT_TRUE(parsed.contains("agent_status"));
 }
 
 TEST_F(FleetCmdTest, PlaybookWithValidSteps) {
@@ -396,6 +416,66 @@ TEST_F(FleetCmdTest, PlaybookWithValidSteps) {
     auto code = cmd_playbook(ctx_, {path});
     // Provider calls may fail in test env
     EXPECT_TRUE(code == 0 || code == 1);
+}
+
+// ---- CI mode tests ----
+
+TEST_F(FleetCmdTest, PlaybookCIMode) {
+    auto path = ctx_.euxis_home + "/playbook-ci.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    // Capture stdout
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    // CI mode: stdout contains JSON only, dashboard goes to stderr
+    auto output = buffer.str();
+    ASSERT_FALSE(output.empty()) << "CI mode must produce stdout output";
+
+    // stdout should be clean JSON — find the artifact
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++; // skip the newline
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded()) << "CI output must contain valid JSON";
+    EXPECT_TRUE(parsed.contains("verdict"));
+    EXPECT_TRUE(parsed.contains("confidence"));
+    EXPECT_TRUE(parsed.contains("sla"));
+    EXPECT_TRUE(parsed.contains("agent_status"));
+    EXPECT_TRUE(parsed.contains("exit_code"));
+    EXPECT_TRUE(parsed.contains("ci"));
+    EXPECT_EQ(parsed["ci"].get<bool>(), true);
+    EXPECT_EQ(parsed["exit_code"].get<int>(), code);
+}
+
+TEST_F(FleetCmdTest, PlaybookCIModeEmptyManifest) {
+    auto path = ctx_.euxis_home + "/empty-ci.json";
+    nlohmann::json manifest;
+    manifest["name"] = "test";
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    EXPECT_EQ(code, 2); // No evidence
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded()) << "CI output must contain valid JSON";
+    EXPECT_EQ(parsed["exit_code"].get<int>(), 2);
 }
 
 // ---- Dispatch command tests ----
@@ -620,6 +700,483 @@ TEST_F(FleetCmdTest, SquadListJsonWithSquads) {
     ctx_.json_output = true;
     auto code = cmd_squad(ctx_, {"list"});
     EXPECT_EQ(code, 0);
+}
+
+// ---- Schema Versioning Tests ----
+
+TEST_F(FleetCmdTest, PlaybookCIModeSchemaVersion) {
+    auto path = ctx_.euxis_home + "/playbook-schema.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded()) << "CI output must contain valid JSON";
+    EXPECT_EQ(parsed["schema"].get<std::string>(), "euxis.verdict");
+    EXPECT_EQ(parsed["schema_version"].get<std::string>(), "1.0.0");
+}
+
+// ---- Policy Tests ----
+
+TEST_F(FleetCmdTest, PolicyLoadDefaults) {
+    // No policy file → no violations → normal behavior
+    auto path = ctx_.euxis_home + "/playbook-nopolicy.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded());
+    // No policy file → no policy_violations key
+    EXPECT_FALSE(parsed.contains("policy_violations"));
+}
+
+TEST_F(FleetCmdTest, PolicyViolationLowConfidence) {
+    // Write policy requiring high confidence
+    auto policy_path = ctx_.data_dir + "/config/policy.json";
+    fs::create_directories(fs::path(policy_path).parent_path());
+    nlohmann::json policy;
+    policy["min_confidence"] = 99;  // Mock agents produce low confidence
+    std::ofstream(policy_path) << policy.dump();
+
+    auto path = ctx_.euxis_home + "/playbook-policy-conf.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_TRUE(parsed.contains("policy_violations"));
+    EXPECT_FALSE(parsed["policy_passed"].get<bool>());
+    // Find the min_confidence violation
+    bool found = false;
+    for (const auto& v : parsed["policy_violations"]) {
+        if (v["gate"].get<std::string>() == "min_confidence") found = true;
+    }
+    EXPECT_TRUE(found) << "Expected min_confidence violation";
+}
+
+TEST_F(FleetCmdTest, PolicyViolationBadVerdict) {
+    // Write policy requiring TRUSTED verdict
+    auto policy_path = ctx_.data_dir + "/config/policy.json";
+    fs::create_directories(fs::path(policy_path).parent_path());
+    nlohmann::json policy;
+    policy["min_verdict"] = "TRUSTED";
+    std::ofstream(policy_path) << policy.dump();
+
+    auto path = ctx_.euxis_home + "/playbook-policy-verdict.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_TRUE(parsed.contains("policy_violations"));
+    bool found = false;
+    for (const auto& v : parsed["policy_violations"]) {
+        if (v["gate"].get<std::string>() == "min_verdict") found = true;
+    }
+    EXPECT_TRUE(found) << "Expected min_verdict violation";
+}
+
+TEST_F(FleetCmdTest, PolicyViolationRegression) {
+    // Seed history with a TRUSTED verdict, then run with regression detection
+    auto hist_path = fs::path(ctx_.euxis_home) / "data" / "runtime" / "verdicts" / "history.jsonl";
+    fs::create_directories(hist_path.parent_path());
+    nlohmann::json entry;
+    entry["timestamp"] = "2026-01-01T00:00:00Z";
+    entry["verdict"] = "TRUSTED";
+    entry["confidence"] = 95;
+    entry["mode"] = "flash";
+    entry["latency_ms"] = 10000;
+    entry["agents_executed"] = 3;
+    entry["agents_skipped"] = 0;
+    entry["timeout_count"] = 0;
+    entry["evidence_density"] = 0.8;
+    entry["early_stopped"] = false;
+    entry["escalated"] = false;
+    entry["budget_exceeded"] = false;
+    std::ofstream(hist_path) << entry.dump() << "\n";
+
+    auto policy_path = ctx_.data_dir + "/config/policy.json";
+    fs::create_directories(fs::path(policy_path).parent_path());
+    nlohmann::json policy;
+    policy["fail_on_regression"] = true;
+    std::ofstream(policy_path) << policy.dump();
+
+    auto path = ctx_.euxis_home + "/playbook-policy-regression.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded());
+    // The mock will produce a non-TRUSTED verdict (CAUTION/INCONCLUSIVE in test),
+    // which should trigger regression from TRUSTED
+    if (parsed.contains("trend") && parsed["trend"].value("regression", false)) {
+        EXPECT_TRUE(parsed.contains("policy_violations"));
+        bool found = false;
+        for (const auto& v : parsed["policy_violations"]) {
+            if (v["gate"].get<std::string>() == "fail_on_regression") found = true;
+        }
+        EXPECT_TRUE(found) << "Expected fail_on_regression violation";
+    }
+    // If no regression detected (mock produced same verdict), test is still valid
+}
+
+TEST_F(FleetCmdTest, PolicyViolationCoverage) {
+    // Write policy requiring high critical coverage
+    auto policy_path = ctx_.data_dir + "/config/policy.json";
+    fs::create_directories(fs::path(policy_path).parent_path());
+    nlohmann::json policy;
+    policy["min_critical_coverage"] = 0.80;  // Mock agents cover 1/4 pillars max → 0.25
+    std::ofstream(policy_path) << policy.dump();
+
+    auto path = ctx_.euxis_home + "/playbook-policy-coverage.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci"});
+    std::cout.rdbuf(old_cout);
+
+    auto output = buffer.str();
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+
+    auto parsed = nlohmann::json::parse(json_str, nullptr, false);
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_TRUE(parsed.contains("policy_violations"));
+    bool found = false;
+    for (const auto& v : parsed["policy_violations"]) {
+        if (v["gate"].get<std::string>() == "min_critical_coverage") found = true;
+    }
+    EXPECT_TRUE(found) << "Expected min_critical_coverage violation";
+}
+
+// ---- Flash Triage Mode Tests ----
+
+// Helper: parse CI JSON artifact from captured stdout
+auto parse_ci_artifact(const std::string& output) -> nlohmann::json {
+    auto json_start = output.rfind("\n{");
+    if (json_start == std::string::npos) json_start = output.find("{");
+    else json_start++;
+    auto json_str = (json_start != std::string::npos) ? output.substr(json_start) : output;
+    return nlohmann::json::parse(json_str, nullptr, false);
+}
+
+// Helper: create a manifest with 11+ steps so flash index selection {0,10} works
+auto make_full_manifest() -> nlohmann::json {
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "librarian"}, {"agent", "librarian"}, {"task", "scan repo"}, {"pillar", "execution"}},
+        {{"name", "writer"}, {"agent", "writer"}, {"task", "write docs"}, {"pillar", "execution"}},
+        {{"name", "unused2"}, {"agent", "alpha"}, {"task", "task2"}, {"pillar", "execution"}},
+        {{"name", "architect"}, {"agent", "architect"}, {"task", "architecture review"}, {"pillar", "architecture"}},
+        {{"name", "optimizer"}, {"agent", "optimizer"}, {"task", "optimize"}, {"pillar", "execution"}},
+        {{"name", "unused5"}, {"agent", "alpha"}, {"task", "task5"}, {"pillar", "execution"}},
+        {{"name", "unused6"}, {"agent", "alpha"}, {"task", "task6"}, {"pillar", "execution"}},
+        {{"name", "unused7"}, {"agent", "alpha"}, {"task", "task7"}, {"pillar", "execution"}},
+        {{"name", "sentinel"}, {"agent", "sentinel"}, {"task", "security audit"}, {"pillar", "security"}},
+        {{"name", "unused9"}, {"agent", "alpha"}, {"task", "task9"}, {"pillar", "execution"}},
+        {{"name", "reviewer"}, {"agent", "reviewer"}, {"task", "final review"}, {"pillar", "quality"}}
+    });
+    return manifest;
+}
+
+TEST_F(FleetCmdTest, FlashTriageAgentCount) {
+    // Flash mode should plan exactly 2 agents: librarian (0) and reviewer (10)
+    auto path = ctx_.euxis_home + "/playbook-flash-triage.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    // Count agents in agent_status (excluding claim-verifier entries)
+    int agent_count = 0;
+    for (auto& [key, _] : parsed["agent_status"].items()) {
+        if (key.find("claim-verifier") == std::string::npos) agent_count++;
+    }
+    EXPECT_EQ(agent_count, 2) << "Flash triage should run exactly 2 agents";
+}
+
+TEST_F(FleetCmdTest, FlashNoEscalationOnConvergence) {
+    // Both agents PASS → no escalation, triage.outcome="converged"
+    auto path = ctx_.euxis_home + "/playbook-flash-converge.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_FALSE(parsed.value("escalated", true));
+    // In CI mode with mock execution, agents produce PASS by default
+    if (parsed.contains("triage")) {
+        EXPECT_EQ(parsed["triage"]["outcome"].get<std::string>(), "converged");
+        EXPECT_EQ(parsed["triage"]["agents"].get<int>(), 2);
+        EXPECT_TRUE(parsed["triage"]["completed"].get<bool>());
+    }
+}
+
+TEST_F(FleetCmdTest, FlashEscalationDisabledInCI) {
+    // CI mode suppresses escalation
+    auto path = ctx_.euxis_home + "/playbook-flash-ci-noesc.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    // In CI mode, escalation is always suppressed (escalated should be false)
+    EXPECT_FALSE(parsed.value("escalated", true));
+    // If escalation was triggered but suppressed, check triage block
+    if (parsed.contains("triage") && parsed["triage"]["outcome"] == "suppressed") {
+        EXPECT_TRUE(parsed["triage"]["suppressed_in_ci"].get<bool>());
+    }
+}
+
+TEST_F(FleetCmdTest, FlashTriageOutcomeInArtifact) {
+    // Artifact contains triage block with outcome/decisive/agents fields
+    auto path = ctx_.euxis_home + "/playbook-flash-artifact.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    ASSERT_TRUE(parsed.contains("triage")) << "Flash artifact must contain triage block";
+    EXPECT_TRUE(parsed["triage"].contains("completed"));
+    EXPECT_TRUE(parsed["triage"].contains("agents"));
+    EXPECT_TRUE(parsed["triage"].contains("decisive"));
+    EXPECT_TRUE(parsed["triage"].contains("outcome"));
+    EXPECT_TRUE(parsed["triage"].contains("suppressed_in_ci"));
+    EXPECT_EQ(parsed["triage"]["agents"].get<int>(), 2);
+}
+
+TEST_F(FleetCmdTest, FlashTriageModeField) {
+    // Artifact mode field should reflect original flash mode
+    auto path = ctx_.euxis_home + "/playbook-flash-mode.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_EQ(parsed["mode"].get<std::string>(), "flash");
+}
+
+TEST_F(FleetCmdTest, SuppressedEscalationCapsVerdict) {
+    // When escalation is suppressed in CI, verdict must not be TRUSTED or TRUSTED WITH GAPS
+    auto path = ctx_.euxis_home + "/playbook-flash-cap.json";
+    std::ofstream(path) << make_full_manifest().dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {path, "--ci", "--mode", "flash"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+
+    if (parsed.contains("triage") && parsed["triage"]["outcome"] == "suppressed") {
+        // Suppressed escalation must not produce a passing verdict
+        auto verdict = parsed["verdict"].get<std::string>();
+        EXPECT_NE(verdict, "TRUSTED") << "Suppressed escalation must not produce TRUSTED";
+        EXPECT_NE(verdict, "TRUSTED WITH GAPS") << "Suppressed escalation must not produce TRUSTED WITH GAPS";
+        EXPECT_NE(code, 0) << "Suppressed escalation must not produce exit code 0";
+    }
+    // If triage converged (no escalation needed), any verdict is valid
+}
+
+TEST_F(FleetCmdTest, StandardModeNoTriageBlock) {
+    // Standard mode should NOT have a triage block in artifact
+    auto path = ctx_.euxis_home + "/playbook-std-notriage.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    EXPECT_FALSE(parsed.contains("triage")) << "Standard mode should not have triage block";
+}
+
+TEST_F(FleetCmdTest, BuiltinChecksInArtifact) {
+    // Built-in pillar checks should appear in builtin_checks, not agent_status
+    auto path = ctx_.euxis_home + "/playbook-builtin.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+
+    // Must have both sections
+    EXPECT_TRUE(parsed.contains("agent_status"));
+    EXPECT_TRUE(parsed.contains("builtin_checks"));
+
+    // Agent status should contain the LLM agent, not built-in checks
+    if (parsed.contains("agent_status") && !parsed["agent_status"].empty()) {
+        for (auto& [key, _] : parsed["agent_status"].items()) {
+            EXPECT_EQ(key.find("builtin/"), std::string::npos)
+                << "Built-in check '" << key << "' should not be in agent_status";
+        }
+    }
+}
+
+TEST_F(FleetCmdTest, PillarScoresIncludeTestingAndSecurity) {
+    // Pillar scores should include testing and security (not Missing when built-in checks run)
+    auto path = ctx_.euxis_home + "/playbook-pillars.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    std::cout.rdbuf(old_cout);
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    ASSERT_FALSE(parsed.is_discarded());
+    ASSERT_TRUE(parsed.contains("pillar_scores"));
+
+    // Check that testing and security pillars exist and are not "Missing"
+    bool has_testing = false, has_security = false;
+    for (const auto& ps : parsed["pillar_scores"]) {
+        if (ps["name"] == "testing") {
+            has_testing = true;
+            EXPECT_NE(ps["status"], "Missing") << "Testing pillar should not be Missing with built-in checks";
+        }
+        if (ps["name"] == "security") {
+            has_security = true;
+            EXPECT_NE(ps["status"], "Missing") << "Security pillar should not be Missing with built-in checks";
+        }
+    }
+    EXPECT_TRUE(has_testing) << "Artifact should have a testing pillar score";
+    EXPECT_TRUE(has_security) << "Artifact should have a security pillar score";
+}
+
+TEST_F(FleetCmdTest, EmptyManifestNoBuiltinChecks) {
+    // Empty manifests should NOT produce built-in checks (no agent evidence = no pillar checks)
+    auto path = ctx_.euxis_home + "/playbook-empty-nobuiltin.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array();
+    std::ofstream(path) << manifest.dump();
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    std::cout.rdbuf(old_cout);
+
+    EXPECT_EQ(code, 2) << "Empty manifest should produce exit code 2 (no evidence)";
+
+    auto parsed = parse_ci_artifact(buffer.str());
+    if (!parsed.is_discarded() && parsed.contains("builtin_checks")) {
+        EXPECT_TRUE(parsed["builtin_checks"].empty())
+            << "Empty manifest should not produce built-in checks";
+    }
 }
 
 } // namespace

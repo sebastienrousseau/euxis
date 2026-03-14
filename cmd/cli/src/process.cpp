@@ -53,6 +53,7 @@ auto read_fd(int fd, TimePoint deadline) -> std::string {
 }
 
 /// Robustly reap child and capture final output buffers.
+/// Kills the entire process group (-pid) to terminate subprocess trees (CLI bridges).
 auto reap_child(pid_t pid, TimePoint deadline, int out_fd = -1, int err_fd = -1, std::string* out_str = nullptr, std::string* err_str = nullptr) -> int {
     int status = 0;
     for (;;) {
@@ -61,14 +62,15 @@ auto reap_child(pid_t pid, TimePoint deadline, int out_fd = -1, int err_fd = -1,
         if (w < 0) return -1;
 
         if (Clock::now() >= deadline) {
-            ::kill(pid, SIGTERM);
+            // Kill entire process group (child called setsid() so pid == pgid)
+            ::kill(-pid, SIGTERM);
             // "Last Breath" capture: process may emit logs while shutting down
             auto shutdown_deadline = Clock::now() + std::chrono::milliseconds(500);
             if (out_fd != -1 && out_str) out_str->append(read_fd(out_fd, shutdown_deadline));
             if (err_fd != -1 && err_str) err_str->append(read_fd(err_fd, shutdown_deadline));
 
             if (::waitpid(pid, &status, WNOHANG) > 0) return status;
-            ::kill(pid, SIGKILL);
+            ::kill(-pid, SIGKILL);
             ::waitpid(pid, &status, 0);
             return status;
         }
@@ -98,6 +100,7 @@ auto Process::run(const std::string& program,
     }
 
     if (pid == 0) {
+        ::setsid(); // New process group so timeout kills the entire subprocess tree
         apply_env_vars(env_vars);
         ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);
@@ -114,7 +117,7 @@ auto Process::run(const std::string& program,
     result.stderr_output = read_fd(stderr_pipe[0], deadline);
 
     result.exit_code = reap_child(pid, deadline, stdout_pipe[0], stderr_pipe[0], &result.stdout_output, &result.stderr_output);
-    
+
     ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
     if (WIFEXITED(result.exit_code)) result.exit_code = WEXITSTATUS(result.exit_code);
     else if (WIFSIGNALED(result.exit_code)) result.exit_code = 128 + WTERMSIG(result.exit_code);
@@ -142,6 +145,7 @@ auto Process::run_with_input(const std::string& program,
     }
 
     if (pid == 0) {
+        ::setsid(); // New process group so timeout kills the entire subprocess tree
         apply_env_vars(env_vars);
         ::close(stdin_pipe[1]); ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdin_pipe[0], STDIN_FILENO); ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);
@@ -160,7 +164,7 @@ auto Process::run_with_input(const std::string& program,
     result.stderr_output = read_fd(stderr_pipe[0], deadline);
 
     result.exit_code = reap_child(pid, deadline, stdout_pipe[0], stderr_pipe[0], &result.stdout_output, &result.stderr_output);
-    
+
     ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
     if (WIFEXITED(result.exit_code)) result.exit_code = WEXITSTATUS(result.exit_code);
     else if (WIFSIGNALED(result.exit_code)) result.exit_code = 128 + WTERMSIG(result.exit_code);
@@ -189,6 +193,7 @@ auto Process::run_streaming(const std::string& program,
     }
 
     if (pid == 0) {
+        ::setsid(); // New process group so timeout kills the entire subprocess tree
         apply_env_vars(env_vars);
         ::close(stdin_pipe[1]); ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdin_pipe[0], STDIN_FILENO); ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);

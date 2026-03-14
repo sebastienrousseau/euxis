@@ -113,7 +113,7 @@ TEST(ProviderRouterTest, ModelFallbackChainGPT) {
 
 TEST(ProviderRouterTest, ModelFallbackChainGemini) {
     ProviderRouter router("/tmp/euxis_nonexistent");
-    auto chain = router.model_fallback_chain("gemini-2.0-flash");
+    auto chain = router.model_fallback_chain("gemini-2.5-flash");
     EXPECT_FALSE(chain.empty());
 }
 

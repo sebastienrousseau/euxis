@@ -25,14 +25,27 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
                                 int timeout_seconds,
                                 std::optional<ResolvedAuth> auth,
                                 std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    auto start = std::chrono::steady_clock::now();
+    std::string effective_provider = selection.provider;
+    if (effective_provider == "anthropic") effective_provider = "claude";
+
+    // Known providers — validate before mock check so unknown providers always fail
+    static const std::vector<std::string> known_providers = {
+        "claude", "openai", "gemini", "ollama", "opencode", "aider", "sgpt", "kiro"
+    };
+    bool is_known = false;
+    for (const auto& kp : known_providers) {
+        if (effective_provider == kp) { is_known = true; break; }
+    }
+    if (!is_known) {
+        return {false, "", "Unknown provider: " + effective_provider, 1, 0.0, {}};
+    }
+
+    // Mock mode for tests — must come AFTER provider validation
     if (std::getenv("EUXIS_TEST_MOCK_EXECUTION")) {
         if (on_chunk) on_chunk("mocked response chunk");
         return {true, "mocked response for " + prompt, "", 0, 10.0, {}};
     }
-    
-    auto start = std::chrono::steady_clock::now();
-    std::string effective_provider = selection.provider;
-    if (effective_provider == "anthropic") effective_provider = "claude";
 
     // --- PRIORITY 1: Ollama Native REST ---
     if (effective_provider == "ollama") {
@@ -50,9 +63,9 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
 
     ProviderResponse resp;
     // --- META-CLI DISPATCHER ---
-    if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" || 
+    if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" ||
         effective_provider == "sgpt" || effective_provider == "kiro") {
-        resp = execute_via_cli(effective_provider, selection.model, prompt, 300, on_chunk);
+        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
     } else if (effective_provider == "claude") {
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
@@ -140,8 +153,23 @@ auto ProviderExecutor::resolve_anthropic_token() -> std::string {
 auto ProviderExecutor::classify_error(int http_status, const std::string& body) -> std::optional<CooldownReason> {
     if (http_status == 429) return CooldownReason::RateLimit;
     if (http_status == 401 || http_status == 403) return CooldownReason::AuthError;
-    if (body.find("SCOPE_INSUFFICIENT") != std::string::npos || body.find("PERMISSION_DENIED") != std::string::npos) {
+    if (http_status == 402) return CooldownReason::BillingError;
+
+    // Case-insensitive body search
+    std::string lower = body;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+    if (lower.find("scope_insufficient") != std::string::npos || lower.find("permission_denied") != std::string::npos) {
         return CooldownReason::AuthError;
+    }
+    // Billing/credit errors in body
+    if (lower.find("billing") != std::string::npos || lower.find("credit") != std::string::npos ||
+        lower.find("insufficient_quota") != std::string::npos) {
+        return CooldownReason::BillingError;
+    }
+    // Rate limit in body
+    if (lower.find("rate_limit") != std::string::npos || lower.find("rate limit") != std::string::npos) {
+        return CooldownReason::RateLimit;
     }
     return std::nullopt;
 }
@@ -154,7 +182,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
     std::string token = auth.has_value() ? auth->token : resolve_anthropic_token();
     if (token.empty()) return {false, "", "No Anthropic auth found.", 1, 0.0, {}};
 
-    std::string m = model.empty() ? "claude-3-5-sonnet-20241022" : model;
+    std::string m = model.empty() ? "claude-sonnet-4-6" : model;
     nlohmann::json body;
     body["model"] = m;
     body["max_tokens"] = 4096;
@@ -257,7 +285,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
     } else if (provider == "gemini") {
         std::string token = auth.has_value() ? auth->token : (std::getenv("GEMINI_API_KEY") ? std::getenv("GEMINI_API_KEY") : "");
         if (token.empty()) return {false, "", "No Gemini auth", 1, 0.0, {}};
-        std::string m = model.empty() ? "gemini-2.0-flash-lite" : model;
+        std::string m = model.empty() ? "gemini-2.5-flash-lite" : model;
         url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + token;
         body["contents"] = nlohmann::json::array({{{"parts", nlohmann::json::array({{{"text", prompt}}})}}});
     }

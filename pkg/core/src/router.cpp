@@ -11,14 +11,12 @@ namespace euxis::core {
 
 FinOpsRouter::FinOpsRouter(double budget_limit) : budget_limit_(budget_limit) {
     // Legacy struct init to populate SoA
+    // Only actual model providers — CLI bridges (opencode, aider, sgpt, kiro)
+    // are tools, not providers, and should not be in the routing rotation.
     std::vector<ProviderMetrics> initial_providers = {
         {"ollama", 0.000, 150, 0.95},
         {"claude", 0.015, 800, 0.99},
         {"gemini", 0.005, 400, 0.98},
-        {"opencode", 0.010, 600, 0.97},
-        {"aider", 0.012, 700, 0.98},
-        {"sgpt", 0.008, 300, 0.96},
-        {"kiro", 0.015, 500, 0.99},
     };
     
     for (size_t i = 0; i < initial_providers.size(); ++i) {

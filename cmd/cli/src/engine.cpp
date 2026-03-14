@@ -61,6 +61,7 @@ void Engine::register_commands() {
     commands_.push_back({"squad",            tr("Fleet"),          tr("Squad orchestration (list/deploy/info)"),    cmd::cmd_squad});
     commands_.push_back({"combo",            tr("Fleet"),          tr("Run agent combo (sequential pipeline)"),     cmd::cmd_combo});
     commands_.push_back({"playbook",         tr("Fleet"),          tr("Execute a playbook manifest"),               cmd::cmd_playbook});
+    commands_.push_back({"ci",               tr("Fleet"),          tr("CI-ready repo verdict (deterministic JSON)"),cmd::cmd_ci});
     commands_.push_back({"dispatch",         tr("Fleet"),          tr("Dispatch agents from architect manifest"),   cmd::cmd_dispatch});
     commands_.push_back({"council",          tr("Fleet"),          tr("Run multi-agent council deliberation"),      cmd::cmd_council});
     commands_.push_back({"loop",             tr("Fleet"),          tr("Agent feedback loop (iterate to quality)"),  cmd::cmd_loop});

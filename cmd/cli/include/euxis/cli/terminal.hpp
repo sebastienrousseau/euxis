@@ -56,6 +56,10 @@ struct TableRow {
 void print_table(const std::vector<std::string>& headers,
                  const std::vector<TableRow>& rows);
 
+/// Print an aligned table to an arbitrary ostream.
+void print_table(std::ostream& os, const std::vector<std::string>& headers,
+                 const std::vector<TableRow>& rows);
+
 // --- Progress ---
 
 /// Print a progress bar to stderr.

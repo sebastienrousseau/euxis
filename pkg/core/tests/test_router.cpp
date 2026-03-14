@@ -17,7 +17,7 @@ TEST(FinOpsRouterTest, SelectionLogic) {
     
     // Balanced weighted scoring - verify it returns a valid hardcoded provider
     auto best = r.select_provider("high", "balanced");
-    EXPECT_TRUE(best == "ollama" || best == "claude" || best == "gemini" || best == "opencode" || best == "aider" || best == "sgpt" || best == "kiro");
+    EXPECT_TRUE(best == "ollama" || best == "claude" || best == "gemini");
 }
 
 TEST(FinOpsRouterTest, UsageTracking) {

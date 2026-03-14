@@ -76,11 +76,15 @@ void print_banner() {
 }
 
 void print_table(const std::vector<std::string>& headers, const std::vector<TableRow>& rows) {
-    for (const auto& h : headers) std::cout << bold(h) << "\t";
-    std::cout << "\n";
+    print_table(std::cout, headers, rows);
+}
+
+void print_table(std::ostream& os, const std::vector<std::string>& headers, const std::vector<TableRow>& rows) {
+    for (const auto& h : headers) os << bold(h) << "\t";
+    os << "\n";
     for (const auto& r : rows) {
-        for (const auto& c : r.cells) std::cout << c << "\t";
-        std::cout << "\n";
+        for (const auto& c : r.cells) os << c << "\t";
+        os << "\n";
     }
 }
 

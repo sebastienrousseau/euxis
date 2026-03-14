@@ -4,9 +4,9 @@
 
   "models": {
     "routine": "gemini-2.5-flash-lite",
-    "data": "deepseek-v3",
-    "code": "claude-sonnet-4",
-    "reason": "claude-opus-4"
+    "data": "gemini-2.5-flash",
+    "code": "claude-sonnet-4-6",
+    "reason": "claude-opus-4-6"
   },
 
   "local": {
@@ -63,6 +63,19 @@
     "data": ["format", "parse", "log", "metric", "convert", "transform", "summarize"],
     "code": ["fix", "debug", "implement", "refactor", "write", "test", "review"],
     "reason": ["architect", "design", "plan", "strategy", "research", "analyze", "mission"]
+  },
+
+  "flash_overrides": {
+    "librarian": {
+      "provider": "ollama",
+      "model": "qwen2.5-coder:7b",
+      "cost": 0.0
+    },
+    "reviewer": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-lite",
+      "cost": 0.075
+    }
   },
 
   "cost_estimates": {

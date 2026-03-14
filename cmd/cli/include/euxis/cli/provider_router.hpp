@@ -46,6 +46,12 @@ public:
                              const std::string& prompt,
                              const std::string& priority = "") const -> ModelSelection;
 
+    /// Route with flash-mode overrides: checks per-agent flash config first,
+    /// falls back to normal route() if no override exists.
+    [[nodiscard]] auto route_flash(const std::string& agent_id,
+                                   const std::string& agent_tier,
+                                   const std::string& prompt) const -> ModelSelection;
+
 
     /// Check if local inference (Ollama) is available.
     [[nodiscard]] auto local_available() const -> bool;
@@ -72,6 +78,14 @@ private:
     TierModels models_;
 
     std::unique_ptr<euxis::core::FinOpsRouter> router_;
+
+    /// Per-agent model overrides for flash mode (loaded from config).
+    struct FlashOverride {
+        std::string provider;
+        std::string model;
+        double cost{0.5};
+    };
+    std::unordered_map<std::string, FlashOverride> flash_overrides_;
 
     void load_config();
     void load_env_overrides();
