@@ -168,7 +168,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     static const std::vector<std::pair<std::string, std::string>> tools = {
         {"claude", "npm install -g @anthropic-ai/claude-code"},
         {"gemini", "npm install -g @google/gemini-cli"},
-        {"openai", tr("Set OPENAI_API_KEY")},
+        {"codex", "npm install -g @openai/codex"},
         {"ollama", "https://ollama.com/download"},
         {"shellcheck", "sudo pacman -S --noconfirm shellcheck # (or your pkg manager)"}
     };
@@ -324,7 +324,7 @@ int cmd_health(Context& ctx, const std::vector<std::string>& args) {
     // 4. Provider connectivity
     {
         int found = 0;
-        static const std::vector<std::string> providers = {"claude", "gemini", "openai", "ollama", "goose"};
+        static const std::vector<std::string> providers = {"claude", "gemini", "codex", "ollama", "goose"};
         for (const auto& p : providers) {
             if (Process::available(p)) ++found;
         }
