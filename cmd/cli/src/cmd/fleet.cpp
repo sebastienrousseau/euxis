@@ -845,7 +845,7 @@ auto build_step_plan(const nlohmann::json& step, const std::string& mode,
 } // namespace
 
 // Forward declaration for stats mode
-void print_playbook_stats(Context& ctx);
+void print_playbook_stats(Context& ctx, const std::string& since = "", int last_n = 0);
 
 // --- agent ---
 int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
@@ -1061,7 +1061,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
     // Fast exit: --stats mode
     if (args[0] == "--stats" || (args.size() > 1 && args[1] == "--stats")) {
-        print_playbook_stats(ctx);
+        std::string since;
+        int last_n = 0;
+        for (size_t i = 0; i < args.size(); ++i) {
+            if (args[i] == "--since" && i + 1 < args.size()) since = args[++i];
+            if (args[i] == "--last" && i + 1 < args.size()) last_n = std::stoi(args[++i]);
+        }
+        print_playbook_stats(ctx, since, last_n);
         return 0;
     }
 
@@ -1069,16 +1075,32 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     bool compare_mode = false;
     for (const auto& a : args) if (a == "--compare") compare_mode = true;
     if (compare_mode) {
-        // Build base args without --compare and --mode
+        // Build base args without --compare and --mode, extract manifest name
         std::vector<std::string> base_args;
+        std::string compare_manifest;
         for (size_t i = 0; i < args.size(); ++i) {
             if (args[i] == "--compare") continue;
             if (args[i] == "--mode" && i + 1 < args.size()) { ++i; continue; }
+            if (args[i] == "--ci" || args[i] == "--policy") { base_args.push_back(args[i]); continue; }
+            if (!args[i].starts_with("--") && compare_manifest.empty()) {
+                compare_manifest = args[i];
+            }
             base_args.push_back(args[i]);
         }
 
+        if (compare_manifest.empty()) {
+            std::cerr << tr("Error: --compare requires a manifest name.") << "\n";
+            std::cerr << tr("Usage: euxis playbook <manifest> --compare") << "\n";
+            return 2;
+        }
+
         std::ostream& out = std::cerr;  // Compare output always to stderr
-        out << term::bold(term::cyan("\n  === A/B COMPARISON: Flash vs Standard ===")) << "\n\n";
+        out << term::bold(term::cyan("\n  === A/B COMPARISON: Flash vs Standard ===")) << "\n";
+        out << "    " << term::bold("Manifest:") << "  " << compare_manifest << "\n\n";
+
+        // Snapshot history size before runs to verify fresh artifacts
+        auto pre_history = load_verdict_history(ctx.euxis_home, 500);
+        size_t pre_count = pre_history.size();
 
         // Run flash
         out << term::bold("  [1/2] Running Flash mode...") << "\n";
@@ -1087,6 +1109,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         flash_args.push_back("flash");
         int flash_rc = cmd_playbook(ctx, flash_args);
 
+        if (flash_rc == 2) {
+            std::cerr << term::red("Error: Flash run failed to produce an artifact. Aborting comparison.") << "\n";
+            return 2;
+        }
+
         // Run standard
         out << term::bold("\n  [2/2] Running Standard mode...") << "\n";
         auto standard_args = base_args;
@@ -1094,47 +1121,67 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         standard_args.push_back("standard");
         int standard_rc = cmd_playbook(ctx, standard_args);
 
-        // Load the two most recent history entries
-        auto history = load_verdict_history(ctx.euxis_home, 500);
-        if (history.size() >= 2) {
-            const auto& std_run = history.back();
-            const auto& flash_run = history[history.size() - 2];
-
-            out << "\n" << term::bold(term::cyan("  === COMPARISON RESULTS ===")) << "\n";
-            out << "    " << std::setw(20) << std::left << "" << std::setw(20) << "Flash" << "Standard\n";
-            out << "    " << std::setw(20) << std::left << "Verdict:" << std::setw(20) << flash_run.verdict << std_run.verdict << "\n";
-            out << "    " << std::setw(20) << std::left << "Confidence:" << std::setw(20) << (std::to_string(flash_run.confidence) + "%") << (std::to_string(std_run.confidence) + "%") << "\n";
-            out << "    " << std::setw(20) << std::left << "Total latency:" << std::setw(20) << term::format_duration(flash_run.latency_ms) << term::format_duration(std_run.latency_ms) << "\n";
-            out << "    " << std::setw(20) << std::left << "Median agent:" << std::setw(20) << term::format_duration(flash_run.median_agent_latency_ms) << term::format_duration(std_run.median_agent_latency_ms) << "\n";
-            out << "    " << std::setw(20) << std::left << "P95 agent:" << std::setw(20) << term::format_duration(flash_run.p95_agent_latency_ms) << term::format_duration(std_run.p95_agent_latency_ms) << "\n";
-            out << "    " << std::setw(20) << std::left << "Agents:" << std::setw(20) << flash_run.agents_executed << std_run.agents_executed << "\n";
-            out << "    " << std::setw(20) << std::left << "Evidence density:" << std::setw(20)
-                      << (std::to_string((int)(flash_run.evidence_density * 100)) + "%")
-                      << (std::to_string((int)(std_run.evidence_density * 100)) + "%") << "\n";
-            out << "    " << std::setw(20) << std::left << "Early-stopped:" << std::setw(20) << (flash_run.early_stopped ? "yes" : "no") << (std_run.early_stopped ? "yes" : "no") << "\n";
-            out << "    " << std::setw(20) << std::left << "Timeouts:" << std::setw(20) << flash_run.timeout_count << std_run.timeout_count << "\n";
-
-            // Verdict drift analysis
-            int conf_drift = std_run.confidence - flash_run.confidence;
-            double speedup = (std_run.latency_ms > 0) ? std_run.latency_ms / std::max(1.0, flash_run.latency_ms) : 0.0;
-
-            out << "\n" << term::bold(term::cyan("  --- Analysis ---")) << "\n";
-            out << "    " << term::bold("Speedup:") << "     " << std::fixed << std::setprecision(1) << speedup << "x (flash vs standard)\n";
-            out << "    " << term::bold("Conf drift:") << "  " << (conf_drift >= 0 ? "+" : "") << conf_drift << " points\n";
-
-            if (flash_run.verdict == std_run.verdict) {
-                out << "    " << term::green("MATCH") << " " << term::dim("Flash and standard agree on verdict.") << "\n";
-            } else {
-                out << "    " << term::yellow("DRIFT") << " " << term::dim("Verdict mismatch: flash=" + flash_run.verdict + " standard=" + std_run.verdict) << "\n";
-            }
-
-            if (std::abs(conf_drift) <= 10) {
-                out << "    " << term::green("OK") << " " << term::dim("Confidence drift within 10-point tolerance.") << "\n";
-            } else {
-                out << "    " << term::yellow("WARNING") << " " << term::dim("Confidence drift exceeds 10-point tolerance.") << "\n";
-            }
-            out << "\n";
+        if (standard_rc == 2) {
+            std::cerr << term::red("Error: Standard run failed to produce an artifact. Aborting comparison.") << "\n";
+            return 2;
         }
+
+        // Verify both runs produced fresh history entries
+        auto post_history = load_verdict_history(ctx.euxis_home, 500);
+        if (post_history.size() < pre_count + 2) {
+            std::cerr << term::red("Error: Expected 2 new history entries but got ")
+                      << (post_history.size() - pre_count) << ". Comparison results may be stale.\n";
+            return 1;
+        }
+
+        const auto& std_run = post_history.back();
+        const auto& flash_run = post_history[post_history.size() - 2];
+
+        // Verify modes match expectations
+        if (flash_run.mode != "flash" || std_run.mode != "standard") {
+            std::cerr << term::red("Error: History entries have unexpected modes (")
+                      << flash_run.mode << ", " << std_run.mode << "). Aborting.\n";
+            return 1;
+        }
+
+        out << "\n" << term::bold(term::cyan("  === COMPARISON RESULTS ===")) << "\n";
+        out << "    " << term::bold("Manifest:") << "  " << compare_manifest << "\n";
+        out << "    " << term::bold("Flash ts:") << "  " << flash_run.timestamp << "\n";
+        out << "    " << term::bold("Std ts:") << "    " << std_run.timestamp << "\n\n";
+
+        out << "    " << std::setw(20) << std::left << "" << std::setw(20) << "Flash" << "Standard\n";
+        out << "    " << std::setw(20) << std::left << "Verdict:" << std::setw(20) << flash_run.verdict << std_run.verdict << "\n";
+        out << "    " << std::setw(20) << std::left << "Confidence:" << std::setw(20) << (std::to_string(flash_run.confidence) + "%") << (std::to_string(std_run.confidence) + "%") << "\n";
+        out << "    " << std::setw(20) << std::left << "Total latency:" << std::setw(20) << term::format_duration(flash_run.latency_ms) << term::format_duration(std_run.latency_ms) << "\n";
+        out << "    " << std::setw(20) << std::left << "Median agent:" << std::setw(20) << term::format_duration(flash_run.median_agent_latency_ms) << term::format_duration(std_run.median_agent_latency_ms) << "\n";
+        out << "    " << std::setw(20) << std::left << "P95 agent:" << std::setw(20) << term::format_duration(flash_run.p95_agent_latency_ms) << term::format_duration(std_run.p95_agent_latency_ms) << "\n";
+        out << "    " << std::setw(20) << std::left << "Agents:" << std::setw(20) << flash_run.agents_executed << std_run.agents_executed << "\n";
+        out << "    " << std::setw(20) << std::left << "Evidence density:" << std::setw(20)
+                  << (std::to_string((int)(flash_run.evidence_density * 100)) + "%")
+                  << (std::to_string((int)(std_run.evidence_density * 100)) + "%") << "\n";
+        out << "    " << std::setw(20) << std::left << "Early-stopped:" << std::setw(20) << (flash_run.early_stopped ? "yes" : "no") << (std_run.early_stopped ? "yes" : "no") << "\n";
+        out << "    " << std::setw(20) << std::left << "Timeouts:" << std::setw(20) << flash_run.timeout_count << std_run.timeout_count << "\n";
+
+        // Verdict drift analysis
+        int conf_drift = std_run.confidence - flash_run.confidence;
+        double speedup = (std_run.latency_ms > 0) ? std_run.latency_ms / std::max(1.0, flash_run.latency_ms) : 0.0;
+
+        out << "\n" << term::bold(term::cyan("  --- Analysis ---")) << "\n";
+        out << "    " << term::bold("Speedup:") << "     " << std::fixed << std::setprecision(1) << speedup << "x (flash vs standard)\n";
+        out << "    " << term::bold("Conf drift:") << "  " << (conf_drift >= 0 ? "+" : "") << conf_drift << " points\n";
+
+        if (flash_run.verdict == std_run.verdict) {
+            out << "    " << term::green("MATCH") << " " << term::dim("Flash and standard agree on verdict.") << "\n";
+        } else {
+            out << "    " << term::yellow("DRIFT") << " " << term::dim("Verdict mismatch: flash=" + flash_run.verdict + " standard=" + std_run.verdict) << "\n";
+        }
+
+        if (std::abs(conf_drift) <= 10) {
+            out << "    " << term::green("OK") << " " << term::dim("Confidence drift within 10-point tolerance.") << "\n";
+        } else {
+            out << "    " << term::yellow("WARNING") << " " << term::dim("Confidence drift exceeds 10-point tolerance.") << "\n";
+        }
+        out << "\n";
 
         return (flash_rc != 0 || standard_rc != 0) ? 1 : 0;
     }
@@ -2294,11 +2341,41 @@ int cmd_ci(Context& ctx, const std::vector<std::string>& args) {
 }
 
 // --- playbook --stats: Aggregated validation metrics from history ---
-void print_playbook_stats(Context& ctx) {
-    auto history = load_verdict_history(ctx.euxis_home, 500);
-    if (history.empty()) {
+void print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
+    auto all_history = load_verdict_history(ctx.euxis_home, 500);
+    if (all_history.empty()) {
         std::cout << term::yellow("No verdict history found.") << " Run 'euxis playbook' to generate data.\n";
         return;
+    }
+
+    // Filter by --since (ISO date prefix match, e.g. "2026-03-14")
+    std::vector<VerdictHistoryEntry> history;
+    if (!since.empty()) {
+        for (const auto& h : all_history) {
+            if (h.timestamp >= since) history.push_back(h);
+        }
+        if (history.empty()) {
+            std::cout << term::yellow("No runs found since " + since + ".") << "\n";
+            return;
+        }
+    } else {
+        history = all_history;
+    }
+
+    // Filter by --last N
+    if (last_n > 0 && (int)history.size() > last_n) {
+        history = std::vector<VerdictHistoryEntry>(history.end() - last_n, history.end());
+    }
+
+    // Show filter info
+    if (!since.empty() || last_n > 0) {
+        std::string filter_desc;
+        if (!since.empty()) filter_desc += "since " + since;
+        if (last_n > 0) {
+            if (!filter_desc.empty()) filter_desc += ", ";
+            filter_desc += "last " + std::to_string(last_n);
+        }
+        std::cout << term::dim("  Filter: " + filter_desc + " (" + std::to_string(history.size()) + " of " + std::to_string(all_history.size()) + " runs)") << "\n\n";
     }
 
     // Load target thresholds
