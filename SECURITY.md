@@ -10,6 +10,7 @@ We provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
+| v0.0.4   | :white_check_mark: |
 | v0.0.3   | :white_check_mark: |
 | < v0.0.3 | :x:                |
 
@@ -112,24 +113,10 @@ We maintain a list of security researchers who have responsibly disclosed vulner
 
 *No acknowledgments yet - be the first!*
 
-## PGP Key
+## Secure Communication
 
-For sensitive communications, you may encrypt your message using our PGP key:
-
-```
------BEGIN PGP PUBLIC KEY BLOCK-----
-
-[PGP KEY PLACEHOLDER]
-
-To be published at: https://euxis.co/.well-known/security.txt
-
-Key ID: [PENDING]
-Fingerprint: [PENDING]
-
------END PGP PUBLIC KEY BLOCK-----
-```
-
-You can also find our security contact information at `/.well-known/security.txt` once published.
+For sensitive communications, encrypt messages to [security@euxis.co](mailto:security@euxis.co).
+A PGP public key will be published at `https://euxis.co/.well-known/security.txt` when available.
 
 ## Scope
 
@@ -150,4 +137,4 @@ For general security questions (not vulnerability reports), you may reach out to
 
 *This security policy follows industry best practices and aligns with SOC 2 Trust Services Criteria for security, availability, and confidentiality.*
 
-*Last updated: February 2026*
+*Last updated: March 2026*

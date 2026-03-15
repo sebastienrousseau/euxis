@@ -90,7 +90,7 @@ Loads agents, squads, and combos from `~/.euxis/agents/registry.json` and
 | `agents` | `list[Agent]` | All registered agents |
 | `squads` | `list[Squad]` | All squad configurations |
 | `combos` | `list[Combo]` | All combo chains |
-| `version` | `str` | Protocol version (default `"v0.0.3"`) |
+| `version` | `str` | Protocol version (default `"v0.0.4"`) |
 
 ### Loading
 
@@ -193,7 +193,7 @@ euxis-etx                                  # Launch the desktop GUI
 euxis <agent> "<task>" [provider]          # Single agent
 euxis-squad deploy <squad> "<task>"        # Squad deployment
 euxis-combo run <combo> "<task>"           # Combo chain
-euxis-health | euxis-certify | euxis-lint  # System utilities
+euxis health | euxis certify | euxis lint   # System utilities
 ```
 
 Run `euxis --help` for the full list of options.

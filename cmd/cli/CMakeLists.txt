@@ -20,6 +20,10 @@ add_library(euxis-cli-lib STATIC
   src/cmd/infra.cpp
   src/cmd/dev.cpp
   src/cmd/specialized.cpp
+  src/cmd/surface.cpp
+  src/cmd/lifecycle.cpp
+  src/cmd/certify.cpp
+  src/certification.cpp
   src/tui/color_system.cpp
   src/tui/event_loop.cpp
   src/tui/layout.cpp
@@ -70,6 +74,9 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_infra.cpp
   tests/test_cmd_dev.cpp
   tests/test_cmd_specialized.cpp
+  tests/test_cmd_surface.cpp
+  tests/test_cmd_lifecycle.cpp
+  tests/test_cmd_certify.cpp
   tests/test_auth_profile_store.cpp
   tests/test_process.cpp
   tests/test_provider_executor.cpp

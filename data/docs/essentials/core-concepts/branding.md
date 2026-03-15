@@ -15,7 +15,7 @@ The branding system ensures consistent attribution and identity across all Euxis
 
 ```bash
 # Check branding compliance
-euxis-certify  # Gate 5 validates branding
+euxis certify-readiness .  # Validates branding in commit signing gate
 
 # View the signature
 cat ~/.euxis/config/branding/signature.txt
@@ -44,7 +44,7 @@ Contains the standardized signature block appended to:
 Automatically appends branding signature to commit messages when configured.
 
 ### Certification Gate
-**Gate 5** in `euxis-certify` validates:
+The commit signing gate in `euxis certify-readiness` validates:
 - Last 5 commits carry branding signature
 - All open PRs include branding
 - Cryptographic signatures are present
@@ -78,7 +78,7 @@ git log --oneline -5 | while read hash msg; do
 done
 
 # Full certification check
-euxis-certify
+euxis certify-readiness .
 ```
 
 ## Best Practices

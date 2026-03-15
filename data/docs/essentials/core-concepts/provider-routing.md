@@ -58,7 +58,7 @@ For critical tasks marked as P0, Euxis always routes to `claude` regardless of t
 ## Checking Provider Availability
 
 ```bash
-euxis-health
+euxis health
 ```
 
 The health check verifies which providers are installed and working.

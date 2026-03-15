@@ -1,0 +1,27 @@
+{
+  "baseline_version": "2026-03-14",
+  "description": "Verdict engine baseline targets — frozen after standard mode stabilization",
+  "flash_sla_hit_rate": 90,
+  "flash_p95_latency_ms": 75000,
+  "min_flash_confidence": 70,
+  "early_stop_rate": 60,
+  "max_escalation_rate": 20,
+  "max_confidence_drift": 10,
+  "max_timeout_rate": 15,
+  "baseline": {
+    "date": "2026-03-14",
+    "flash": {
+      "median_latency_ms": 45000,
+      "median_confidence": 87,
+      "agents": 2,
+      "typical_verdict": "TRUSTED WITH GAPS"
+    },
+    "standard": {
+      "median_latency_ms": 162000,
+      "median_confidence": 69,
+      "agents": 5,
+      "typical_verdict": "INCONCLUSIVE",
+      "timeout_rate_pct": 8
+    }
+  }
+}

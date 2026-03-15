@@ -331,7 +331,7 @@ ETX is the Qt6 desktop GUI with 17 screens and 3 themes. Launch via `euxis-etx`.
 | About Screen | Implemented | System info and version |
 | Dark/Light/Contrast | Implemented | Three themes via `Ctrl+T` |
 | Keyboard Navigation | Implemented | Tab, arrows, Enter, Escape |
-| Tool Runner | Implemented | Inline euxis-health/certify/lint |
+| Tool Runner | Implemented | Inline euxis health/certify/lint |
 | Provider Selection | Implemented | Modal provider picker |
 | 51 Tests | Passing | Comprehensive test coverage |
 
@@ -368,4 +368,4 @@ The original bash-based menu interface remains available as `euxis-ui` for compa
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

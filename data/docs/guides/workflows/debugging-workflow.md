@@ -50,7 +50,7 @@ euxis investigator "Trace the authentication flow for password reset users"
 For issues involving multiple systems:
 
 ```bash
-euxis-combo run protect "Investigate why sessions expire immediately after login"
+euxis combo run protect "Investigate why sessions expire immediately after login"
 ```
 
 The Protect combo runs: `sentinel → pentester → auditor → inspector → reviewer`
@@ -116,7 +116,7 @@ euxis-cortex remember "CONTRAINDICATION: Never compare token timestamps without 
 |------|---------|
 | Quick bug analysis | `euxis debugger "<description>"` |
 | Deep forensics | `euxis investigator "<trace request>"` |
-| Security-focused investigation | `euxis-combo run protect "<issue>"` |
+| Security-focused investigation | `euxis combo run protect "<issue>"` |
 | Write regression tests | `euxis tester "Write tests for <fix>"` |
 | Full verification | `euxis-squad deploy quality "<verify>"` |
 
@@ -150,4 +150,4 @@ euxis responder "Production alert: 500 errors spiking on /api/checkout"
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

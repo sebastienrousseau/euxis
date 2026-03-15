@@ -1,0 +1,44 @@
+# Build artifacts
+cmake-build/
+build/cmake-build/
+build/out/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# Version control
+.git/
+.gitignore
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# AI tooling
+.claude/
+.aider*
+
+# Runtime data
+data/runtime/context/
+data/runtime/lifecycle/
+data/runtime/metrics/events.jsonl
+data/runtime/memory/cortex/db/
+data/runtime/sessions/
+data/runtime/verdicts/
+
+# Dependencies
+node_modules/
+_deps/
+
+# Coverage
+*.gcda
+*.gcno
+coverage.info
+coverage-report/
+
+# OS
+.DS_Store

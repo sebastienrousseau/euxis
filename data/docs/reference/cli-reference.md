@@ -1,63 +1,344 @@
 # Euxis CLI Reference
 
-Complete reference for all Euxis command-line tools.
+Complete reference for the Euxis command-line interface.
+
+## Quick Reference
+
+```bash
+euxis check .                               # Verify a repo (standard mode)
+euxis triage .                              # Fast bounded triage (flash mode)
+euxis review .                              # Deep verification (standard mode)
+euxis review . --forensic                   # Forensic-depth verification
+euxis certify-readiness . --framework soc2  # Certification readiness
+euxis compare .                             # Compare triage vs deep verification
+euxis stats --last 5                        # Recent validation metrics
+euxis doctor                                # Environment diagnostics
+euxis policy show                           # Inspect active policy
+```
 
 ## Table of Contents
 
-### Core System
-- [euxis](#euxis) - Main Euxis CLI entry point
-- [euxis-daemon](#euxis-daemon) - Background daemon management
-- [euxis-gateway](#euxis-gateway) - Gateway control plane
-- [euxis-health](#euxis-health) - System health monitoring
-- [euxis-verify](#euxis-verify) - Single verification runner
-- [euxis-verify-all](#euxis-verify-all) - Comprehensive verification
+### Core Commands
+- [euxis check](#euxis-check) - Verify a repository or target
+- [euxis triage](#euxis-triage) - Fast bounded triage scan
+- [euxis review](#euxis-review) - Deep verification (standard/forensic)
+- [euxis certify-readiness](#euxis-certify-readiness) - Certification readiness assessment
+- [euxis compare](#euxis-compare) - Compare triage vs deep verification
+- [euxis stats](#euxis-stats) - Validation metrics and drift history
+- [euxis policy](#euxis-policy) - Policy inspection and enforcement
 
-### Memory & Knowledge
-- [euxis-cortex](#euxis-cortex) - Semantic memory system
-- [euxis-graph](#euxis-graph) - Knowledge graph operations
-- [euxis-codex](#euxis-codex) - Code knowledge indexing
+### Lifecycle
+- [euxis install](#euxis-install) - Bootstrap local installation
+- [euxis update](#euxis-update) - Refresh metadata and registry
+- [euxis upgrade](#euxis-upgrade) - Upgrade binary (pull + rebuild)
+- [euxis uninstall](#euxis-uninstall) - Remove Euxis from this machine
+- [euxis self](#euxis-self) - Installation introspection
 
-### Agent Orchestration
-- [euxis-dispatch](#euxis-dispatch) - Multi-agent task coordination
-- [euxis-council](#euxis-council) - Agent council management
-- [euxis-synthesize](#euxis-synthesize) - Dynamic agent synthesis
-- [euxis-squad](#euxis-squad) - Squad-based agent groups
+### System
+- [euxis doctor](#euxis-doctor) - Environment diagnostics
+- [euxis health](#euxis-health) - Fleet integrity check
+- [euxis verify](#euxis-verify) - Verify agent prompt integrity
+- [euxis lint](#euxis-lint) - Lint agent prompts and configs
 
-### Development & Quality
-- [euxis-lint](#euxis-lint) - Code quality checks
-- [euxis-certify](#euxis-certify) - Release certification
-- [euxis-audit-run](#euxis-audit-run) - Audit execution
-- [euxis-license-check](#euxis-license-check) - License compliance
-- [euxis-test-infra](#euxis-test-infra) - Test infrastructure
-- [euxis-cross-platform-verify](#euxis-cross-platform-verify) - Cross-platform validation
+### Fleet (Advanced)
+- [euxis playbook](#euxis-playbook) - Execute a playbook manifest
+- [euxis agent](#euxis-agent) - Manage agents (list/register/unregister)
+- [euxis combo](#euxis-combo) - Run agent combo (sequential pipeline)
+- [euxis squad](#euxis-squad) - Squad orchestration
+- [euxis dispatch](#euxis-dispatch) - Dispatch agents from manifest
+- [euxis council](#euxis-council) - Multi-agent council deliberation
+- [euxis loop](#euxis-loop) - Agent feedback loop
+- [euxis synthesize](#euxis-synthesize) - Synthesize agent outputs
+- [euxis ci](#euxis-ci) - CI-ready repo verdict
 
-### Automation & Optimization
-- [euxis-bench](#euxis-bench) - Performance benchmarking
-- [euxis-optimize](#euxis-optimize) - Performance optimization
-- [euxis-kaizen](#euxis-kaizen) - Continuous improvement
-- [euxis-polish](#euxis-polish) - Code polish and cleanup
-- [euxis-combo](#euxis-combo) - Combo action sequences
+### Knowledge
+- [euxis cortex](#euxis-cortex) - Semantic memory (remember/recall/forget)
+- [euxis graph](#euxis-graph) - Knowledge graph operations
+- [euxis codex](#euxis-codex) - Template codex (list/render/validate)
 
-### Communication & Integration
-- [euxis-bus](#euxis-bus) - Message bus operations
-- [euxis-playbook](#euxis-playbook) - Playbook execution
-- [euxis-loop](#euxis-loop) - Event loop management
-- [euxis-hooks](#euxis-hooks) - Git hooks management
-- [euxis-git-guard](#euxis-git-guard) - Git operation protection
+### Aliases
 
-### User Interface
-- [euxis-ui](#euxis-ui) - User interface tools
-- [euxis-voice](#euxis-voice) - Voice interface
-- [euxis-slash](#euxis-slash) - Slash command processor
-
-### Utilities
-- [euxis-deploy](#euxis-deploy) - Deployment operations
-- [euxis-sync-docs](#euxis-sync-docs) - Documentation synchronization
-- [euxis-gym](#euxis-gym) - Training and simulation environment
+| Alias | Resolves to |
+|-------|-------------|
+| `quick` | `triage` |
+| `deep` | `review` |
+| `diag` | `doctor` |
+| `metrics` | `stats` |
+| `pb` | `playbook` |
+| `verify-all` | `check` |
 
 ---
 
-## Core System
+## Core Commands
+
+### euxis check
+
+**Synopsis:** `euxis check [target] [options]`
+
+**Description:**
+Primary repository verification command. Runs the verdict engine in standard mode by default.
+
+**Arguments:**
+- `target` - Path, URL, or named target. Defaults to current directory.
+
+**Options:**
+- `--triage` - Run fast triage instead of standard verification
+- `--standard` - Force standard mode (default)
+- `--forensic` - Run the most exhaustive verification
+- `--policy [path]` - Apply policy evaluation
+- `--ci` - Emit CI-safe output (JSON to stdout, TUI to stderr)
+- `--json` - Emit artifact JSON to stdout
+
+**Examples:**
+```bash
+euxis check .
+euxis check /srv/project --ci
+euxis check https://github.com/org/repo --policy
+euxis check . --forensic --json
+```
+
+**Aliases:** `verify-all` resolves to `check`
+
+**See Also:** [euxis triage](#euxis-triage), [euxis review](#euxis-review), [euxis playbook](#euxis-playbook)
+
+---
+
+### euxis triage
+
+**Synopsis:** `euxis triage [target] [options]`
+
+**Description:**
+Fast bounded triage scan using flash mode. Runs 2 agents (librarian + reviewer) with a 75-second budget. Ideal for quick screening before deeper analysis.
+
+**Arguments:**
+- `target` - Path, URL, or named target. Defaults to current directory.
+
+**Options:**
+- `--policy [path]` - Apply policy evaluation
+- `--ci` - Emit CI-safe output
+- `--json` - Emit artifact JSON to stdout
+
+**Examples:**
+```bash
+euxis triage .
+euxis triage https://github.com/org/repo --ci
+euxis triage /repo --json
+```
+
+**Aliases:** `quick` resolves to `triage`
+
+**See Also:** [euxis check](#euxis-check), [euxis compare](#euxis-compare)
+
+---
+
+### euxis review
+
+**Synopsis:** `euxis review [target] [options]`
+
+**Description:**
+Deep verification using standard mode (5 agents) or forensic mode (all 11 agents). Standard mode runs with a 10-minute budget; forensic with a 20-minute budget.
+
+**Arguments:**
+- `target` - Path, URL, or named target. Defaults to current directory.
+
+**Options:**
+- `--forensic` - Run forensic verification (all agents, 20-minute budget)
+- `--policy [path]` - Apply policy evaluation
+- `--ci` - Emit CI-safe output
+- `--json` - Emit artifact JSON to stdout
+
+**Examples:**
+```bash
+euxis review .
+euxis review . --forensic
+euxis review /repo --policy strict.json --ci
+```
+
+**Aliases:** `deep` resolves to `review`
+
+**See Also:** [euxis check](#euxis-check), [euxis triage](#euxis-triage)
+
+---
+
+### euxis certify-readiness
+
+**Synopsis:** `euxis certify-readiness [target] [options]`
+
+**Description:**
+Certification readiness assessment across 18 domains with framework-aware overlays. Runs 5 hard gates (commit signing, unit tests, build integrity, documentation, security) and evaluates domain coverage with evidence collection.
+
+**Arguments:**
+- `target` - Path to repository. Defaults to current directory.
+
+**Subcommands:**
+- `controls` - Print the 18-domain control model and critical gates
+- `report <artifact>` - Pretty-print an existing certification artifact
+
+**Options:**
+- `--framework <general|soc2|iso27001>` - Framework overlay (default: general)
+- `--strict` - Make soft gates blocking
+- `--ci` - CI-safe output (TUI to stderr, JSON to stdout)
+- `--json` - Emit artifact JSON to stdout
+- `--no-build` - Skip build integrity gate
+- `--no-tests` - Skip unit test health gate
+- `--no-security` - Skip security critical gate
+- `--commit-window <N>` - Number of recent commits to check for signing (default: 20)
+- `--since-ref <ref>` - Check commits since this git ref
+- `--output <path>` - Custom artifact output path
+
+**Examples:**
+```bash
+euxis certify-readiness .
+euxis certify-readiness . --framework soc2
+euxis certify-readiness . --strict --json
+euxis certify-readiness controls
+euxis certify-readiness report ~/.euxis/data/runtime/sessions/latest_certification.json
+```
+
+**Exit Codes:**
+- `0` - READY or READY WITH GAPS
+- `1` - BLOCKED or INCONCLUSIVE
+- `2` - Usage error or invalid framework
+
+**Artifact:** Written to `$EUXIS_HOME/data/runtime/sessions/latest_certification.json`.
+
+**See Also:** [euxis check](#euxis-check), [euxis audit](#euxis-audit-run)
+
+---
+
+### euxis compare
+
+**Synopsis:** `euxis compare <target> [options]`
+
+**Description:**
+Runs both triage (flash) and standard verification on the same target, then produces an A/B comparison including verdict drift classification (SEMANTIC, MECHANICAL, or MIXED).
+
+**Arguments:**
+- `target` - **Required.** Path, URL, or named target.
+
+**Options:**
+- `--json` - Emit artifact JSON to stdout
+- `--policy [path]` - Apply policy evaluation
+
+**Examples:**
+```bash
+euxis compare .
+euxis compare /path/to/repo
+euxis compare https://github.com/org/repo
+```
+
+**See Also:** [euxis stats](#euxis-stats)
+
+---
+
+### euxis stats
+
+**Synopsis:** `euxis stats [options]`
+
+**Description:**
+Displays validation metrics, drift history, and baseline compliance from the verdict history. Reads targets from `data/config/targets.json`.
+
+**Options:**
+- `--since <YYYY-MM-DD>` - Filter history by date
+- `--last <N>` - Show only last N runs
+- `--check-baseline` - Exit non-zero if targets are not met (CI mode)
+- `--json` - Emit JSON output
+
+**Examples:**
+```bash
+euxis stats
+euxis stats --since 2026-03-14
+euxis stats --last 10
+euxis stats --check-baseline   # exit 1 if targets violated
+```
+
+**Aliases:** `metrics` resolves to `stats`
+
+**See Also:** [euxis compare](#euxis-compare)
+
+---
+
+### euxis policy
+
+**Synopsis:** `euxis policy <subcommand> [options]`
+
+**Description:**
+Policy inspection and enforcement. Manage and evaluate policy rules against verdict artifacts.
+
+**Subcommands:**
+
+- `show` - Display the active policy file
+- `validate [path]` - Validate policy JSON syntax and check for unknown fields
+- `check [target]` - Evaluate policy against the latest verdict artifact. If a target is provided, runs a fresh verification with policy applied.
+
+**Examples:**
+```bash
+euxis policy show
+euxis policy validate data/config/policy.json
+euxis policy check               # check latest artifact
+euxis policy check . --ci        # run fresh verification under policy
+```
+
+**See Also:** [euxis check](#euxis-check)
+
+---
+
+## Aliases
+
+| Shorthand | Resolves to | Description |
+|-----------|-------------|-------------|
+| `quick` | `triage` | Fast screening alias |
+| `deep` | `review` | Deep verification alias |
+| `diag` | `doctor` | Diagnostics alias |
+| `metrics` | `stats` | Metrics alias |
+| `pb` | `playbook` | Playbook shorthand |
+| `verify-all` | `check` | Compatibility alias |
+
+---
+
+## Lifecycle Commands
+
+### euxis install
+
+**Synopsis:** `euxis install`
+
+**Description:** Bootstrap a local Euxis installation. Sets up data directories, agent registry, and configuration.
+
+---
+
+### euxis update
+
+**Synopsis:** `euxis update`
+
+**Description:** Refresh metadata and agent registry from upstream sources.
+
+---
+
+### euxis upgrade
+
+**Synopsis:** `euxis upgrade`
+
+**Description:** Pull latest changes and rebuild the binary (`git pull && make cpp-build`).
+
+---
+
+### euxis uninstall
+
+**Synopsis:** `euxis uninstall`
+
+**Description:** Remove Euxis from this machine. Cleans up symlinks, configuration, and data directories.
+
+---
+
+### euxis self
+
+**Synopsis:** `euxis self`
+
+**Description:** Installation introspection. Shows installation path, version, build info, and configuration status.
+
+---
+
+## System Commands
 
 ### euxis
 
@@ -128,25 +409,24 @@ euxis-gateway config
 **See Also:** [Gateway Protocol](gateway.md), [Gateway Config](gateway-config.md)
 
 ---
-### euxis-health
+### euxis health
 
-**Synopsis:** `euxis-health [--silent] [--json]`
+**Synopsis:** `euxis health [--json]`
 
 **Description:**
-Runs a 10-check fleet health probe: naming consistency, script hardening, orphan detection, header schema validation, documentation drift, certification readiness, provider connectivity, codex integrity, bus pipe activity, and cortex connectivity.
+Fleet integrity check: agent registry, provider connectivity, build status, and test health.
 
 **Options:**
-- `--silent` - Exit code only, no output
-- `--json` - JSON output (implies `--silent`)
+- `--json` - JSON output
 - `-h, --help` - Show help
 
 **Examples:**
 ```bash
-euxis-health
-euxis-health --json
+euxis health
+euxis health --json
 ```
 
-**See Also:** [euxis-verify](#euxis-verify)
+**See Also:** [euxis certify-readiness](#euxis-certify-readiness)
 
 ### euxis-verify
 
@@ -191,7 +471,7 @@ Canonical sequential verification pipeline. Uses the playbook engine when availa
 
 **Examples:**
 ```bash
-euxis-verify-all "Release readiness for v0.0.3"
+euxis-verify-all "Release readiness for v0.0.4"
 euxis-verify-all "Docs audit" --from-gate 2
 ```
 
@@ -226,7 +506,7 @@ Cross-platform semantic memory system using vector and graph hybrid storage. Man
 
 **Examples:**
 ```bash
-euxis-cortex remember 'Deployed v0.0.3 to staging, all tests passed' 'gatekeeper' --type episodic
+euxis-cortex remember 'Deployed v0.0.4 to staging, all tests passed' 'gatekeeper' --type episodic
 euxis-cortex recall 'auth token' 5 --hybrid
 euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 ```
@@ -376,28 +656,31 @@ euxis-lint src/ --fix
 euxis-lint --check security
 ```
 
-**See Also:** [euxis-certify](#euxis-certify), [euxis-audit-run](#euxis-audit-run)
+**See Also:** [euxis certify-readiness](#euxis-certify-readiness), [euxis-audit-run](#euxis-audit-run)
 
 ---
 
-### euxis-certify
+### euxis certify-readiness
 
-**Synopsis:** `euxis-certify [--stage STAGE] [--profile PROFILE]`
+**Synopsis:** `euxis certify-readiness <target> [OPTIONS]`
 
 **Description:**
-Release certification and quality gate validation. Ensures code meets production readiness standards.
+18-domain certification readiness assessment with framework overlays and structured JSON artifacts.
 
 **Options:**
-- `--stage` - Certification stage
-- `--profile` - Certification profile
+- `--framework <general|soc2|iso27001>` - Framework overlay (default: general)
+- `--strict` - Make soft gates blocking
+- `--json` - JSON output to stdout
+- `--ci` - CI-safe output mode
 
 **Examples:**
 ```bash
-euxis-certify
-euxis-certify --stage production --profile security
+euxis certify-readiness .
+euxis certify-readiness . --framework soc2
+euxis certify-readiness . --strict --json
 ```
 
-**See Also:** [euxis-verify-all](#euxis-verify-all), [euxis-lint](#euxis-lint)
+**See Also:** [euxis check](#euxis-check), [euxis review](#euxis-review)
 
 ---
 
@@ -414,7 +697,7 @@ euxis-audit-run security
 euxis-audit-run compliance src/
 ```
 
-**See Also:** [euxis-certify](#euxis-certify), [euxis-license-check](#euxis-license-check)
+**See Also:** [euxis certify-readiness](#euxis-certify-readiness), [euxis-license-check](#euxis-license-check)
 
 ---
 
@@ -744,7 +1027,7 @@ euxis-deploy staging
 euxis-deploy production --confirm
 ```
 
-**See Also:** [euxis-certify](#euxis-certify)
+**See Also:** [euxis certify-readiness](#euxis-certify-readiness)
 
 ---
 
@@ -797,25 +1080,27 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 | Item | Location |
 |------|----------|
 | Installation | `~/.euxis/` |
-| Executables | `~/.euxis/euxis-bin/` (optional symlinks in `~/.local/bin/`) |
-| Configuration | `~/.euxis/config/` |
+| Build output | `~/.euxis/build/cmake-build/cmd/cli/euxis-cli` |
+| Configuration | `~/.euxis/data/config/` |
+| Agent prompts | `~/.euxis/data/agents/prompts/` |
+| Agent registry | `~/.euxis/data/agents/registry.db` |
+| Verdicts | `~/.euxis/data/runtime/sessions/` |
 | Cortex Database | `~/.euxis/data/runtime/memory/cortex/db/` |
-| Agent Outputs | `~/.euxis/data/runtime/projects/` |
-| Logs | `~/.euxis/data/runtime/logs/` |
 
 **Environment Variables:**
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `EUXIS_HOME` | `~/.euxis` | Installation directory |
-| `EUXIS_PROVIDER` | `claude` | Default AI provider |
-| `EUXIS_PROJECT` | current dir | Active project context |
+| `EUXIS_DEFAULT_PROVIDER` | `claude` | Default AI provider |
+| `EUXIS_LOCAL_ONLY` | unset | Force all routing to Ollama |
+| `EUXIS_MODEL_OVERRIDE` | unset | Force a specific model |
+| `EUXIS_DEFAULT_RESEARCH_PROVIDER` | unset | Override provider for research tasks |
+| `EUXIS_DEFAULT_CODING_PROVIDER` | unset | Override provider for coding tasks |
+| `EUXIS_DEFAULT_SECURITY_PROVIDER` | unset | Override provider for security tasks |
+| `EUXIS_LOCAL_MODEL` | `qwen2.5-coder:7b` | Model for local-only mode |
+| `EUXIS_TEST_MOCK_EXECUTION` | unset | Enable mock execution for tests |
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
-
----
-
-Designed by Sebastien Rousseau — https://sebastienrousseau.com
-Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
+*Euxis v0.0.4 · [euxis.co](https://euxis.co)*

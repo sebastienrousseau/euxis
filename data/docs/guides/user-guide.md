@@ -2,112 +2,128 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version v0.0.3
+Version v0.0.4
 
-## CLI Tools
+## Getting Started
 
-Complete command-line toolkit. Each tool serves one function.
+```bash
+euxis triage .                              # Quick triage (~45s, flash mode)
+euxis check .                               # Standard verification (~3 min)
+euxis review . --forensic                   # Forensic-depth verification
+euxis certify-readiness . --framework soc2  # Certification readiness
+euxis compare .                             # Compare triage vs standard
+euxis stats --last 5                        # Recent validation metrics
+euxis doctor                                # Environment diagnostics
+euxis policy show                           # Inspect active policy
+```
 
-### Core
+## Core Commands
 
-| Command | Function |
-|---------|----------|
-| `euxis <agent> <task> [provider]` | Deploy agent with automatic intelligence routing |
-| `euxis-etx` | Qt6 desktop GUI for fleet management |
-| `euxis-ui` | Legacy menu-based interface (Bash) |
+The primary user-facing commands. These wrap the underlying playbook engine.
 
-**See also**: [UI Guide](ui-guide.md)
+| Command | Description | Default Mode |
+|---------|-------------|-------------|
+| `euxis check [target]` | Verify a repository or target | standard |
+| `euxis triage [target]` | Fast bounded triage scan | flash |
+| `euxis review [target]` | Deep verification | standard |
+| `euxis review [target] --forensic` | Forensic-depth verification | forensic |
+| `euxis certify-readiness [target]` | Certification readiness assessment (18 domains) | general |
+| `euxis compare <target>` | Compare triage vs deep verification | flash+standard |
+| `euxis stats [--since] [--last]` | Validation metrics and drift history | — |
+| `euxis policy <sub>` | Policy inspection and enforcement | — |
+| `euxis doctor` | Environment diagnostics | — |
 
-### Quality & Certification
+### Modes
 
-Verify fleet integrity before and after changes.
+| Mode | Agents | SLA | Use Case |
+|------|--------|-----|----------|
+| **flash** | 2 (librarian, reviewer) | 45-75s | Quick screening, CI gates |
+| **standard** | 5 (librarian, architect, optimizer, sentinel, reviewer) | 3-5 min | Pre-merge verification |
+| **forensic** | 11 (all agents) | 10-15 min | Release audits, deep analysis |
 
-| Command | Description |
-|---------|-------------|
-| `euxis-lint` | Static analysis: registry integrity, protocol compliance, version sync |
-| `euxis-test-infra` | Infrastructure unit tests: validation, routing, space handling |
-| `euxis-certify` | 6-gate certification: lint, tests, semantic, branding, documentation governance |
-| `euxis-health` | 10-point fleet health check: naming, hardening, orphans, headers, doc drift, certification, providers, codex |
-| `euxis-git-guard` | Pre-commit safety checks |
-| `euxis-verify` | Output verification |
-| `euxis-polish` | Prompt polishing |
+### Aliases
 
-### Orchestration & Autonomy
+| Alias | Resolves to |
+|-------|-------------|
+| `quick` | `triage` |
+| `deep` | `review` |
+| `diag` | `doctor` |
+| `metrics` | `stats` |
+| `pb` | `playbook` |
+| `verify-all` | `check` |
 
-Coordinate multiple agents or run autonomous workflows.
-
-| Command | Description |
-|---------|-------------|
-| `euxis-council "<topic>"` | 3-round adversarial debate between architect, pentester, optimizer |
-| `euxis-loop <agent> <task> <verify_cmd> [retries]` | Autonomous retry with reflexion and checkpoints |
-| `euxis-dispatch [--mode MODE] <manifest.json>` | Parallel agent execution across hierarchical, mesh, or federated modes |
-| `euxis-kaizen` | 4-gate self-improvement cycle |
-| `euxis-daemon [interval]` | Periodic kaizen with fail-safe halting (default: 30 min) |
-
-### Squads, Playbooks & Combos
-
-Activate teams, run phased workflows, or chain agents in sequence.
-
-| Command | Description |
-|---------|-------------|
-| `euxis-squad list` | All squads with member counts |
-| `euxis-squad info <id>` | Squad details: lead, members, purpose |
-| `euxis-squad deploy <id> "<task>"` | Deploy a full squad via dispatch manifest |
-| `euxis-squad members <id>` | Member list with registry info |
-| `euxis-squad validate` | Cross-check all squad members against registry |
-| `euxis-playbook list` | Available playbooks |
-| `euxis-playbook info <id>` | Phase breakdown with squads and checkpoints |
-| `euxis-playbook run <id> "<goal>" [--dry-run]` | Execute phases sequentially (or preview with `--dry-run`) |
-| `euxis-playbook status [session-id]` | Session log |
-| `euxis-combo list` | Available combos with chains |
-| `euxis-combo info <id>` | Chain detail |
-| `euxis-combo run <id> "<task>" [--provider P]` | Execute sequential agent chain |
-| `euxis-codex list` | All prompt templates with categories |
-| `euxis-codex info <id>` | Template details, variables, and target agents |
-| `euxis-codex show <id>` | Print raw template content |
-| `euxis-codex run <id> VAR=value [--provider P]` | Substitute variables and execute via target agent |
-| `euxis-hooks install [--repo PATH]` | Install Euxis Git hooks into a repository |
-| `euxis-hooks uninstall [--repo PATH]` | Remove Euxis hook symlinks |
-| `euxis-hooks status [--repo PATH]` | Show which Euxis hooks are installed |
-| `euxis-hooks pr "<title>" [--body "<text>"]` | Create a PR with branding signature auto-appended |
-| `euxis-hooks check-pr [PR_NUMBER]` | Verify open PR descriptions carry the branding signature |
-
-### Performance & Audit
-
-Benchmark your fleet and run deep security audits.
+## Lifecycle Commands
 
 | Command | Description |
 |---------|-------------|
-| `euxis-bench` | Performance benchmarks: health, lint, cortex recall, provider latency |
-| `euxis-audit-run` | Deep audit: benchmarks, logic integrity, security probes, readiness |
-| `euxis-gym <agent> <test_case> [provider]` | Agent evaluation and A/B testing against golden datasets |
+| `euxis install` | Bootstrap local Euxis installation |
+| `euxis update` | Refresh metadata and registry |
+| `euxis upgrade` | Upgrade binary (pull + rebuild) |
+| `euxis uninstall` | Remove Euxis from this machine |
+| `euxis self` | Installation introspection |
 
-### Memory & Knowledge
-
-Store and recall typed memories across sessions.
-
-| Command | Description |
-|---------|-------------|
-| `euxis-cortex remember "<fact>" "<agent>" --type <episodic\|semantic\|procedural>` | Store typed facts in vector memory |
-| `euxis-cortex recall "<query>" [n] [--type <type>]` | Semantic recall from Cortex with type filtering |
-| `euxis-cortex stats` | Database statistics |
-| `euxis-cortex forget "<text>"` | Remove memory entry |
-
-### Documentation & Governance
+## System Commands
 
 | Command | Description |
 |---------|-------------|
-| `euxis-sync-docs` | Doc sync with human approval |
-| `euxis-optimize` | Prompt optimization and compression |
+| `euxis doctor` | Environment diagnostics (providers, dirs, tools) |
+| `euxis fix` | Autonomous environment self-repair |
+| `euxis health` | Fleet integrity check (10-point) |
+| `euxis verify` | Verify agent prompt integrity |
+| `euxis lint` | Lint agent prompts and configs |
+| `euxis shell-lint` | Lint shell scripts (shellcheck) |
+| `euxis verify-all` | Run all verification checks |
+| `euxis cross-platform-verify` | Cross-platform compatibility check |
 
-**UI Documentation**: [UI Guide](ui-guide.md) | [Fleet Constitution](../CONSTITUTION.md)
+## Advanced Commands
+
+### Fleet Orchestration
+
+| Command | Description |
+|---------|-------------|
+| `euxis playbook <manifest> [target]` | Execute a playbook manifest |
+| `euxis agent list\|info\|register` | Manage agents |
+| `euxis combo list\|run <id> "<task>"` | Run agent combo (sequential pipeline) |
+| `euxis squad list\|deploy\|info` | Squad orchestration |
+| `euxis council "<topic>"` | Multi-agent council deliberation |
+| `euxis loop <agent> <task> <verify>` | Agent feedback loop |
+| `euxis dispatch <manifest.json>` | Dispatch agents from manifest |
+| `euxis synthesize` | Synthesize outputs from multiple agents |
+| `euxis ci` | CI-ready repo verdict (deterministic JSON) |
+
+### Knowledge & Memory
+
+| Command | Description |
+|---------|-------------|
+| `euxis cortex remember\|recall\|forget` | Semantic memory |
+| `euxis graph` | Knowledge graph operations |
+| `euxis codex list\|render\|validate` | Template codex |
+
+### Development & Quality
+
+| Command | Description |
+|---------|-------------|
+| `euxis bench` | Performance benchmarks |
+| `euxis audit` | Security and compliance audit |
+| `euxis audit-run` | Execute audit run with evidence |
+| `euxis certify` | Certify agent readiness (5-point check) |
+| `euxis certify-readiness` | Certification readiness (18-domain assessment) |
+| `euxis evidence-verify` | Verify audit evidence artifacts |
+| `euxis gym <agent> <test>` | Agent training gym |
+| `euxis hooks` | Manage git hooks |
+| `euxis license-check` | Check license compliance |
+| `euxis docs-test` | Test documentation examples |
+| `euxis sync-docs` | Sync docs to latest code state |
 
 ### Infrastructure
 
 | Command | Description |
 |---------|-------------|
-| `euxis-deploy` | Launch enterprise fleet via Docker Compose |
-| `euxis-voice` | Voice interface: record, transcribe, orchestrate, speak |
+| `euxis gateway` | Start HTTP/WS gateway server |
+| `euxis bus` | Message bus operations |
+| `euxis daemon` | Background daemon management |
+| `euxis deploy` | Deploy agent configurations |
+| `euxis optimize` | Optimize runtime performance |
 
 ## Agent Fleet
 
@@ -255,53 +271,56 @@ FINAL ANSWER: <Synthesized deliverable citing supporting OBSERVATIONs>
 
 Minimum 2 cycles before FINAL ANSWER. Every claim must cite supporting OBSERVATION.
 
-## Quick Start
+## Provider Strategy
+
+Euxis routes tasks to the optimal AI provider based on semantic classification.
+
+| Task Class | Primary Provider | Fallback |
+|-----------|-----------------|----------|
+| Research / synthesis | OpenAI | Gemini, Claude |
+| Coding / architecture / audit | Claude | Gemini, Ollama |
+| Deep research / security | Gemini | OpenAI, Claude |
+| Private / local | Ollama | — |
+| Surgical edits | Aider | Claude, Ollama |
+| Terminal automation | Kiro | ShellGPT, Claude |
+
+Configuration: [`data/config/provider_strategy.json`](../../config/provider_strategy.json).
+
+Override per task class with environment variables:
+- `EUXIS_DEFAULT_RESEARCH_PROVIDER`
+- `EUXIS_DEFAULT_CODING_PROVIDER`
+- `EUXIS_DEFAULT_SECURITY_PROVIDER`
+- `EUXIS_LOCAL_ONLY=true` forces all tasks to Ollama
+
+## Quick Reference
 
 ```bash
-# Run an agent
-euxis architect "Review the auth module"
+# Core verification commands
+euxis triage .                              # Quick triage (~45s)
+euxis check .                               # Standard (~3 min)
+euxis review . --forensic                   # Forensic depth
+euxis certify-readiness . --framework soc2  # Certification readiness
 
-# Check fleet health
-euxis-health
+# Fleet orchestration
+euxis playbook verify-everything .          # Full playbook
+euxis combo run envision "Design X"         # Multi-agent pipeline
+euxis squad deploy quality "Audit auth"     # Squad deployment
+euxis council "Should we adopt gRPC?"       # Council deliberation
 
-# Full certification
-euxis-certify
+# Knowledge & memory
+euxis cortex remember "auth uses JWT"       # Store memory
+euxis cortex recall "authentication"        # Recall knowledge
 
-# Store a typed memory
-euxis-cortex remember "Project uses hexagonal architecture" "architect" --type semantic
+# Infrastructure
+euxis gateway                               # Start HTTP/WS gateway
+euxis bench                                 # Performance benchmarks
+euxis audit                                 # Security audit
 
-# Recall procedural knowledge
-euxis-cortex recall "deployment workflow" --type procedural
-
-# Dispatch with mesh mode
-euxis-dispatch --mode mesh manifest.json
-
-# Performance benchmark
-euxis-bench
-
-# Deep audit
-euxis-audit-run
-
-# Sync documentation (with approval)
-euxis-sync-docs
-
-# Start the gateway (local)
-euxis-gateway run
-
-# Check gateway status
-euxis-gateway status
-
-# Deploy a squad
-euxis-squad deploy build "Fix auth module"
-
-# Run a playbook (dry run first)
-euxis-playbook run zero-to-one "Launch auth service" --dry-run
-
-# Execute a combo chain
-euxis-combo run envision "Design new onboarding flow"
+# Diagnostics
+euxis doctor                                # Environment check
+euxis health                                # Fleet integrity
 ```
 
 ---
 
-Designed by Sebastien Rousseau — https://sebastienrousseau.com
-Engineered with Euxis — Enterprise Unified Execution Intelligence System — https://euxis.co
+Euxis v0.0.4 · [euxis.co](https://euxis.co)

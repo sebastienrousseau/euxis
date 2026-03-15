@@ -18,7 +18,7 @@ The Euxis plugin system allows you to register third-party agents without modify
 
 **Key Benefits:**
 - Non-invasive: no core system modification required
-- Automatic discovery: plugins appear in `euxis-health` and `list_agents` output
+- Automatic discovery: plugins appear in `euxis health` and `list_agents` output
 - Full feature support: plugins inherit all protocol features (ReAct, memory, audit trails)
 - Easy management: register, unregister, and list plugins with simple commands
 
@@ -122,7 +122,7 @@ register_agent_plugin ~/my-plugins/code-optimizer-manifest.json
 
 ```bash
 # Check if the agent is registered
-euxis-health | grep code-optimizer
+euxis health | grep code-optimizer
 
 # List all plugins
 source ~/.euxis/core/lib/agents.sh && list_plugins
@@ -545,7 +545,7 @@ Choose the appropriate tier for your agent based on its computational requiremen
 source ~/.euxis/core/lib/agents.sh && list_plugins
 
 # Full health report including plugins
-euxis-health
+euxis health
 
 # Check agent liveness specifically
 source ~/.euxis/core/lib/agents.sh
@@ -746,4 +746,4 @@ euxis log-analyzer "Analyze the application logs from the last hour for any erro
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

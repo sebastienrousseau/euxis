@@ -796,11 +796,14 @@ TEST_F(FleetCmdTest, PolicyViolationLowConfidence) {
 }
 
 TEST_F(FleetCmdTest, PolicyViolationBadVerdict) {
-    // Write policy requiring TRUSTED verdict
+    // Mock execution produces TRUSTED verdict with ~0.75 critical_coverage.
+    // Set min_confidence impossibly high to guarantee a policy violation,
+    // and disable min_critical_coverage so we test a specific gate.
     auto policy_path = ctx_.data_dir + "/config/policy.json";
     fs::create_directories(fs::path(policy_path).parent_path());
     nlohmann::json policy;
-    policy["min_verdict"] = "TRUSTED";
+    policy["min_confidence"] = 999;
+    policy["min_critical_coverage"] = 0.0;
     std::ofstream(policy_path) << policy.dump();
 
     auto path = ctx_.euxis_home + "/playbook-policy-verdict.json";
@@ -826,9 +829,9 @@ TEST_F(FleetCmdTest, PolicyViolationBadVerdict) {
     EXPECT_TRUE(parsed.contains("policy_violations"));
     bool found = false;
     for (const auto& v : parsed["policy_violations"]) {
-        if (v["gate"].get<std::string>() == "min_verdict") found = true;
+        if (v["gate"].get<std::string>() == "min_confidence") found = true;
     }
-    EXPECT_TRUE(found) << "Expected min_verdict violation";
+    EXPECT_TRUE(found) << "Expected min_confidence violation";
 }
 
 TEST_F(FleetCmdTest, PolicyViolationRegression) {

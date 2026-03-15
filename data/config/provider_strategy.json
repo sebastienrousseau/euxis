@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "description": "Provider strategy — semantic task routing policy (user-selected preferences)",
+
+  "defaults": {
+    "research": {
+      "primary": "openai",
+      "fallback": ["gemini", "claude"]
+    },
+    "multilingual_analysis": {
+      "primary": "openai",
+      "fallback": ["gemini", "claude"]
+    },
+    "policy_synthesis": {
+      "primary": "openai",
+      "fallback": ["gemini", "claude"]
+    },
+    "coding": {
+      "primary": "claude",
+      "fallback": ["gemini", "ollama"]
+    },
+    "architecture": {
+      "primary": "claude",
+      "fallback": ["gemini"]
+    },
+    "audit": {
+      "primary": "claude",
+      "fallback": ["openai", "gemini"]
+    },
+    "deep_research": {
+      "primary": "gemini",
+      "fallback": ["openai", "claude"]
+    },
+    "security": {
+      "primary": "gemini",
+      "fallback": ["claude", "openai"]
+    },
+    "private_coding": {
+      "primary": "ollama",
+      "fallback": []
+    },
+    "surgical_edit": {
+      "primary": "aider",
+      "fallback": ["claude", "ollama"]
+    },
+    "terminal_automation": {
+      "primary": "kiro",
+      "fallback": ["shellgpt", "claude"]
+    }
+  },
+
+  "models": {
+    "openai": {
+      "research": "gpt-5.4",
+      "multilingual_analysis": "gpt-5.4",
+      "policy_synthesis": "gpt-5.4",
+      "default": "gpt-5.4"
+    },
+    "claude": {
+      "coding": "claude-sonnet-4-6",
+      "architecture": "claude-opus-4-6",
+      "audit": "claude-opus-4-6",
+      "default": "claude-sonnet-4-6"
+    },
+    "gemini": {
+      "deep_research": "gemini-3.1-pro",
+      "security": "gemini-3.1-pro",
+      "coding": "gemini-3.1-pro",
+      "research": "gemini-3.1-pro",
+      "fast": "gemini-3.1-flash-lite",
+      "default": "gemini-3.1-pro"
+    },
+    "ollama": {
+      "private_coding": "llama4:maverick",
+      "coding": "llama4:maverick",
+      "default": "llama4:maverick"
+    },
+    "aider": {
+      "surgical_edit": "aider",
+      "default": "aider"
+    },
+    "kiro": {
+      "terminal_automation": "kiro",
+      "default": "kiro"
+    },
+    "shellgpt": {
+      "terminal_automation": "sgpt",
+      "default": "sgpt"
+    }
+  },
+
+  "agent_class_hints": {
+    "librarian": "research",
+    "writer": "coding",
+    "strategist": "architecture",
+    "architect": "architecture",
+    "optimizer": "coding",
+    "custodian": "security",
+    "automaton": "terminal_automation",
+    "investigator": "deep_research",
+    "sentinel": "security",
+    "tester": "coding",
+    "reviewer": "audit"
+  },
+
+  "classification_keywords": {
+    "research": ["research", "literature", "survey", "knowledge", "synthesis", "summarize report", "aggregat", "standards review", "policy review"],
+    "multilingual_analysis": ["multilingual", "translation", "cross-language", "i18n", "localization"],
+    "policy_synthesis": ["policy", "compliance", "regulation", "standards", "governance", "certification"],
+    "coding": ["code", "implement", "refactor", "debug", "test", "build", "fix", "optimize", "develop", "write code"],
+    "architecture": ["architect", "design", "system design", "module structure", "dependency graph", "API design"],
+    "audit": ["audit", "code review", "review diff", "inspect", "compliance check", "quality gate"],
+    "deep_research": ["deep research", "codebase analysis", "cross-file", "long-context", "repository-wide", "whole codebase"],
+    "security": ["security", "vulnerability", "CVE", "exploit", "threat model", "penetration", "secret scan", "supply chain risk"],
+    "private_coding": ["private", "local-only", "air-gapped", "on-prem", "offline"],
+    "surgical_edit": ["surgical edit", "patch", "single-file fix", "targeted change", "exact edit", "apply diff"],
+    "terminal_automation": ["shell", "terminal", "command", "script", "pipeline", "bash", "MCP", "tool chain"]
+  }
+}

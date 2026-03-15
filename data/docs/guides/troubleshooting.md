@@ -9,45 +9,24 @@ This comprehensive troubleshooting guide covers common issues, diagnostic comman
 
 Before diving into specific issues, run these diagnostic commands to assess your system state.
 
-### euxis-health Command
+### euxis health Command
 
-The `euxis-health` command performs 10 automated checks on your fleet:
+The `euxis health` command performs fleet integrity checks:
 
 ```bash
-euxis-health
+euxis health
 ```
 
 **Expected output (healthy system):**
 
 ```
-==================================================
-  EUXIS HEALTH CHECK
-==================================================
-
-[1/10] Naming Consistency...
-  All agent filenames match their agent_id.
-
-[2/10] Script Hardening...
-  All bash scripts have hardening flags.
-
-[3/10] Orphan Detection...
-  All agents are registered. No orphans or ghosts.
-
-[4/10] Header Schema Validation...
-  All agents have complete headers (agent_id, role, version, tags, last_updated).
-
-[5/10] Documentation Drift...
-  docs/guides/user-guide.md is current (updated within 24h).
-
-[6/10] Certification Readiness...
-  euxis-certify is present and executable.
-  euxis-lint is present and executable.
-  euxis-test-infra is present and executable.
-
-[7/10] Provider Connectivity...
-  FOUND: claude
-  FOUND: gemini
-  NOT FOUND: ollama (optional -- install to enable this provider)
+=== FLEET HEALTH ===
+Agents:      11 registered, 0 orphans
+Providers:   claude, gemini, ollama
+Build:       OK (cmake-build/)
+Tests:       1063 passed
+Registry:    agents/registry.db valid
+```
   3 of 9 provider CLIs available.
 
 [8/10] Codex Integrity...
@@ -77,141 +56,45 @@ euxis-health
 **Command Options:**
 
 ```bash
-# Exit code only (for euxis-ops/CI)
-euxis-health --silent
-
 # JSON output for programmatic parsing
-euxis-health --json
+euxis health --json
 ```
 
-**JSON output example:**
+### euxis certify-readiness Command
 
-```json
-{
-  "status": "healthy",
-  "failures": 0,
-  "warnings": 2,
-  "agents": 41,
-  "providers": 3,
-  "bus_pipes": 3,
-  "bus_messages": 45,
-  "timestamp": "current-02-14T10:30:00Z"
-}
-```
-
-### euxis-certify Command
-
-The `euxis-certify` command runs the complete 6-gate certification pipeline:
+The `euxis certify-readiness` command performs an 18-domain certification readiness assessment:
 
 ```bash
-euxis-certify
+euxis certify-readiness .
 ```
 
-**Expected output (certified system):**
+**Expected output:**
 
 ```
-==================================================
-  EUXIS CERTIFICATION PIPELINE
-==================================================
+=== CERTIFICATION READINESS ASSESSMENT ===
+Target:      .
+Framework:   general
+Status:      READY WITH GAPS
+Confidence:  78%
 
-[GATE 0] Environment Pre-Validation (Fail-Fast)...
---------------------------------------------------
-  Running full validation...
-  Running minimal validation...
-  Registry database valid (53 agents)
-  Euxis directory structure is valid
-  All system dependencies available
-  Full validation passed.
-
-[GATE 0a] Certification Prerequisites...
---------------------------------------------------
-  Static analysis tool is accessible
-  Infrastructure testing is accessible
-  Main Euxis script is accessible
-  Branding signature exists
-  Main README exists
-  User guide exists
-  Fleet guide exists
-  Temporary file write access verified
-  Current version detected: v0.0.3
-  All certification prerequisites met
-
-[GATE 0b] Security & Quality Enforcement...
---------------------------------------------------
-  PASS: euxis-bus uses jq for safe JSON generation
-  PASS: Provider model name validation present
-  PASS: Task input sanitization in dispatch pipeline
-  PASS: PII sanitization in logging functions
-  PASS: Project license declared in pyproject.toml
-  PASS: Prompt injection detection in task validation
-  PASS: Message bus sender validation present
-  PASS: Message bus retention policy (cleanup) present
-  PASS: TUI deployment confirmation gates present
-  All mandatory security controls verified
-
-[GATE 1+2] Static Analysis (Lint)...
---------------------------------------------------
-  All agents passed lint checks
-
-[GATE 3] Infrastructure Tests...
---------------------------------------------------
-  All infrastructure tests passed
-
-[GATE 4] Semantic Verification...
---------------------------------------------------
-  Golden dataset found. Running sample eval...
-  Testing architect agent (timeout: 180s)...
-  PASS: Architect produced output (2847 chars).
-
-[GATE 5] Branding Compliance...
---------------------------------------------------
-  PASS: config/branding/signature.txt exists.
-  PASS: PR template carries branding signature.
-  PASS: README.md carries author attribution.
-  PASS: prepare-commit-msg hook is present and executable.
-  PASS: commit.gpgsign is globally enabled.
-  PASS: Signing key is configured (format: ssh).
-  PASS: Last 5 commits carry branding signature.
-  PASS: Last 5 commits are cryptographically signed.
-  PASS: Signature URL points to euxis.co.
-  PASS: GitHub Actions branding-check workflow exists.
-
-[GATE 6] Documentation Governance...
---------------------------------------------------
-  Documentation directory accessible
-  jq available for JSON validation
-  PASS: euxis-sync-docs is present and executable.
-  PASS: README.md exists.
-  PASS: docs/guides/user-guide.md exists.
-  PASS: docs/guides/fleet-guide.md exists.
-  PASS: All documentation is current (updated within 7 days).
-  PASS: README.md references version 0.0.2.
-  Validating JSON manifest files...
-  PASS: agents/registry.json is valid JSON.
-  PASS: agents/squads.json is valid JSON.
-  PASS: config/capabilities.json is valid JSON.
-  PASS: config/codex/codex.json is valid JSON.
-
-==================================================
-  EUXIS IS CERTIFIED.
-  All toll gates passed.
-==================================================
+--- Critical Gates ---
+✔ Commit signing          20/20 signed
+✔ Unit test health        1063/1063 passed (100%)
+✔ Build integrity         cmake build OK
+✔ Documentation accuracy  README, CHANGELOG, docs/ present
 ```
+
+Run with `--json` for machine-readable output, or `--framework soc2` for SOC2-specific assessment.
 
 ### Common Health Check Failures
 
 | Check | Failure Message | Quick Fix |
 |-------|-----------------|-----------|
-| Naming Consistency | `MISMATCH: agent.txt` | Rename file to match `agent_id` in header |
-| Script Hardening | `MISSING HARDENING` | Add `set -euo pipefail` to script |
+| Build Integrity | `cmake build failed` | Run `make cpp-configure && make cpp-build` |
+| Test Health | `tests failing` | Run `make cpp-test` to see failures |
+| Provider Connectivity | `NOT FOUND` | Install provider CLI or set API key |
 | Orphan Detection | `ORPHAN AGENTS` | Add agent to registry or remove file |
-| Orphan Detection | `GHOST ENTRIES` | Remove registry entry or create prompt file |
-| Header Schema | `MISSING FIELD` | Add required field to agent frontmatter |
-| Documentation Drift | `STALE` | Run `euxis-sync-docs` |
-| Provider Connectivity | `NOT FOUND` | Install provider CLI or use available provider |
-| Codex Integrity | `MISSING TEMPLATE` | Add template file or update codex.json |
-| Bus Pipe Activity | `stale pipes` | Run `euxis-bus cleanup` |
-| Cortex Connectivity | `unreachable` | Run `euxis-cortex init` |
+| Documentation Drift | `STALE` | Update docs to match current CLI surface |
 
 ---
 
@@ -257,55 +140,38 @@ ls -la ~/.euxis/euxis-bin/euxis
    set -Ux fish_user_paths $HOME/.euxis/euxis-bin $fish_user_paths
    ```
 
-2. **Re-run setup if symlinks are missing:**
+2. **Rebuild if binary is missing:**
    ```bash
-   ~/.euxis/install.sh
+   cd ~/.euxis && make cpp-configure && make cpp-build
    ```
 
 3. **Verify installation:**
    ```bash
    which euxis
-   # Expected: /home/username/.euxis/euxis-bin/euxis
+   euxis --version
    ```
 
 ### Missing Dependencies
 
-**Bash 4.0+ Required:**
+**C++ Toolchain Required:**
 
 ```bash
-# Check Bash version
-bash --version
+# Check compiler version
+g++ --version   # GCC 14+ required
+# or
+clang++ --version  # Clang 18+ required
 
-# If version < 4.0, install newer Bash
+# Check CMake version
+cmake --version  # 3.28+ required
+
 # macOS:
-brew install bash
+brew install cmake gcc
 
 # Ubuntu/Debian:
-sudo apt update && sudo apt install bash
-```
+sudo apt update && sudo apt install cmake g++-14 libsqlite3-dev libsodium-dev
 
-**Python 3.8+ Required:**
-
-```bash
-# Check Python version
-python3 --version
-
-# If version < 3.8, install Python 3.12+
-# macOS:
-brew install python@3.12
-
-# Ubuntu/Debian:
-sudo apt update && sudo apt install python3.12 python3.12-venv
-```
-
-**Required Python venv:**
-
-```bash
-# If venv doesn't exist, create it
-python3 -m venv ~/.euxis/.venv
-
-# Install dependencies
-~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
+# Arch Linux:
+sudo pacman -S cmake gcc sqlite libsodium
 ```
 
 **Optional but recommended tools:**
@@ -512,7 +378,7 @@ ollama pull llama3.2
 export EUXIS_API_TIMEOUT=600  # 10 minutes
 
 # Use faster provider for simple tasks
-euxis butler "Quick question" ollama
+euxis triage . --provider ollama
 
 # Check if timeout command is available
 which timeout gtimeout
@@ -531,7 +397,7 @@ Agent fails instead of falling back to alternate provider.
 
 ```bash
 # List available providers
-euxis-health 2>&1 | grep -A 15 "Provider Connectivity"
+euxis health 2>&1 | grep -A 15 "Provider Connectivity"
 ```
 
 **Solution:**
@@ -598,7 +464,7 @@ jq -r '.agents[].id' ~/.euxis/agents/registry.json | sort
 
 3. **Re-sync registry:**
    ```bash
-   euxis-health  # Will report orphans/ghosts
+   euxis health  # Will report orphans/ghosts
    ```
 
 ### Agent Stuck in Active State
@@ -884,30 +750,23 @@ ls ~/.euxis/data/runtime/projects/myproject/*/memory.md
 
 **Symptoms:**
 
-```
-[euxis] ERROR: Python venv not found at ~/.euxis/.venv
-```
-or
-```
-ModuleNotFoundError: No module named 'textual'
-```
+The ETX terminal UI does not start.
 
 **Solutions:**
 
-1. **Create/recreate venv:**
+1. **Rebuild the project:**
    ```bash
-   python3 -m venv ~/.euxis/.venv
-   ~/.euxis/.venv/bin/pip install -r ~/.euxis/requirements.txt
+   cd ~/.euxis && make cpp-build
    ```
 
-2. **Install Textual manually:**
+2. **Check the ETX binary:**
    ```bash
-   ~/.euxis/.venv/bin/pip install textual textual-dev
+   ls -la cmake-build/cmd/etx/euxis-etx
    ```
 
-3. **Verify installation:**
+3. **Run directly:**
    ```bash
-   ~/.euxis/.venv/bin/python -c "import textual; print(textual.__version__)"
+   ./cmake-build/cmd/etx/euxis-etx
    ```
 
 ### Display Rendering Issues
@@ -1130,18 +989,14 @@ System slows down during fleet dispatch.
 |---------------|-------|----------|
 | `Unknown agent: X` | Agent ID doesn't exist in registry | Check spelling, run `euxis --help` for list |
 | `Provider 'X' not configured` | Provider CLI not installed | Install provider: `brew install X` |
-| `Python venv not found` | Venv not created | Run `python3 -m venv ~/.euxis/.venv` |
+| `Build failed` | Compilation error | Run `make cpp-configure && make cpp-build` |
 | `Rate limit exceeded` | API rate limiting | Wait 60s or use different provider |
 | `Provider command timed out` | API too slow / network issue | Increase `EUXIS_API_TIMEOUT` |
 | `Path traversal rejected` | Security: Invalid file path | Use valid paths within `~/.euxis` |
 | `Invalid model name` | Malformed model identifier | Check `EUXIS_*_MODEL` env vars |
-| `Registry not found` | Missing agents/registry.db/json | Run `~/.euxis/install.sh` |
-| `FATAL: Cannot load validation library` | Missing lib/validation.sh | Re-clone repository |
+| `Registry not found` | Missing agents/registry.db | Rebuild with `make cpp-build` |
 | `Task input rejected: prompt injection` | Security: Dangerous input | Remove injection patterns from task |
-| `chromadb not installed` | Missing Cortex dependencies | Run `pip install chromadb` |
-| `jq not installed` | Missing JSON processor | Run `brew install jq` |
-| `timeout command not available` | Missing coreutils | Run `brew install coreutils` |
-| `Module not found: textual` | TUI dependencies missing | Run `pip install textual` |
+| `jq not installed` | Missing JSON processor | Run `brew install jq` or `sudo pacman -S jq` |
 | `CERTIFICATION FAILED at Gate X` | Certification check failed | See gate output for specific issue |
 | `MISMATCH: filename vs agent_id` | Prompt file name != agent_id | Rename file to match agent_id |
 | `ORPHAN AGENTS` | Agent file not in registry | Add to registry or remove file |
@@ -1193,20 +1048,20 @@ euxis architect "Your task"
 
     echo "=== System Info ==="
     uname -a
-    echo "Bash: $(bash --version | head -1)"
-    echo "Python: $(python3 --version)"
+    echo "Compiler: $(g++ --version 2>/dev/null | head -1 || clang++ --version 2>/dev/null | head -1)"
+    echo "CMake: $(cmake --version | head -1)"
+    echo ""
+
+    echo "=== Euxis Version ==="
+    euxis --version 2>&1
     echo ""
 
     echo "=== Health Check ==="
-    euxis-health 2>&1
-    echo ""
-
-    echo "=== Recent Errors ==="
-    grep -r "ERROR" ~/.euxis/data/runtime/lifecycle/transitions.jsonl 2>/dev/null | tail -20
+    euxis health 2>&1
     echo ""
 
     echo "=== Provider Status ==="
-    for p in claude gemini ollama goose qwen; do
+    for p in claude gemini ollama; do
         which $p 2>/dev/null && echo "$p: $(which $p)" || echo "$p: not found"
     done
 } > ~/euxis-bug-report.txt
@@ -1228,4 +1083,4 @@ echo "Report saved to ~/euxis-bug-report.txt"
 
 ---
 
-**Still stuck?** Run `euxis-health --json` and open an issue with the output attached.
+**Still stuck?** Run `euxis health --json` and open an issue with the output attached.

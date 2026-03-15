@@ -23,11 +23,18 @@ struct CheckResult {
     std::string name;
     bool passed{false};
     std::string detail;
+    bool optional{false};  // Optional checks show warning icon instead of fail
 };
 
 void print_check(const CheckResult& r) {
-    std::cout << "  " << (r.passed ? term::icon_ok() : term::icon_fail())
-              << " " << r.name;
+    if (r.passed) {
+        std::cout << "  " << term::icon_ok();
+    } else if (r.optional) {
+        std::cout << "  " << term::icon_warn();
+    } else {
+        std::cout << "  " << term::icon_fail();
+    }
+    std::cout << " " << r.name;
     if (!r.detail.empty()) std::cout << " " << term::dim("(" + r.detail + ")");
     std::cout << "\n";
 }
@@ -165,15 +172,35 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
     }
 
     // 7. Providers & Tools
-    static const std::vector<std::pair<std::string, std::string>> tools = {
+    // Required: at least one AI provider must be available
+    // Optional: individual providers are not required
+    static const std::vector<std::pair<std::string, std::string>> required_tools = {
+        {"shellcheck", "sudo pacman -S --noconfirm shellcheck # (or your pkg manager)"}
+    };
+    struct ProviderInfo { std::string name; std::string fix; };
+    static const std::vector<ProviderInfo> providers = {
         {"claude", "npm install -g @anthropic-ai/claude-code"},
         {"gemini", "npm install -g @google/gemini-cli"},
         {"codex", "npm install -g @openai/codex"},
         {"ollama", "https://ollama.com/download"},
-        {"shellcheck", "sudo pacman -S --noconfirm shellcheck # (or your pkg manager)"}
     };
 
-    for (const auto& [name, fix] : tools) {
+    int providers_available = 0;
+    for (const auto& p : providers) {
+        bool found = Process::available(p.name);
+        if (found) ++providers_available;
+        checks.push_back({tr("provider: ") + p.name, found,
+                          found ? tr("available") : tr("not installed (optional)"),
+                          /*optional=*/!found});
+    }
+    if (providers_available == 0) {
+        ++failures;
+        fixable.push_back(tr("Install at least one AI provider (ollama, claude, gemini)"));
+    }
+    checks.push_back({tr("AI providers"), providers_available > 0,
+                      std::to_string(providers_available) + "/4 " + tr("available")});
+
+    for (const auto& [name, fix] : required_tools) {
         bool found = Process::available(name);
         checks.push_back({tr("tool: ") + name, found, found ? tr("available") : tr("not found")});
         if (!found) {
@@ -182,11 +209,12 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    // 8. Terminal
+    // 8. Terminal (informational — not counted as failures)
     {
         const char* term_env = std::getenv("TERM");
         checks.push_back({tr("TERM"), term_env != nullptr, term_env ? term_env : tr("not set")});
-        checks.push_back({tr("Colors"), term::colors_enabled(), term::colors_enabled() ? tr("yes") : tr("no")});
+        bool colors = term::colors_enabled();
+        checks.push_back({tr("Colors"), true, colors ? tr("yes") : tr("no (non-TTY)")});
         checks.push_back({tr("CI mode"), true, term::is_ci() ? tr("yes") : tr("no")});
     }
 

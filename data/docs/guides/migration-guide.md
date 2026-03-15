@@ -250,9 +250,9 @@ git fetch origin
 git checkout feat/v0.0.7-release  # Or: git pull origin main
 ```
 
-**Step 2: Install TUI dependencies**
+**Step 2: Build from source**
 ```bash
-pip install textual[all] --upgrade
+make cpp-configure && make cpp-build
 ```
 
 **Step 3: Migrate configuration**
@@ -280,18 +280,17 @@ Loaded 40 agents
 
 **Step 5: Verify installation**
 ```bash
-euxis-health --verbose
-euxis-certify
+euxis health
+euxis certify-readiness .
 ```
 
 **Expected output:**
 ```
 Euxis Health Check
 ==================
-✓ Registry: 40 agents loaded
-✓ Configuration: etx-settings.json valid
-✓ Playbooks: 16 language playbooks found
-✓ TUI: Textual 0.89+ installed
+✓ Registry: agents loaded
+✓ Build: cmake-build OK
+✓ Tests: all passing
 
 All checks passed.
 ```
@@ -378,9 +377,9 @@ Use this checklist template for any version migration:
 - [ ] Initialize new components
 
 ### Post-Migration
-- [ ] Run health check: `euxis-health`
-- [ ] Run certification: `euxis-certify`
-- [ ] Execute test suite: `pytest tests/`
+- [ ] Run health check: `euxis health`
+- [ ] Run certification: `euxis certify-readiness .`
+- [ ] Execute test suite: `make cpp-test`
 - [ ] Test core agent functionality
 - [ ] Verify TUI launches correctly
 - [ ] Check provider connectivity
@@ -427,16 +426,16 @@ print(f'Registry loaded with {len(registry.agents)} agents')
 "
 ```
 
-### Issue: TUI Dependencies Missing
+### Issue: Build Failure
 
 **Symptoms:**
 ```
-ModuleNotFoundError: No module named 'textual'
+cmake --build failed with exit code 1
 ```
 
 **Solution:**
 ```bash
-pip install textual[all] rich
+make cpp-configure && make cpp-build
 ```
 
 ### Issue: Configuration Not Loading
@@ -537,7 +536,7 @@ rm -f ~/.euxis/agents/registry.db
 rm -rf ~/.euxis/config/etx-settings.json
 
 # 4. Verify rollback
-euxis-health
+euxis health
 ```
 
 ### Selective Rollback
@@ -564,7 +563,7 @@ cat ~/.euxis/agents/registry.json | jq -r '.protocol_version'
 # Expected: 0.0.6
 
 # 2. Run health check
-euxis-health
+euxis health
 
 # 3. Test agent execution
 euxis architect "Test query" claude
@@ -697,7 +696,7 @@ All metrics passing: 13/13 (100%)
 
 ```bash
 # Full integration test
-euxis-certify
+euxis certify-readiness .
 
 # Expected output
 # Gate 1: ✓ STRUCTURE

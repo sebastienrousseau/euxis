@@ -7,12 +7,16 @@
 #include "euxis/cli/cmd/infra.hpp"
 #include "euxis/cli/cmd/dev.hpp"
 #include "euxis/cli/cmd/specialized.hpp"
+#include "euxis/cli/cmd/surface.hpp"
+#include "euxis/cli/cmd/lifecycle.hpp"
+#include "euxis/cli/cmd/certify.hpp"
 
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <map>
 #include <print>
+#include <unordered_map>
 
 namespace euxis::cli {
 
@@ -45,6 +49,22 @@ Engine::Engine(const std::string& euxis_home) {
 }
 
 void Engine::register_commands() {
+    // Core (7) — primary user-facing commands
+    commands_.push_back({"check",              tr("Core"), tr("Verify a repository or target"),         cmd::cmd_check});
+    commands_.push_back({"triage",             tr("Core"), tr("Fast bounded triage scan"),              cmd::cmd_triage});
+    commands_.push_back({"review",             tr("Core"), tr("Deep verification (standard/forensic)"), cmd::cmd_review});
+    commands_.push_back({"certify-readiness",  tr("Core"), tr("Certification readiness assessment"),    cmd::cmd_certify_readiness});
+    commands_.push_back({"compare",            tr("Core"), tr("Compare triage vs deep verification"),   cmd::cmd_compare});
+    commands_.push_back({"stats",              tr("Core"), tr("Validation metrics and drift history"),   cmd::cmd_stats});
+    commands_.push_back({"policy",             tr("Core"), tr("Policy inspection and enforcement"),     cmd::cmd_policy});
+
+    // Lifecycle (5) — installation and maintenance
+    commands_.push_back({"install",    tr("Lifecycle"), tr("Bootstrap local Euxis installation"),    cmd::cmd_install});
+    commands_.push_back({"update",     tr("Lifecycle"), tr("Refresh metadata and registry"),         cmd::cmd_update});
+    commands_.push_back({"upgrade",    tr("Lifecycle"), tr("Upgrade binary (pull + rebuild)"),        cmd::cmd_upgrade});
+    commands_.push_back({"uninstall",  tr("Lifecycle"), tr("Remove Euxis from this machine"),        cmd::cmd_uninstall});
+    commands_.push_back({"self",       tr("Lifecycle"), tr("Installation introspection"),             cmd::cmd_self});
+
     // System (7)
     commands_.push_back({"doctor",                 tr("System"),         tr("Run installation diagnostics"),        cmd::cmd_doctor});
     commands_.push_back({"fix",                    tr("System"),         tr("Autonomous environment self-repair"),  cmd::cmd_fix});
@@ -135,12 +155,25 @@ auto Engine::run(const std::vector<std::string>& args) -> int {
 
     const auto& cmd = remaining[0];
 
+    // Alias resolution — convenience and compatibility aliases
+    static const std::unordered_map<std::string, std::string> aliases = {
+        {"quick",      "triage"},
+        {"deep",       "review"},
+        {"diag",       "doctor"},
+        {"metrics",    "stats"},
+        {"pb",         "playbook"},
+        {"verify-all", "check"},
+    };
+    std::string resolved_cmd = cmd;
+    auto alias_it = aliases.find(cmd);
+    if (alias_it != aliases.end()) resolved_cmd = alias_it->second;
+
     // Built-in meta commands
-    if (cmd == "version" || cmd == "--version" || cmd == "-V") {
+    if (resolved_cmd == "version" || resolved_cmd == "--version" || resolved_cmd == "-V") {
         print_version();
         return 0;
     }
-    if (cmd == "help" || cmd == "--help" || cmd == "-h") {
+    if (resolved_cmd == "help" || resolved_cmd == "--help" || resolved_cmd == "-h") {
         print_version();
         print_help();
         return 0;
@@ -149,7 +182,7 @@ auto Engine::run(const std::vector<std::string>& args) -> int {
     // Table-driven dispatch
     std::vector<std::string> sub_args(remaining.begin() + 1, remaining.end());
     for (const auto& entry : commands_) {
-        if (entry.name == cmd) {
+        if (entry.name == resolved_cmd) {
             return entry.handler(ctx_, sub_args);
         }
     }
@@ -171,7 +204,7 @@ void Engine::print_help() const {
     std::map<std::string, std::vector<const CommandEntry*>> groups;
     // Preserve insertion order with explicit ordering
     static const std::vector<std::string> group_order = {
-        tr("System"), tr("Fleet"), tr("Knowledge"), tr("Infrastructure"), tr("Development"), tr("Specialized")
+        tr("Core"), tr("Lifecycle"), tr("System"), tr("Fleet"), tr("Knowledge"), tr("Infrastructure"), tr("Development"), tr("Specialized")
     };
     for (const auto& g : group_order) { groups[g] = {}; }
     for (const auto& entry : commands_) {

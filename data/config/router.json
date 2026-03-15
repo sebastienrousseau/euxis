@@ -78,6 +78,24 @@
     }
   },
 
+  "standard_overrides": {
+    "librarian": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "cost": 0.5
+    },
+    "architect": {
+      "provider": "claude",
+      "model": "claude-sonnet-4-6",
+      "cost": 3.0
+    },
+    "reviewer": {
+      "provider": "claude",
+      "model": "claude-sonnet-4-6",
+      "cost": 3.0
+    }
+  },
+
   "cost_estimates": {
     "routine": 0.10,
     "data": 0.27,

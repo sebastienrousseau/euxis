@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version v0.0.3
+Version v0.0.4
 
 ---
 
@@ -401,10 +401,10 @@ Each agent receives:
 ### Combo Commands
 
 ```bash
-euxis-combo list                                              # See available combos
-euxis-combo info protect                                    # View the chain
-euxis-combo run envision "Design onboarding flow"           # Execute the combo
-euxis-combo run protect "Audit payment module" --provider claude  # Override provider for all agents
+euxis combo list                                              # See available combos
+euxis combo info protect                                    # View the chain
+euxis combo run envision "Design onboarding flow"           # Execute the combo
+euxis combo run protect "Audit payment module" --provider claude  # Override provider for all agents
 ```
 
 ### Squads vs. Playbooks vs. Combos
@@ -458,4 +458,4 @@ euxis-hooks status                      # Check installation
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

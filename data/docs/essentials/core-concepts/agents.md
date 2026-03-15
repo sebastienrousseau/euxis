@@ -168,7 +168,7 @@ euxis <agent> "<task>" [provider]
 euxis orchestrator "Complex goal requiring multiple specialists"
 
 # Agent status and capabilities
-euxis-health  # Check all agent integrity
+euxis health  # Check all agent integrity
 ```
 
 See [Fleet Guide](../guides/fleet-guide.md) for complete agent reference and [User Guide](../guides/user-guide.md) for all CLI commands.

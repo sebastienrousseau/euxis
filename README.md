@@ -1,79 +1,200 @@
-# Euxis: High-Performance C++23 Agent OS
+# Euxis
 
-[![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/) [![Version][version-badge]][version-url] [![License][license-badge]][license-url]
+High-performance agent OS. Built in C++23.
 
-Deploy, orchestrate, and observe hardware-native AI agents. Euxis eliminates the latency of traditional Python agent loops by operating as a fully compiled, C++23 Agent OS.
+[![Version][version-badge]][version-url] [![License][license-badge]][license-url] [![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/)
 
-## Core Architectural Requirements
+Deploy, orchestrate, and observe AI agents at native speed.
+Euxis replaces interpreted agent loops with compiled execution —
+sub-10ms dispatch, zero-copy memory, cryptographic provenance.
 
-Euxis operates on three uncompromising principles to achieve sub-10ms execution:
+## Get Started
 
-1. **Native Execution**: Compile agents to `wasm32-wasi` AOT binaries. The Euxis Gateway executes them within Firecracker microVMs and eBPF Seccomp enclaves for near-zero cold starts.
-2. **Zero-Copy Memory**: Map binary snapshots directly into memory via `mmap`. Do not allocate intermediate buffers. Utilize C++23 `std::generator` for lazy-loaded episodic memory streams.
-3. **Cryptographic Provenance**: Sign every agent binary cryptographically. The `sentinel-identity` agent enforces strict NHI (Non-Human Identity) IAM scoping and blocks unauthenticated state mutations.
+### Prerequisites
 
-## 2026 Enterprise Mesh
+| Tool | Minimum | Check |
+|------|---------|-------|
+| CMake | 3.28+ | `cmake --version` |
+| C++ compiler | GCC 14+ or Clang 18+ | `g++ --version` or `clang++ --version` |
+| Git | 2.x+ | `git --version` |
 
-Euxis provides a fully interoperable, state-aware ecosystem:
+**Platform support:** macOS (Apple Clang or Homebrew GCC), Linux (GCC/Clang), WSL (Ubuntu GCC).
 
-* **Model Context Protocol (MCP)**: Discover and bind to universal tools dynamically via the `McpClient`.
-* **SIMD-Aware Orchestration**: Broadcast `BidRequests` to the mesh. The `FinOpsRouter` evaluates 16+ providers simultaneously using Structure-of-Arrays (SoA) SIMD auto-vectorization.
-* **Proactive Self-Healing**: Deploy the `SupervisorAgent` daemon to monitor circuit breakers and autonomously tune LRU eviction policies, mitigating context window blowout.
+<details>
+<summary><strong>Platform-specific setup</strong></summary>
 
-## System Topology
-
-Euxis enforces a strict Domain-Driven Design (DDD) layout. Integrate exactly what your infrastructure requires.
-
-### Application Layer (`cmd/`)
-
-* `cli`: Command-line orchestrator and TUI.
-* `gateway`: High-throughput asynchronous WebSockets and HTTP interface.
-* `etx`: Qt6 desktop GUI featuring 17 screens and command palette.
-* `publisher`: C++23 `inja` rendering engine for low-latency document generation.
-
-### SDK Layer (`pkg/`)
-
-* `core`: Central execution engine, `FinOpsRouter`, and `SwarmOrchestrator`.
-* `network`: `McpClient`, asynchronous A2A transports, and thread-safe resilience patterns.
-* `runtime`: Agent lifecycle, scheduling, and MessagePack zero-copy memory stores.
-* `crypto`: AES-256-GCM, Ed25519, and Argon2id primitives.
-* `identity`: W3C DID, Verifiable Credentials, and ERC-8004 agent cards.
-* `inference`: Hardware-accelerated local inference via `llama.cpp`.
-* `bridge`: Skill import, admission pipeline, and sandbox execution.
-* `memory`: Tier-bound encrypted memory with AAD isolation.
-* `metrics`: Telemetry, performance profiling, and validation framework.
-* `a2a`: A2A v0.2 protocol and JSON-RPC message formats.
-* `security`: Threat detection and policy enforcement.
-* `adapters`: Omnichannel endpoints (WhatsApp, Discord, Slack, Telegram).
-* `bench`: Security, autonomy, performance, and interop benchmarks.
-
-### Internal System (`internal/`)
-
-* `platform`: Platform Abstraction Layer (PAL). Hardware-specific OS integrations (macOS, Linux, WSL).
-
-## Building
-
-Build the Agent OS from source.
-
-* **Precondition**: Ensure CMake 3.28+ and a C++23-capable compiler (GCC 14+ / Clang 18+) are present.
-* **Postcondition**: Generates highly optimized binaries in `build/cmake-build`.
-
+**macOS:**
 ```bash
-make cpp-configure
-make cpp-build
-make cpp-test
+brew install cmake gcc
 ```
 
-## Licensing
+**Ubuntu / Debian / WSL:**
+```bash
+sudo apt update && sudo apt install -y cmake g++-14 git
+```
 
-AGPL-3.0 License - see [LICENSE](LICENSE).
+**Arch Linux:**
+```bash
+sudo pacman -S cmake gcc git
+```
 
-Author: Sebastien Rousseau
+</details>
+
+### Build
+
+```bash
+git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
+cd ~/.euxis
+make cpp-configure
+make cpp-build
+make cpp-test       # 1063 tests, all passing
+```
+
+Binaries are in `build/cmake-build/cmd/cli/`.
+
+### Add to PATH
+
+Pick one method:
+
+```bash
+# Symlink (recommended)
+sudo ln -sf ~/.euxis/build/cmake-build/cmd/cli/euxis-cli /usr/local/bin/euxis
+
+# Or add to shell profile
+# Bash / Zsh:
+echo 'export PATH="$HOME/.euxis/build/cmake-build/cmd/cli:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Fish:
+fish_add_path ~/.euxis/build/cmake-build/cmd/cli
+```
+
+### Verify
+
+```bash
+euxis doctor
+```
+
+## Core Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `euxis check [target]` | Verify a repository (standard mode) |
+| `euxis triage [target]` | Fast bounded triage (~45 seconds) |
+| `euxis review [target]` | Deep verification (standard or forensic) |
+| `euxis certify-readiness [target]` | Certification readiness assessment (18 domains) |
+| `euxis compare <target>` | Compare triage against deep verification |
+| `euxis stats` | Validation metrics and drift history |
+| `euxis policy <sub>` | Policy inspection and enforcement |
+
+```bash
+euxis triage .                    # Fast scan
+euxis check .                     # Standard verification (~3 min)
+euxis review . --forensic         # Forensic depth
+euxis certify-readiness . --framework soc2   # SOC2 readiness
+euxis compare .                   # Side-by-side comparison
+euxis stats --last 5              # Recent metrics
+euxis doctor                      # Environment diagnostics
+```
+
+### Aliases
+
+| Alias | Resolves To |
+|-------|-------------|
+| `quick` | `triage` |
+| `deep` | `review` |
+| `diag` | `doctor` |
+| `metrics` | `stats` |
+| `pb` | `playbook` |
+| `verify-all` | `check` |
+
+### All Command Groups
+
+Run `euxis --help` for the full list across 8 groups:
+**Core** · Lifecycle · System · Fleet · Knowledge · Infrastructure · Development · Specialized.
+
+## Advanced
+
+```bash
+euxis playbook verify-everything .       # Full verification playbook
+euxis combo run envision "Design X"      # Multi-agent pipeline
+euxis certify-readiness . --strict       # Strict certification
+euxis-etx                                # Desktop GUI (Qt6)
+```
+
+## Architecture
+
+```
+cmd/              Application layer
+  cli/            Command-line interface (58 commands, 8 groups)
+  etx/            Qt6 desktop GUI (17 screens)
+  gateway/        HTTP/WebSocket server
+  publisher/      Document rendering engine
+
+pkg/              SDK layer
+  core/           Execution engine, FinOps routing, swarm orchestration
+  runtime/        Agent lifecycle and scheduling
+  security/       Threat detection and policy enforcement
+  network/        MCP client, A2A transports
+  crypto/         AES-256-GCM, Ed25519, Argon2id
+  metrics/        Telemetry and validation framework
+  inference/      Local inference via llama.cpp
+
+internal/         Platform abstraction (macOS, Linux, WSL)
+data/             Configuration, agent prompts, playbooks, docs
+```
+
+### Provider Strategy
+
+Euxis routes tasks to the optimal AI provider based on semantic classification:
+
+| Task Class | Primary Provider | Fallback |
+|-----------|-----------------|----------|
+| Research / synthesis | OpenAI | Gemini, Claude |
+| Coding / architecture / audit | Claude | Gemini, Ollama |
+| Deep research / security | Gemini | OpenAI, Claude |
+| Private / local | Ollama | — |
+| Surgical edits | Aider | Claude, Ollama |
+| Terminal automation | Kiro | ShellGPT, Claude |
+
+Configuration: [`data/config/provider_strategy.json`](data/config/provider_strategy.json).
+Override with environment variables: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_PROVIDER`, `EUXIS_DEFAULT_SECURITY_PROVIDER`.
+
+## Building from Source
+
+```bash
+make cpp-configure    # CMake configure (Release, LTO)
+make cpp-build        # Build all targets
+make cpp-test         # Run test suite (ctest)
+make cpp-clean        # Remove build artifacts
+make cpp-format       # Format with clang-format
+make cpp-coverage     # Build with coverage (requires lcov)
+```
+
+Override parallelism: `make cpp-build CPP_BUILD_JOBS=8`.
+
+## Documentation
+
+| Guide | Content |
+|-------|---------|
+| [Quick Start](data/docs/essentials/quick-start.md) | Clone to verified in 5 minutes |
+| [User Guide](data/docs/guides/user-guide.md) | Complete CLI reference and modes |
+| [CLI Reference](data/docs/reference/cli-reference.md) | Every command, flag, and example |
+| [Fleet Guide](data/docs/guides/fleet-guide.md) | Agent roster and routing |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). All commits must be [signed](CONTRIBUTING.md#commit-signing).
+
+## License
+
+AGPL-3.0 — see [LICENSE](LICENSE).
 
 ---
-*Part of the [Euxis Agent Framework](https://euxis.co) (Euxis v0.0.3)*
+
+Euxis v0.0.4 · [euxis.co](https://euxis.co)
 
 [license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-v0.0.3-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.3
+[version-badge]: https://img.shields.io/badge/version-v0.0.4-green.svg
+[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.4

@@ -4,7 +4,7 @@ A minimal end-to-end example for talking to the Euxis Gateway over WebSocket.
 
 ## 1) Connect
 
-The Gateway listens on `127.0.0.1:18789` in v0.0.3.
+The Gateway listens on `127.0.0.1:18789` in v0.0.4.
 Token auth is enabled by default, so clients should include an `Authorization` header.
 See `docs/reference/gateway-auth.md` for details.
 
@@ -24,7 +24,7 @@ async def main():
             "id": "req_connect_1",
             "method": "gateway.connect",
             "params": {
-                "protocol": "v0.0.3",
+                "protocol": "v0.0.4",
                 "client_id": "quickstart"
             }
         }))
@@ -64,7 +64,7 @@ Then paste a request frame:
   "id": "req_connect_1",
   "method": "gateway.connect",
   "params": {
-    "protocol": "v0.0.3",
+    "protocol": "v0.0.4",
     "client_id": "wscat"
   }
 }

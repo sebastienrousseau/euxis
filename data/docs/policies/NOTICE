@@ -1,10 +1,10 @@
 Euxis
 Copyright 2026 Sebastien Rousseau
 
-This product is licensed under the Apache License, Version 2.0.
+This product is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0-only).
 You may obtain a copy of the License at:
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://www.gnu.org/licenses/agpl-3.0.html
 
 ================================================================================
 THIRD-PARTY DEPENDENCIES
@@ -14,73 +14,55 @@ This product includes software developed by third parties. Below is a list of
 these dependencies and their respective licenses.
 
 --------------------------------------------------------------------------------
-PRODUCTION DEPENDENCIES
+PRODUCTION DEPENDENCIES (C++ / FetchContent)
 --------------------------------------------------------------------------------
 
-chromadb
-  License: Apache-2.0
-  https://github.com/chroma-core/chroma
-
-sentence-transformers
-  License: Apache-2.0
-  https://github.com/UKPLab/sentence-transformers
-
-textual
-  Copyright (c) Will McGugan / Textualize
+nlohmann/json
+  Copyright (c) Niels Lohmann
   License: MIT
-  https://github.com/Textualize/textual
+  https://github.com/nlohmann/json
 
-rich
-  Copyright (c) Will McGugan / Textualize
+inja
+  Copyright (c) Lars Berscheid
   License: MIT
-  https://github.com/Textualize/rich
+  https://github.com/pantor/inja
 
-fastapi
-  Copyright (c) Sebastián Ramírez
+yaml-cpp
+  Copyright (c) Jesse Beder
   License: MIT
-  https://github.com/tiangolo/fastapi
+  https://github.com/jbeder/yaml-cpp
 
-uvicorn
-  Copyright (c) Encode
+spdlog
+  Copyright (c) Gabi Melman
+  License: MIT
+  https://github.com/gabime/spdlog
+
+IXWebSocket
+  Copyright (c) Machine Zone
   License: BSD-3-Clause
-  https://github.com/encode/uvicorn
+  https://github.com/machinezone/IXWebSocket
 
-pydantic
-  Copyright (c) Samuel Colvin
+cpp-httplib
+  Copyright (c) Yuji Hirose
   License: MIT
-  https://github.com/pydantic/pydantic
+  https://github.com/yhirose/cpp-httplib
 
-httpx
-  Copyright (c) Encode
-  License: BSD-3-Clause
-  https://github.com/encode/httpx
+libsodium
+  Copyright (c) Frank Denis
+  License: ISC
+  https://github.com/jedisct1/libsodium
 
-cryptography
-  Copyright (c) Python Cryptographic Authority
-  License: Apache-2.0 OR BSD-3-Clause (dual licensed)
-  https://github.com/pyca/cryptography
+SQLite3
+  Public Domain
+  https://www.sqlite.org/
 
 --------------------------------------------------------------------------------
 DEVELOPMENT DEPENDENCIES
 --------------------------------------------------------------------------------
 
-pytest
-  License: MIT
-  https://github.com/pytest-dev/pytest
-
-black
-  Copyright (c) Python Software Foundation
-  License: MIT
-  https://github.com/psf/black
-
-ruff
-  Copyright (c) Astral
-  License: MIT
-  https://github.com/astral-sh/ruff
-
-bandit
-  Copyright (c) PyCQA
-  License: Apache-2.0
-  https://github.com/PyCQA/bandit
+Google Test
+  Copyright (c) Google LLC
+  License: BSD-3-Clause
+  https://github.com/google/googletest
 
 ================================================================================

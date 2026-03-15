@@ -135,7 +135,7 @@ bash -n ~/.euxis/agents/prompts/fleet/my-agent.txt
 euxis-lint
 
 # Health check
-euxis-health
+euxis health
 
 # Gym evaluation
 euxis-gym my-agent "standard-task"
@@ -241,4 +241,4 @@ See the ADR documents for rationale behind key design decisions:
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

@@ -33,6 +33,8 @@ auto CliProvider::execute(const std::string& model,
         .model = model,
         .tier = Tier::Code,
         .estimated_cost_per_1m = 0.0,
+        .route_reason = {},
+        .task_class = {},
     };
 
     auto auth = auth_store_.resolve(selection.provider);
@@ -59,6 +61,8 @@ auto CliProvider::execute(const runtime::ModelSpec& spec,
         .model = spec.model,
         .tier = parse_tier(spec.tier),
         .estimated_cost_per_1m = spec.estimated_cost_per_1m,
+        .route_reason = {},
+        .task_class = {},
     };
 
     auto auth = auth_store_.resolve(spec.provider);

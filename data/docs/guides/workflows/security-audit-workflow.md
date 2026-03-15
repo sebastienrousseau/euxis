@@ -118,7 +118,7 @@ This deploys 8 agents in parallel:
 For cryptographic systems:
 
 ```bash
-euxis-combo run seal "Audit the encryption implementation for user data"
+euxis combo run seal "Audit the encryption implementation for user data"
 ```
 
 The Seal combo runs: `sentinel → cryptographer → pentester → reviewer`
@@ -197,7 +197,7 @@ euxis telemetrist "Add security event logging for failed authentication attempts
 | Threat modeling | `euxis sentinel "<system>"` |
 | Quick vulnerability scan | `euxis pentester "<target>"` |
 | Full security audit | `euxis-squad deploy quality "<scope>"` |
-| Crypto audit | `euxis-combo run seal "<system>"` |
+| Crypto audit | `euxis combo run seal "<system>"` |
 | Compliance check | `euxis auditor "<requirement>"` |
 | Security testing | `euxis tester "Security tests for <fix>"` |
 
@@ -236,4 +236,4 @@ euxis telemetrist "Add security event logging for failed authentication attempts
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

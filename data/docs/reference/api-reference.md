@@ -194,7 +194,7 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 | `euxis-bin/euxis.sh` | Main entry point — agent dispatch with latency budgets |
 | `euxis-bin/euxis-lint` | 8-check static analysis (registry, protocol, versions, permissions, headers, patterns, compliance, deps) |
 | `euxis-bin/euxis-bench` | 7-benchmark performance suite (health, lint, recall, provider, coordination, assembly, memory) |
-| `euxis-bin/euxis-health` | System health check with `--silent` mode |
+| `euxis health` | System health check with `--silent` mode |
 | `euxis-bin/euxis-dispatch` | Multi-agent pipeline orchestration (mesh/federated/sequential) |
 | `euxis-bin/euxis-loop` | Iterative agent execution with convergence |
 | `euxis-bin/euxis-council` | Multi-agent deliberation and voting |
@@ -203,4 +203,4 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

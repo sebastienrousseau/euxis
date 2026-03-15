@@ -3,6 +3,7 @@
 # ============================================================================
 
 # --- Build Artifacts ---
+cmake-build/
 build/cmake-build/
 build/out/
 *.o

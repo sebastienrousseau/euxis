@@ -135,7 +135,7 @@ The `verify_cmd` field specifies how to verify task completion:
       "agent": "reviewer",
       "priority": "P2",
       "task": "Review all documentation changes",
-      "verify_cmd": "euxis-certify 2>&1 | grep -q 'CERTIFIED'"
+      "verify_cmd": "euxis certify-readiness . --json 2>&1 | grep -q 'READY'"
     }
   ]
 }

@@ -38,7 +38,7 @@ The architect will:
 For complex features, get the full strategic view:
 
 ```bash
-euxis-combo run envision "Design user notification preferences with multi-channel support"
+euxis combo run envision "Design user notification preferences with multi-channel support"
 ```
 
 The Envision combo runs: `deep-researcher → planner → architect → evangelist → reviewer`
@@ -170,7 +170,7 @@ The Zero to One playbook executes: `Vision → Build → Quality → Growth`
 | Task | Command |
 |------|---------|
 | Architecture design | `euxis architect "<feature>"` |
-| Full strategic design | `euxis-combo run envision "<feature>"` |
+| Full strategic design | `euxis combo run envision "<feature>"` |
 | Implementation planning | `euxis planner "<breakdown>"` |
 | Code implementation | `euxis debugger "<implement>"` |
 | Infrastructure setup | `euxis automaton "<setup>"` |
@@ -254,4 +254,4 @@ euxis tester "Test migration on copy of production data"
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4 · Build something that matters.*

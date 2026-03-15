@@ -6,29 +6,18 @@
 
 <!-- How was this tested? -->
 
-- [ ] `euxis-health` — 8-point fleet integrity check passes
-- [ ] `euxis-lint` — Static analysis clean
-- [ ] `euxis-certify` — All 6 gates pass
+- [ ] `make cpp-test` — All tests pass
+- [ ] `euxis health` — Fleet integrity check passes
+- [ ] `euxis certify-readiness .` — Certification gates pass
 - [ ] Manual verification
 
 ## Quality Checklist
 
-- [ ] Code follows project conventions (`set -uo pipefail` in bash scripts)
-- [ ] Documentation updated (README.md, docs/user-guide.md, docs/fleet-guide.md)
+- [ ] Code compiles with `-Werror` (no warnings)
+- [ ] Documentation updated (README.md, user-guide.md, cli-reference.md)
 - [ ] No secrets or credentials committed
-- [ ] Branding signature present in all commits
-- [ ] JSON manifests valid (registry.json, squads.json, codex.json)
-- [ ] Agent prompts include required header fields (agent_id, role, version, tags, last_updated)
-
-## Certification Gates
-
-| Gate | Check | Status |
-|:-----|:------|:-------|
-| 1+2 | Static Analysis (Lint) | |
-| 3 | Infrastructure Tests | |
-| 4 | Semantic Verification | |
-| 5 | Branding Compliance | |
-| 6 | Documentation Governance | |
+- [ ] Commits are GPG-signed
+- [ ] C++23 standards followed (no raw pointers, RAII, const-correct)
 
 ---
 

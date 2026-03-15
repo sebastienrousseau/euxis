@@ -7,12 +7,13 @@
 - [Installation](README.md#quick-start): Clone, setup, verify
 
 ## Core Commands
-- `euxis <agent> "<task>"` - Deploy a single agent
-- `euxis-combo run <name> "<task>"` - Run sequential agent chain
-- `euxis-squad deploy <name> "<task>"` - Deploy parallel agent team
-- `euxis-playbook run <name> "<goal>"` - Execute multi-phase workflow
-- `euxis-health` - Verify fleet health (10 checks)
-- `euxis-tui` - Launch terminal interface
+- `euxis check <target>` - Standard analysis (5 agents)
+- `euxis triage <target>` - Fast flash triage (2 agents)
+- `euxis review <target>` - Standard review, supports --forensic
+- `euxis certify-readiness <target>` - 18-domain certification assessment
+- `euxis compare <target>` - Compare against baseline
+- `euxis stats` - Historical statistics
+- `euxis health` - Fleet integrity check
 
 ## Agents (41 total)
 
@@ -107,13 +108,13 @@ Override: `euxis architect "task" gemini`
 - [CLI Reference](docs/reference/cli-reference.md): All commands
 
 ## Troubleshooting
-- `euxis-health` - Run health check
-- `euxis-certify` - Full certification pipeline
-- PATH issue: `export PATH="$HOME/bin:$PATH"`
+- `euxis health` - Run fleet integrity check
+- `euxis certify-readiness .` - Full certification assessment
+- PATH issue: `export PATH="$HOME/.euxis/euxis-bin:$PATH"`
 
 ## Requirements
-- Bash 4.0+, Python 3.8+
+- CMake 3.28+, GCC 14+ or Clang 18+ (C++23)
 - At least one AI provider (Ollama recommended for local)
 
 ---
-Euxis v0.0.3 | https://euxis.co/
+Euxis v0.0.4 | https://euxis.co/

@@ -1,367 +1,216 @@
-# Euxis Quick Start
+# Quick Start
 
-**Get your AI agent fleet running in 5 minutes.**
-
-> Status note (February 18,): for current test/coverage/performance
-> verification metrics and known stabilization areas, see
-> `../reports/initial-user-expectations-current-02-18.md`.
+**Clone, build, and verify in 5 minutes.**
 
 ---
 
-## What You'll Accomplish
+## What This Guide Covers
 
-By the end of this guide, you'll have:
+By the end:
 
-- **50 AI agents** ready to handle engineering tasks
-- **Your first completed task** with verified output
-- **Working knowledge** of the three main usage patterns
+- Euxis compiled and installed
+- First verification run complete
+- Understanding of core commands and modes
 
 ---
 
-## Before You Begin
+## Prerequisites
 
-### Prerequisites
-
-| Requirement | Minimum Version | Check Command |
-|-------------|-----------------|---------------|
-| Bash | 4.0+ | `bash --version` |
-| Python | 3.8+ | `python3 --version` |
-| AI Provider | Any one | See [Providers](#ai-providers) |
+| Tool | Minimum | Check |
+|------|---------|-------|
+| CMake | 3.28+ | `cmake --version` |
+| C++ compiler | GCC 14+ or Clang 18+ | `g++ --version` or `clang++ --version` |
+| Git | 2.x+ | `git --version` |
+| AI provider | At least one | See [Providers](#ai-providers) |
 
 ### AI Providers
 
-Euxis works with 8 providers. You need at least one installed:
+Euxis routes tasks to the optimal provider. At least one must be available:
 
-| Provider | Best For | Quick Install |
-|:---------|:---------|:--------------|
-| [Ollama](https://ollama.com/) | Local, free, no API key | `curl -fsSL https://ollama.ai/install.sh \| sh` |
-| [Claude](https://docs.anthropic.com/en/docs/claude-cli) | Strategy, architecture | `brew install claude-cli` |
-| [Gemini](https://github.com/google-gemini/gemini-cli) | Research, large context | Follow installation guide |
+| Provider | Best For | Setup |
+|:---------|:---------|:------|
+| [Ollama](https://ollama.com/) | Local inference, free | `curl -fsSL https://ollama.ai/install.sh \| sh` |
+| [Claude](https://docs.anthropic.com/en/docs/claude-cli) | Coding, architecture, audit | Set `ANTHROPIC_API_KEY` |
+| [Gemini](https://github.com/google-gemini/gemini-cli) | Research, security, large context | Set `GEMINI_API_KEY` |
+| [OpenAI](https://platform.openai.com/) | Research, synthesis | Set `OPENAI_API_KEY` |
 
 <details>
-<summary><strong>All 8 Providers</strong></summary>
+<summary><strong>Additional providers</strong></summary>
 
-**Cloud Providers:**
-- [Claude](https://docs.anthropic.com/en/docs/claude-cli) — Strategic reasoning
-- [Gemini](https://github.com/google-gemini/gemini-cli) — Research with large context
-- [Kiro CLI](https://kiro.dev) — AI coding assistant
-- [Codex CLI](https://github.com/openai/codex) — OpenAI models
+| Provider | Purpose |
+|----------|---------|
+| [Aider](https://aider.chat/) | Surgical code edits |
+| [Kiro](https://kiro.dev) | Terminal automation |
+| [ShellGPT](https://github.com/TheR1D/shell_gpt) | Shell command generation |
 
-**Local Providers:**
-- [Ollama](https://ollama.com/) — Local inference, zero cost
-- [Qwen](https://github.com/QwenLM/qwen-code) — 256K context coding
-- [Goose](https://github.com/block/goose) — MCP-native agent
-- [Crush](https://github.com/charmbracelet/crush) — Multi-model TUI
+</details>
+
+<details>
+<summary><strong>Platform-specific compiler install</strong></summary>
+
+**macOS:**
+```bash
+brew install cmake gcc
+```
+
+**Ubuntu / Debian / WSL:**
+```bash
+sudo apt update && sudo apt install -y cmake g++-14 git
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S cmake gcc git
+```
 
 </details>
 
 ---
 
-## Step 1: Install Euxis
-
-Clone the repository and run setup:
+## Step 1: Clone and Build
 
 ```bash
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 cd ~/.euxis
-./install.sh
+make cpp-configure
+make cpp-build
+make cpp-test
 ```
 
-**Expected output:**
-```
-Installing Euxis Fleet...
-Adding EUXIS_HOME and PATH to ~/.zshrc
-  ✓ euxis
-  ✓ euxis-health
-  ✓ euxis-certify
-  [... 35+ tools linked ...]
-Installation complete!
-```
+Build output: `build/cmake-build/cmd/cli/euxis-cli`.
 
 ---
 
-## Step 2: Add to Your PATH
+## Step 2: Add to PATH
 
-Make Euxis commands available globally.
+Pick one method:
 
-**For Zsh (macOS default):**
 ```bash
-source ~/.zshrc
+# Symlink (recommended)
+sudo ln -sf ~/.euxis/build/cmake-build/cmd/cli/euxis-cli /usr/local/bin/euxis
 ```
 
-**For Bash:**
+<details>
+<summary><strong>Alternative: add to shell profile</strong></summary>
+
+**Bash / Zsh:**
 ```bash
+echo 'export PATH="$HOME/.euxis/build/cmake-build/cmd/cli:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-<details>
-<summary><strong>Other Shells</strong></summary>
-
 **Fish:**
 ```bash
-source ~/.config/fish/config.fish
-```
-
-**Generic (add to your shell's config):**
-```bash
-export EUXIS_HOME="$HOME/.euxis"
-export PATH="$EUXIS_HOME/euxis-bin:$PATH"
+fish_add_path ~/.euxis/build/cmake-build/cmd/cli
 ```
 
 </details>
 
 ---
 
-## Step 3: Verify Installation
-
-Run the fleet health check:
+## Step 3: Verify
 
 ```bash
-euxis-health
+euxis doctor
 ```
 
-**Expected output:**
-```
-✅ Naming Consistency
-✅ Script Hardening
-✅ Orphan Detection
-✅ Header Schema Validation
-✅ Documentation Drift
-✅ Certification Readiness
-✅ Provider Connectivity
-✅ Codex Integrity
-✅ Bus Pipe Activity
-✅ Cortex Connectivity
-
-```
-
-**What each check validates:**
-
-| Check | What It Verifies |
-|-------|------------------|
-| Naming Consistency | Agent filenames match their `agent_id` |
-| Script Hardening | Shell scripts use strict error handling |
-| Orphan Detection | No prompt files missing from registry |
-| Header Schema Validation | Required headers present in scripts and prompts |
-| Documentation Drift | Canonical docs have been updated recently |
-| Certification Readiness | Certification prerequisites are satisfied |
-| Provider Connectivity | At least one provider CLI is available |
-| Codex Integrity | Prompt templates are valid |
-| Bus Pipe Activity | Internal bus pipe is writable |
-| Cortex Connectivity | Cortex backend is reachable (if enabled) |
-
-✅ **Checkpoint:** All checks pass. Your fleet is ready.
+Doctor checks the platform, required tools, data directories, agent registry, and available AI providers.
 
 ---
 
-## Step 4: Meet Your First Agent
+## Step 4: First Run
 
-The command syntax is:
-
-```bash
-euxis <agent> "<task>" [provider]
-```
-
-Try the **Butler** agent for a friendly introduction:
+Run a quick triage scan on any repository:
 
 ```bash
-euxis butler "Introduce yourself briefly"
+euxis triage .
 ```
 
-**Expected output:**
-```
-[euxis] Agent: butler
-[euxis] Provider: ollama
-[euxis] ⠋ butler (ollama)...
-
-Hello! I'm your Euxis Butler, optimized for clear communication.
-I translate complex system outputs into natural, spoken English.
-The fleet has 53 agents ready to assist with engineering tasks.
-```
-
-**Understanding the output:**
-
-| Line | Meaning |
-|------|---------|
-| `Agent: butler` | Which specialist is working |
-| `Provider: ollama` | Which AI is running the agent |
-| Spinner `⠋` | Live status while agent works |
-
-<details>
-<summary><strong>Understanding Provider Selection</strong></summary>
-
-Euxis picks the optimal AI provider for each agent:
-
-| Agent Type | Provider | Why |
-|------------|----------|-----|
-| Strategic (orchestrator, architect) | `claude` | Best reasoning |
-| Research (researcher) | `gemini` | Massive context |
-| Coding (debugger, tester) | `goose` | Tool use |
-| Utility (butler, writer) | `ollama` | Fast, local |
-
-**Override anytime:**
-```bash
-euxis butler "Introduce yourself" claude  # Force Claude
-```
-
-</details>
+This deploys 2 agents (librarian + reviewer) in flash mode with a 75-second budget. The output is a structured verdict with confidence score and findings.
 
 ---
 
-## Step 5: Run a Real Task
-
-Now deploy the **Architect** agent for actual analysis:
+## Step 5: Go Deeper
 
 ```bash
-euxis architect "Explain the key components of the Euxis system"
+# Standard verification (~3 minutes, 5 agents)
+euxis check .
+
+# Forensic-depth review (all 11 agents)
+euxis review . --forensic
+
+# Compare triage vs standard side-by-side
+euxis compare .
+
+# Certification readiness (18 domains, framework overlays)
+euxis certify-readiness . --framework general
+
+# View recent metrics and drift
+euxis stats --last 5
 ```
 
-**Expected output:**
-```
-[euxis] Agent: architect
-[euxis] Provider: claude
-[euxis] ⠋ architect (claude)...
+### Modes
 
-THOUGHT 1: I need to examine the Euxis system structure to understand its architecture.
+| Mode | Agents | Budget | Use Case |
+|------|--------|--------|----------|
+| **Flash** | 2 | 45-75s | Quick screening, CI gates |
+| **Standard** | 5 | 3-5 min | Pre-merge verification |
+| **Forensic** | 11 | 10-15 min | Release audits, deep analysis |
 
-ACTION 1: List the main directories to see the overall organization.
+---
 
-OBSERVATION 1: Found: euxis-bin/, config/, euxis-policy/, data/runtime/memory/, metrics/src/metrics/, docs/, agents/, tests/, ui/src/tui/, api/src/gateway/, adapters/src/adapters/, api/src/gateway/, adapters/src/adapters/
+## Core Commands
 
-THOUGHT 2: I can now describe each component's role in the system.
+| Command | What It Does |
+|---------|-------------|
+| `euxis check [target]` | Verify a repository (standard mode) |
+| `euxis triage [target]` | Fast bounded triage (~45 seconds) |
+| `euxis review [target]` | Deep verification (standard or forensic) |
+| `euxis certify-readiness [target]` | Certification readiness assessment |
+| `euxis compare <target>` | Compare triage against deep verification |
+| `euxis stats` | Validation metrics and drift history |
+| `euxis policy <sub>` | Policy inspection and enforcement |
+| `euxis doctor` | Environment diagnostics |
 
-FINAL ANSWER:
-# Euxis System Architecture
+### Aliases
 
-## Core Components
+| Alias | Resolves To |
+|-------|-------------|
+| `quick` | `triage` |
+| `deep` | `review` |
+| `diag` | `doctor` |
+| `metrics` | `stats` |
 
-### 1. Agent Execution (cli/)
-- 38 executable tools for agent deployment
-- Shell libraries in core/lib/ for shared functionality
-- Entry point: `euxis` command
+Run `euxis --help` for the full command list across 8 groups.
 
-### 2. Configuration (config/ + euxis-policy/)
-- Gateway policy defaults: `euxis-policy/gateway.json`
-- Quality patterns for code enforcement
-- Playbook definitions for workflows
-- Provider routing rules
-- Gateway settings (optional): `~/.euxis/euxis-policy/gateway.json`
+---
 
-Minimal gateway config example:
-
-```json
-{
-  "gateway": {
-    "bind": "127.0.0.1",
-    "port": 18789,
-    "health_enabled": true,
-    "health_path": "/health",
-    "auth": {
-      "mode": "token",
-      "token": {
-        "value": "replace-with-secure-random-value"
-      }
-    }
-  }
-}
-```
-
-Token guidance:
+## Advanced
 
 ```bash
-openssl rand -hex 32
+# Full verification playbook
+euxis playbook verify-everything .
+
+# Multi-agent pipeline
+euxis combo run envision "Design a notification system"
+
+# Squad deployment
+euxis squad deploy quality "Audit the auth module"
+
+# Desktop GUI
+euxis-etx
 ```
-
-Store tokens in environment variables or a secrets manager. Avoid committing them to git.
-
-See also: `docs/reference/gateway-auth.md` and `docs/reference/gateway-config.md`.
-
-### 3. Knowledge Storage (data/runtime/memory/ + metrics/src/metrics/ + data/runtime/)
-- Metrics live in `metrics/src/metrics/` (runtime data in `~/.euxis/metrics/`)
-- Cortex: Semantic memory with vector search
-- Project-specific agent outputs
-- Performance metrics (metrics/src/metrics/)
-
-### 4. Agent Intelligence (agents/)
-- 41 agent personality definitions
-- 9 core agents + 32 specialists
-- ReAct reasoning protocols
-
-### 5. Terminal Interface (ui/src/tui/)
-- Python Textual-based TUI
-- 12 screens for fleet management
-- Command palette and theming
-
-[... continues with detailed breakdown ...]
-```
-
-**What you're seeing:**
-
-1. **THOUGHT**: Agent's reasoning process
-2. **ACTION**: Steps being taken
-3. **OBSERVATION**: Results of each action
-4. **FINAL ANSWER**: Synthesized deliverable
-
-This is the **ReAct pattern** — agents reason through problems step by step, grounding every claim in observations.
-
-✅ **Checkpoint:** You deployed an agent that reasoned through a task systematically.
 
 ---
 
 ## What's Next
 
-You've completed the quick start. Here's where to go from here:
-
-### Try These Tasks
-
-```bash
-# Debug a problem
-euxis debugger "Why would a login function return null for valid credentials?"
-
-# Research options
-euxis researcher "Compare the top 3 Python web frameworks for REST APIs"
-
-# Design something
-euxis architect "Design a caching strategy for a high-traffic API"
-
-# Write documentation
-euxis writer "Create getting started docs for our CLI tool"
-```
-
-### Coordinate Multiple Agents
-
-```bash
-# Chain agents for refined output (planner → architect → evangelist → reviewer)
-euxis-combo run envision "Design a user notification system"
-
-# Deploy a full squad for comprehensive work
-euxis-squad deploy quality "Audit the authentication module"
-```
-
-### Launch the Desktop Interface
-
-```bash
-euxis-etx
-```
-
-Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, performance metrics, 17 screens, 3 themes.
-
-### Learn the Concepts
-
-| Guide | What You'll Learn |
-|-------|-------------------|
-| [Choosing Coordination](core-concepts/choosing-coordination.md) | When to use agents vs combos vs squads vs playbooks |
-| [Agent Selection](core-concepts/agent-selection.md) | How to pick the right agent for your task |
-| [Memory System](core-concepts/memory.md) | How agents learn and remember |
-| [Workflows](../guides/workflows/) | Problem-to-solution tutorials |
-
-### Reference Documentation
-
-| Guide | What You'll Learn |
-|-------|-------------------|
-| [Fleet Guide](../guides/fleet-guide.md) | All 53 agents in detail |
-| [User Guide](../guides/user-guide.md) | Complete CLI reference |
-| [API Reference](../reference/api-reference.md) | Build custom integrations |
+| Guide | Content |
+|-------|---------|
+| [User Guide](../guides/user-guide.md) | Complete CLI reference and modes |
+| [CLI Reference](../reference/cli-reference.md) | Every command, flag, and example |
+| [Fleet Guide](../guides/fleet-guide.md) | Agent roster and provider routing |
+| [Choosing Coordination](core-concepts/choosing-coordination.md) | Agents vs combos vs squads vs playbooks |
 
 ---
 
@@ -370,76 +219,54 @@ Features: Fleet dashboard, command palette (`Ctrl+K`), streaming execution, perf
 <details>
 <summary><strong>Command not found: euxis</strong></summary>
 
-**Problem:** Shell can't find Euxis commands.
+Verify the binary exists and PATH is configured:
 
-**Diagnosis:**
 ```bash
-echo $PATH | grep "$HOME/.euxis/euxis-bin"
-ls ~/.euxis/euxis-bin/euxis
+ls ~/.euxis/build/cmake-build/cmd/cli/euxis-cli
+echo $PATH | grep euxis
 ```
 
-**Solution:**
-1. Verify PATH was updated correctly
-2. Restart your terminal completely
-3. Re-run: `source ~/.zshrc` (or `~/.bashrc`)
+If the binary exists but PATH is wrong, re-run the symlink or profile step above. Then restart the terminal.
 
 </details>
 
 <details>
-<summary><strong>Health check failures</strong></summary>
+<summary><strong>Build fails</strong></summary>
 
-**Problem:** `euxis-health` reports failed checks.
-
-**Solution:**
+Check compiler version:
 ```bash
-euxis-certify
+g++ --version   # Need 14+
+cmake --version  # Need 3.28+
 ```
 
-This runs the full certification pipeline and fixes common issues automatically.
+On Ubuntu, install a newer GCC:
+```bash
+sudo apt install -y g++-14
+export CXX=g++-14
+make cpp-clean && make cpp-configure && make cpp-build
+```
 
 </details>
 
 <details>
 <summary><strong>No AI provider available</strong></summary>
 
-**Problem:** Agents can't execute because no provider is configured.
-
-**Solution:**
+Install Ollama for free local inference:
 ```bash
-# Install Ollama (local, free)
 curl -fsSL https://ollama.ai/install.sh | sh
-ollama pull llama2
-
-# Verify
+ollama pull qwen2.5-coder:7b
 ollama list
 ```
 
-</details>
-
-<details>
-<summary><strong>Agent output is empty or truncated</strong></summary>
-
-**Problem:** Agent returns incomplete response.
-
-**Possible causes:**
-- Provider rate limiting
-- Network timeout
-- Context too large
-
-**Solutions:**
+Or set an API key for a cloud provider:
 ```bash
-# Try a different provider
-euxis architect "Your task" ollama
-
-# Simplify the task
-euxis architect "List the main components only"
-
-# Check provider status
-euxis-health
+export ANTHROPIC_API_KEY="sk-..."
+export OPENAI_API_KEY="sk-..."
+export GEMINI_API_KEY="..."
 ```
 
 </details>
 
 ---
 
-*Euxis v0.0.3 · Build something that matters.*
+*Euxis v0.0.4*

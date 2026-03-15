@@ -40,13 +40,13 @@ Use active voice to make instructions clear and direct. Passive voice obscures w
 **Do:**
 ```
 The orchestrator routes requests to the appropriate agent.
-Run `euxis-health` to check system status.
+Run `euxis health` to check system status.
 ```
 
 **Do not:**
 ```
 Requests are routed to the appropriate agent by the orchestrator.
-System status can be checked by running `euxis-health`.
+System status can be checked by running `euxis health`.
 ```
 
 ### Avoid Marketing Language
@@ -101,7 +101,7 @@ Always specify the language for syntax highlighting. Use the most specific langu
 **Do:**
 ````markdown
 ```bash
-euxis-health --verbose
+euxis health --verbose
 ```
 
 ```python
@@ -111,7 +111,7 @@ def check_status():
 
 ```json
 {
-  "version": "v0.0.3",
+  "version": "v0.0.4",
   "status": "healthy"
 }
 ```
@@ -120,7 +120,7 @@ def check_status():
 **Do not:**
 ````markdown
 ```
-euxis-health --verbose
+euxis health --verbose
 ```
 ````
 
@@ -128,7 +128,7 @@ For shell sessions showing both commands and output, use `console` or `bash` wit
 
 ````markdown
 ```console
-$ euxis-health
+$ euxis health
 Status: healthy
 Agents: 3 active
 Uptime: 2h 34m
@@ -138,7 +138,7 @@ Uptime: 2h 34m
 ### Inline Code
 
 Use backticks for:
-- Command names: `euxis-health`
+- Command names: `euxis health`
 - File paths: `/etc/euxis/config.yaml`
 - Configuration keys: `max_retries`
 - Variable names: `EUXIS_HOME`
@@ -181,9 +181,9 @@ Keep tables simple. If a table exceeds 4-5 columns or requires complex formattin
 - Requirements where order does not matter
 
 ```markdown
-- Python 3.10 or higher
+- CMake 3.28 or higher
+- GCC 14+ or Clang 18+
 - 4 GB available memory
-- Network access to the API endpoint
 ```
 
 **List formatting rules:**
@@ -198,10 +198,10 @@ Keep tables simple. If a table exceeds 4-5 columns or requires complex formattin
 When demonstrating commands, show both the command and its expected output. This helps users verify they are on the right track.
 
 ```console
-$ euxis-health --json
+$ euxis health --json
 {
   "status": "healthy",
-  "version": "v0.0.3",
+  "version": "v0.0.4",
   "agents": {
     "orchestrator": "running",
     "analyzer": "running",
@@ -249,7 +249,7 @@ except ConnectionError as e:
 ```
 
 ```console
-$ euxis-health
+$ euxis health
 Error: Could not connect to orchestrator
 Hint: Ensure the daemon is running with `euxis-daemon start`
 ```
@@ -279,7 +279,7 @@ raise ConnectionError("Failed after {max_retries} attempts")
 |------|---------|-----------|
 | Product name | Euxis | EUXIS, euxis, EuXis |
 | Agent names | orchestrator, analyzer, executor | Orchestrator, ANALYZER |
-| Command names | `euxis-health`, `euxis-daemon` | euxis-health (without backticks) |
+| Command names | `euxis health`, `euxis-daemon` | euxis health (without backticks) |
 
 ### Capitalization Rules
 
@@ -440,7 +440,7 @@ Mark deprecated features clearly with a deprecation notice. Include:
 - The version when removal is planned (if known)
 
 ```markdown
-> **Deprecated in v0.0.3**
+> **Deprecated in v0.0.4**
 >
 > The `--legacy` flag is deprecated and will be removed in version 0.0.2.
 > Use `--compat-mode` instead.
@@ -450,7 +450,7 @@ For deprecated configuration:
 ```markdown
 ### `legacy_mode`
 
-**Deprecated:** Use `compat_mode` instead. Will be removed in v0.0.3.
+**Deprecated:** Use `compat_mode` instead. Will be removed in v0.0.4.
 ```
 
 ### Changelog References
@@ -467,7 +467,7 @@ See the [changelog](./CHANGELOG.md) for a complete list of changes in this versi
 |---------|------------|---------|
 | Product name | Capitalized | Euxis |
 | Agent names | Lowercase | orchestrator |
-| Commands | Backticks | `euxis-health` |
+| Commands | Backticks | `euxis health` |
 | File paths | Backticks | `/etc/euxis/config.yaml` |
 | Config keys | Backticks, lowercase | `max_retries` |
 | Env variables | Backticks, uppercase | `EUXIS_HOME` |

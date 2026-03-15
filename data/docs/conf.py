@@ -16,8 +16,8 @@ from datetime import datetime
 project = "Euxis"
 copyright = f"{datetime.now().year}, Euxis Fleet"
 author = "Euxis Fleet"
-version = "0.0.3"
-release = "v0.0.3"
+version = "0.0.4"
+release = "v0.0.4"
 
 # -- General configuration ---------------------------------------------------
 
