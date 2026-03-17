@@ -4,12 +4,12 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 
 ## Phase 1: Core Boundary Enforcement
 
-- Core contracts are defined in `pkg/core/include/euxis/core/`.
-  - Contract header: `pkg/core/include/euxis/core/contracts.hpp`
+- Core contracts are defined in `libs/core/include/euxis/core/`.
+  - Contract header: `libs/core/include/euxis/core/contracts.hpp`
 - Platform type adapters are co-located in the core header:
-  - `pkg/core/include/euxis/core/types.hpp`
+  - `libs/core/include/euxis/core/types.hpp`
 - Agent routing logic:
-  - `pkg/core/src/router.cpp`
+  - `libs/core/src/router.cpp`
 - Gateway transport is now HTTP-only (WebSocket adapter removed).
 - CI guardrail: `euxis-ops/architecture/check_boundaries.py`.
 - Guardrail blocks direct `subprocess`/network imports in pure core logic.
@@ -20,10 +20,10 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 
 - GitHub Actions matrix for Linux/macOS: `.github/workflows/cpp.yml`.
 - Platform normalization tests:
-  - `pkg/core/tests/test_platform_adapter.cpp`
-  - `pkg/core/tests/test_contracts.cpp`
-  - `pkg/core/tests/test_router.cpp`
-  - `pkg/core/tests/test_swarm.cpp`
+  - `libs/core/tests/test_platform_adapter.cpp`
+  - `libs/core/tests/test_contracts.cpp`
+  - `libs/core/tests/test_router.cpp`
+  - `libs/core/tests/test_swarm.cpp`
   - Includes OS mapping and WSL environment detection coverage.
 
 ## Phase 3: Supply chain integrity
@@ -47,10 +47,10 @@ This document tracks the implementation of the 2026 architecture hardening roadm
 ## Phase 4: Resilience and performance
 
 - Resilience primitives:
-  - `pkg/core/src/resilience.cpp`
-  - `pkg/core/tests/test_resilience.cpp`
+  - `libs/core/src/resilience.cpp`
+  - `libs/core/tests/test_resilience.cpp`
 - Runtime concurrency uses `std::jthread` (dedicated concurrency module removed):
-  - `pkg/core/src/swarm.cpp`
+  - `libs/core/src/swarm.cpp`
 - Performance budget gate:
   - `euxis-ops/perf/check_perf_budget.py`
   - Policy file: `euxis-ops/perf/perf_policy.json` (`current`, `target_q2_2026`, `target_q4_2026`)

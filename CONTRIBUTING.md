@@ -117,8 +117,8 @@ make cpp-test
 Or run the test binary directly for filtered output:
 
 ```bash
-build/cmake-build/cmd/cli/euxis-cli-cpp_tests
-build/cmake-build/cmd/cli/euxis-cli-cpp_tests --gtest_filter="YourTest.*"
+cmake-build/apps/cli/euxis-cli-cpp_tests
+cmake-build/apps/cli/euxis-cli-cpp_tests --gtest_filter="YourTest.*"
 ```
 
 ### Formatting
@@ -168,9 +168,8 @@ All source files must include a copyright header:
 
 | Directory | Role | Rules |
 |-----------|------|-------|
-| `cmd/` | Application entry points | Thin wrappers around `pkg/` |
-| `pkg/` | SDK libraries | No `main()`. Reusable across apps. |
-| `internal/` | Platform abstraction | The only place for `#ifdef __APPLE__` / `#ifdef __linux__` |
+| `apps/` | Application entry points | Thin wrappers around `libs/` |
+| `libs/` | SDK libraries | No `main()`. Reusable across apps. |
 | `data/` | Read-only data | Config, schemas, agent prompts, docs |
 
 ### The Gold Rule

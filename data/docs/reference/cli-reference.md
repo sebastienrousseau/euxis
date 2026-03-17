@@ -1080,7 +1080,7 @@ Euxis runs on macOS, Linux, and WSL. Paths adjust to your platform automatically
 | Item | Location |
 |------|----------|
 | Installation | `~/.euxis/` |
-| Build output | `~/.euxis/build/cmake-build/cmd/cli/euxis-cli` |
+| Build output | `~/.euxis/cmake-build/apps/cli/euxis-cli` |
 | Configuration | `~/.euxis/data/config/` |
 | Agent prompts | `~/.euxis/data/agents/prompts/` |
 | Agent registry | `~/.euxis/data/agents/registry.db` |

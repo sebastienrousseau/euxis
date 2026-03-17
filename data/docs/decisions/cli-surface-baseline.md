@@ -56,9 +56,9 @@
 
 | File | Role |
 |------|------|
-| `cmd/cli/include/euxis/cli/cmd/surface.hpp` | Header |
-| `cmd/cli/src/cmd/surface.cpp` | Implementation (~280 lines) |
-| `cmd/cli/tests/test_cmd_surface.cpp` | Tests (~450 lines) |
+| `apps/cli/include/euxis/cli/cmd/surface.hpp` | Header |
+| `apps/cli/src/cmd/surface.cpp` | Implementation (~280 lines) |
+| `apps/cli/tests/test_cmd_surface.cpp` | Tests (~450 lines) |
 | `data/config/completions/euxis.{bash,zsh,fish}` | Shell completions |
 
 ## Rules

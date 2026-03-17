@@ -761,12 +761,12 @@ The ETX terminal UI does not start.
 
 2. **Check the ETX binary:**
    ```bash
-   ls -la cmake-build/cmd/etx/euxis-etx
+   ls -la cmake-build/apps/etx/euxis-etx
    ```
 
 3. **Run directly:**
    ```bash
-   ./cmake-build/cmd/etx/euxis-etx
+   ./cmake-build/apps/etx/euxis-etx
    ```
 
 ### Display Rendering Issues

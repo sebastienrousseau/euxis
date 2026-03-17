@@ -50,7 +50,7 @@ make cpp-build
 make cpp-test       # 1063 tests, all passing
 ```
 
-Binaries are in `build/cmake-build/cmd/cli/`.
+Binaries are in `cmake-build/apps/cli/`.
 
 ### Add to PATH
 
@@ -58,15 +58,15 @@ Pick one method:
 
 ```bash
 # Symlink (recommended)
-sudo ln -sf ~/.euxis/build/cmake-build/cmd/cli/euxis-cli /usr/local/bin/euxis
+sudo ln -sf ~/.euxis/cmake-build/apps/cli/euxis-cli /usr/local/bin/euxis
 
 # Or add to shell profile
 # Bash / Zsh:
-echo 'export PATH="$HOME/.euxis/build/cmake-build/cmd/cli:$PATH"' >> ~/.bashrc
+echo 'export PATH="$HOME/.euxis/cmake-build/apps/cli:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 
 # Fish:
-fish_add_path ~/.euxis/build/cmake-build/cmd/cli
+fish_add_path ~/.euxis/cmake-build/apps/cli
 ```
 
 ### Verify
@@ -125,13 +125,13 @@ euxis-etx                                # Desktop GUI (Qt6)
 ## Architecture
 
 ```
-cmd/              Application layer
+apps/             Application layer
   cli/            Command-line interface (58 commands, 8 groups)
   etx/            Qt6 desktop GUI (17 screens)
   gateway/        HTTP/WebSocket server
   publisher/      Document rendering engine
 
-pkg/              SDK layer
+libs/             SDK layer
   core/           Execution engine, FinOps routing, swarm orchestration
   runtime/        Agent lifecycle and scheduling
   security/       Threat detection and policy enforcement
@@ -139,8 +139,8 @@ pkg/              SDK layer
   crypto/         AES-256-GCM, Ed25519, Argon2id
   metrics/        Telemetry and validation framework
   inference/      Local inference via llama.cpp
+  platform/       Platform abstraction (macOS, Linux, WSL)
 
-internal/         Platform abstraction (macOS, Linux, WSL)
 data/             Configuration, agent prompts, playbooks, docs
 ```
 

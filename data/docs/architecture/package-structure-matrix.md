@@ -16,7 +16,7 @@ Generated from `euxis-ops/quality/package_standards.json`.
 | `euxis-scripts-cpp` | `cpp-library` | `euxis-cpp/euxis-scripts-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-scripts-cpp/tests` (yes) | `data/docs/modules/euxis-scripts-cpp.md` (yes) | `ok` |
 | `euxis-runtime-cpp` | `cpp-library` | `euxis-cpp/euxis-runtime-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-runtime-cpp/tests` (yes) | `data/docs/modules/euxis-runtime-cpp.md` (yes) | `ok` |
 | `euxis-metrics-cpp` | `cpp-library` | `euxis-cpp/euxis-metrics-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-metrics-cpp/tests` (yes) | `data/docs/modules/euxis-metrics-cpp.md` (yes) | `ok` |
-| `euxis-core-cpp` | `cpp-library` | `pkg/core` | `CMakeLists.txt` (yes) | `pkg/core/tests` (yes) | `data/docs/modules/euxis-core-cpp.md` (yes) | `ok` |
+| `euxis-core-cpp` | `cpp-library` | `libs/core` | `CMakeLists.txt` (yes) | `libs/core/tests` (yes) | `data/docs/modules/euxis-core-cpp.md` (yes) | `ok` |
 | `euxis-adapters-cpp` | `cpp-library` | `euxis-cpp/euxis-adapters-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-adapters-cpp/tests` (yes) | `data/docs/modules/euxis-adapters-cpp.md` (yes) | `ok` |
 | `euxis-gateway-cpp` | `cpp-library` | `euxis-cpp/euxis-gateway-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-gateway-cpp/tests` (yes) | `data/docs/modules/euxis-gateway-cpp.md` (yes) | `ok` |
 | `euxis-cli-cpp` | `cpp-application` | `euxis-cpp/euxis-cli-cpp` | `CMakeLists.txt` (yes) | `euxis-cpp/euxis-cli-cpp/tests` (yes) | `data/docs/modules/euxis-cli-cpp.md` (yes) | `ok` |

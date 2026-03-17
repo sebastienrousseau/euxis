@@ -77,7 +77,7 @@ make cpp-build
 make cpp-test
 ```
 
-Build output: `build/cmake-build/cmd/cli/euxis-cli`.
+Build output: `cmake-build/apps/cli/euxis-cli`.
 
 ---
 
@@ -87,7 +87,7 @@ Pick one method:
 
 ```bash
 # Symlink (recommended)
-sudo ln -sf ~/.euxis/build/cmake-build/cmd/cli/euxis-cli /usr/local/bin/euxis
+sudo ln -sf ~/.euxis/cmake-build/apps/cli/euxis-cli /usr/local/bin/euxis
 ```
 
 <details>
@@ -95,13 +95,13 @@ sudo ln -sf ~/.euxis/build/cmake-build/cmd/cli/euxis-cli /usr/local/bin/euxis
 
 **Bash / Zsh:**
 ```bash
-echo 'export PATH="$HOME/.euxis/build/cmake-build/cmd/cli:$PATH"' >> ~/.bashrc
+echo 'export PATH="$HOME/.euxis/cmake-build/apps/cli:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 **Fish:**
 ```bash
-fish_add_path ~/.euxis/build/cmake-build/cmd/cli
+fish_add_path ~/.euxis/cmake-build/apps/cli
 ```
 
 </details>
@@ -222,7 +222,7 @@ euxis-etx
 Verify the binary exists and PATH is configured:
 
 ```bash
-ls ~/.euxis/build/cmake-build/cmd/cli/euxis-cli
+ls ~/.euxis/cmake-build/apps/cli/euxis-cli
 echo $PATH | grep euxis
 ```
 
