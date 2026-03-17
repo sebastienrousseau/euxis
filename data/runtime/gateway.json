@@ -1,1 +1,1 @@
-{"gateway": {"auth": {"mode": "token", "token": {"value": "test-token"}}}}
+{"gateway": {"auth": {"mode": "token", "token": {"value": "${EUXIS_GATEWAY_TOKEN}"}}}}

@@ -63,12 +63,12 @@
       "default": "claude-sonnet-4-6"
     },
     "gemini": {
-      "deep_research": "gemini-3.1-pro",
-      "security": "gemini-3.1-pro",
-      "coding": "gemini-3.1-pro",
-      "research": "gemini-3.1-pro",
-      "fast": "gemini-3.1-flash-lite",
-      "default": "gemini-3.1-pro"
+      "deep_research": "gemini-2.5-pro",
+      "security": "gemini-2.5-pro",
+      "coding": "gemini-2.5-pro",
+      "research": "gemini-2.5-pro",
+      "fast": "gemini-2.5-flash-lite",
+      "default": "gemini-2.5-pro"
     },
     "ollama": {
       "private_coding": "llama4:maverick",

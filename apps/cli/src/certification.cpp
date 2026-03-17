@@ -34,7 +34,7 @@ auto read_file_content(const fs::path& path) -> std::string {
     try {
         std::ifstream f(path);
         return {std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()};
-    } catch (...) { return {}; }
+    } catch (const std::exception&) { return {}; }
 }
 
 // =====================================================================
@@ -146,7 +146,7 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
                         }
                     }
                 }
-            } catch (...) {}
+            } catch (const std::exception&) {}
             if (tests_detected) break;
         }
     }
@@ -202,13 +202,13 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
         if (line.find("[  PASSED  ]") != std::string::npos) {
             auto pos = line.find("]");
             if (pos != std::string::npos) {
-                try { passed = std::stoi(line.substr(pos + 1)); } catch (...) {}
+                try { passed = std::stoi(line.substr(pos + 1)); } catch (const std::exception&) {}
             }
         }
         if (line.find("[  FAILED  ]") != std::string::npos) {
             auto pos = line.find("]");
             if (pos != std::string::npos) {
-                try { failed = std::stoi(line.substr(pos + 1)); } catch (...) {}
+                try { failed = std::stoi(line.substr(pos + 1)); } catch (const std::exception&) {}
             }
         }
     }
@@ -357,7 +357,7 @@ auto gate_docs_accuracy(const fs::path& target,
                     check_stale(entry.path());
                 }
             }
-        } catch (...) {}
+        } catch (const std::exception&) {}
     }
 
     if (stale_count == 0 && !checked_surfaces.empty()) {
@@ -514,12 +514,12 @@ auto analyze_quality_risk(const fs::path& target) -> QualityRisk {
                         " (" + std::to_string(line_count) + " lines)");
                     qr.status = "gaps";
                 }
-            } catch (...) {}
+            } catch (const std::exception&) {}
 
             ++files_scanned;
             if (files_scanned >= 500) break; // Bounded
         }
-    } catch (...) {}
+    } catch (const std::exception&) {}
 
     qr.data = {{"status", qr.status},
                {"high_complexity_files", qr.high_complexity_files},

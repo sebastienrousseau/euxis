@@ -77,7 +77,7 @@ void ProviderRouter::load_config() {
                 standard_overrides_[agent_id] = so;
             }
         }
-    } catch (...) {}
+    } catch (const std::exception& e) { spdlog::warn("router.json parse error: {}", e.what()); }
 }
 
 void ProviderRouter::load_strategy_config() {
@@ -119,7 +119,8 @@ void ProviderRouter::load_strategy_config() {
                 classification_keywords_[cls] = std::move(keywords);
             }
         }
-    } catch (...) {
+    } catch (const std::exception& e) {
+        spdlog::warn("provider_strategy.json parse error: {}", e.what());
         strategy_loaded_ = false;
     }
 }
@@ -178,7 +179,7 @@ auto ProviderRouter::route(const std::string& agent_tier,
     // Map provider + tier to the appropriate model
     if (provider == "claude") {
         switch (effective) {
-            case Tier::Routine: sel.model = "claude-haiku-3-5"; break;
+            case Tier::Routine: sel.model = "claude-haiku-4-5"; break;
             case Tier::Data:    sel.model = models_.code; break;   // sonnet
             case Tier::Code:    sel.model = models_.code; break;   // sonnet
             case Tier::Reason:  sel.model = models_.reason; break; // opus
@@ -399,7 +400,7 @@ auto ProviderRouter::route_by_strategy(const std::string& task_class,
                 auto tier = std::max(parse_tier(agent_tier), analyze_task_tier(prompt));
                 if (primary == "claude") {
                     switch (tier) {
-                        case Tier::Routine: model = "claude-haiku-3-5"; break;
+                        case Tier::Routine: model = "claude-haiku-4-5"; break;
                         case Tier::Data:
                         case Tier::Code:    model = models_.code; break;
                         case Tier::Reason:  model = models_.reason; break;
@@ -407,7 +408,7 @@ auto ProviderRouter::route_by_strategy(const std::string& task_class,
                 } else if (primary == "openai") {
                     model = "gpt-5.4";
                 } else if (primary == "gemini") {
-                    model = "gemini-3.1-pro";
+                    model = "gemini-2.5-pro";
                 } else if (primary == "ollama") {
                     model = "llama4:maverick";
                 } else {
@@ -429,7 +430,7 @@ auto ProviderRouter::route_by_strategy(const std::string& task_class,
             if (model.empty()) {
                 if (fb == "claude") model = models_.code;
                 else if (fb == "openai") model = "gpt-5.4";
-                else if (fb == "gemini") model = "gemini-3.1-pro";
+                else if (fb == "gemini") model = "gemini-2.5-pro";
                 else if (fb == "ollama") model = "llama4:maverick";
                 else model = fb;
             }
@@ -498,8 +499,8 @@ void ProviderRouter::print_status() const {
             {"coding",                "Claude Sonnet / Opus 4.6"},
             {"architecture",          "Claude Opus 4.6"},
             {"audit",                 "Claude Opus 4.6"},
-            {"deep_research",         "Gemini 3.1 Pro"},
-            {"security",              "Gemini 3.1 Pro"},
+            {"deep_research",         "Gemini 2.5 Pro"},
+            {"security",              "Gemini 2.5 Pro"},
             {"private_coding",        "Ollama (local)"},
             {"surgical_edit",         "Aider"},
             {"terminal_automation",   "Kiro / ShellGPT"},
@@ -533,7 +534,7 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
     // Default fallback chains by provider
     if (model.find("claude") != std::string::npos || model.find("anthropic") != std::string::npos) {
         return {
-            {"openai", "gpt-4o", Tier::Code, 5.0, "", ""},
+            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
             {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
             {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
         };
@@ -548,14 +549,14 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
     if (model.find("gemini") != std::string::npos) {
         return {
             {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-            {"openai", "gpt-4o", Tier::Code, 5.0, "", ""},
+            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
             {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
         };
     }
     // Generic: try all major providers
     return {
         {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-        {"openai", "gpt-4o", Tier::Code, 5.0, "", ""},
+        {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
         {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };

@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <map>
 #include <print>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace euxis::cli {
@@ -37,8 +38,9 @@ Engine::Engine(const std::string& euxis_home) {
             ctx_.euxis_home = home;
         } else {
             const char* user_home = std::getenv("HOME");
+            if (!user_home) throw std::runtime_error("Neither EUXIS_HOME nor HOME is set");
             ctx_.euxis_home =
-                (std::filesystem::path(user_home ? user_home : "/tmp") / ".euxis")
+                (std::filesystem::path(user_home) / ".euxis")
                     .string();
         }
     }

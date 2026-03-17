@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <stdexcept>
 
 namespace euxis::gateway {
 namespace {
@@ -12,7 +13,8 @@ auto euxis_home() -> std::filesystem::path {
     const char* home = std::getenv("EUXIS_HOME");
     if (home) return home;
     const char* user_home = std::getenv("HOME");
-    return std::filesystem::path(user_home ? user_home : "/tmp") / ".euxis";
+    if (!user_home) throw std::runtime_error("Neither EUXIS_HOME nor HOME is set");
+    return std::filesystem::path(user_home) / ".euxis";
 }
 
 } // namespace
@@ -82,7 +84,7 @@ auto load_session_from_disk(const std::string& session_id)
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) continue;
-        try { entries.push_back(nlohmann::json::parse(line)); } catch (...) {}
+        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) {}
     }
     return entries;
 }
@@ -99,7 +101,7 @@ auto load_session_meta(const std::string& session_id) -> nlohmann::json {
     if (!std::filesystem::exists(path)) return {};
     std::ifstream f(path);
     nlohmann::json j;
-    try { f >> j; } catch (...) { return {}; }
+    try { f >> j; } catch (const std::exception&) { return {}; }
     return j;
 }
 
@@ -126,7 +128,7 @@ auto load_run_events(const std::string& run_id)
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) continue;
-        try { entries.push_back(nlohmann::json::parse(line)); } catch (...) {}
+        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) {}
     }
     return entries;
 }

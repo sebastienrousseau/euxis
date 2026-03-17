@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,11 @@ int main(int argc, char* argv[]) {
         euxis_home = home;
     } else {
         const char* user_home = std::getenv("HOME");
-        euxis_home = (std::filesystem::path(user_home ? user_home : "/tmp") / ".euxis").string();
+        if (!user_home) {
+            std::cerr << "error: Neither EUXIS_HOME nor HOME is set\n";
+            return 1;
+        }
+        euxis_home = (std::filesystem::path(user_home) / ".euxis").string();
     }
 
     // Initialize i18n from LANG/LC_ALL environment

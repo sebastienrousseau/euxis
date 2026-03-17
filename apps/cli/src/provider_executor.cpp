@@ -146,7 +146,7 @@ auto ProviderExecutor::resolve_anthropic_token() -> std::string {
         if (creds.contains("claudeAiOauth")) {
             return creds["claudeAiOauth"].value("accessToken", "");
         }
-    } catch (...) {}
+    } catch (const std::exception& e) { spdlog::debug("credential parse: {}", e.what()); }
     return {};
 }
 
@@ -209,7 +209,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
                             std::string text = j["delta"].value("text", "");
                             if (!text.empty()) on_chunk(text);
                         }
-                    } catch (...) {}
+                    } catch (const std::exception& e) { spdlog::debug("SSE parse: {}", e.what()); }
                 }
             }
             sse_buffer = sse_buffer.substr(pos);
@@ -222,14 +222,14 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string output = result.stdout_output;
         int status = 0;
         auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) { try { status = std::stoi(output.substr(last_nl + 1)); } catch (...) {} output = output.substr(0, last_nl); }
+        if (last_nl != std::string::npos) { try { status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) {} output = output.substr(0, last_nl); }
         try {
             auto j = nlohmann::json::parse(output);
             if (j.contains("error")) return {false, "", "Anthropic API: " + j["error"].dump(), 1, 0.0, classify_error(status, output)};
             std::string content;
             for (const auto& b : j["content"]) if (b.contains("text")) content += b["text"].get<std::string>();
             return {true, content, "", 0, 0.0, {}};
-        } catch (...) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
+        } catch (const std::exception& e) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
     }
 }
 
@@ -249,7 +249,7 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
             std::string line;
             while (std::getline(stream, line)) {
                 if (line.empty()) continue;
-                try { auto j = nlohmann::json::parse(line); std::string text = j.value("response", ""); if (!text.empty()) on_chunk(text); } catch (...) {}
+                try { auto j = nlohmann::json::parse(line); std::string text = j.value("response", ""); if (!text.empty()) on_chunk(text); } catch (const std::exception& e) { spdlog::debug("ollama SSE parse: {}", e.what()); }
             }
         };
         auto result = Process::run_streaming("curl", {"-s", "-S", "http://localhost:11434/api/generate", "-H", "Content-Type: application/json", "-d", body.dump()}, "", sse_parser, timeout);
@@ -263,7 +263,7 @@ auto ProviderExecutor::execute_ollama(const std::string& model,
             return {false, "", "ollama: malformed response (no JSON)", 1, 0.0, {}};
         }
         std::string json_part = output.substr(start_brace, last_brace - start_brace + 1);
-        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (...) { return {false, "", "ollama: malformed response", 1, 0.0, {}}; }
+        try { auto j = nlohmann::json::parse(json_part); if (j.contains("error")) return {false, "", "Ollama API: " + j["error"].get<std::string>(), 1, 0.0, {}}; return {true, j.value("response", ""), "", 0, 0.0, {}}; } catch (const std::exception& e) { return {false, "", "ollama: malformed response", 1, 0.0, {}}; }
     }
 }
 
@@ -302,13 +302,13 @@ auto ProviderExecutor::execute_api(const std::string& provider,
     std::string output = result.stdout_output;
     int http_status = 0;
     auto last_nl = output.rfind('\n');
-    if (last_nl != std::string::npos) { try { http_status = std::stoi(output.substr(last_nl + 1)); } catch (...) {} output = output.substr(0, last_nl); }
+    if (last_nl != std::string::npos) { try { http_status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) {} output = output.substr(0, last_nl); }
     try {
         auto resp_json = nlohmann::json::parse(output);
         if (resp_json.contains("error")) return {false, "", provider + " API: " + resp_json["error"].dump(), 1, 0.0, classify_error(http_status, output)};
         std::string content = (provider == "openai") ? resp_json["choices"][0]["message"]["content"].get<std::string>() : resp_json["candidates"][0]["content"]["parts"][0]["text"].get<std::string>();
         return {true, content, "", 0, 0.0, {}};
-    } catch (...) { return {false, "", provider + ": malformed response", 1, 0.0, classify_error(http_status, output)}; }
+    } catch (const std::exception& e) { return {false, "", provider + ": malformed response", 1, 0.0, classify_error(http_status, output)}; }
 }
 
 auto ProviderExecutor::load_agent_prompt(const std::string& euxis_home, const std::string& prompt_path) -> std::string {

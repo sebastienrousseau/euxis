@@ -59,7 +59,7 @@ RegistryClient::RegistryClient(const std::string& data_dir)
                 std::ifstream f(p);
                 impl_->squads_json = nlohmann::json::parse(f);
                 break;
-            } catch (...) {}
+            } catch (const std::exception& e) { spdlog::warn("squads.json parse error: {}", e.what()); }
         }
     }
 }
@@ -283,7 +283,7 @@ auto RegistryClient::list_playbooks() const -> std::vector<PlaybookInfo> {
                     pb.description = j.value("description", "");
                     pb.file_path = entry.path().string();
                     result.push_back(std::move(pb));
-                } catch (...) {}
+                } catch (const std::exception& e) { spdlog::debug("playbook parse error {}: {}", entry.path().string(), e.what()); }
             }
         }
     }

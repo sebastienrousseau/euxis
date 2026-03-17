@@ -1,0 +1,8 @@
+euxis_add_library(euxis-a2a-types-cpp
+  SOURCES
+    src/message.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+  TEST_SOURCES
+    tests/test_message.cpp
+)

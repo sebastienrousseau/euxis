@@ -359,7 +359,7 @@ protected:
             {"models", {
                 {"openai", {{"research", "gpt-5.4"}, {"default", "gpt-5.4"}}},
                 {"claude", {{"coding", "claude-sonnet-4-6"}, {"architecture", "claude-opus-4-6"}, {"audit", "claude-opus-4-6"}, {"default", "claude-sonnet-4-6"}}},
-                {"gemini", {{"deep_research", "gemini-3.1-pro"}, {"security", "gemini-3.1-pro"}, {"default", "gemini-3.1-pro"}}},
+                {"gemini", {{"deep_research", "gemini-2.5-pro"}, {"security", "gemini-2.5-pro"}, {"default", "gemini-2.5-pro"}}},
                 {"ollama", {{"private_coding", "llama4:maverick"}, {"default", "llama4:maverick"}}},
                 {"aider", {{"surgical_edit", "aider"}, {"default", "aider"}}},
                 {"kiro",  {{"terminal_automation", "kiro"}, {"default", "kiro"}}}
@@ -496,14 +496,14 @@ TEST_F(StrategyRouterTest, RouteSecurityToGemini) {
     ProviderRouter router(tmp_.string());
     auto sel = router.route_by_strategy("security", "sentinel", "code", "security scan");
     EXPECT_EQ(sel.provider, "gemini");
-    EXPECT_EQ(sel.model, "gemini-3.1-pro");
+    EXPECT_EQ(sel.model, "gemini-2.5-pro");
 }
 
 TEST_F(StrategyRouterTest, RouteDeepResearchToGemini) {
     ProviderRouter router(tmp_.string());
     auto sel = router.route_by_strategy("deep_research", "", "code", "deep analysis");
     EXPECT_EQ(sel.provider, "gemini");
-    EXPECT_EQ(sel.model, "gemini-3.1-pro");
+    EXPECT_EQ(sel.model, "gemini-2.5-pro");
 }
 
 TEST_F(StrategyRouterTest, RouteArchitectureToClaude) {

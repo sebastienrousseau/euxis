@@ -6,9 +6,8 @@
     "auth": {
       "mode": "token",
       "token": {
-        "value": "e2e-token",
-        "allow_query_param": true,
-        "suppress_query_warning": true
+        "value": "${EUXIS_E2E_TOKEN}",
+        "allow_query_param": false
       },
       "password": {
         "value": ""

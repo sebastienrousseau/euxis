@@ -2,12 +2,12 @@ euxis_add_library(euxis-a2a-cpp
   SOURCES
     src/agent_card.cpp
     src/task.cpp
-    src/message.cpp
     src/server.cpp
     src/http_transport.cpp
     src/websocket_transport.cpp
   DEPS
     euxis-identity-cpp
+    euxis-a2a-types-cpp
     euxis-network-cpp
     unofficial-sodium::sodium
     nlohmann_json::nlohmann_json
@@ -16,7 +16,6 @@ euxis_add_library(euxis-a2a-cpp
   TEST_SOURCES
     tests/test_agent_card.cpp
     tests/test_task.cpp
-    tests/test_message.cpp
     tests/test_server.cpp
     tests/test_http_transport.cpp
     tests/test_websocket_transport.cpp

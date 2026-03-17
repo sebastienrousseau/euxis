@@ -7,7 +7,7 @@ euxis_add_library(euxis-network-cpp
   DEPS
     ixwebsocket::ixwebsocket
     spdlog::spdlog
-    euxis-a2a-cpp
+    euxis-a2a-types-cpp
     nlohmann_json::nlohmann_json
   TEST_SOURCES
     tests/test_ws_client.cpp

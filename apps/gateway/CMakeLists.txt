@@ -31,3 +31,6 @@ euxis_add_library(euxis-gateway-cpp
     tests/test_websocket.cpp
     tests/test_state.cpp
 )
+
+add_executable(euxis-gateway src/main.cpp)
+target_link_libraries(euxis-gateway PRIVATE euxis-gateway-cpp)

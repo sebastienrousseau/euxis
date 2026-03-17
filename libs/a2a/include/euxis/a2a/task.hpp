@@ -9,7 +9,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "message.hpp"
+#include <euxis/a2a/message.hpp>
 
 namespace euxis::a2a {
 
