@@ -23,16 +23,22 @@ public:
     const PlatformInfo& info() const override { return info_; }
 
     bool open_url(std::string_view url) const override {
-        std::string cmd;
-        if (info_.os == OSType::MacOS) {
-            cmd = "open '" + std::string(url) + "' 2>/dev/null &";
-        } else if (info_.os == OSType::WSL1 || info_.os == OSType::WSL2) {
-            if (std::system(("wslview '" + std::string(url) + "' 2>/dev/null").c_str()) == 0) return true;
-            cmd = "cmd.exe /c start '" + std::string(url) + "' 2>/dev/null";
-        } else {
-            cmd = "xdg-open '" + std::string(url) + "' >/dev/null 2>&1 &";
+        // Validate URL to prevent shell injection — reject anything with shell metacharacters
+        for (char c : url) {
+            if (c == '\'' || c == '"' || c == '`' || c == '$' || c == '\\' ||
+                c == ';' || c == '|' || c == '&' || c == '\n' || c == '\r') {
+                return false;
+            }
         }
-        return std::system(cmd.c_str()) == 0;
+        std::string url_str(url);
+        if (info_.os == OSType::MacOS) {
+            return detail::exec_no_shell("open", {url_str});
+        } else if (info_.os == OSType::WSL1 || info_.os == OSType::WSL2) {
+            if (detail::exec_no_shell("wslview", {url_str})) return true;
+            return detail::exec_no_shell("cmd.exe", {"/c", "start", url_str});
+        } else {
+            return detail::exec_no_shell("xdg-open", {url_str});
+        }
     }
 
     bool clipboard_copy(std::string_view text) const override {

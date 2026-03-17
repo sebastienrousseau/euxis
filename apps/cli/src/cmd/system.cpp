@@ -139,9 +139,8 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         "data/runtime/memory",
         "data/runtime/memory/cortex",
         "data/runtime/memory/cortex/db",
-        "data/runtime/data",
-        "data/runtime/data/bus",
-        "data/runtime/data/bus/pipes",
+        "data/runtime/bus",
+        "data/runtime/bus/pipes",
         "data/runtime/context",
         "data/runtime/metrics"
     };

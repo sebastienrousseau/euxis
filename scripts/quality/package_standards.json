@@ -99,10 +99,10 @@
     },
     {
       "name": "euxis-core-cpp",
-      "path": "pkg/core",
+      "path": "libs/core",
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
-      "test_paths": ["pkg/core/tests"],
+      "test_paths": ["libs/core/tests"],
       "docs_path": "data/docs/modules/euxis-core-cpp.md"
     },
     {

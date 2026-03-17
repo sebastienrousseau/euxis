@@ -47,7 +47,7 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 cd ~/.euxis
 make cpp-configure
 make cpp-build
-make cpp-test       # 1063 tests, all passing
+make cpp-test       # 2000+ tests across 19 suites
 ```
 
 Binaries are in `cmake-build/apps/cli/`.

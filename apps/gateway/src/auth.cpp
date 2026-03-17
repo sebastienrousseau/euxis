@@ -3,9 +3,7 @@
 #include <sodium.h>
 
 #include <cstring>
-#include <iomanip>
-#include <sstream>
-#include <vector>
+#include <string>
 
 namespace euxis::gateway {
 
@@ -28,12 +26,10 @@ auto verify_hmac(const std::string& payload,
         payload.size());
     crypto_auth_hmacsha256_final(&state, mac);
 
-    // Convert to hex
-    std::ostringstream hex_stream;
-    for (auto b : mac)
-        hex_stream << std::hex << std::setw(2) << std::setfill('0')
-                   << static_cast<int>(b);
-    auto computed = hex_stream.str();
+    // Convert to hex using libsodium (safe, no format specifier issues)
+    char hex_buf[crypto_auth_hmacsha256_BYTES * 2 + 1];
+    sodium_bin2hex(hex_buf, sizeof(hex_buf), mac, crypto_auth_hmacsha256_BYTES);
+    std::string computed(hex_buf);
 
     // Constant-time compare
     if (signature.size() != computed.size())
@@ -49,7 +45,7 @@ auto verify_bearer_token(const std::string& token,
                          const std::string& expected)
     -> std::expected<bool, AuthError> {
     if (expected.empty())
-        return true;  // No auth configured
+        return std::unexpected(AuthError{500, "No auth token configured"});
     if (token.empty())
         return std::unexpected(AuthError{401, "Missing bearer token"});
 

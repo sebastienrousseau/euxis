@@ -1,10 +1,28 @@
 #include "euxis/gateway/server.hpp"
+#include "euxis/gateway/auth.hpp"
 #include "euxis/gateway/routes.hpp"
 
 #include <spdlog/spdlog.h>
 #include <sodium.h>
 
 namespace euxis::gateway {
+
+bool authorize_request(const httplib::Request& req, httplib::Response& res,
+                       const RouteContext& ctx) {
+    if (req.body.size() > kMaxRequestBodySize) {
+        res.status = 413;
+        res.set_content(R"({"error":"request body too large"})", "application/json");
+        return false;
+    }
+    auto token = extract_bearer(req);
+    auto result = verify_bearer_token(token, ctx.auth_token);
+    if (!result.has_value()) {
+        res.status = result.error().status_code;
+        res.set_content(R"({"error":")" + result.error().message + R"("})", "application/json");
+        return false;
+    }
+    return true;
+}
 
 GatewayServer::GatewayServer(GatewayConfig config)
     : config_(std::move(config)),
@@ -32,11 +50,18 @@ void GatewayServer::stop() {
 }
 
 void GatewayServer::register_routes() {
+    // Extract auth token from config
+    RouteContext ctx;
+    if (config_.raw.contains("gateway") && config_.raw["gateway"].contains("auth") &&
+        config_.raw["gateway"]["auth"].contains("token")) {
+        ctx.auth_token = config_.raw["gateway"]["auth"]["token"].value("value", "");
+    }
+
     register_health_routes(server_);
-    register_session_routes(server_);
-    register_webhook_routes(server_);
-    register_admin_routes(server_);
-    register_mcp_routes(server_);
+    register_session_routes(server_, ctx);
+    register_webhook_routes(server_, ctx);
+    register_admin_routes(server_, ctx);
+    register_mcp_routes(server_, ctx);
 }
 
 void GatewayServer::setup_ws_handlers() {

@@ -5,9 +5,10 @@
 
 namespace euxis::gateway {
 
-void register_session_routes(httplib::Server& server) {
+void register_session_routes(httplib::Server& server, const RouteContext& ctx) {
     server.Get(R"(/api/sessions/(\w+))",
-               [](const httplib::Request& req, httplib::Response& res) {
+               [ctx](const httplib::Request& req, httplib::Response& res) {
+                   if (!authorize_request(req, res, ctx)) return;
                    auto session_id = req.matches[1].str();
                    auto history = load_session_from_disk(session_id);
                    nlohmann::json body = {
@@ -18,7 +19,8 @@ void register_session_routes(httplib::Server& server) {
                });
 
     server.Post("/api/sessions",
-                [](const httplib::Request& req, httplib::Response& res) {
+                [ctx](const httplib::Request& req, httplib::Response& res) {
+                    if (!authorize_request(req, res, ctx)) return;
                     try {
                         auto j = nlohmann::json::parse(req.body);
                         auto session_id = j.value("session_id", "");

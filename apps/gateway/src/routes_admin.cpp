@@ -5,9 +5,10 @@
 
 namespace euxis::gateway {
 
-void register_admin_routes(httplib::Server& server) {
+void register_admin_routes(httplib::Server& server, const RouteContext& ctx) {
     server.Get("/api/admin/config",
-               [](const httplib::Request&, httplib::Response& res) {
+               [ctx](const httplib::Request& req, httplib::Response& res) {
+                   if (!authorize_request(req, res, ctx)) return;
                    nlohmann::json body = {
                        {"version", "0.0.3"},
                        {"runtime", "cpp"},

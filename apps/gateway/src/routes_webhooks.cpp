@@ -5,9 +5,10 @@
 
 namespace euxis::gateway {
 
-void register_webhook_routes(httplib::Server& server) {
+void register_webhook_routes(httplib::Server& server, const RouteContext& ctx) {
     server.Post("/api/webhooks/inbound",
-                [](const httplib::Request& req, httplib::Response& res) {
+                [ctx](const httplib::Request& req, httplib::Response& res) {
+                    if (!authorize_request(req, res, ctx)) return;
                     try {
                         auto j = nlohmann::json::parse(req.body);
                         audit_log({{"event", "webhook.inbound"},

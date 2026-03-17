@@ -1,4 +1,4 @@
-.PHONY: all test lint format clean install dev build bench coverage
+.PHONY: all test lint format clean install dev build bench coverage check cpp-configure cpp-build cpp-test cpp-clean cpp-format cpp-coverage
 
 # Conservative default for laptop thermals/memory; override per run as needed.
 CPP_BUILD_JOBS ?= 4
@@ -12,6 +12,9 @@ build: cpp-build
 clean: cpp-clean
 
 format: cpp-format
+
+check: cpp-test
+	@echo "All checks passed."
 
 cpp-configure:
 	cmake -B build/cmake-build -S . \

@@ -103,10 +103,14 @@ namespace {
         buf.insert(buf.end(), s.begin(), s.end());
     }
 
-    std::string read_string(const uint8_t*& p) {
+    std::string read_string(const uint8_t*& p, const uint8_t* end) {
+        if (end - p < 4)
+            throw std::runtime_error("msgpack: truncated string length");
         uint32_t len;
         std::memcpy(&len, p, 4);
         p += 4;
+        if (len > static_cast<uint32_t>(end - p))
+            throw std::runtime_error("msgpack: string length exceeds buffer");
         std::string s(reinterpret_cast<const char*>(p), len);
         p += len;
         return s;
@@ -136,19 +140,25 @@ auto AgentCard::to_msgpack() const -> std::vector<uint8_t> {
 auto AgentCard::from_msgpack(const std::vector<uint8_t>& data) -> AgentCard {
     AgentCard card;
     const uint8_t* p = data.data();
-    card.name = read_string(p);
-    card.description = read_string(p);
-    card.url = read_string(p);
-    card.version = read_string(p);
-    
+    const uint8_t* end = data.data() + data.size();
+    card.name = read_string(p, end);
+    card.description = read_string(p, end);
+    card.url = read_string(p, end);
+    card.version = read_string(p, end);
+
+    if (end - p < 4)
+        throw std::runtime_error("msgpack: truncated capability count");
     uint32_t num_caps;
     std::memcpy(&num_caps, p, 4);
     p += 4;
-    
+
+    if (num_caps > 10000)
+        throw std::runtime_error("msgpack: unreasonable capability count");
+
     for (uint32_t i = 0; i < num_caps; ++i) {
         Capability cap;
-        cap.name = read_string(p);
-        cap.description = read_string(p);
+        cap.name = read_string(p, end);
+        cap.description = read_string(p, end);
         card.capabilities.push_back(std::move(cap));
     }
     return card;

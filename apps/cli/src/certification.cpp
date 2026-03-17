@@ -649,7 +649,7 @@ auto collect_evidence(const fs::path& target,
     }
 
     // User Protection
-    if (check_file(target, "src/pii_filter.cpp") || check_file(target, "cmd/cli/src/pii_filter.cpp"))
+    if (check_file(target, "src/pii_filter.cpp") || check_file(target, "apps/cli/src/pii_filter.cpp"))
         ev.push_back({next_id(), "User Protection & Safety", "file", "pass", false, "PII filter present"});
 
     // Training

@@ -64,9 +64,10 @@ TEST_F(AuthTest, InvalidBearerToken) {
 }
 
 TEST_F(AuthTest, NoAuthConfigured) {
+    // With no auth token configured, fail-closed: reject with 500
     auto result = verify_bearer_token("anything", "");
-    ASSERT_TRUE(result.has_value());
-    EXPECT_TRUE(*result);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error().status_code, 500);
 }
 
 // --- Coverage: line 43 (HMAC signature wrong length) ---

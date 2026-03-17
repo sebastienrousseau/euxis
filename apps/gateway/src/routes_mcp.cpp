@@ -5,8 +5,9 @@
 
 namespace euxis::gateway {
 
-void register_mcp_routes(httplib::Server& server) {
-    server.Post("/mcp", [](const httplib::Request& req, httplib::Response& res) {
+void register_mcp_routes(httplib::Server& server, const RouteContext& ctx) {
+    server.Post("/mcp", [ctx](const httplib::Request& req, httplib::Response& res) {
+        if (!authorize_request(req, res, ctx)) return;
         static McpHost host;
         try {
             auto request = nlohmann::json::parse(req.body);

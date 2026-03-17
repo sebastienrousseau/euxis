@@ -16,6 +16,17 @@
 
 namespace euxis::cli {
 
+namespace {
+    /// Validate that a path component has no traversal sequences.
+    bool is_safe_path_component(const std::string& s) {
+        if (s.empty()) return false;
+        if (s == "." || s == "..") return false;
+        if (s.find('/') != std::string::npos || s.find('\\') != std::string::npos) return false;
+        if (s.find('\0') != std::string::npos) return false;
+        return true;
+    }
+}
+
 Session::Session(const std::string& euxis_home) : euxis_home_(euxis_home) {}
 
 auto Session::project_name() const -> std::string {
@@ -43,20 +54,27 @@ auto Session::euxis_home() const -> std::string {
 
 auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::string {
     auto project = project_name();
+    if (!is_safe_path_component(project) || !is_safe_path_component(agent_id)) {
+        throw std::runtime_error("invalid project name or agent id");
+    }
+
     auto base = std::filesystem::path(euxis_home_) / "data" / "projects" / project;
     auto agent_dir = base / agent_id;
     auto output_dir = agent_dir / "output";
 
     std::filesystem::create_directories(output_dir);
 
-    // Create audit.md and memory.md if they don't exist
+    // Create audit.md and memory.md atomically (open with exclusive create, fall
+    // through silently if they already exist — avoids TOCTOU race).
     auto audit_path = agent_dir / "audit.md";
-    if (!std::filesystem::exists(audit_path)) {
-        std::ofstream(audit_path) << "# Audit Log: " << agent_id << "\n";
+    std::ofstream audit(audit_path, std::ios::app);
+    if (audit.is_open() && std::filesystem::file_size(audit_path) == 0) {
+        audit << "# Audit Log: " << agent_id << "\n";
     }
     auto memory_path = agent_dir / "memory.md";
-    if (!std::filesystem::exists(memory_path)) {
-        std::ofstream(memory_path) << "# Memory: " << agent_id << "\n";
+    std::ofstream mem(memory_path, std::ios::app);
+    if (mem.is_open() && std::filesystem::file_size(memory_path) == 0) {
+        mem << "# Memory: " << agent_id << "\n";
     }
 
     return agent_dir.string();
@@ -64,6 +82,7 @@ auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::str
 
 auto Session::get_memory_context(const std::string& agent_id, int max_lines) const -> std::string {
     auto project = project_name();
+    if (!is_safe_path_component(project) || !is_safe_path_component(agent_id)) return {};
     auto memory_path = std::filesystem::path(euxis_home_) / "data" / "projects" /
                        project / agent_id / "memory.md";
 
@@ -126,6 +145,7 @@ auto Session::get_memory_context(const std::string& agent_id, int max_lines) con
 
 void Session::save_memory(const std::string& agent_id, const std::string& user_msg, const std::string& assistant_msg) const {
     auto project = project_name();
+    if (!is_safe_path_component(project) || !is_safe_path_component(agent_id)) return;
     auto agent_dir = std::filesystem::path(euxis_home_) / "data" / "projects" / project / agent_id;
     std::filesystem::create_directories(agent_dir);
     

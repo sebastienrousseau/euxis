@@ -82,6 +82,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
     config.port = 0;
     config.ws_port = 0;
     config.host = "127.0.0.1";
+    config.raw = {{"gateway", {{"auth", {{"token", {{"value", "test-token-xyz"}}}}}}}};
 
     GatewayServer srv(config);
 
@@ -98,9 +99,10 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
     // Give the server a moment to start
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    // Test health endpoint
+    // Test health endpoint (no auth needed)
     httplib::Client cli("127.0.0.1", port);
     cli.set_connection_timeout(2);
+    httplib::Headers auth_headers = {{"Authorization", "Bearer test-token-xyz"}};
 
     auto res = cli.Get("/health");
     ASSERT_TRUE(res != nullptr);
@@ -115,15 +117,21 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
     auto ready_body = nlohmann::json::parse(ready_res->body);
     EXPECT_EQ(ready_body["ready"], true);
 
-    // Test admin config endpoint
-    auto admin_res = cli.Get("/api/admin/config");
+    // Test admin config endpoint (requires auth)
+    auto admin_res = cli.Get("/api/admin/config", auth_headers);
     ASSERT_TRUE(admin_res != nullptr);
     EXPECT_EQ(admin_res->status, 200);
     auto admin_body = nlohmann::json::parse(admin_res->body);
     EXPECT_EQ(admin_body["runtime"], "cpp");
 
+    // Test admin config without auth — should be rejected
+    auto admin_noauth = cli.Get("/api/admin/config");
+    ASSERT_TRUE(admin_noauth != nullptr);
+    EXPECT_EQ(admin_noauth->status, 401);
+
     // Test webhook inbound with valid JSON
     auto webhook_res = cli.Post("/api/webhooks/inbound",
+                                 auth_headers,
                                  R"({"event":"test"})",
                                  "application/json");
     ASSERT_TRUE(webhook_res != nullptr);
@@ -131,6 +139,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test webhook inbound with invalid JSON
     auto webhook_bad = cli.Post("/api/webhooks/inbound",
+                                 auth_headers,
                                  "not json{{{",
                                  "application/json");
     ASSERT_TRUE(webhook_bad != nullptr);
@@ -138,6 +147,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test session POST with valid data
     auto session_res = cli.Post("/api/sessions",
+                                 auth_headers,
                                  R"({"session_id":"test-session","content":"hello"})",
                                  "application/json");
     ASSERT_TRUE(session_res != nullptr);
@@ -145,6 +155,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test session POST with missing fields
     auto session_bad = cli.Post("/api/sessions",
+                                 auth_headers,
                                  R"({"session_id":""})",
                                  "application/json");
     ASSERT_TRUE(session_bad != nullptr);
@@ -152,6 +163,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test session POST with invalid JSON
     auto session_invalid = cli.Post("/api/sessions",
+                                     auth_headers,
                                      "not json{{{",
                                      "application/json");
     ASSERT_TRUE(session_invalid != nullptr);
@@ -159,6 +171,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test MCP endpoint with valid JSON-RPC
     auto mcp_res = cli.Post("/mcp",
+                             auth_headers,
                              R"({"jsonrpc":"2.0","method":"initialize","id":1})",
                              "application/json");
     ASSERT_TRUE(mcp_res != nullptr);
@@ -166,6 +179,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // Test MCP endpoint with invalid JSON
     auto mcp_bad = cli.Post("/mcp",
+                             auth_headers,
                              "not json{{{",
                              "application/json");
     ASSERT_TRUE(mcp_bad != nullptr);
@@ -173,7 +187,7 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
 
     // --- Coverage: routes_sessions.cpp lines 11-17 (GET /api/sessions/:id) ---
     // Test session GET endpoint
-    auto session_get = cli.Get("/api/sessions/test-session");
+    auto session_get = cli.Get("/api/sessions/test-session", auth_headers);
     ASSERT_TRUE(session_get != nullptr);
     // Session may or may not exist (depends on server state) — just ensure
     // the endpoint responds (200 or 404)
