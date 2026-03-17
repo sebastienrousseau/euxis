@@ -126,7 +126,7 @@ void LifecycleManager::load_from_disk() {
                     .session = j.value("session", ""),
                     .timestamp = j.value("ts", ""),
                 });
-            } catch (...) {
+            } catch (const std::exception&) {
                 continue;
             }
         }

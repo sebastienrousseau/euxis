@@ -42,7 +42,7 @@ auto derive_ws_url(const std::string& gateway_url) -> std::string {
         try {
             const int port = std::stoi(port_str) + 1;
             ws_url = ws_url.substr(0, colon + 1) + std::to_string(port);
-        } catch (...) {}
+        } catch (const std::exception&) {}
     }
     return ws_url;
 }

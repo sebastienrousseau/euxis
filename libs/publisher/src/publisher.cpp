@@ -18,9 +18,9 @@ namespace {
  */
 nlohmann::json yaml_to_json(const DataNode auto& node) {
     if (node.IsScalar()) {
-        try { return node.template as<bool>(); } catch (...) {}
-        try { return node.template as<int64_t>(); } catch (...) {}
-        try { return node.template as<double>(); } catch (...) {}
+        try { return node.template as<bool>(); } catch (const std::exception&) {}
+        try { return node.template as<int64_t>(); } catch (const std::exception&) {}
+        try { return node.template as<double>(); } catch (const std::exception&) {}
         return node.template as<std::string>();
     }
     if (node.IsSequence()) {

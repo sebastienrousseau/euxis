@@ -137,7 +137,8 @@ bool install_completions(const std::string& euxis_home, const std::string& shell
     if (shell == "fish") {
         auto fish_comp = comp_src / "euxis.fish";
         const char* home = std::getenv("HOME");
-        auto fish_dest = fs::path(home ? home : "/tmp") / ".config" / "fish" / "completions" / "euxis.fish";
+        if (!home) return false;
+        auto fish_dest = fs::path(home) / ".config" / "fish" / "completions" / "euxis.fish";
 
         if (!fs::exists(fish_comp)) return false;
         bool dest_exists = fs::is_symlink(fish_dest) || fs::exists(fish_dest);
@@ -184,7 +185,8 @@ bool install_completions(const std::string& euxis_home, const std::string& shell
         auto zsh_comp = comp_src / "euxis.zsh";
         if (!fs::exists(zsh_comp)) return false;
         const char* home = std::getenv("HOME");
-        auto zsh_dest = fs::path(home ? home : "/tmp") / ".zsh" / "completions" / "_euxis";
+        if (!home) return false;
+        auto zsh_dest = fs::path(home) / ".zsh" / "completions" / "_euxis";
         bool dest_exists = fs::is_symlink(zsh_dest) || fs::exists(zsh_dest);
         if (dest_exists && !force) {
             std::cout << "  " << term::icon_ok() << " " << tr("Zsh completions") << " " << term::dim(tr("(installed)")) << "\n";
@@ -436,7 +438,7 @@ int cmd_update(Context& ctx, const std::vector<std::string>& args) {
                 agent_count = static_cast<int>(j["agents"].size());
             }
             std::cout << "  " << term::icon_ok() << " " << tr("Registry:") << " " << agent_count << " " << tr("agents") << "\n";
-        } catch (...) {
+        } catch (const std::exception&) {
             std::cout << "  " << term::icon_fail() << " " << tr("Registry JSON is invalid") << "\n";
         }
 
@@ -794,7 +796,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                 if (j.contains("agents") && j["agents"].is_array()) {
                     agents = static_cast<int>(j["agents"].size());
                 }
-            } catch (...) {}
+            } catch (const std::exception&) {}
         }
 
         auto mode = detect_install_mode(ctx.euxis_home);
@@ -878,7 +880,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto rj = nlohmann::json::parse(f);
                     if (rj.contains("version"))
                         j["registry_version"] = rj["version"].get<std::string>();
-                } catch (...) {}
+                } catch (const std::exception&) {}
             }
             std::cout << j.dump(2) << "\n";
         } else {
@@ -890,7 +892,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto j = nlohmann::json::parse(f);
                     if (j.contains("version"))
                         std::cout << tr("Registry:") << " " << j["version"].get<std::string>() << "\n";
-                } catch (...) {}
+                } catch (const std::exception&) {}
             }
             std::cout << tr("Protocol:") << " 1.0\n";
         }

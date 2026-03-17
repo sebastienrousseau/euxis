@@ -14,7 +14,7 @@ void register_webhook_routes(httplib::Server& server) {
                                    {"payload", j},
                                    {"timestamp", timestamp()}});
                         res.set_content(R"({"ok":true})", "application/json");
-                    } catch (...) {
+                    } catch (const std::exception&) {
                         res.status = 400;
                         res.set_content(R"({"error":"invalid json"})",
                                         "application/json");

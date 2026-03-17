@@ -102,7 +102,7 @@ void FastMetricsCollector::background_flush_loop(std::stop_token stop) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         try {
             flush();
-        } catch (...) {
+        } catch (const std::exception&) {
             // Don't let flush errors break the loop
         }
     }

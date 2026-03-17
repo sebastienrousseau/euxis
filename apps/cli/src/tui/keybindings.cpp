@@ -99,7 +99,7 @@ bool KeybindingEngine::load(const std::filesystem::path& config_path) {
             }
         }
         return true;
-    } catch (...) {
+    } catch (const std::exception&) {
         return false;
     }
 }
@@ -233,7 +233,7 @@ std::optional<int> KeybindingEngine::parse_key_name(const std::string& name) {
         try {
             int n = std::stoi(name.substr(1));
             if (n >= 5 && n <= 12) return KeyCode::F5 + (n - 5);
-        } catch (...) {}
+        } catch (const std::exception&) {}
     }
 
     // Single character

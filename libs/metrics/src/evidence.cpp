@@ -124,7 +124,7 @@ auto EvidenceFramework::load_evidence(const std::string& evidence_hash)
             if (j.value("hash", "") == evidence_hash) {
                 return Evidence::from_json(j);
             }
-        } catch (...) {
+        } catch (const std::exception&) {
             continue;
         }
     }
@@ -140,7 +140,7 @@ auto EvidenceFramework::load_all_evidence() -> std::vector<Evidence> {
         if (line.empty()) continue;
         try {
             result.push_back(Evidence::from_json(nlohmann::json::parse(line)));
-        } catch (...) {
+        } catch (const std::exception&) {
             continue;
         }
     }

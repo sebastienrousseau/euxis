@@ -93,7 +93,7 @@ auto PerformanceAnalyzer::load_events(int hours_back)
         if (line.empty()) continue;
         try {
             events.push_back(nlohmann::json::parse(line));
-        } catch (...) {
+        } catch (const std::exception&) {
             continue;
         }
     }
@@ -112,7 +112,7 @@ auto PerformanceAnalyzer::load_sessions(int hours_back)
         if (line.empty()) continue;
         try {
             sessions.push_back(nlohmann::json::parse(line));
-        } catch (...) {
+        } catch (const std::exception&) {
             continue;
         }
     }

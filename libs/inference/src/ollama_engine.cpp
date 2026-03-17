@@ -134,7 +134,7 @@ auto OllamaEngine::supports_model(std::string_view name) -> bool {
                 return true;
             }
         }
-    } catch (...) {
+    } catch (const std::exception&) {
         return false;
     }
     return false;
@@ -171,7 +171,7 @@ auto OllamaEngine::health() -> nlohmann::json {
         auto tags = nlohmann::json::parse(res->body);
         status["status"]  = "ok";
         status["models"]  = tags.value("models", nlohmann::json::array());
-    } catch (...) {
+    } catch (const std::exception&) {
         status["status"] = "parse_error";
     }
 

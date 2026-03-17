@@ -15,7 +15,7 @@ WebSocketClient::WebSocketClient(const std::string& url) : url_(url) {
                 std::lock_guard<std::mutex> lock(mutex_);
                 last_response_ = nlohmann::json::parse(msg->str);
                 cv_.notify_all();
-            } catch (...) {}
+            } catch (const std::exception&) {}
         } else if (msg->type == ix::WebSocketMessageType::Error) {
             spdlog::error("WebSocket error from {}: {}", url_, msg->errorInfo.reason);
         } else if (msg->type == ix::WebSocketMessageType::Close) {

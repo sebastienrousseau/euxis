@@ -31,7 +31,7 @@ struct LlamaEngine::Impl {
                 if (parsed > 0 && parsed <= 65535) {
                     port = static_cast<uint16_t>(parsed);
                 }
-            } catch (...) {
+            } catch (const std::exception&) {
                 spdlog::warn("LlamaEngine: invalid LLAMA_SERVER_PORT '{}', "
                              "using default {}", env_port, port);
             }
@@ -213,7 +213,7 @@ auto LlamaEngine::supports_model(std::string_view name) -> bool {
             }
             // Model not found in server's list
             return false;
-        } catch (...) {
+        } catch (const std::exception&) {
             // Parse error — fall through to config match
         }
     }
@@ -259,7 +259,7 @@ auto LlamaEngine::health() -> nlohmann::json {
     try {
         auto body = nlohmann::json::parse(res->body);
         status["server_status"] = body.value("status", "unknown");
-    } catch (...) {
+    } catch (const std::exception&) {
         // Non-JSON health response is fine — server is up
     }
 

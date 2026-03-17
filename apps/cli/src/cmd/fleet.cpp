@@ -153,7 +153,7 @@ auto load_policy(const std::string& data_dir, const std::string& explicit_path) 
         if (!fs::exists(explicit_path)) return std::nullopt;
         std::ifstream f(explicit_path);
         try { j = nlohmann::json::parse(f); }
-        catch (...) { return std::nullopt; }
+        catch (const std::exception&) { return std::nullopt; }
     } else {
         ConfigLoader loader(data_dir);
         auto loaded = loader.load("config/policy.json");
@@ -407,7 +407,7 @@ auto load_verdict_history(const std::string& euxis_home, int max_entries = 50) -
                 j.value("escalated", false),
                 j.value("budget_exceeded", false)
             });
-        } catch (...) { continue; }
+        } catch (const std::exception&) { continue; }
     }
     // Keep only the most recent entries
     if ((int)history.size() > max_entries) {
@@ -630,7 +630,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
                         }
                     }
                 }
-            } catch (...) {}
+            } catch (const std::exception&) {}
             if (found_test_binary) tests_detected = true;
         }
     }
@@ -683,7 +683,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
             }
             if (test_file_count >= 200) break; // Bounded
         }
-    } catch (...) {}
+    } catch (const std::exception&) {}
 
     results.push_back({"test-file-count", test_file_count > 0 ? "detected" : "missing",
                         std::to_string(test_file_count) + " test files found", 0.0, 1,
@@ -719,7 +719,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                 while (std::getline(gi, line)) {
                     if (line.find(".env") != std::string::npos) { env_in_gitignore = true; break; }
                 }
-            } catch (...) {}
+            } catch (const std::exception&) {}
         }
 
         if (has_env_file && !env_in_gitignore) {
@@ -786,7 +786,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                     std::string content((std::istreambuf_iterator<char>(f)),
                                          std::istreambuf_iterator<char>());
                     if (content.find("FetchContent") != std::string::npos) has_fetch = true;
-                } catch (...) {}
+                } catch (const std::exception&) {}
             }
             std::string detail;
             if (has_vcpkg) detail = "vcpkg.json present — use 'vcpkg x-ci-verify-versions' for audit";
@@ -853,7 +853,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
             results.push_back({"build-flags", has_unsafe ? "failing" : "passing",
                                 has_unsafe ? issue : "No unsafe build flags detected",
                                 0.0, 1, 1});
-        } catch (...) {}
+        } catch (const std::exception&) {}
     }
 
     return results;
@@ -1017,7 +1017,7 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
         std::ifstream f(manifest_path);
         nlohmann::json manifest;
         try { manifest = nlohmann::json::parse(f); }
-        catch (...) { std::cerr << tr("Invalid JSON:") << " " << manifest_path << "\n"; return 1; }
+        catch (const std::exception&) { std::cerr << tr("Invalid JSON:") << " " << manifest_path << "\n"; return 1; }
         std::string agent_id = manifest.value("agent_id", manifest.value("id", ""));
         if (agent_id.empty()) { std::cerr << tr("Missing agent_id in manifest") << "\n"; return 1; }
         registry.register_plugin(agent_id, manifest);
@@ -1380,7 +1380,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::ifstream f(manifest_path);
     nlohmann::json manifest;
     try { manifest = nlohmann::json::parse(f); }
-    catch (...) { std::cerr << "Invalid Manifest\n"; return 1; }
+    catch (const std::exception&) { std::cerr << "Invalid Manifest\n"; return 1; }
 
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
@@ -2872,7 +2872,7 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     std::ifstream f(path);
     nlohmann::json manifest;
     try { manifest = nlohmann::json::parse(f); }
-    catch (...) { std::cerr << tr("Invalid JSON:") << " " << path << "\n"; return 1; }
+    catch (const std::exception&) { std::cerr << tr("Invalid JSON:") << " " << path << "\n"; return 1; }
     if (!manifest.contains("agents") || !manifest["agents"].is_array()) {
         std::cerr << tr("Manifest must contain an 'agents' array") << "\n";
         return 1;

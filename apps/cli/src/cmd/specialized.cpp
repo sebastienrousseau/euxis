@@ -1063,7 +1063,7 @@ int cmd_replay(Context& ctx, const std::vector<std::string>& args) {
             std::string ts = j.value("timestamp", "?");
             std::string event = j.value("event", j.value("type", "?"));
             std::cout << "  [" << ts << "] " << event << "\n";
-        } catch (...) {
+        } catch (const std::exception&) {
             std::cout << "  " << line << "\n";
         }
     }

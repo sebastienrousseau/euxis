@@ -40,7 +40,7 @@ void register_session_routes(httplib::Server& server) {
                                    {"session_id", session_id},
                                    {"timestamp", timestamp()}});
                         res.set_content(entry.dump(), "application/json");
-                    } catch (...) {
+                    } catch (const std::exception&) {
                         res.status = 400;
                         res.set_content(R"({"error":"invalid json"})",
                                         "application/json");

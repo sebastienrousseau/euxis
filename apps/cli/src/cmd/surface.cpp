@@ -330,7 +330,7 @@ int cmd_policy(Context& ctx, const std::vector<std::string>& args) {
         std::ifstream af(artifact_path);
         nlohmann::json artifact;
         try { artifact = nlohmann::json::parse(af); }
-        catch (...) {
+        catch (const std::exception&) {
             std::cerr << tr("Failed to parse verdict artifact.") << "\n";
             return 1;
         }

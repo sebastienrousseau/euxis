@@ -44,7 +44,7 @@ auto load_cortex_entries(const fs::path& path) -> nlohmann::json {
         if (j.is_object()) {
             return j;
         }
-    } catch (...) {
+    } catch (const std::exception&) {
         // Corrupt file; start fresh
     }
     return nlohmann::json::object();

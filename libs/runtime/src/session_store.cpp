@@ -161,7 +161,7 @@ public:
                         munmap(mapped, sb.st_size);
                         close(fd);
                         return snap;
-                    } catch (...) {
+                    } catch (const std::exception&) {
                         munmap(mapped, sb.st_size);
                         close(fd);
                         return std::unexpected("MessagePack decoding failed");
@@ -177,7 +177,7 @@ public:
         std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
         try {
             return snapshot_from_json(nlohmann::json::from_msgpack(buffer), session_id, branch);
-        } catch (...) {
+        } catch (const std::exception&) {
             return std::unexpected("MessagePack decoding failed");
         }
     }

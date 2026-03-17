@@ -106,7 +106,7 @@ auto TelegramAdapter::resolve_chat_id(const std::string& session_id)
 
     auto raw = session_id;
     if (raw.starts_with("telegram_")) raw = raw.substr(9);
-    try { return std::stoll(raw); } catch (...) { return std::nullopt; }
+    try { return std::stoll(raw); } catch (const std::exception&) { return std::nullopt; }
 }
 
 auto TelegramAdapter::api_call(const std::string& method,
@@ -116,7 +116,7 @@ auto TelegramAdapter::api_call(const std::string& method,
     auto path = "/bot" + config_.token + "/" + method;
     auto res = cli.Post(path, data.dump(), "application/json");
     if (res && !res->body.empty()) {
-        try { return nlohmann::json::parse(res->body); } catch (...) {}
+        try { return nlohmann::json::parse(res->body); } catch (const std::exception&) {}
     }
     return {};
 }

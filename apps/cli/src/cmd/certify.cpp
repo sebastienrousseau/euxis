@@ -309,7 +309,7 @@ int cmd_certify_readiness(Context& ctx, const std::vector<std::string>& args) {
             opts.run_security = false;
         } else if (args[i] == "--commit-window" && i + 1 < args.size()) {
             try { opts.commit_window = std::stoi(args[++i]); }
-            catch (...) { std::cerr << tr("Invalid commit window") << "\n"; return 2; }
+            catch (const std::exception&) { std::cerr << tr("Invalid commit window") << "\n"; return 2; }
         } else if (args[i] == "--since-ref" && i + 1 < args.size()) {
             opts.since_ref = args[++i];
         } else if (args[i] == "--output" && i + 1 < args.size()) {

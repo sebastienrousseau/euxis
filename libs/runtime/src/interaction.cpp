@@ -165,7 +165,7 @@ auto InteractionOrchestrator::run_with_evaluator(
                     result.output = work_result.output;
                     return result;
                 }
-            } catch (...) {
+            } catch (const std::exception&) {
                 // If not a simple number, assume success if the evaluator didn't error
                 result.success = true;
                 result.output = work_result.output;

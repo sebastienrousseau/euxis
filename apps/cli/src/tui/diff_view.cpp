@@ -35,7 +35,7 @@ Diff parse_unified_diff(std::string_view diff_text) {
                 try {
                     old_line = std::stoi(line.substr(minus + 1));
                     new_line = std::stoi(line.substr(plus + 1));
-                } catch (...) {}
+                } catch (const std::exception&) {}
             }
         } else if (line.starts_with("+")) {
             diff.lines.push_back({DiffLine::Type::Addition, line.substr(1), -1, new_line++});

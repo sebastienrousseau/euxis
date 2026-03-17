@@ -27,7 +27,7 @@ void ContextSidebar::refresh_system_context() {
     if (status_res.exit_code == 0) {
         try {
             modified_count_ = std::stoi(status_res.stdout_output);
-        } catch (...) {
+        } catch (const std::exception&) {
             modified_count_ = 0;
         }
     }

@@ -70,7 +70,7 @@ auto run_with_resilience(F&& operation,
             auto result = operation();
             breaker.record_success();
             return result;
-        } catch (...) {
+        } catch (const std::exception&) {
             last_exception = std::current_exception();
             breaker.record_failure();
             
