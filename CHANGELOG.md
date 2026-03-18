@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI Surface Layer**: Verb-first Core command group (`check`, `triage`, `review`, `compare`, `stats`, `policy`) as the primary user-facing interface
 - **Certification Readiness** (`certify-readiness`): 18-domain certification assessment with framework overlays (general, SOC2, ISO 27001), 5 hard gates, quality risk analysis, and structured JSON artifacts
 - **Provider Strategy Routing**: Semantic task classification with 11 task classes routing to optimal providers (OpenAI for research, Claude for coding, Gemini for security, Ollama for local). Configuration via `data/config/provider_strategy.json`
+- **Forensic Mode Routing**: `route_forensic()` with per-agent overrides — opus for critical agents (architect, strategist, investigator, sentinel, reviewer), sonnet for support agents, gemini-pro for research agents
+- **Benchmark Suite**: Deterministic `--stats` and `--compare` test fixtures with synthetic verdict history (12 entries, 5 compare tests, 7 stats tests)
 - **Command Aliases**: `quick`→triage, `deep`→review, `diag`→doctor, `metrics`→stats, `pb`→playbook, `verify-all`→check
 - **Shell Completions**: Tab completion for Bash, Zsh, and Fish (`data/config/completions/`)
 - **Help Smoke Tests**: 9 snapshot-like tests verifying help output stability for all Core commands
@@ -18,13 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Lifecycle Commands**: `install`, `update`, `upgrade`, `uninstall`, `self` for installation management
 
 ### Changed
+- **Directory Restructuring**: `cmd/`→`apps/`, `pkg/`→`libs/`, `internal/platform/`→`libs/platform/`, `build/cmake/`→`cmake/`
+- **Agent Tier Promotions**: sentinel, strategist, and investigator promoted from fleet to core tier for Reason-class model routing
+- **Version**: Bumped to v0.0.10 across CMakeLists.txt, engine, lifecycle, and TUI
 - **Help Output**: "Core" group now appears first in `euxis --help`, before System/Fleet/Knowledge groups
 - **README**: Rewritten with accurate C++23 build instructions, provider strategy overview, and complete Core commands table
 - **CONTRIBUTING.md**: Updated for C++23 workflow (CMake/GCC prerequisites, `make cpp-test`, AGPL-3.0 license, commit signing required)
-- **Documentation**: User guide, quick start, and CLI reference updated to use Core commands as primary examples
-- **Test Suite**: 1063 tests (up from 961), all passing
+- **Documentation**: User guide, quick start, and CLI reference updated to use Core commands as primary examples; all stale `cmd/`/`pkg/` path references updated
+- **Test Suite**: 1092 tests (up from 961), all passing
 
 ### Fixed
+- **Security Hardening**: Auth profile store bounds checks, path traversal guards, command injection prevention, bare `catch(...)` elimination
+- **Circular Dependency**: Broke crypto↔identity circular include
+- **Dependency Vulnerabilities**: Patched flatted (CVE-2026-32141), PyJWT (CVE-2026-32597), removed `/tmp` fallback paths
+- **Custodian Task Class**: Fixed routing hint from "security" to "coding" (observability agent)
 - **PolicyViolationBadVerdict Test**: Fixed false pass caused by mock execution producing TRUSTED verdict that satisfied the `min_verdict` gate
 
 ---
@@ -354,7 +363,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.9...HEAD
 [0.0.9]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.9
-[v0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.3
+[v0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.2...v0.0.3
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5

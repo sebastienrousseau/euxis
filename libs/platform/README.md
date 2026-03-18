@@ -4,7 +4,7 @@ The `euxis::platform` module is the strict Platform Abstraction Layer (PAL) for 
 
 ## Architectural Boundaries
 
-This module is strictly internal. Applications (`cmd/`) and public libraries (`pkg/`) must never instantiate platform types directly. 
+This module is strictly internal. Applications (`apps/`) and public libraries (`libs/`) must never instantiate platform types directly. 
 
 * **Precondition**: Host OS meets minimal kernel requirements (e.g., Linux 5.15+ with eBPF).
 * **Postcondition**: Exposes a unified `euxis::runtime::Platform` interface.

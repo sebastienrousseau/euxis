@@ -427,5 +427,290 @@ TEST(CertificationTest, RunResultToJsonHasRequiredFields) {
     EXPECT_TRUE(j.contains("evidence_summary"));
 }
 
+// =====================================================================
+//  Edge cases: framework overlap, strict precedence, artifact schema
+// =====================================================================
+
+TEST(CertificationTest, SOC2AndISOShareSomeCriticalDomains) {
+    // Both SOC2 and ISO27001 share SDLC, AppSec, SQA, Docs, Governance, SupplyChain as critical
+    auto soc2 = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::SOC2, soc2);
+
+    auto iso = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::ISO27001, iso);
+
+    // Shared critical: verify both mark these as critical
+    std::vector<std::string> shared_critical = {
+        "Secure Software Development Lifecycle",
+        "Application Security",
+        "Software Quality Assurance",
+        "Documentation & Audit Evidence",
+        "Governance & Organizational Controls",
+        "Supply Chain & Third-Party Security"
+    };
+
+    for (const auto& name : shared_critical) {
+        bool soc2_crit = false, iso_crit = false;
+        for (const auto& d : soc2) {
+            if (d.name == name) soc2_crit = d.critical;
+        }
+        for (const auto& d : iso) {
+            if (d.name == name) iso_crit = d.critical;
+        }
+        EXPECT_TRUE(soc2_crit) << name << " should be critical in SOC2";
+        EXPECT_TRUE(iso_crit) << name << " should be critical in ISO27001";
+    }
+}
+
+TEST(CertificationTest, SOC2UniqueCriticalDomains) {
+    // SOC2 has IAM, Logging, Change Management as critical — ISO does not
+    auto soc2 = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::SOC2, soc2);
+
+    auto iso = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::ISO27001, iso);
+
+    std::vector<std::string> soc2_only = {
+        "Identity & Access Management",
+        "Logging, Monitoring & Detection",
+        "Change Management"
+    };
+
+    for (const auto& name : soc2_only) {
+        bool soc2_crit = false, iso_crit = false;
+        for (const auto& d : soc2) {
+            if (d.name == name) soc2_crit = d.critical;
+        }
+        for (const auto& d : iso) {
+            if (d.name == name) iso_crit = d.critical;
+        }
+        EXPECT_TRUE(soc2_crit) << name << " should be critical in SOC2";
+        EXPECT_FALSE(iso_crit) << name << " should NOT be critical in ISO27001";
+    }
+}
+
+TEST(CertificationTest, ISO27001UniqueCriticalDomains) {
+    // ISO27001 has Vulnerability Mgmt, Incident Response, BC/DR as critical — SOC2 does not
+    auto soc2 = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::SOC2, soc2);
+
+    auto iso = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::ISO27001, iso);
+
+    std::vector<std::string> iso_only = {
+        "Vulnerability & Patch Management",
+        "Incident Response",
+        "Business Continuity & Disaster Recovery"
+    };
+
+    for (const auto& name : iso_only) {
+        bool soc2_crit = false, iso_crit = false;
+        for (const auto& d : soc2) {
+            if (d.name == name) soc2_crit = d.critical;
+        }
+        for (const auto& d : iso) {
+            if (d.name == name) iso_crit = d.critical;
+        }
+        EXPECT_FALSE(soc2_crit) << name << " should NOT be critical in SOC2";
+        EXPECT_TRUE(iso_crit) << name << " should be critical in ISO27001";
+    }
+}
+
+TEST(CertificationTest, GeneralCriticalCountIs4) {
+    auto domains = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::General, domains);
+    int count = 0;
+    for (const auto& d : domains) {
+        if (d.critical) ++count;
+    }
+    EXPECT_EQ(count, 4);
+}
+
+TEST(CertificationTest, SOC2CriticalCountIs9) {
+    auto domains = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::SOC2, domains);
+    int count = 0;
+    for (const auto& d : domains) {
+        if (d.critical) ++count;
+    }
+    EXPECT_EQ(count, 9);
+}
+
+TEST(CertificationTest, ISO27001CriticalCountIs9) {
+    auto domains = certification::default_domains();
+    certification::apply_framework_overlay(certification::Framework::ISO27001, domains);
+    int count = 0;
+    for (const auto& d : domains) {
+        if (d.critical) ++count;
+    }
+    EXPECT_EQ(count, 9);
+}
+
+TEST_F(CertifyCmdTest, StrictModeBlocksOnDocsFail) {
+    // Remove README to trigger docs gap, then run --strict → BLOCKED
+    fs::remove(repo_dir_ + "/README.md");
+    Process::shell("cd " + repo_dir_ + " && git add -A && git commit -q -m 'remove readme'", 30);
+
+    auto code = cmd_certify_readiness(ctx_, {repo_dir_, "--strict", "--no-build", "--no-tests", "--no-security"});
+    EXPECT_EQ(code, 1); // BLOCKED or INCONCLUSIVE → exit 1
+
+    auto artifact_path = fs::path(ctx_.euxis_home) / "data" / "runtime" / "sessions" / "latest_certification.json";
+    std::ifstream f(artifact_path);
+    auto artifact = nlohmann::json::parse(f);
+
+    // Docs gate must be blocking in strict mode
+    for (const auto& g : artifact["gates"]) {
+        if (g["name"] == "documentation_accuracy") {
+            EXPECT_TRUE(g.value("blocking", false)) << "Docs gate must be blocking in --strict";
+        }
+    }
+    EXPECT_EQ(artifact["status"], "BLOCKED");
+}
+
+TEST_F(CertifyCmdTest, StrictModeCommitSigningIsBlocking) {
+    // In strict mode, commit_signing gate should be set to blocking
+    (void)cmd_certify_readiness(ctx_, {repo_dir_, "--strict", "--no-build", "--no-tests", "--no-security"});
+
+    auto artifact_path = fs::path(ctx_.euxis_home) / "data" / "runtime" / "sessions" / "latest_certification.json";
+    std::ifstream f(artifact_path);
+    auto artifact = nlohmann::json::parse(f);
+
+    bool found_signing = false;
+    for (const auto& g : artifact["gates"]) {
+        if (g["name"] == "commit_signing") {
+            found_signing = true;
+            EXPECT_TRUE(g.value("blocking", false)) << "Commit signing must be blocking in --strict";
+            // Status depends on host gpg config; valid statuses are pass/fail/partial
+            auto status = g["status"].get<std::string>();
+            EXPECT_TRUE(status == "pass" || status == "fail" || status == "partial")
+                << "Unexpected commit_signing status: " << status;
+        }
+    }
+    EXPECT_TRUE(found_signing) << "commit_signing gate must be present";
+
+    // Overall status: BLOCKED because strict mode + critical domains blocked (skipped gates)
+    EXPECT_EQ(artifact["status"], "BLOCKED");
+}
+
+TEST_F(CertifyCmdTest, ArtifactSchemaFullValidation) {
+    cmd_certify_readiness(ctx_, {repo_dir_, "--no-build", "--no-tests", "--no-security"});
+
+    auto artifact_path = fs::path(ctx_.euxis_home) / "data" / "runtime" / "sessions" / "latest_certification.json";
+    std::ifstream f(artifact_path);
+    auto artifact = nlohmann::json::parse(f);
+
+    // Top-level required fields
+    EXPECT_EQ(artifact["schema"].get<std::string>(), "euxis.certification");
+    EXPECT_EQ(artifact["schema_version"].get<std::string>(), "1.0.0");
+    EXPECT_EQ(artifact["assessment_type"].get<std::string>(), "internal_readiness");
+    EXPECT_EQ(artifact["official_certification"].get<bool>(), false);
+    EXPECT_TRUE(artifact.contains("timestamp"));
+    EXPECT_TRUE(artifact.contains("disclaimer"));
+    EXPECT_TRUE(artifact.contains("target"));
+    EXPECT_TRUE(artifact.contains("framework"));
+    EXPECT_TRUE(artifact.contains("strict"));
+    EXPECT_TRUE(artifact.contains("status"));
+    EXPECT_TRUE(artifact.contains("confidence"));
+    EXPECT_TRUE(artifact.contains("exit_code"));
+    EXPECT_TRUE(artifact.contains("readiness_summary"));
+
+    // Gates structure
+    ASSERT_TRUE(artifact.contains("gates"));
+    ASSERT_TRUE(artifact["gates"].is_array());
+    for (const auto& g : artifact["gates"]) {
+        EXPECT_TRUE(g.contains("name")) << "Gate missing 'name'";
+        EXPECT_TRUE(g.contains("status")) << "Gate missing 'status'";
+        auto status = g["status"].get<std::string>();
+        EXPECT_TRUE(status == "pass" || status == "fail" || status == "partial" || status == "skipped")
+            << "Invalid gate status: " << status;
+    }
+
+    // Domains structure
+    ASSERT_TRUE(artifact.contains("domains"));
+    ASSERT_TRUE(artifact["domains"].is_array());
+    EXPECT_EQ(artifact["domains"].size(), 18u);
+    for (const auto& d : artifact["domains"]) {
+        EXPECT_TRUE(d.contains("name")) << "Domain missing 'name'";
+        EXPECT_TRUE(d.contains("status")) << "Domain missing 'status'";
+        EXPECT_TRUE(d.contains("coverage")) << "Domain missing 'coverage'";
+        EXPECT_TRUE(d.contains("critical")) << "Domain missing 'critical'";
+        auto status = d["status"].get<std::string>();
+        EXPECT_TRUE(status == "verified" || status == "gaps" || status == "blocked" || status == "inconclusive")
+            << "Invalid domain status: " << status;
+        double coverage = d["coverage"].get<double>();
+        EXPECT_GE(coverage, 0.0);
+        EXPECT_LE(coverage, 1.0);
+    }
+
+    // Status must be valid
+    auto status = artifact["status"].get<std::string>();
+    EXPECT_TRUE(status == "READY" || status == "READY WITH GAPS" ||
+                status == "BLOCKED" || status == "INCONCLUSIVE")
+        << "Invalid status: " << status;
+
+    // Confidence range
+    int confidence = artifact["confidence"].get<int>();
+    EXPECT_GE(confidence, 0);
+    EXPECT_LE(confidence, 100);
+}
+
+TEST_F(CertifyCmdTest, AllGatesSkippedReducesReadiness) {
+    // Skip all 3 optional gates → critical domains (AppSec, SQA) have no evidence → BLOCKED
+    (void)cmd_certify_readiness(ctx_, {repo_dir_, "--no-build", "--no-tests", "--no-security"});
+
+    auto artifact_path = fs::path(ctx_.euxis_home) / "data" / "runtime" / "sessions" / "latest_certification.json";
+    std::ifstream f(artifact_path);
+    auto artifact = nlohmann::json::parse(f);
+
+    // Count skipped gates
+    int skipped = 0;
+    for (const auto& g : artifact["gates"]) {
+        if (g["status"] == "skipped") ++skipped;
+    }
+    EXPECT_GE(skipped, 3) << "Should have at least 3 skipped gates";
+
+    // Readiness summary must mention skipped gates
+    auto summary = artifact.value("readiness_summary", "");
+    EXPECT_NE(summary.find("skipped"), std::string::npos);
+
+    // Status must be BLOCKED (critical domains blocked due to missing gate evidence)
+    // or INCONCLUSIVE (>2 skipped), but never READY
+    auto status = artifact["status"].get<std::string>();
+    EXPECT_TRUE(status == "BLOCKED" || status == "INCONCLUSIVE")
+        << "Expected BLOCKED or INCONCLUSIVE when all gates skipped, got: " << status;
+    EXPECT_EQ(artifact["exit_code"].get<int>(), 1);
+}
+
+TEST(CertificationTest, RunResultToJsonDomainsPreserveCritical) {
+    // Build a RunResult with mixed critical/non-critical domains
+    certification::RunResult r;
+    r.framework = certification::Framework::SOC2;
+    r.target = "/test";
+    r.strict = false;
+    r.status = "READY WITH GAPS";
+    r.confidence = 60;
+    r.readiness_summary = "test";
+    r.exit_code = 0;
+
+    certification::DomainResult critical_domain;
+    critical_domain.name = "Application Security";
+    critical_domain.status = "verified";
+    critical_domain.coverage = 1.0;
+    critical_domain.critical = true;
+
+    certification::DomainResult non_critical;
+    non_critical.name = "Training & Awareness";
+    non_critical.status = "inconclusive";
+    non_critical.coverage = 0.0;
+    non_critical.critical = false;
+
+    r.domains = {critical_domain, non_critical};
+
+    auto j = r.to_json();
+    ASSERT_EQ(j["domains"].size(), 2u);
+    EXPECT_TRUE(j["domains"][0]["critical"].get<bool>());
+    EXPECT_FALSE(j["domains"][1]["critical"].get<bool>());
+}
+
 } // namespace
 } // namespace euxis::cli::cmd
