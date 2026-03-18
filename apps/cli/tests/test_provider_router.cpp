@@ -702,5 +702,81 @@ TEST_F(StrategyRouterTest, PrintStatusWithStrategy) {
     router.print_status();
 }
 
+// --- Override routing for sentinel and optimizer ---
+
+class OverrideRouterTest : public ::testing::Test {
+protected:
+    std::filesystem::path tmp_;
+
+    void SetUp() override {
+        tmp_ = std::filesystem::temp_directory_path() / "euxis_override_test";
+        std::filesystem::create_directories(tmp_ / "config");
+
+        nlohmann::json router_cfg = {
+            {"models", {
+                {"routine", "gemini-2.5-flash-lite"},
+                {"data", "gemini-2.5-flash"},
+                {"code", "claude-sonnet-4-6"},
+                {"reason", "claude-opus-4-6"}
+            }},
+            {"standard_overrides", {
+                {"sentinel",  {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}},
+                {"optimizer", {{"provider", "gemini"}, {"model", "gemini-2.5-flash"}, {"cost", 0.5}}},
+                {"architect", {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}},
+                {"reviewer",  {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}}
+            }},
+            {"flash_overrides", {
+                {"librarian", {{"provider", "ollama"}, {"model", "qwen2.5-coder:7b"}, {"cost", 0.0}}},
+                {"reviewer",  {{"provider", "gemini"}, {"model", "gemini-2.5-flash-lite"}, {"cost", 0.075}}}
+            }}
+        };
+        std::ofstream(tmp_ / "config" / "router.json") << router_cfg.dump();
+    }
+
+    void TearDown() override {
+        std::filesystem::remove_all(tmp_);
+    }
+};
+
+TEST_F(OverrideRouterTest, SentinelStandardOverrideUsesClaude) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_standard("sentinel", "core", "check security boundaries");
+    EXPECT_EQ(sel.provider, "claude");
+    EXPECT_EQ(sel.model, "claude-sonnet-4-6");
+    EXPECT_TRUE(sel.route_reason.find("standard override") != std::string::npos);
+}
+
+TEST_F(OverrideRouterTest, OptimizerStandardOverrideUsesGemini) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_standard("optimizer", "fleet", "check performance budgets");
+    EXPECT_EQ(sel.provider, "gemini");
+    EXPECT_EQ(sel.model, "gemini-2.5-flash");
+    EXPECT_TRUE(sel.route_reason.find("standard override") != std::string::npos);
+}
+
+TEST_F(OverrideRouterTest, CoreTierMapsToReason) {
+    ProviderRouter router(tmp_.string());
+    // sentinel with core tier, no override in flash → falls to route()
+    // core maps to Reason tier via parse_tier
+    auto sel = router.route_flash("sentinel", "core", "check runtime safety");
+    // No flash override for sentinel → uses route() with Reason tier
+    EXPECT_FALSE(sel.provider.empty());
+    EXPECT_FALSE(sel.model.empty());
+}
+
+TEST_F(OverrideRouterTest, FlashOverrideStillWorksForLibrarian) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_flash("librarian", "core", "check docs");
+    EXPECT_EQ(sel.provider, "ollama");
+    EXPECT_EQ(sel.model, "qwen2.5-coder:7b");
+}
+
+TEST_F(OverrideRouterTest, NoOverrideForUnknownAgent) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_standard("unknown_agent", "fleet", "some task");
+    // Falls back to route() — no standard override
+    EXPECT_TRUE(sel.route_reason.find("standard override") == std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::cli

@@ -89,6 +89,16 @@
       "model": "claude-sonnet-4-6",
       "cost": 3.0
     },
+    "sentinel": {
+      "provider": "claude",
+      "model": "claude-sonnet-4-6",
+      "cost": 3.0
+    },
+    "optimizer": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "cost": 0.5
+    },
     "reviewer": {
       "provider": "claude",
       "model": "claude-sonnet-4-6",

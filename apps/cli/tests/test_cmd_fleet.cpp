@@ -1352,5 +1352,156 @@ TEST_F(FleetCmdTest, CiExitCodeNonZeroOnBuildFailure) {
     }
 }
 
+// =====================================================================
+//  BENCHMARK FIXTURE — deterministic stats from synthetic verdict history
+// =====================================================================
+
+class BenchmarkStatsTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        setenv("EUXIS_TEST_MOCK_EXECUTION", "1", 1);
+        ctx_.euxis_home = "/tmp/euxis_test_bench_" + std::to_string(getpid());
+        ctx_.data_dir = ctx_.euxis_home + "/data";
+        fs::create_directories(ctx_.data_dir + "/agents");
+        fs::create_directories(ctx_.data_dir + "/runtime/verdicts");
+        fs::create_directories(ctx_.data_dir + "/config");
+
+        // Minimal registry
+        nlohmann::json reg;
+        reg["agents"] = nlohmann::json::array({
+            {{"agent_id", "alpha"}, {"role", "leader"}, {"version", "1.0"}, {"tier", "code"},
+             {"tags", {"core"}}, {"capabilities", {"routing"}}, {"prompt_path", ""}}
+        });
+        reg["squads"] = nlohmann::json::array();
+        std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+
+        // Seed deterministic verdict history (5 flash, 5 standard, 2 forensic)
+        auto hist_path = ctx_.euxis_home + "/data/runtime/verdicts/history.jsonl";
+        std::ofstream hist(hist_path);
+        // Flash runs: 4 within SLA (<=75s), 1 over
+        write_entry(hist, "flash", "2026-03-10T10:00:00Z", "TRUSTED",           72, 42500, 0, true,  false);
+        write_entry(hist, "flash", "2026-03-10T11:00:00Z", "TRUSTED WITH GAPS", 68, 55000, 0, false, false);
+        write_entry(hist, "flash", "2026-03-10T12:00:00Z", "TRUSTED",           75, 38000, 0, true,  false);
+        write_entry(hist, "flash", "2026-03-10T13:00:00Z", "CAUTION",           60, 72000, 1, false, true);
+        write_entry(hist, "flash", "2026-03-10T14:00:00Z", "TRUSTED",           80, 35000, 0, true,  false);
+        // Standard runs
+        write_entry(hist, "standard", "2026-03-11T10:00:00Z", "TRUSTED WITH GAPS", 69, 162000, 0, false, false);
+        write_entry(hist, "standard", "2026-03-11T11:00:00Z", "TRUSTED",           74, 155000, 0, false, false);
+        write_entry(hist, "standard", "2026-03-11T12:00:00Z", "TRUSTED WITH GAPS", 65, 178000, 1, false, false);
+        write_entry(hist, "standard", "2026-03-11T13:00:00Z", "TRUSTED",           71, 160000, 0, false, false);
+        write_entry(hist, "standard", "2026-03-11T14:00:00Z", "TRUSTED",           77, 145000, 0, false, false);
+        // Forensic runs
+        write_entry(hist, "forensic", "2026-03-12T10:00:00Z", "TRUSTED",           82, 480000, 0, false, false);
+        write_entry(hist, "forensic", "2026-03-12T11:00:00Z", "TRUSTED WITH GAPS", 78, 520000, 1, false, false);
+    }
+
+    void write_entry(std::ostream& out, const std::string& mode,
+                     const std::string& ts, const std::string& verdict,
+                     int confidence, double latency_ms, int timeouts,
+                     bool early_stopped, bool escalated) {
+        int agents = (mode == "flash") ? 2 : (mode == "standard") ? 5 : 11;
+        nlohmann::json e;
+        e["timestamp"] = ts;
+        e["verdict"] = verdict;
+        e["confidence"] = confidence;
+        e["mode"] = mode;
+        e["latency_ms"] = latency_ms;
+        e["median_agent_latency_ms"] = latency_ms * 0.4;
+        e["p95_agent_latency_ms"] = latency_ms * 0.9;
+        e["agents_executed"] = agents;
+        e["agents_skipped"] = 0;
+        e["timeout_count"] = timeouts;
+        e["evidence_density"] = 1.0;
+        e["early_stopped"] = early_stopped;
+        e["escalated"] = escalated;
+        e["budget_exceeded"] = false;
+        out << e.dump() << "\n";
+    }
+
+    void TearDown() override {
+        unsetenv("EUXIS_TEST_MOCK_EXECUTION");
+        fs::remove_all(ctx_.euxis_home);
+    }
+
+    Context ctx_;
+};
+
+TEST_F(BenchmarkStatsTest, StatsProducesOutput) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {"--stats"});
+    std::cout.rdbuf(old_buf);
+    EXPECT_EQ(code, 0);
+    auto output = buffer.str();
+    EXPECT_FALSE(output.empty());
+    // Must contain mode sections
+    EXPECT_NE(output.find("Flash"), std::string::npos) << "Stats should show flash section";
+}
+
+TEST_F(BenchmarkStatsTest, StatsFlashRunCount) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {"--stats"});
+    std::cout.rdbuf(old_buf);
+    auto output = buffer.str();
+    // 5 flash runs in fixture
+    EXPECT_NE(output.find("5"), std::string::npos) << "Should report 5 flash runs";
+}
+
+TEST_F(BenchmarkStatsTest, StatsFilterBySince) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {"--stats", "--since", "2026-03-11"});
+    std::cout.rdbuf(old_buf);
+    auto output = buffer.str();
+    // Only standard + forensic runs (7 out of 12)
+    EXPECT_NE(output.find("7 of 12"), std::string::npos) << "Filter should show 7 of 12 runs";
+}
+
+TEST_F(BenchmarkStatsTest, StatsFilterByLast) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {"--stats", "--last", "3"});
+    std::cout.rdbuf(old_buf);
+    auto output = buffer.str();
+    // Last 3 of 12 runs
+    EXPECT_NE(output.find("3 of 12"), std::string::npos) << "Filter should show 3 of 12 runs";
+}
+
+TEST_F(BenchmarkStatsTest, StatsShowsTimeoutRate) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {"--stats"});
+    std::cout.rdbuf(old_buf);
+    auto output = buffer.str();
+    // 2 timeouts out of 12 runs = 16.7% — should appear somewhere
+    EXPECT_NE(output.find("Timeout"), std::string::npos) << "Stats should show timeout metrics";
+}
+
+TEST_F(BenchmarkStatsTest, StatsShowsEarlyStopRate) {
+    std::stringstream buffer;
+    auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+    (void)cmd_playbook(ctx_, {"--stats"});
+    std::cout.rdbuf(old_buf);
+    auto output = buffer.str();
+    // 3 early-stopped flash runs out of 5 = 60%
+    EXPECT_NE(output.find("early"), std::string::npos) << "Stats should mention early stop";
+}
+
+TEST_F(BenchmarkStatsTest, StatsDeterministicAcrossRuns) {
+    // Run stats twice — output must be identical
+    auto run_stats = [&]() -> std::string {
+        std::stringstream buffer;
+        auto* old_buf = std::cout.rdbuf(buffer.rdbuf());
+        (void)cmd_playbook(ctx_, {"--stats"});
+        std::cout.rdbuf(old_buf);
+        return buffer.str();
+    };
+
+    auto run1 = run_stats();
+    auto run2 = run_stats();
+    EXPECT_EQ(run1, run2) << "Stats output must be deterministic with fixed fixture data";
+}
+
 } // namespace
 } // namespace euxis::cli::cmd

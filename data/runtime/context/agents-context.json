@@ -503,7 +503,7 @@
         "policy",
         "threat-modeling"
       ],
-      "tier": "fleet",
+      "tier": "core",
       "version": "v0.0.3"
     },
     {
@@ -515,7 +515,7 @@
         "community",
         "strategy"
       ],
-      "tier": "fleet",
+      "tier": "core",
       "version": "v0.0.3"
     },
     {
