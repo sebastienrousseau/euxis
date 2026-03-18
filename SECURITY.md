@@ -8,11 +8,11 @@ The Euxis team takes security seriously. We appreciate your efforts to responsib
 
 We provide security updates for the following versions:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| v0.0.4   | :white_check_mark: |
-| v0.0.3   | :white_check_mark: |
-| < v0.0.3 | :x:                |
+| Version  | Supported          |
+| -------- | ------------------ |
+| v0.0.10  | :white_check_mark: |
+| v0.0.9   | :white_check_mark: |
+| < v0.0.9 | :x:                |
 
 Users are strongly encouraged to upgrade to the latest supported version to ensure they receive all security patches.
 

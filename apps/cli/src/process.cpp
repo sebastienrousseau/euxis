@@ -269,7 +269,22 @@ auto Process::run_streaming(const std::string& program,
 }
 
 auto Process::shell(const std::string& command, int timeout_seconds) -> ProcessResult { return run("/bin/sh", {"-c", command}, timeout_seconds); }
-auto Process::shell_interactive(const std::string& command) -> int { int status = std::system(command.c_str()); return WIFEXITED(status) ? WEXITSTATUS(status) : -1; }
+auto Process::shell_interactive(const std::string& command) -> int {
+    // Security: reject commands containing shell injection metacharacters.
+    // This function is intentionally limited to simple commands (e.g. package
+    // manager invocations from doctor --fix).  Backticks, $(), and pipes
+    // outside of known-safe patterns are blocked.  CWE-78 mitigation.
+    static constexpr std::string_view dangerous[] = {"$(", "`", ";", "&&", "||", "|", ">>", "<<"};
+    for (const auto& pattern : dangerous) {
+        if (command.find(pattern) != std::string::npos) {
+            return -1;  // reject
+        }
+    }
+    if (command.empty() || command.size() > 4096) return -1;
+
+    int status = std::system(command.c_str());
+    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+}
 auto Process::which(const std::string& name) -> std::optional<std::string> {
     const char* path_env = std::getenv("PATH"); if (!path_env) return std::nullopt;
     std::string path_str(path_env); size_t start = 0;

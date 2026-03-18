@@ -32,6 +32,17 @@ data/runtime/memory/cortex/db/*
 node_modules/
 _deps/
 
+# --- Secrets & Credentials ---
+.env
+.env.*
+*.key
+*.pem
+!data/docs/**/*.pem
+credentials*
+*.p12
+*.pfx
+*.keystore
+
 # --- Coverage ---
 *.gcda
 *.gcno

