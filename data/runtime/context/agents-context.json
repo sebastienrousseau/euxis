@@ -308,7 +308,7 @@
         "debugging",
         "investigation"
       ],
-      "tier": "fleet",
+      "tier": "core",
       "version": "v0.0.3"
     },
     {

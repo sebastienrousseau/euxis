@@ -778,5 +778,81 @@ TEST_F(OverrideRouterTest, NoOverrideForUnknownAgent) {
     EXPECT_TRUE(sel.route_reason.find("standard override") == std::string::npos);
 }
 
+// --- Forensic override tests ---
+
+class ForensicRouterTest : public ::testing::Test {
+protected:
+    std::filesystem::path tmp_;
+
+    void SetUp() override {
+        tmp_ = std::filesystem::temp_directory_path() / "euxis_forensic_test";
+        std::filesystem::create_directories(tmp_ / "config");
+
+        nlohmann::json router_cfg = {
+            {"models", {
+                {"routine", "gemini-2.5-flash-lite"},
+                {"data", "gemini-2.5-flash"},
+                {"code", "claude-sonnet-4-6"},
+                {"reason", "claude-opus-4-6"}
+            }},
+            {"forensic_overrides", {
+                {"architect",     {{"provider", "claude"}, {"model", "claude-opus-4-6"}, {"cost", 15.0}}},
+                {"investigator",  {{"provider", "claude"}, {"model", "claude-opus-4-6"}, {"cost", 15.0}}},
+                {"sentinel",      {{"provider", "claude"}, {"model", "claude-opus-4-6"}, {"cost", 15.0}}},
+                {"reviewer",      {{"provider", "claude"}, {"model", "claude-opus-4-6"}, {"cost", 15.0}}},
+                {"librarian",     {{"provider", "gemini"}, {"model", "gemini-2.5-pro"}, {"cost", 1.25}}},
+                {"optimizer",     {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}},
+                {"tester",        {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}}
+            }}
+        };
+        std::ofstream(tmp_ / "config" / "router.json") << router_cfg.dump();
+    }
+
+    void TearDown() override {
+        std::filesystem::remove_all(tmp_);
+    }
+};
+
+TEST_F(ForensicRouterTest, ArchitectUsesOpus) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("architect", "core", "deep architecture analysis");
+    EXPECT_EQ(sel.provider, "claude");
+    EXPECT_EQ(sel.model, "claude-opus-4-6");
+    EXPECT_TRUE(sel.route_reason.find("forensic override") != std::string::npos);
+}
+
+TEST_F(ForensicRouterTest, InvestigatorUsesOpus) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("investigator", "core", "forensic security analysis");
+    EXPECT_EQ(sel.provider, "claude");
+    EXPECT_EQ(sel.model, "claude-opus-4-6");
+}
+
+TEST_F(ForensicRouterTest, SentinelUsesOpus) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("sentinel", "core", "runtime safety deep audit");
+    EXPECT_EQ(sel.provider, "claude");
+    EXPECT_EQ(sel.model, "claude-opus-4-6");
+}
+
+TEST_F(ForensicRouterTest, LibrarianUsesGeminiPro) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("librarian", "core", "comprehensive docs review");
+    EXPECT_EQ(sel.provider, "gemini");
+    EXPECT_EQ(sel.model, "gemini-2.5-pro");
+}
+
+TEST_F(ForensicRouterTest, UnknownAgentFallsToRoute) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("unknown_agent", "fleet", "some task");
+    EXPECT_TRUE(sel.route_reason.find("forensic override") == std::string::npos);
+}
+
+TEST_F(ForensicRouterTest, ForensicTierIsReason) {
+    ProviderRouter router(tmp_.string());
+    auto sel = router.route_forensic("reviewer", "core", "final truth gate");
+    EXPECT_EQ(sel.tier, Tier::Reason);
+}
+
 } // namespace
 } // namespace euxis::cli

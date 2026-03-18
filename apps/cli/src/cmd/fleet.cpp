@@ -958,7 +958,9 @@ auto build_step_plan(const nlohmann::json& step, const std::string& mode,
         ? router.route_flash(agent_id, tier, routing_task)
         : (mode == "standard")
             ? router.route_standard(agent_id, tier, routing_task)
-            : router.route(tier, routing_task, "swarm");
+            : (mode == "forensic")
+                ? router.route_forensic(agent_id, tier, routing_task)
+                : router.route(tier, routing_task, "swarm");
 
     return {name, agent_id, step_task, pillar, depends, model};
 }

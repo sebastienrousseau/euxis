@@ -73,6 +73,11 @@ public:
                                       const std::string& agent_tier,
                                       const std::string& prompt) const -> ModelSelection;
 
+    /// Route with forensic-mode overrides (highest-capability models).
+    [[nodiscard]] auto route_forensic(const std::string& agent_id,
+                                      const std::string& agent_tier,
+                                      const std::string& prompt) const -> ModelSelection;
+
     // --- Strategy routing (new) ---
 
     /// Classify a task into a semantic class based on agent, pillar, and prompt.
@@ -139,6 +144,7 @@ private:
     };
     std::unordered_map<std::string, ModeOverride> flash_overrides_;
     std::unordered_map<std::string, ModeOverride> standard_overrides_;
+    std::unordered_map<std::string, ModeOverride> forensic_overrides_;
 
     /// Strategy routing data (loaded from provider_strategy.json).
     std::unordered_map<std::string, TaskClassRoute> strategy_defaults_;

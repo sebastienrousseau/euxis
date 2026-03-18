@@ -1503,5 +1503,175 @@ TEST_F(BenchmarkStatsTest, StatsDeterministicAcrossRuns) {
     EXPECT_EQ(run1, run2) << "Stats output must be deterministic with fixed fixture data";
 }
 
+// =====================================================================
+//  BENCHMARK COMPARE FIXTURE — A/B comparison with mock execution
+// =====================================================================
+
+class BenchmarkCompareTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        setenv("EUXIS_TEST_MOCK_EXECUTION", "1", 1);
+        ctx_.euxis_home = "/tmp/euxis_test_compare_" + std::to_string(getpid());
+        ctx_.data_dir = ctx_.euxis_home + "/data";
+        fs::create_directories(ctx_.data_dir + "/agents");
+        fs::create_directories(ctx_.data_dir + "/runtime/verdicts");
+        fs::create_directories(ctx_.data_dir + "/config");
+
+        // Minimal registry
+        nlohmann::json reg;
+        reg["agents"] = nlohmann::json::array({
+            {{"agent_id", "alpha"}, {"role", "leader"}, {"version", "1.0"}, {"tier", "code"},
+             {"tags", {"core"}}, {"capabilities", {"routing"}}, {"prompt_path", ""}}
+        });
+        reg["squads"] = nlohmann::json::array();
+        std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+
+        // Create a minimal playbook manifest
+        manifest_path_ = ctx_.euxis_home + "/test-manifest.json";
+        nlohmann::json manifest;
+        manifest["task"] = "test comparison";
+        manifest["steps"] = nlohmann::json::array({
+            {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code quality"}}
+        });
+        std::ofstream(manifest_path_) << manifest.dump();
+    }
+
+    void TearDown() override {
+        unsetenv("EUXIS_TEST_MOCK_EXECUTION");
+        fs::remove_all(ctx_.euxis_home);
+    }
+
+    // Helper: pre-seed a verdict history entry
+    void seed_entry(const std::string& mode, const std::string& verdict,
+                    int confidence, double latency_ms, int agents,
+                    int timeouts = 0) {
+        auto hist_path = ctx_.euxis_home + "/data/runtime/verdicts/history.jsonl";
+        std::ofstream f(hist_path, std::ios::app);
+        nlohmann::json e;
+        e["timestamp"] = "2026-03-15T10:00:00Z";
+        e["verdict"] = verdict;
+        e["confidence"] = confidence;
+        e["mode"] = mode;
+        e["latency_ms"] = latency_ms;
+        e["median_agent_latency_ms"] = latency_ms * 0.4;
+        e["p95_agent_latency_ms"] = latency_ms * 0.9;
+        e["agents_executed"] = agents;
+        e["agents_skipped"] = 0;
+        e["timeout_count"] = timeouts;
+        e["evidence_density"] = 1.0;
+        e["early_stopped"] = false;
+        e["escalated"] = false;
+        e["budget_exceeded"] = false;
+        f << e.dump() << "\n";
+    }
+
+    Context ctx_;
+    std::string manifest_path_;
+};
+
+TEST_F(BenchmarkCompareTest, CompareRequiresManifest) {
+    auto code = cmd_playbook(ctx_, {"--compare"});
+    EXPECT_EQ(code, 2) << "--compare without manifest must exit 2";
+}
+
+TEST_F(BenchmarkCompareTest, CompareRunsProduceHistory) {
+    // Run compare with mock execution — should produce 2 history entries
+    std::stringstream cerr_buf;
+    auto* old_cerr = std::cerr.rdbuf(cerr_buf.rdbuf());
+    std::stringstream cout_buf;
+    auto* old_cout = std::cout.rdbuf(cout_buf.rdbuf());
+
+    auto code = cmd_playbook(ctx_, {manifest_path_, "--compare"});
+
+    std::cerr.rdbuf(old_cerr);
+    std::cout.rdbuf(old_cout);
+
+    // Compare may succeed (0) or partially fail (1), but not usage error (2)
+    EXPECT_NE(code, 2) << "Compare should not return usage error with valid manifest";
+
+    // Verify history has 2 entries (flash + standard)
+    auto hist_path = ctx_.euxis_home + "/data/runtime/verdicts/history.jsonl";
+    if (fs::exists(hist_path)) {
+        std::ifstream f(hist_path);
+        std::string line;
+        int count = 0;
+        while (std::getline(f, line)) {
+            if (!line.empty()) count++;
+        }
+        EXPECT_EQ(count, 2) << "Compare should produce exactly 2 history entries";
+    }
+}
+
+TEST_F(BenchmarkCompareTest, CompareOutputShowsTable) {
+    // Capture stderr where comparison output goes
+    std::stringstream cerr_buf;
+    auto* old_cerr = std::cerr.rdbuf(cerr_buf.rdbuf());
+    std::stringstream cout_buf;
+    auto* old_cout = std::cout.rdbuf(cout_buf.rdbuf());
+
+    (void)cmd_playbook(ctx_, {manifest_path_, "--compare"});
+
+    std::cerr.rdbuf(old_cerr);
+    std::cout.rdbuf(old_cout);
+
+    auto output = cerr_buf.str();
+    // Comparison header
+    EXPECT_NE(output.find("COMPARISON"), std::string::npos)
+        << "Compare output should contain COMPARISON header";
+    // Table columns
+    EXPECT_NE(output.find("Flash"), std::string::npos)
+        << "Compare table should show Flash column";
+    EXPECT_NE(output.find("Standard"), std::string::npos)
+        << "Compare table should show Standard column";
+    // Verdict row
+    EXPECT_NE(output.find("Verdict"), std::string::npos)
+        << "Compare table should show Verdict row";
+}
+
+TEST_F(BenchmarkCompareTest, CompareShowsDriftAnalysis) {
+    std::stringstream cerr_buf;
+    auto* old_cerr = std::cerr.rdbuf(cerr_buf.rdbuf());
+    std::stringstream cout_buf;
+    auto* old_cout = std::cout.rdbuf(cout_buf.rdbuf());
+
+    (void)cmd_playbook(ctx_, {manifest_path_, "--compare"});
+
+    std::cerr.rdbuf(old_cerr);
+    std::cout.rdbuf(old_cout);
+
+    auto output = cerr_buf.str();
+    // Analysis section
+    EXPECT_NE(output.find("Analysis"), std::string::npos)
+        << "Compare output should contain Analysis section";
+    // Speedup metric
+    EXPECT_NE(output.find("Speedup"), std::string::npos)
+        << "Compare output should show speedup metric";
+    // Drift classification (one of OK, SEMANTIC, MECHANICAL, MIXED, MATCH, DRIFT)
+    bool has_drift_class =
+        output.find("OK") != std::string::npos ||
+        output.find("SEMANTIC") != std::string::npos ||
+        output.find("MECHANICAL") != std::string::npos ||
+        output.find("MIXED") != std::string::npos ||
+        output.find("MATCH") != std::string::npos ||
+        output.find("DRIFT") != std::string::npos;
+    EXPECT_TRUE(has_drift_class) << "Compare output should contain drift classification";
+}
+
+TEST_F(BenchmarkCompareTest, PreSeededHistoryShowsInStats) {
+    // Pre-seed history with a flash + standard pair
+    seed_entry("flash", "TRUSTED", 75, 42000, 2);
+    seed_entry("standard", "TRUSTED WITH GAPS", 69, 162000, 5, 1);
+
+    std::stringstream buffer;
+    auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
+    auto code = cmd_playbook(ctx_, {"--stats"});
+    std::cout.rdbuf(old_cout);
+
+    EXPECT_EQ(code, 0);
+    auto output = buffer.str();
+    EXPECT_NE(output.find("Flash"), std::string::npos) << "Stats should show flash section";
+    EXPECT_NE(output.find("Standard"), std::string::npos) << "Stats should show standard section";
+}
+
 } // namespace
 } // namespace euxis::cli::cmd

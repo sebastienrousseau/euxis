@@ -77,6 +77,15 @@ void ProviderRouter::load_config() {
                 standard_overrides_[agent_id] = so;
             }
         }
+        if (config_.contains("forensic_overrides")) {
+            for (auto& [agent_id, ovr] : config_["forensic_overrides"].items()) {
+                ModeOverride fo;
+                fo.provider = ovr.value("provider", "claude");
+                fo.model = ovr.value("model", "claude-opus-4-6");
+                fo.cost = ovr.value("cost", 15.0);
+                forensic_overrides_[agent_id] = fo;
+            }
+        }
     } catch (const std::exception& e) { spdlog::warn("router.json parse error: {}", e.what()); }
 }
 
@@ -221,6 +230,18 @@ auto ProviderRouter::route_standard(const std::string& agent_id,
         const auto& ovr = it->second;
         return {ovr.provider, ovr.model, Tier::Code, ovr.cost,
                 "standard override for " + agent_id, ""};
+    }
+    return route(agent_tier, prompt, "swarm");
+}
+
+auto ProviderRouter::route_forensic(const std::string& agent_id,
+                                     const std::string& agent_tier,
+                                     const std::string& prompt) const -> ModelSelection {
+    auto it = forensic_overrides_.find(agent_id);
+    if (it != forensic_overrides_.end()) {
+        const auto& ovr = it->second;
+        return {ovr.provider, ovr.model, Tier::Reason, ovr.cost,
+                "forensic override for " + agent_id, ""};
     }
     return route(agent_tier, prompt, "swarm");
 }
