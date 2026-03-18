@@ -192,9 +192,9 @@ AGPL-3.0 — see [LICENSE](LICENSE).
 
 ---
 
-Euxis v0.0.4 · [euxis.co](https://euxis.co)
+Euxis v0.0.10 · [euxis.co](https://euxis.co)
 
 [license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-v0.0.4-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.4
+[version-badge]: https://img.shields.io/badge/version-v0.0.10-green.svg
+[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.10

@@ -1,7 +1,7 @@
 {
   "review_schema_version": "2026.1",
   "previous_release": "v0.0.3",
-  "next_release": "v0.0.4",
+  "next_release": "v0.0.10",
   "proposal_sha256": "8e17094e4f078da509f4828c10e5ffe76c994c7a1c2ab6668404fb41466a1ecc",
   "threshold_percent": 25.0,
   "flagged_for_manual_review": true,

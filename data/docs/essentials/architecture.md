@@ -2,7 +2,7 @@
 
 Comprehensive architectural documentation for the Euxis multi-provider AI agent orchestration framework.
 
-**Version:** v0.0.4
+**Version:** v0.0.10
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 
@@ -12,7 +12,7 @@ Comprehensive architectural documentation for the Euxis multi-provider AI agent 
 
 The Euxis framework is organized into five distinct layers, each with specific responsibilities. The CLI layer provides the user interface, shell libraries handle core logic, the optional Python TUI offers rich visualization, the data layer manages persistence, and the provider layer abstracts AI model interactions.
 
-## Gateway Control Plane (v0.0.4)
+## Gateway Control Plane (v0.0.10)
 
 Euxis introduces a minimal Gateway control plane to front agent execution with a WebSocket surface and health endpoint. The Gateway is a thin runtime that delegates execution to existing Euxis CLI entry points.
 
@@ -56,15 +56,15 @@ flowchart TB
         ui[euxis-ui<br/>Textual Dashboard]
     end
 
-    subgraph CppLayer["C++23 Runtime (euxis-cpp/)"]
+    subgraph CppLayer["C++23 Runtime (libs/ + apps/)"]
         direction LR
-        crypto_cpp[euxis-crypto-cpp<br/>AES-256-GCM, Ed25519]
-        bridge_cpp[euxis-bridge-cpp<br/>Skill Import, Sandbox]
-        memory_cpp[euxis-memory-cpp<br/>Encrypted Memory]
-        identity_cpp[euxis-identity-cpp<br/>DID, Credentials]
-        inference_cpp[euxis-inference-cpp<br/>llama.cpp, Ollama]
-        a2a_cpp[euxis-a2a-cpp<br/>A2A v0.2 Protocol]
-        etx[euxis-etx<br/>Qt6 Desktop GUI]
+        crypto_cpp[libs/crypto<br/>AES-256-GCM, Ed25519]
+        bridge_cpp[libs/bridge<br/>Skill Import, Sandbox]
+        memory_cpp[libs/memory<br/>Encrypted Memory]
+        identity_cpp[libs/identity<br/>DID, Credentials]
+        inference_cpp[libs/inference<br/>llama.cpp, Ollama]
+        a2a_cpp[libs/a2a<br/>A2A v0.2 Protocol]
+        etx[apps/etx<br/>Qt6 Desktop GUI]
     end
 
     subgraph Data["Data Layer"]
@@ -706,23 +706,32 @@ make cpp-bench    # Run benchmark suites against performance targets
 ├── agents/registry.db                   # SQLite agent registry
 ├── agents/registry.json                 # JSON registry (fallback)
 ├── agents/squads.json                   # Squad/combo definitions
-└── euxis-cpp/                           # C++23 Runtime
-    ├── CMakeLists.txt               # Top-level CMake project
-    ├── vcpkg.json                   # Dependency manifest
-    ├── cmake/                       # Shared CMake modules
-    ├── euxis-crypto-cpp/            # AES-256-GCM, Ed25519, Argon2id
-    ├── euxis-bridge-cpp/            # Skill import, sandbox execution
-    ├── euxis-memory-cpp/            # Tier-bound encrypted memory
-    ├── euxis-identity-cpp/          # W3C DID, Verifiable Credentials
-    ├── euxis-inference-cpp/         # llama.cpp + Ollama inference
-    ├── euxis-a2a-cpp/               # A2A v0.2 protocol
-    ├── euxis-bench-cpp/             # Benchmark suites
-    └── euxis-etx/                   # Qt6 desktop GUI
+├── libs/                                # C++23 Libraries
+│   ├── crypto/                      # AES-256-GCM, Ed25519, Argon2id
+│   ├── bridge/                      # Skill import, sandbox execution
+│   ├── memory/                      # Tier-bound encrypted memory
+│   ├── identity/                    # W3C DID, Verifiable Credentials
+│   ├── inference/                   # llama.cpp + Ollama inference
+│   ├── a2a/                         # A2A v0.2 protocol
+│   ├── bench/                       # Benchmark suites
+│   ├── core/                        # Swarm, supervisor, router
+│   ├── metrics/                     # Evidence, validation pipeline
+│   ├── runtime/                     # Agent session, lifecycle
+│   ├── network/                     # MCP client, WebSocket, topology
+│   ├── adapters/                    # Discord, Slack, Telegram, WhatsApp
+│   ├── security/                    # Security scanning
+│   └── platform/                    # OS abstraction (Linux, macOS, WSL)
+├── apps/                                # C++23 Applications
+│   ├── cli/                         # CLI application
+│   ├── etx/                         # Qt6 desktop GUI
+│   ├── gateway/                     # HTTP/WebSocket gateway
+│   └── publisher/                   # Package publisher
+└── cmake/                               # Shared CMake modules
 ```
 
 ---
 
-*Euxis v0.0.4 - Build something that matters.*
+*Euxis v0.0.10 - Build something that matters.*
 
 ### Observability (metrics/src/metrics/)
 Euxis records fleet events and performance data in `~/.euxis/metrics/events.jsonl` for analysis and dashboards.

@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-security-cpp/tests`
+- Test paths: `libs/security/tests`
 
 ## Core vs Platform Separation
 

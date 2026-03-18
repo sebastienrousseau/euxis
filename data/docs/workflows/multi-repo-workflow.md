@@ -20,7 +20,8 @@ Recommended local layout (one folder per repo):
   euxis-metrics/
   data/
   euxis-web/
-  euxis-cpp/
+  libs/
+  apps/
 ```
 
 ## Setup

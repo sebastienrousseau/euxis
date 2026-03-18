@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-bench-cpp/tests`
+- Test paths: `libs/bench/tests`
 
 ## Core vs Platform Separation
 

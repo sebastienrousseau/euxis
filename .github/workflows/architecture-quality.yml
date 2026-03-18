@@ -48,8 +48,8 @@ jobs:
           python3 euxis-ops/perf/propose_package_benchmark_baseline.py \
             --current data/perf/package-benchmarks.json \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --previous-release v0.0.3 \
-            --next-release v0.0.4 \
+            --previous-release v0.0.9 \
+            --next-release v0.0.10 \
             --output data/perf/proposed-package-benchmarks-baseline.json
       - name: Review package benchmark baseline proposal
         run: |
@@ -108,8 +108,8 @@ jobs:
         run: |
           python3 euxis-ops/perf/propose_release_baseline.py \
             --metrics data/runtime/perf/metrics.jsonl \
-            --previous-release v0.0.3 \
-            --next-release v0.0.4 \
+            --previous-release v0.0.9 \
+            --next-release v0.0.10 \
             --output data/release/proposed-baseline.json
       - name: Review baseline proposal (manual-review flag)
         run: |

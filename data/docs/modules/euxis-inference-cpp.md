@@ -4,5 +4,5 @@ C++23 local inference engine — llama.cpp integration, Ollama client, model reg
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-inference-cpp/README.md
+```{include} ../../libs/inference/README.md
 ```

@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-memory-cpp/tests`
+- Test paths: `libs/memory/tests`
 
 ## Core vs Platform Separation
 

@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-metrics-cpp/tests`
+- Test paths: `libs/metrics/tests`
 
 ## Core vs Platform Separation
 

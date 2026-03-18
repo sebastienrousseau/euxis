@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-a2a-cpp/tests`
+- Test paths: `libs/a2a/tests`
 
 ## Core vs Platform Separation
 

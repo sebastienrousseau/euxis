@@ -4,5 +4,5 @@ C++23 W3C DID, Verifiable Credentials, attestations, identity registry, and ERC-
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-identity-cpp/README.md
+```{include} ../../libs/identity/README.md
 ```

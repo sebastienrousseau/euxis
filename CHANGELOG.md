@@ -27,7 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **README**: Rewritten with accurate C++23 build instructions, provider strategy overview, and complete Core commands table
 - **CONTRIBUTING.md**: Updated for C++23 workflow (CMake/GCC prerequisites, `make cpp-test`, AGPL-3.0 license, commit signing required)
 - **Documentation**: User guide, quick start, and CLI reference updated to use Core commands as primary examples; all stale `cmd/`/`pkg/` path references updated
-- **Test Suite**: 1092 tests (up from 961), all passing
+- **Test Suite**: 1115 tests (up from 961), all passing
+- **CI Workflows**: Fixed stale artifact paths, added `cpp-bench` and `cpp-clang-tidy` Makefile targets, bumped release refs to v0.0.10
+- **TEMPLATE_CONFORMANCE**: Updated all 16 test path references from `euxis-cpp/` to `apps/`/`libs/`
+- **Data Config Versions**: Bumped `registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json` from v0.0.3 to v0.0.10
+- **Documentation**: Updated ~40 doc files from v0.0.4 footers/badges to v0.0.10, fixed `euxis-cpp/` monorepo paths to `apps/`/`libs/`
+
+### Security
+- **CWE-78 Mitigation**: `shell_interactive()` rejects shell metacharacters (`$(`, `` ` ``, `;`, `&&`, `||`, `|`, `>>`, `<<`) with 12 new tests
+- **SOUP Register**: Formal Software of Unknown Provenance classification for all 9 dependencies per IEC 62304 (`data/docs/compliance/soup-classification.md`)
+- **Software Validation Procedure**: ISO 13485 SVP with traceability matrix, release checklist, and non-conformance handling (`data/docs/compliance/software-validation-procedure.md`)
+- **SAST**: `.clang-tidy` config with security-focused checks (bugprone-*, cert-*, concurrency-*, use-after-move as error)
+- **Credential Exclusion**: `.gitignore` expanded with `.env*`, `*.key`, `*.pem`, `credentials*`, `*.p12`, `*.pfx`, `*.keystore`
 
 ### Fixed
 - **Security Hardening**: Auth profile store bounds checks, path traversal guards, command injection prevention, bare `catch(...)` elimination

@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-inference-cpp/tests`
+- Test paths: `libs/inference/tests`
 
 ## Core vs Platform Separation
 

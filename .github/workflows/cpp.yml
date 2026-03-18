@@ -36,5 +36,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cpp-test-logs-${{ matrix.os }}
-          path: euxis-cpp/build/Testing/
+          path: build/cmake-build/Testing/
           if-no-files-found: ignore

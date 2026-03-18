@@ -1,7 +1,7 @@
 # Package Baseline Proposal Review
 
 - Previous release: `v0.0.3`
-- Next release: `v0.0.4`
+- Next release: `v0.0.10`
 - Proposal SHA-256: `8e17094e4f078da509f4828c10e5ffe76c994c7a1c2ab6668404fb41466a1ecc`
 - Threshold: `25.00%`
 - Manual review required: `yes`

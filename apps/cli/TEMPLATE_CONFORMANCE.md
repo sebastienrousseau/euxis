@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-cli-cpp/tests`
+- Test paths: `apps/cli/tests`
 
 ## Core vs Platform Separation
 

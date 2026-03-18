@@ -12,4 +12,5 @@ euxis_add_library(euxis-crypto-cpp
     tests/test_aes_gcm_aad.cpp
     tests/test_key_derivation.cpp
     tests/test_ed25519.cpp
+    tests/test_errors.cpp
 )

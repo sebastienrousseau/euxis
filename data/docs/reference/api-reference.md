@@ -203,4 +203,4 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 
 ---
 
-*Euxis v0.0.4 · Build something that matters.*
+*Euxis v0.0.10 · Build something that matters.*

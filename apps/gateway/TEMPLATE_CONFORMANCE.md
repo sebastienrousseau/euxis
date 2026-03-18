@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-gateway-cpp/tests`
+- Test paths: `apps/gateway/tests`
 
 ## Core vs Platform Separation
 

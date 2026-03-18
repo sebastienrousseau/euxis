@@ -2,7 +2,7 @@
   "status": "ok",
   "iterations": 3,
   "previous_release": "v0.0.3",
-  "next_release": "v0.0.4",
+  "next_release": "v0.0.10",
   "generated_at_utc": "2026-03-09T23:50:27.377909+00:00",
   "packages": {
     "euxis-sdk": {

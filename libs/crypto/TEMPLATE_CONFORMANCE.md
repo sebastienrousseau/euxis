@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-crypto-cpp/tests`
+- Test paths: `libs/crypto/tests`
 
 ## Core vs Platform Separation
 

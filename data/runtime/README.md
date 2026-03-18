@@ -8,7 +8,7 @@ Gateway and related packages.
 ## Why This Is Not `euxis-*`
 
 `euxis-policy/` is a workspace-level policy asset directory, not a standalone package.
-Package code remains under `euxis-cpp/euxis-security-cpp/`.
+Package code remains under `libs/security/`.
 
 ## Current Contents
 

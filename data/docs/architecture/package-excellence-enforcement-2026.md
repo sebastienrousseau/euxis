@@ -17,7 +17,8 @@ All workspace packages are covered:
 - `euxis-sdk`
 - `euxis-web`
 - `data`
-- `euxis-cpp/*` (C++23 modules)
+- `libs/*` (C++23 library modules)
+- `apps/*` (C++23 application modules)
 
 ## Enforcement Artifacts
 

@@ -1,4 +1,4 @@
-# Gateway Canvas Schema (v0.0.4)
+# Gateway Canvas Schema (v0.0.10)
 
 Canvas state is a JSON object stored per session and rendered by compatible UIs.
 

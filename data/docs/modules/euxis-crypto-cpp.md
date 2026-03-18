@@ -4,5 +4,5 @@ C++23 cryptographic primitives — AES-256-GCM, Ed25519, key derivation via libs
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-crypto-cpp/README.md
+```{include} ../../libs/crypto/README.md
 ```

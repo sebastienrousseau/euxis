@@ -4,5 +4,5 @@ Qt6 desktop GUI for the Euxis platform — fleet management, agent deployment, a
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-etx/README.md
+```{include} ../../apps/etx/README.md
 ```

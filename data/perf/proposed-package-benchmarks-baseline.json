@@ -1,6 +1,6 @@
 {
   "previous_release": "v0.0.3",
-  "next_release": "v0.0.4",
+  "next_release": "v0.0.10",
   "generated_at_utc": "2026-03-09T23:56:56.594972+00:00",
   "packages": {
     "euxis-sdk": {

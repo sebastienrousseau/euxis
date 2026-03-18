@@ -4,5 +4,5 @@ C++23 bridge hardening — skill import, static analysis, admission pipeline, sa
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-bridge-cpp/README.md
+```{include} ../../libs/bridge/README.md
 ```

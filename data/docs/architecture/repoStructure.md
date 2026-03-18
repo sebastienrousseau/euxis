@@ -20,7 +20,8 @@ This document captures the target split for functional repositories to reduce co
 - `euxis-scripts`
 - `euxis-sdk`
 - `data`
-- `euxis-cpp` (contains crypto, bridge, memory, identity, inference, a2a, bench, etx)
+- `libs/` (contains crypto, bridge, memory, identity, inference, a2a, bench, core, adapters, metrics, runtime, security, network, platform, publisher)
+- `apps/` (contains cli, etx, gateway, publisher)
 
 ## Migration Notes
 

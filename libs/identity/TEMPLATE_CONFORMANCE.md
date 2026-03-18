@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-identity-cpp/tests`
+- Test paths: `libs/identity/tests`
 
 ## Core vs Platform Separation
 

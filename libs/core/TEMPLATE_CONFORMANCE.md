@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `pkg/core/tests`
+- Test paths: `libs/core/tests`
 
 ## Core vs Platform Separation
 

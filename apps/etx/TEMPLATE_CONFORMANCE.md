@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `(none)`
+- Test paths: `apps/etx/tests`
 
 ## Core vs Platform Separation
 

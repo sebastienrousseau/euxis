@@ -10,6 +10,6 @@ euxis_add_library(euxis-platform-cpp
     tests/test_linux_hardening.cpp
 )
 
-target_include_directories(euxis-platform-cpp PRIVATE
-  ${CMAKE_SOURCE_DIR}/apps/cli/include
+target_include_directories(euxis-platform-cpp PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

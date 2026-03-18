@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-bridge-cpp/tests`
+- Test paths: `libs/bridge/tests`
 
 ## Core vs Platform Separation
 

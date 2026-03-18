@@ -6,8 +6,9 @@ We actively support security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < v0.0.3 | :x:                |
+| v0.0.10 | :white_check_mark: |
+| v0.0.9  | :white_check_mark: |
+| < v0.0.9 | :x:                |
 
 ## Dependency Security
 
@@ -15,8 +16,9 @@ We actively support security updates for the following versions:
 
 This project uses automated dependency vulnerability scanning through:
 
-- **Python Dependencies**: `safety`, `pip-audit`, `bandit`, and `semgrep`
-- **Node.js Dependencies**: `npm audit` and `semgrep`
+- **C++ Dependencies**: Pinned versions via CMake FetchContent, SOUP register (EUXIS-SOUP-001)
+- **Static Analysis**: clang-tidy with security-focused checks (bugprone-*, cert-*, concurrency-*)
+- **Compiler Hardening**: `-fstack-protector-strong`, PIE, full RELRO, `_FORTIFY_SOURCE=2`, ASan/UBSan
 - **Scheduled Scans**: Weekly automated scans on Sundays at 2 AM UTC
 - **PR Scans**: All pull requests trigger security scans before merge
 
@@ -27,6 +29,7 @@ The following security gates are enforced:
 1. **Critical/High Vulnerabilities**: Build fails if critical or high-severity vulnerabilities are detected
 2. **Code Security Issues**: High-severity code security issues trigger warnings and require review
 3. **Dependency Freshness**: Dependencies should be updated regularly (tracked in security reports)
+4. **Command Injection Prevention**: `shell_interactive()` rejects shell metacharacters (CWE-78)
 
 ### Manual Security Review
 
@@ -93,27 +96,6 @@ If you discover a security vulnerability, please report it responsibly:
 3. **Branch Protection**: Use signed commits for security-sensitive changes
 4. **Code Review**: All security-relevant changes require peer review
 
-## Security Tools and Configuration
-
-### Python Security Tools
-
-- **safety**: Checks for known vulnerabilities in Python packages
-- **bandit**: Static security analysis for Python code
-- **pip-audit**: Comprehensive Python package vulnerability scanning
-- **semgrep**: Advanced static analysis with security rules
-
-### Node.js Security Tools
-
-- **npm audit**: Built-in npm vulnerability scanning
-- **semgrep**: JavaScript/TypeScript security analysis
-
-### Configuration Files
-
-Security tool configurations are stored in:
-- `.bandit.yml` - Bandit security linter configuration
-- `.semgrepignore` - Semgrep analysis exclusions
-- `pyproject.toml` - Python tool configurations
-
 ## Security Contacts
 
 - **Security Team**: security@euxis.co
@@ -122,5 +104,5 @@ Security tool configurations are stored in:
 
 ---
 
-**Last Updated**: 2026-02-18
-**Policy Version**: 1.0
+**Last Updated**: 2026-03-18
+**Policy Version**: 2.0

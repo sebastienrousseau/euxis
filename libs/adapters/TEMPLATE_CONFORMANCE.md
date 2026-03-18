@@ -14,7 +14,7 @@
 
 ## Tests
 
-- Test paths: `euxis-cpp/euxis-adapters-cpp/tests`
+- Test paths: `libs/adapters/tests`
 
 ## Core vs Platform Separation
 

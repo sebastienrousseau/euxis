@@ -7,17 +7,12 @@ This guide provides step-by-step instructions for upgrading between Euxis versio
 ## Table of Contents
 
 1. [Version History](#version-history)
-2. [Migrating from v0.0.6 to v0.0.7](#migrating-from-v006-to-v007)
-   - [New Features](#new-features)
-   - [Breaking Changes](#breaking-changes)
-   - [Deprecated Features](#deprecated-features)
-   - [Step-by-Step Upgrade Instructions](#step-by-step-upgrade-instructions)
-   - [Configuration Changes](#configuration-changes)
-   - [Backward Compatibility Notes](#backward-compatibility-notes)
-3. [General Migration Checklist](#general-migration-checklist)
-4. [Troubleshooting Common Migration Issues](#troubleshooting-common-migration-issues)
-5. [Rollback Procedures](#rollback-procedures)
-6. [Testing Your Migration](#testing-your-migration)
+2. [Migrating from v0.0.9 to v0.0.10](#migrating-from-v009-to-v0010)
+3. [Migrating from v0.0.6 to v0.0.7](#migrating-from-v006-to-v007)
+4. [General Migration Checklist](#general-migration-checklist)
+5. [Troubleshooting Common Migration Issues](#troubleshooting-common-migration-issues)
+6. [Rollback Procedures](#rollback-procedures)
+7. [Testing Your Migration](#testing-your-migration)
 
 ---
 
@@ -25,8 +20,79 @@ This guide provides step-by-step instructions for upgrading between Euxis versio
 
 | Version | Release Date | Major Changes |
 |---------|--------------|---------------|
-| 0.0.7   |-02-09   | TUI (ETX), SQLite registry, 16 language playbooks, performance optimizations |
-| 0.0.6   |-01-15   | Initial fleet architecture, JSON registry, core agents |
+| 0.0.10  | 2026-03     | Directory restructure, security hardening, SOUP/SVP compliance, 1115+ CLI tests |
+| 0.0.9   | 2026-02-16  | Dependency security patches, release hygiene |
+| 0.0.7   | 2026-02-09  | TUI (ETX), SQLite registry, 16 language playbooks, performance optimizations |
+| 0.0.6   | 2026-01-15  | Initial fleet architecture, JSON registry, core agents |
+
+---
+
+## Migrating from v0.0.9 to v0.0.10
+
+### Breaking Changes
+
+#### 1. Directory Restructure
+
+The entire repository layout has changed. **Scripts that reference old paths must be updated.**
+
+| Old Path | New Path |
+|----------|----------|
+| `cmd/cli/` | `apps/cli/` |
+| `cmd/etx/` | `apps/etx/` |
+| `cmd/gateway/` | `apps/gateway/` |
+| `cmd/publisher/` | `apps/publisher/` |
+| `pkg/<name>/` | `libs/<name>/` |
+| `internal/platform/` | `libs/platform/` |
+| `build/cmake/` | `cmake/` |
+
+#### 2. Platform Header Location
+
+The platform abstraction header has moved:
+
+```
+# Before
+#include "euxis/cli/tui/platform.hpp"
+
+# After (canonical)
+#include "euxis/platform/platform.hpp"
+```
+
+A forwarding header at the old location ensures backward compatibility, but new code should use the canonical path.
+
+### New Features
+
+- **CLI Surface Layer**: Verb-first Core commands (`check`, `triage`, `review`, `compare`, `stats`, `policy`)
+- **Certification Readiness** (`certify-readiness`): 18-domain assessment with SOC2/ISO27001 overlays
+- **Provider Strategy Routing**: 11 semantic task classes with optimal provider selection
+- **Forensic Mode**: Deep investigation routing with opus-class models
+- **SOUP Register**: Formal IEC 62304 dependency classification
+- **SAST**: `.clang-tidy` security-focused static analysis config
+- **Shell Hardening**: CWE-78 command injection prevention in `shell_interactive()`
+
+### Step-by-Step Upgrade
+
+```bash
+# 1. Backup
+cp -r ~/.euxis ~/.euxis.backup.$(date +%Y%m%d)
+
+# 2. Pull latest
+cd ~/.euxis && git pull origin main
+
+# 3. Rebuild
+cmake -B cmake-build -S . -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+cmake --build cmake-build -j$(nproc)
+
+# 4. Run tests
+cmake-build/apps/cli/euxis-cli-cpp_tests
+
+# 5. Verify
+euxis self status
+euxis certify-readiness .
+```
+
+### Configuration Changes
+
+All data config files (`registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json`) are bumped from `v0.0.3` to `v0.0.10`. These update automatically when you pull the latest code.
 
 ---
 

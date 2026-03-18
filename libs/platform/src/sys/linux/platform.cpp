@@ -1,4 +1,4 @@
-#include "euxis/cli/tui/platform.hpp"
+#include "euxis/platform/platform.hpp"
 #include <euxis/runtime/platform.hpp>
 #include <cstdlib>
 #include <fstream>

@@ -4,5 +4,5 @@ C++23 benchmark suite — security, autonomy, performance, portability, and inte
 
 ## README
 
-```{include} ../../euxis-cpp/euxis-bench-cpp/README.md
+```{include} ../../libs/bench/README.md
 ```
