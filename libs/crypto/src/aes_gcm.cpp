@@ -2,9 +2,13 @@
 
 #include <sodium.h>
 
+#include <cassert>
 #include <cstring>
 
 namespace euxis::crypto {
+
+/// P10-R2: Maximum plaintext size for a single encryption (64 MB).
+constexpr size_t kMaxPlaintextSize = 64 * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
 // to_base64  (defined here because it depends on libsodium)
@@ -52,6 +56,10 @@ auto encrypt(std::span<const std::byte> data,
              std::span<const std::byte, 32> key)
     -> std::expected<EncryptionResult, CryptoError> {
 
+    assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
+           && "P10-R5: encryption key must not be all zeros");
+
     EncryptionResult result;
     generate_iv(result.iv);
     result.algorithm = "AES-256-GCM";
@@ -87,6 +95,11 @@ auto decrypt(std::span<const std::byte> ciphertext,
              std::span<const std::byte, 32> key,
              std::span<const std::byte, 12> iv)
     -> std::expected<DecryptionResult, CryptoError> {
+
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
+           && "P10-R5: decryption key must not be all zeros");
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(iv.data()), 12)
+           && "P10-R5: IV must not be all zeros");
 
     if (ciphertext.size() < crypto_aead_aes256gcm_ABYTES) {
         return std::unexpected(CryptoError::DecryptionFailed);
@@ -125,6 +138,10 @@ auto encrypt_aad(std::span<const std::byte> data,
                  std::span<const std::byte> aad)
     -> std::expected<EncryptionResult, CryptoError> {
 
+    assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
+           && "P10-R5: encryption key must not be all zeros");
+
     EncryptionResult result;
     generate_iv(result.iv);
     result.algorithm = "AES-256-GCM";
@@ -160,6 +177,11 @@ auto decrypt_aad(std::span<const std::byte> ciphertext,
                  std::span<const std::byte, 12> iv,
                  std::span<const std::byte> aad)
     -> std::expected<DecryptionResult, CryptoError> {
+
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
+           && "P10-R5: decryption key must not be all zeros");
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(iv.data()), 12)
+           && "P10-R5: IV must not be all zeros");
 
     if (ciphertext.size() < crypto_aead_aes256gcm_ABYTES) {
         return std::unexpected(CryptoError::DecryptionFailed);

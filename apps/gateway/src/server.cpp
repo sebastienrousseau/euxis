@@ -18,7 +18,8 @@ bool authorize_request(const httplib::Request& req, httplib::Response& res,
     auto result = verify_bearer_token(token, ctx.auth_token);
     if (!result.has_value()) {
         res.status = result.error().status_code;
-        res.set_content(R"({"error":")" + result.error().message + R"("})", "application/json");
+        nlohmann::json err_body = {{"error", result.error().message}};
+        res.set_content(err_body.dump(), "application/json");
         return false;
     }
     return true;
@@ -65,14 +66,32 @@ void GatewayServer::register_routes() {
 }
 
 void GatewayServer::setup_ws_handlers() {
+    // Capture auth token for WebSocket authentication.
+    std::string ws_auth_token;
+    if (config_.raw.contains("gateway") && config_.raw["gateway"].contains("auth") &&
+        config_.raw["gateway"]["auth"].contains("token")) {
+        ws_auth_token = config_.raw["gateway"]["auth"]["token"].value("value", "");
+    }
+
     ws_hub_.set_message_handler(
-        [](const std::string& client_id,
+        [ws_auth_token](const std::string& client_id,
            const nlohmann::json& message) -> nlohmann::json {
             auto type = message.value("type", "");
 
             if (type == "ping") {
                 return {{"type", "pong"},
                         {"client_id", client_id}};
+            }
+
+            // Authenticate before processing commands.
+            if (!ws_auth_token.empty()) {
+                auto token = message.value("token", "");
+                if (token.size() != ws_auth_token.size() ||
+                    sodium_memcmp(token.data(), ws_auth_token.data(),
+                                  ws_auth_token.size()) != 0) {
+                    return {{"type", "error"},
+                            {"message", "Authentication required"}};
+                }
             }
 
             if (type == "dispatch") {
@@ -91,7 +110,7 @@ void GatewayServer::setup_ws_handlers() {
             }
 
             return {{"type", "error"},
-                    {"message", "Unknown message type: " + type}};
+                    {"message", "Unknown message type"}};
         });
 }
 

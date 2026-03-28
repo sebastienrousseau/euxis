@@ -1,7 +1,9 @@
 #include <euxis/bridge/executor.hpp>
 #include <euxis/bridge/platform.hpp>
 
+#include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstring>
 
@@ -18,6 +20,27 @@ namespace euxis::bridge {
 
 namespace {
 
+/// P10-R2: Maximum number of poll iterations (bounds the read loop).
+constexpr int kMaxPollIterations = 6000;
+
+/// P10-R2: Default poll interval in milliseconds.
+constexpr int kPollIntervalMs = 100;
+
+/// P10-R2: Maximum output buffer size (16 MB).
+constexpr size_t kMaxOutputBytes = 16 * 1024 * 1024;
+
+/// P10-R5: Environment variable names that must never be overridden.
+constexpr std::array kDeniedEnvVars = {
+    "LD_PRELOAD", "LD_LIBRARY_PATH", "DYLD_INSERT_LIBRARIES",
+    "DYLD_LIBRARY_PATH", "PATH", "HOME", "USER", "SHELL",
+};
+
+/// Check whether an env var name is on the deny list.
+[[nodiscard]] auto is_denied_env(const std::string& name) -> bool {
+    return std::any_of(kDeniedEnvVars.begin(), kDeniedEnvVars.end(),
+                       [&](const char* denied) { return name == denied; });
+}
+
 #ifdef __linux__
 /// Safe process spawner using fork/execvp (no shell involved).
 struct SpawnResult {
@@ -28,8 +51,13 @@ struct SpawnResult {
 };
 
 auto safe_spawn(const std::vector<std::string>& argv,
-                const std::vector<std::string>& env_vars)
+                const std::vector<std::string>& env_vars,
+                int timeout_seconds = 60)
     -> std::expected<SpawnResult, std::string> {
+
+    assert(!argv.empty() && "P10-R5: argv must contain at least a program name");
+    assert(timeout_seconds > 0 && "P10-R5: timeout must be positive");
+
     int stdout_pipe[2];
     if (pipe(stdout_pipe) != 0) {
         return std::unexpected("pipe() failed: " + std::string(strerror(errno)));
@@ -51,11 +79,14 @@ auto safe_spawn(const std::vector<std::string>& argv,
         dup2(stdout_pipe[1], STDERR_FILENO);
         close(stdout_pipe[1]);
 
-        // Set environment variables
+        // Set environment variables (filtered against deny list)
         for (const auto& e : env_vars) {
             auto eq = e.find('=');
             if (eq != std::string::npos) {
-                setenv(e.substr(0, eq).c_str(), e.substr(eq + 1).c_str(), 1);
+                auto var_name = e.substr(0, eq);
+                if (!is_denied_env(var_name)) {
+                    setenv(var_name.c_str(), e.substr(eq + 1).c_str(), 1);
+                }
             }
         }
 
@@ -80,13 +111,22 @@ auto safe_spawn(const std::vector<std::string>& argv,
     pfd.fd = stdout_pipe[0];
     pfd.events = POLLIN;
 
-    while (true) {
-        int ret = poll(&pfd, 1, 60000);  // 60s timeout
+    // P10-R2: Bounded poll loop — max iterations derived from timeout.
+    const int max_iterations = std::min(
+        kMaxPollIterations,
+        (timeout_seconds * 1000) / kPollIntervalMs);
+    int poll_count = 0;
+
+    while (poll_count++ < max_iterations) {
+        int ret = poll(&pfd, 1, kPollIntervalMs);
         if (ret <= 0) break;
         ssize_t n = read(stdout_pipe[0], buffer.data(), buffer.size());
         if (n <= 0) break;
         output.append(buffer.data(), static_cast<size_t>(n));
+        if (output.size() > kMaxOutputBytes) break;  // P10-R2: output bounded
     }
+
+    assert(poll_count <= max_iterations + 1 && "P10-R2: poll loop terminated within bounds");
 
     close(stdout_pipe[0]);
 
@@ -114,6 +154,9 @@ SkillExecutor::SkillExecutor(std::optional<SkillExecutionPolicy> policy)
 
 auto SkillExecutor::run(const BridgedSkill& skill)
     -> std::expected<ExecutionResult, std::string> {
+    assert(!skill.name.empty() && "P10-R5: skill name must not be empty");
+    assert(!skill.entrypoint.empty() && "P10-R5: skill entrypoint must be set");
+
     auto env = build_env(skill);
 
     auto platform = detect_platform();
@@ -165,7 +208,8 @@ auto SkillExecutor::spawn_sandboxed(
     argv.push_back(runtime);
     argv.push_back(entrypoint.string());
 
-    auto result = safe_spawn(argv, {});
+    const int timeout = policy_ ? static_cast<int>(policy_->resources.timeout_seconds) : 60;
+    auto result = safe_spawn(argv, {}, timeout);
     if (!result) return std::unexpected(result.error());
 
     return ExecutionResult{
@@ -192,7 +236,8 @@ auto SkillExecutor::spawn_direct(
 
     std::vector<std::string> argv = {runtime, entrypoint.string()};
 
-    auto result = safe_spawn(argv, env);
+    const int timeout = policy_ ? static_cast<int>(policy_->resources.timeout_seconds) : 60;
+    auto result = safe_spawn(argv, env, timeout);
     if (!result) return std::unexpected(result.error());
 
     return ExecutionResult{

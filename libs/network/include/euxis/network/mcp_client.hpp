@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <expected>
 #include <future>
 #include <memory>
@@ -44,7 +45,7 @@ private:
         -> std::expected<nlohmann::json, std::string>;
 
     std::shared_ptr<euxis::a2a::ITransport> transport_;
-    int request_id_{0};
+    std::atomic<int> request_id_{0};  ///< P10: Thread-safe request ID counter.
 };
 
 } // namespace euxis::network

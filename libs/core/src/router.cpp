@@ -1,6 +1,7 @@
 #include "euxis/core/router.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <string>
 #include <vector>
 #include <utility>
@@ -31,6 +32,7 @@ FinOpsRouter::FinOpsRouter(double budget_limit) : budget_limit_(budget_limit) {
 auto FinOpsRouter::select_provider(const std::string& task_complexity,
                                    const std::string& priority) -> std::string {
     const size_t n = p_names_.size();
+    assert(n == p_costs_.size() && "P10-R5: SoA arrays must be same length");
     if (n == 0) return "ollama";
 
     if (task_complexity == "low") [[likely]] {
@@ -38,8 +40,7 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     }
 
     if (priority == "swarm") {
-        static size_t rr_counter = 0;
-        return p_names_[(rr_counter++) % n];
+        return p_names_[rr_counter_.fetch_add(1, std::memory_order_relaxed) % n];
     }
 
     if (priority == "speed") {
@@ -89,6 +90,9 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
                                         const std::string& agent_id,
                                         const std::string& model,
                                         int input_tokens, int output_tokens) {
+    assert(!session_id.empty() && "P10-R5: session_id must not be empty");
+    assert(input_tokens >= 0 && output_tokens >= 0 && "P10-R5: token counts must be non-negative");
+
     const int total = input_tokens + output_tokens;
     double cost = 0.0;
 
@@ -103,6 +107,8 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
     if (cost <= 0.0) {
         cost = (static_cast<double>(std::max(1, total)) / 1000.0) * 0.001;
     }
+
+    const std::scoped_lock lock(session_mutex_);
 
     if (!session_usage_.contains(session_id)) [[unlikely]] {
         session_order_.push_back(session_id);
@@ -131,9 +137,11 @@ void FinOpsRouter::enforce_limits() {
 }
 
 auto FinOpsRouter::session_cost(const std::string& session_id) const -> double {
+    const std::scoped_lock lock(session_mutex_);
+
     auto it = session_usage_.find(session_id);
     if (it == session_usage_.end()) [[unlikely]] return 0.0;
-    
+
     double total = 0.0;
     for (const auto& r : it->second) total += r.cost;
     return total;

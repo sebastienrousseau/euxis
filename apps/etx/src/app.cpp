@@ -52,7 +52,7 @@ EuxisApp::EuxisApp(QWidget* parent)
     : QMainWindow(parent)
     , screen_stack_(new QStackedWidget(this))
     , theme_engine_(new ThemeEngine(this))
-    , config_(new ETXConfig())
+    , config_(std::make_unique<ETXConfig>())
     , registry_(new FleetRegistry(ETXConfig::data_dir(), this))
     , chat_engine_(new ChatEngine(ETXConfig::data_dir(), registry_, this))
 {
@@ -67,7 +67,7 @@ EuxisApp::EuxisApp(QWidget* parent)
     screen_stack_->addWidget(create_welcome_screen(this, screen_stack_));
     // Index 1: Dashboard
     screen_stack_->addWidget(create_dashboard_screen(this, registry_, theme_engine_,
-                                                      config_, chat_engine_,
+                                                      config_.get(), chat_engine_,
                                                       screen_stack_));
     // Index 2: Agent
     screen_stack_->addWidget(create_agent_screen(screen_stack_));
@@ -76,22 +76,22 @@ EuxisApp::EuxisApp(QWidget* parent)
     // Index 4: About
     screen_stack_->addWidget(create_about_screen(screen_stack_));
     // Index 5: Settings
-    screen_stack_->addWidget(create_settings_screen(theme_engine_, config_,
+    screen_stack_->addWidget(create_settings_screen(theme_engine_, config_.get(),
                                                      screen_stack_));
     // Index 6: Help
     screen_stack_->addWidget(create_help_screen(screen_stack_));
     // Index 7: Logs
-    screen_stack_->addWidget(create_logs_screen(config_, screen_stack_));
+    screen_stack_->addWidget(create_logs_screen(config_.get(), screen_stack_));
     // Index 8: Playbooks
     screen_stack_->addWidget(create_playbooks_screen(registry_, screen_stack_));
     // Index 9: Approvals
-    screen_stack_->addWidget(create_approvals_screen(config_, screen_stack_));
+    screen_stack_->addWidget(create_approvals_screen(config_.get(), screen_stack_));
     // Index 10: Cortex
-    screen_stack_->addWidget(create_cortex_screen(config_, screen_stack_));
+    screen_stack_->addWidget(create_cortex_screen(config_.get(), screen_stack_));
     // Index 11: Error Details
     screen_stack_->addWidget(create_error_details_screen(screen_stack_));
     // Index 12: Metrics
-    screen_stack_->addWidget(create_metrics_screen(registry_, config_, screen_stack_));
+    screen_stack_->addWidget(create_metrics_screen(registry_, config_.get(), screen_stack_));
     // Index 13: OmniGraph
     screen_stack_->addWidget(create_omnigraph_screen(registry_, screen_stack_));
     // Index 14: Squad Detail

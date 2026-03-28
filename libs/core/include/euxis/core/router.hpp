@@ -1,7 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <deque>
 #include <map>
+#include <mutex>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -64,16 +66,19 @@ private:
     double budget_limit_;
     double current_spend_{0.0};
     size_t session_limit_{100};
-    
+
     // Hardware-aware Structure of Arrays (SoA) for SIMD vectorization
     std::vector<std::string> p_names_;
     std::vector<double> p_costs_;
     std::vector<int> p_latencies_;
     std::vector<double> p_reliabilities_;
-    
+
     std::unordered_map<std::string, size_t> name_to_provider_; ///< O(1) provider lookup index
     std::map<std::string, std::vector<SessionUsageRecord>> session_usage_;
     std::deque<std::string> session_order_;
+
+    mutable std::mutex session_mutex_;           ///< P10: Thread-safe session tracking.
+    std::atomic<size_t> rr_counter_{0};          ///< P10: Atomic round-robin counter.
 };
 
 } // namespace euxis::core

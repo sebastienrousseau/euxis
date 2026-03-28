@@ -13,7 +13,7 @@ namespace euxis::etx {
 ChatInputBar::ChatInputBar(FleetRegistry* registry, QWidget* parent)
     : QWidget(parent)
     , registry_(registry)
-    , ghost_engine_(new GhostTextEngine())
+    , ghost_engine_(std::make_unique<GhostTextEngine>())
 {
     setObjectName("chat_input_bar");
     setFixedHeight(80);
@@ -110,6 +110,8 @@ ChatInputBar::ChatInputBar(FleetRegistry* registry, QWidget* parent)
     connect(input_, &QTextEdit::textChanged,
             this, &ChatInputBar::on_text_changed);
 }
+
+ChatInputBar::~ChatInputBar() = default;
 
 void ChatInputBar::set_focus() {
     input_->setFocus();

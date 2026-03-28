@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include <QWidget>
 #include <QTextEdit>
 #include <QPushButton>
@@ -23,6 +25,7 @@ class ChatInputBar : public QWidget {
 public:
     /// Construct an input bar backed by @p registry for agent autocomplete.
     explicit ChatInputBar(FleetRegistry* registry, QWidget* parent = nullptr);
+    ~ChatInputBar() override;
 
     /// Give keyboard focus to the text input.
     void set_focus();
@@ -57,7 +60,7 @@ private:
     void navigate_history(int direction);
 
     FleetRegistry* registry_;
-    GhostTextEngine* ghost_engine_;
+    std::unique_ptr<GhostTextEngine> ghost_engine_;
     QTextEdit* input_;
     QLabel* ghost_label_;
     QPushButton* send_btn_;

@@ -1,6 +1,7 @@
 #include "euxis/core/swarm.hpp"
 #include "euxis/network/ws_client.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <exception>
 #include <format>
@@ -60,10 +61,22 @@ SwarmOrchestrator::SwarmOrchestrator(const std::string& gateway_url,
       connection_breaker_(3, 5.0),
       simulation_mode_(gateway_url.find("localhost") != std::string::npos) {}
 
+/// P10-R2: Maximum number of phases in a playbook.
+constexpr size_t kMaxPhases = 64;
+
+/// P10-R2: Maximum number of delegates per phase.
+constexpr size_t kMaxDelegatesPerPhase = 128;
+
 auto SwarmOrchestrator::execute_playbook(const nlohmann::json& playbook,
                                          const std::string& goal)
     -> std::vector<nlohmann::json> {
-    for (const auto& phase : playbook.value("phases", nlohmann::json::array())) {
+
+    assert(!goal.empty() && "P10-R5: goal must not be empty");
+
+    const auto phases = playbook.value("phases", nlohmann::json::array());
+    assert(phases.size() <= kMaxPhases && "P10-R2: phase count bounded");
+
+    for (const auto& phase : phases) {
         execute_phase(phase, goal);
     }
     return history_;
@@ -72,11 +85,18 @@ auto SwarmOrchestrator::execute_playbook(const nlohmann::json& playbook,
 void SwarmOrchestrator::execute_phase(const nlohmann::json& phase,
                                       const std::string& goal) {
     const auto mode = phase.value("mode", "sequential");
+    const auto delegates = phase.value("delegates", nlohmann::json::array());
+    assert(delegates.size() <= kMaxDelegatesPerPhase && "P10-R2: delegate count bounded");
+
     std::vector<SwarmTask> tasks;
-    for (const auto& d : phase.value("delegates", nlohmann::json::array())) {
+    for (const auto& d : delegates) {
         std::string content = d.value("task_template", "");
-        const auto pos = content.find("${goal}");
-        if (pos != std::string::npos) content.replace(pos, 7, goal);
+        // Replace all occurrences of ${goal}, not just the first.
+        size_t pos = 0;
+        while ((pos = content.find("${goal}", pos)) != std::string::npos) {
+            content.replace(pos, 7, goal);
+            pos += goal.size();
+        }
         
         tasks.push_back({
             .agent_id = d.value("agent", ""),
@@ -104,6 +124,9 @@ void SwarmOrchestrator::execute_phase_parallel(std::vector<SwarmTask>& tasks) {
 }
 
 void SwarmOrchestrator::run_task(SwarmTask& task) {
+    assert(!task.agent_id.empty() && "P10-R5: agent_id must not be empty");
+    assert(!task.run_id.empty() && "P10-R5: run_id must not be empty");
+
     const auto provider = router_.select_provider(task.complexity);
     task.status = "running";
 

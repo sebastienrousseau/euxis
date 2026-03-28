@@ -1,9 +1,13 @@
 #include <euxis/network/ws_client.hpp>
+
+#include <cassert>
+
 #include <spdlog/spdlog.h>
 
 namespace euxis::network {
 
 WebSocketClient::WebSocketClient(const std::string& url) : url_(url) {
+    assert(!url.empty() && "P10-R5: WebSocket URL must not be empty");
     ws_.setUrl(url);
     ws_.setPingInterval(30);
     ws_.enablePong();
@@ -44,9 +48,12 @@ void WebSocketClient::send(const nlohmann::json& message) {
     ws_.send(message.dump());
 }
 
-auto WebSocketClient::send_and_wait(const nlohmann::json& message, int timeout_secs) 
+auto WebSocketClient::send_and_wait(const nlohmann::json& message, int timeout_secs)
     -> std::expected<nlohmann::json, std::string> {
-    
+
+    assert(timeout_secs > 0 && "P10-R5: timeout must be positive");
+    assert(!message.empty() && "P10-R5: message must not be empty");
+
     {
         std::lock_guard<std::mutex> lock(mutex_);
         last_response_ = std::nullopt;

@@ -1,19 +1,27 @@
 #include <euxis/network/mcp_client.hpp>
 #include <euxis/a2a/transport.hpp>
 #include <euxis/a2a/message.hpp>
+
+#include <cassert>
+
 #include <spdlog/spdlog.h>
 
 namespace euxis::network {
 
 McpClient::McpClient(std::shared_ptr<euxis::a2a::ITransport> transport)
-    : transport_(std::move(transport)) {}
+    : transport_(std::move(transport)) {
+    assert(transport_ != nullptr && "P10-R5: transport must not be null");
+}
 
 auto McpClient::send_rpc(const std::string& method, const nlohmann::json& params)
     -> std::expected<nlohmann::json, std::string> {
-    
+
+    assert(!method.empty() && "P10-R5: RPC method must not be empty");
+    assert(transport_ != nullptr && "P10-R5: transport must be initialized");
+
     nlohmann::json rpc_req = {
         {"jsonrpc", "2.0"},
-        {"id", ++request_id_},
+        {"id", request_id_.fetch_add(1, std::memory_order_relaxed) + 1},
         {"method", method}
     };
     if (params != nullptr) {

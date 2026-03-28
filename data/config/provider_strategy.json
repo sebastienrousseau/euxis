@@ -1,6 +1,8 @@
 {
   "version": 1,
   "description": "Provider strategy — semantic task routing policy (user-selected preferences)",
+  "last_reviewed": "2026-03-28",
+  "review_cadence_days": 30,
 
   "defaults": {
     "research": {

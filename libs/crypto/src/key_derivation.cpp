@@ -3,9 +3,13 @@
 #include <sodium.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 
 namespace euxis::crypto {
+
+/// P10-R2: Maximum key size to prevent excessive allocation.
+constexpr size_t kMaxKeySize = 1024;
 
 auto derive_key(std::span<const std::byte> password,
                 std::span<const std::byte> salt,
@@ -13,9 +17,13 @@ auto derive_key(std::span<const std::byte> password,
                 size_t key_size)
     -> std::expected<DerivedKey, CryptoError> {
 
+    assert(!password.empty() && "P10-R5: password/seed must not be empty");
+    assert(key_size > 0 && key_size <= kMaxKeySize && "P10-R2: key_size bounded");
+
     // Fast-path: if iterations is 0, use BLAKE2b (crypto_generichash) instead of Argon2id.
-    // This is significantly faster and suitable for deterministic session key derivation 
-    // where brute-force resistance (memory hardness) is not the primary goal.
+    // WARNING: BLAKE2b is NOT memory-hard. Only use iterations==0 for deterministic
+    // session key derivation where brute-force resistance is not required.
+    // Do NOT use iterations==0 for user-password-based encryption.
     if (iterations == 0) {
         if (key_size < crypto_generichash_BYTES_MIN || key_size > crypto_generichash_BYTES_MAX) {
             return std::unexpected(CryptoError::KeyDerivationFailed);
@@ -96,8 +104,13 @@ auto derive_key(std::span<const std::byte> password,
 }
 
 auto generate_key(size_t size) -> std::vector<std::byte> {
+    assert(size > 0 && size <= kMaxKeySize && "P10-R2: key size bounded");
+
     std::vector<std::byte> key(size);
     randombytes_buf(key.data(), key.size());
+
+    assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), key.size())
+           && "P10-R5: generated key must not be all zeros");
     return key;
 }
 

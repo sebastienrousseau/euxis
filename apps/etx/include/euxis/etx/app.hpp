@@ -1,6 +1,8 @@
 /// @file
 /// @brief ETX app
 #pragma once
+#include <memory>
+
 #include <QMainWindow>
 #include <QStackedWidget>
 #include <string>
@@ -48,7 +50,7 @@ private:
 
     QStackedWidget* screen_stack_;
     ThemeEngine* theme_engine_;
-    ETXConfig* config_;
+    std::unique_ptr<ETXConfig> config_;
     FleetRegistry* registry_;
     ChatEngine* chat_engine_;
 };

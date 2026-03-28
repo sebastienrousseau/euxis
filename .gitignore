@@ -23,8 +23,13 @@ build/out/
 # --- Data & Runtime (Ignore volatile execution data) ---
 data/runtime/context/*
 data/runtime/lifecycle/*
-data/runtime/metrics/events.jsonl
-data/runtime/memory/cortex/db/*
+data/runtime/manifests/*
+data/runtime/memory/cortex/*
+data/runtime/metrics/*
+data/runtime/perf/*
+data/runtime/sessions/*
+data/runtime/verdicts/*
+data/runtime/data/*
 !data/runtime/README.md
 !data/runtime/gateway.json
 

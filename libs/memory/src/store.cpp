@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cstring>
 #include <fstream>
@@ -180,6 +181,9 @@ void EncryptedMemoryStore::derive_agent_key(
 auto EncryptedMemoryStore::store(std::string_view content, MemoryTier tier)
     -> std::expected<EncryptedMemoryEntry, std::string> {
 
+    assert(!content.empty() && "P10-R5: content must not be empty");
+    assert(!agent_did_.empty() && "P10-R5: agent DID must be set");
+
     if (is_key_zeroed(agent_key_)) {
         return std::unexpected(std::string("Agent keys have been destroyed"));
     }
@@ -235,6 +239,9 @@ auto EncryptedMemoryStore::store(std::string_view content, MemoryTier tier)
 // ---------------------------------------------------------------------------
 auto EncryptedMemoryStore::retrieve(std::string_view entry_id)
     -> std::expected<std::string, std::string> {
+
+    assert(!entry_id.empty() && "P10-R5: entry_id must not be empty");
+    assert(!agent_did_.empty() && "P10-R5: agent DID must be set");
 
     if (is_key_zeroed(agent_key_)) {
         return std::unexpected(std::string("Agent keys have been destroyed"));
@@ -345,6 +352,9 @@ auto EncryptedMemoryStore::export_tier_encrypted(MemoryTier tier)
 // load_entries
 // ---------------------------------------------------------------------------
 auto EncryptedMemoryStore::load_entries() -> std::vector<EncryptedMemoryEntry> {
+    /// P10-R2: Maximum number of JSONL entries to read.
+    constexpr size_t kMaxEntries = 100000;
+
     std::vector<EncryptedMemoryEntry> entries;
 
     if (!std::filesystem::exists(store_path_)) {
@@ -358,16 +368,19 @@ auto EncryptedMemoryStore::load_entries() -> std::vector<EncryptedMemoryEntry> {
     }
 
     std::string line;
-    while (std::getline(ifs, line)) {
+    size_t count = 0;
+    while (std::getline(ifs, line) && count < kMaxEntries) {
         if (line.empty()) continue;
         try {
             auto j = nlohmann::json::parse(line);
             entries.push_back(EncryptedMemoryEntry::from_json(j));
+            ++count;
         } catch (const std::exception& ex) {
             spdlog::warn("Skipping malformed JSONL line: {}", ex.what());
         }
     }
 
+    assert(count <= kMaxEntries && "P10-R2: entry count bounded");
     return entries;
 }
 
