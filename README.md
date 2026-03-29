@@ -47,7 +47,7 @@ git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 cd ~/.euxis
 make cpp-configure
 make cpp-build
-make cpp-test       # 2000+ tests across 19 suites
+make cpp-test       # 2,400+ tests across 35 suites
 ```
 
 Binaries are in `cmake-build/apps/cli/`.
@@ -106,7 +106,6 @@ euxis doctor                      # Environment diagnostics
 | `diag` | `doctor` |
 | `metrics` | `stats` |
 | `pb` | `playbook` |
-| `verify-all` | `check` |
 
 ### All Command Groups
 
@@ -126,12 +125,12 @@ euxis-etx                                # Desktop GUI (Qt6)
 
 ```
 apps/             Application layer
-  cli/            Command-line interface (58 commands, 8 groups)
+  cli/            Command-line interface (60 commands, 8 groups)
   etx/            Qt6 desktop GUI (17 screens)
   gateway/        HTTP/WebSocket server
   publisher/      Document rendering engine
 
-libs/             SDK layer
+libs/             SDK layer (16 libraries)
   core/           Execution engine, FinOps routing, swarm orchestration
   runtime/        Agent lifecycle and scheduling
   security/       Threat detection and policy enforcement
@@ -139,7 +138,14 @@ libs/             SDK layer
   crypto/         AES-256-GCM, Ed25519, Argon2id
   metrics/        Telemetry and validation framework
   inference/      Local inference via llama.cpp
+  memory/         Persistent memory store (SQLite-backed)
+  identity/       Agent identity and credential management
   platform/       Platform abstraction (macOS, Linux, WSL)
+  a2a/            Agent-to-agent protocol implementation
+  adapters/       Provider adapters (Slack, Telegram, etc.)
+  bridge/         CLI bridge executor for external tools
+  bench/          Benchmark harness and fixtures
+  publisher/      Document rendering and export
 
 data/             Configuration, agent prompts, playbooks, docs
 ```
@@ -197,4 +203,4 @@ Euxis v0.0.10 · [euxis.co](https://euxis.co)
 [license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
 [license-url]: LICENSE
 [version-badge]: https://img.shields.io/badge/version-v0.0.10-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis/releases/tag/v0.0.10
+[version-url]: https://github.com/sebastienrousseau/euxis

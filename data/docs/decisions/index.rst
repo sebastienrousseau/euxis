@@ -1,4 +1,4 @@
 Decisions
 =========
 
-Decision records are maintained under ``reference/architecture-decisions``.
+Decision records are maintained under ``adr/``.

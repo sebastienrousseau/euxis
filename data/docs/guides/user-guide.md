@@ -50,7 +50,6 @@ The primary user-facing commands. These wrap the underlying playbook engine.
 | `diag` | `doctor` |
 | `metrics` | `stats` |
 | `pb` | `playbook` |
-| `verify-all` | `check` |
 
 ## Lifecycle Commands
 
@@ -155,7 +154,7 @@ Fleet agents execute work within scope. They do not override core authority. For
 - `euxis agents`
 - [Fleet Guide](fleet-guide.md)
 
-**For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../CONSTITUTION.md).**
+**For the complete agent registry, governance document, and detailed authority model, see [CONSTITUTION.md](../policies/CONSTITUTION.md).**
 
 ## Glossary
 

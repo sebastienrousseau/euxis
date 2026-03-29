@@ -180,6 +180,7 @@ euxis stats --last 5
 | `deep` | `review` |
 | `diag` | `doctor` |
 | `metrics` | `stats` |
+| `pb` | `playbook` |
 
 Run `euxis --help` for the full command list across 8 groups.
 

@@ -2,9 +2,8 @@
 
 This directory indexes Architecture Decision Records (ADRs) for Euxis.
 
-## ADR Locations
-- `docs/adr/` — primary ADRs for product and system decisions
-- `docs/reference/architecture-decisions/` — reference copies and legacy ADRs
+## ADR Location
+- `docs/adr/` — all Architecture Decision Records
 
 ## Conventions
 - Use numbered ADRs (`001-...`, `002-...`) with one decision per file.

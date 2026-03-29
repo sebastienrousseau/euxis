@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Provider Strategy Routing**: Semantic task classification with 11 task classes routing to optimal providers (OpenAI for research, Claude for coding, Gemini for security, Ollama for local). Configuration via `data/config/provider_strategy.json`
 - **Forensic Mode Routing**: `route_forensic()` with per-agent overrides — opus for critical agents (architect, strategist, investigator, sentinel, reviewer), sonnet for support agents, gemini-pro for research agents
 - **Benchmark Suite**: Deterministic `--stats` and `--compare` test fixtures with synthetic verdict history (12 entries, 5 compare tests, 7 stats tests)
-- **Command Aliases**: `quick`→triage, `deep`→review, `diag`→doctor, `metrics`→stats, `pb`→playbook, `verify-all`→check
+- **Command Aliases**: `quick`→triage, `deep`→review, `diag`→doctor, `metrics`→stats, `pb`→playbook
 - **Shell Completions**: Tab completion for Bash, Zsh, and Fish (`data/config/completions/`)
 - **Help Smoke Tests**: 9 snapshot-like tests verifying help output stability for all Core commands
 - **Policy Command**: Standalone policy inspection (`show`), validation (`validate`), and enforcement (`check`) without requiring a full playbook run
@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [v0.0.3] - 2026-02-17
+## [0.0.8] - 2026-02-17
 
 ### Added
 - **Multi-Tier Model Routing**: Intelligent cost optimization with capability-to-model mapping (`router.sh`)
@@ -169,7 +169,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed Providers**: OpenCode and Kilo Code removed from supported providers
 
 ### Deprecated
-- **JSON Registry Format**: SQLite is now the primary storage; JSON support will be removed in v0.0.3
+- **JSON Registry Format**: SQLite is now the primary storage; JSON support will be removed in a future release
 
 ### Removed
 - **OpenCode Provider**: Discontinued due to lack of active development
@@ -373,8 +373,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version Comparison Links
 
 [Unreleased]: https://github.com/sebastienrousseau/euxis/compare/v0.0.9...HEAD
-[0.0.9]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.9
-[v0.0.3]: https://github.com/sebastienrousseau/euxis/compare/v0.0.2...v0.0.3
+[0.0.9]: https://github.com/sebastienrousseau/euxis/compare/v0.0.8...v0.0.9
+[0.0.8]: https://github.com/sebastienrousseau/euxis/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/sebastienrousseau/euxis/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/sebastienrousseau/euxis/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/sebastienrousseau/euxis/compare/v0.0.4...v0.0.5

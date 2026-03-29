@@ -65,7 +65,6 @@ euxis policy show                           # Inspect active policy
 | `diag` | `doctor` |
 | `metrics` | `stats` |
 | `pb` | `playbook` |
-| `verify-all` | `check` |
 
 ---
 
@@ -96,8 +95,6 @@ euxis check /srv/project --ci
 euxis check https://github.com/org/repo --policy
 euxis check . --forensic --json
 ```
-
-**Aliases:** `verify-all` resolves to `check`
 
 **See Also:** [euxis triage](#euxis-triage), [euxis review](#euxis-review), [euxis playbook](#euxis-playbook)
 
@@ -136,13 +133,13 @@ euxis triage /repo --json
 **Synopsis:** `euxis review [target] [options]`
 
 **Description:**
-Deep verification using standard mode (5 agents) or forensic mode (all 11 agents). Standard mode runs with a 10-minute budget; forensic with a 20-minute budget.
+Deep verification using standard mode (5 agents) or forensic mode (all 11 agents). Standard mode runs with a 3-5 minute budget; forensic with a 10-15 minute budget.
 
 **Arguments:**
 - `target` - Path, URL, or named target. Defaults to current directory.
 
 **Options:**
-- `--forensic` - Run forensic verification (all agents, 20-minute budget)
+- `--forensic` - Run forensic verification (all agents, 10-15 minute budget)
 - `--policy [path]` - Apply policy evaluation
 - `--ci` - Emit CI-safe output
 - `--json` - Emit artifact JSON to stdout
@@ -292,7 +289,6 @@ euxis policy check . --ci        # run fresh verification under policy
 | `diag` | `doctor` | Diagnostics alias |
 | `metrics` | `stats` | Metrics alias |
 | `pb` | `playbook` | Playbook shorthand |
-| `verify-all` | `check` | Compatibility alias |
 
 ---
 
@@ -428,9 +424,9 @@ euxis health --json
 
 **See Also:** [euxis certify-readiness](#euxis-certify-readiness)
 
-### euxis-verify
+### euxis verify
 
-**Synopsis:** `euxis-verify [OPTIONS]`
+**Synopsis:** `euxis verify [OPTIONS]`
 
 **Description:**
 Comprehensive release gate runner. Supports running all gates or specific subsets.
@@ -457,9 +453,9 @@ euxis-verify --docs --json
 
 **See Also:** [euxis-verify-all](#euxis-verify-all)
 
-### euxis-verify-all
+### euxis verify-all
 
-**Synopsis:** `euxis-verify-all "<goal>" [--dry-run] [--from-gate N]`
+**Synopsis:** `euxis verify-all "<goal>" [--dry-run] [--from-gate N]`
 
 **Description:**
 Canonical sequential verification pipeline. Uses the playbook engine when available and falls back to direct delegation.
@@ -479,9 +475,9 @@ euxis-verify-all "Docs audit" --from-gate 2
 
 ## Memory & Knowledge
 
-### euxis-cortex
+### euxis cortex
 
-**Synopsis:** `euxis-cortex <command> [args]`
+**Synopsis:** `euxis cortex <command> [args]`
 
 **Description:**
 Cross-platform semantic memory system using vector and graph hybrid storage. Manages episodic, semantic, and procedural knowledge.
@@ -515,37 +511,44 @@ euxis-cortex relate 'JWT implementation' auth-module --relation part_of
 
 ---
 
-### euxis-graph
+### euxis graph
 
-**Synopsis:** `euxis-graph <command> [args]`
+**Synopsis:** `euxis graph <command> [args]`
 
 **Description:**
-Knowledge graph operations for entity relationships and semantic connections.
+Query entities, add edges, and traverse the knowledge graph for semantic connections between agents, concepts, and code.
 
 **Commands:**
-- Various graph operations for entities and relationships
+- `query <entity>` - Look up an entity and its relationships
+- `add-edge <source> <target> <relation>` - Create a relationship between entities
 
 **Examples:**
 ```bash
-euxis-graph query "auth-module"
-euxis-graph add-edge source target relationship
+euxis graph query "auth-module"
+euxis graph add-edge source target relationship
 ```
 
 **See Also:** [euxis-cortex](#euxis-cortex)
 
 ---
 
-### euxis-codex
+### euxis codex
 
-**Synopsis:** `euxis-codex <command> [args]`
+**Synopsis:** `euxis codex <command> [args]`
 
 **Description:**
-Code knowledge indexing and retrieval system for codebase understanding.
+Prompt template library: list, render, and validate battle-tested templates for structured agent output.
+
+**Commands:**
+- `list` - List available templates
+- `render <template>` - Render a template with parameters
+- `validate <template>` - Validate template syntax
 
 **Examples:**
 ```bash
-euxis-codex index
-euxis-codex search "authentication"
+euxis codex list
+euxis codex render security-audit
+euxis codex validate my-template
 ```
 
 **See Also:** [euxis-cortex](#euxis-cortex), [euxis-graph](#euxis-graph)
@@ -554,9 +557,9 @@ euxis-codex search "authentication"
 
 ## Agent Orchestration
 
-### euxis-dispatch
+### euxis dispatch
 
-**Synopsis:** `euxis-dispatch <manifest.json> [--mode MODE]`
+**Synopsis:** `euxis dispatch <manifest.json> [--mode MODE]`
 
 **Description:**
 Multi-agent task coordination using dispatch manifests. Orchestrates parallel and sequential agent workflows.
@@ -581,9 +584,9 @@ euxis architect 'Analyze repo and output MISSION MANIFEST.' claude > manifest.js
 
 ---
 
-### euxis-council
+### euxis council
 
-**Synopsis:** `euxis-council <command> [args]`
+**Synopsis:** `euxis council <command> [args]`
 
 **Description:**
 Agent council management for collaborative decision-making and consensus building.
@@ -598,9 +601,9 @@ euxis-council vote proposal-123
 
 ---
 
-### euxis-synthesize
+### euxis synthesize
 
-**Synopsis:** `euxis-synthesize <command> [args]`
+**Synopsis:** `euxis synthesize <command> [args]`
 
 **Description:**
 Dynamic agent synthesis for creating specialized, temporary agents with scoped capabilities.
@@ -619,9 +622,9 @@ euxis-synthesize dissolve custom-validator
 
 ---
 
-### euxis-squad
+### euxis squad
 
-**Synopsis:** `euxis-squad <command> [args]`
+**Synopsis:** `euxis squad <command> [args]`
 
 **Description:**
 Squad-based agent group management for coordinated team operations.
@@ -638,9 +641,9 @@ euxis-squad assign pentester security-team
 
 ## Development & Quality
 
-### euxis-lint
+### euxis lint
 
-**Synopsis:** `euxis-lint [target] [--fix] [--check TYPE]`
+**Synopsis:** `euxis lint [target] [--fix] [--check TYPE]`
 
 **Description:**
 Comprehensive code quality checks including syntax, style, security, and best practices.
@@ -684,9 +687,9 @@ euxis certify-readiness . --strict --json
 
 ---
 
-### euxis-audit-run
+### euxis audit-run
 
-**Synopsis:** `euxis-audit-run [audit-type] [target]`
+**Synopsis:** `euxis audit-run [audit-type] [target]`
 
 **Description:**
 Executes security, compliance, and quality audits on the codebase.
@@ -701,9 +704,9 @@ euxis-audit-run compliance src/
 
 ---
 
-### euxis-license-check
+### euxis license-check
 
-**Synopsis:** `euxis-license-check [--scan] [--report]`
+**Synopsis:** `euxis license-check [--scan] [--report]`
 
 **Description:**
 License compliance verification for dependencies and source code.
@@ -722,9 +725,9 @@ euxis-license-check --report
 
 ---
 
-### euxis-test-infra
+### euxis test-infra
 
-**Synopsis:** `euxis-test-infra [command] [target]`
+**Synopsis:** `euxis test-infra [command] [target]`
 
 **Description:**
 Test infrastructure management and validation. Coordinates test execution across multiple environments.
@@ -739,9 +742,9 @@ euxis-test-infra validate integration
 
 ---
 
-### euxis-cross-platform-verify
+### euxis cross-platform-verify
 
-**Synopsis:** `euxis-cross-platform-verify [--platform PLATFORM]`
+**Synopsis:** `euxis cross-platform-verify [--platform PLATFORM]`
 
 **Description:**
 Cross-platform compatibility verification for Darwin, Linux, and Windows environments.
@@ -761,9 +764,9 @@ euxis-cross-platform-verify --platform linux
 
 ## Automation & Optimization
 
-### euxis-bench
+### euxis bench
 
-**Synopsis:** `euxis-bench [target] [--profile PROFILE]`
+**Synopsis:** `euxis bench [target] [--profile PROFILE]`
 
 **Description:**
 Performance benchmarking and profiling for system components.
@@ -781,9 +784,9 @@ euxis-bench memory --profile intensive
 
 ---
 
-### euxis-optimize
+### euxis optimize
 
-**Synopsis:** `euxis-optimize [target] [options]`
+**Synopsis:** `euxis optimize [target] [options]`
 
 **Description:**
 Performance optimization recommendations and automatic improvements.
@@ -798,9 +801,9 @@ euxis-optimize database-queries
 
 ---
 
-### euxis-kaizen
+### euxis kaizen
 
-**Synopsis:** `euxis-kaizen [focus-area]`
+**Synopsis:** `euxis kaizen [focus-area]`
 
 **Description:**
 Continuous improvement analysis and recommendations for the Euxis system.
@@ -815,9 +818,9 @@ euxis-kaizen workflow-efficiency
 
 ---
 
-### euxis-polish
+### euxis polish
 
-**Synopsis:** `euxis-polish [target]`
+**Synopsis:** `euxis polish [target]`
 
 **Description:**
 Code polish and cleanup operations for improved readability and maintainability.
@@ -832,9 +835,9 @@ euxis-polish src/agents/
 
 ---
 
-### euxis-combo
+### euxis combo
 
-**Synopsis:** `euxis-combo <sequence> [args]`
+**Synopsis:** `euxis combo <sequence> [args]`
 
 **Description:**
 Executes predefined sequences of Euxis operations for common workflows.
@@ -851,9 +854,9 @@ euxis-combo full-audit
 
 ## Communication & Integration
 
-### euxis-bus
+### euxis bus
 
-**Synopsis:** `euxis-bus <command> [args]`
+**Synopsis:** `euxis bus <command> [args]`
 
 **Description:**
 Message bus operations for inter-agent communication and event coordination.
@@ -873,9 +876,9 @@ euxis-bus subscribe security-alerts
 
 ---
 
-### euxis-playbook
+### euxis playbook
 
-**Synopsis:** `euxis-playbook <command> [playbook] [args]`
+**Synopsis:** `euxis playbook <command> [playbook] [args]`
 
 **Description:**
 Playbook execution engine for standardized operational procedures and incident response.
@@ -896,9 +899,9 @@ euxis-playbook validate security-audit.yml
 
 ---
 
-### euxis-loop
+### euxis loop
 
-**Synopsis:** `euxis-loop <command> [args]`
+**Synopsis:** `euxis loop <command> [args]`
 
 **Description:**
 Event loop management for continuous processing and monitoring.
@@ -913,9 +916,9 @@ euxis-loop stop background-tasks
 
 ---
 
-### euxis-hooks
+### euxis hooks
 
-**Synopsis:** `euxis-hooks <command> [hook-name]`
+**Synopsis:** `euxis hooks <command> [hook-name]`
 
 **Description:**
 Git hooks management for automated quality gates and workflow enforcement.
@@ -936,9 +939,9 @@ euxis-hooks uninstall pre-push
 
 ---
 
-### euxis-git-guard
+### euxis git-guard
 
-**Synopsis:** `euxis-git-guard [command]`
+**Synopsis:** `euxis git-guard [command]`
 
 **Description:**
 Git operation protection and safety enforcement to prevent destructive actions.
@@ -955,57 +958,49 @@ euxis-git-guard check-force-push
 
 ## User Interface
 
-### euxis-ui
+### euxis tui
 
-**Synopsis:** `euxis-ui <command> [args]`
+**Synopsis:** `euxis tui`
 
 **Description:**
-User interface tools and components for Euxis interaction.
-
-**Commands:**
-- Various UI-related operations
+Launch the interactive terminal dashboard with fleet monitoring, metrics, and agent management.
 
 **Examples:**
 ```bash
-euxis-ui start
-euxis-ui dashboard
+euxis tui
 ```
 
 **See Also:** [euxis-voice](#euxis-voice), [euxis-slash](#euxis-slash)
 
 ---
 
-### euxis-voice
+### euxis voice
 
-**Synopsis:** `euxis-voice <command> [args]`
+**Synopsis:** `euxis voice [command]`
 
 **Description:**
-Voice interface for hands-free Euxis interaction and voice-driven workflows.
-
-**Commands:**
-- Voice processing and recognition commands
+Start a voice session for hands-free interaction. Processes spoken commands via real-time STT/TTS with streaming WebSocket delivery.
 
 **Examples:**
 ```bash
-euxis-voice start-session
-euxis-voice process-audio input.wav
+euxis voice
 ```
 
 **See Also:** [euxis-ui](#euxis-ui)
 
 ---
 
-### euxis-slash
+### euxis slash
 
-**Synopsis:** `euxis-slash <command> [args]`
+**Synopsis:** `euxis slash <command> [args]`
 
 **Description:**
-Slash command processor for quick Euxis operations via chat interfaces.
+Slash command registry for quick operations via chat interfaces and interactive sessions.
 
 **Examples:**
 ```bash
-euxis-slash process "/deploy staging"
-euxis-slash register new-command
+euxis slash list
+euxis slash register new-command
 ```
 
 **See Also:** [euxis-ui](#euxis-ui)
@@ -1014,9 +1009,9 @@ euxis-slash register new-command
 
 ## Utilities
 
-### euxis-deploy
+### euxis deploy
 
-**Synopsis:** `euxis-deploy [target] [environment]`
+**Synopsis:** `euxis deploy [target] [environment]`
 
 **Description:**
 Deployment operations and environment management.
@@ -1031,9 +1026,9 @@ euxis-deploy production --confirm
 
 ---
 
-### euxis-sync-docs
+### euxis sync-docs
 
-**Synopsis:** `euxis-sync-docs [source] [target]`
+**Synopsis:** `euxis sync-docs [source] [target]`
 
 **Description:**
 Documentation synchronization across repositories and environments.
@@ -1053,20 +1048,17 @@ euxis-sync-docs local remote
 
 ---
 
-### euxis-gym
+### euxis gym
 
-**Synopsis:** `euxis-gym <command> [args]`
+**Synopsis:** `euxis gym <agent> <test>`
 
 **Description:**
-Training and simulation environment for agent development and testing.
-
-**Commands:**
-- Training and simulation operations
+Agent training gym: run evaluation drills and simulation scenarios against specific agents in a sandboxed environment.
 
 **Examples:**
 ```bash
-euxis-gym simulate incident-response
-euxis-gym train new-agent
+euxis gym sentinel incident-response
+euxis gym architect design-review
 ```
 
 **See Also:** [euxis-bench](#euxis-bench)
