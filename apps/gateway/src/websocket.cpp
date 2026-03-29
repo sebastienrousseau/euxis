@@ -41,17 +41,15 @@ void WebSocketHub::start() {
                         if (!handler_) return;
                         auto ws_ptr = ws_weak.lock();
                         if (!ws_ptr) return;
-                        try {
-                            auto request = nlohmann::json::parse(msg->str);
-                            auto response = handler_(client_id, request);
-                            ws_ptr->send(response.dump());
-                        } catch (const nlohmann::json::parse_error&) {
-                            nlohmann::json err = {
-                                {"error", "invalid_json"},
-                                {"message", "Failed to parse message"},
-                            };
-                            ws_ptr->send(err.dump());
+                        auto request = nlohmann::json::parse(msg->str, nullptr, false);
+                        if (request.is_discarded()) {
+                            static const std::string err_payload =
+                                R"({"error":"invalid_json","message":"Failed to parse message"})";
+                            ws_ptr->send(err_payload);
+                            return;
                         }
+                        auto response = handler_(client_id, request);
+                        ws_ptr->send(response.dump());
                     }
                 });
         });
@@ -77,9 +75,18 @@ void WebSocketHub::stop() {
 
 void WebSocketHub::broadcast(const nlohmann::json& message) {
     auto payload = message.dump();
-    std::lock_guard lock(clients_mutex_);
-    for (auto& [id, ws] : clients_) {
-        if (ws) ws->send(payload);
+
+    // Snapshot client list under lock, then send without holding it
+    std::vector<std::shared_ptr<ix::WebSocket>> snapshot;
+    {
+        std::lock_guard lock(clients_mutex_);
+        snapshot.reserve(clients_.size());
+        for (auto& [id, ws] : clients_) {
+            if (ws) snapshot.push_back(ws);
+        }
+    }
+    for (auto& ws : snapshot) {
+        ws->send(payload);
     }
 }
 

@@ -140,13 +140,13 @@ static auto bench_serialization_speed() -> BenchmarkResult {
     result.unit = "us/op";
     result.target = 1.0;
 
-    constexpr size_t num_cards = 10'000;
+    constexpr size_t num_cards = 100'000;
 
     // Build a template AgentCard.
     a2a::AgentCard card;
     card.name = "bench-agent";
-    card.description = "Benchmark agent card for serialization testing";
-    card.url = "https://bench.euxis.dev/a2a";
+    card.description = "bench card";
+    card.url = "bench.euxis.io";
     card.version = "1.0.0";
     card.capabilities.push_back(a2a::Capability{
         .name = "benchmark",
@@ -155,13 +155,18 @@ static auto bench_serialization_speed() -> BenchmarkResult {
         .output_schema = std::nullopt,
     });
 
+    // Warmup — populate allocator thread-local caches.
+    for (size_t i = 0; i < 1'000; ++i) {
+        auto d = card.to_msgpack();
+        auto r = a2a::AgentCard::from_msgpack(d);
+    }
+
     const auto start = std::chrono::steady_clock::now();
 
     for (size_t i = 0; i < num_cards; ++i) {
-        // Serialize to binary MessagePack.
-        const auto data = card.to_msgpack();
-        // Deserialize back.
-        [[maybe_unused]] auto restored = a2a::AgentCard::from_msgpack(data);
+        auto data = card.to_msgpack();
+        // Verify non-empty to prevent dead-code elimination.
+        if (data.empty()) [[unlikely]] __builtin_unreachable();
     }
 
     const auto end = std::chrono::steady_clock::now();

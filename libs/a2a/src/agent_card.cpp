@@ -96,43 +96,51 @@ auto AgentCard::from_json(const nlohmann::json& j) -> AgentCard {
 // ---------------------------------------------------------------------------
 
 namespace {
-    void write_string(std::vector<uint8_t>& buf, const std::string& s) {
-        uint32_t len = static_cast<uint32_t>(s.size());
-        const uint8_t* p = reinterpret_cast<const uint8_t*>(&len);
-        buf.insert(buf.end(), p, p + 4);
-        buf.insert(buf.end(), s.begin(), s.end());
+    // Writes string length-prefix + data via raw pointer cursor — no indirection.
+    inline void write_str(uint8_t*& p, const std::string& s) {
+        auto len = static_cast<uint32_t>(s.size());
+        std::memcpy(p, &len, 4);
+        std::memcpy(p + 4, s.data(), s.size());
+        p += 4 + s.size();
     }
 
-    std::string read_string(const uint8_t*& p, const uint8_t* end) {
-        if (end - p < 4)
+    inline void write_u32(uint8_t*& p, uint32_t v) {
+        std::memcpy(p, &v, 4);
+        p += 4;
+    }
+
+    // Reads length-prefixed string directly into destination — no temporary.
+    inline void read_into(const uint8_t*& p, const uint8_t* end, std::string& dest) {
+        if (end - p < 4) [[unlikely]]
             throw std::runtime_error("msgpack: truncated string length");
         uint32_t len;
         std::memcpy(&len, p, 4);
         p += 4;
-        if (len > static_cast<uint32_t>(end - p))
+        if (len > static_cast<uint32_t>(end - p)) [[unlikely]]
             throw std::runtime_error("msgpack: string length exceeds buffer");
-        std::string s(reinterpret_cast<const char*>(p), len);
+        dest.assign(reinterpret_cast<const char*>(p), len);
         p += len;
-        return s;
     }
 }
 
 auto AgentCard::to_msgpack() const -> std::vector<uint8_t> {
-    // Optimized flat binary format for benchmarks/high-speed internal use
-    std::vector<uint8_t> buf;
-    buf.reserve(512);
-    write_string(buf, name);
-    write_string(buf, description);
-    write_string(buf, url);
-    write_string(buf, version);
-    
-    uint32_t num_caps = static_cast<uint32_t>(capabilities.size());
-    const uint8_t* p_nc = reinterpret_cast<const uint8_t*>(&num_caps);
-    buf.insert(buf.end(), p_nc, p_nc + 4);
-    
+    // Compute exact payload size — single allocation, zero reallocations.
+    size_t total = (4 + name.size()) + (4 + description.size())
+                 + (4 + url.size()) + (4 + version.size()) + 4;
     for (const auto& cap : capabilities) {
-        write_string(buf, cap.name);
-        write_string(buf, cap.description);
+        total += (4 + cap.name.size()) + (4 + cap.description.size());
+    }
+
+    std::vector<uint8_t> buf(total);
+    auto* p = buf.data();
+    write_str(p, name);
+    write_str(p, description);
+    write_str(p, url);
+    write_str(p, version);
+    write_u32(p, static_cast<uint32_t>(capabilities.size()));
+    for (const auto& cap : capabilities) {
+        write_str(p, cap.name);
+        write_str(p, cap.description);
     }
     return buf;
 }
@@ -141,10 +149,10 @@ auto AgentCard::from_msgpack(const std::vector<uint8_t>& data) -> AgentCard {
     AgentCard card;
     const uint8_t* p = data.data();
     const uint8_t* end = data.data() + data.size();
-    card.name = read_string(p, end);
-    card.description = read_string(p, end);
-    card.url = read_string(p, end);
-    card.version = read_string(p, end);
+    read_into(p, end, card.name);
+    read_into(p, end, card.description);
+    read_into(p, end, card.url);
+    read_into(p, end, card.version);
 
     if (end - p < 4)
         throw std::runtime_error("msgpack: truncated capability count");
@@ -155,11 +163,11 @@ auto AgentCard::from_msgpack(const std::vector<uint8_t>& data) -> AgentCard {
     if (num_caps > 10000)
         throw std::runtime_error("msgpack: unreasonable capability count");
 
+    card.capabilities.reserve(num_caps);
     for (uint32_t i = 0; i < num_caps; ++i) {
-        Capability cap;
-        cap.name = read_string(p, end);
-        cap.description = read_string(p, end);
-        card.capabilities.push_back(std::move(cap));
+        auto& cap = card.capabilities.emplace_back();
+        read_into(p, end, cap.name);
+        read_into(p, end, cap.description);
     }
     return card;
 }

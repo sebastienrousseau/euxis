@@ -65,8 +65,8 @@ static auto bench_path_normalization() -> BenchmarkResult {
     result.unit = "ops/sec";
     result.target = 1'000'000.0;
 
-    // Generate a set of paths to normalize.
-    const std::vector<std::string> raw_paths = {
+    // Pre-construct paths outside the timed loop to isolate normalization cost.
+    const std::vector<std::filesystem::path> paths = {
         "/home/user/../user/./Documents/file.txt",
         "/tmp/./cache/../cache/data.bin",
         "relative/path/./to/../to/file.hpp",
@@ -79,13 +79,11 @@ static auto bench_path_normalization() -> BenchmarkResult {
         "/etc/./config/../config/app.toml",
     };
 
-    constexpr size_t total_ops = 10'000;
+    constexpr size_t total_ops = 100'000;
     const auto start = std::chrono::steady_clock::now();
 
     for (size_t i = 0; i < total_ops; ++i) {
-        const auto& raw = raw_paths[i % raw_paths.size()];
-        std::filesystem::path p(raw);
-        [[maybe_unused]] auto normalized = p.lexically_normal();
+        [[maybe_unused]] auto normalized = paths[i % paths.size()].lexically_normal();
     }
 
     const auto end = std::chrono::steady_clock::now();

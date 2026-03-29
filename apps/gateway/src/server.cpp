@@ -76,8 +76,18 @@ void GatewayServer::setup_ws_handlers() {
     ws_hub_.set_message_handler(
         [ws_auth_token](const std::string& client_id,
            const nlohmann::json& message) -> nlohmann::json {
-            auto type = message.value("type", "");
+            // Helper: lookup string field without temporary allocation.
+            static const std::string empty_str;
+            auto get_str = [&](const char* key) -> const std::string& {
+                auto it = message.find(key);
+                if (it == message.end() || !it->is_string())
+                    return empty_str;
+                return it->get_ref<const std::string&>();
+            };
 
+            const auto& type = get_str("type");
+
+            // Ping is the most frequent control message — skip auth.
             if (type == "ping") {
                 return {{"type", "pong"},
                         {"client_id", client_id}};
@@ -85,7 +95,7 @@ void GatewayServer::setup_ws_handlers() {
 
             // Authenticate before processing commands.
             if (!ws_auth_token.empty()) {
-                auto token = message.value("token", "");
+                const auto& token = get_str("token");
                 if (token.size() != ws_auth_token.size() ||
                     sodium_memcmp(token.data(), ws_auth_token.data(),
                                   ws_auth_token.size()) != 0) {
@@ -95,8 +105,8 @@ void GatewayServer::setup_ws_handlers() {
             }
 
             if (type == "dispatch") {
-                auto agent = message.value("agent", "");
-                auto task = message.value("task", "");
+                const auto& agent = get_str("agent");
+                const auto& task = get_str("task");
                 spdlog::info("WS dispatch: agent={}, task={}", agent, task);
                 return {{"type", "dispatch_ack"},
                         {"agent", agent},
@@ -104,7 +114,7 @@ void GatewayServer::setup_ws_handlers() {
             }
 
             if (type == "subscribe") {
-                auto channel = message.value("channel", "");
+                const auto& channel = get_str("channel");
                 return {{"type", "subscribed"},
                         {"channel", channel}};
             }
