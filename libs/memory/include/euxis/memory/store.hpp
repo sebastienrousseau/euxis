@@ -9,6 +9,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 #include "entry.hpp"
 #include "tier.hpp"
@@ -42,8 +43,15 @@ private:
     std::filesystem::path store_path_;
     std::string agent_did_;
 
+    // In-memory cache: populated on first access, invalidated on store()
+    mutable std::vector<EncryptedMemoryEntry> cache_;
+    mutable std::unordered_map<std::string, size_t> cache_index_; // entry_id -> vector index
+    mutable bool cache_valid_{false};
+
     void derive_agent_key(std::span<const std::byte, 32> master_key);
-    auto load_entries() -> std::vector<EncryptedMemoryEntry>;
+    auto entries() const -> const std::vector<EncryptedMemoryEntry>&;
+    void invalidate_cache();
+    auto load_entries_from_disk() const -> std::vector<EncryptedMemoryEntry>;
     void save_entry(const EncryptedMemoryEntry& entry);
 };
 

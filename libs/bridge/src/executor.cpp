@@ -105,6 +105,7 @@ auto safe_spawn(const std::vector<std::string>& argv,
     close(stdout_pipe[1]);
 
     std::string output;
+    output.reserve(64 * 1024);  // Pre-allocate 64KB to avoid early reallocations
     std::array<char, 4096> buffer{};
 
     struct pollfd pfd{};

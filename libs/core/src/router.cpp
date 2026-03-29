@@ -110,12 +110,14 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
 
     const std::scoped_lock lock(session_mutex_);
 
-    if (!session_usage_.contains(session_id)) [[unlikely]] {
+    auto idx_it = session_index_.find(session_id);
+    if (idx_it == session_index_.end()) [[unlikely]] {
         session_order_.push_back(session_id);
+        session_index_[session_id] = std::prev(session_order_.end());
         enforce_limits();
     } else [[likely]] {
-        session_order_.erase(std::remove(session_order_.begin(), session_order_.end(), session_id), session_order_.end());
-        session_order_.push_back(session_id);
+        // O(1) move-to-back via splice (no allocation, no linear scan)
+        session_order_.splice(session_order_.end(), session_order_, idx_it->second);
     }
 
     session_usage_[session_id].push_back({
@@ -130,9 +132,10 @@ void FinOpsRouter::track_session_usage(const std::string& session_id,
 
 void FinOpsRouter::enforce_limits() {
     while (session_order_.size() > session_limit_) [[unlikely]] {
-        const std::string victim = session_order_.front();
-        session_order_.pop_front();
+        const std::string& victim = session_order_.front();
+        session_index_.erase(victim);
         session_usage_.erase(victim);
+        session_order_.pop_front();
     }
 }
 

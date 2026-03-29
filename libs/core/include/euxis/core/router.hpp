@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <deque>
+#include <list>
 #include <map>
 #include <mutex>
 #include <unordered_map>
@@ -75,7 +76,8 @@ private:
 
     std::unordered_map<std::string, size_t> name_to_provider_; ///< O(1) provider lookup index
     std::map<std::string, std::vector<SessionUsageRecord>> session_usage_;
-    std::deque<std::string> session_order_;
+    std::list<std::string> session_order_;
+    std::unordered_map<std::string, std::list<std::string>::iterator> session_index_;
 
     mutable std::mutex session_mutex_;           ///< P10: Thread-safe session tracking.
     std::atomic<size_t> rr_counter_{0};          ///< P10: Atomic round-robin counter.

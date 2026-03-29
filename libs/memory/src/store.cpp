@@ -7,9 +7,8 @@
 #include <cassert>
 #include <chrono>
 #include <cstring>
+#include <format>
 #include <fstream>
-#include <iomanip>
-#include <sstream>
 
 #include "euxis/crypto/aes_gcm.hpp"
 #include "euxis/crypto/key_derivation.hpp"
@@ -88,14 +87,13 @@ namespace {
     std::tm utc_tm{};
     gmtime_r(&time_t_now, &utc_tm);
 
-    // Get milliseconds
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         now.time_since_epoch()) % 1000;
 
-    std::ostringstream oss;
-    oss << std::put_time(&utc_tm, "%Y-%m-%dT%H:%M:%S");
-    oss << '.' << std::setfill('0') << std::setw(3) << ms.count() << 'Z';
-    return oss.str();
+    return std::format("{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}.{:03d}Z",
+                       utc_tm.tm_year + 1900, utc_tm.tm_mon + 1, utc_tm.tm_mday,
+                       utc_tm.tm_hour, utc_tm.tm_min, utc_tm.tm_sec,
+                       static_cast<int>(ms.count()));
 }
 
 /// Generate a random UUID-style hex string (32 hex chars from 16 random bytes).
@@ -247,15 +245,14 @@ auto EncryptedMemoryStore::retrieve(std::string_view entry_id)
         return std::unexpected(std::string("Agent keys have been destroyed"));
     }
 
-    auto entries = load_entries();
-    auto it = std::ranges::find_if(entries, [&](const auto& e) {
-        return e.entry_id == entry_id;
-    });
-
-    if (it == entries.end()) {
+    const auto& all = entries();
+    std::string id_str(entry_id);
+    auto idx_it = cache_index_.find(id_str);
+    if (idx_it == cache_index_.end()) {
         return std::unexpected(
-            std::string("Entry not found: ") + std::string(entry_id));
+            std::string("Entry not found: ") + id_str);
     }
+    auto it = all.begin() + static_cast<std::ptrdiff_t>(idx_it->second);
 
     // Base64-decode.
     auto raw = base64_decode(it->ciphertext_b64);
@@ -295,7 +292,7 @@ auto EncryptedMemoryStore::retrieve_tier(MemoryTier tier, size_t limit)
         return {};
     }
 
-    auto entries = load_entries();
+    const auto& entries = this->entries();
     std::vector<std::string> results;
     results.reserve(std::min(limit, entries.size()));
 
@@ -339,7 +336,7 @@ void EncryptedMemoryStore::destroy_agent_keys() {
 auto EncryptedMemoryStore::export_tier_encrypted(MemoryTier tier)
     -> std::vector<EncryptedMemoryEntry> {
 
-    auto entries = load_entries();
+    const auto& entries = this->entries();
     std::vector<EncryptedMemoryEntry> filtered;
 
     std::ranges::copy_if(entries, std::back_inserter(filtered),
@@ -349,9 +346,29 @@ auto EncryptedMemoryStore::export_tier_encrypted(MemoryTier tier)
 }
 
 // ---------------------------------------------------------------------------
-// load_entries
+// entries (cached access)
 // ---------------------------------------------------------------------------
-auto EncryptedMemoryStore::load_entries() -> std::vector<EncryptedMemoryEntry> {
+auto EncryptedMemoryStore::entries() const -> const std::vector<EncryptedMemoryEntry>& {
+    if (!cache_valid_) {
+        cache_ = load_entries_from_disk();
+        cache_index_.clear();
+        cache_index_.reserve(cache_.size());
+        for (size_t i = 0; i < cache_.size(); ++i) {
+            cache_index_[cache_[i].entry_id] = i;
+        }
+        cache_valid_ = true;
+    }
+    return cache_;
+}
+
+void EncryptedMemoryStore::invalidate_cache() {
+    cache_valid_ = false;
+}
+
+// ---------------------------------------------------------------------------
+// load_entries_from_disk
+// ---------------------------------------------------------------------------
+auto EncryptedMemoryStore::load_entries_from_disk() const -> std::vector<EncryptedMemoryEntry> {
     /// P10-R2: Maximum number of JSONL entries to read.
     constexpr size_t kMaxEntries = 100000;
 
@@ -395,6 +412,12 @@ void EncryptedMemoryStore::save_entry(const EncryptedMemoryEntry& entry) {
         return;
     }
     ofs << entry.to_json().dump() << '\n';
+
+    // Append to cache directly (no full re-read needed)
+    if (cache_valid_) {
+        cache_index_[entry.entry_id] = cache_.size();
+        cache_.push_back(entry);
+    }
 }
 
 } // namespace euxis::memory
