@@ -19,6 +19,7 @@ build/out/
 .idea/
 *.swp
 *~
+.aider.*
 
 # --- Data & Runtime (Ignore volatile execution data) ---
 data/runtime/context/*
@@ -30,8 +31,13 @@ data/runtime/perf/*
 data/runtime/sessions/*
 data/runtime/verdicts/*
 data/runtime/data/*
+data/projects/.euxis/
 !data/runtime/README.md
 !data/runtime/gateway.json
+
+# --- SQLite WAL ---
+*.db-shm
+*.db-wal
 
 # --- Dependencies ---
 node_modules/
