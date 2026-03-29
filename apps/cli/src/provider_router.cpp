@@ -44,6 +44,16 @@ ProviderRouter::ProviderRouter(const std::string& data_dir)
 
     load_config();
     load_strategy_config();
+
+    // Store initial file timestamps for hot-reload detection
+    namespace fs = std::filesystem;
+    auto router_path = fs::path(data_dir_) / "config" / "router.json";
+    auto strategy_path = fs::path(data_dir_) / "config" / "provider_strategy.json";
+    std::error_code ec;
+    if (fs::exists(router_path, ec))
+        router_last_modified_ = fs::last_write_time(router_path, ec);
+    if (fs::exists(strategy_path, ec))
+        strategy_last_modified_ = fs::last_write_time(strategy_path, ec);
 }
 
 void ProviderRouter::load_config() {
@@ -173,7 +183,9 @@ auto ProviderRouter::select_model(Tier tier) const -> ModelSelection {
 
 auto ProviderRouter::route(const std::string& agent_tier,
                             const std::string& task,
-                            const std::string& priority) const -> ModelSelection {
+                            const std::string& priority) -> ModelSelection {
+    check_and_reload();
+
     Tier at = parse_tier(agent_tier);
     Tier tt = analyze_task_tier(task);
     Tier effective = std::max(at, tt);
@@ -212,7 +224,7 @@ auto ProviderRouter::route(const std::string& agent_tier,
 
 auto ProviderRouter::route_flash(const std::string& agent_id,
                                   const std::string& agent_tier,
-                                  const std::string& prompt) const -> ModelSelection {
+                                  const std::string& prompt) -> ModelSelection {
     auto it = flash_overrides_.find(agent_id);
     if (it != flash_overrides_.end()) {
         const auto& ovr = it->second;
@@ -224,7 +236,7 @@ auto ProviderRouter::route_flash(const std::string& agent_id,
 
 auto ProviderRouter::route_standard(const std::string& agent_id,
                                      const std::string& agent_tier,
-                                     const std::string& prompt) const -> ModelSelection {
+                                     const std::string& prompt) -> ModelSelection {
     auto it = standard_overrides_.find(agent_id);
     if (it != standard_overrides_.end()) {
         const auto& ovr = it->second;
@@ -236,7 +248,7 @@ auto ProviderRouter::route_standard(const std::string& agent_id,
 
 auto ProviderRouter::route_forensic(const std::string& agent_id,
                                      const std::string& agent_tier,
-                                     const std::string& prompt) const -> ModelSelection {
+                                     const std::string& prompt) -> ModelSelection {
     auto it = forensic_overrides_.find(agent_id);
     if (it != forensic_overrides_.end()) {
         const auto& ovr = it->second;
@@ -367,7 +379,7 @@ auto ProviderRouter::route_by_strategy(const std::string& task_class,
                                         const std::string& /*agent_id*/,
                                         const std::string& agent_tier,
                                         const std::string& prompt,
-                                        const RouteOptions& opts) const -> ModelSelection {
+                                        const RouteOptions& opts) -> ModelSelection {
     // 1. Explicit provider override (--provider flag)
     if (!opts.provider_override.empty()) {
         std::string model = strategy_model(opts.provider_override, task_class);
@@ -472,7 +484,7 @@ auto ProviderRouter::route_with_policy(const std::string& task,
                                         const std::string& agent_id,
                                         const std::string& agent_tier,
                                         const std::string& pillar,
-                                        const RouteOptions& opts) const -> ModelSelection {
+                                        const RouteOptions& opts) -> ModelSelection {
     // Classify the task
     auto task_class = classify_task_class(task, agent_id, pillar);
 
@@ -487,6 +499,71 @@ auto ProviderRouter::route_with_policy(const std::string& task,
     }
 
     return result;
+}
+
+// --- Hot-reload ---
+
+auto ProviderRouter::reload_config() -> bool {
+    namespace fs = std::filesystem;
+    auto router_path   = fs::path(data_dir_) / "config" / "router.json";
+    auto strategy_path = fs::path(data_dir_) / "config" / "provider_strategy.json";
+
+    // Snapshot previous state to detect changes
+    auto old_config   = config_;
+    auto old_strategy = strategy_config_;
+
+    // Clear mutable maps before re-loading
+    flash_overrides_.clear();
+    standard_overrides_.clear();
+    forensic_overrides_.clear();
+    strategy_defaults_.clear();
+    agent_class_hints_.clear();
+    classification_keywords_.clear();
+
+    // Reset defaults in case the config no longer overrides them
+    models_.routine = "gemini-2.5-flash-lite";
+    models_.data    = "gemini-2.5-flash";
+    models_.code    = "claude-sonnet-4-6";
+    models_.reason  = "claude-opus-4-6";
+
+    load_config();
+    load_strategy_config();
+
+    // Update stored timestamps
+    std::error_code ec;
+    if (fs::exists(router_path, ec))
+        router_last_modified_ = fs::last_write_time(router_path, ec);
+    if (fs::exists(strategy_path, ec))
+        strategy_last_modified_ = fs::last_write_time(strategy_path, ec);
+
+    bool changed = (config_ != old_config) || (strategy_config_ != old_strategy);
+    if (changed) {
+        spdlog::info("provider config hot-reloaded");
+    }
+    return changed;
+}
+
+void ProviderRouter::check_and_reload() {
+    namespace fs = std::filesystem;
+    std::error_code ec;
+
+    auto router_path   = fs::path(data_dir_) / "config" / "router.json";
+    auto strategy_path = fs::path(data_dir_) / "config" / "provider_strategy.json";
+
+    bool needs_reload = false;
+
+    if (fs::exists(router_path, ec)) {
+        auto mtime = fs::last_write_time(router_path, ec);
+        if (!ec && mtime != router_last_modified_) needs_reload = true;
+    }
+    if (!needs_reload && fs::exists(strategy_path, ec)) {
+        auto mtime = fs::last_write_time(strategy_path, ec);
+        if (!ec && mtime != strategy_last_modified_) needs_reload = true;
+    }
+
+    if (needs_reload) {
+        reload_config();
+    }
 }
 
 // --- Availability ---

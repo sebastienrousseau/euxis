@@ -3,8 +3,13 @@
 #include "euxis/cli/auth_profile_store.hpp"
 #include "euxis/cli/provider_router.hpp"
 
+#include <euxis/bridge/policy.hpp>
+#include <euxis/network/resilience.hpp>
+
+#include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 #include <functional>
 
@@ -31,7 +36,8 @@ public:
                                 const std::string& prompt,
                                 int timeout_seconds = 120,
                                 std::optional<ResolvedAuth> auth = std::nullopt,
-                                std::function<void(const std::string&)> on_chunk = nullptr) -> ProviderResponse;
+                                std::function<void(const std::string&)> on_chunk = nullptr,
+                                const bridge::AgentCapabilityToken* capability_token = nullptr) -> ProviderResponse;
 
     /// Load an agent's system prompt from its prompt file (strips YAML frontmatter).
     [[nodiscard]] static auto load_agent_prompt(const std::string& euxis_home,
@@ -55,6 +61,10 @@ public:
 private:
     std::string data_dir_;
     AuthProfileStore auth_store_;
+    std::unordered_map<std::string, std::unique_ptr<euxis::network::CircuitBreaker>> breakers_;
+
+    /// Get or create a circuit breaker for the given provider.
+    auto get_breaker(const std::string& provider) -> euxis::network::CircuitBreaker&;
 
     auto execute_claude(const std::string& model, const std::string& prompt,
                         int timeout, const std::optional<ResolvedAuth>& auth,

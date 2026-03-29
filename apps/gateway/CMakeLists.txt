@@ -9,6 +9,8 @@ euxis_add_library(euxis-gateway-cpp
     src/routes_webhooks.cpp
     src/routes_admin.cpp
     src/mcp.cpp
+    src/mcp_fleet_tools.cpp
+    src/mcp_stdio.cpp
     src/routes_mcp.cpp
     src/websocket.cpp
   DEPS
@@ -28,6 +30,8 @@ euxis_add_library(euxis-gateway-cpp
     tests/test_server.cpp
     tests/test_routes.cpp
     tests/test_mcp.cpp
+    tests/test_mcp_fleet_tools.cpp
+    tests/test_mcp_resources.cpp
     tests/test_websocket.cpp
     tests/test_state.cpp
 )

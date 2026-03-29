@@ -36,6 +36,20 @@ void McpHost::register_tool(std::string name, std::string description,
     handlers_[std::move(name)] = std::move(handler);
 }
 
+void McpHost::register_resource(const std::string& uri,
+                                 const std::string& name,
+                                 const std::string& description,
+                                 const std::string& mime_type,
+                                 McpResourceHandler handler) {
+    resources_.push_back(McpResource{
+        .uri = uri,
+        .name = name,
+        .description = description,
+        .mime_type = mime_type,
+    });
+    resource_handlers_[uri] = std::move(handler);
+}
+
 auto McpHost::handle_request(const nlohmann::json& request) -> nlohmann::json {
     if (!request.contains("jsonrpc") || request["jsonrpc"] != "2.0" ||
         !request.contains("method")) {
@@ -67,6 +81,12 @@ auto McpHost::handle_request(const nlohmann::json& request) -> nlohmann::json {
     if (method == "tools/call") {
         return handle_tools_call(request);
     }
+    if (method == "resources/list") {
+        return handle_resources_list(request);
+    }
+    if (method == "resources/read") {
+        return handle_resources_read(request);
+    }
     if (method == "ping") {
         return handle_ping(request);
     }
@@ -78,11 +98,16 @@ auto McpHost::tools() const -> const std::vector<McpTool>& {
     return tools_;
 }
 
+auto McpHost::resources() const -> const std::vector<McpResource>& {
+    return resources_;
+}
+
 auto McpHost::handle_initialize(const nlohmann::json& req) -> nlohmann::json {
     initialized_ = true;
     nlohmann::json result = {
         {"protocolVersion", protocol_version_},
-        {"capabilities", {{"tools", {{"listChanged", true}}}}},
+        {"capabilities", {{"tools", {{"listChanged", true}}},
+                          {"resources", {{"listChanged", true}}}}},
         {"serverInfo", {{"name", "euxis-gateway"}, {"version", "0.0.3"}}},
     };
     return make_result(req.value("id", nlohmann::json(nullptr)), result);
@@ -120,6 +145,45 @@ auto McpHost::handle_tools_call(const nlohmann::json& req) -> nlohmann::json {
         return make_result(id, {{"content", content}});
     } catch (const std::exception& e) {
         return make_error(id, -32603, std::string("Tool error: ") + e.what());
+    }
+}
+
+auto McpHost::handle_resources_list(const nlohmann::json& req)
+    -> nlohmann::json {
+    auto resources_json = nlohmann::json::array();
+    for (const auto& r : resources_) {
+        resources_json.push_back({
+            {"uri", r.uri},
+            {"name", r.name},
+            {"description", r.description},
+            {"mimeType", r.mime_type},
+        });
+    }
+    return make_result(req.value("id", nlohmann::json(nullptr)),
+                       {{"resources", resources_json}});
+}
+
+auto McpHost::handle_resources_read(const nlohmann::json& req)
+    -> nlohmann::json {
+    auto id = req.value("id", nlohmann::json(nullptr));
+    auto params = req.value("params", nlohmann::json::object());
+    auto uri = params.value("uri", std::string{});
+
+    auto it = resource_handlers_.find(uri);
+    if (it == resource_handlers_.end()) {
+        return make_error(id, -32602, "Unknown resource URI: " + uri);
+    }
+
+    try {
+        auto content = it->second(uri);
+        return make_result(id, {{"contents", {{
+            {"uri", uri},
+            {"mimeType", "application/json"},
+            {"text", content.dump()},
+        }}}});
+    } catch (const std::exception& e) {
+        return make_error(id, -32603,
+                          std::string("Resource error: ") + e.what());
     }
 }
 

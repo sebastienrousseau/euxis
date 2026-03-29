@@ -1,4 +1,5 @@
 #include "euxis/cli/provider_executor.hpp"
+#include "euxis/cli/mcp_provider.hpp"
 #include "euxis/cli/process.hpp"
 
 #include <algorithm>
@@ -20,18 +21,36 @@ ProviderExecutor::ProviderExecutor(const std::string& data_dir)
     auth_store_.auto_import_gemini_oauth();
 }
 
+auto ProviderExecutor::get_breaker(const std::string& provider) -> euxis::network::CircuitBreaker& {
+    auto it = breakers_.find(provider);
+    if (it == breakers_.end()) {
+        auto [inserted, _] = breakers_.emplace(provider, std::make_unique<euxis::network::CircuitBreaker>(5, 10.0));
+        return *inserted->second;
+    }
+    return *it->second;
+}
+
 auto ProviderExecutor::execute(const ModelSelection& selection,
                                 const std::string& prompt,
                                 int timeout_seconds,
                                 std::optional<ResolvedAuth> auth,
-                                std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+                                std::function<void(const std::string&)> on_chunk,
+                                const bridge::AgentCapabilityToken* capability_token) -> ProviderResponse {
     auto start = std::chrono::steady_clock::now();
     std::string effective_provider = selection.provider;
     if (effective_provider == "anthropic") effective_provider = "claude";
 
+    // Capability token enforcement — check before anything else
+    if (capability_token) {
+        auto& allowed = capability_token->allowed_providers;
+        if (std::find(allowed.begin(), allowed.end(), effective_provider) == allowed.end()) {
+            return {false, "", "provider not allowed by capability token", 1, 0.0, {}};
+        }
+    }
+
     // Known providers — validate before mock check so unknown providers always fail
     static const std::vector<std::string> known_providers = {
-        "claude", "openai", "gemini", "ollama", "opencode", "aider", "sgpt", "kiro"
+        "claude", "openai", "gemini", "ollama", "opencode", "aider", "sgpt", "kiro", "mcp"
     };
     bool is_known = false;
     for (const auto& kp : known_providers) {
@@ -47,9 +66,29 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         return {true, "mocked response for " + prompt, "", 0, 10.0, {}};
     }
 
+    // Circuit breaker check — skip provider if circuit is open
+    if (get_breaker(effective_provider).is_open()) {
+        return {false, "", "provider circuit open: " + effective_provider, 1, 0.0, {}};
+    }
+
+    // --- MCP provider — delegate to MCP server ---
+    if (effective_provider == "mcp") {
+        McpProviderBridge mcp_bridge(data_dir_);
+        std::string server_name = selection.model;  // model field holds server name for MCP
+        auto mcp_resp = mcp_bridge.execute(server_name, "generate", {{"prompt", prompt}}, timeout_seconds);
+        auto elapsed = std::chrono::steady_clock::now() - start;
+        mcp_resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
+        return mcp_resp;
+    }
+
     // --- PRIORITY 1: Ollama Native REST ---
     if (effective_provider == "ollama") {
         auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
+        if (resp.success) {
+            get_breaker(effective_provider).record_success();
+        } else if (resp.failure_reason.has_value()) {
+            get_breaker(effective_provider).record_failure();
+        }
         auto elapsed = std::chrono::steady_clock::now() - start;
         resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
         return resp;
@@ -70,6 +109,13 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
     } else {
         resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
+    }
+
+    // Circuit breaker tracking
+    if (resp.success) {
+        get_breaker(effective_provider).record_success();
+    } else if (resp.failure_reason.has_value()) {
+        get_breaker(effective_provider).record_failure();
     }
 
     if (auth.has_value()) {

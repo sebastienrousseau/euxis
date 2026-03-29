@@ -164,6 +164,8 @@
     }
   },
 
+  "mcp_servers": {},
+
   "cost_estimates": {
     "routine": 0.10,
     "data": 0.27,

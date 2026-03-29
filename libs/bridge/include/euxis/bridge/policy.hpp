@@ -53,4 +53,41 @@ struct SkillExecutionPolicy {
     [[nodiscard]] nlohmann::json to_json() const;
 };
 
+/// Per-agent capability token for Zero-Trust execution.
+struct AgentCapabilityToken {
+    std::string agent_id;
+    std::string session_id;
+    std::vector<std::string> allowed_providers;
+    std::vector<std::string> allowed_tools;
+    int max_token_budget{4096};
+    bool filesystem_read_only{true};
+    bool network_deny_all{true};
+    std::string issued_at;
+    std::string expires_at;
+    std::string hmac_signature;
+
+    /// Deterministic canonical string for HMAC computation.
+    [[nodiscard]] auto canonical_string() const -> std::string;
+
+    /// Serialize to JSON.
+    [[nodiscard]] auto to_json() const -> nlohmann::json;
+
+    /// Deserialize from JSON.
+    [[nodiscard]] static auto from_json(const nlohmann::json& j) -> AgentCapabilityToken;
+};
+
+/// Issue a capability token with HMAC-SHA256 signature.
+[[nodiscard]] auto issue_capability_token(
+    const std::string& agent_id,
+    const std::string& session_id,
+    const std::vector<std::string>& allowed_providers,
+    const std::vector<std::string>& allowed_tools,
+    int max_token_budget,
+    const unsigned char* signing_key) -> AgentCapabilityToken;
+
+/// Verify a capability token's HMAC signature.
+[[nodiscard]] auto verify_capability_token(
+    const AgentCapabilityToken& token,
+    const unsigned char* signing_key) -> bool;
+
 } // namespace euxis::bridge

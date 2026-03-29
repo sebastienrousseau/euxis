@@ -1,4 +1,5 @@
 #include "euxis/cli/process.hpp"
+#include <euxis/platform/sandbox.hpp>
 
 #include <array>
 #include <chrono>
@@ -133,6 +134,9 @@ auto Process::run(const std::string& program,
 
     if (pid == 0) {
         ::setsid(); // New process group so timeout kills the entire subprocess tree
+#ifdef __linux__
+        (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
+#endif
         apply_env_vars(env_vars);
         ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);
@@ -179,6 +183,9 @@ auto Process::run_with_input(const std::string& program,
 
     if (pid == 0) {
         ::setsid(); // New process group so timeout kills the entire subprocess tree
+#ifdef __linux__
+        (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
+#endif
         apply_env_vars(env_vars);
         ::close(stdin_pipe[1]); ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdin_pipe[0], STDIN_FILENO); ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);
@@ -228,6 +235,9 @@ auto Process::run_streaming(const std::string& program,
 
     if (pid == 0) {
         ::setsid(); // New process group so timeout kills the entire subprocess tree
+#ifdef __linux__
+        (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
+#endif
         apply_env_vars(env_vars);
         ::close(stdin_pipe[1]); ::close(stdout_pipe[0]); ::close(stderr_pipe[0]);
         ::dup2(stdin_pipe[0], STDIN_FILENO); ::dup2(stdout_pipe[1], STDOUT_FILENO); ::dup2(stderr_pipe[1], STDERR_FILENO);

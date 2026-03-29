@@ -1,6 +1,7 @@
 #pragma once
 
 #include "euxis/core/router.hpp"
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <string>
@@ -59,24 +60,25 @@ public:
     [[nodiscard]] auto analyze_task_tier(const std::string& task) const -> Tier;
 
     /// Get the model for a specific agent + task combination (tier-based).
+    /// Calls check_and_reload() to pick up config changes.
     [[nodiscard]] auto route(const std::string& agent_tier,
                              const std::string& prompt,
-                             const std::string& priority = "") const -> ModelSelection;
+                             const std::string& priority = "") -> ModelSelection;
 
     /// Route with flash-mode overrides.
     [[nodiscard]] auto route_flash(const std::string& agent_id,
                                    const std::string& agent_tier,
-                                   const std::string& prompt) const -> ModelSelection;
+                                   const std::string& prompt) -> ModelSelection;
 
     /// Route with standard-mode overrides.
     [[nodiscard]] auto route_standard(const std::string& agent_id,
                                       const std::string& agent_tier,
-                                      const std::string& prompt) const -> ModelSelection;
+                                      const std::string& prompt) -> ModelSelection;
 
     /// Route with forensic-mode overrides (highest-capability models).
     [[nodiscard]] auto route_forensic(const std::string& agent_id,
                                       const std::string& agent_tier,
-                                      const std::string& prompt) const -> ModelSelection;
+                                      const std::string& prompt) -> ModelSelection;
 
     // --- Strategy routing (new) ---
 
@@ -91,14 +93,14 @@ public:
                                           const std::string& agent_id,
                                           const std::string& agent_tier,
                                           const std::string& prompt,
-                                          const RouteOptions& opts = {}) const -> ModelSelection;
+                                          const RouteOptions& opts = {}) -> ModelSelection;
 
     /// Full routing pipeline: classify + route with overrides and fallbacks.
     [[nodiscard]] auto route_with_policy(const std::string& task,
                                           const std::string& agent_id,
                                           const std::string& agent_tier,
                                           const std::string& pillar = {},
-                                          const RouteOptions& opts = {}) const -> ModelSelection;
+                                          const RouteOptions& opts = {}) -> ModelSelection;
 
     // --- Availability ---
 
@@ -113,6 +115,13 @@ public:
 
     /// Print router status to stdout (includes strategy info).
     void print_status() const;
+
+    /// Re-read both config files and update internal routing maps.
+    /// Returns true if anything changed (file was re-parsed).
+    auto reload_config() -> bool;
+
+    /// Compare current file timestamps with stored values; reload if changed.
+    void check_and_reload();
 
     /// Get fallback model chain for a given model.
     [[nodiscard]] auto model_fallback_chain(const std::string& model) const -> std::vector<ModelSelection>;
@@ -150,6 +159,9 @@ private:
     std::unordered_map<std::string, TaskClassRoute> strategy_defaults_;
     std::unordered_map<std::string, std::string> agent_class_hints_;
     std::unordered_map<std::string, std::vector<std::string>> classification_keywords_;
+
+    std::filesystem::file_time_type router_last_modified_;
+    std::filesystem::file_time_type strategy_last_modified_;
 
     void load_config();
     void load_strategy_config();

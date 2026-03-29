@@ -10,6 +10,7 @@
 #include "euxis/cli/cmd/surface.hpp"
 #include "euxis/cli/cmd/lifecycle.hpp"
 #include "euxis/cli/cmd/certify.hpp"
+#include "euxis/cli/cmd/system_card.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -76,6 +77,7 @@ void Engine::register_commands() {
     commands_.push_back({"shell-lint",             tr("System"),         tr("Lint shell scripts (shellcheck)"),     cmd::cmd_shell_lint});
     commands_.push_back({"verify-all",             tr("System"),         tr("Run all verification checks"),        cmd::cmd_verify_all});
     commands_.push_back({"cross-platform-verify",  tr("System"),         tr("Cross-platform compatibility check"), cmd::cmd_cross_platform_verify});
+    commands_.push_back({"system-card",             tr("System"),         tr("Generate system card"),                cmd::cmd_system_card});
 
     // Fleet (9)
     commands_.push_back({"agent",            tr("Fleet"),          tr("Manage agents (list/register/unregister)"),  cmd::cmd_agent});

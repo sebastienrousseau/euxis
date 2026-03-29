@@ -14,6 +14,7 @@ add_library(euxis-cli-lib STATIC
   src/provider_executor.cpp
   src/auth_profile_store.cpp
   src/cli_provider.cpp
+  src/mcp_provider.cpp
   src/cmd/system.cpp
   src/cmd/fleet.cpp
   src/cmd/knowledge.cpp
@@ -23,7 +24,10 @@ add_library(euxis-cli-lib STATIC
   src/cmd/surface.cpp
   src/cmd/lifecycle.cpp
   src/cmd/certify.cpp
+  src/cmd/system_card.cpp
+  src/agent_mcp_context.cpp
   src/certification.cpp
+  src/playbook_schema.cpp
   src/tui/color_system.cpp
   src/tui/event_loop.cpp
   src/tui/layout.cpp
@@ -44,6 +48,8 @@ target_include_directories(euxis-cli-lib PUBLIC
 )
 target_link_libraries(euxis-cli-lib PUBLIC
   euxis-core-cpp
+  euxis-bridge-cpp
+  euxis-network-cpp
   euxis-platform-cpp
   euxis-runtime-cpp
   euxis-gateway-cpp
@@ -77,6 +83,7 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_surface.cpp
   tests/test_cmd_lifecycle.cpp
   tests/test_cmd_certify.cpp
+  tests/test_cmd_system_card.cpp
   tests/test_auth_profile_store.cpp
   tests/test_process.cpp
   tests/test_provider_executor.cpp
@@ -97,6 +104,10 @@ add_executable(euxis-cli-cpp_tests
   tests/test_context_sidebar.cpp
   tests/test_swarm_view.cpp
   tests/test_text_utils.cpp
+  tests/test_agent_mcp_context.cpp
+  tests/test_mcp_provider.cpp
+  tests/test_verdict.cpp
+  tests/test_playbook_schema.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib

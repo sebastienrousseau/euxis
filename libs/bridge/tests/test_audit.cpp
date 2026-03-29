@@ -107,4 +107,109 @@ TEST_F(AuditTest, CreateParentDirectories) {
     EXPECT_TRUE(std::filesystem::exists(log_path));
 }
 
+// --- P0-1: Hash-chained audit log tests ---
+
+TEST_F(AuditTest, EntryContainsPrevHash) {
+    auto log_path = tmp_dir_ / "chain.jsonl";
+    AuditLogger logger(log_path);
+
+    logger.log("event", "skill");
+
+    std::ifstream f(log_path);
+    std::string line;
+    std::getline(f, line);
+    auto j = nlohmann::json::parse(line);
+
+    EXPECT_TRUE(j.contains("prev_hash"));
+    // First entry has empty prev_hash (chain root)
+    EXPECT_EQ(j["prev_hash"], "");
+}
+
+TEST_F(AuditTest, ChainLinksCorrectly) {
+    auto log_path = tmp_dir_ / "chain.jsonl";
+    AuditLogger logger(log_path);
+
+    logger.log("event1", "skill-a");
+    logger.log("event2", "skill-b");
+
+    std::ifstream f(log_path);
+    std::string line1, line2;
+    std::getline(f, line1);
+    std::getline(f, line2);
+
+    auto j2 = nlohmann::json::parse(line2);
+    // Second entry's prev_hash should be non-empty (hash of first line)
+    EXPECT_FALSE(j2["prev_hash"].get<std::string>().empty());
+}
+
+TEST_F(AuditTest, VerifyChainValid) {
+    auto log_path = tmp_dir_ / "chain.jsonl";
+    AuditLogger logger(log_path);
+
+    logger.log("event1", "skill-a");
+    logger.log("event2", "skill-b");
+    logger.log("event3", "skill-c");
+
+    EXPECT_TRUE(AuditLogger::verify_chain(log_path));
+}
+
+TEST_F(AuditTest, VerifyChainDetectsTampering) {
+    auto log_path = tmp_dir_ / "chain.jsonl";
+    {
+        AuditLogger logger(log_path);
+        logger.log("event1", "skill-a");
+        logger.log("event2", "skill-b");
+        logger.log("event3", "skill-c");
+    }
+
+    // Tamper with the second line
+    std::vector<std::string> lines;
+    {
+        std::ifstream f(log_path);
+        std::string line;
+        while (std::getline(f, line)) {
+            lines.push_back(line);
+        }
+    }
+    ASSERT_GE(lines.size(), 2u);
+    auto j = nlohmann::json::parse(lines[1]);
+    j["skill_name"] = "tampered";
+    lines[1] = j.dump();
+
+    {
+        std::ofstream f(log_path, std::ios::trunc);
+        for (const auto& l : lines) {
+            f << l << '\n';
+        }
+    }
+
+    EXPECT_FALSE(AuditLogger::verify_chain(log_path));
+}
+
+TEST_F(AuditTest, VerifyEmptyFileIsValid) {
+    auto log_path = tmp_dir_ / "empty.jsonl";
+    // File doesn't exist — valid chain
+    EXPECT_TRUE(AuditLogger::verify_chain(log_path));
+
+    // Create empty file — also valid
+    { std::ofstream f(log_path); }
+    EXPECT_TRUE(AuditLogger::verify_chain(log_path));
+}
+
+TEST_F(AuditTest, ChainHeadUpdates) {
+    auto log_path = tmp_dir_ / "chain.jsonl";
+    AuditLogger logger(log_path);
+
+    EXPECT_TRUE(logger.chain_head_hash().empty());
+
+    logger.log("event1", "skill-a");
+    auto hash1 = logger.chain_head_hash();
+    EXPECT_FALSE(hash1.empty());
+    EXPECT_EQ(hash1.size(), 64u);  // SHA-256 hex = 64 chars
+
+    logger.log("event2", "skill-b");
+    auto hash2 = logger.chain_head_hash();
+    EXPECT_NE(hash1, hash2);
+}
+
 }  // namespace euxis::bridge

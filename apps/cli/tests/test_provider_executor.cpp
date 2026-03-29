@@ -1,8 +1,14 @@
 #include "euxis/cli/provider_executor.hpp"
 
+#include <euxis/network/resilience.hpp>
+
 #include <gtest/gtest.h>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <memory>
+#include <thread>
+#include <unordered_map>
 
 namespace euxis::cli {
 namespace {
@@ -455,6 +461,51 @@ TEST_F(ProviderExecutorFileTest, ExecuteNoAuthFallback) {
     auto resp = executor.execute(sel, "hello", 3);
     EXPECT_FALSE(resp.success);
     EXPECT_TRUE(resp.error.find("Unknown provider") != std::string::npos);
+}
+
+// ---- Circuit breaker tests ----
+
+TEST(ProviderExecutorCircuitTest, BreakerTripsAfterFailures) {
+    // Verify the breaker concept with direct CircuitBreaker usage
+    euxis::network::CircuitBreaker breaker(3, 0.1);
+    EXPECT_FALSE(breaker.is_open());
+    breaker.record_failure();
+    breaker.record_failure();
+    breaker.record_failure();
+    EXPECT_TRUE(breaker.is_open());
+}
+
+TEST(ProviderExecutorCircuitTest, RecoveryAllowsRetry) {
+    euxis::network::CircuitBreaker breaker(2, 0.001);  // Very short recovery
+    breaker.record_failure();
+    breaker.record_failure();
+    EXPECT_TRUE(breaker.is_open());
+    // After recovery timeout, should allow retry
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    EXPECT_FALSE(breaker.is_open());
+}
+
+TEST(ProviderExecutorCircuitTest, SuccessResets) {
+    euxis::network::CircuitBreaker breaker(3, 10.0);
+    breaker.record_failure();
+    breaker.record_failure();
+    breaker.record_success();
+    EXPECT_FALSE(breaker.is_open());
+    breaker.record_failure();
+    breaker.record_failure();
+    EXPECT_FALSE(breaker.is_open()); // Only 2 since last reset
+}
+
+TEST(ProviderExecutorCircuitTest, MultipleProvidersIndependent) {
+    std::unordered_map<std::string, std::unique_ptr<euxis::network::CircuitBreaker>> breakers;
+    breakers.emplace("claude", std::make_unique<euxis::network::CircuitBreaker>(2, 10.0));
+    breakers.emplace("gemini", std::make_unique<euxis::network::CircuitBreaker>(2, 10.0));
+
+    breakers.at("claude")->record_failure();
+    breakers.at("claude")->record_failure();
+
+    EXPECT_TRUE(breakers.at("claude")->is_open());
+    EXPECT_FALSE(breakers.at("gemini")->is_open());
 }
 
 } // namespace

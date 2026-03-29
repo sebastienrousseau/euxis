@@ -1,4 +1,5 @@
 #include "euxis/cli/cmd/fleet.hpp"
+#include "euxis/cli/agent_mcp_context.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
@@ -7,9 +8,13 @@
 #include "euxis/cli/registry_client.hpp"
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
+#include "euxis/bridge/provenance.hpp"
+
+#include <unistd.h>
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
@@ -1175,6 +1180,153 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
     return 0;
 }
 
+// --- P1-1: Deterministic Verdict Verification ---
+
+struct VerdictViolation {
+    std::string rule;
+    std::string detail;
+};
+
+auto verify_verdict_consistency(const std::string& verdict,
+                                 const std::vector<AgentEvidence>& evidence,
+                                 int confidence,
+                                 const std::vector<ContradictionEntry>& contradictions) -> std::vector<VerdictViolation> {
+    std::vector<VerdictViolation> violations;
+
+    int effective_fails = 0, timeout_count = 0, passes = 0;
+    for (const auto& ev : evidence) {
+        if (ev.verdict == "FAILED") effective_fails++;
+        if (ev.verdict == "TIMEOUT" && ev.raw_verdict == "FAIL") effective_fails++;
+        if (ev.verdict == "TIMEOUT") timeout_count++;
+        if (ev.verdict == "PASS") passes++;
+    }
+    bool has_contradiction = !contradictions.empty();
+
+    // Rule 1: TRUSTED requires no contradictions, no fails, no timeouts, high confidence
+    if (verdict == "TRUSTED") {
+        if (has_contradiction) violations.push_back({"R1", "TRUSTED with contradictions"});
+        if (effective_fails > 0) violations.push_back({"R1", "TRUSTED with effective_fails > 0"});
+        if (timeout_count > 0) violations.push_back({"R1", "TRUSTED with timeouts"});
+        if (confidence < 80) violations.push_back({"R1", "TRUSTED with confidence < 80"});
+    }
+
+    // Rule 2: BLOCKED requires fails and no passes
+    if (verdict == "BLOCKED" && (effective_fails == 0 || passes > 0)) {
+        violations.push_back({"R2", "BLOCKED without unanimous failure"});
+    }
+
+    // Rule 3: INCONCLUSIVE requires contradiction
+    if (verdict == "INCONCLUSIVE" && !has_contradiction) {
+        violations.push_back({"R3", "INCONCLUSIVE without contradictions"});
+    }
+
+    // Rule 4: All-TIMEOUT cannot be TRUSTED
+    if (verdict == "TRUSTED" && timeout_count == (int)evidence.size() && !evidence.empty()) {
+        violations.push_back({"R4", "TRUSTED with all agents timed out"});
+    }
+
+    // Rule 5: Decisive negatives > 50% cannot be TRUSTED or TRUSTED WITH GAPS
+    if (!evidence.empty() && effective_fails > (int)evidence.size() / 2) {
+        if (verdict == "TRUSTED" || verdict == "TRUSTED WITH GAPS") {
+            violations.push_back({"R5", "Positive verdict with majority decisive negatives"});
+        }
+    }
+
+    return violations;
+}
+
+// --- P1-3: Cross-Fleet Drift Detection ---
+
+struct DriftAlert {
+    std::string agent_id;
+    std::string metric;  // "verdict_distribution", "latency", "evidence_density"
+    double baseline_value{0.0};
+    double current_value{0.0};
+    double deviation_pct{0.0};
+    std::string severity;  // "info", "warning", "alert"
+};
+
+auto detect_agent_drift(const std::string& euxis_home,
+                         const std::vector<AgentEvidence>& current_evidence) -> std::vector<DriftAlert> {
+    std::vector<DriftAlert> alerts;
+
+    auto history_path = fs::path(euxis_home) / "data" / "runtime" / "sessions" / "history.jsonl";
+    if (!fs::exists(history_path)) return alerts;
+
+    // Load last 10 runs
+    std::vector<nlohmann::json> history;
+    {
+        std::ifstream hf(history_path);
+        std::string line;
+        while (std::getline(hf, line)) {
+            if (line.empty()) continue;
+            try { history.push_back(nlohmann::json::parse(line)); }
+            catch (...) { continue; }
+        }
+    }
+    if (history.size() < 3) return alerts;  // Need at least 3 runs for baselines
+
+    // Take last 10
+    if (history.size() > 10) {
+        history = std::vector<nlohmann::json>(history.end() - 10, history.end());
+    }
+
+    // Per-agent analysis
+    for (const auto& ev : current_evidence) {
+        // Collect historical latencies for this agent from agent_status sections
+        std::vector<double> hist_latencies;
+        int hist_timeout_count = 0;
+        int hist_total = 0;
+
+        for (const auto& h : history) {
+            if (!h.contains("agent_status")) continue;
+            auto& status = h["agent_status"];
+            if (!status.contains(ev.agent_name)) continue;
+            auto& agent = status[ev.agent_name];
+            hist_total++;
+            if (agent.contains("duration_ms")) {
+                hist_latencies.push_back(agent["duration_ms"].get<double>());
+            }
+            if (agent.contains("status") && agent["status"] == "TIMEOUT") {
+                hist_timeout_count++;
+            }
+        }
+
+        if (hist_latencies.size() < 3) continue;
+
+        // Compute mean and stddev for latency
+        double sum = 0;
+        for (double l : hist_latencies) sum += l;
+        double mean = sum / hist_latencies.size();
+        double var_sum = 0;
+        for (double l : hist_latencies) var_sum += (l - mean) * (l - mean);
+        double stddev = std::sqrt(var_sum / hist_latencies.size());
+
+        // Check latency deviation
+        if (stddev > 0 && std::abs(ev.duration_ms - mean) > 2 * stddev) {
+            double deviation = ((ev.duration_ms - mean) / mean) * 100.0;
+            alerts.push_back({
+                ev.agent_id, "latency", mean, ev.duration_ms, deviation,
+                std::abs(deviation) > 100 ? "alert" : "warning"
+            });
+        }
+
+        // Check timeout spike
+        if (hist_total > 0) {
+            double hist_timeout_rate = (double)hist_timeout_count / hist_total;
+            double current_timeout = (ev.verdict == "TIMEOUT") ? 1.0 : 0.0;
+            if (current_timeout > 0 && hist_timeout_rate < 0.3) {
+                alerts.push_back({
+                    ev.agent_id, "verdict_distribution", hist_timeout_rate * 100, 100.0,
+                    100.0 - hist_timeout_rate * 100, "warning"
+                });
+            }
+        }
+    }
+
+    return alerts;
+}
+
 // --- playbook ---
 
 int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
@@ -1350,12 +1502,14 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::string goal = "Audit and improve the codebase";
     std::string manifest_name = args[0];
     bool ci_mode = false;
+    bool human_approve = false;
     std::string policy_path;
     bool policy_flag = false;
 
     for (size_t i = 1; i < args.size(); ++i) {
         if (args[i] == "--mode" && i + 1 < args.size()) { mode = args[++i]; }
         else if (args[i] == "--ci") { ci_mode = true; }
+        else if (args[i] == "--human-approve") { human_approve = true; }
         else if (args[i] == "--policy") {
             policy_flag = true;
             if (i + 1 < args.size() && !args[i + 1].starts_with("--")) policy_path = args[++i];
@@ -1387,6 +1541,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     RegistryClient registry(ctx.data_dir);
     ProviderRouter router(ctx.data_dir);
     ProviderExecutor executor(ctx.data_dir);
+    AgentMcpContext agent_context;  // P2-5: Shared agent context
     Session session(ctx.euxis_home);
 
     // --- SYSTEM INITIALIZATION PROBE ---
@@ -1483,10 +1638,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::unordered_map<std::string, std::string> step_outputs;
     std::unordered_map<std::string, std::string> step_verdicts;
     std::vector<AgentEvidence> evidence_log;
+    std::vector<ModelSelection> agent_model_selections;  // P0-5: AIBOM tracking
     std::vector<double> agent_latencies;
     std::vector<bool> started(plans.size(), false);
     std::string session_failover;
     double total_estimated_cost = 0.0;
+    std::unordered_map<std::string, bool> agent_retried;  // P1-2: max 1 retry per agent
+    std::vector<nlohmann::json> reflexion_log;  // P1-2: reflexion outcomes
     std::vector<std::string> critical_gaps; // Concrete gap reasons
 
     auto start_time = std::chrono::steady_clock::now();
@@ -1643,6 +1801,14 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                         if (!session_failover.empty()) { m.provider = session_failover; m.model = "qwen2.5-coder:7b"; is_degraded = true; }
                     }
 
+                    // P2-5: Inject prior agent context for reviewer
+                    if (plan.agent_id == "reviewer") {
+                        auto prior_context = agent_context.build_context_summary();
+                        if (!prior_context.empty()) {
+                            context += "\n" + prior_context;
+                        }
+                    }
+
                     auto response = executor.execute(m, ProviderExecutor::build_prompt("", plan.task, context), agent_timeout);
                     bool timed_out = (response.exit_code == 124 || response.exit_code == 137 || response.exit_code == 143 ||
                                       response.duration_ms > agent_timeout * 1000.0);
@@ -1693,6 +1859,38 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                                 exec_backed, inferred, total_claims_parsed,
                                 findings, is_degraded, raw_v
                             });
+                            agent_model_selections.push_back(m);  // P0-5: AIBOM
+                            agent_context.publish_agent_findings(plan.agent_id, status, findings, response.duration_ms);  // P2-5
+
+                            // P1-2: Reflexion loop — retry on TIMEOUT if budget allows
+                            if ((status == "TIMEOUT" || (exec_backed == 0 && inferred > 2 * exec_backed)) &&
+                                !agent_retried[plan.agent_id]) {
+                                auto remaining_ms_now = sla.budget_ms - std::chrono::duration<double, std::milli>(
+                                    std::chrono::steady_clock::now() - start_time).count();
+                                if (remaining_ms_now >= sla.agent_timeout_s * 500.0) {
+                                    agent_retried[plan.agent_id] = true;
+                                    std::string reflexion_prompt = "Your previous attempt " +
+                                        std::string(status == "TIMEOUT" ? "timed out" : "produced low-quality output") +
+                                        ". Focus on execution-backed claims. Be concise (200 words max).\n\n" + plan.task;
+
+                                    auto retry_response = executor.execute(m,
+                                        ProviderExecutor::build_prompt("", reflexion_prompt, ""),
+                                        agent_timeout / 2);
+
+                                    if (retry_response.success && !retry_response.output.empty()) {
+                                        auto [r_exec, r_inf, r_total] = parse_evidence_depth(retry_response.output);
+                                        bool improved = (r_exec > exec_backed);
+                                        reflexion_log.push_back({
+                                            {"agent_id", plan.agent_id},
+                                            {"original_verdict", status},
+                                            {"retry_duration_ms", retry_response.duration_ms},
+                                            {"improved", improved}
+                                        });
+                                        tui << "      " << term::dim("Reflexion: " + plan.name +
+                                            (improved ? " improved" : " no improvement")) << "\n";
+                                    }
+                                }
+                            }
 
                             // Track concrete gaps
                             if (status == "TIMEOUT") {
@@ -2329,6 +2527,150 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         artifact["policy_passed"] = policy_violations.empty();
     }
 
+    // --- P0-5: AIBOM (AI Bill of Materials) ---
+    {
+        nlohmann::json aibom;
+        aibom["schema"] = "euxis.aibom";
+        aibom["version"] = "1.0.0";
+
+        // Models used per agent
+        auto tier_str = [](Tier t) -> std::string {
+            switch (t) {
+                case Tier::Routine: return "routine";
+                case Tier::Data:    return "data";
+                case Tier::Code:    return "code";
+                case Tier::Reason:  return "reason";
+            }
+            return "unknown";
+        };
+        aibom["models_used"] = nlohmann::json::array();
+        for (size_t i = 0; i < evidence_log.size() && i < agent_model_selections.size(); ++i) {
+            const auto& ev = evidence_log[i];
+            const auto& ms = agent_model_selections[i];
+            aibom["models_used"].push_back({
+                {"provider", ms.provider}, {"model", ms.model},
+                {"tier", tier_str(ms.tier)}, {"agent_id", ev.agent_id}
+            });
+        }
+
+        // Tools used (CLI bridges invoked)
+        std::vector<std::string> tools_used;
+        for (const auto& ms : agent_model_selections) {
+            if (ms.provider == "aider" || ms.provider == "sgpt" ||
+                ms.provider == "kiro" || ms.provider == "opencode") {
+                if (std::find(tools_used.begin(), tools_used.end(), ms.provider) == tools_used.end())
+                    tools_used.push_back(ms.provider);
+            }
+        }
+        aibom["tools_used"] = tools_used;
+
+        // Runtime info
+        aibom["runtime"] = {
+            {"compiler",
+#if defined(__clang__)
+             "clang " + std::to_string(__clang_major__) + "." + std::to_string(__clang_minor__)
+#elif defined(__GNUC__)
+             "gcc " + std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__)
+#else
+             "unknown"
+#endif
+            },
+            {"cpp_standard", std::to_string(__cplusplus)},
+            {"platform",
+#if defined(__linux__)
+             "linux"
+#elif defined(__APPLE__)
+             "macos"
+#else
+             "unknown"
+#endif
+            }
+        };
+
+        artifact["aibom"] = aibom;
+    }
+
+    // --- P1-7: Machine-Readable Provenance (SLSA v1) ---
+    {
+        nlohmann::json provenance;
+        provenance["builder"] = {{"id", "euxis-cli/v0.0.10"}};
+        provenance["build_type"] = "https://slsa.dev/provenance/v1";
+        provenance["invocation"] = {
+            {"parameters", {
+                {"mode", original_mode},
+                {"playbook", manifest_name},
+                {"goal", goal}
+            }}
+        };
+
+        // Materials — hash the target
+        provenance["materials"] = nlohmann::json::array();
+        if (!goal.empty()) {
+            // Try to hash the target directory/file
+            auto target_path = fs::path(goal);
+            if (fs::exists(target_path)) {
+                auto hash = bridge::ProvenanceChain::hash_file(target_path);
+                if (!hash.empty()) {
+                    provenance["materials"].push_back({
+                        {"uri", target_path.string()},
+                        {"digest", {{"sha256", hash}}}
+                    });
+                }
+            }
+        }
+
+        // Metadata
+        provenance["metadata"] = {
+            {"build_started_on", timestamp},
+            {"build_finished_on", timestamp},
+            {"completeness", {
+                {"parameters", true},
+                {"environment", false},
+                {"materials", !provenance["materials"].empty()}
+            }}
+        };
+
+        artifact["provenance"] = provenance;
+    }
+
+    // --- P1-1: Deterministic Verdict Verification ---
+    {
+        auto violations = verify_verdict_consistency(verdict_text, evidence_log, confidence, contradictions);
+        if (!violations.empty()) {
+            artifact["verdict_violations"] = nlohmann::json::array();
+            for (const auto& v : violations) {
+                artifact["verdict_violations"].push_back({{"rule", v.rule}, {"detail", v.detail}});
+                tui << "    " << term::yellow("VERDICT CHECK") << " " << term::dim("[" + v.rule + "] " + v.detail) << "\n";
+            }
+            // Cap verdict downward if violations detected
+            if (verdict_text == "TRUSTED") {
+                verdict_text = "TRUSTED WITH GAPS";
+                artifact["verdict"] = verdict_text;
+                artifact["verdict_capped"] = true;
+            }
+        }
+    }
+
+    // --- P1-2: Reflexion Loop Outcomes ---
+    if (!reflexion_log.empty()) {
+        artifact["reflexion"] = reflexion_log;
+    }
+
+    // --- P1-3: Cross-Fleet Drift Detection ---
+    {
+        auto drift_alerts = detect_agent_drift(ctx.euxis_home, evidence_log);
+        if (!drift_alerts.empty()) {
+            artifact["drift_alerts"] = nlohmann::json::array();
+            for (const auto& da : drift_alerts) {
+                artifact["drift_alerts"].push_back({
+                    {"agent_id", da.agent_id}, {"metric", da.metric},
+                    {"baseline", da.baseline_value}, {"current", da.current_value},
+                    {"deviation_pct", da.deviation_pct}, {"severity", da.severity}
+                });
+            }
+        }
+    }
+
     auto artifact_path = fs::path(ctx.euxis_home) / "data" / "runtime" / "sessions" / "latest_verdict.json";
     fs::create_directories(artifact_path.parent_path());
     std::ofstream af(artifact_path);
@@ -2488,6 +2830,31 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
             }
         }
         tui << "\n";
+    }
+
+    // --- P0-2: Human Oversight Gate ---
+    if (human_approve) {
+        if (!isatty(STDIN_FILENO)) {
+            std::cerr << "Error: --human-approve requires an interactive terminal (stdin is not a TTY)\n";
+            artifact["human_approved"] = false;
+            // Re-save artifact with human_approved field
+            { std::ofstream af2(artifact_path); af2 << artifact.dump(2); }
+            return 2;
+        }
+        tui << term::bold(term::cyan("  === HUMAN OVERSIGHT GATE ===")) << "\n";
+        tui << "    Verdict: " << verdict_text << " (" << confidence << "% confidence)\n";
+        tui << "    Do you approve this verdict? [y/N]: ";
+        std::string response;
+        std::getline(std::cin, response);
+        bool approved = !response.empty() && (response[0] == 'y' || response[0] == 'Y');
+        artifact["human_approved"] = approved;
+        // Re-save artifact with human_approved field
+        { std::ofstream af2(artifact_path); af2 << artifact.dump(2); }
+        if (!approved) {
+            tui << "    " << term::red("Verdict REJECTED by human reviewer.") << "\n\n";
+            return 1;
+        }
+        tui << "    " << term::green("Verdict APPROVED by human reviewer.") << "\n\n";
     }
 
     // --- CI MODE: Emit JSON to stdout ---
