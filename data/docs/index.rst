@@ -92,19 +92,6 @@ See ``reports/initial-user-expectations-2026-02-18`` for full details.
 
    policies/index
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Legacy Docs
-
-   legacy/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Archive
-
-   archive/index
-
-
 Indices and tables
 ==================
 
