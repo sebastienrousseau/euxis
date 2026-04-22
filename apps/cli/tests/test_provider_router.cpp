@@ -928,5 +928,42 @@ TEST(HotReloadTest, ReloadUpdatesRouting) {
     std::filesystem::remove_all(tmp);
 }
 
+TEST(HotReloadTest, CorruptFilePreservesExistingConfig) {
+    auto tmp = std::filesystem::temp_directory_path() / ("euxis_test_corrupt_" + std::to_string(getpid()));
+    std::filesystem::create_directories(tmp / "config");
+
+    // Write valid initial config with a standard override
+    nlohmann::json router_cfg;
+    router_cfg["models"] = {{"routine", "gemini-2.5-flash-lite"}, {"data", "gemini-2.5-flash"},
+                             {"code", "claude-sonnet-4-6"}, {"reason", "claude-opus-4-6"}};
+    router_cfg["standard_overrides"] = {{"architect", {{"provider", "claude"}, {"model", "claude-sonnet-4-6"}, {"cost", 3.0}}}};
+    std::ofstream(tmp / "config" / "router.json") << router_cfg.dump();
+
+    nlohmann::json strategy_cfg;
+    strategy_cfg["defaults"] = nlohmann::json::object();
+    std::ofstream(tmp / "config" / "provider_strategy.json") << strategy_cfg.dump();
+
+    ProviderRouter router(tmp.string());
+
+    // Verify the standard override loaded
+    auto sel = router.route_standard("architect", "code", "test");
+    EXPECT_EQ(sel.provider, "claude");
+    EXPECT_EQ(sel.model, "claude-sonnet-4-6");
+
+    // Now corrupt router.json with invalid JSON
+    std::ofstream(tmp / "config" / "router.json") << "NOT VALID JSON {{{";
+
+    // reload_config should return false and leave overrides intact
+    bool changed = router.reload_config();
+    EXPECT_FALSE(changed);
+
+    // Overrides should still work as before
+    auto sel2 = router.route_standard("architect", "code", "test");
+    EXPECT_EQ(sel2.provider, "claude");
+    EXPECT_EQ(sel2.model, "claude-sonnet-4-6");
+
+    std::filesystem::remove_all(tmp);
+}
+
 } // namespace
 } // namespace euxis::cli

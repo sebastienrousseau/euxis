@@ -508,26 +508,99 @@ auto ProviderRouter::reload_config() -> bool {
     auto router_path   = fs::path(data_dir_) / "config" / "router.json";
     auto strategy_path = fs::path(data_dir_) / "config" / "provider_strategy.json";
 
-    // Snapshot previous state to detect changes
-    auto old_config   = config_;
-    auto old_strategy = strategy_config_;
+    // Build new state in temporaries — live maps untouched until both succeed
+    nlohmann::json new_config;
+    nlohmann::json new_strategy_config;
+    bool new_strategy_loaded = false;
+    TierModels new_models{
+        "gemini-2.5-flash-lite", "gemini-2.5-flash",
+        "claude-sonnet-4-6", "claude-opus-4-6"
+    };
+    std::unordered_map<std::string, ModeOverride> new_flash, new_standard, new_forensic;
+    std::unordered_map<std::string, TaskClassRoute> new_strategy_defaults;
+    std::unordered_map<std::string, std::string> new_agent_class_hints;
+    std::unordered_map<std::string, std::vector<std::string>> new_classification_keywords;
 
-    // Clear mutable maps before re-loading
-    flash_overrides_.clear();
-    standard_overrides_.clear();
-    forensic_overrides_.clear();
-    strategy_defaults_.clear();
-    agent_class_hints_.clear();
-    classification_keywords_.clear();
+    // Parse router.json into temporaries
+    try {
+        if (fs::exists(router_path)) {
+            std::ifstream f(router_path);
+            new_config = nlohmann::json::parse(f);
+            if (new_config.contains("models")) {
+                auto& m = new_config["models"];
+                if (m.contains("routine")) new_models.routine = m["routine"].get<std::string>();
+                if (m.contains("data"))    new_models.data = m["data"].get<std::string>();
+                if (m.contains("code"))    new_models.code = m["code"].get<std::string>();
+                if (m.contains("reason"))  new_models.reason = m["reason"].get<std::string>();
+            }
+            if (new_config.contains("flash_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["flash_overrides"].items()) {
+                    new_flash[agent_id] = {ovr.value("provider", "gemini"), ovr.value("model", "gemini-2.5-flash"), ovr.value("cost", 0.5)};
+                }
+            }
+            if (new_config.contains("standard_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["standard_overrides"].items()) {
+                    new_standard[agent_id] = {ovr.value("provider", "claude"), ovr.value("model", "claude-sonnet-4-6"), ovr.value("cost", 3.0)};
+                }
+            }
+            if (new_config.contains("forensic_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["forensic_overrides"].items()) {
+                    new_forensic[agent_id] = {ovr.value("provider", "claude"), ovr.value("model", "claude-opus-4-6"), ovr.value("cost", 15.0)};
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        spdlog::warn("router.json parse error during reload: {}", e.what());
+        return false;  // live maps unchanged
+    }
 
-    // Reset defaults in case the config no longer overrides them
-    models_.routine = "gemini-2.5-flash-lite";
-    models_.data    = "gemini-2.5-flash";
-    models_.code    = "claude-sonnet-4-6";
-    models_.reason  = "claude-opus-4-6";
+    // Parse provider_strategy.json into temporaries
+    try {
+        if (fs::exists(strategy_path)) {
+            std::ifstream f(strategy_path);
+            new_strategy_config = nlohmann::json::parse(f);
+            new_strategy_loaded = true;
+            if (new_strategy_config.contains("defaults")) {
+                for (auto& [tc, route] : new_strategy_config["defaults"].items()) {
+                    TaskClassRoute tcr;
+                    tcr.primary = route.value("primary", "claude");
+                    if (route.contains("fallback")) {
+                        for (const auto& fb : route["fallback"])
+                            tcr.fallback.push_back(fb.get<std::string>());
+                    }
+                    new_strategy_defaults[tc] = std::move(tcr);
+                }
+            }
+            if (new_strategy_config.contains("agent_class_hints")) {
+                for (auto& [agent, cls] : new_strategy_config["agent_class_hints"].items())
+                    new_agent_class_hints[agent] = cls.get<std::string>();
+            }
+            if (new_strategy_config.contains("classification_keywords")) {
+                for (auto& [cls, kws] : new_strategy_config["classification_keywords"].items()) {
+                    std::vector<std::string> keywords;
+                    for (const auto& kw : kws) keywords.push_back(kw.get<std::string>());
+                    new_classification_keywords[cls] = std::move(keywords);
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        spdlog::warn("provider_strategy.json parse error during reload: {}", e.what());
+        return false;  // live maps unchanged
+    }
 
-    load_config();
-    load_strategy_config();
+    // Both parsed successfully — swap all live state
+    bool changed = (new_config != config_) || (new_strategy_config != strategy_config_);
+
+    config_ = std::move(new_config);
+    strategy_config_ = std::move(new_strategy_config);
+    strategy_loaded_ = new_strategy_loaded;
+    models_ = new_models;
+    flash_overrides_ = std::move(new_flash);
+    standard_overrides_ = std::move(new_standard);
+    forensic_overrides_ = std::move(new_forensic);
+    strategy_defaults_ = std::move(new_strategy_defaults);
+    agent_class_hints_ = std::move(new_agent_class_hints);
+    classification_keywords_ = std::move(new_classification_keywords);
 
     // Update stored timestamps
     std::error_code ec;
@@ -536,7 +609,6 @@ auto ProviderRouter::reload_config() -> bool {
     if (fs::exists(strategy_path, ec))
         strategy_last_modified_ = fs::last_write_time(strategy_path, ec);
 
-    bool changed = (config_ != old_config) || (strategy_config_ != old_strategy);
     if (changed) {
         spdlog::info("provider config hot-reloaded");
     }

@@ -133,7 +133,9 @@ auto Process::run(const std::string& program,
     }
 
     if (pid == 0) {
-        ::setsid(); // New process group so timeout kills the entire subprocess tree
+        if (::setsid() < 0) {
+            [[maybe_unused]] auto _ = ::write(STDERR_FILENO, "euxis: setsid() failed\n", 23);
+        }
 #ifdef __linux__
         (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
 #endif
@@ -182,7 +184,9 @@ auto Process::run_with_input(const std::string& program,
     }
 
     if (pid == 0) {
-        ::setsid(); // New process group so timeout kills the entire subprocess tree
+        if (::setsid() < 0) {
+            [[maybe_unused]] auto _ = ::write(STDERR_FILENO, "euxis: setsid() failed\n", 23);
+        }
 #ifdef __linux__
         (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
 #endif
@@ -234,7 +238,9 @@ auto Process::run_streaming(const std::string& program,
     }
 
     if (pid == 0) {
-        ::setsid(); // New process group so timeout kills the entire subprocess tree
+        if (::setsid() < 0) {
+            [[maybe_unused]] auto _ = ::write(STDERR_FILENO, "euxis: setsid() failed\n", 23);
+        }
 #ifdef __linux__
         (void)euxis::platform::apply_seccomp(euxis::platform::SandboxProfile::Default);
 #endif
@@ -284,13 +290,21 @@ auto Process::shell_interactive(const std::string& command) -> int {
     // This function is intentionally limited to simple commands (e.g. package
     // manager invocations from doctor --fix).  Backticks, $(), and pipes
     // outside of known-safe patterns are blocked.  CWE-78 mitigation.
-    static constexpr std::string_view dangerous[] = {"$(", "`", ";", "&&", "||", "|", ">>", "<<"};
+
+    // Fail-fast: empty or oversized commands
+    if (command.empty() || command.size() > 4096) return -1;
+
+    // Reject embedded null bytes (would truncate the C string)
+    if (command.find('\0') != std::string::npos) return -1;
+
+    static constexpr std::string_view dangerous[] = {
+        "$(", "`", ";", "&&", "||", "|", ">>", "<<", "\n", "\r"
+    };
     for (const auto& pattern : dangerous) {
         if (command.find(pattern) != std::string::npos) {
             return -1;  // reject
         }
     }
-    if (command.empty() || command.size() > 4096) return -1;
 
     int status = std::system(command.c_str());
     return WIFEXITED(status) ? WEXITSTATUS(status) : -1;

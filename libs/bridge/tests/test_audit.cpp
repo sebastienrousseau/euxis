@@ -212,4 +212,35 @@ TEST_F(AuditTest, ChainHeadUpdates) {
     EXPECT_NE(hash1, hash2);
 }
 
+TEST_F(AuditTest, WriteFailureKeepsHashUnchanged) {
+    // Create a read-only directory so the log file cannot be written
+    auto ro_dir = tmp_dir_ / "readonly";
+    std::filesystem::create_directories(ro_dir);
+    auto log_path = ro_dir / "audit.jsonl";
+
+    // Write one entry successfully first
+    AuditLogger logger(log_path);
+    logger.log("event1", "skill-a");
+    auto hash_after_first = logger.chain_head_hash();
+    EXPECT_FALSE(hash_after_first.empty());
+
+    // Make the directory read-only
+    std::filesystem::permissions(ro_dir, std::filesystem::perms::owner_read | std::filesystem::perms::owner_exec);
+
+    // Remove the file so the open() will fail (dir is read-only)
+    // Actually the file exists but let's try to write — the dir perms
+    // prevent creating new files but existing file might still be writable.
+    // Instead, remove the file and try to write a new one.
+    // The open(O_CREAT) should fail because the directory is read-only.
+    auto log_path2 = ro_dir / "audit2.jsonl";
+    AuditLogger logger2(log_path2);
+    logger2.log("should_fail", "fail-skill");
+
+    // Hash should remain empty (initial state) since write failed
+    EXPECT_TRUE(logger2.chain_head_hash().empty());
+
+    // Restore permissions for cleanup
+    std::filesystem::permissions(ro_dir, std::filesystem::perms::owner_all);
+}
+
 }  // namespace euxis::bridge

@@ -332,7 +332,8 @@ auto ProviderExecutor::execute_api(const std::string& provider,
         std::string token = auth.has_value() ? auth->token : (std::getenv("GEMINI_API_KEY") ? std::getenv("GEMINI_API_KEY") : "");
         if (token.empty()) return {false, "", "No Gemini auth", 1, 0.0, {}};
         std::string m = model.empty() ? "gemini-2.5-flash-lite" : model;
-        url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent?key=" + token;
+        url = "https://generativelanguage.googleapis.com/v1beta/models/" + m + ":generateContent";
+        auth_header = "x-goog-api-key: " + token;
         body["contents"] = nlohmann::json::array({{{"parts", nlohmann::json::array({{{"text", prompt}}})}}});
     }
     
