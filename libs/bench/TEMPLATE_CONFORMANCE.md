@@ -10,7 +10,7 @@
 
 ## Documentation
 
-- Module docs page: `data/docs/modules/euxis-bench-cpp.md`
+- Module docs page: `docs/modules/euxis-bench-cpp.md`
 
 ## Tests
 

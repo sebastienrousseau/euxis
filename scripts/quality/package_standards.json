@@ -7,7 +7,7 @@
       "kind": "rust",
       "required_files": ["Cargo.toml", "README.md"],
       "test_paths": ["euxis-sdk/tests"],
-      "docs_path": "data/docs/modules/euxis-sdk.md"
+      "docs_path": "docs/modules/euxis-sdk.md"
     },
     {
       "name": "euxis-web",
@@ -15,7 +15,7 @@
       "kind": "node",
       "required_files": ["package.json", "README.md"],
       "test_paths": ["euxis-web/src/crypto-lib/tests"],
-      "docs_path": "data/docs/modules/euxis-web.md"
+      "docs_path": "docs/modules/euxis-web.md"
     },
     {
       "name": "euxis-crypto-cpp",
@@ -23,7 +23,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-crypto-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-crypto-cpp.md"
+      "docs_path": "docs/modules/euxis-crypto-cpp.md"
     },
     {
       "name": "euxis-bridge-cpp",
@@ -31,7 +31,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-bridge-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-bridge-cpp.md"
+      "docs_path": "docs/modules/euxis-bridge-cpp.md"
     },
     {
       "name": "euxis-memory-cpp",
@@ -39,7 +39,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-memory-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-memory-cpp.md"
+      "docs_path": "docs/modules/euxis-memory-cpp.md"
     },
     {
       "name": "euxis-identity-cpp",
@@ -47,7 +47,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-identity-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-identity-cpp.md"
+      "docs_path": "docs/modules/euxis-identity-cpp.md"
     },
     {
       "name": "euxis-inference-cpp",
@@ -55,7 +55,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-inference-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-inference-cpp.md"
+      "docs_path": "docs/modules/euxis-inference-cpp.md"
     },
     {
       "name": "euxis-a2a-cpp",
@@ -63,7 +63,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-a2a-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-a2a-cpp.md"
+      "docs_path": "docs/modules/euxis-a2a-cpp.md"
     },
     {
       "name": "euxis-security-cpp",
@@ -71,7 +71,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-security-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-security-cpp.md"
+      "docs_path": "docs/modules/euxis-security-cpp.md"
     },
     {
       "name": "euxis-scripts-cpp",
@@ -79,7 +79,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-scripts-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-scripts-cpp.md"
+      "docs_path": "docs/modules/euxis-scripts-cpp.md"
     },
     {
       "name": "euxis-runtime-cpp",
@@ -87,7 +87,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-runtime-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-runtime-cpp.md"
+      "docs_path": "docs/modules/euxis-runtime-cpp.md"
     },
     {
       "name": "euxis-metrics-cpp",
@@ -95,7 +95,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-metrics-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-metrics-cpp.md"
+      "docs_path": "docs/modules/euxis-metrics-cpp.md"
     },
     {
       "name": "euxis-core-cpp",
@@ -103,7 +103,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["libs/core/tests"],
-      "docs_path": "data/docs/modules/euxis-core-cpp.md"
+      "docs_path": "docs/modules/euxis-core-cpp.md"
     },
     {
       "name": "euxis-adapters-cpp",
@@ -111,7 +111,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-adapters-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-adapters-cpp.md"
+      "docs_path": "docs/modules/euxis-adapters-cpp.md"
     },
     {
       "name": "euxis-gateway-cpp",
@@ -119,7 +119,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-gateway-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-gateway-cpp.md"
+      "docs_path": "docs/modules/euxis-gateway-cpp.md"
     },
     {
       "name": "euxis-cli-cpp",
@@ -127,7 +127,7 @@
       "kind": "cpp-application",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-cli-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-cli-cpp.md"
+      "docs_path": "docs/modules/euxis-cli-cpp.md"
     },
     {
       "name": "euxis-bench-cpp",
@@ -135,7 +135,7 @@
       "kind": "cpp-library",
       "required_files": ["CMakeLists.txt"],
       "test_paths": ["euxis-cpp/euxis-bench-cpp/tests"],
-      "docs_path": "data/docs/modules/euxis-bench-cpp.md"
+      "docs_path": "docs/modules/euxis-bench-cpp.md"
     },
     {
       "name": "euxis-etx",
@@ -143,7 +143,7 @@
       "kind": "cpp-application",
       "required_files": ["CMakeLists.txt"],
       "test_paths": [],
-      "docs_path": "data/docs/modules/euxis-etx.md"
+      "docs_path": "docs/modules/euxis-etx.md"
     }
   ]
 }

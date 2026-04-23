@@ -35,8 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 - **CWE-78 Mitigation**: `shell_interactive()` rejects shell metacharacters (`$(`, `` ` ``, `;`, `&&`, `||`, `|`, `>>`, `<<`) with 12 new tests
-- **SOUP Register**: Formal Software of Unknown Provenance classification for all 9 dependencies per IEC 62304 (`data/docs/compliance/soup-classification.md`)
-- **Software Validation Procedure**: ISO 13485 SVP with traceability matrix, release checklist, and non-conformance handling (`data/docs/compliance/software-validation-procedure.md`)
+- **SOUP Register**: Formal Software of Unknown Provenance classification for all 9 dependencies per IEC 62304 (`docs/compliance/soup-classification.md`)
+- **Software Validation Procedure**: ISO 13485 SVP with traceability matrix, release checklist, and non-conformance handling (`docs/compliance/software-validation-procedure.md`)
 - **SAST**: `.clang-tidy` config with security-focused checks (bugprone-*, cert-*, concurrency-*, use-after-move as error)
 - **Credential Exclusion**: `.gitignore` expanded with `.env*`, `*.key`, `*.pem`, `credentials*`, `*.p12`, `*.pfx`, `*.keystore`
 

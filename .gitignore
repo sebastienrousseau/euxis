@@ -35,9 +35,17 @@ data/projects/.euxis/
 !data/runtime/README.md
 !data/runtime/gateway.json
 
-# --- SQLite WAL ---
+# --- SQLite ---
 *.db-shm
 *.db-wal
+data/agents/registry.db
+data/agents/registry.db.backup.*
+
+# --- Gateway runtime logs ---
+data/gateway/**/*.jsonl
+
+# --- Unused root dirs ---
+metrics/
 
 # --- Dependencies ---
 node_modules/
@@ -48,7 +56,7 @@ _deps/
 .env.*
 *.key
 *.pem
-!data/docs/**/*.pem
+!docs/**/*.pem
 credentials*
 *.p12
 *.pfx

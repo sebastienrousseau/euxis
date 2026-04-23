@@ -183,10 +183,10 @@ Override parallelism: `make cpp-build CPP_BUILD_JOBS=8`.
 
 | Guide | Content |
 |-------|---------|
-| [Quick Start](data/docs/essentials/quick-start.md) | Clone to verified in 5 minutes |
-| [User Guide](data/docs/guides/user-guide.md) | Complete CLI reference and modes |
-| [CLI Reference](data/docs/reference/cli-reference.md) | Every command, flag, and example |
-| [Fleet Guide](data/docs/guides/fleet-guide.md) | Agent roster and routing |
+| [Quick Start](docs/essentials/quick-start.md) | Clone to verified in 5 minutes |
+| [User Guide](docs/guides/user-guide.md) | Complete CLI reference and modes |
+| [CLI Reference](docs/reference/cli-reference.md) | Every command, flag, and example |
+| [Fleet Guide](docs/guides/fleet-guide.md) | Agent roster and routing |
 
 ## Contributing
 

@@ -33,7 +33,7 @@ DEFAULT_ARTIFACTS = [
 ]
 
 DEFAULT_DOCS = [
-    "data/docs/architecture/core-platform-separation-2026.md",
+    "docs/architecture/core-platform-separation-2026.md",
 ]
 
 

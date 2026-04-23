@@ -36,42 +36,42 @@ jobs:
             --repo-root . \
             --standards euxis-ops/quality/package_standards.json \
             --iterations 3 \
-            --output data/perf/package-benchmarks.json
+            --output fixtures/benchmarks/package-benchmarks.json
       - name: Validate package benchmark budgets
         run: |
           python3 euxis-ops/perf/validate_package_benchmark_budget.py \
-            --benchmarks data/perf/package-benchmarks.json \
+            --benchmarks fixtures/benchmarks/package-benchmarks.json \
             --policy euxis-ops/perf/package_resource_policy.json \
             --stage current
       - name: Propose package benchmark baseline update
         run: |
           python3 euxis-ops/perf/propose_package_benchmark_baseline.py \
-            --current data/perf/package-benchmarks.json \
+            --current fixtures/benchmarks/package-benchmarks.json \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
             --previous-release v0.0.9 \
             --next-release v0.0.10 \
-            --output data/perf/proposed-package-benchmarks-baseline.json
+            --output fixtures/benchmarks/proposed-package-benchmarks-baseline.json
       - name: Review package benchmark baseline proposal
         run: |
           python3 euxis-ops/release/review_package_benchmark_baseline.py \
-            --proposal data/perf/proposed-package-benchmarks-baseline.json \
+            --proposal fixtures/benchmarks/proposed-package-benchmarks-baseline.json \
             --threshold-percent 25 \
-            --output data/perf/package-benchmark-baseline-review.json \
-            --markdown-output data/perf/package-benchmark-baseline-review.md
+            --output fixtures/benchmarks/package-benchmark-baseline-review.json \
+            --markdown-output fixtures/benchmarks/package-benchmark-baseline-review.md
       - name: Validate package benchmark baseline governance bundle
         run: |
           python3 euxis-ops/perf/validate_package_benchmark_baseline_governance.py \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --proposal data/perf/proposed-package-benchmarks-baseline.json \
-            --review data/perf/package-benchmark-baseline-review.json \
-            --json-output data/perf/package-benchmark-baseline-governance.json
+            --proposal fixtures/benchmarks/proposed-package-benchmarks-baseline.json \
+            --review fixtures/benchmarks/package-benchmark-baseline-review.json \
+            --json-output fixtures/benchmarks/package-benchmark-baseline-governance.json
       - name: Add package baseline review summary
-        run: cat data/perf/package-benchmark-baseline-review.md >> "$GITHUB_STEP_SUMMARY"
+        run: cat fixtures/benchmarks/package-benchmark-baseline-review.md >> "$GITHUB_STEP_SUMMARY"
       - name: Evaluate package benchmark regressions (main push warning)
         if: github.event_name == 'push'
         run: |
           python3 euxis-ops/perf/validate_package_benchmark_regression.py \
-            --current data/perf/package-benchmarks.json \
+            --current fixtures/benchmarks/package-benchmarks.json \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
             --threshold-percent 20 \
             --min-baseline-wall-ms 2 \
@@ -81,7 +81,7 @@ jobs:
             --min-absolute-cpu-ms 0.5 \
             --min-absolute-memory-mb 4 \
             --warn-only \
-            --summary-output data/perf/package-benchmark-regression.md
+            --summary-output fixtures/benchmarks/package-benchmark-regression.md
       - name: Release checklist gate
         run: |
           python3 euxis-ops/release/generate_checklist.py \
@@ -161,22 +161,22 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-benchmark-dataset
-          path: data/perf/package-benchmarks.json
+          path: fixtures/benchmarks/package-benchmarks.json
       - name: Upload package benchmark baseline proposal/review
         uses: actions/upload-artifact@v4
         with:
           name: package-benchmark-baseline-governance
           path: |
-            data/perf/proposed-package-benchmarks-baseline.json
-            data/perf/package-benchmark-baseline-review.json
-            data/perf/package-benchmark-baseline-review.md
-            data/perf/package-benchmark-baseline-governance.json
+            fixtures/benchmarks/proposed-package-benchmarks-baseline.json
+            fixtures/benchmarks/package-benchmark-baseline-review.json
+            fixtures/benchmarks/package-benchmark-baseline-review.md
+            fixtures/benchmarks/package-benchmark-baseline-governance.json
       - name: Upload package benchmark regression summary
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: package-benchmark-regression
-          path: data/perf/package-benchmark-regression.md
+          path: fixtures/benchmarks/package-benchmark-regression.md
 
   perf-trend-warning:
     name: Perf Trend Warning (Q2 target)
@@ -214,19 +214,19 @@ jobs:
             --repo-root . \
             --standards euxis-ops/quality/package_standards.json \
             --iterations 1 \
-            --output data/perf/package-benchmarks-pr.json
+            --output fixtures/benchmarks/package-benchmarks-pr.json
       - name: Render package benchmark trend summary
         run: |
           python3 euxis-ops/perf/render_package_benchmark_trend.py \
-            --current data/perf/package-benchmarks-pr.json \
+            --current fixtures/benchmarks/package-benchmarks-pr.json \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
             --threshold-percent 10 \
-            --output data/perf/package-benchmark-trend.md
-          cat data/perf/package-benchmark-trend.md >> "$GITHUB_STEP_SUMMARY"
+            --output fixtures/benchmarks/package-benchmark-trend.md
+          cat fixtures/benchmarks/package-benchmark-trend.md >> "$GITHUB_STEP_SUMMARY"
       - name: Evaluate package benchmark regression (warn-only)
         run: |
           python3 euxis-ops/perf/validate_package_benchmark_regression.py \
-            --current data/perf/package-benchmarks-pr.json \
+            --current fixtures/benchmarks/package-benchmarks-pr.json \
             --baseline euxis-ops/perf/package_benchmarks_baseline.json \
             --threshold-percent 10 \
             --min-baseline-wall-ms 2 \
@@ -236,16 +236,16 @@ jobs:
             --min-absolute-cpu-ms 0.5 \
             --min-absolute-memory-mb 4 \
             --warn-only \
-            --summary-output data/perf/package-benchmark-regression-pr.md
-          cat data/perf/package-benchmark-regression-pr.md >> "$GITHUB_STEP_SUMMARY"
+            --summary-output fixtures/benchmarks/package-benchmark-regression-pr.md
+          cat fixtures/benchmarks/package-benchmark-regression-pr.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload package benchmark trend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: package-benchmark-trend
           path: |
-            data/perf/package-benchmarks-pr.json
-            data/perf/package-benchmark-trend.md
-            data/perf/package-benchmark-regression-pr.md
+            fixtures/benchmarks/package-benchmarks-pr.json
+            fixtures/benchmarks/package-benchmark-trend.md
+            fixtures/benchmarks/package-benchmark-regression-pr.md
 
   package-structure-matrix-report:
     name: Package Structure Matrix Report
@@ -261,7 +261,7 @@ jobs:
           python3 euxis-ops/quality/report_package_structure_matrix_staleness.py \
             --repo-root . \
             --standards euxis-ops/quality/package_standards.json \
-            --matrix data/docs/architecture/package-structure-matrix.md \
+            --matrix docs/architecture/package-structure-matrix.md \
             --summary-output data/release/package-structure-matrix-staleness.md \
             --diff-output data/release/package-structure-matrix-staleness.diff \
             --warn-only

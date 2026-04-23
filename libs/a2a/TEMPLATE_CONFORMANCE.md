@@ -10,7 +10,7 @@
 
 ## Documentation
 
-- Module docs page: `data/docs/modules/euxis-a2a-cpp.md`
+- Module docs page: `docs/modules/euxis-a2a-cpp.md`
 
 ## Tests
 
