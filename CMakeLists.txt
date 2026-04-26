@@ -15,19 +15,32 @@ include(FetchContent)
 include(CheckIPOSupported)
 
 # --- Performance Optimizations ---
+option(EUXIS_NATIVE_ARCH "Use -march=native for dev builds" OFF)
+
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     check_ipo_supported(RESULT lto_supported OUTPUT error)
     if(lto_supported)
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+        # Use fat LTO objects: native code + LTO IR in every .o file.
+        # Required so test targets (linked via GTest which may not use LTO)
+        # can still resolve symbols from static libraries built with LTO.
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            add_compile_options(-ffat-lto-objects)
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        add_compile_options(-march=native -O3 -flto)
+        if(EUXIS_NATIVE_ARCH)
+            add_compile_options(-march=native)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+            add_compile_options(-march=x86-64-v3)
+        endif()
+        add_compile_options(-O3)
     endif()
 endif()
 
-# Disable warnings-as-errors for external dependencies that might trigger modern compiler diagnostics
-set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
+# Warnings-as-errors for euxis targets; SYSTEM-marked FetchContent deps are excluded automatically.
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # --- Unified Dependency Resolution via FetchContent ---
 
@@ -36,6 +49,7 @@ FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG        v3.11.3
+    FIND_PACKAGE_ARGS NAMES nlohmann_json
 )
 FetchContent_MakeAvailable(nlohmann_json)
 if(NOT TARGET nlohmann_json::nlohmann_json)
@@ -50,6 +64,7 @@ FetchContent_Declare(
     inja
     GIT_REPOSITORY https://github.com/pantor/inja.git
     GIT_TAG        v3.4.0
+    SYSTEM
 )
 FetchContent_MakeAvailable(inja)
 
@@ -60,6 +75,7 @@ FetchContent_Declare(
     yaml-cpp
     GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
     GIT_TAG        0.8.0
+    SYSTEM
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
@@ -68,6 +84,7 @@ FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG        v1.15.0
+    FIND_PACKAGE_ARGS NAMES spdlog
 )
 FetchContent_MakeAvailable(spdlog)
 
@@ -76,6 +93,7 @@ FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG        v1.14.0
+    FIND_PACKAGE_ARGS NAMES GTest
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
@@ -84,13 +102,23 @@ if(NOT TARGET GTest::gtest_main)
 endif()
 
 # ixwebsocket (With specific patch for missing cstdint in some versions)
+find_package(OpenSSL QUIET)
 FetchContent_Declare(
     ixwebsocket
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG        v11.4.4
 )
-set(USE_TLS OFF CACHE BOOL "" FORCE)
+if(OpenSSL_FOUND)
+    set(USE_TLS ON CACHE BOOL "" FORCE)
+    message(STATUS "Euxis: IXWebSocket TLS enabled (OpenSSL ${OPENSSL_VERSION})")
+else()
+    set(USE_TLS OFF CACHE BOOL "" FORCE)
+    message(STATUS "Euxis: IXWebSocket TLS disabled (OpenSSL not found)")
+endif()
 FetchContent_MakeAvailable(ixwebsocket)
+if(TARGET ixwebsocket)
+    target_compile_options(ixwebsocket PRIVATE -Wno-shadow -Wno-error)
+endif()
 if(NOT TARGET ixwebsocket::ixwebsocket)
     add_library(ixwebsocket::ixwebsocket ALIAS ixwebsocket)
 endif()
@@ -118,6 +146,22 @@ if(NOT unofficial-sodium_FOUND)
     add_library(unofficial-sodium::sodium ALIAS PkgConfig::SODIUM)
 endif()
 
+# --- RPATH settings for installed binaries ---
+set(CMAKE_SKIP_BUILD_RPATH OFF)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+set(CMAKE_INSTALL_RPATH_USE_LINK_LIBRARIES TRUE)
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
+else()
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+endif()
+
+# --- Debug info compression for Release builds ---
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-g1)
+    add_link_options(-Wl,--compress-debug-sections=zlib)
+endif()
+
 enable_testing()
 
 # Build order (libs -> apps)
@@ -141,3 +185,14 @@ add_subdirectory(apps/cli)
 add_subdirectory(apps/publisher)
 add_subdirectory(libs/bench)
 add_subdirectory(apps/etx)
+
+# --- CPack packaging ---
+set(CPACK_PACKAGE_NAME "euxis")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Euxis — multi-agent code certification CLI")
+set(CPACK_GENERATOR "TGZ")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND CPACK_GENERATOR "DEB" "RPM")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "euxis maintainers")
+endif()
+include(CPack)

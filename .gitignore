@@ -45,6 +45,7 @@ data/agents/registry.db.backup.*
 data/gateway/**/*.jsonl
 
 # --- Unused root dirs ---
+bin/
 metrics/
 
 # --- Dependencies ---
@@ -61,6 +62,8 @@ credentials*
 *.p12
 *.pfx
 *.keystore
+auth_profiles.json
+data/runtime/auth_profiles.json
 
 # --- Coverage ---
 *.gcda

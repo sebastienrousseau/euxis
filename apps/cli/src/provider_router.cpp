@@ -13,6 +13,9 @@
 
 namespace euxis::cli {
 
+// P5: Static cache for tool availability — avoids PATH scan + stat on every route call
+static std::unordered_map<std::string, bool> s_tool_cache;
+
 using euxis::cli::i18n::tr;
 
 auto tier_label(Tier t) -> std::string {
@@ -259,9 +262,10 @@ auto ProviderRouter::route_forensic(const std::string& agent_id,
 }
 
 auto ProviderRouter::analyze_task_tier(const std::string& task) const -> Tier {
-    static const std::vector<std::string> reason_keywords = {"architect", "design", "plan", "strategy", "complex", "critical", "security", "audit", "review"};
-    static const std::vector<std::string> code_keywords = {"code", "implement", "refactor", "debug", "test", "build", "fix", "optimize", "develop"};
-    static const std::vector<std::string> data_keywords = {"data", "analyze", "summarize", "report", "aggregate", "query", "extract", "parse", "transform"};
+    // P3: string_view keywords — no allocations in hot path
+    static constexpr std::string_view reason_keywords[] = {"architect", "design", "plan", "strategy", "complex", "critical", "security", "audit", "review"};
+    static constexpr std::string_view code_keywords[] = {"code", "implement", "refactor", "debug", "test", "build", "fix", "optimize", "develop"};
+    static constexpr std::string_view data_keywords[] = {"data", "analyze", "summarize", "report", "aggregate", "query", "extract", "parse", "transform"};
     std::string lower = task;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     for (const auto& kw : reason_keywords) if (lower.find(kw) != std::string::npos) return Tier::Reason;
@@ -610,6 +614,7 @@ auto ProviderRouter::reload_config() -> bool {
         strategy_last_modified_ = fs::last_write_time(strategy_path, ec);
 
     if (changed) {
+        s_tool_cache.clear();  // P5: invalidate tool availability cache on reload
         spdlog::info("provider config hot-reloaded");
     }
     return changed;
@@ -643,7 +648,11 @@ void ProviderRouter::check_and_reload() {
 auto ProviderRouter::local_available() const -> bool { return Process::available("ollama"); }
 
 auto ProviderRouter::tool_available(const std::string& tool) const -> bool {
-    return Process::available(tool);
+    auto it = s_tool_cache.find(tool);
+    if (it != s_tool_cache.end()) return it->second;
+    bool avail = Process::available(tool);
+    s_tool_cache[tool] = avail;
+    return avail;
 }
 
 auto ProviderRouter::available_providers() const -> std::vector<std::string> {
@@ -701,35 +710,36 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
         return chain;
     }
 
-    // Default fallback chains by provider
-    if (model.find("claude") != std::string::npos || model.find("anthropic") != std::string::npos) {
-        return {
-            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-            {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    if (model.find("gpt") != std::string::npos || model.find("openai") != std::string::npos) {
-        return {
-            {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-            {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    if (model.find("gemini") != std::string::npos) {
-        return {
-            {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    // Generic: try all major providers
-    return {
+    // P6: Pre-built static chains — avoid repeated vector construction
+    static const std::vector<ModelSelection> claude_chain = {
+        {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
+        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> openai_chain = {
+        {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
+        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> gemini_chain = {
+        {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
+        {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> generic_chain = {
         {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
         {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
         {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };
+
+    if (model.find("claude") != std::string::npos || model.find("anthropic") != std::string::npos)
+        return claude_chain;
+    if (model.find("gpt") != std::string::npos || model.find("openai") != std::string::npos)
+        return openai_chain;
+    if (model.find("gemini") != std::string::npos)
+        return gemini_chain;
+    return generic_chain;
 }
 
 } // namespace euxis::cli

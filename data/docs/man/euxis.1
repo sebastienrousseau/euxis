@@ -1,0 +1,140 @@
+.\" Euxis man page — generated for v0.0.10
+.TH EUXIS 1 "2026-04-25" "v0.0.10" "Euxis Agent OS"
+.SH NAME
+euxis \- epistemic trust engine for software verification
+.SH SYNOPSIS
+.B euxis
+.RI [ command ]
+.RI [ options ]
+.RI [ target ]
+.SH DESCRIPTION
+.B euxis
+is a multi-agent verification system that produces epistemic verdicts on
+software repositories. It orchestrates LLM agents across evidence pillars
+(testing, security, architecture, documentation) and synthesizes a trust
+verdict with confidence scoring.
+.SH CORE COMMANDS
+.TP
+.B check \fR[\fItarget\fR]
+Run standard verification. Use \fB\-\-triage\fR for flash mode or
+\fB\-\-forensic\fR for deep analysis.
+.TP
+.B triage \fR[\fItarget\fR]
+Quick flash-mode verification (2 agents, ~45s SLA).
+.TP
+.B review \fR[\fItarget\fR]
+Standard verification (5 agents, ~180s SLA). Use \fB\-\-forensic\fR for
+the full 11-agent sweep.
+.TP
+.B compare \fItarget\fR
+A/B comparison against baseline verdicts.
+.TP
+.B stats
+Display benchmark statistics from verdict history.
+.TP
+.B policy \fR[\fBshow\fR|\fBvalidate\fR|\fBcheck\fR]
+Policy inspection, validation, and enforcement.
+.TP
+.B certify\-readiness \fR[\fItarget\fR]
+18-domain certification readiness assessment with framework overlays
+(general, SOC2, ISO 27001). Subcommands: \fBcontrols\fR, \fBreport\fR.
+.TP
+.B system\-card
+Display the system transparency card (model roster, capabilities, security).
+.SH SYSTEM COMMANDS
+.TP
+.B doctor
+Diagnose installation health. Use \fB\-\-fix\fR to auto-repair.
+.TP
+.B install\fR, \fBupdate\fR, \fBupgrade\fR, \fBuninstall
+Lifecycle management commands.
+.TP
+.B version
+Display version information.
+.SH FLEET COMMANDS
+.TP
+.B playbook \fR[\fIname\fR] \fR[\fItarget\fR]
+Run a named verification playbook.
+.TP
+.B agent \fR[\fIagent-id\fR]
+Interact with a single agent.
+.TP
+.B squad \fR[\fIsquad-name\fR]
+Run a predefined agent squad.
+.SH OPTIONS
+.TP
+.B \-\-format \fR[\fBjson\fR|\fBsarif\fR]
+Output format. Default: human-readable. Use \fBsarif\fR for CI/CD
+integration with GitHub/GitLab security tabs.
+.TP
+.B \-\-fix
+Request autofix suggestions alongside findings.
+.TP
+.B \-\-ci
+CI mode: TUI to stderr, JSON to stdout, no escalation.
+.TP
+.B \-\-json
+Emit structured JSON artifact.
+.TP
+.B \-\-strict
+Enable strict mode (all gates blocking).
+.TP
+.B \-\-framework \fR[\fBgeneral\fR|\fBsoc2\fR|\fBiso27001\fR]
+Framework overlay for certify-readiness.
+.TP
+.B \-\-provider \fIprovider\fR
+Override provider selection (claude, gemini, openai, ollama).
+.TP
+.B \-\-local\-only
+Force all routing to local Ollama instance.
+.TP
+.B \-\-human\-approve
+Require human approval before finalizing verdict.
+.SH ENVIRONMENT
+.TP
+.B EUXIS_HOME
+Override the default data directory (~/.euxis).
+.TP
+.B ANTHROPIC_API_KEY\fR, \fBOPENAI_API_KEY\fR, \fBGEMINI_API_KEY
+Provider API credentials.
+.TP
+.B EUXIS_DEFAULT_PROVIDER
+Force a specific default provider.
+.TP
+.B EUXIS_LOCAL_ONLY
+Set to \fB1\fR to route all requests through Ollama.
+.TP
+.B EUXIS_LOG_SANITIZE
+Set to \fB0\fR to disable PII redaction in logs.
+.SH ALIASES
+.B quick\fR=triage, \fBdeep\fR=review, \fBdiag\fR=doctor,
+.B metrics\fR=stats, \fBpb\fR=playbook, \fBverify\-all\fR=check
+.SH EXIT STATUS
+.TP
+.B 0
+Verdict: TRUSTED or TRUSTED WITH GAPS.
+.TP
+.B 1
+Verdict: BLOCKED, INCONCLUSIVE, or CAUTION.
+.TP
+.B 2
+No evidence collected or usage error.
+.SH FILES
+.TP
+.B ~/.euxis/data/config/router.json
+Provider routing configuration.
+.TP
+.B ~/.euxis/data/config/provider_strategy.json
+Semantic task class routing strategy.
+.TP
+.B ~/.euxis/data/config/playbooks/
+Verification playbook definitions.
+.TP
+.B ~/.euxis/data/runtime/sessions/
+Verdict artifacts and session data.
+.SH AUTHORS
+Euxis contributors.
+.SH SEE ALSO
+.BR claude (1),
+.BR ollama (1),
+.BR aider (1)

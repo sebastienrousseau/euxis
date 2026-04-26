@@ -46,6 +46,11 @@ auto parse_common(const std::vector<std::string>& args,
             result.passthrough.push_back("--ci");
         } else if (args[i] == "--json") {
             result.passthrough.push_back("--json");
+        } else if (args[i] == "--format" && i + 1 < args.size()) {
+            result.passthrough.push_back("--format");
+            result.passthrough.push_back(args[++i]);
+        } else if (args[i] == "--fix") {
+            result.passthrough.push_back("--fix");
         } else if (args[i] == "--help" || args[i] == "-h") {
             // Handled per-command
             result.passthrough.push_back("--help");
@@ -85,7 +90,9 @@ int cmd_check(Context& ctx, const std::vector<std::string>& args) {
                       << "  --forensic        " << tr("Run the most exhaustive verification") << "\n"
                       << "  --policy [path]   " << tr("Apply policy evaluation") << "\n"
                       << "  --ci              " << tr("Emit CI-safe output") << "\n"
-                      << "  --json            " << tr("Emit artifact JSON to stdout") << "\n";
+                      << "  --json            " << tr("Emit artifact JSON to stdout") << "\n"
+                      << "  --format sarif    " << tr("Emit SARIF v2.1.0 output") << "\n"
+                      << "  --fix             " << tr("Request autofix suggestions") << "\n";
             return 0;
         }
     }

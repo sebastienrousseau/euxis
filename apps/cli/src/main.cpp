@@ -7,7 +7,16 @@
 #include <string>
 #include <vector>
 
+#include <sodium.h>
+
 int main(int argc, char* argv[]) {
+    // S6: Initialize libsodium before any crypto operations (HMAC, signing).
+    // sodium_init() is idempotent: returns 0 on first call, 1 on subsequent.
+    if (sodium_init() < 0) {
+        std::cerr << "error: libsodium initialization failed\n";
+        return 1;
+    }
+
     std::vector<std::string> args(argv + 1, argv + argc);
 
     const char* home = std::getenv("EUXIS_HOME");

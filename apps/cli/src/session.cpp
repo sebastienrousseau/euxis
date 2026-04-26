@@ -71,6 +71,10 @@ auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::str
     if (audit.is_open() && std::filesystem::file_size(audit_path) == 0) {
         audit << "# Audit Log: " << agent_id << "\n";
     }
+    // S3: Restrict audit log permissions — may contain verdicts and provider context
+    std::filesystem::permissions(audit_path,
+        std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+        std::filesystem::perm_options::replace);
     auto memory_path = agent_dir / "memory.md";
     std::ofstream mem(memory_path, std::ios::app);
     if (mem.is_open() && std::filesystem::file_size(memory_path) == 0) {

@@ -128,6 +128,7 @@ void Engine::register_commands() {
     commands_.push_back({"gym",              tr("Specialized"),    tr("Agent training gym (eval + drill)"),          cmd::cmd_gym});
     commands_.push_back({"replay",           tr("Specialized"),    tr("Replay agent session from log"),             cmd::cmd_replay});
     commands_.push_back({"context-worker",   tr("Specialized"),    tr("Background context enrichment worker"),      cmd::cmd_context_worker});
+    commands_.push_back({"lsp",              tr("Specialized"),    tr("Emit LSP-compatible diagnostics JSON"),      cmd::cmd_lsp});
 }
 
 auto Engine::run(const std::vector<std::string>& args) -> int {

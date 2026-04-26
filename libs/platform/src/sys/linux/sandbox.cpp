@@ -10,10 +10,28 @@
 #include <stddef.h>
 #include <cerrno>
 #include <cstring>
+#include <fstream>
+#include <memory>
+#include <string>
 
 namespace euxis::platform {
 
+namespace {
+/// Detect WSL2 via /proc/version — WSL2 has incomplete seccomp BPF support
+/// and filter installation may fail silently or return EINVAL.
+auto is_wsl() -> bool {
+    std::ifstream f("/proc/version");
+    if (!f.is_open()) return false;
+    std::string line;
+    std::getline(f, line);
+    // Both WSL1 and WSL2 contain "microsoft" (case-insensitive) in /proc/version
+    return line.find("microsoft") != std::string::npos
+        || line.find("Microsoft") != std::string::npos;
+}
+} // namespace
+
 auto seccomp_available() -> bool {
+    if (is_wsl()) return false;
     // PR_GET_SECCOMP returns 0 if seccomp is available (mode disabled),
     // or the current mode if already active.  Returns -1 with EINVAL
     // if the kernel was built without CONFIG_SECCOMP.
@@ -23,6 +41,13 @@ auto seccomp_available() -> bool {
 
 auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
     SandboxResult result;
+
+    // WSL2 has incomplete seccomp support — gracefully degrade to no-filter.
+    if (is_wsl()) {
+        result.applied = false;
+        result.error = "seccomp BPF skipped on WSL (incomplete kernel support)";
+        return result;
+    }
 
     // Step 1: Set no-new-privileges (required for unprivileged seccomp filters).
     if (::prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0) {
@@ -45,6 +70,7 @@ auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
     //   [N+2] DENY  (return EPERM)
 
     // Blocked syscalls for Default profile.
+    // S9: Added execveat, memfd_create, userfaultfd to prevent container/sandbox escape
     int blocked_default[] = {
         __NR_mount,
         __NR_umount2,
@@ -55,6 +81,9 @@ auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
         __NR_init_module,
         __NR_pivot_root,
         __NR_kexec_load,
+        __NR_execveat,
+        __NR_memfd_create,
+        __NR_userfaultfd,
     };
     constexpr int n_default = sizeof(blocked_default) / sizeof(blocked_default[0]);
 
@@ -70,6 +99,9 @@ auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
         __NR_pivot_root,
         __NR_kexec_load,
         __NR_execve,
+        __NR_execveat,
+        __NR_memfd_create,
+        __NR_userfaultfd,
     };
     constexpr int n_strict = sizeof(blocked_strict) / sizeof(blocked_strict[0]);
 
@@ -79,7 +111,8 @@ auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
     // Total instructions: 1 (load) + n_blocked (JEQ checks) + 1 (ALLOW) + 1 (DENY)
     int total = 1 + n_blocked + 2;
 
-    auto* filter = new struct sock_filter[total];
+    // S8: RAII allocation — no leak on early return or exception
+    auto filter = std::make_unique<struct sock_filter[]>(total);
     int idx = 0;
 
     // [0] BPF_LD | BPF_W | BPF_ABS — load seccomp_data.nr (syscall number)
@@ -106,15 +139,13 @@ auto apply_seccomp(SandboxProfile profile) -> SandboxResult {
 
     struct sock_fprog prog {};
     prog.len = static_cast<unsigned short>(total);
-    prog.filter = filter;
+    prog.filter = filter.get();
 
     if (::prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &prog) != 0) {
         result.error = std::string("prctl(PR_SET_SECCOMP) failed: ") + std::strerror(errno);
-        delete[] filter;
-        return result;
+        return result;  // S8: unique_ptr auto-frees
     }
 
-    delete[] filter;
     result.applied = true;
     return result;
 }

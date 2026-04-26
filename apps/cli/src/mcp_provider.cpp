@@ -87,13 +87,26 @@ auto McpProviderBridge::execute(const std::string& server_name,
 
     std::string full_input = init_framed + ack_framed + framed;
 
-    // Set env vars
+    // Q2: Set env vars with allowlist validation — reject shell metacharacters
+    static const std::string_view allowed_key_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
     std::map<std::string, std::string> env_map;
     for (const auto& e : cfg.env) {
         auto eq = e.find('=');
-        if (eq != std::string::npos) {
-            env_map[e.substr(0, eq)] = e.substr(eq + 1);
+        if (eq == std::string::npos) continue;
+        auto key = e.substr(0, eq);
+        auto val = e.substr(eq + 1);
+        // Reject keys with non-identifier characters
+        if (key.find_first_not_of(allowed_key_chars) != std::string::npos) continue;
+        // Reject values with shell metacharacters
+        bool safe = true;
+        for (char c : val) {
+            if (c == '`' || c == '$' || c == ';' || c == '|' || c == '\n' || c == '\r' || c == '\0') {
+                safe = false;
+                break;
+            }
         }
+        if (safe) env_map[key] = val;
     }
 
     auto result = Process::run_with_input(cfg.command, cfg.args, full_input,

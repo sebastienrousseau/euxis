@@ -6,12 +6,14 @@
 #include <cstring>
 #include <filesystem>
 
+#if defined(__unix__) || defined(__APPLE__)
 #include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#endif
 #include <functional>
 
 namespace euxis::cli {
@@ -28,6 +30,19 @@ auto ms_remaining(TimePoint deadline) -> int {
 }
 
 [[maybe_unused]] void apply_resource_limits() {}
+
+/// Create a pipe with O_CLOEXEC set on both ends.
+/// Prevents file descriptor leaks into forked child processes.
+auto cloexec_pipe(int fds[2]) -> int {
+#ifdef __linux__
+    return ::pipe2(fds, O_CLOEXEC);
+#else
+    if (::pipe(fds) != 0) return -1;
+    ::fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+    ::fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+    return 0;
+#endif
+}
 
 void apply_env_vars(const std::map<std::string, std::string>& env_vars) {
     for (const auto& [key, value] : env_vars) {
@@ -119,7 +134,7 @@ auto Process::run(const std::string& program,
                   const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdout_pipe[2];
     int stderr_pipe[2];
-    if (::pipe(stdout_pipe) != 0 || ::pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
+    if (cloexec_pipe(stdout_pipe) != 0 || cloexec_pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
 
     std::vector<const char*> argv;
     argv.push_back(program.c_str());
@@ -170,7 +185,7 @@ auto Process::run_with_input(const std::string& program,
                               int timeout_seconds,
                               const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdin_pipe[2], stdout_pipe[2], stderr_pipe[2];
-    if (::pipe(stdin_pipe) != 0 || ::pipe(stdout_pipe) != 0 || ::pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
+    if (cloexec_pipe(stdin_pipe) != 0 || cloexec_pipe(stdout_pipe) != 0 || cloexec_pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
 
     std::vector<const char*> argv;
     argv.push_back(program.c_str());
@@ -224,7 +239,7 @@ auto Process::run_streaming(const std::string& program,
                             int timeout_seconds,
                             const std::map<std::string, std::string>& env_vars) -> ProcessResult {
     int stdin_pipe[2], stdout_pipe[2], stderr_pipe[2];
-    if (::pipe(stdin_pipe) != 0 || ::pipe(stdout_pipe) != 0 || ::pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
+    if (cloexec_pipe(stdin_pipe) != 0 || cloexec_pipe(stdout_pipe) != 0 || cloexec_pipe(stderr_pipe) != 0) return {-1, "", "pipe() failed"};
 
     std::vector<const char*> argv;
     argv.push_back(program.c_str());
@@ -288,8 +303,10 @@ auto Process::shell(const std::string& command, int timeout_seconds) -> ProcessR
 auto Process::shell_interactive(const std::string& command) -> int {
     // Security: reject commands containing shell injection metacharacters.
     // This function is intentionally limited to simple commands (e.g. package
-    // manager invocations from doctor --fix).  Backticks, $(), and pipes
-    // outside of known-safe patterns are blocked.  CWE-78 mitigation.
+    // manager invocations from doctor --fix).  CWE-78 mitigation.
+    //
+    // S2 fix: uses Process::run() instead of std::system() so that the
+    // command runs through the same setsid/timeout/kill-group protections.
 
     // Fail-fast: empty or oversized commands
     if (command.empty() || command.size() > 4096) return -1;
@@ -306,8 +323,8 @@ auto Process::shell_interactive(const std::string& command) -> int {
         }
     }
 
-    int status = std::system(command.c_str());
-    return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    auto result = run("/bin/sh", {"-c", command}, 300);
+    return result.exit_code;
 }
 auto Process::which(const std::string& name) -> std::optional<std::string> {
     const char* path_env = std::getenv("PATH"); if (!path_env) return std::nullopt;

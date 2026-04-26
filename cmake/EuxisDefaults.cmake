@@ -1,4 +1,5 @@
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+# Warnings: -Werror controlled via CMAKE_COMPILE_WARNING_AS_ERROR (set in root CMakeLists.txt)
+add_compile_options(-Wall -Wextra -Wpedantic -Wshadow)
 
 # Security hardening flags
 add_compile_options(-fstack-protector-strong)
@@ -9,13 +10,32 @@ if(NOT WIN32)
   add_link_options(-pie)
   # _FORTIFY_SOURCE requires optimization; only set for Release/RelWithDebInfo
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "")
-    add_compile_definitions(_FORTIFY_SOURCE=2)
+    # Use _FORTIFY_SOURCE=3 on GCC 12+ / Clang 14+, fallback to 2
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
+       OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14"))
+      add_compile_definitions(_FORTIFY_SOURCE=3)
+    else()
+      add_compile_definitions(_FORTIFY_SOURCE=2)
+    endif()
   endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15")
   # GCC 15 false-positive in <regex> and <functional> internals
   add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
+# Fast linker auto-detection (mold > lld > default)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  find_program(MOLD_LINKER mold)
+  find_program(LLD_LINKER ld.lld)
+  if(MOLD_LINKER)
+    add_link_options(-fuse-ld=mold)
+    message(STATUS "Euxis: using mold linker")
+  elseif(LLD_LINKER)
+    add_link_options(-fuse-ld=lld)
+    message(STATUS "Euxis: using lld linker")
+  endif()
 endif()
 
 # Sanitizers (debug/dev builds)

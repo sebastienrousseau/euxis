@@ -237,8 +237,8 @@ auto ProviderExecutor::execute_claude(const std::string& model,
 
     if (on_chunk) {
         body["stream"] = true;
+        std::string sse_buffer;  // Per-stream buffer — NOT static (was race condition)
         auto sse_parser = [&](const std::string& chunk) {
-            static std::string sse_buffer;
             sse_buffer += chunk;
             size_t pos = 0;
             while (pos < sse_buffer.size()) {

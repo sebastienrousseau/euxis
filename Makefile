@@ -1,7 +1,7 @@
 .PHONY: all test lint format clean install dev build bench coverage check cpp-configure cpp-build cpp-test cpp-bench cpp-clean cpp-format cpp-coverage cpp-clang-tidy
 
-# Conservative default for laptop thermals/memory; override per run as needed.
-CPP_BUILD_JOBS ?= 4
+# Auto-detect available cores; override per run as needed.
+CPP_BUILD_JOBS ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
 all: build test
 
@@ -46,11 +46,19 @@ cpp-format:
 cpp-clang-tidy: cpp-configure
 	find apps/ libs/ -name '*.cpp' | grep -v build/ | xargs -P4 clang-tidy -p build/cmake-build
 
-# C++ code coverage (requires lcov; run after cpp-test)
+# C++ code coverage (requires gcovr; run after cpp-test)
 cpp-coverage:
 	cmake -B build/cmake-build -S . \
 		$(if $(VCPKG_ROOT),-DCMAKE_TOOLCHAIN_FILE=$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake,) \
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DEUXIS_COVERAGE=ON -DEUXIS_DISABLE_SANITIZERS=ON
 	cmake --build build/cmake-build --parallel $(CPP_BUILD_JOBS)
 	ctest --test-dir build/cmake-build --output-on-failure
+	@mkdir -p coverage-report
+	gcovr --root . --filter 'apps/' --filter 'libs/' \
+		--exclude '.*tests/.*' --exclude '.*/build/.*' \
+		--exclude 'apps/etx/src/main.cpp' \
+		--html-details coverage-report/index.html \
+		--json coverage-report/coverage.json \
+		--print-summary --fail-under-line 98

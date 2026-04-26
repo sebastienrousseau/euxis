@@ -3,11 +3,13 @@
 #include "euxis/cli/box.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
+#include "euxis/cli/lsp_bridge.hpp"
 #include "euxis/cli/pii_filter.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/provider_router.hpp"
 #include "euxis/cli/registry_client.hpp"
+#include "euxis/cli/sarif.hpp"
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
 
@@ -1284,6 +1286,69 @@ int cmd_context_worker(Context& ctx, const std::vector<std::string>& args) {
 
     std::cout << "\n" << term::icon_ok() << " " << tr("Context gathering complete") << "\n";
     return 0;
+}
+
+// --- lsp ---
+
+int cmd_lsp(Context& ctx, const std::vector<std::string>& args) {
+    namespace term = terminal;
+    using euxis::cli::i18n::tr;
+
+    // Read latest verdict artifact
+    std::string artifact_path;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (args[i] == "--artifact" && i + 1 < args.size()) {
+            artifact_path = args[++i];
+        }
+    }
+
+    if (artifact_path.empty()) {
+        auto sessions_dir = std::filesystem::path(ctx.data_dir) / "runtime" / "sessions";
+        auto latest = sessions_dir / "latest.json";
+        if (std::filesystem::exists(latest)) {
+            artifact_path = latest.string();
+        } else {
+            std::cerr << tr("No verdict artifact found. Run 'euxis check' first.") << "\n";
+            return 2;
+        }
+    }
+
+    try {
+        std::ifstream f(artifact_path);
+        auto artifact = nlohmann::json::parse(f);
+
+        // Extract findings from agent_status entries
+        std::vector<SarifFinding> findings;
+        if (artifact.contains("agent_status") && artifact["agent_status"].is_array()) {
+            for (const auto& agent : artifact["agent_status"]) {
+                std::string agent_id = agent.value("agent_id", "");
+                std::string pillar = agent.value("pillar", "");
+                std::string verdict = agent.value("verdict", "");
+                if (agent.contains("key_findings") && agent["key_findings"].is_array()) {
+                    int idx = 0;
+                    for (const auto& finding : agent["key_findings"]) {
+                        idx++;
+                        std::string level = (verdict == "FAILED") ? "error" : "warning";
+                        findings.push_back({
+                            "euxis/" + pillar + "-" + std::to_string(idx),
+                            finding.get<std::string>(),
+                            level,
+                            "", 0,
+                            agent_id,
+                            pillar
+                        });
+                    }
+                }
+            }
+        }
+
+        auto lsp_output = findings_to_lsp_diagnostics(findings);
+        std::cout << lsp_output.dump(2) << "\n";
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1;
+    }
 }
 
 } // namespace euxis::cli::cmd

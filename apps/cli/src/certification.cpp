@@ -15,7 +15,7 @@
 using euxis::cli::i18n::tr;
 
 namespace euxis::cli::certification {
-namespace {
+namespace detail {
 
 namespace fs = std::filesystem;
 namespace term = terminal;
@@ -880,7 +880,7 @@ void finalize_result(RunResult& result) {
     }
 }
 
-} // anonymous namespace
+} // namespace detail
 
 // =====================================================================
 //  PUBLIC API
@@ -1029,47 +1029,47 @@ auto run_certification(Context& /*ctx*/,
     // --- Run gates ---
 
     // 1. Commit signing (blocking only in strict)
-    result.gates.push_back(gate_commit_signing(target, opts.commit_window, opts.since_ref, opts.strict));
+    result.gates.push_back(detail::gate_commit_signing(target, opts.commit_window, opts.since_ref, opts.strict));
 
     // 2. Unit test health
     if (opts.run_tests) {
-        result.gates.push_back(gate_unit_test_health(target));
+        result.gates.push_back(detail::gate_unit_test_health(target));
     } else {
         result.gates.push_back({"unit_test_health", "skipped", "Skipped (--no-tests)", false, {{"status", "skipped"}}});
     }
 
     // 3. Build integrity
     if (opts.run_build) {
-        result.gates.push_back(gate_build_integrity(target));
+        result.gates.push_back(detail::gate_build_integrity(target));
     } else {
         result.gates.push_back({"build_integrity", "skipped", "Skipped (--no-build)", false, {{"status", "skipped"}}});
     }
 
     // 4. Documentation accuracy
-    auto docs_gate = gate_docs_accuracy(target, known_commands);
+    auto docs_gate = detail::gate_docs_accuracy(target, known_commands);
     if (opts.strict) docs_gate.blocking = true;
     result.gates.push_back(docs_gate);
 
     // 5. Security critical
     if (opts.run_security) {
-        result.gates.push_back(gate_security_critical(target));
+        result.gates.push_back(detail::gate_security_critical(target));
     } else {
         result.gates.push_back({"security_critical", "skipped", "Skipped (--no-security)", false, {{"status", "skipped"}}});
     }
 
     // --- Quality risk analysis (not a gate) ---
-    result.quality_risk = analyze_quality_risk(target);
+    result.quality_risk = detail::analyze_quality_risk(target);
 
     // --- Collect evidence ---
-    result.evidence = collect_evidence(target, result.gates, result.quality_risk);
+    result.evidence = detail::collect_evidence(target, result.gates, result.quality_risk);
 
     // --- Evaluate domains ---
     auto domains = default_domains();
     apply_framework_overlay(opts.framework, domains);
-    result.domains = evaluate_domains(domains, result.evidence);
+    result.domains = detail::evaluate_domains(domains, result.evidence);
 
     // --- Finalize ---
-    finalize_result(result);
+    detail::finalize_result(result);
 
     return result;
 }

@@ -329,14 +329,12 @@ auto extract_findings(const std::string& output) -> std::vector<std::string> {
         }
     }
 
-    // Deduplicate (preserve order)
+    // P2: O(n) deduplication (was O(n²) nested loop)
     std::vector<std::string> unique;
-    for (const auto& f : findings) {
-        bool dup = false;
-        for (const auto& u : unique) {
-            if (u == f) { dup = true; break; }
-        }
-        if (!dup) unique.push_back(f);
+    std::unordered_set<std::string> seen;
+    unique.reserve(findings.size());
+    for (auto& f : findings) {
+        if (seen.insert(f).second) unique.push_back(std::move(f));
     }
     return unique;
 }
@@ -1021,9 +1019,9 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
         if (args.size() < 2) { std::cerr << tr("Usage: euxis agent register <manifest.json>") << "\n"; return 2; }
         auto manifest_path = args[1];
         if (!fs::exists(manifest_path)) { std::cerr << tr("File not found:") << " " << manifest_path << "\n"; return 1; }
-        std::ifstream f(manifest_path);
+        std::ifstream manifest_file(manifest_path);
         nlohmann::json manifest;
-        try { manifest = nlohmann::json::parse(f); }
+        try { manifest = nlohmann::json::parse(manifest_file); }
         catch (const std::exception&) { std::cerr << tr("Invalid JSON:") << " " << manifest_path << "\n"; return 1; }
         std::string agent_id = manifest.value("agent_id", manifest.value("id", ""));
         if (agent_id.empty()) { std::cerr << tr("Missing agent_id in manifest") << "\n"; return 1; }
@@ -1533,9 +1531,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     auto manifest_path = fs::path(ctx.data_dir) / "config" / "playbooks" / (manifest_name + ".json");
     if (!fs::exists(manifest_path)) manifest_path = manifest_name;
 
-    std::ifstream f(manifest_path);
+    std::ifstream manifest_file(manifest_path);
     nlohmann::json manifest;
-    try { manifest = nlohmann::json::parse(f); }
+    try { manifest = nlohmann::json::parse(manifest_file); }
     catch (const std::exception&) { std::cerr << "Invalid Manifest\n"; return 1; }
 
     RegistryClient registry(ctx.data_dir);
@@ -1646,6 +1644,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::unordered_map<std::string, bool> agent_retried;  // P1-2: max 1 retry per agent
     std::vector<nlohmann::json> reflexion_log;  // P1-2: reflexion outcomes
     std::vector<std::string> critical_gaps; // Concrete gap reasons
+    std::vector<std::jthread> agent_threads;  // S5/P1: managed threads (was detach())
 
     auto start_time = std::chrono::steady_clock::now();
 
@@ -1786,7 +1785,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                     std::chrono::steady_clock::now() - start_time).count();
                 int agent_timeout = std::min(sla.agent_timeout_s, std::max(1, (int)(remaining_ms / 1000.0)));
 
-                std::thread([&, i, plan = plans[i], weight, agent_timeout]() {
+                agent_threads.emplace_back([&, i, plan = plans[i], weight, agent_timeout]() {
                     std::string context;
                     {
                         std::lock_guard<std::mutex> lk(mtx);
@@ -1923,7 +1922,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                         completed.insert(plan.name); completed_count++; used_slots -= weight;
                     }
                     cv.notify_all();
-                }).detach();
+                });
             }
         }
         if (!launched && completed_count < (int)plans.size()) {
@@ -1931,11 +1930,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    // Wait for all detached threads to finish their critical sections
-    {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [&]{ return completed_count >= (int)plans.size(); });
-    }
+    // Join all agent threads — replaces old detach()+cv.wait pattern
+    // jthread destructor calls request_stop() + join(), so this is safe
+    agent_threads.clear();
 
     auto elapsed = std::chrono::steady_clock::now() - start_time;
     double total_s = std::chrono::duration<double>(elapsed).count();
@@ -2349,7 +2346,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- Collect all key findings ---
     std::vector<std::string> all_findings;
     for (const auto& ev : evidence_log) {
-        for (const auto& f : ev.key_findings) all_findings.push_back("[" + ev.agent_name + "] " + f);
+        for (const auto& finding : ev.key_findings) all_findings.push_back("[" + ev.agent_name + "] " + finding);
     }
 
     // =====================================================================
@@ -2445,11 +2442,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- Claim Verification Results in Artifact ---
     if (!verifications.empty()) {
         artifact["claim_verification"] = nlohmann::json::array();
-        for (const auto& vr : verifications) {
+        for (const auto& ver : verifications) {
             artifact["claim_verification"].push_back({
-                {"check", vr.check_name}, {"command", vr.command},
-                {"verified", vr.success}, {"duration_ms", vr.duration_ms},
-                {"claims_upgraded", vr.claims_upgraded}
+                {"check", ver.check_name}, {"command", ver.command},
+                {"verified", ver.success}, {"duration_ms", ver.duration_ms},
+                {"claims_upgraded", ver.claims_upgraded}
             });
         }
         artifact["claims_upgraded"] = claims_upgraded;

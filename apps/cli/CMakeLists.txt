@@ -28,6 +28,10 @@ add_library(euxis-cli-lib STATIC
   src/agent_mcp_context.cpp
   src/certification.cpp
   src/playbook_schema.cpp
+  src/sarif.cpp
+  src/autofix.cpp
+  src/lsp_bridge.cpp
+  src/lang_detect.cpp
   src/tui/color_system.cpp
   src/tui/event_loop.cpp
   src/tui/layout.cpp
@@ -63,6 +67,7 @@ target_link_libraries(euxis-cli-lib PUBLIC
 # Main executable
 add_executable(euxis-cli src/main.cpp)
 target_link_libraries(euxis-cli PRIVATE euxis-cli-lib)
+install(TARGETS euxis-cli RUNTIME DESTINATION bin)
 
 # Tests
 add_executable(euxis-cli-cpp_tests
@@ -108,6 +113,8 @@ add_executable(euxis-cli-cpp_tests
   tests/test_mcp_provider.cpp
   tests/test_verdict.cpp
   tests/test_playbook_schema.cpp
+  tests/test_certification.cpp
+  tests/test_hardening.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib

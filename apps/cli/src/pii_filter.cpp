@@ -23,9 +23,21 @@ auto PiiFilter::redact(const std::string& input) -> std::string {
     static const std::regex api_key_re(R"((sk|key|api[_-]?key)[_\-][a-zA-Z0-9_\-]{16,})");
     result = std::regex_replace(result, api_key_re, "[API_KEY]");
 
-    // Bearer tokens
+    // Bearer tokens (including JWTs: eyJ...)
     static const std::regex bearer_re(R"(Bearer\s+[a-zA-Z0-9._\-]+)", std::regex::icase);
     result = std::regex_replace(result, bearer_re, "Bearer [TOKEN]");
+
+    // Q1: Standalone JWTs (eyJhbG... three base64 segments)
+    static const std::regex jwt_re(R"(eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,})");
+    result = std::regex_replace(result, jwt_re, "[JWT]");
+
+    // Q1: SSN patterns (###-##-####)
+    static const std::regex ssn_re(R"(\b\d{3}-\d{2}-\d{4}\b)");
+    result = std::regex_replace(result, ssn_re, "[SSN]");
+
+    // Q1: Credit card numbers (13-19 digit sequences with optional separators)
+    static const std::regex cc_re(R"(\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{1,7}\b)");
+    result = std::regex_replace(result, cc_re, "[CREDIT_CARD]");
 
     // IPv4 addresses (except 127.0.0.1 and 0.0.0.0)
     static const std::regex ipv4_re(
