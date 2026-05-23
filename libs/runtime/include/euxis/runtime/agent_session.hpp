@@ -36,15 +36,16 @@ public:
 
 /** @brief Internal message type for active conversations. */
 struct ConversationMessage : public SessionMessage {
+    using SessionMessage::operator=;  // unhide base operator=(const SessionMessage&)
+
     ConversationMessage() = default;
     ConversationMessage(Role r, std::string c, std::string a, std::string m, std::string t, double d)
         : SessionMessage{r, std::move(c), std::move(a), std::move(m), std::move(t), d, {}} {}
-    
+
     ConversationMessage(const SessionMessage& other) : SessionMessage(other) {}
-    ConversationMessage& operator=(const SessionMessage& other) {
-        SessionMessage::operator=(other);
-        return *this;
-    }
+    // Compiler-generated operator=(const ConversationMessage&) handles derived-to-derived;
+    // the using-declaration above handles base-to-derived assignment without slicing
+    // surprises (returns SessionMessage&, so no chained derived-method calls).
 };
 
 /** @brief Result of an LLM provider execution. */
