@@ -43,6 +43,25 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   if(NOT EUXIS_DISABLE_SANITIZERS)
     add_compile_options(-fsanitize=address,undefined)
     add_link_options(-fsanitize=address,undefined)
+
+    # LeakSanitizer uses ptrace(PTRACE_ATTACH) on itself to walk the heap at exit.
+    # On hosts with Yama LSM hardening (kernel.yama.ptrace_scope >= 1) — common on
+    # CachyOS, hardened Arch, Ubuntu hardened, WSL2 — that ptrace is denied and LSan
+    # aborts the process even when no leak occurred. Detect at configure time and
+    # have euxis_add_library() set ASAN_OPTIONS=detect_leaks=0 on each test target
+    # so ctest still reflects real test outcomes.
+    set(EUXIS_LSAN_NEEDS_DISABLE OFF CACHE INTERNAL "Yama ptrace_scope blocks LSan")
+    if(EXISTS "/proc/sys/kernel/yama/ptrace_scope")
+      file(READ "/proc/sys/kernel/yama/ptrace_scope" _yama_ptrace_scope LIMIT 4)
+      string(STRIP "${_yama_ptrace_scope}" _yama_ptrace_scope)
+      if(NOT _yama_ptrace_scope STREQUAL "0")
+        set(EUXIS_LSAN_NEEDS_DISABLE ON CACHE INTERNAL "Yama ptrace_scope blocks LSan")
+        message(STATUS "Euxis: kernel.yama.ptrace_scope=${_yama_ptrace_scope} blocks LeakSanitizer; tests will run with ASAN_OPTIONS=detect_leaks=0")
+        message(STATUS "Euxis: to enable leak detection, run: sudo sysctl kernel.yama.ptrace_scope=0")
+      else()
+        message(STATUS "Euxis: LeakSanitizer enabled (ptrace_scope=0)")
+      endif()
+    endif()
   endif()
 endif()
 
