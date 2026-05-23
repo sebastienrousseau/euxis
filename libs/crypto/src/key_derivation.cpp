@@ -17,8 +17,14 @@ auto derive_key(std::span<const std::byte> password,
                 size_t key_size)
     -> std::expected<DerivedKey, CryptoError> {
 
-    assert(!password.empty() && "P10-R5: password/seed must not be empty");
-    assert(key_size > 0 && key_size <= kMaxKeySize && "P10-R2: key_size bounded");
+    // Bounded-input contract: callers may pass any size; out-of-range values yield an
+    // explicit error (matches the documented std::expected return type — historically
+    // these were assert()s, but tests like KeySizeTooSmall verify the error path).
+    if (key_size == 0 || key_size > kMaxKeySize) {
+        return std::unexpected(CryptoError::KeyDerivationFailed);
+    }
+    // Note: empty password is allowed (see KeyDerivationTest.EmptyPasswordWorks);
+    // libsodium handles it via the underlying KDF.
 
     // Fast-path: if iterations is 0, use BLAKE2b (crypto_generichash) instead of Argon2id.
     // WARNING: BLAKE2b is NOT memory-hard. Only use iterations==0 for deterministic
