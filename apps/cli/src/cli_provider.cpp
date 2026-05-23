@@ -51,8 +51,7 @@ auto CliProvider::execute(const std::string& model,
     };
 
     auto auth = auth_store_.resolve(selection.provider);
-    auto response = executor_.execute(selection, prompt, timeout_ms / 1000,
-                                       auth ? std::optional{*auth} : std::nullopt);
+    auto response = executor_.execute(selection, prompt, timeout_ms / 1000, auth);
 
     return runtime::ProviderResponse{
         .success = response.success,
@@ -79,8 +78,7 @@ auto CliProvider::execute(const runtime::ModelSpec& spec,
     };
 
     auto auth = auth_store_.resolve(spec.provider);
-    auto response = executor_.execute(selection, prompt, timeout_ms / 1000,
-                                       auth ? std::optional{*auth} : std::nullopt);
+    auto response = executor_.execute(selection, prompt, timeout_ms / 1000, auth);
 
     return runtime::ProviderResponse{
         .success = response.success,

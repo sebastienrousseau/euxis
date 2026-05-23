@@ -222,6 +222,7 @@ void EventLoop::process_stdin() {
                                         case '5': ev.key = 1012; break; // PgUp
                                         case '6': ev.key = 1013; break; // PgDn
                                         case '3': ev.key = 1014; break; // Delete
+                                        default: break;                 // unknown VT seq — leave ev.key unset
                                     }
                                 } else if (seq[1] == '1' && seq[2] == ';') {
                                     // ESC [ 1 ; <mod> <dir> (Ctrl/Shift+arrow)
