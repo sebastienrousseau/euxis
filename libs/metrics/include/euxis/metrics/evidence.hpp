@@ -82,7 +82,6 @@ public:
 private:
     std::filesystem::path evidence_dir_;
     std::filesystem::path evidence_db_;
-    static const std::unordered_map<EvidenceGrade, int> decay_days_;
 };
 
 } // namespace euxis::metrics

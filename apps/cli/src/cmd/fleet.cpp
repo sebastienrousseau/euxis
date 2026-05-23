@@ -122,10 +122,15 @@ auto format_agent_status(const std::string& status) -> std::string {
     return term::dim(status);
 }
 
-// Critical pillars that must be checked for high-confidence verdicts
-const std::vector<std::string> CRITICAL_PILLARS = {
-    "security", "testing", "build", "architecture"
-};
+// Critical pillars that must be checked for high-confidence verdicts.
+// Function-local static: lazy init avoids throwing during the static-init phase
+// (bugprone-throwing-static-initialization).
+auto critical_pillars() -> const std::vector<std::string>& {
+    static const std::vector<std::string> kCriticalPillars = {
+        "security", "testing", "build", "architecture"
+    };
+    return kCriticalPillars;
+}
 
 // Canonicalize pillar names so manifest aliases map to critical pillars
 auto canonicalize_pillar(const std::string& raw) -> std::string {
@@ -2107,11 +2112,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     for (const auto& ev : evidence_log) pillar_evidence[ev.pillar].push_back(&ev);
 
     int critical_covered = 0;
-    for (const auto& cp : CRITICAL_PILLARS) {
+    for (const auto& cp : critical_pillars()) {
         if (pillar_evidence.count(cp) && !pillar_evidence[cp].empty()) critical_covered++;
     }
-    double critical_coverage = CRITICAL_PILLARS.empty() ? 1.0
-        : static_cast<double>(critical_covered) / CRITICAL_PILLARS.size();
+    double critical_coverage = critical_pillars().empty() ? 1.0
+        : static_cast<double>(critical_covered) / critical_pillars().size();
 
     // 4. Degradation penalty
     int degraded_agents = 0;
@@ -2136,7 +2141,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // Factor: Critical pillar coverage (weight: 25)
     int coverage_penalty = static_cast<int>((1.0 - critical_coverage) * 25);
     confidence -= coverage_penalty;
-    if (coverage_penalty > 0) confidence_factors.push_back("Coverage: -" + std::to_string(coverage_penalty) + " (" + std::to_string(critical_covered) + "/" + std::to_string(CRITICAL_PILLARS.size()) + " critical pillars)");
+    if (coverage_penalty > 0) confidence_factors.push_back("Coverage: -" + std::to_string(coverage_penalty) + " (" + std::to_string(critical_covered) + "/" + std::to_string(critical_pillars().size()) + " critical pillars)");
 
     // Factor: Degradation (weight: 15)
     int degradation_penalty = static_cast<int>(degradation_ratio * 15);
@@ -2261,7 +2266,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     {
         std::unordered_set<std::string> seen_pillars;
         for (const auto& ev : evidence_log) seen_pillars.insert(ev.pillar);
-        for (const auto& cp : CRITICAL_PILLARS) seen_pillars.insert(cp);
+        for (const auto& cp : critical_pillars()) seen_pillars.insert(cp);
 
         for (const auto& pname : seen_pillars) {
             PillarScore ps;
@@ -2308,7 +2313,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     bench.agents_executed = (int)evidence_log.size();
     bench.agents_skipped = agents_skipped;
     bench.estimated_cost_usd = total_estimated_cost;
-    bench.critical_checks_expected = (int)CRITICAL_PILLARS.size();
+    bench.critical_checks_expected = (int)critical_pillars().size();
     bench.critical_checks_present = critical_covered;
     bench.coverage_ratio = critical_coverage;
     double p95_latency_ms = 0.0;

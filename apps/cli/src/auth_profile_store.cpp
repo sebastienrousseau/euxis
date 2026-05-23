@@ -9,18 +9,19 @@
 
 namespace euxis::cli {
 
-// Default fallback chains
-static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
-    {"claude",    {"openai", "gemini", "ollama"}},
-    {"anthropic", {"openai", "gemini", "ollama"}},
-    {"openai",    {"claude", "gemini", "ollama"}},
-    {"gemini",    {"claude", "openai", "ollama"}},
-    {"ollama",    {"claude", "openai", "gemini"}},
-};
-
 AuthProfileStore::AuthProfileStore(const std::string& data_dir)
     : data_dir_(data_dir)
 {
+    // Function-local static: lazy init avoids throwing during static-init phase
+    // (bugprone-throwing-static-initialization).
+    static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
+        {"claude",    {"openai", "gemini", "ollama"}},
+        {"anthropic", {"openai", "gemini", "ollama"}},
+        {"openai",    {"claude", "gemini", "ollama"}},
+        {"gemini",    {"claude", "openai", "ollama"}},
+        {"ollama",    {"claude", "openai", "gemini"}},
+    };
+
     auto config_dir = std::filesystem::path(data_dir) / "config";
     std::filesystem::create_directories(config_dir);
     store_path_ = (config_dir / "auth_profiles.json").string();

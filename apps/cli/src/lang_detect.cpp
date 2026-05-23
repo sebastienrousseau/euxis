@@ -9,66 +9,67 @@ namespace euxis::cli {
 
 namespace fs = std::filesystem;
 
-// Extension → language mapping
-static const std::unordered_map<std::string, std::string> ext_map = {
-    {".cpp", "C++"}, {".cc", "C++"}, {".cxx", "C++"}, {".hpp", "C++"}, {".h", "C/C++"},
-    {".c", "C"},
-    {".rs", "Rust"},
-    {".go", "Go"},
-    {".py", "Python"}, {".pyi", "Python"},
-    {".js", "JavaScript"}, {".mjs", "JavaScript"}, {".cjs", "JavaScript"},
-    {".ts", "TypeScript"}, {".tsx", "TypeScript"},
-    {".java", "Java"}, {".kt", "Kotlin"},
-    {".rb", "Ruby"},
-    {".swift", "Swift"},
-    {".cs", "C#"},
-    {".php", "PHP"},
-    {".lua", "Lua"},
-    {".zig", "Zig"},
-    {".nim", "Nim"},
-    {".ex", "Elixir"}, {".exs", "Elixir"},
-    {".erl", "Erlang"},
-    {".hs", "Haskell"},
-    {".ml", "OCaml"}, {".mli", "OCaml"},
-    {".scala", "Scala"},
-    {".sh", "Shell"}, {".bash", "Shell"}, {".zsh", "Shell"}, {".fish", "Shell"},
-};
-
-// Config file → framework mapping
-static const std::unordered_map<std::string, std::string> framework_map = {
-    {"CMakeLists.txt", "CMake"},
-    {"Makefile", "Make"},
-    {"Cargo.toml", "Cargo"},
-    {"go.mod", "Go Modules"},
-    {"package.json", "npm"},
-    {"pyproject.toml", "Python (pyproject)"},
-    {"setup.py", "Python (setuptools)"},
-    {"requirements.txt", "pip"},
-    {"Gemfile", "Bundler"},
-    {"pom.xml", "Maven"},
-    {"build.gradle", "Gradle"},
-    {"build.gradle.kts", "Gradle (Kotlin)"},
-    {"Package.swift", "Swift Package Manager"},
-    {"mix.exs", "Mix"},
-    {"stack.yaml", "Haskell Stack"},
-    {"dune-project", "Dune"},
-    {"meson.build", "Meson"},
-    {"BUILD", "Bazel"},
-    {"WORKSPACE", "Bazel"},
-    {"flake.nix", "Nix"},
-    {"vcpkg.json", "vcpkg"},
-    {"conanfile.txt", "Conan"},
-    {"conanfile.py", "Conan"},
-    {".clang-tidy", "clang-tidy"},
-    {".eslintrc.json", "ESLint"},
-    {"tsconfig.json", "TypeScript"},
-    {"docker-compose.yml", "Docker Compose"},
-    {"Dockerfile", "Docker"},
-    {".github", "GitHub Actions"},
-    {".gitlab-ci.yml", "GitLab CI"},
-};
-
 auto detect_languages(const std::string& root_dir) -> LanguageProfile {
+    // Function-local statics: lazy-init avoids throwing during static-init phase
+    // (bugprone-throwing-static-initialization). Both maps are pure lookup tables
+    // and are only consulted from within this function.
+    static const std::unordered_map<std::string, std::string> ext_map = {
+        {".cpp", "C++"}, {".cc", "C++"}, {".cxx", "C++"}, {".hpp", "C++"}, {".h", "C/C++"},
+        {".c", "C"},
+        {".rs", "Rust"},
+        {".go", "Go"},
+        {".py", "Python"}, {".pyi", "Python"},
+        {".js", "JavaScript"}, {".mjs", "JavaScript"}, {".cjs", "JavaScript"},
+        {".ts", "TypeScript"}, {".tsx", "TypeScript"},
+        {".java", "Java"}, {".kt", "Kotlin"},
+        {".rb", "Ruby"},
+        {".swift", "Swift"},
+        {".cs", "C#"},
+        {".php", "PHP"},
+        {".lua", "Lua"},
+        {".zig", "Zig"},
+        {".nim", "Nim"},
+        {".ex", "Elixir"}, {".exs", "Elixir"},
+        {".erl", "Erlang"},
+        {".hs", "Haskell"},
+        {".ml", "OCaml"}, {".mli", "OCaml"},
+        {".scala", "Scala"},
+        {".sh", "Shell"}, {".bash", "Shell"}, {".zsh", "Shell"}, {".fish", "Shell"},
+    };
+
+    static const std::unordered_map<std::string, std::string> framework_map = {
+        {"CMakeLists.txt", "CMake"},
+        {"Makefile", "Make"},
+        {"Cargo.toml", "Cargo"},
+        {"go.mod", "Go Modules"},
+        {"package.json", "npm"},
+        {"pyproject.toml", "Python (pyproject)"},
+        {"setup.py", "Python (setuptools)"},
+        {"requirements.txt", "pip"},
+        {"Gemfile", "Bundler"},
+        {"pom.xml", "Maven"},
+        {"build.gradle", "Gradle"},
+        {"build.gradle.kts", "Gradle (Kotlin)"},
+        {"Package.swift", "Swift Package Manager"},
+        {"mix.exs", "Mix"},
+        {"stack.yaml", "Haskell Stack"},
+        {"dune-project", "Dune"},
+        {"meson.build", "Meson"},
+        {"BUILD", "Bazel"},
+        {"WORKSPACE", "Bazel"},
+        {"flake.nix", "Nix"},
+        {"vcpkg.json", "vcpkg"},
+        {"conanfile.txt", "Conan"},
+        {"conanfile.py", "Conan"},
+        {".clang-tidy", "clang-tidy"},
+        {".eslintrc.json", "ESLint"},
+        {"tsconfig.json", "TypeScript"},
+        {"docker-compose.yml", "Docker Compose"},
+        {"Dockerfile", "Docker"},
+        {".github", "GitHub Actions"},
+        {".gitlab-ci.yml", "GitLab CI"},
+    };
+
     LanguageProfile profile;
     std::unordered_map<std::string, int> lang_counts;
     std::unordered_map<std::string, bool> frameworks_seen;
