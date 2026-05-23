@@ -61,7 +61,7 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-security-cpp
   nlohmann_json::nlohmann_json
   spdlog::spdlog
-  SQLite::SQLite3
+  SQLite3::SQLite3
 )
 
 # Main executable
