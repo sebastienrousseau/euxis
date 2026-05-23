@@ -2272,12 +2272,12 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                 ps.coverage = 0; ps.agreement = 0; ps.evidence_density = 0;
             } else {
                 const auto& agents = pillar_evidence[pname];
-                int p = 0, f = 0, incomplete = 0, pex = 0, pinf = 0, pcl = 0;
+                int p = 0, f = 0, incomplete = 0, pex = 0, pcl = 0;
                 for (const auto* a : agents) {
                     if (a->verdict == "PASS" || a->verdict == "DEGRADED") p++;
                     else if (a->verdict == "FAILED") f++;
                     else incomplete++; // PARTIAL, TIMEOUT
-                    pex += a->execution_backed; pinf += a->inferred; pcl += a->total_claims;
+                    pex += a->execution_backed; pcl += a->total_claims;
                 }
                 ps.coverage = std::min(100, (int)agents.size() * 50); // 2+ agents = full coverage
                 ps.agreement = (int)(static_cast<double>(std::max({p, f, incomplete})) / agents.size() * 100);
@@ -3132,14 +3132,13 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
                   << term::dim(" (target: <=" + std::to_string(drift_target) + "pt)") << "\n";
 
         if (std::abs((int)drift) > drift_target) {
-            // Classify drift: compare median agent counts and timeout rates
+            // Classify drift: compare median agent counts and standard timeout rate
             double flash_median_agents = 0, std_median_agents = 0;
-            double flash_timeout_rate = 0, std_timeout_rate = 0;
-            for (const auto* r : flash_runs) { flash_median_agents += r->agents_executed; flash_timeout_rate += r->timeout_count; }
+            double std_timeout_rate = 0;
+            for (const auto* r : flash_runs) { flash_median_agents += r->agents_executed; }
             for (const auto* r : standard_runs) { std_median_agents += r->agents_executed; std_timeout_rate += r->timeout_count; }
             flash_median_agents /= flash_runs.size();
             std_median_agents /= standard_runs.size();
-            flash_timeout_rate /= flash_runs.size();
             std_timeout_rate /= standard_runs.size();
 
             bool deeper = std_median_agents > flash_median_agents + 1;

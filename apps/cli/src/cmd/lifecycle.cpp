@@ -315,11 +315,9 @@ int cmd_install(Context& ctx, const std::vector<std::string>& args) {
     static const std::vector<std::pair<std::string, bool>> providers = {
         {"ollama", false}, {"claude", false}, {"gemini", false}, {"codex", false}
     };
-    int providers_found = 0;
     std::cout << "\n  " << term::bold(tr("Providers:")) << "\n";
     for (const auto& [name, _] : providers) {
         bool found = Process::available(name);
-        if (found) ++providers_found;
         std::cout << "  " << (found ? term::icon_ok() : term::icon_warn())
                   << " " << name << " " << (found ? term::dim(tr("(available)")) : term::dim(tr("(not found, optional)"))) << "\n";
     }

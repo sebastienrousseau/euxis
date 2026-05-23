@@ -220,7 +220,6 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
 
     // Interactive Chat Loop
     std::string line;
-    int turn = 0;
     std::string memory_ctx;
     std::vector<std::pair<std::string, std::string>> history;
     std::string active_agent = "code-agent";
@@ -342,8 +341,6 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
             
         std::string full_prompt = ProviderExecutor::build_prompt(system_prompt, safe_input, memory_ctx);
 
-        ++turn;
-        
         if (&input == &std::cin) {
             std::cout << term::dim("  \xe2\xa0\x8b Thinking...");
             std::cout.flush();
