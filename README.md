@@ -1,72 +1,91 @@
-# Euxis
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
-High-performance agent OS. Built in C++23.
+<h1 align="center">euxis</h1>
 
-[![Version][version-badge]][version-url] [![License][license-badge]][license-url] [![Docs](https://img.shields.io/badge/docs-gh--pages-blue)](https://sebastienrousseau.github.io/euxis/)
+<p align="center">
+  A native, agent-driven code certification engine written in C++23.
+</p>
 
-Deploy, orchestrate, and observe AI agents at native speed.
-Euxis replaces interpreted agent loops with compiled execution —
-sub-10ms dispatch, zero-copy memory, cryptographic provenance.
+<p align="center">
+  <a href="https://github.com/sebastienrousseau/euxis/actions/workflows/cpp.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/euxis/cpp.yml?branch=main&style=for-the-badge&logo=github" alt="Build" /></a>
+  <a href="https://github.com/sebastienrousseau/euxis/releases"><img src="https://img.shields.io/github/v/release/sebastienrousseau/euxis?include_prereleases&style=for-the-badge&color=fc8d62" alt="Release" /></a>
+  <a href="https://sebastienrousseau.github.io/euxis/"><img src="https://img.shields.io/badge/Docs-gh--pages-66c2a5?style=for-the-badge" alt="Docs" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=for-the-badge" alt="License: AGPL-3.0" /></a>
+  <a href="https://euxis.co"><img src="https://img.shields.io/badge/euxis.co-Project%20site-orange?style=for-the-badge" alt="Project site" /></a>
+</p>
 
-## Get Started
+---
+
+## Contents
+
+**Getting started**
+
+- [Install](#install) — prerequisites, build, verify
+- [Quick start](#quick-start) — first verification in five minutes
+
+**Command surface**
+
+- [Core commands](#core-commands) — daily-driver verbs
+- [Command groups](#command-groups) — the full eight groups
+
+**SDK / Library reference**
+
+- [Embedding euxis in C++](#embedding-euxis-in-c) — the SDK example
+- [Public libraries](#public-libraries) — sixteen-library matrix
+- [Build options](#build-options) — CMake feature flags
+- [Provider strategy](#provider-strategy) — FinOps router defaults
+
+**Operational**
+
+- [Architecture](#architecture) — directory layout at a glance
+- [Why this approach?](#why-this-approach) — design rationale
+- [Building from source](#building-from-source) — make targets
+- [Benchmarks](#benchmarks) — two harnesses, two jobs
+- [Documentation](#documentation) — all reference docs
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Install
+
+Euxis builds from source. Pre-built packages are not yet published; the build is one command on macOS, Linux, and WSL2.
 
 ### Prerequisites
 
 | Tool | Minimum | Check |
-|------|---------|-------|
-| CMake | 3.28+ | `cmake --version` |
+|---|---|---|
+| CMake | 3.28 | `cmake --version` |
 | C++ compiler | GCC 14+ or Clang 18+ | `g++ --version` or `clang++ --version` |
-| Git | 2.x+ | `git --version` |
+| Git | 2.x | `git --version` |
+| libsodium | 1.0.18+ | `pkg-config --modversion libsodium` |
+| SQLite | 3.x | `sqlite3 --version` |
 
-**Platform support:** macOS (Apple Clang or Homebrew GCC), Linux (GCC/Clang), WSL (Ubuntu GCC).
+Optional, only when the corresponding feature is enabled:
 
-<details>
-<summary><strong>Platform-specific setup</strong></summary>
+| Tool | Required by | Install |
+|---|---|---|
+| Qt6 | `apps/etx` desktop GUI | `brew install qt` / `pacman -S qt6-base` |
+| Doxygen | `EUXIS_BUILD_DOCS=ON` (default ON) | `pacman -S doxygen graphviz` |
+| Google Benchmark | fetched automatically when `EUXIS_BUILD_GBENCH=ON` | — |
 
-**macOS:**
-```bash
-brew install cmake gcc
-```
+### Platform setup
 
-**Ubuntu / Debian / WSL:**
-```bash
-sudo apt update && sudo apt install -y cmake g++-14 git
-```
-
-**Arch Linux:**
-```bash
-sudo pacman -S cmake gcc git
-```
-
-</details>
+| Platform | Command |
+|---|---|
+| macOS (Homebrew) | `brew install cmake gcc libsodium sqlite` |
+| Ubuntu / Debian / WSL2 | `sudo apt update && sudo apt install -y cmake g++-14 git libsodium-dev libsqlite3-dev` |
+| Arch / CachyOS | `sudo pacman -S cmake gcc git libsodium sqlite` |
 
 ### Build
 
 ```bash
 git clone https://github.com/sebastienrousseau/euxis.git ~/.euxis
 cd ~/.euxis
-make cpp-configure
-make cpp-build
-make cpp-test       # 2,400+ tests across 35 suites
-```
+make cpp-build              # Release + LTO, parallel
+make cpp-test               # ctest, all suites
 
-Binaries are in `cmake-build/apps/cli/`.
-
-### Add to PATH
-
-Pick one method:
-
-```bash
-# Symlink (recommended)
 sudo ln -sf ~/.euxis/cmake-build/apps/cli/euxis-cli /usr/local/bin/euxis
-
-# Or add to shell profile
-# Bash / Zsh:
-echo 'export PATH="$HOME/.euxis/cmake-build/apps/cli:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-
-# Fish:
-fish_add_path ~/.euxis/cmake-build/apps/cli
 ```
 
 ### Verify
@@ -75,87 +94,129 @@ fish_add_path ~/.euxis/cmake-build/apps/cli
 euxis doctor
 ```
 
-## Core Commands
+---
 
-| Command | What It Does |
-|---------|-------------|
-| `euxis check [target]` | Verify a repository (standard mode) |
-| `euxis triage [target]` | Fast bounded triage (~45 seconds) |
-| `euxis review [target]` | Deep verification (standard or forensic) |
-| `euxis certify-readiness [target]` | Certification readiness assessment (18 domains) |
-| `euxis compare <target>` | Compare triage against deep verification |
-| `euxis stats` | Validation metrics and drift history |
-| `euxis policy <sub>` | Policy inspection and enforcement |
+## Quick start
 
 ```bash
-euxis triage .                    # Fast scan
-euxis check .                     # Standard verification (~3 min)
-euxis review . --forensic         # Forensic depth
-euxis certify-readiness . --framework soc2   # SOC2 readiness
-euxis compare .                   # Side-by-side comparison
-euxis stats --last 5              # Recent metrics
-euxis doctor                      # Environment diagnostics
+euxis triage .                              # 45-second bounded triage
+euxis check .                               # standard verification, ~3 min
+euxis review . --forensic                   # forensic depth + supply-chain audit
+euxis certify-readiness . --framework soc2  # SOC 2 readiness report
+euxis compare .                             # triage vs deep, side-by-side
+euxis stats --last 5                        # recent metrics + drift history
 ```
 
-### Aliases
+The triage path is bounded for CI. The full review path is bounded for human review. The certification path emits a reproducible evidence pack.
 
-| Alias | Resolves To |
-|-------|-------------|
-| `quick` | `triage` |
-| `deep` | `review` |
-| `diag` | `doctor` |
-| `metrics` | `stats` |
-| `pb` | `playbook` |
+---
 
-### All Command Groups
+## Core commands
 
-Run `euxis --help` for the full list across 8 groups:
-**Core** · Lifecycle · System · Fleet · Knowledge · Infrastructure · Development · Specialized.
+The Core group is the daily-driver surface. Aliases map to the canonical command.
 
-## Advanced
+| Command | Alias | What it does |
+|---|---|---|
+| `euxis check [target]` | — | Standard verification. The default mode. |
+| `euxis triage [target]` | `euxis quick` | Fast bounded triage, ~45 seconds. |
+| `euxis review [target]` | `euxis deep` | Deep verification, standard or `--forensic`. |
+| `euxis certify-readiness [target] --framework <name>` | — | Certification readiness across 18 domains. |
+| `euxis compare <target>` | — | Diff triage results against deep verification. |
+| `euxis stats` | `euxis metrics` | Validation metrics + drift history. |
+| `euxis policy <subcommand>` | — | Policy inspection and enforcement. |
+| `euxis playbook <name>` | `euxis pb` | Run a multi-step verification pipeline. |
+| `euxis combo run <pipeline> "<goal>"` | — | Multi-agent execution graph. |
+| `euxis doctor` | `euxis diag` | Environment diagnostics. |
+
+---
+
+## Command groups
+
+Euxis ships sixty commands across eight groups: **Core, Lifecycle, System, Fleet, Knowledge, Infrastructure, Development, Specialized**. The full inventory lives in [`docs/reference/cli-reference.md`](docs/reference/cli-reference.md); `euxis --help` enumerates every command and flag at the terminal.
+
+| Group | Headline commands |
+|---|---|
+| Core | `check`, `triage`, `review`, `certify-readiness`, `compare`, `stats`, `policy`, `playbook`, `doctor` |
+| Lifecycle | session and run-state management |
+| System | host inspection and configuration |
+| Fleet | agent roster, routing, and assignment |
+| Knowledge | corpus and reference data |
+| Infrastructure | gateway and deployment surfaces |
+| Development | development-only helpers (lint, fmt, format-check) |
+| Specialized | targeted workflows for specific frameworks |
+
+---
+
+## Embedding euxis in C++
+
+The same libraries the CLI uses ship as a public SDK under `libs/`. The minimal end-to-end example lives at [`docs/examples/cpp/a2a_minimal_server/`](docs/examples/cpp/a2a_minimal_server/) and builds an A2A v0.2 server handler in under 100 lines of C++23.
 
 ```bash
-euxis playbook verify-everything .       # Full verification playbook
-euxis combo run envision "Design X"      # Multi-agent pipeline
-euxis certify-readiness . --strict       # Strict certification
-euxis-etx                                # Desktop GUI (Qt6)
+cmake -B cmake-build -DEUXIS_BUILD_EXAMPLES=ON
+cmake --build cmake-build --target euxis_example_a2a_minimal_server
+./cmake-build/docs/examples/cpp/a2a_minimal_server/euxis_example_a2a_minimal_server
 ```
 
-## Architecture
+Expected output is the full A2A task lifecycle: `agent/card`, `capabilities/list`, `task/create`, `task/get`, `task/cancel`, `task/get` again. See the example's own `README.md` for the annotated walk-through.
 
+---
+
+## Public libraries
+
+Sixteen static libraries ship from `libs/`. Link only what the application uses.
+
+| Library | Public header | Purpose |
+|---|---|---|
+| `euxis-a2a-cpp` | `<euxis/a2a/agent_card.hpp>` | A2A v0.2 protocol — cards, tasks, JSON-RPC server |
+| `euxis-a2a-types-cpp` | `<euxis/a2a/message.hpp>` | Shared message + transport types |
+| `euxis-runtime-cpp` | `<euxis/runtime/agent_session.hpp>` | Agent session, lifecycle, tool registry |
+| `euxis-core-cpp` | `<euxis/core/contracts.hpp>` | FinOps router, supervisor, swarm orchestrator |
+| `euxis-crypto-cpp` | `<euxis/crypto/aes_gcm.hpp>` | AES-256-GCM, Ed25519, BLAKE2b key derivation |
+| `euxis-identity-cpp` | `<euxis/identity/did.hpp>` | DID, ERC-8004 attestation, credentials |
+| `euxis-network-cpp` | `<euxis/network/mcp_client.hpp>` | MCP client, WebSocket transport, resilience |
+| `euxis-bridge-cpp` | `<euxis/bridge/admission.hpp>` | External-tool admission, audit, verification |
+| `euxis-metrics-cpp` | `<euxis/metrics/analyzer.hpp>` | mdspan telemetry, validation pipeline |
+| `euxis-memory-cpp` | `<euxis/memory/store.hpp>` | SQLite-backed persistent memory |
+| `euxis-inference-cpp` | `<euxis/inference/engine.hpp>` | Local inference via llama.cpp, ollama |
+| `euxis-adapters-cpp` | `<euxis/adapters/adapter.hpp>` | Outbound channel adapters (Slack, Discord, Telegram) |
+| `euxis-security-cpp` | `<euxis/security/errors.hpp>` | Threat detection, policy enforcement |
+| `euxis-platform-cpp` | `<euxis/platform/platform.hpp>` | OS abstraction (macOS, Linux, WSL2) |
+| `euxis-publisher-cpp` | `<euxis/publisher/publisher.hpp>` | Document rendering and export |
+| `euxis-bench-cpp` | `<euxis/bench/runner.hpp>` | Benchmark harness and result matrix |
+
+The full API reference is generated by `cmake --build cmake-build --target docs` (requires `doxygen`; falls back to a no-op when absent). Output lands in `cmake-build/docs/html/` styled with [doxygen-awesome-css](https://jothepro.github.io/doxygen-awesome-css/).
+
+---
+
+## Build options
+
+All optional features are off by default unless noted. Enable only what the application needs.
+
+| Option | Default | What it enables |
+|---|---|---|
+| `EUXIS_BUILD_EXAMPLES` | `OFF` | First-party SDK examples under `docs/examples/cpp/` |
+| `EUXIS_BUILD_GBENCH` | `OFF` | Google Benchmark statistical harness for the `performance` suite |
+| `EUXIS_BUILD_DOCS` | `ON` | Doxygen API reference target (auto-skips if doxygen absent) |
+| `EUXIS_NATIVE_ARCH` | `OFF` | Use `-march=native` for dev builds |
+| `EUXIS_COVERAGE` | `OFF` | Enable gcov instrumentation |
+| `EUXIS_DISABLE_SANITIZERS` | `OFF` | Skip ASan/UBSan in debug builds |
+
+```bash
+# Example: examples + statistical bench + documentation
+cmake -B cmake-build \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+  -DEUXIS_BUILD_EXAMPLES=ON \
+  -DEUXIS_BUILD_GBENCH=ON
 ```
-apps/             Application layer
-  cli/            Command-line interface (60 commands, 8 groups)
-  etx/            Qt6 desktop GUI (17 screens)
-  gateway/        HTTP/WebSocket server
-  publisher/      Document rendering engine
 
-libs/             SDK layer (16 libraries)
-  core/           Execution engine, FinOps routing, swarm orchestration
-  runtime/        Agent lifecycle and scheduling
-  security/       Threat detection and policy enforcement
-  network/        MCP client, A2A transports
-  crypto/         AES-256-GCM, Ed25519, Argon2id
-  metrics/        Telemetry and validation framework
-  inference/      Local inference via llama.cpp
-  memory/         Persistent memory store (SQLite-backed)
-  identity/       Agent identity and credential management
-  platform/       Platform abstraction (macOS, Linux, WSL)
-  a2a/            Agent-to-agent protocol implementation
-  adapters/       Provider adapters (Slack, Telegram, etc.)
-  bridge/         CLI bridge executor for external tools
-  bench/          Benchmark harness and fixtures
-  publisher/      Document rendering and export
+---
 
-data/             Configuration, agent prompts, playbooks, docs
-```
+## Provider strategy
 
-### Provider Strategy
+Euxis routes inference work to the optimal provider based on task class. The mapping is configurable per environment via [`data/config/provider_strategy.json`](data/config/provider_strategy.json) and overridable at runtime through environment variables.
 
-Euxis routes tasks to the optimal AI provider based on semantic classification:
-
-| Task Class | Primary Provider | Fallback |
-|-----------|-----------------|----------|
+| Task class | Default provider | Fallbacks |
+|---|---|---|
 | Research / synthesis | OpenAI | Gemini, Claude |
 | Coding / architecture / audit | Claude | Gemini, Ollama |
 | Deep research / security | Gemini | OpenAI, Claude |
@@ -163,44 +224,127 @@ Euxis routes tasks to the optimal AI provider based on semantic classification:
 | Surgical edits | Aider | Claude, Ollama |
 | Terminal automation | Kiro | ShellGPT, Claude |
 
-Configuration: [`data/config/provider_strategy.json`](data/config/provider_strategy.json).
-Override with environment variables: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_PROVIDER`, `EUXIS_DEFAULT_SECURITY_PROVIDER`.
+Environment overrides: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_PROVIDER`, `EUXIS_DEFAULT_SECURITY_PROVIDER`.
 
-## Building from Source
+The `FinOpsRouter` in [`libs/core/src/router.cpp`](libs/core/src/router.cpp) picks within each class using a Structure-of-Arrays scoring loop — branchless, SIMD-vectorizable, deterministic. The `swarm` priority cycles through providers via an atomic round-robin counter.
+
+---
+
+## Architecture
+
+```
+apps/                Application layer
+  cli/               Command-line interface — 60 commands, 8 groups
+  etx/               Qt6 desktop GUI — 17 screens
+  gateway/           HTTP/WebSocket server
+  publisher/         Document rendering engine
+
+libs/                SDK layer — 16 static libraries
+  a2a/               A2A v0.2 protocol implementation
+  a2a-types/         Shared message and transport types
+  adapters/          Outbound channel adapters
+  bench/             Benchmark harnesses (custom + optional Google Benchmark)
+  bridge/            CLI bridge for external-tool execution + admission
+  core/              FinOps router, supervisor, swarm orchestrator
+  crypto/            AES-256-GCM, Ed25519, BLAKE2b, Argon2id
+  identity/          DID, ERC-8004 attestation, credential management
+  inference/         Local inference via llama.cpp, ollama
+  memory/            Persistent memory store, SQLite-backed
+  metrics/           mdspan telemetry, fast collector, validation pipeline
+  network/           MCP client, WebSocket transport, resilience patterns
+  platform/          OS abstraction (macOS, Linux, WSL2)
+  publisher/         Document export
+  runtime/           Agent session, lifecycle, tool manifest, validator
+  security/          Threat detection, policy enforcement, errors
+
+data/                Configuration, agent prompts, playbooks, docs
+docs/                Documentation site sources + SDK examples
+```
+
+---
+
+## Why this approach?
+
+Euxis is a multi-agent code certification CLI built native, not a wrapper around an interpreted runtime. The implementation is C++23 throughout — header files use `std::expected` for error handling (61 sites across `libs/`), `std::mdspan` for metric collection, and concepts for adapter interfaces. The same binary runs the entire agent loop in-process: no Python startup, no JIT warm-up, no per-turn marshalling cost.
+
+Three architectural choices motivate the rewrite from interpreted equivalents:
+
+1. **Cryptographic provenance is in the hot path.** Every verification carries an Ed25519 attestation. The AES-256-GCM context (`libs/crypto/aes_gcm.hpp`) caches the key schedule once and amortizes it across calls — measured at 1.54 GiB/s on x86_64-v3 versus 1.50 GiB/s for the simple API, with both well above the 50,000 ops/sec SLO target. Interpreted runtimes pay the schedule per call.
+
+2. **A2A is first-class, not glued on.** `libs/a2a` implements the v0.2 protocol surface end-to-end — agent cards, validation, JSON-RPC server, HTTP and WebSocket transports, msgpack binary serialization at 30 M ops/sec. The minimum-viable embedding is the SDK example at `docs/examples/cpp/a2a_minimal_server/main.cpp`.
+
+3. **No dynamic plugin loading.** Every library under `libs/` is statically linked into the apps that use it. Configuration changes never require relinking, but the *capability surface* of any euxis binary is determined entirely at build time. This is a feature for an audit tool: builds are deterministic and reproducible, and a verification cannot be silently extended by a runtime-loaded plugin.
+
+The trade-off is that euxis does not match the plugin-loader ergonomics of personal-AI-assistant frameworks (OpenClaw, Hermes Agent). That is intentional — the product is verification, not extensibility.
+
+---
+
+## Building from source
 
 ```bash
-make cpp-configure    # CMake configure (Release, LTO)
+make cpp-configure    # CMake configure (Release, LTO, _FORTIFY_SOURCE=3)
 make cpp-build        # Build all targets
 make cpp-test         # Run test suite (ctest)
 make cpp-clean        # Remove build artifacts
-make cpp-format       # Format with clang-format
-make cpp-coverage     # Build with coverage (requires lcov)
+make cpp-format       # clang-format pass
+make cpp-coverage     # Build with coverage (requires gcovr, lcov)
+make cpp-clang-tidy   # Static analysis
 ```
 
-Override parallelism: `make cpp-build CPP_BUILD_JOBS=8`.
+Override parallelism with `make cpp-build CPP_BUILD_JOBS=8`. The repository pins `-DCMAKE_POLICY_VERSION_MINIMUM=3.5` to accommodate vendored third-party CMake files that predate the modern minimum-version policy.
+
+---
+
+## Benchmarks
+
+Two complementary harnesses ship with euxis. See [`libs/bench/README.md`](libs/bench/README.md) for the full guide.
+
+| Harness | Use for | Output |
+|---|---|---|
+| Custom (`euxis-bench-cpp`) | CI smoke tests against hardcoded SLO targets across five suites | JSON via `ResultMatrix` |
+| Google Benchmark (`euxis_perf_gbench`, opt-in) | Statistical analysis of the `performance` suite; trend tracking | `benchmark::` console / JSON / CSV |
+
+Initial run on GCC 16 / x86_64-v3 (`euxis_perf_gbench --benchmark_min_time=0.1s`):
+
+| Benchmark | Time | Throughput |
+|---|---|---|
+| `BM_CryptoThroughput_Simple` | 0.640 us | 1.50 GiB/s |
+| `BM_CryptoThroughput_Cached` | 0.622 us | 1.54 GiB/s |
+| `BM_KeyDerivation_FastPath` | 0.203 us | — |
+| `BM_AgentCardMsgpackRoundTrip` | 33.1 ns | 30.3 M ops/sec |
+
+Synthetic microbenchmarks measure library overhead, not user-visible performance. Before optimizing a hot path that a bench identifies, profile a real `euxis-cli` workload (`perf record euxis-cli triage .`) and confirm the function appears in the production call graph.
+
+---
 
 ## Documentation
 
 | Guide | Content |
-|-------|---------|
-| [Quick Start](docs/essentials/quick-start.md) | Clone to verified in 5 minutes |
-| [User Guide](docs/guides/user-guide.md) | Complete CLI reference and modes |
-| [CLI Reference](docs/reference/cli-reference.md) | Every command, flag, and example |
-| [Fleet Guide](docs/guides/fleet-guide.md) | Agent roster and routing |
+|---|---|
+| [Quick start](docs/essentials/quick-start.md) | Clone to verified, in five minutes |
+| [User guide](docs/guides/user-guide.md) | Complete CLI reference and modes |
+| [CLI reference](docs/reference/cli-reference.md) | Every command, flag, and example |
+| [Fleet guide](docs/guides/fleet-guide.md) | Agent roster and routing |
+| [Bench harnesses](libs/bench/README.md) | Custom vs. Google Benchmark, when to use which |
+| [SDK example](docs/examples/cpp/a2a_minimal_server/README.md) | Minimal A2A v0.2 server |
+| API reference | Build locally: `cmake --build cmake-build --target docs` |
+
+Hosted documentation lives at [sebastienrousseau.github.io/euxis](https://sebastienrousseau.github.io/euxis/).
+
+---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). All commits must be [signed](CONTRIBUTING.md#commit-signing).
+Issues and pull requests are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development setup, commit-signing policy, and review process. All commits must be cryptographically signed.
+
+For sweeping changes (formatting passes, warning-flip drives, coverage drives), open an issue first to align on scope before sending a PR.
+
+Security disclosures: see [`SECURITY.md`](SECURITY.md) for the coordinated-disclosure policy.
+
+---
 
 ## License
 
 AGPL-3.0 — see [LICENSE](LICENSE).
 
----
-
 Euxis v0.0.10 · [euxis.co](https://euxis.co)
-
-[license-badge]: https://img.shields.io/badge/license-AGPL--3.0-blue.svg
-[license-url]: LICENSE
-[version-badge]: https://img.shields.io/badge/version-v0.0.10-green.svg
-[version-url]: https://github.com/sebastienrousseau/euxis
