@@ -101,6 +101,21 @@ if(NOT TARGET GTest::gtest_main)
     add_library(GTest::gtest_main ALIAS gtest_main)
 endif()
 
+# Google Benchmark (opt-in for libs/bench statistical harness)
+option(EUXIS_BUILD_GBENCH "Fetch Google Benchmark and build the gbench harness" OFF)
+if(EUXIS_BUILD_GBENCH)
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        benchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG        v1.9.1
+        SYSTEM
+    )
+    FetchContent_MakeAvailable(benchmark)
+endif()
+
 # ixwebsocket (With specific patch for missing cstdint in some versions)
 find_package(OpenSSL QUIET)
 FetchContent_Declare(

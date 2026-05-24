@@ -22,3 +22,16 @@ euxis_add_library(euxis-bench-cpp
     tests/test_result_matrix.cpp
     tests/test_bench_suites.cpp
 )
+
+# Optional: Google Benchmark harness for the performance suite.
+# Enabled by -DEUXIS_BUILD_GBENCH=ON at the root.
+if(EUXIS_BUILD_GBENCH)
+    add_executable(euxis_perf_gbench src/performance_bench_gbench.cpp)
+    target_link_libraries(euxis_perf_gbench
+        PRIVATE
+            euxis-crypto-cpp
+            euxis-a2a-cpp
+            benchmark::benchmark
+            benchmark::benchmark_main
+    )
+endif()
