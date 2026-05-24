@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <sodium.h>
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 #include "euxis/a2a/task.hpp"
 
@@ -78,6 +80,50 @@ TEST_F(TaskTest, TaskIdFormat) {
     EXPECT_EQ(task.id[13], '-');
     EXPECT_EQ(task.id[18], '-');
     EXPECT_EQ(task.id[23], '-');
+
+    // Every non-dash position must be a lowercase hex digit (defends the
+    // hand-coded sodium_bin2hex+memcpy formatter against drift).
+    for (size_t i = 0; i < task.id.size(); ++i) {
+        if (i == 8 || i == 13 || i == 18 || i == 23) continue;
+        const char c = task.id[i];
+        EXPECT_TRUE((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))
+            << "non-hex char '" << c << "' at position " << i << " in id " << task.id;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Generated UUIDs cover a wide range across many invocations
+// (smoke test that nothing is constant after the hand-coded refactor).
+// ---------------------------------------------------------------------------
+TEST_F(TaskTest, TaskIdRandomness) {
+    constexpr int n = 256;
+    std::vector<std::string> ids;
+    ids.reserve(n);
+    for (int i = 0; i < n; ++i) ids.push_back(create_task().id);
+
+    std::sort(ids.begin(), ids.end());
+    ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
+    EXPECT_EQ(ids.size(), static_cast<size_t>(n));
+}
+
+// ---------------------------------------------------------------------------
+// Timestamp is ISO-8601 "YYYY-MM-DDTHH:MM:SSZ"; validate per-position digits
+// and separators. Defends the hand-coded put2/put4 writer against drift.
+// ---------------------------------------------------------------------------
+TEST_F(TaskTest, CreatedAtIsoFormat) {
+    auto task = create_task();
+    const auto& s = task.created_at;
+    ASSERT_EQ(s.size(), 20u);
+    auto is_digit = [](char c) { return c >= '0' && c <= '9'; };
+    for (size_t i : {0u, 1u, 2u, 3u, 5u, 6u, 8u, 9u, 11u, 12u, 14u, 15u, 17u, 18u}) {
+        EXPECT_TRUE(is_digit(s[i])) << "non-digit at " << i << " in " << s;
+    }
+    EXPECT_EQ(s[4],  '-');
+    EXPECT_EQ(s[7],  '-');
+    EXPECT_EQ(s[10], 'T');
+    EXPECT_EQ(s[13], ':');
+    EXPECT_EQ(s[16], ':');
+    EXPECT_EQ(s[19], 'Z');
 }
 
 // ---------------------------------------------------------------------------
