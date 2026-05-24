@@ -117,7 +117,10 @@ else()
 endif()
 FetchContent_MakeAvailable(ixwebsocket)
 if(TARGET ixwebsocket)
-    target_compile_options(ixwebsocket PRIVATE -Wno-shadow -Wno-error)
+    # CMAKE_COMPILE_WARNING_AS_ERROR injects -Werror after PRIVATE flags, so
+    # target-level -Wno-error is overridden. Property-based opt-out wins.
+    set_target_properties(ixwebsocket PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+    target_compile_options(ixwebsocket PRIVATE -Wno-shadow -Wno-array-bounds)
 endif()
 if(NOT TARGET ixwebsocket::ixwebsocket)
     add_library(ixwebsocket::ixwebsocket ALIAS ixwebsocket)
@@ -185,6 +188,12 @@ add_subdirectory(apps/cli)
 add_subdirectory(apps/publisher)
 add_subdirectory(libs/bench)
 add_subdirectory(apps/etx)
+
+# Optional: SDK examples (opt-in to avoid slowing default builds)
+option(EUXIS_BUILD_EXAMPLES "Build C++ SDK examples under docs/examples/cpp/" OFF)
+if(EUXIS_BUILD_EXAMPLES)
+    add_subdirectory(docs/examples/cpp)
+endif()
 
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME "euxis")

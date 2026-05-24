@@ -25,6 +25,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
   add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "16")
+  # GCC 16 emits false-positive -Warray-bounds on std::shared_ptr allocator
+  # paths and nlohmann::json::dump() template inlining when combined with
+  # _FORTIFY_SOURCE=3 LTO. Disable globally on GCC 16+ to unblock builds.
+  add_compile_options(-Wno-array-bounds)
+endif()
+
 # Fast linker auto-detection (mold > lld > default)
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
   find_program(MOLD_LINKER mold)
