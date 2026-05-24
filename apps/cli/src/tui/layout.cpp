@@ -127,7 +127,7 @@ Size HSplit::preferred_size() const {
 void HSplit::render(terminal::TerminalScreen& screen, Rect area) {
     if (area.empty()) return;
 
-    int left_w = static_cast<int>(std::round(area.w * ratio_));
+    int left_w = static_cast<int>(std::round(static_cast<float>(area.w) * ratio_));
     int right_w = area.w - left_w;
 
     if (left_ && left_->visible()) {
@@ -160,7 +160,7 @@ Size VSplit::preferred_size() const {
 void VSplit::render(terminal::TerminalScreen& screen, Rect area) {
     if (area.empty()) return;
 
-    int top_h = static_cast<int>(std::round(area.h * ratio_));
+    int top_h = static_cast<int>(std::round(static_cast<float>(area.h) * ratio_));
     int bottom_h = area.h - top_h;
 
     if (top_ && top_->visible()) {
@@ -192,7 +192,7 @@ Size Float::preferred_size() const {
 void Float::render(terminal::TerminalScreen& screen, Rect area) {
     if (!content_ || area.empty()) return;
 
-    int float_w = static_cast<int>(area.w * width_pct_);
+    int float_w = static_cast<int>(static_cast<float>(area.w) * width_pct_);
     int float_h = std::min(max_rows_, area.h - 2);
     if (float_w < 10 || float_h < 3) return;
 

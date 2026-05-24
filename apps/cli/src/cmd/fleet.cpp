@@ -1300,10 +1300,10 @@ auto detect_agent_drift(const std::string& euxis_home,
         // Compute mean and stddev for latency
         double sum = 0;
         for (double l : hist_latencies) sum += l;
-        double mean = sum / hist_latencies.size();
+        double mean = sum / static_cast<double>(hist_latencies.size());
         double var_sum = 0;
         for (double l : hist_latencies) var_sum += (l - mean) * (l - mean);
-        double stddev = std::sqrt(var_sum / hist_latencies.size());
+        double stddev = std::sqrt(var_sum / static_cast<double>(hist_latencies.size()));
 
         // Check latency deviation
         if (stddev > 0 && std::abs(ev.duration_ms - mean) > 2 * stddev) {
@@ -2116,7 +2116,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         if (pillar_evidence.count(cp) && !pillar_evidence[cp].empty()) critical_covered++;
     }
     double critical_coverage = critical_pillars().empty() ? 1.0
-        : static_cast<double>(critical_covered) / critical_pillars().size();
+        : static_cast<double>(critical_covered) / static_cast<double>(critical_pillars().size());
 
     // 4. Degradation penalty
     int degraded_agents = 0;
@@ -2285,7 +2285,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                     pex += a->execution_backed; pcl += a->total_claims;
                 }
                 ps.coverage = std::min(100, (int)agents.size() * 50); // 2+ agents = full coverage
-                ps.agreement = (int)(static_cast<double>(std::max({p, f, incomplete})) / agents.size() * 100);
+                ps.agreement = (int)(static_cast<double>(std::max({p, f, incomplete})) / static_cast<double>(agents.size()) * 100);
                 ps.evidence_density = (pcl > 0) ? (int)(static_cast<double>(pex) / pcl * 100) : 0;
                 ps.status = (p > 0 && f > 0) ? "Conflict" : (f > 0 ? "Issue" : (incomplete > 0 ? "Gaps" : "Verified"));
             }
@@ -2321,7 +2321,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto sorted_lat = agent_latencies;
         std::sort(sorted_lat.begin(), sorted_lat.end());
         bench.median_agent_latency_ms = sorted_lat[sorted_lat.size() / 2];
-        size_t p95_idx = std::min(sorted_lat.size() - 1, (size_t)(sorted_lat.size() * 0.95));
+        size_t p95_idx = std::min(sorted_lat.size() - 1, (size_t)(static_cast<double>(sorted_lat.size()) * 0.95));
         p95_latency_ms = sorted_lat[p95_idx];
     }
 
@@ -2983,7 +2983,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     auto compute_percentile = [](std::vector<double> vals, double pct) -> double {
         if (vals.empty()) return 0.0;
         std::sort(vals.begin(), vals.end());
-        size_t idx = std::min(vals.size() - 1, (size_t)(vals.size() * pct));
+        size_t idx = std::min(vals.size() - 1, (size_t)(static_cast<double>(vals.size()) * pct));
         return vals[idx];
     };
 
@@ -3023,7 +3023,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
         // SLA hit rate
         int sla_met = 0;
         for (const auto* r : flash_runs) if (r->latency_ms <= 45000 + SLA_TOLERANCE_MS) sla_met++;
-        int sla_rate = (int)(100.0 * sla_met / flash_runs.size());
+        int sla_rate = (int)(100.0 * sla_met / static_cast<double>(flash_runs.size()));
         int sla_target = targets.value("flash_sla_hit_rate", 90);
         std::cout << "    " << term::bold("SLA hit rate:") << "   "
                   << sla_met << "/" << flash_runs.size() << " ("
@@ -3055,7 +3055,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     } else {
         int early_stops = 0;
         for (const auto* r : flash_runs) if (r->early_stopped) early_stops++;
-        int rate = (int)(100.0 * early_stops / flash_runs.size());
+        int rate = (int)(100.0 * early_stops / static_cast<double>(flash_runs.size()));
         int es_target = targets.value("early_stop_rate", 60);
         std::string es_label = (rate >= es_target) ? term::green("INFO") : term::yellow("INFO");
         std::cout << "    " << term::bold("Early-stops:") << "  "
@@ -3078,7 +3078,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     } else {
         int escalations = 0;
         for (const auto* r : flash_runs) if (r->escalated) escalations++;
-        int rate = (int)(100.0 * escalations / flash_runs.size());
+        int rate = (int)(100.0 * escalations / static_cast<double>(flash_runs.size()));
         int esc_target = targets.value("max_escalation_rate", 20);
         std::string color = (rate > 30) ? term::red(std::to_string(rate) + "%")
                           : (rate > 10) ? term::yellow(std::to_string(rate) + "%")
@@ -3113,12 +3113,12 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
 
         std::cout << "    " << term::bold("Flash verdict distribution:") << "\n";
         for (const auto& [v, c] : flash_verdicts) {
-            int pct = (int)(100.0 * c / flash_runs.size());
+            int pct = (int)(100.0 * c / static_cast<double>(flash_runs.size()));
             std::cout << "      " << v << ": " << c << " (" << pct << "%)\n";
         }
         std::cout << "    " << term::bold("Standard verdict distribution:") << "\n";
         for (const auto& [v, c] : standard_verdicts) {
-            int pct = (int)(100.0 * c / standard_runs.size());
+            int pct = (int)(100.0 * c / static_cast<double>(standard_runs.size()));
             std::cout << "      " << v << ": " << c << " (" << pct << "%)\n";
         }
 
@@ -3142,9 +3142,9 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
             double std_timeout_rate = 0;
             for (const auto* r : flash_runs) { flash_median_agents += r->agents_executed; }
             for (const auto* r : standard_runs) { std_median_agents += r->agents_executed; std_timeout_rate += r->timeout_count; }
-            flash_median_agents /= flash_runs.size();
-            std_median_agents /= standard_runs.size();
-            std_timeout_rate /= standard_runs.size();
+            flash_median_agents /= static_cast<double>(flash_runs.size());
+            std_median_agents /= static_cast<double>(standard_runs.size());
+            std_timeout_rate /= static_cast<double>(standard_runs.size());
 
             bool deeper = std_median_agents > flash_median_agents + 1;
             bool low_timeouts = std_timeout_rate <= 2.0;
@@ -3197,7 +3197,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
                 auto violations = evaluate_policy(run_artifact, *policy_opt);
                 if (violations.empty()) policy_passed++;
             }
-            int compliance = (int)(100.0 * policy_passed / history.size());
+            int compliance = (int)(100.0 * policy_passed / static_cast<double>(history.size()));
             std::cout << "\n" << term::bold(term::cyan("  --- Policy Compliance ---")) << "\n";
             std::string comp_color = (compliance >= 90) ? term::green(std::to_string(compliance) + "%")
                                    : (compliance >= 70) ? term::yellow(std::to_string(compliance) + "%")

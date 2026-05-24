@@ -111,7 +111,7 @@ public:
         return load(session_id, "main")
             .and_then([&](SessionSnapshot&& snap) -> std::expected<void, std::string> {
                 if (snap.messages.size() > keep_last_n) {
-                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + (snap.messages.size() - keep_last_n));
+                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + static_cast<std::ptrdiff_t>(snap.messages.size() - keep_last_n));
                 }
                 return save(snap);
             });
@@ -205,7 +205,7 @@ public:
         return load(session_id, "main")
             .and_then([&](SessionSnapshot&& snap) -> std::expected<void, std::string> {
                 if (snap.messages.size() > keep_last_n) {
-                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + (snap.messages.size() - keep_last_n));
+                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + static_cast<std::ptrdiff_t>(snap.messages.size() - keep_last_n));
                 }
                 return save(snap);
             });

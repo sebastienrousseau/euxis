@@ -65,8 +65,8 @@ void spinner_clear() {
 
 void progress_bar(int current, int total, std::string_view label) {
     int width = 20;
-    float progress = total > 0 ? (float)current / total : 0.0f;
-    int filled = (int)(width * progress);
+    float progress = total > 0 ? static_cast<float>(current) / static_cast<float>(total) : 0.0F;
+    int filled = static_cast<int>(static_cast<float>(width) * progress);
     std::string bar = "[";
     for (int i = 0; i < width; ++i) bar += (i < filled) ? "■" : " ";
     bar += "]";
@@ -219,8 +219,10 @@ void TerminalScreen::write_gradient(int x, int y, std::string_view text, uint8_t
         cps.push_back(cp); i += len;
     }
     for (size_t i = 0; i < cps.size(); ++i) {
-        float t = (cps.size() > 1) ? (float)i / (cps.size() - 1) : 0;
-        uint8_t r = (uint8_t)(r1 + t * (r2 - r1)), g = (uint8_t)(g1 + t * (g2 - g1)), b = (uint8_t)(b1 + t * (b2 - b1));
+        float t = (cps.size() > 1) ? static_cast<float>(i) / static_cast<float>(cps.size() - 1) : 0.0F;
+        uint8_t r = (uint8_t)(static_cast<float>(r1) + t * static_cast<float>(r2 - r1));
+        uint8_t g = (uint8_t)(static_cast<float>(g1) + t * static_cast<float>(g2 - g1));
+        uint8_t b = (uint8_t)(static_cast<float>(b1) + t * static_cast<float>(b2 - b1));
         set_cell(x + (int)i, y, cps[i], r, g, b, 0, 0, 0, true);
     }
 }

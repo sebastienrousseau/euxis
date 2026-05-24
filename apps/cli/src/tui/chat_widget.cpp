@@ -169,7 +169,7 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         screen.write_text(area.x + 5, y, msg.sender, pr, pg, pb, 0, 0, 0, true);
         
         if (!msg.model.empty()) {
-            screen.write_text(area.x + 5 + msg.sender.size() + 2, y, std::format("[{}]", msg.model), muted_r, muted_g, muted_b);
+            screen.write_text(area.x + 5 + static_cast<int>(msg.sender.size()) + 2, y, std::format("[{}]", msg.model), muted_r, muted_g, muted_b);
         }
     }
     y++;
