@@ -13,4 +13,5 @@ euxis_add_library(euxis-core-cpp
     tests/test_router.cpp
     tests/test_swarm.cpp
     tests/test_supervisor.cpp
+    tests/test_contracts.cpp
 )

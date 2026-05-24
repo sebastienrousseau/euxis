@@ -38,16 +38,48 @@ TEST(SupervisorAgentTest, LifecycleAndTuning) {
 TEST(SupervisorAgentTest, TuningLogic) {
     auto router = std::make_shared<FinOpsRouter>();
     auto cb = std::make_shared<euxis::network::CircuitBreaker>(1, 10.0);
-    
+
     SupervisorAgent supervisor(router, cb);
-    
+
     // Manually force breaker open
     cb->record_failure();
     EXPECT_TRUE(cb->is_open());
-    
-    // Note: To test monitor_loop directly without hanging, we'd normally refactor it 
-    // to take an iteration count or use dependency injection for sleep. 
+
+    // Note: To test monitor_loop directly without hanging, we'd normally refactor it
+    // to take an iteration count or use dependency injection for sleep.
     // Given the constraints, we have verified start/stop.
+}
+
+// --- F4: destructor must stop the worker thread (RAII safety) ---
+TEST(SupervisorAgentTest, DestructorStopsWorker) {
+    auto router = std::make_shared<FinOpsRouter>();
+    auto cb = std::make_shared<euxis::network::CircuitBreaker>(1, 0.5);
+    {
+        SupervisorAgent supervisor(router, cb);
+        supervisor.start();
+        // Drop without calling stop() — destructor must clean up cleanly.
+    }
+    // If destructor didn't stop the worker, this would either hang the suite
+    // or terminate via std::terminate(). Reaching here is the assertion.
+    SUCCEED();
+}
+
+// --- F4: stop() before start() is a no-op, not undefined behaviour ---
+TEST(SupervisorAgentTest, StopWithoutStartIsSafe) {
+    auto router = std::make_shared<FinOpsRouter>();
+    auto cb = std::make_shared<euxis::network::CircuitBreaker>(1, 0.5);
+    SupervisorAgent supervisor(router, cb);
+    EXPECT_NO_THROW(supervisor.stop());
+}
+
+// --- F4: double start() must not leak a second thread ---
+TEST(SupervisorAgentTest, DoubleStartIsIdempotent) {
+    auto router = std::make_shared<FinOpsRouter>();
+    auto cb = std::make_shared<euxis::network::CircuitBreaker>(1, 0.5);
+    SupervisorAgent supervisor(router, cb);
+    supervisor.start();
+    EXPECT_NO_THROW(supervisor.start()); // must not spawn a 2nd worker
+    supervisor.stop();
 }
 
 } // namespace
