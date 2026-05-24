@@ -210,6 +210,10 @@ if(EUXIS_BUILD_EXAMPLES)
     add_subdirectory(docs/examples/cpp)
 endif()
 
+# Optional: Doxygen API reference target (auto-skips if doxygen absent)
+option(EUXIS_BUILD_DOCS "Generate API docs with Doxygen if available" ON)
+include(EuxisDocs)
+
 # --- CPack packaging ---
 set(CPACK_PACKAGE_NAME "euxis")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
