@@ -73,6 +73,69 @@ static auto bench_crypto_throughput() -> BenchmarkResult {
 }
 
 // ---------------------------------------------------------------------------
+// Benchmark: crypto_throughput_cached
+// Same workload as crypto_throughput, but uses AesGcmContext to amortize the
+// key-schedule cost (`beforenm`) across all encrypt/decrypt calls. Profile
+// shows the simple API spends ~15.6% of CPU re-running `beforenm` per call.
+// ---------------------------------------------------------------------------
+static auto bench_crypto_throughput_cached() -> BenchmarkResult {
+    BenchmarkResult result;
+    result.name = "crypto_throughput_cached";
+    result.suite = "performance";
+    result.unit = "ops/sec";
+    result.target = 50'000.0;
+
+    auto key_vec = crypto::generate_key(32);
+    std::array<std::byte, 32> key{};
+    std::copy_n(key_vec.begin(), 32, key.begin());
+
+    auto ctx_result = crypto::AesGcmContext::create(key);
+    if (!ctx_result.has_value()) {
+        result.passed = false;
+        result.message = "AesGcmContext::create failed";
+        return result;
+    }
+    const auto& ctx = *ctx_result;
+
+    std::vector<std::byte> plaintext(1024);
+    for (size_t i = 0; i < plaintext.size(); ++i) {
+        plaintext[i] = static_cast<std::byte>(i & 0xFF);
+    }
+
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    size_t ops = 0;
+    const auto start = std::chrono::steady_clock::now();
+
+    while (std::chrono::steady_clock::now() < deadline) {
+        auto enc_result = ctx.encrypt(plaintext);
+        if (!enc_result.has_value()) {
+            break;
+        }
+        auto dec_result = ctx.decrypt(enc_result->ciphertext, enc_result->iv);
+        if (!dec_result.has_value()) {
+            break;
+        }
+        ++ops;
+    }
+
+    const auto end = std::chrono::steady_clock::now();
+    const auto elapsed_us =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    const double elapsed_sec =
+        static_cast<double>(elapsed_us.count()) / 1'000'000.0;
+
+    result.duration = elapsed_us;
+    result.value = static_cast<double>(ops) / elapsed_sec;
+    result.passed = result.value >= result.target;
+    result.message = std::format(
+        "{} encrypt/decrypt ops in {:.3f}s = {:.0f} ops/sec (cached state)",
+        ops, elapsed_sec, result.value);
+
+    spdlog::info("performance/crypto_throughput_cached: {}", result.message);
+    return result;
+}
+
+// ---------------------------------------------------------------------------
 // Benchmark: key_derivation_p95
 // ---------------------------------------------------------------------------
 static auto bench_key_derivation_p95() -> BenchmarkResult {
@@ -192,6 +255,8 @@ static auto bench_serialization_speed() -> BenchmarkResult {
 void register_performance_benchmarks(BenchmarkRunner& runner) {
     runner.register_benchmark("performance", "crypto_throughput",
                               bench_crypto_throughput);
+    runner.register_benchmark("performance", "crypto_throughput_cached",
+                              bench_crypto_throughput_cached);
     runner.register_benchmark("performance", "key_derivation_p95",
                               bench_key_derivation_p95);
     runner.register_benchmark("performance", "serialization_speed",

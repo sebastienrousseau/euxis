@@ -232,6 +232,120 @@ TEST_F(AesGcmTest, DecryptAadTooShortCiphertext) {
     EXPECT_EQ(dec.error(), CryptoError::DecryptionFailed);
 }
 
+// ===========================================================================
+// AesGcmContext (precomputed key schedule)
+// ===========================================================================
+
+// Round-trip via context: encrypt and decrypt with the same context.
+TEST_F(AesGcmTest, ContextEncryptDecryptRoundtrip) {
+    const auto key = random_key();
+    auto ctx_result = AesGcmContext::create(key);
+    ASSERT_TRUE(ctx_result.has_value()) << to_string(ctx_result.error());
+    const auto& ctx = *ctx_result;
+
+    const auto plaintext = as_bytes("Hello via cached context!");
+    auto enc = ctx.encrypt(plaintext);
+    ASSERT_TRUE(enc.has_value()) << to_string(enc.error());
+    EXPECT_EQ(enc->algorithm, "AES-256-GCM");
+    EXPECT_GE(enc->ciphertext.size(), plaintext.size());
+
+    auto dec = ctx.decrypt(enc->ciphertext, enc->iv);
+    ASSERT_TRUE(dec.has_value()) << to_string(dec.error());
+    EXPECT_EQ(dec->plaintext.size(), plaintext.size());
+    EXPECT_TRUE(std::equal(plaintext.begin(), plaintext.end(),
+                           dec->plaintext.begin()));
+}
+
+// Cross-compat: ciphertext produced via context must decrypt with the free
+// function (and vice-versa). Same algorithm + key, different code path.
+TEST_F(AesGcmTest, ContextInteropWithFreeFunctions) {
+    const auto key = random_key();
+    auto ctx = AesGcmContext::create(key).value();
+
+    const auto plaintext = as_bytes("interop check");
+
+    // context-encrypt → free-function decrypt
+    auto ctx_enc = ctx.encrypt(plaintext);
+    ASSERT_TRUE(ctx_enc.has_value());
+    auto free_dec = decrypt(ctx_enc->ciphertext, key, ctx_enc->iv);
+    ASSERT_TRUE(free_dec.has_value()) << to_string(free_dec.error());
+    EXPECT_TRUE(std::equal(plaintext.begin(), plaintext.end(),
+                           free_dec->plaintext.begin()));
+
+    // free-function encrypt → context decrypt
+    auto free_enc = encrypt(plaintext, key);
+    ASSERT_TRUE(free_enc.has_value());
+    auto ctx_dec = ctx.decrypt(free_enc->ciphertext, free_enc->iv);
+    ASSERT_TRUE(ctx_dec.has_value()) << to_string(ctx_dec.error());
+    EXPECT_TRUE(std::equal(plaintext.begin(), plaintext.end(),
+                           ctx_dec->plaintext.begin()));
+}
+
+// AAD round-trip via context.
+TEST_F(AesGcmTest, ContextAadRoundtrip) {
+    const auto key = random_key();
+    auto ctx = AesGcmContext::create(key).value();
+    const auto plaintext = as_bytes("with aad");
+    const auto aad = as_bytes("session=42");
+
+    auto enc = ctx.encrypt_aad(plaintext, aad);
+    ASSERT_TRUE(enc.has_value());
+
+    auto dec = ctx.decrypt_aad(enc->ciphertext, enc->iv, aad);
+    ASSERT_TRUE(dec.has_value());
+    EXPECT_TRUE(std::equal(plaintext.begin(), plaintext.end(),
+                           dec->plaintext.begin()));
+}
+
+// Wrong AAD must fail authentication.
+TEST_F(AesGcmTest, ContextWrongAadFails) {
+    const auto key = random_key();
+    auto ctx = AesGcmContext::create(key).value();
+    auto enc = ctx.encrypt_aad(as_bytes("payload"), as_bytes("aad-1")).value();
+
+    auto dec = ctx.decrypt_aad(enc.ciphertext, enc.iv, as_bytes("aad-2"));
+    ASSERT_FALSE(dec.has_value());
+    EXPECT_EQ(dec.error(), CryptoError::AuthenticationFailed);
+}
+
+// All-zero key is rejected by libsodium safety check.
+TEST_F(AesGcmTest, ContextRejectsZeroKey) {
+    std::array<std::byte, 32> zero_key{};  // all zeros
+    auto ctx_result = AesGcmContext::create(zero_key);
+    ASSERT_FALSE(ctx_result.has_value());
+    EXPECT_EQ(ctx_result.error(), CryptoError::EncryptionFailed);
+}
+
+// Move semantics: a moved-from context's resources should be properly
+// transferred to the destination, and the destination remains usable.
+TEST_F(AesGcmTest, ContextMoveConstructible) {
+    const auto key = random_key();
+    auto src = AesGcmContext::create(key).value();
+    auto dst = std::move(src);
+
+    const auto plaintext = as_bytes("after move");
+    auto enc = dst.encrypt(plaintext);
+    ASSERT_TRUE(enc.has_value());
+    auto dec = dst.decrypt(enc->ciphertext, enc->iv);
+    ASSERT_TRUE(dec.has_value());
+    EXPECT_TRUE(std::equal(plaintext.begin(), plaintext.end(),
+                           dec->plaintext.begin()));
+}
+
+TEST_F(AesGcmTest, ContextMoveAssignable) {
+    const auto key1 = random_key();
+    const auto key2 = random_key();
+    auto a = AesGcmContext::create(key1).value();
+    auto b = AesGcmContext::create(key2).value();
+    a = std::move(b);  // 'a' now uses key2
+
+    auto enc = a.encrypt(as_bytes("ping"));
+    ASSERT_TRUE(enc.has_value());
+    // Free-function decrypt with key2 should succeed; with key1 should fail.
+    EXPECT_TRUE(decrypt(enc->ciphertext, key2, enc->iv).has_value());
+    EXPECT_FALSE(decrypt(enc->ciphertext, key1, enc->iv).has_value());
+}
+
 // --- Coverage: errors.hpp lines 21-29 (to_string all CryptoError enum values) ---
 TEST_F(AesGcmTest, CryptoErrorToStringAllValues) {
     EXPECT_EQ(to_string(CryptoError::InvalidKeySize), "Invalid key size");
