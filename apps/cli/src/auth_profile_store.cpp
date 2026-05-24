@@ -471,7 +471,7 @@ auto AuthProfileStore::compute_cooldown_ms(CooldownReason reason, int consecutiv
     }
 
     // RateLimit / AuthError: 1m → 5m → 25m → 60m cap
-    constexpr int64_t base = 60 * 1000;  // 1 minute
+    constexpr int64_t base = 60LL * 1000;  // 1 minute
     constexpr int64_t cap = 60LL * 60 * 1000;  // 60 minutes
     int64_t ms = base;
     for (int i = 1; i < consecutive; ++i) ms *= 5;

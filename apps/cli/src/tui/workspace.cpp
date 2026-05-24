@@ -41,7 +41,7 @@ void FileTree::render(terminal::TerminalScreen& screen, Rect area) {
         bool is_sel = (idx == selected_);
         int y = area.y + 1 + row;
 
-        std::string indent(entry.depth * 2, ' ');
+        std::string indent(static_cast<size_t>(entry.depth) * 2, ' ');
         std::string icon = entry.is_dir ? (entry.expanded ? "▾ " : "▸ ") : "  ";
         std::string line = indent + icon + entry.name;
 

@@ -133,8 +133,8 @@ void get_terminal_size(int& w, int& h) {
 
 TerminalScreen::TerminalScreen() {
     get_terminal_size(width_, height_);
-    front_buffer_.assign(width_ * height_, Cell{.ch = 0xFFFFFFFF});
-    back_buffer_.resize(width_ * height_);
+    front_buffer_.assign(static_cast<size_t>(width_) * height_, Cell{.ch = 0xFFFFFFFF});
+    back_buffer_.resize(static_cast<size_t>(width_) * height_);
 }
 
 TerminalScreen::~TerminalScreen() { disable_raw_mode(); }
@@ -142,8 +142,8 @@ TerminalScreen::~TerminalScreen() { disable_raw_mode(); }
 void TerminalScreen::resize(int w, int h) {
     if (w == width_ && h == height_) return;
     width_ = w; height_ = h;
-    front_buffer_.assign(w * h, Cell{.ch = 0xFFFFFFFF});
-    back_buffer_.assign(w * h, Cell{});
+    front_buffer_.assign(static_cast<size_t>(w) * h, Cell{.ch = 0xFFFFFFFF});
+    back_buffer_.assign(static_cast<size_t>(w) * h, Cell{});
 }
 
 void TerminalScreen::clear() { for (auto& c : back_buffer_) c = Cell{}; }

@@ -34,7 +34,7 @@ constexpr int kMaxPollIterations = 6000;
 constexpr int kPollIntervalMs = 100;
 
 /// P10-R2: Maximum output buffer size (16 MB).
-constexpr size_t kMaxOutputBytes = 16 * 1024 * 1024;
+constexpr size_t kMaxOutputBytes = 16ULL * 1024 * 1024;
 
 /// P10-R5: Environment variable names that must never be overridden.
 constexpr std::array kDeniedEnvVars = {
@@ -112,7 +112,7 @@ auto safe_spawn(const std::vector<std::string>& argv,
     close(stdout_pipe[1]);
 
     std::string output;
-    output.reserve(64 * 1024);  // Pre-allocate 64KB to avoid early reallocations
+    output.reserve(64ULL * 1024);  // Pre-allocate 64KB to avoid early reallocations
     std::array<char, 4096> buffer{};
 
     struct pollfd pfd{};

@@ -222,7 +222,7 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         std::error_code ec;
         auto space_info = fs::space(ctx.euxis_home, ec);
         if (!ec) {
-            auto avail_mb = space_info.available / (1024 * 1024);
+            auto avail_mb = space_info.available / (1024ULL * 1024);
             bool ok = avail_mb >= 100;
             checks.push_back({tr("Disk space"), ok,
                                std::to_string(avail_mb) + " " + tr("MB available")});

@@ -14,7 +14,7 @@
 namespace euxis::gateway {
 
 /// Maximum allowed request body size (1 MB).
-constexpr size_t kMaxRequestBodySize = 1 * 1024 * 1024;
+constexpr size_t kMaxRequestBodySize = 1ULL * 1024 * 1024;
 
 /// Shared route context with auth token from config.
 struct RouteContext {

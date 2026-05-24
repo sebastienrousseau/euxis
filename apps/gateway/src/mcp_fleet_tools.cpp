@@ -34,7 +34,7 @@ auto is_safe_arg(const std::string& arg) -> bool {
 }
 
 /// Maximum output size (16 MB) to prevent OOM on unbounded child output (P2-3).
-static constexpr size_t kMaxOutputBytes = 16u * 1024u * 1024u;
+static constexpr size_t kMaxOutputBytes = 16ULL * 1024 * 1024;
 
 /// Execute an euxis subcommand via fork+execvp (no shell, no popen).
 /// @param euxis_home  EUXIS_HOME to set in child environment

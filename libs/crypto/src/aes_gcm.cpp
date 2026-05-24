@@ -8,7 +8,7 @@
 namespace euxis::crypto {
 
 /// P10-R2: Maximum plaintext size for a single encryption (64 MB).
-constexpr size_t kMaxPlaintextSize = 64 * 1024 * 1024;
+constexpr size_t kMaxPlaintextSize = 64ULL * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
 // to_base64  (defined here because it depends on libsodium)
