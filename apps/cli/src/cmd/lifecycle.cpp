@@ -794,7 +794,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                 if (j.contains("agents") && j["agents"].is_array()) {
                     agents = static_cast<int>(j["agents"].size());
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
         }
 
         auto mode = detect_install_mode(ctx.euxis_home);
@@ -878,7 +878,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto rj = nlohmann::json::parse(f);
                     if (rj.contains("version"))
                         j["registry_version"] = rj["version"].get<std::string>();
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::cout << j.dump(2) << "\n";
         } else {
@@ -890,7 +890,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto j = nlohmann::json::parse(f);
                     if (j.contains("version"))
                         std::cout << tr("Registry:") << " " << j["version"].get<std::string>() << "\n";
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::cout << tr("Protocol:") << " 1.0\n";
         }

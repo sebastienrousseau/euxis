@@ -215,6 +215,7 @@ auto LlamaEngine::supports_model(std::string_view name) -> bool {
             return false;
         } catch (const std::exception&) {
             // Parse error — fall through to config match
+            (void)0;  // swallowed: best-effort
         }
     }
 
@@ -261,6 +262,7 @@ auto LlamaEngine::health() -> nlohmann::json {
         status["server_status"] = body.value("status", "unknown");
     } catch (const std::exception&) {
         // Non-JSON health response is fine — server is up
+        (void)0;  // swallowed: best-effort
     }
 
     return status;

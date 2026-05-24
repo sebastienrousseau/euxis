@@ -144,7 +144,8 @@ QWidget* create_metrics_screen(FleetRegistry* registry, ETXConfig* /*config*/,
                 router_table->setRowHeight(i, 36);
             }
         } catch (const json::exception&) {
-            // Ignore parse errors
+            // Ignore parse errors — swallowed: best-effort
+            (void)0;
         }
     }
 

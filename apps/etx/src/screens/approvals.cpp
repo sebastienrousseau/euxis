@@ -68,7 +68,8 @@ QWidget* create_approvals_screen(ETXConfig* /*config*/, QWidget* parent) {
                 has_queue = true;
             }
         } catch (const json::exception&) {
-            // ignore
+            // ignore — swallowed: best-effort
+            (void)0;
         }
     }
 

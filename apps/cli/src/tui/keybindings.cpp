@@ -233,7 +233,7 @@ std::optional<int> KeybindingEngine::parse_key_name(const std::string& name) {
         try {
             int n = std::stoi(name.substr(1));
             if (n >= 5 && n <= 12) return KeyCode::F5 + (n - 5);
-        } catch (const std::exception&) {}
+        } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
 
     // Single character

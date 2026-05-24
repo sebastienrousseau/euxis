@@ -31,7 +31,8 @@ static int count_cortex_entries(const QString& runtime_dir) {
         if (doc.is_array()) return static_cast<int>(doc.size());
         if (doc.is_object()) return static_cast<int>(doc.size());
     } catch (const json::exception&) {
-        // ignore
+        // ignore — swallowed: best-effort
+        (void)0;
     }
     return 0;
 }

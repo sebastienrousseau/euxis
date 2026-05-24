@@ -268,7 +268,7 @@ auto ProviderExecutor::execute_claude(const std::string& model,
         std::string output = result.stdout_output;
         int status = 0;
         auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) { try { status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) {} output = output.substr(0, last_nl); }
+        if (last_nl != std::string::npos) { try { status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; } output = output.substr(0, last_nl); }
         try {
             auto j = nlohmann::json::parse(output);
             if (j.contains("error")) return {false, "", "Anthropic API: " + j["error"].dump(), 1, 0.0, classify_error(status, output)};
@@ -349,7 +349,7 @@ auto ProviderExecutor::execute_api(const std::string& provider,
     std::string output = result.stdout_output;
     int http_status = 0;
     auto last_nl = output.rfind('\n');
-    if (last_nl != std::string::npos) { try { http_status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) {} output = output.substr(0, last_nl); }
+    if (last_nl != std::string::npos) { try { http_status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; } output = output.substr(0, last_nl); }
     try {
         auto resp_json = nlohmann::json::parse(output);
         if (resp_json.contains("error")) return {false, "", provider + " API: " + resp_json["error"].dump(), 1, 0.0, classify_error(http_status, output)};

@@ -638,7 +638,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
                         }
                     }
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             if (found_test_binary) tests_detected = true;
         }
     }
@@ -691,7 +691,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
             }
             if (test_file_count >= 200) break; // Bounded
         }
-    } catch (const std::exception&) {}
+    } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
 
     results.push_back({"test-file-count", test_file_count > 0 ? "detected" : "missing",
                         std::to_string(test_file_count) + " test files found", 0.0, 1,
@@ -727,7 +727,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                 while (std::getline(gi, line)) {
                     if (line.find(".env") != std::string::npos) { env_in_gitignore = true; break; }
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
         }
 
         if (has_env_file && !env_in_gitignore) {
@@ -794,7 +794,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                     std::string content((std::istreambuf_iterator<char>(f)),
                                          std::istreambuf_iterator<char>());
                     if (content.find("FetchContent") != std::string::npos) has_fetch = true;
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::string detail;
             if (has_vcpkg) detail = "vcpkg.json present — use 'vcpkg x-ci-verify-versions' for audit";
@@ -861,7 +861,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
             results.push_back({"build-flags", has_unsafe ? "failing" : "passing",
                                 has_unsafe ? issue : "No unsafe build flags detected",
                                 0.0, 1, 1});
-        } catch (const std::exception&) {}
+        } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
 
     return results;

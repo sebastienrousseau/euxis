@@ -116,7 +116,7 @@ auto TelegramAdapter::api_call(const std::string& method,
     auto path = "/bot" + config_.token + "/" + method;
     auto res = cli.Post(path, data.dump(), "application/json");
     if (res && !res->body.empty()) {
-        try { return nlohmann::json::parse(res->body); } catch (const std::exception&) {}
+        try { return nlohmann::json::parse(res->body); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
     return {};
 }

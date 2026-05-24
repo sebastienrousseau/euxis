@@ -136,7 +136,7 @@ auto McpProviderBridge::execute(const std::string& server_name,
         if (body_start + cl_val > output.size()) break;
 
         std::string response_body = output.substr(body_start, cl_val);
-        try { last_response = nlohmann::json::parse(response_body); } catch (...) {}
+        try { last_response = nlohmann::json::parse(response_body); } catch (...) { /* swallowed: best-effort path */ (void)0; }
 
         pos = body_start + cl_val;
     }

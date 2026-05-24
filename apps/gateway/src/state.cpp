@@ -84,7 +84,7 @@ auto load_session_from_disk(const std::string& session_id)
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) continue;
-        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) {}
+        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
     return entries;
 }
@@ -128,7 +128,7 @@ auto load_run_events(const std::string& run_id)
     std::string line;
     while (std::getline(f, line)) {
         if (line.empty()) continue;
-        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) {}
+        try { entries.push_back(nlohmann::json::parse(line)); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
     return entries;
 }

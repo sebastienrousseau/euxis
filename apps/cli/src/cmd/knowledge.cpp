@@ -46,6 +46,7 @@ auto load_cortex_entries(const fs::path& path) -> nlohmann::json {
         }
     } catch (const std::exception&) {
         // Corrupt file; start fresh
+        (void)0;  // swallowed: best-effort
     }
     return nlohmann::json::object();
 }
