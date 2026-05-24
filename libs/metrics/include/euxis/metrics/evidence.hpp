@@ -32,7 +32,7 @@ struct Evidence {
     std::string source_file;
     std::optional<int> source_line;
     std::string evidence_type;
-    EvidenceGrade grade;
+    EvidenceGrade grade{};
     std::string content;
     std::string timestamp;
     std::optional<std::string> verification_cmd;

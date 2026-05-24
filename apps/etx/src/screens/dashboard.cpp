@@ -199,11 +199,11 @@ private:
         }
     }
 
-    FleetRegistry* registry_;
-    EuxisApp* app_;
-    QLineEdit* search_;
-    QListWidget* agent_list_;
-    QListWidget* squad_list_;
+    FleetRegistry* registry_ = nullptr;
+    EuxisApp* app_ = nullptr;
+    QLineEdit* search_ = nullptr;
+    QListWidget* agent_list_ = nullptr;
+    QListWidget* squad_list_ = nullptr;
 };
 
 // --- Dashboard Screen (split layout) ---
@@ -408,11 +408,11 @@ private slots:
     }
 
 private:
-    ChatEngine* chat_;
-    EuxisApp* app_;
-    ConversationWidget* conversation_;
-    ChatInputBar* input_;
-    AgentSidebar* sidebar_;
+    ChatEngine* chat_ = nullptr;
+    EuxisApp* app_ = nullptr;
+    ConversationWidget* conversation_ = nullptr;
+    ChatInputBar* input_ = nullptr;
+    AgentSidebar* sidebar_ = nullptr;
 };
 
 QWidget* create_dashboard_screen(EuxisApp* app, FleetRegistry* registry,

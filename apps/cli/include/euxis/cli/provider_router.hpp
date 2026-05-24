@@ -25,7 +25,7 @@ auto parse_tier(const std::string& s) -> Tier;
 struct ModelSelection {
     std::string provider;
     std::string model;
-    Tier tier;
+    Tier tier{};
     double estimated_cost_per_1m{0.0};
     std::string route_reason;   // Explainable routing decision
     std::string task_class;     // Semantic class that triggered this route

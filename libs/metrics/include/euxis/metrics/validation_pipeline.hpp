@@ -13,8 +13,8 @@ namespace euxis::metrics {
 /// @brief A potential claim extracted from raw text.
 struct ExtractedClaim {
     std::string matched_text;
-    int position_start;
-    int position_end;
+    int position_start = 0;
+    int position_end = 0;
     std::string context;
     std::optional<double> value;
     std::optional<std::string> unit;

@@ -12,11 +12,11 @@ namespace euxis::bench {
 struct BenchmarkResult {
     std::string name;
     std::string suite;
-    bool passed;
-    double value;
+    bool passed = false;
+    double value = 0.0;
     std::string unit;
-    double target;
-    std::chrono::microseconds duration;
+    double target = 0.0;
+    std::chrono::microseconds duration{};
     std::string message;
 
     [[nodiscard]] nlohmann::json to_json() const;
@@ -25,9 +25,9 @@ struct BenchmarkResult {
 struct SuiteReport {
     std::string suite_name;
     std::vector<BenchmarkResult> results;
-    size_t passed;
-    size_t failed;
-    std::chrono::microseconds total_duration;
+    size_t passed = 0;
+    size_t failed = 0;
+    std::chrono::microseconds total_duration{};
 
     [[nodiscard]] nlohmann::json to_json() const;
 };

@@ -14,7 +14,7 @@ namespace euxis::crypto {
 /** @brief Result of a successful encryption. */
 struct EncryptionResult {
     std::vector<std::byte> ciphertext;
-    std::array<std::byte, 12> iv;
+    std::array<std::byte, 12> iv{};  // default-init to zeros; populated by encrypt()
     std::string algorithm;
 
     /** @brief Encodes IV + Ciphertext as Base64. */

@@ -20,8 +20,8 @@ QWidget* create_shortcut_bar_widget(QWidget* parent) {
     hint_font.setFamily("monospace");
 
     struct Hint {
-        QString shortcut;
-        QString action;
+        QString shortcut{};
+        QString action{};
     };
 
     QList<Hint> hints = {

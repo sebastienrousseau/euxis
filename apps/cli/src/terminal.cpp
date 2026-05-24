@@ -126,7 +126,7 @@ int read_key() {
 }
 
 void get_terminal_size(int& w, int& h) {
-    struct winsize ws;
+    struct winsize ws{};
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) { w = 80; h = 24; }
     else { w = ws.ws_col; h = ws.ws_row; }
 }

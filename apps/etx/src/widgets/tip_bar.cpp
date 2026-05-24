@@ -73,10 +73,10 @@ private:
         tip_label_->setText(tips_[current_index_]);
     }
 
-    ETXConfig* config_;
-    QLabel* tip_label_;
+    ETXConfig* config_ = nullptr;
+    QLabel* tip_label_ = nullptr;
     QStringList tips_;
-    int current_index_;
+    int current_index_ = 0;
 };
 
 QWidget* create_tip_bar_widget(ETXConfig* config, QWidget* parent) {

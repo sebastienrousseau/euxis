@@ -118,7 +118,7 @@ private:
 
     QVector<float> values_;
     QString label_;
-    QColor accent_color_;
+    QColor accent_color_{};
 };
 
 QWidget* create_sparkline_chart_widget(QWidget* parent) {

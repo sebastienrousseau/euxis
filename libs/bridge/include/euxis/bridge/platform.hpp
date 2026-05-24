@@ -7,8 +7,8 @@ namespace euxis::bridge {
 struct PlatformInfo {
     std::string os_name;     // "linux", "macos", "windows"
     std::string arch;        // "x86_64", "aarch64"
-    bool has_nsjail;
-    bool has_sandbox_exec;
+    bool has_nsjail = false;
+    bool has_sandbox_exec = false;
 };
 
 /// Detect platform capabilities

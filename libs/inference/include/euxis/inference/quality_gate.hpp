@@ -9,10 +9,10 @@ namespace euxis::inference {
 
 /// @brief Scorecard representing the quality metrics of a response.
 struct QualityScore {
-    float coherence;
-    float relevance;
-    float repetition_ratio;
-    bool passed;
+    float coherence = 0.0F;
+    float relevance = 0.0F;
+    float repetition_ratio = 0.0F;
+    bool passed = false;
 };
 
 /// @brief Evaluates LLM responses against safety and quality standards.

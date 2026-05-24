@@ -151,7 +151,7 @@ public:
 #ifndef _WIN32
         int fd = open(path.c_str(), O_RDONLY);
         if (fd != -1) {
-            struct stat sb;
+            struct stat sb{};
             if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
                 void* mapped = mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
                 if (mapped != MAP_FAILED) {

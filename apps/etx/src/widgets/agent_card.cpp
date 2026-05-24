@@ -137,7 +137,7 @@ protected:
 
 private:
     QString agent_id_;
-    EuxisApp* app_;
+    EuxisApp* app_ = nullptr;
 };
 
 QWidget* create_agent_card_widget(const AgentInfo& agent, EuxisApp* app,

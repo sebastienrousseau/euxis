@@ -19,8 +19,8 @@ namespace euxis::inference {
 /// @brief metadata and content of a successful inference generation.
 struct InferenceResult {
     std::string text;
-    uint32_t tokens_generated;
-    float tokens_per_second;
+    uint32_t tokens_generated = 0;
+    float tokens_per_second = 0.0F;
     std::string engine_name;
     std::string model_name;
 };

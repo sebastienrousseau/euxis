@@ -123,10 +123,10 @@ QWidget* create_time_travel_screen(QWidget* parent) {
 
     // Sample events for mission run-0042
     struct Event {
-        QString type_icon;
-        QString timestamp;
-        QString agent;
-        QString data;
+        QString type_icon{};
+        QString timestamp{};
+        QString agent{};
+        QString data{};
     };
 
     QList<Event> events = {

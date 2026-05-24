@@ -97,7 +97,7 @@ auto Session::get_memory_context(const std::string& agent_id, int max_lines) con
     int fd = ::open(memory_path.c_str(), O_RDONLY);
     if (fd == -1) return {};
 
-    struct stat sb;
+    struct stat sb{};
     if (::fstat(fd, &sb) == -1 || sb.st_size == 0) {
         ::close(fd);
         return {};

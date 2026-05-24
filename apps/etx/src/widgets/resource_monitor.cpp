@@ -70,7 +70,7 @@ protected:
     }
 
 private:
-    QColor color_;
+    QColor color_{};
     QVector<float> values_;
 };
 
