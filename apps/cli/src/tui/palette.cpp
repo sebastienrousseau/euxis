@@ -131,7 +131,7 @@ void Palette::render(terminal::TerminalScreen& screen, Rect area) {
         const auto& entry = filtered_[entry_idx];
         bool is_sel = (entry_idx == selected_);
 
-        uint8_t text_r, text_g, text_b;
+        uint8_t text_r = 0, text_g = 0, text_b = 0;
         uint8_t bg_r = 26, bg_g = 27, bg_b = 38;
 
         if (is_sel) {

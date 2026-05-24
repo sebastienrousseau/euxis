@@ -82,7 +82,7 @@ void SwarmView::render_node(terminal::TerminalScreen& screen, const SwarmNode& n
         line = line.substr(0, static_cast<size_t>(max_w));
 
     // Choose color based on status
-    uint8_t r, g, b;
+    uint8_t r = 0, g = 0, b = 0;
     if (node.status == "error") {
         r = err_r; g = err_g; b = err_b;
     } else if (node.active) {

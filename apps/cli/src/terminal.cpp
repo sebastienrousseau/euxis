@@ -120,7 +120,7 @@ void disable_raw_mode() {
 }
 
 int read_key() {
-    unsigned char c;
+    unsigned char c = 0;
     if (::read(STDIN_FILENO, &c, 1) != 1) return 0;
     return static_cast<int>(c);
 }
@@ -163,7 +163,7 @@ void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr,
                 std::string_view sgr = text.substr(i + 2, m_pos - (i + 2));
                 if (sgr == "0") { curr_fr = fr; curr_fg = fg; curr_fb = fb; }
                 else if (sgr.starts_with("38;2;")) {
-                    int r, g, b; if (std::sscanf(std::string(sgr).c_str(), "38;2;%d;%d;%d", &r, &g, &b) == 3) {
+                    int r = 0, g = 0, b = 0; if (std::sscanf(std::string(sgr).c_str(), "38;2;%d;%d;%d", &r, &g, &b) == 3) {
                         curr_fr = (uint8_t)r; curr_fg = (uint8_t)g; curr_fb = (uint8_t)b;
                     }
                 }

@@ -89,7 +89,7 @@ void DiffView::render(terminal::TerminalScreen& screen, Rect area) {
         const auto& dl = diff_.lines[line_idx];
         int y = area.y + row;
 
-        uint8_t fg_r, fg_g, fg_b;
+        uint8_t fg_r = 0, fg_g = 0, fg_b = 0;
         uint8_t bg_r = 0, bg_g = 0, bg_b = 0;
 
         switch (dl.type) {

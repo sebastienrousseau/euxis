@@ -68,7 +68,7 @@ auto derive_key(std::span<const std::byte> password,
     //   >= 100'000  -> SENSITIVE  (4)
     //   >= 10'000   -> MODERATE   (3)
     //   otherwise   -> INTERACTIVE (2, libsodium minimum)
-    unsigned long long opslimit;
+    unsigned long long opslimit = 0;
     if (iterations >= 100'000) {
         opslimit = crypto_pwhash_OPSLIMIT_SENSITIVE;
     } else if (iterations >= 10'000) {
@@ -79,7 +79,7 @@ auto derive_key(std::span<const std::byte> password,
 
     // Use MODERATE memory for SENSITIVE ops, INTERACTIVE memory otherwise,
     // to keep runtime reasonable while still being secure.
-    size_t memlimit;
+    size_t memlimit = 0;
     if (opslimit >= crypto_pwhash_OPSLIMIT_SENSITIVE) {
         memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
     } else if (opslimit >= crypto_pwhash_OPSLIMIT_MODERATE) {

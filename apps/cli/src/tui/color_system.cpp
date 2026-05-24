@@ -52,7 +52,7 @@ double APCA::contrast(RGB text, RGB bg) {
     double yt = soft_clamp(apca_y(text));
     double yb = soft_clamp(apca_y(bg));
 
-    double lc;
+    double lc = 0.0;
     if (yb > yt) {
         // Normal polarity (light text on dark bg)
         lc = (std::pow(yb, Nbg) - std::pow(yt, Ntx)) * Scale;

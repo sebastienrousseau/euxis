@@ -111,7 +111,7 @@ private:
         const char* path = std::getenv("PATH");
         if (!path) return false;
         std::string p(path);
-        size_t start = 0, end;
+        size_t start = 0, end = 0;
         while ((end = p.find(':', start)) != std::string::npos) {
             std::string dir = p.substr(start, end - start);
 #ifdef __linux__

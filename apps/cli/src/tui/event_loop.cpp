@@ -191,7 +191,7 @@ void EventLoop::quit() {
 }
 
 void EventLoop::process_stdin() {
-    unsigned char c;
+    unsigned char c = 0;
     if (::read(STDIN_FILENO, &c, 1) == 1) {
         Event ev{EventType::Key, static_cast<int>(c)};
 
@@ -226,7 +226,7 @@ void EventLoop::process_stdin() {
                                     }
                                 } else if (seq[1] == '1' && seq[2] == ';') {
                                     // ESC [ 1 ; <mod> <dir> (Ctrl/Shift+arrow)
-                                    unsigned char mod_byte, dir_byte;
+                                    unsigned char mod_byte = 0, dir_byte = 0;
                                     if (::read(STDIN_FILENO, &mod_byte, 1) == 1 &&
                                         ::read(STDIN_FILENO, &dir_byte, 1) == 1) {
                                         int mod = mod_byte - '0';
@@ -238,7 +238,7 @@ void EventLoop::process_stdin() {
                                 }
                                 // F-keys: ESC [ 1 5 ~ = F5, etc.
                                 else if (seq[2] >= '0' && seq[2] <= '9') {
-                                    unsigned char tilde;
+                                    unsigned char tilde = 0;
                                     if (::read(STDIN_FILENO, &tilde, 1) == 1 && tilde == '~') {
                                         int code = (seq[1] - '0') * 10 + (seq[2] - '0');
                                         // Map CSI codes to sequential F-key constants
