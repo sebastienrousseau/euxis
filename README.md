@@ -3,7 +3,7 @@
 <h1 align="center">euxis</h1>
 
 <p align="center">
-  A native, agent-driven code certification engine written in C++23.
+  Cryptographically-signed compliance audits for your codebase, at native speed.
 </p>
 
 <p align="center">
@@ -13,6 +13,12 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=for-the-badge" alt="License: AGPL-3.0" /></a>
   <a href="https://euxis.co"><img src="https://img.shields.io/badge/euxis.co-Project%20site-orange?style=for-the-badge" alt="Project site" /></a>
 </p>
+
+---
+
+**Euxis runs the verification an auditor would — SOC 2, ISO 27001, NIST CSF, OWASP, and 15 other frameworks — across a swarm of agents in 45 seconds to 3 minutes.** It emits an Ed25519-signed evidence pack that reproduces byte-for-byte next quarter, so a regulator can re-run your audit and get the same digest. Built in C++23 as a single static binary: no Python startup, no per-turn JIT warm-up, no interpreter in the agent loop.
+
+Run it as a CLI in your CI pipeline, embed it in your build as a 16-library SDK, or drive it from a Qt6 desktop GUI. Wire it into A2A v0.2 agent meshes via `libs/a2a`, or use the FinOps router to pick the cheapest model that still meets your SLO.
 
 ---
 
