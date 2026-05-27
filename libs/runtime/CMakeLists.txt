@@ -9,6 +9,7 @@ euxis_add_library(euxis-runtime-cpp
     src/tool_manifest.cpp
     src/interaction.cpp
     src/platform.cpp
+    src/context_engine.cpp
   DEPS
     nlohmann_json::nlohmann_json
     spdlog::spdlog
@@ -25,4 +26,5 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_platform.cpp
     tests/test_approval_classifier.cpp
     tests/test_iteration_budget.cpp
+    tests/test_context_engine.cpp
 )
