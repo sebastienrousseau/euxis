@@ -23,4 +23,5 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_interaction.cpp
     tests/test_interaction_extended.cpp
     tests/test_platform.cpp
+    tests/test_approval_classifier.cpp
 )

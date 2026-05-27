@@ -77,4 +77,74 @@ auto validate_tool_manifest(const ToolManifest& manifest,
     return {};
 }
 
+namespace {
+
+// Read-only verb prefixes recognised by classify_approval(). The check is
+// case-insensitive ASCII; non-ASCII names fall through to ExecCapable.
+constexpr std::string_view kReadonlyVerbs[] = {
+    "read", "list", "get", "query", "show", "status",
+    "scan", "fetch", "describe", "view", "check",
+    "validate", "lookup", "search", "count",
+};
+
+[[nodiscard]] auto starts_with_ci(std::string_view s, std::string_view prefix) noexcept
+    -> bool {
+    if (s.size() < prefix.size()) return false;
+    for (size_t i = 0; i < prefix.size(); ++i) {
+        const char a = s[i];
+        const char b = prefix[i];
+        const char la = (a >= 'A' && a <= 'Z') ? static_cast<char>(a + 32) : a;
+        const char lb = (b >= 'A' && b <= 'Z') ? static_cast<char>(b + 32) : b;
+        if (la != lb) return false;
+    }
+    return true;
+}
+
+[[nodiscard]] auto contains_ci(std::string_view s, std::string_view needle) noexcept
+    -> bool {
+    if (needle.empty() || s.size() < needle.size()) return false;
+    for (size_t i = 0; i + needle.size() <= s.size(); ++i) {
+        bool match = true;
+        for (size_t j = 0; j < needle.size(); ++j) {
+            const char a = s[i + j];
+            const char b = needle[j];
+            const char la = (a >= 'A' && a <= 'Z') ? static_cast<char>(a + 32) : a;
+            const char lb = (b >= 'A' && b <= 'Z') ? static_cast<char>(b + 32) : b;
+            if (la != lb) { match = false; break; }
+        }
+        if (match) return true;
+    }
+    return false;
+}
+
+} // namespace
+
+auto classify_approval(const ToolDeclaration_v2& decl,
+                       std::string_view required_scope) noexcept
+    -> ApprovalClass {
+    // 1. Scope override: anything in admin / control / policy land is
+    //    ControlPlane regardless of the name.
+    if (contains_ci(required_scope, "admin") ||
+        contains_ci(required_scope, "control") ||
+        contains_ci(required_scope, "policy")) {
+        return ApprovalClass::ControlPlane;
+    }
+
+    // 2. Name-prefix match against the read-only verb table.
+    const std::string_view name{decl.name};
+    for (const auto verb : kReadonlyVerbs) {
+        if (starts_with_ci(name, verb)) {
+            // Reject false positives like "getup_destructive_action".
+            // A read verb followed by '_' or end-of-name counts as readonly;
+            // anything else falls through to ExecCapable.
+            if (name.size() == verb.size() || name[verb.size()] == '_') {
+                return ApprovalClass::Readonly;
+            }
+        }
+    }
+
+    // 3. Conservative fallback.
+    return ApprovalClass::ExecCapable;
+}
+
 } // namespace euxis::runtime
