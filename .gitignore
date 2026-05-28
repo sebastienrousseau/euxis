@@ -45,8 +45,8 @@ data/agents/registry.db.backup.*
 data/gateway/**/*.jsonl
 
 # --- Unused root dirs ---
-bin/
-metrics/
+/bin/
+/metrics/
 
 # --- Dependencies ---
 node_modules/

@@ -6,6 +6,7 @@ euxis_add_library(euxis-metrics-cpp
     src/evidence.cpp
     src/validation_pipeline.cpp
     src/mdspan_views.cpp
+    src/insights.cpp
   DEPS
     nlohmann_json::nlohmann_json
     spdlog::spdlog
@@ -16,4 +17,5 @@ euxis_add_library(euxis-metrics-cpp
     tests/test_evidence.cpp
     tests/test_validation_pipeline.cpp
     tests/test_mdspan_views.cpp
+    tests/test_insights.cpp
 )
