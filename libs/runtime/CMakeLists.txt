@@ -10,6 +10,7 @@ euxis_add_library(euxis-runtime-cpp
     src/interaction.cpp
     src/platform.cpp
     src/context_engine.cpp
+    src/agent_loop.cpp
   DEPS
     nlohmann_json::nlohmann_json
     spdlog::spdlog
@@ -27,4 +28,5 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_approval_classifier.cpp
     tests/test_iteration_budget.cpp
     tests/test_context_engine.cpp
+    tests/test_agent_loop.cpp
 )
