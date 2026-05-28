@@ -3,6 +3,7 @@ euxis_add_library(euxis-core-cpp
     src/router.cpp
     src/swarm.cpp
     src/supervisor.cpp
+    src/credential_pool.cpp
   DEPS
     euxis-crypto-cpp
     euxis-metrics-cpp
@@ -14,4 +15,5 @@ euxis_add_library(euxis-core-cpp
     tests/test_swarm.cpp
     tests/test_supervisor.cpp
     tests/test_contracts.cpp
+    tests/test_credential_pool.cpp
 )
