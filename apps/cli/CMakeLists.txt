@@ -20,6 +20,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/knowledge.cpp
   src/cmd/infra.cpp
   src/cmd/dev.cpp
+  src/cmd/sdk.cpp
   src/cmd/specialized.cpp
   src/cmd/surface.cpp
   src/cmd/lifecycle.cpp

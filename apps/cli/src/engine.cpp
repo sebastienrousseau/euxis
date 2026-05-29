@@ -11,6 +11,7 @@
 #include "euxis/cli/cmd/lifecycle.hpp"
 #include "euxis/cli/cmd/certify.hpp"
 #include "euxis/cli/cmd/system_card.hpp"
+#include "euxis/cli/cmd/sdk.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -114,6 +115,7 @@ void Engine::register_commands() {
     commands_.push_back({"docs-test",          tr("Development"),    tr("Test documentation examples"),               cmd::cmd_docs_test});
     commands_.push_back({"sync-docs",          tr("Development"),    tr("Sync docs to latest code state"),            cmd::cmd_sync_docs});
     commands_.push_back({"test-infra",         tr("Development"),    tr("Run infrastructure test suite"),             cmd::cmd_test_infra});
+    commands_.push_back({"sdk-demo",           tr("Development"),    tr("Drive AgentLoopHarness end-to-end (mock)"),  cmd::cmd_sdk_demo});
 
     // Specialized (12)
     commands_.push_back({"voice",            tr("Specialized"),    tr("Voice interface mode"),                       cmd::cmd_voice});
