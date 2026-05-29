@@ -20,9 +20,12 @@ if(NOT WIN32)
   endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15")
-  # GCC 15 false-positive in <regex> and <functional> internals
-  add_compile_options(-Wno-maybe-uninitialized)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14")
+  # GCC 14 false-positive in nlohmann_json iter_impl.hpp; same family of
+  # warning as the GCC 15 <regex>/<functional> case. Suppressing both
+  # -Wuninitialized and -Wmaybe-uninitialized is the upstream-recommended
+  # workaround for the json iterator chains.
+  add_compile_options(-Wno-uninitialized -Wno-maybe-uninitialized)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "16")

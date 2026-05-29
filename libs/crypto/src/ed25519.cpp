@@ -8,7 +8,9 @@
 namespace euxis::crypto {
 
 /// P10-R2: Maximum message size for signing/verification (256 MB).
-constexpr size_t kMaxMessageSize = 256ULL * 1024 * 1024;
+/// [[maybe_unused]] because the constant documents the policy but the
+/// runtime check happens in higher-level callers, not here.
+[[maybe_unused]] constexpr size_t kMaxMessageSize = 256ULL * 1024 * 1024;
 
 auto generate_keypair() -> Ed25519Keypair {
     Ed25519Keypair kp{};
