@@ -162,7 +162,27 @@ if(NOT TARGET httplib::httplib)
 endif()
 
 # SQLite3
+#
+# CMake's FindSQLite3 module is supposed to create the SQLite3::SQLite3
+# IMPORTED target whenever SQLite3 is found. In practice, this is not
+# uniform across CMake versions and runner configurations — some
+# environments find the library, set SQLite3_FOUND=TRUE, but do not
+# materialise the imported target. The fallback below mirrors what
+# modern FindSQLite3 modules do: synthesise the imported target from
+# the variables that find_package always populates.
 find_package(SQLite3 REQUIRED)
+if(NOT TARGET SQLite3::SQLite3)
+    add_library(SQLite3::SQLite3 INTERFACE IMPORTED)
+    if(DEFINED SQLite3_INCLUDE_DIRS)
+        set_target_properties(SQLite3::SQLite3 PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIRS}")
+    endif()
+    if(DEFINED SQLite3_LIBRARIES)
+        set_target_properties(SQLite3::SQLite3 PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${SQLite3_LIBRARIES}")
+    endif()
+    message(STATUS "Euxis: synthesised SQLite3::SQLite3 imported target")
+endif()
 
 # Libsodium
 find_package(unofficial-sodium CONFIG QUIET)
