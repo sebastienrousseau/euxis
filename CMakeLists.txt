@@ -86,6 +86,15 @@ FetchContent_Declare(
     SYSTEM
 )
 FetchContent_MakeAvailable(yaml-cpp)
+if(TARGET yaml-cpp)
+    # Mirrors the ixwebsocket workaround below: the global
+    # CMAKE_COMPILE_WARNING_AS_ERROR ON injects -Werror after any
+    # PRIVATE flags, so target-level -Wno-error is overridden. Use the
+    # property-based form. yaml-cpp 0.8.0 has -Wshadow false positives
+    # under Apple Clang.
+    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+    target_compile_options(yaml-cpp PRIVATE -Wno-shadow)
+endif()
 
 # spdlog (Use latest stable)
 FetchContent_Declare(
