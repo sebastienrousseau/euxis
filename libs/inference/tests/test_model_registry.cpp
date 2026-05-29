@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <thread>
 
 #include <sodium.h>
 

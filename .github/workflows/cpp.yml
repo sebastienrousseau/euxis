@@ -29,7 +29,22 @@ jobs:
           echo "CXX=g++-14" >> "$GITHUB_ENV"
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install libsodium nlohmann-json spdlog fmt googletest sqlite pkg-config
+        run: |
+          # Homebrew LLVM ships a clang/libc++ with <generator> (C++23).
+          # Apple Clang on macos-13 and macos-14 lags upstream LLVM and
+          # does not provide that header; libs/runtime/include/euxis/
+          # runtime/session_store.hpp requires it.
+          brew install llvm libsodium nlohmann-json spdlog fmt googletest \
+            sqlite pkg-config
+      - name: Select Homebrew Clang (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          LLVM_PREFIX="$(brew --prefix llvm)"
+          echo "CC=${LLVM_PREFIX}/bin/clang"   >> "$GITHUB_ENV"
+          echo "CXX=${LLVM_PREFIX}/bin/clang++" >> "$GITHUB_ENV"
+          # libc++ from Homebrew LLVM is at ${LLVM_PREFIX}/lib/c++.
+          echo "LDFLAGS=-L${LLVM_PREFIX}/lib/c++ -L${LLVM_PREFIX}/lib/unwind -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lunwind" >> "$GITHUB_ENV"
+          echo "CPPFLAGS=-I${LLVM_PREFIX}/include" >> "$GITHUB_ENV"
       - name: Build
         run: make cpp-build
       - name: Test
