@@ -45,11 +45,19 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 # --- Unified Dependency Resolution via FetchContent ---
 
 # nlohmann_json
+#
+# NOTE: we deliberately do NOT use FIND_PACKAGE_ARGS here. inja v3.4.0's
+# CMakeLists.txt has unguarded `install(TARGETS nlohmann_json EXPORT
+# injaTargets)` calls (lines 52, 63) that run regardless of INJA_INSTALL.
+# Those need `nlohmann_json` to be a real, installable target — which
+# FetchContent gives us. find_package produces only the namespaced
+# `nlohmann_json::nlohmann_json` imported alias, and the unprefixed
+# `nlohmann_json` target does not exist, which breaks the configure
+# step in CI environments that have nlohmann-json3-dev installed.
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG        v3.11.3
-    FIND_PACKAGE_ARGS NAMES nlohmann_json
 )
 FetchContent_MakeAvailable(nlohmann_json)
 if(NOT TARGET nlohmann_json::nlohmann_json)
