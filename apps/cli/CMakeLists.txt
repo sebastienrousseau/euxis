@@ -51,6 +51,14 @@ add_library(euxis-cli-lib STATIC
 target_include_directories(euxis-cli-lib PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
+# Defensive re-find: root-scope find_package(SQLite3 REQUIRED) creates
+# the SQLite3::SQLite3 IMPORTED target which CMake propagates to
+# subdirectories. Some CI CMake versions / configs surface this target
+# only in the directory it was found in, leaving apps/cli/CMakeLists
+# unable to link it. Re-finding here is cheap (find_package short-
+# circuits when a result is already cached) and guarantees the target
+# resolves at this scope.
+find_package(SQLite3 REQUIRED)
 target_link_libraries(euxis-cli-lib PUBLIC
   euxis-core-cpp
   euxis-bridge-cpp
