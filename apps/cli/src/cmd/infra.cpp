@@ -210,8 +210,17 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
         auto message = args[2];
         fs::create_directories(bus_dir);
         auto pipe_path = bus_dir / pipe;
-        std::ofstream f(pipe_path, std::ios::app);
-        f << message << "\n";
+        {
+            // Scoped ofstream + explicit close: relying on RAII alone left
+            // a race where a follow-on `subscribe` could observe the file
+            // before the buffer was flushed to disk on some filesystems.
+            // Explicit close() before returning makes the publish a
+            // synchronous, observed operation.
+            std::ofstream f(pipe_path, std::ios::app);
+            f << message << "\n";
+            f.flush();
+            f.close();
+        }
         std::cout << term::icon_ok() << " " << tr("Published to:") << " " << pipe << "\n";
         return 0;
     }
