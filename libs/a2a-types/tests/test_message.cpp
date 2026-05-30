@@ -163,6 +163,102 @@ TEST(MessageTest, ArtifactJsonCamelCase) {
 }
 
 // ---------------------------------------------------------------------------
+// BidRequest roundtrip
+// ---------------------------------------------------------------------------
+TEST(MessageTest, BidRequestRoundtrip) {
+    BidRequest original;
+    original.task_id              = "task-42";
+    original.capability_required  = "code-review";
+    original.max_latency_ms       = 250;
+
+    const auto j = original.to_json();
+    const auto restored = BidRequest::from_json(j);
+
+    EXPECT_EQ(restored.task_id,             "task-42");
+    EXPECT_EQ(restored.capability_required, "code-review");
+    EXPECT_EQ(restored.max_latency_ms,      250);
+}
+
+// Documents the current convention: BidRequest uses *snake_case* JSON
+// keys — inconsistent with A2AMessage / Artifact which use camelCase.
+// Test pins the contract; changing the wire format requires updating
+// every consumer at the same time.
+TEST(MessageTest, BidRequestJsonUsesSnakeCase) {
+    BidRequest req;
+    req.task_id             = "t1";
+    req.capability_required = "deep-audit";
+    req.max_latency_ms      = 1500;
+
+    const auto j = req.to_json();
+    EXPECT_TRUE(j.contains("task_id"));
+    EXPECT_TRUE(j.contains("capability_required"));
+    EXPECT_TRUE(j.contains("max_latency_ms"));
+}
+
+TEST(MessageTest, BidRequestDefaultLatencyIsZero) {
+    BidRequest req;
+    req.task_id             = "task";
+    req.capability_required = "any";
+    EXPECT_EQ(req.max_latency_ms, 0);
+}
+
+// ---------------------------------------------------------------------------
+// BidResponse roundtrip
+// ---------------------------------------------------------------------------
+TEST(MessageTest, BidResponseRoundtrip) {
+    BidResponse original;
+    original.task_id             = "task-42";
+    original.agent_id            = "agent-alpha";
+    original.estimated_cost      = 0.015;
+    original.estimated_latency_ms = 120;
+    original.accepted            = true;
+
+    const auto j = original.to_json();
+    const auto restored = BidResponse::from_json(j);
+
+    EXPECT_EQ(restored.task_id,              "task-42");
+    EXPECT_EQ(restored.agent_id,             "agent-alpha");
+    EXPECT_DOUBLE_EQ(restored.estimated_cost, 0.015);
+    EXPECT_EQ(restored.estimated_latency_ms, 120);
+    EXPECT_TRUE(restored.accepted);
+}
+
+TEST(MessageTest, BidResponseRejectedIsRoundTripped) {
+    BidResponse original;
+    original.task_id  = "task-99";
+    original.agent_id = "agent-busy";
+    original.accepted = false;  // explicit rejection
+
+    const auto j        = original.to_json();
+    const auto restored = BidResponse::from_json(j);
+    EXPECT_FALSE(restored.accepted);
+}
+
+// Same snake_case convention as BidRequest above.
+TEST(MessageTest, BidResponseJsonUsesSnakeCase) {
+    BidResponse resp;
+    resp.task_id              = "t";
+    resp.agent_id             = "a";
+    resp.estimated_cost       = 0.25;
+    resp.estimated_latency_ms = 75;
+    resp.accepted             = true;
+
+    const auto j = resp.to_json();
+    EXPECT_TRUE(j.contains("task_id"));
+    EXPECT_TRUE(j.contains("agent_id"));
+    EXPECT_TRUE(j.contains("estimated_cost"));
+    EXPECT_TRUE(j.contains("estimated_latency_ms"));
+    EXPECT_TRUE(j.contains("accepted"));
+}
+
+TEST(MessageTest, BidResponseDefaultsAreSafe) {
+    BidResponse resp;
+    EXPECT_DOUBLE_EQ(resp.estimated_cost,       0.0);
+    EXPECT_EQ(resp.estimated_latency_ms,        0);
+    EXPECT_FALSE(resp.accepted);
+}
+
+// ---------------------------------------------------------------------------
 // Multiple artifacts
 // ---------------------------------------------------------------------------
 TEST(MessageTest, MultipleArtifacts) {
