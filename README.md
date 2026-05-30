@@ -3,7 +3,7 @@
 <h1 align="center">euxis</h1>
 
 <p align="center">
-  Cryptographically-signed compliance audits for your codebase, at native speed.
+  An ultra-fast, automated security auditor for your codebase.
 </p>
 
 <p align="center">
@@ -16,9 +16,36 @@
 
 ---
 
-**Euxis runs the verification an auditor would — SOC 2, ISO 27001, NIST CSF, OWASP, and 15 other frameworks — across a swarm of agents in 45 seconds to 3 minutes.** It emits an Ed25519-signed evidence pack that reproduces byte-for-byte next quarter, so a regulator can re-run your audit and get the same digest. Built in C++23 as a single static binary: no Python startup, no per-turn JIT warm-up, no interpreter in the agent loop.
+## What this actually is
 
-Run it as a CLI in your CI pipeline, embed it in your build as a 16-library SDK, or drive it from a Qt6 desktop GUI. Wire it into A2A v0.2 agent meshes via `libs/a2a`, or use the FinOps router to pick the cheapest model that still meets your SLO.
+**Euxis verifies code the way a human security auditor would — except in under three minutes.**
+
+When a software team needs to prove their app meets SOC 2, ISO 27001, NIST, OWASP, or any of fourteen other frameworks, they normally pay a human expert to spend weeks reading code, running checks, and writing reports. Euxis is a single binary you drop into your CI pipeline: every time the code changes, it runs the same audit a human would, and emits a tamper-proof, regulator-ready evidence pack.
+
+The same engine ships as an embeddable C++23 SDK across sixteen libraries, so teams building agentic verification systems can wire it directly into their own product — see [Embedding euxis in C++](#embedding-euxis-in-c) below.
+
+## What the jargon actually means
+
+| Phrase you'll see | What it actually means |
+|---|---|
+| **Cryptographically-signed evidence pack** | A tamper-proof digital receipt. Guarantees to regulators that the audit results are real and haven't been faked. Re-run the same audit next quarter against the same code: same bytes, same digest. |
+| **Native speed / C++23 static binary** | One clean binary that runs instantly. No Python runtime to warm up, no per-turn JIT lag, no interpreter in the agent loop. |
+| **Swarm of agents** | A group of AI assistants working simultaneously to read and test different parts of your code, coordinated by a single controller. |
+| **FinOps router** | A smart budget manager. Routes easy tasks to cheap models (Ollama, Haiku) and hard tasks to expensive ones (Opus, GPT-5), so you don't overpay. |
+| **A2A v0.2 agent meshes** | A standardised wire protocol that lets independent agents trade tasks. Open spec; not Euxis-specific. |
+| **CI pipeline integration** | Drop it into GitHub Actions / GitLab CI / Jenkins. Runs every time someone pushes code. Fails the build if a compliance gate breaks. |
+| **Forensic mode** | The deepest review mode (`euxis review --forensic`). Adds supply-chain audit, dependency provenance, and admission-policy enforcement. ~3 minutes vs ~45 seconds for triage. |
+
+## How you use it
+
+```bash
+euxis triage .                              # 45-second bounded scan
+euxis check .                               # standard verification, ~3 min
+euxis review . --forensic                   # forensic depth + supply-chain audit
+euxis certify-readiness . --framework soc2  # SOC 2 readiness report
+```
+
+Pipe the output into your CI gate, or hand the evidence pack to a regulator.
 
 ---
 
