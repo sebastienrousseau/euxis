@@ -45,8 +45,23 @@ data/agents/registry.db.backup.*
 data/gateway/**/*.jsonl
 
 # --- Unused root dirs ---
+# These are legacy or transient on-disk directories that must never be
+# tracked. Some predate the C++23 rewrite (the Python TUI in tui/ was
+# superseded by apps/cli/src/tui/); others are tool caches that
+# shouldn't be re-introduced. See docs/architecture/legacy-cleanup-2026.md
+# for the full rationale.
 /bin/
 /metrics/
+/tui/
+/bus/
+/packages/
+/prompts/
+/codex/
+/.venv/
+/.venv-voice/
+/.pytest_cache/
+__pycache__/
+*.pyc
 
 # --- Dependencies ---
 node_modules/
