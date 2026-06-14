@@ -1,276 +1,88 @@
 name: Architecture and Quality Gates
 
+# Rewritten in v0.0.3 (P0.12). The previous workflow referenced ~16
+# euxis-ops/* scripts that did not exist, so every step failed at
+# runtime; the workflow appeared green because the failure messages
+# never made it past `make gate-all` (which also did not exist).
+#
+# The new workflow runs five standalone gates, each backed by a script
+# under scripts/architecture/ that has its own unittest coverage
+# (scripts/architecture/tests/test_gates.py).
+#
+# Every script referenced here must resolve to a real on-disk path:
+# the `workflow-integrity` gate enforces that invariant against this
+# very file, so the workflow cannot rot back to its previous state.
+
 on:
   push:
-    branches: [main, feat/*, fix/*]
+    branches: [main, "feat/*", "fix/*"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  canonical-gates:
-    name: Canonical Quality Gates
-    runs-on: ubuntu-latest
+  gate-tests:
+    name: Gate-script unittests
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run canonical gate entrypoint
-        run: make gate-all
+      - name: Run gate unittests
+        run: python3 -m unittest discover -s scripts/architecture/tests -v
 
-  perf-and-scorecard:
-    name: Performance and Scorecard Gates
-    runs-on: ubuntu-latest
+  workflow-integrity:
+    name: Workflow integrity (no broken script refs)
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Performance budget
-        run: python3 euxis-ops/perf/check_perf_budget.py data/runtime/perf/metrics.jsonl euxis-ops/perf/perf_policy.json current
-      - name: Scorecard gate
-        run: python3 euxis-ops/eval/scorecard.py data/scorecard/metrics.sample.json data/scorecard/latest.json
-      - name: Collect package benchmark dataset
-        run: |
-          python3 euxis-ops/perf/collect_package_benchmarks.py \
-            --repo-root . \
-            --standards euxis-ops/quality/package_standards.json \
-            --iterations 3 \
-            --output fixtures/benchmarks/package-benchmarks.json
-      - name: Validate package benchmark budgets
-        run: |
-          python3 euxis-ops/perf/validate_package_benchmark_budget.py \
-            --benchmarks fixtures/benchmarks/package-benchmarks.json \
-            --policy euxis-ops/perf/package_resource_policy.json \
-            --stage current
-      - name: Propose package benchmark baseline update
-        run: |
-          python3 euxis-ops/perf/propose_package_benchmark_baseline.py \
-            --current fixtures/benchmarks/package-benchmarks.json \
-            --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --previous-release v0.0.9 \
-            --next-release v0.0.10 \
-            --output fixtures/benchmarks/proposed-package-benchmarks-baseline.json
-      - name: Review package benchmark baseline proposal
-        run: |
-          python3 euxis-ops/release/review_package_benchmark_baseline.py \
-            --proposal fixtures/benchmarks/proposed-package-benchmarks-baseline.json \
-            --threshold-percent 25 \
-            --output fixtures/benchmarks/package-benchmark-baseline-review.json \
-            --markdown-output fixtures/benchmarks/package-benchmark-baseline-review.md
-      - name: Validate package benchmark baseline governance bundle
-        run: |
-          python3 euxis-ops/perf/validate_package_benchmark_baseline_governance.py \
-            --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --proposal fixtures/benchmarks/proposed-package-benchmarks-baseline.json \
-            --review fixtures/benchmarks/package-benchmark-baseline-review.json \
-            --json-output fixtures/benchmarks/package-benchmark-baseline-governance.json
-      - name: Add package baseline review summary
-        run: cat fixtures/benchmarks/package-benchmark-baseline-review.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Evaluate package benchmark regressions (main push warning)
-        if: github.event_name == 'push'
-        run: |
-          python3 euxis-ops/perf/validate_package_benchmark_regression.py \
-            --current fixtures/benchmarks/package-benchmarks.json \
-            --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --threshold-percent 20 \
-            --min-baseline-wall-ms 2 \
-            --min-baseline-cpu-ms 2 \
-            --min-baseline-memory-mb 32 \
-            --min-absolute-wall-ms 0.5 \
-            --min-absolute-cpu-ms 0.5 \
-            --min-absolute-memory-mb 4 \
-            --warn-only \
-            --summary-output fixtures/benchmarks/package-benchmark-regression.md
-      - name: Release checklist gate
-        run: |
-          python3 euxis-ops/release/generate_checklist.py \
-            --metrics data/runtime/perf/metrics.jsonl \
-            --policy euxis-ops/perf/perf_policy.json \
-            --stage current \
-            --baseline euxis-ops/perf/release_baseline.json \
-            --threshold-percent 10 \
-            --output data/release/checklist.md \
-            --json-output data/release/checklist.json
-      - name: Upload scorecard
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-scorecard
-          path: data/scorecard/latest.json
-      - name: Upload release checklist
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-checklist
-          path: |
-            data/release/checklist.md
-            data/release/checklist.json
-      - name: Propose next release baseline
-        run: |
-          python3 euxis-ops/perf/propose_release_baseline.py \
-            --metrics data/runtime/perf/metrics.jsonl \
-            --previous-release v0.0.9 \
-            --next-release v0.0.10 \
-            --output data/release/proposed-baseline.json
-      - name: Review baseline proposal (manual-review flag)
-        run: |
-          python3 euxis-ops/release/review_baseline_proposal.py \
-            --baseline euxis-ops/perf/release_baseline.json \
-            --proposal data/release/proposed-baseline.json \
-            --threshold-percent 20 \
-            --output data/release/baseline-review.json \
-            --markdown-output data/release/baseline-review.md
-      - name: Add baseline review summary
-        run: cat data/release/baseline-review.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Build release evidence bundle
-        run: |
-          python3 euxis-ops/release/aggregate_release_evidence.py \
-            --scorecard data/scorecard/latest.json \
-            --checklist data/release/checklist.json \
-            --proposal data/release/proposed-baseline.json \
-            --baseline-review data/release/baseline-review.json \
-            --output data/release/release-evidence.json \
-            --markdown-output data/release/release-evidence.md
-      - name: Add release evidence summary
-        run: cat data/release/release-evidence.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Validate release evidence
-        run: |
-          python3 euxis-ops/release/validate_release_evidence.py \
-            --evidence data/release/release-evidence.json \
-            --min-overall 9.0 \
-            --min-category 8.0
-      - name: Upload proposed baseline
-        uses: actions/upload-artifact@v4
-        with:
-          name: proposed-release-baseline
-          path: data/release/proposed-baseline.json
-      - name: Upload baseline review
-        uses: actions/upload-artifact@v4
-        with:
-          name: baseline-review
-          path: |
-            data/release/baseline-review.json
-            data/release/baseline-review.md
-      - name: Upload release evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence
-          path: |
-            data/release/release-evidence.json
-            data/release/release-evidence.md
-      - name: Upload package benchmark dataset
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-benchmark-dataset
-          path: fixtures/benchmarks/package-benchmarks.json
-      - name: Upload package benchmark baseline proposal/review
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-benchmark-baseline-governance
-          path: |
-            fixtures/benchmarks/proposed-package-benchmarks-baseline.json
-            fixtures/benchmarks/package-benchmark-baseline-review.json
-            fixtures/benchmarks/package-benchmark-baseline-review.md
-            fixtures/benchmarks/package-benchmark-baseline-governance.json
-      - name: Upload package benchmark regression summary
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-benchmark-regression
-          path: fixtures/benchmarks/package-benchmark-regression.md
+      - name: Every script reference in .github/workflows/ must resolve
+        run: python3 scripts/architecture/check_workflow_integrity.py
 
-  perf-trend-warning:
-    name: Perf Trend Warning (Q2 target)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+  no-stale-dirs:
+    name: No stale directories tracked
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Evaluate warning-only trend gate
-        run: |
-          set +e
-          python3 euxis-ops/release/generate_checklist.py \
-            --metrics data/runtime/perf/metrics.jsonl \
-            --policy euxis-ops/perf/perf_policy.json \
-            --stage target_q2_2026 \
-            --baseline euxis-ops/perf/release_baseline.json \
-            --threshold-percent 10 \
-            --output data/release/checklist-q2-warning.md \
-            --json-output data/release/checklist-q2-warning.json
-          status=$?
-          echo "PERF_Q2_STATUS=${status}" >> "$GITHUB_ENV"
-          exit 0
-      - name: Add perf trend summary
-        run: |
-          python3 euxis-ops/perf/render_trend_summary.py \
-            --report data/release/checklist-q2-warning.json \
-            --status-code "${PERF_Q2_STATUS}" \
-            --output data/release/perf-trend-summary.md
-          cat data/release/perf-trend-summary.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Collect package benchmarks (warning-only trend)
-        run: |
-          python3 euxis-ops/perf/collect_package_benchmarks.py \
-            --repo-root . \
-            --standards euxis-ops/quality/package_standards.json \
-            --iterations 1 \
-            --output fixtures/benchmarks/package-benchmarks-pr.json
-      - name: Render package benchmark trend summary
-        run: |
-          python3 euxis-ops/perf/render_package_benchmark_trend.py \
-            --current fixtures/benchmarks/package-benchmarks-pr.json \
-            --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --threshold-percent 10 \
-            --output fixtures/benchmarks/package-benchmark-trend.md
-          cat fixtures/benchmarks/package-benchmark-trend.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Evaluate package benchmark regression (warn-only)
-        run: |
-          python3 euxis-ops/perf/validate_package_benchmark_regression.py \
-            --current fixtures/benchmarks/package-benchmarks-pr.json \
-            --baseline euxis-ops/perf/package_benchmarks_baseline.json \
-            --threshold-percent 10 \
-            --min-baseline-wall-ms 2 \
-            --min-baseline-cpu-ms 2 \
-            --min-baseline-memory-mb 32 \
-            --min-absolute-wall-ms 0.5 \
-            --min-absolute-cpu-ms 0.5 \
-            --min-absolute-memory-mb 4 \
-            --warn-only \
-            --summary-output fixtures/benchmarks/package-benchmark-regression-pr.md
-          cat fixtures/benchmarks/package-benchmark-regression-pr.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload package benchmark trend artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-benchmark-trend
-          path: |
-            fixtures/benchmarks/package-benchmarks-pr.json
-            fixtures/benchmarks/package-benchmark-trend.md
-            fixtures/benchmarks/package-benchmark-regression-pr.md
+      - name: Refuse tui/, .venv/, codex/, etc. from being re-introduced
+        run: python3 scripts/architecture/check_no_stale_dirs.py
 
-  package-structure-matrix-report:
-    name: Package Structure Matrix Report
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+  lib-layout:
+    name: libs/ layout audit
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Report package structure matrix staleness (warn-only)
-        run: |
-          python3 euxis-ops/quality/report_package_structure_matrix_staleness.py \
-            --repo-root . \
-            --standards euxis-ops/quality/package_standards.json \
-            --matrix docs/architecture/package-structure-matrix.md \
-            --summary-output data/release/package-structure-matrix-staleness.md \
-            --diff-output data/release/package-structure-matrix-staleness.diff \
-            --warn-only
-      - name: Add package structure summary
-        run: cat data/release/package-structure-matrix-staleness.md >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload package structure matrix report
-        uses: actions/upload-artifact@v4
+      - name: Every libs/<name>/ must ship CMake, headers, src
+        run: python3 scripts/architecture/check_lib_layout.py
+
+  commit-branding:
+    name: Branding footer on tip commit
+    runs-on: ubuntu-24.04
+    # Skip on PRs from forks where we can't always rewrite a
+    # contributor's commit message. The branding-check.yml workflow
+    # continues to enforce this on main and feat/* branches.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
         with:
-          name: package-structure-matrix-report
-          path: |
-            data/release/package-structure-matrix-staleness.md
-            data/release/package-structure-matrix-staleness.diff
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Branding signature present on HEAD
+        run: python3 scripts/architecture/check_commit_branding.py
