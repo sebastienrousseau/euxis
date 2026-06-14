@@ -25,10 +25,17 @@ if(TARGET tree-sitter AND NOT TARGET tree_sitter)
 endif()
 
 # ---- tree-sitter-c grammar -------------------------------------------------
+# SOURCE_SUBDIR pointing at a non-existent path tells FetchContent to
+# populate the repo (so we can reach parser.c) but skip the implicit
+# add_subdirectory() of the grammar's own CMakeLists.txt. Necessary
+# because every grammar repo defines an `ts-test` target with the
+# same name, which collides at root scope under CMP0002. We only
+# need the generated C sources, not the grammar's build system.
 FetchContent_Declare(
     tree-sitter-c
     GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter-c.git
     GIT_TAG        v0.23.4
+    SOURCE_SUBDIR  _euxis_skip_subdir_
 )
 FetchContent_GetProperties(tree-sitter-c)
 if(NOT tree-sitter-c_POPULATED)
@@ -58,6 +65,7 @@ FetchContent_Declare(
     tree-sitter-cpp
     GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter-cpp.git
     GIT_TAG        v0.23.4
+    SOURCE_SUBDIR  _euxis_skip_subdir_
 )
 FetchContent_GetProperties(tree-sitter-cpp)
 if(NOT tree-sitter-cpp_POPULATED)
@@ -97,6 +105,7 @@ macro(euxis_add_grammar NAME REPO TAG)
         ${NAME}
         GIT_REPOSITORY ${REPO}
         GIT_TAG        ${TAG}
+        SOURCE_SUBDIR  _euxis_skip_subdir_
     )
     FetchContent_GetProperties(${NAME})
     if(NOT ${NAME}_POPULATED)
@@ -132,6 +141,7 @@ FetchContent_Declare(
     ts_grammar_typescript
     GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter-typescript.git
     GIT_TAG        v0.23.2
+    SOURCE_SUBDIR  _euxis_skip_subdir_
 )
 FetchContent_GetProperties(ts_grammar_typescript)
 if(NOT ts_grammar_typescript_POPULATED)
