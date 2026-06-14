@@ -1,14 +1,23 @@
 /// @file
-/// @brief SARIF v2.1.0 output formatter for verdict findings.
+/// @brief SARIF v2.1.0 output formatter.
+///
+/// Emits SARIF documents that consumer tools (GitHub Code Scanning,
+/// Defender for Cloud, GitLab SAST widget, Snyk import) can ingest
+/// directly. Carries CWE Top 25:2025 and OWASP Top 10:2025 taxonomies
+/// as per the 2025-12-11 CISA release and the 2025-11 OWASP release.
 #pragma once
 
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
+#include "euxis/security/finding.hpp"
+
 namespace euxis::cli {
 
-/// A single finding that can be converted to SARIF.
+/// Legacy SARIF finding struct (kept for the agent-output regex path
+/// used by `extract_sarif_findings`). New emitters should produce
+/// `euxis::security::Finding` and call `findings_to_sarif()`.
 struct SarifFinding {
     std::string rule_id;         // e.g. "euxis/security-01"
     std::string message;
@@ -19,9 +28,17 @@ struct SarifFinding {
     std::string pillar;          // evidence pillar
 };
 
-/// Convert verdict findings to SARIF v2.1.0 JSON.
+/// Convert legacy verdict findings to SARIF v2.1.0 JSON.
+/// Preserved for back-compat with the agent-driven verification path.
 [[nodiscard]] auto findings_to_sarif(
     const std::vector<SarifFinding>& findings,
+    const std::string& tool_version = "0.0.10") -> nlohmann::json;
+
+/// Convert the canonical Finding type to SARIF v2.1.0 JSON, including
+/// `taxonomies` entries for CWE Top 25:2025 and OWASP Top 10:2025, and
+/// `fixes[]` blocks for any deterministic codemods.
+[[nodiscard]] auto findings_to_sarif(
+    const std::vector<euxis::security::Finding>& findings,
     const std::string& tool_version = "0.0.10") -> nlohmann::json;
 
 /// Parse agent evidence output to extract SarifFinding objects.

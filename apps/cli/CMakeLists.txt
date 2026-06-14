@@ -124,6 +124,7 @@ add_executable(euxis-cli-cpp_tests
   tests/test_playbook_schema.cpp
   tests/test_certification.cpp
   tests/test_hardening.cpp
+  tests/test_sarif.cpp
 )
 target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib

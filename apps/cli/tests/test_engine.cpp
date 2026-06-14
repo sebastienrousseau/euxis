@@ -1,8 +1,19 @@
 #include <gtest/gtest.h>
 #include "euxis/cli/engine.hpp"
+#include "euxis/cli/exit_codes.hpp"
 
 namespace euxis::cli {
 namespace {
+
+TEST(ExitCodes, IntegerValuesAreStable) {
+    EXPECT_EQ(to_int(ExitCode::Success), 0);
+    EXPECT_EQ(to_int(ExitCode::InfraError), 1);
+    EXPECT_EQ(to_int(ExitCode::AdvisoryFindings), 2);
+    EXPECT_EQ(to_int(ExitCode::BlockingFindings), 3);
+    EXPECT_EQ(to_int(ExitCode::PolicyViolation), 4);
+    EXPECT_EQ(to_int(ExitCode::TimeoutPartial), 5);
+    EXPECT_EQ(to_int(ExitCode::Interrupted), 130);
+}
 
 TEST(EngineTest, VersionCommand) {
     Engine e("/tmp/euxis_test");
@@ -25,7 +36,8 @@ TEST(EngineTest, EmptyArgsShowsUsage) {
 TEST(EngineTest, UnknownCommand) {
     Engine e("/tmp/euxis_test");
     auto code = e.run({"nonexistent"});
-    EXPECT_EQ(code, 1);
+    EXPECT_EQ(code, to_int(ExitCode::InfraError));
+    EXPECT_EQ(code, 1);  // backwards-compat: unknown command stays 1
 }
 
 TEST(EngineTest, VersionFlag) {

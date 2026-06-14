@@ -1,4 +1,5 @@
 #include "euxis/cli/engine.hpp"
+#include "euxis/cli/exit_codes.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/terminal.hpp"
 #include "euxis/cli/cmd/system.hpp"
@@ -195,7 +196,7 @@ auto Engine::run(const std::vector<std::string>& args) -> int {
 
     std::println(stderr, "{} {}", tr("Unknown command:"), cmd);
     std::println(stderr, "{}", tr("Run 'euxis help' for available commands."));
-    return 1;
+    return to_int(ExitCode::InfraError);
 }
 
 void Engine::print_version() {
