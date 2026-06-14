@@ -9,12 +9,18 @@
 #include <string>
 #include <utility>
 
-// Grammar entry points provided by the vendored tree-sitter-c and
-// tree-sitter-cpp libraries. The grammars expose a single C ABI
-// function each that returns a pointer to the TSLanguage descriptor.
+// Grammar entry points provided by the vendored tree-sitter grammar
+// libraries. Each grammar exposes a single C ABI function that
+// returns a pointer to the TSLanguage descriptor.
 extern "C" {
 const TSLanguage* tree_sitter_c(void);
 const TSLanguage* tree_sitter_cpp(void);
+const TSLanguage* tree_sitter_rust(void);
+const TSLanguage* tree_sitter_go(void);
+const TSLanguage* tree_sitter_python(void);
+const TSLanguage* tree_sitter_javascript(void);
+const TSLanguage* tree_sitter_typescript(void);
+const TSLanguage* tree_sitter_java(void);
 }
 
 namespace euxis::parse {
@@ -23,8 +29,14 @@ namespace {
 
 const TSLanguage* ts_language_for(Language lang) noexcept {
     switch (lang) {
-        case Language::C:   return tree_sitter_c();
-        case Language::Cpp: return tree_sitter_cpp();
+        case Language::C:          return tree_sitter_c();
+        case Language::Cpp:        return tree_sitter_cpp();
+        case Language::Rust:       return tree_sitter_rust();
+        case Language::Go:         return tree_sitter_go();
+        case Language::Python:     return tree_sitter_python();
+        case Language::JavaScript: return tree_sitter_javascript();
+        case Language::TypeScript: return tree_sitter_typescript();
+        case Language::Java:       return tree_sitter_java();
     }
     return nullptr;
 }

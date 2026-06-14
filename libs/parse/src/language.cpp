@@ -24,7 +24,7 @@ struct ExtMap {
     std::string_view ext;
     Language lang;
 };
-constexpr std::array<ExtMap, 14> kExtensions{{
+constexpr std::array<ExtMap, 28> kExtensions{{
     // C
     {"c",  Language::C},
     {"h",  Language::C},  // ambiguous with C++ headers; the heuristic below promotes if a paired .cpp exists
@@ -41,14 +41,41 @@ constexpr std::array<ExtMap, 14> kExtensions{{
     {"c++", Language::Cpp},
     {"h++", Language::Cpp},
     {"cppm", Language::Cpp},  // C++ modules interface unit
+    // Rust
+    {"rs",  Language::Rust},
+    // Go
+    {"go",  Language::Go},
+    // Python
+    {"py",  Language::Python},
+    {"pyi", Language::Python},  // type stubs
+    {"pyw", Language::Python},  // Windows windowed scripts
+    // JavaScript
+    {"js",  Language::JavaScript},
+    {"mjs", Language::JavaScript},
+    {"cjs", Language::JavaScript},
+    {"jsx", Language::JavaScript},  // tree-sitter-javascript natively handles JSX
+    // TypeScript (just .ts variants; .tsx needs the TSX subgrammar which
+    // is deferred until libs/parse links a second tree-sitter-typescript
+    // entry point)
+    {"ts",  Language::TypeScript},
+    {"mts", Language::TypeScript},
+    {"cts", Language::TypeScript},
+    // Java
+    {"java", Language::Java},
 }};
 
 } // namespace
 
 auto language_str(Language lang) noexcept -> const char* {
     switch (lang) {
-        case Language::C:   return "c";
-        case Language::Cpp: return "cpp";
+        case Language::C:          return "c";
+        case Language::Cpp:        return "cpp";
+        case Language::Rust:       return "rust";
+        case Language::Go:         return "go";
+        case Language::Python:     return "python";
+        case Language::JavaScript: return "javascript";
+        case Language::TypeScript: return "typescript";
+        case Language::Java:       return "java";
     }
     return "unknown";
 }

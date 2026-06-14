@@ -30,6 +30,12 @@ namespace euxis::parse {
 enum class Language : std::uint8_t {
     C,
     Cpp,
+    Rust,
+    Go,
+    Python,
+    JavaScript,
+    TypeScript,
+    Java,
 };
 
 /// Stringify for diagnostics + Finding emission.

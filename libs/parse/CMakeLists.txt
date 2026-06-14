@@ -85,6 +85,83 @@ target_compile_options(euxis_ts_grammar_cpp PRIVATE
     -w
 )
 
+# ---- additional grammars --------------------------------------------------
+# Helper macro: clone a tree-sitter-<lang> repo, compile its
+# `src/parser.c` (plus `src/scanner.c` when present) into a small
+# static library, and silence the inevitable generator-produced
+# warnings. The macro intentionally avoids the FetchContent_Declare
+# pattern of the core dep so version pins stay co-located with the
+# library definition.
+macro(euxis_add_grammar NAME REPO TAG)
+    FetchContent_Declare(
+        ${NAME}
+        GIT_REPOSITORY ${REPO}
+        GIT_TAG        ${TAG}
+    )
+    FetchContent_GetProperties(${NAME})
+    if(NOT ${NAME}_POPULATED)
+        FetchContent_MakeAvailable(${NAME})
+    endif()
+    set(_ts_sources ${${NAME}_SOURCE_DIR}/src/parser.c)
+    if(EXISTS ${${NAME}_SOURCE_DIR}/src/scanner.c)
+        list(APPEND _ts_sources ${${NAME}_SOURCE_DIR}/src/scanner.c)
+    endif()
+    add_library(euxis_${NAME} STATIC ${_ts_sources})
+    target_include_directories(euxis_${NAME} PRIVATE
+        ${${NAME}_SOURCE_DIR}/src
+    )
+    target_link_libraries(euxis_${NAME} PUBLIC tree-sitter)
+    set_target_properties(euxis_${NAME} PROPERTIES
+        COMPILE_WARNING_AS_ERROR OFF
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(euxis_${NAME} PRIVATE -w)
+endmacro()
+
+euxis_add_grammar(ts_grammar_rust       https://github.com/tree-sitter/tree-sitter-rust.git       v0.23.2)
+euxis_add_grammar(ts_grammar_go         https://github.com/tree-sitter/tree-sitter-go.git         v0.23.4)
+euxis_add_grammar(ts_grammar_python     https://github.com/tree-sitter/tree-sitter-python.git     v0.23.6)
+euxis_add_grammar(ts_grammar_javascript https://github.com/tree-sitter/tree-sitter-javascript.git v0.23.1)
+euxis_add_grammar(ts_grammar_java       https://github.com/tree-sitter/tree-sitter-java.git       v0.23.5)
+
+# tree-sitter-typescript is special — the repo ships two grammars
+# (typescript + tsx) under subdirectories. We wire just the
+# typescript subgrammar here; tsx lands when libs/parse adds a
+# Language::Tsx enumerator in a follow-up batch.
+FetchContent_Declare(
+    ts_grammar_typescript
+    GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter-typescript.git
+    GIT_TAG        v0.23.2
+)
+FetchContent_GetProperties(ts_grammar_typescript)
+if(NOT ts_grammar_typescript_POPULATED)
+    FetchContent_MakeAvailable(ts_grammar_typescript)
+endif()
+set(_ts_typescript_sources
+    ${ts_grammar_typescript_SOURCE_DIR}/typescript/src/parser.c
+)
+# Recent tree-sitter-typescript releases moved the scanner to
+# `common/scanner.c`; older releases kept a per-grammar copy. Probe
+# both so the build survives either layout.
+if(EXISTS ${ts_grammar_typescript_SOURCE_DIR}/common/scanner.c)
+    list(APPEND _ts_typescript_sources
+        ${ts_grammar_typescript_SOURCE_DIR}/common/scanner.c)
+elseif(EXISTS ${ts_grammar_typescript_SOURCE_DIR}/typescript/src/scanner.c)
+    list(APPEND _ts_typescript_sources
+        ${ts_grammar_typescript_SOURCE_DIR}/typescript/src/scanner.c)
+endif()
+add_library(euxis_ts_grammar_typescript STATIC ${_ts_typescript_sources})
+target_include_directories(euxis_ts_grammar_typescript PRIVATE
+    ${ts_grammar_typescript_SOURCE_DIR}/typescript/src
+    ${ts_grammar_typescript_SOURCE_DIR}/common
+)
+target_link_libraries(euxis_ts_grammar_typescript PUBLIC tree-sitter)
+set_target_properties(euxis_ts_grammar_typescript PROPERTIES
+    COMPILE_WARNING_AS_ERROR OFF
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_options(euxis_ts_grammar_typescript PRIVATE -w)
+
 # ---- libs/parse main library ----------------------------------------------
 euxis_add_library(euxis-parse-cpp
     SOURCES
@@ -95,6 +172,12 @@ euxis_add_library(euxis-parse-cpp
         tree-sitter
         euxis_ts_grammar_c
         euxis_ts_grammar_cpp
+        euxis_ts_grammar_rust
+        euxis_ts_grammar_go
+        euxis_ts_grammar_python
+        euxis_ts_grammar_javascript
+        euxis_ts_grammar_typescript
+        euxis_ts_grammar_java
     TEST_SOURCES
         tests/test_language.cpp
         tests/test_parser.cpp
