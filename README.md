@@ -18,9 +18,11 @@
 
 ## What this actually is
 
-**Euxis verifies code the way a human security auditor would — except in under three minutes.**
+**Euxis verifies code the way a human security auditor would — except in under three minutes — and ships a Sigstore-signed evidence pack any regulator can verify offline.**
 
 When a software team needs to prove their app meets SOC 2, ISO 27001, NIST, OWASP, or any of fourteen other frameworks, they normally pay a human expert to spend weeks reading code, running checks, and writing reports. Euxis is a single binary you drop into your CI pipeline: every time the code changes, it runs the same audit a human would, and emits a tamper-proof, regulator-ready evidence pack.
+
+The evidence pack is a **Sigstore Bundle v0.3** — an in-toto Statement v1 wrapped in a SLSA v1.2 provenance predicate, DSSE-signed with Ed25519, and bundled with the SARIF findings, CycloneDX 1.6 + SPDX 3.0.1 SBOMs, and OpenVEX exception document. A verifier (auditor, regulator, SOC) checks the chain offline with `euxis verify` or any sigstore-compatible tool — no contact to a vendor service required. See [`docs/evidence-packs/anatomy.md`](docs/evidence-packs/anatomy.md) for the full anatomy and [`docs/evidence-packs/verifying-a-bundle.md`](docs/evidence-packs/verifying-a-bundle.md) for the verification run-book.
 
 The same engine ships as an embeddable C++23 SDK across sixteen libraries, so teams building agentic verification systems can wire it directly into their own product — see [Embedding euxis in C++](#embedding-euxis-in-c) below.
 
@@ -43,9 +45,15 @@ euxis triage .                              # 45-second bounded scan
 euxis check .                               # standard verification, ~3 min
 euxis review . --forensic                   # forensic depth + supply-chain audit
 euxis certify-readiness . --framework soc2  # SOC 2 readiness report
+
+euxis sbom . --format=both                  # CycloneDX 1.6 + SPDX 3.0.1
+euxis slopsquatting .                       # LLM-hallucinated-package guard
+euxis attest evidence.tar.gz                # Sigstore-signed evidence bundle
+euxis verify evidence.tar.gz.sigstore.json  # offline signature check
+euxis cache stats                           # incremental scan cache
 ```
 
-Pipe the output into your CI gate, or hand the evidence pack to a regulator.
+Pipe the output into your CI gate, or hand the evidence pack to a regulator. See [`docs/compliance/cra.md`](docs/compliance/cra.md) for the EU Cyber Resilience Act mapping and [`docs/compliance/dora.md`](docs/compliance/dora.md) for DORA / TLPT.
 
 ---
 
@@ -67,6 +75,14 @@ Pipe the output into your CI gate, or hand the evidence pack to a regulator.
 - [Public libraries](#public-libraries) — sixteen-library matrix
 - [Build options](#build-options) — CMake feature flags
 - [Provider strategy](#provider-strategy) — FinOps router defaults
+
+**Evidence and compliance**
+
+- [Anatomy of an evidence pack](docs/evidence-packs/anatomy.md) — bundle layout, top to bottom
+- [Verifying a bundle](docs/evidence-packs/verifying-a-bundle.md) — operational run-book
+- [EU Cyber Resilience Act mapping](docs/compliance/cra.md) — CRA Article 13 / 14
+- [DORA / TLPT mapping](docs/compliance/dora.md) — financial-services workflow
+- [Benchmark methodology](docs/benchmarks/methodology.md) — how the scan + evidence numbers are measured
 
 **Operational**
 

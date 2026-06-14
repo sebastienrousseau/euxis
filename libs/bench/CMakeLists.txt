@@ -34,4 +34,21 @@ if(EUXIS_BUILD_GBENCH)
             benchmark::benchmark
             benchmark::benchmark_main
     )
+
+    # Scan + evidence pipeline benchmarks. Distinct binary so the
+    # crypto micro-benchmarks (euxis_perf_gbench) stay focused on
+    # primitives while euxis_scan_gbench reports the user-visible
+    # SBOM / sign / parse / cache numbers.
+    add_executable(euxis_scan_gbench src/scan_bench.cpp)
+    target_link_libraries(euxis_scan_gbench
+        PRIVATE
+            euxis-attest-cpp
+            euxis-cache-cpp
+            euxis-crypto-cpp
+            euxis-sbom-cpp
+            euxis-sca-cpp
+            euxis-slopsquatting-cpp
+            benchmark::benchmark
+            benchmark::benchmark_main
+    )
 endif()
