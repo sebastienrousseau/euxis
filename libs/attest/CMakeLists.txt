@@ -1,0 +1,18 @@
+euxis_add_library(euxis-attest-cpp
+  SOURCES
+    src/statement.cpp
+    src/slsa.cpp
+    src/dsse.cpp
+    src/signing.cpp
+    src/bundle.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+    euxis-crypto-cpp
+    euxis-cache-cpp
+  TEST_SOURCES
+    tests/test_statement.cpp
+    tests/test_slsa.cpp
+    tests/test_dsse.cpp
+    tests/test_signing.cpp
+    tests/test_bundle.cpp
+)

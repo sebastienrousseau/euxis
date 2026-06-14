@@ -16,6 +16,7 @@
 #include "euxis/cli/cmd/sbom.hpp"
 #include "euxis/cli/cmd/slopsquatting.hpp"
 #include "euxis/cli/cmd/cache.hpp"
+#include "euxis/cli/cmd/attest.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -68,6 +69,8 @@ void Engine::register_commands() {
     commands_.push_back({"sbom",               tr("Core"), tr("Emit CycloneDX 1.6 / SPDX 3.0.1 / OpenVEX from a directory scan"), cmd::cmd_sbom});
     commands_.push_back({"slopsquatting",      tr("Core"), tr("Guard against LLM-hallucinated package names"), cmd::cmd_slopsquatting});
     commands_.push_back({"cache",              tr("Core"), tr("Inspect / purge the incremental scan cache"), cmd::cmd_cache});
+    commands_.push_back({"attest",             tr("Core"), tr("Produce a Sigstore-format signed in-toto evidence bundle"), cmd::cmd_attest});
+    commands_.push_back({"verify",             tr("Core"), tr("Verify a Sigstore-format signed evidence bundle"), cmd::cmd_verify});
 
     // Lifecycle (5) — installation and maintenance
     commands_.push_back({"install",    tr("Lifecycle"), tr("Bootstrap local Euxis installation"),    cmd::cmd_install});
