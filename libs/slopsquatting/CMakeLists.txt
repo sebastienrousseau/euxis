@@ -1,0 +1,13 @@
+euxis_add_library(euxis-slopsquatting-cpp
+  SOURCES
+    src/guard.cpp
+    src/seed_corpus.cpp
+    src/integration.cpp
+  DEPS
+    euxis-sbom-cpp
+    euxis-sca-cpp
+    euxis-security-cpp
+  TEST_SOURCES
+    tests/test_guard.cpp
+    tests/test_integration.cpp
+)

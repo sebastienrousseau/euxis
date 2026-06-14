@@ -27,6 +27,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/certify.cpp
   src/cmd/system_card.cpp
   src/cmd/sbom.cpp
+  src/cmd/slopsquatting.cpp
   src/agent_mcp_context.cpp
   src/certification.cpp
   src/playbook_schema.cpp
@@ -71,6 +72,7 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-security-cpp
   euxis-sbom-cpp
   euxis-sca-cpp
+  euxis-slopsquatting-cpp
   nlohmann_json::nlohmann_json
   spdlog::spdlog
   SQLite3::SQLite3
