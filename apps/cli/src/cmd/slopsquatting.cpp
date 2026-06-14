@@ -3,17 +3,25 @@
 
 #include "euxis/cli/cmd/slopsquatting.hpp"
 #include "euxis/cli/exit_codes.hpp"
+#include "euxis/cli/process.hpp"
 #include "euxis/cli/sarif.hpp"
 
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <print>
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
+#include "euxis/sca/cargo_lock.hpp"
+#include "euxis/sca/go_sum.hpp"
+#include "euxis/sca/npm_lock.hpp"
+#include "euxis/sca/pipfile_lock.hpp"
 #include "euxis/sca/scanner.hpp"
 #include "euxis/slopsquatting/guard.hpp"
 #include "euxis/slopsquatting/integration.hpp"
@@ -121,13 +129,66 @@ int cmd_slopsquatting(Context& /*ctx*/, const std::vector<std::string>& argv) {
     }
 
     // Scan.
-    auto scan = euxis::sca::scan_directory(a.target);
-    if (!scan) {
-        std::println(stderr, "euxis slopsquatting: {}", scan.error().message);
-        return to_int(ExitCode::InfraError);
+    euxis::sca::ScanResult scan_owned;
+    const euxis::sca::ScanResult* scan = nullptr;
+
+    if (a.staged) {
+        // Restrict to lockfiles among the staged changes. The pre-
+        // commit hook from .pre-commit-hooks.yaml relies on this:
+        // a freshly-edited package-lock.json triggers a focused scan
+        // without re-walking the whole tree.
+        static const std::unordered_set<std::string_view> kLockfileNames{
+            "Cargo.lock", "package-lock.json", "Pipfile.lock", "go.sum",
+        };
+        auto git = Process::run("git",
+            {"diff", "--cached", "--name-only", "--diff-filter=ACMR"},
+            10);
+        if (!git.success()) {
+            std::println(stderr,
+                "euxis slopsquatting: `git diff --cached` failed (exit {}). "
+                "Are you inside a git repository?", git.exit_code);
+            return to_int(ExitCode::InfraError);
+        }
+        std::istringstream iss(git.stdout_output);
+        std::string rel;
+        std::size_t lockfile_count = 0;
+        while (std::getline(iss, rel)) {
+            if (rel.empty()) continue;
+            std::filesystem::path p{rel};
+            if (kLockfileNames.find(p.filename().string()) == kLockfileNames.end()) {
+                continue;
+            }
+            ++lockfile_count;
+            const auto name = p.filename().string();
+            std::expected<euxis::sca::ParsedManifest, euxis::sca::ParseError> parsed;
+            if      (name == "Cargo.lock")        parsed = euxis::sca::parse_cargo_lock_file(p);
+            else if (name == "package-lock.json") parsed = euxis::sca::parse_npm_lock_file(p);
+            else if (name == "Pipfile.lock")      parsed = euxis::sca::parse_pipfile_lock_file(p);
+            else if (name == "go.sum")            parsed = euxis::sca::parse_go_sum_file(p);
+            if (parsed) {
+                scan_owned.manifests.push_back(std::move(*parsed));
+            } else {
+                scan_owned.errors.push_back(parsed.error());
+            }
+        }
+        if (lockfile_count == 0) {
+            std::println("euxis slopsquatting: no staged lockfiles; nothing to do.");
+            print_summary(guard.size(), 0, 0);
+            return to_int(ExitCode::Success);
+        }
+        scan = &scan_owned;
+    } else {
+        auto walk = euxis::sca::scan_directory(a.target);
+        if (!walk) {
+            std::println(stderr, "euxis slopsquatting: {}", walk.error().message);
+            return to_int(ExitCode::InfraError);
+        }
+        scan_owned = std::move(*walk);
+        scan = &scan_owned;
     }
 
     auto findings = euxis::slopsquatting::check_scan_result(guard, *scan);
+    const auto manifest_count = scan->manifests.size();
 
     // Output.
     if (!a.sarif_output.empty()) {
@@ -145,7 +206,7 @@ int cmd_slopsquatting(Context& /*ctx*/, const std::vector<std::string>& argv) {
     if (!a.quiet) {
         for (const auto& f : findings) print_finding(f);
     }
-    print_summary(guard.size(), scan->manifests.size(), findings.size());
+    print_summary(guard.size(), manifest_count, findings.size());
 
     return findings.empty()
         ? to_int(ExitCode::Success)
