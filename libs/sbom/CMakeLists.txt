@@ -1,0 +1,16 @@
+euxis_add_library(euxis-sbom-cpp
+  SOURCES
+    src/types.cpp
+    src/purl.cpp
+    src/cyclonedx.cpp
+    src/spdx.cpp
+    src/openvex.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+  TEST_SOURCES
+    tests/test_types.cpp
+    tests/test_purl.cpp
+    tests/test_cyclonedx.cpp
+    tests/test_spdx.cpp
+    tests/test_openvex.cpp
+)
