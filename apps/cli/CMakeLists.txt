@@ -30,6 +30,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/slopsquatting.cpp
   src/cmd/cache.cpp
   src/cmd/attest.cpp
+  src/cmd/scan.cpp
   src/agent_mcp_context.cpp
   src/certification.cpp
   src/playbook_schema.cpp
@@ -77,6 +78,9 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-slopsquatting-cpp
   euxis-cache-cpp
   euxis-attest-cpp
+  euxis-parse-cpp
+  euxis-cpg-cpp
+  euxis-scan-cpp
   unofficial-sodium::sodium
   nlohmann_json::nlohmann_json
   spdlog::spdlog
