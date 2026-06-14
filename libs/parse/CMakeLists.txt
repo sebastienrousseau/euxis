@@ -6,6 +6,11 @@
 # `src/parser.c` (+ optional `src/scanner.c`) — no CMakeLists.txt —
 # so we compile each grammar into a small static library here.
 
+# Root project is declared LANGUAGES CXX only. The grammar
+# parser.c sources need a working C toolchain; enable it here so
+# every grammar library (euxis_ts_grammar_*) below can be built.
+enable_language(C)
+
 include(FetchContent)
 
 # ---- tree-sitter core ------------------------------------------------------
@@ -55,6 +60,7 @@ target_link_libraries(euxis_ts_grammar_c PUBLIC tree-sitter)
 set_target_properties(euxis_ts_grammar_c PROPERTIES
     COMPILE_WARNING_AS_ERROR OFF
     POSITION_INDEPENDENT_CODE ON
+    INTERPROCEDURAL_OPTIMIZATION OFF
 )
 target_compile_options(euxis_ts_grammar_c PRIVATE
     -w
@@ -88,6 +94,7 @@ target_link_libraries(euxis_ts_grammar_cpp PUBLIC tree-sitter)
 set_target_properties(euxis_ts_grammar_cpp PROPERTIES
     COMPILE_WARNING_AS_ERROR OFF
     POSITION_INDEPENDENT_CODE ON
+    INTERPROCEDURAL_OPTIMIZATION OFF
 )
 target_compile_options(euxis_ts_grammar_cpp PRIVATE
     -w
@@ -123,6 +130,7 @@ macro(euxis_add_grammar NAME REPO TAG)
     set_target_properties(euxis_${NAME} PROPERTIES
         COMPILE_WARNING_AS_ERROR OFF
         POSITION_INDEPENDENT_CODE ON
+        INTERPROCEDURAL_OPTIMIZATION OFF
     )
     target_compile_options(euxis_${NAME} PRIVATE -w)
 endmacro()
@@ -169,6 +177,7 @@ target_link_libraries(euxis_ts_grammar_typescript PUBLIC tree-sitter)
 set_target_properties(euxis_ts_grammar_typescript PROPERTIES
     COMPILE_WARNING_AS_ERROR OFF
     POSITION_INDEPENDENT_CODE ON
+    INTERPROCEDURAL_OPTIMIZATION OFF
 )
 target_compile_options(euxis_ts_grammar_typescript PRIVATE -w)
 
