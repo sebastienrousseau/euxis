@@ -5,7 +5,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14]
+        # macos-15 is Apple Silicon (arm64); macos-13/14 are Intel (x86_64).
+        # Keeping all three so the build is exercised on both architectures
+        # while CMakeLists.txt drives the right -march per host.
+        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

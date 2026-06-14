@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1.7
+
+# Multi-arch FROM-scratch image for the euxis CLI.
+# Binaries are produced by .github/workflows/release.yml and dropped
+# into ctx/<platform>/euxis before the build step.
+#
+# The image carries:
+#   /euxis          — the statically-linked CLI binary
+#   /etc/ssl/certs  — bundled CA roots (for Sigstore + OSV.dev fetches)
+#
+# It does NOT carry a shell. CI users that need `sh` should pull
+# `:latest-debian` once that variant exists.
+
+FROM --platform=$BUILDPLATFORM alpine:3.20 AS certs
+RUN apk add --no-cache ca-certificates
+
+FROM scratch
+ARG TARGETPLATFORM
+COPY --from=certs /etc/ssl/certs /etc/ssl/certs
+COPY ctx/${TARGETPLATFORM}/euxis /euxis
+ENTRYPOINT ["/euxis"]

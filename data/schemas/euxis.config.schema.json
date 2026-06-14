@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://euxis.co/schemas/euxis.config.schema.json",
+  "title": ".euxis.yaml",
+  "description": "Per-repository configuration for the euxis security auditor. Resolution order is env > CLI flag > project .euxis.yaml > ~/.euxis/config.yaml > defaults.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1",
+      "description": "Schema version. Only \"1\" is currently accepted."
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "owner": { "type": "string" },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["c", "cpp", "rust", "go", "python", "javascript", "typescript", "java", "ruby", "shell"]
+          }
+        }
+      }
+    },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["triage", "check", "review", "forensic"],
+          "default": "check"
+        },
+        "target": { "type": "string", "default": "." },
+        "include": {
+          "type": "array",
+          "items": { "type": "string", "description": "Glob pattern" }
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string", "description": "Glob pattern" },
+          "default": ["build/**", "node_modules/**", "vendor/**", ".venv/**", "target/**", "dist/**", "*.min.*"]
+        },
+        "max_file_size_kb": { "type": "integer", "minimum": 1, "default": 4096 },
+        "follow_symlinks": { "type": "boolean", "default": false },
+        "respect_gitignore": { "type": "boolean", "default": true }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "path": { "type": "string", "default": "~/.cache/euxis/scan-cache.sqlite" },
+        "ttl_days": { "type": "integer", "minimum": 0, "default": 30 }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "packs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["euxis/core", "euxis/cwe-top-25", "euxis/owasp-top-10", "euxis/cnsa-2.0", "euxis/slopsquatting"],
+          "description": "Rule packs to load. Built-in packs are prefixed 'euxis/'."
+        },
+        "custom": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "pattern", "message", "severity"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_-]+$" },
+              "pattern": { "type": "string" },
+              "message": { "type": "string" },
+              "severity": { "$ref": "#/$defs/severity" },
+              "languages": { "type": "array", "items": { "type": "string" } },
+              "cwe": { "type": "string", "pattern": "^CWE-[0-9]+$" }
+            }
+          }
+        },
+        "severity_overrides": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/severity" },
+          "description": "Map rule-id -> severity. Useful to demote noisy rules."
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": ".euxis-baseline.json",
+          "description": "Path to a baseline file. Findings present in the baseline are suppressed."
+        },
+        "fail_on_new_only": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, only findings absent from the baseline can fail the run."
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "advisory_threshold": { "$ref": "#/$defs/severity", "default": "medium" },
+        "blocking_threshold": { "$ref": "#/$defs/severity", "default": "high" },
+        "max_runtime_seconds": { "type": "integer", "minimum": 1, "default": 180 }
+      }
+    },
+    "triage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "ensemble": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "providers": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["claude", "openai", "gemini"]
+            },
+            "quorum": { "type": "integer", "minimum": 1, "default": 2 },
+            "send_source_code": {
+              "type": "boolean",
+              "default": false,
+              "description": "If false, only hashed AST features cross the provider boundary."
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "emit": { "type": "boolean", "default": true },
+        "sarif": { "type": "boolean", "default": true },
+        "cyclonedx": { "type": "boolean", "default": true },
+        "spdx": { "type": "boolean", "default": true },
+        "openvex": { "type": "boolean", "default": true },
+        "signing": {
+          "type": "string",
+          "enum": ["off", "keyless-oidc", "key-backed"],
+          "default": "keyless-oidc"
+        },
+        "rekor_upload": { "type": "boolean", "default": true },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["cra", "dora", "sec", "pci-dss-4.0.1", "nist-ssdf", "soc2", "iso27001", "cnsa-2.0", "fedramp-rev5", "owasp-top-10-2025"]
+          },
+          "default": ["owasp-top-10-2025"]
+        }
+      }
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "LLM provider routing overrides. See data/config/provider_strategy.json for defaults.",
+      "properties": {
+        "research": { "type": "string" },
+        "coding":   { "type": "string" },
+        "security": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low", "info", "none"]
+    }
+  }
+}

@@ -34,6 +34,12 @@ if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
             add_compile_options(-march=native)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
             add_compile_options(-march=x86-64-v3)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+            # Apple Silicon (M1+) and Linux ARM64 servers ship ARMv8.4-A
+            # with crypto and CRC extensions; -mcpu=apple-m1 is also
+            # acceptable on Darwin but armv8.4-a is portable to Graviton3,
+            # Ampere Altra, and aarch64 Linux runners.
+            add_compile_options(-march=armv8.4-a+crypto+crc)
         endif()
         add_compile_options(-O3)
     endif()

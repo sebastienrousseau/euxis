@@ -1,0 +1,69 @@
+name: euxis-scan (reusable)
+# Reusable workflow: callers do
+#   jobs:
+#     audit:
+#       uses: sebastienrousseau/euxis/.github/workflows/euxis-scan-reusable.yml@v1
+#       with:
+#         mode: triage
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        default: 'check'
+        description: 'triage | check | review | forensic'
+      target:
+        type: string
+        default: '.'
+      version:
+        type: string
+        default: 'latest'
+      fail-on:
+        type: string
+        default: 'high'
+        description: 'critical | high | medium | low | none'
+      runs-on:
+        type: string
+        default: 'ubuntu-24.04'
+      upload-evidence:
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  security-events: write   # SARIF upload
+  id-token: write          # Sigstore verify
+  actions: read
+
+jobs:
+  audit:
+    name: euxis ${{ inputs.mode }}
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: sebastienrousseau/euxis/.github/actions/euxis-scan@v1
+        id: scan
+        with:
+          mode: ${{ inputs.mode }}
+          target: ${{ inputs.target }}
+          version: ${{ inputs.version }}
+          fail-on: ${{ inputs.fail-on }}
+      - name: PR summary
+        if: github.event_name == 'pull_request' && always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f euxis-results.sarif ]; then
+            COUNT='${{ steps.scan.outputs.findings-count }}'
+            {
+              echo "## euxis scan"
+              echo ""
+              echo "- Mode: \`${{ inputs.mode }}\`"
+              echo "- Findings: ${COUNT}"
+              echo "- SARIF: uploaded to Code Scanning"
+              echo "- Evidence pack: workflow artifacts"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

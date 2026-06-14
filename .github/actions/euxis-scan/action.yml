@@ -1,0 +1,163 @@
+name: 'euxis-scan'
+description: 'Run an ultra-fast euxis security audit and produce a Sigstore-signed evidence pack.'
+author: 'Sebastien Rousseau'
+branding:
+  icon: 'shield'
+  color: 'orange'
+
+inputs:
+  mode:
+    description: 'Audit mode: triage | check | review | forensic'
+    required: false
+    default: 'check'
+  target:
+    description: 'Directory or file to scan'
+    required: false
+    default: '.'
+  version:
+    description: 'euxis release tag (e.g. v0.1.0). "latest" pulls the latest GitHub Release.'
+    required: false
+    default: 'latest'
+  sarif-output:
+    description: 'Path to write the SARIF 2.1.0 report'
+    required: false
+    default: 'euxis-results.sarif'
+  sbom-output:
+    description: 'Path to write the CycloneDX 1.6 SBOM'
+    required: false
+    default: 'euxis-sbom.cdx.json'
+  evidence-output:
+    description: 'Path to write the signed evidence pack tarball'
+    required: false
+    default: 'euxis-evidence.tar.gz'
+  fail-on:
+    description: 'Severity threshold that fails the job: critical | high | medium | low | none'
+    required: false
+    default: 'high'
+  cache:
+    description: 'Enable persistent scan cache (true|false)'
+    required: false
+    default: 'true'
+
+outputs:
+  sarif-path:
+    description: 'Path to the generated SARIF report'
+    value: ${{ steps.scan.outputs.sarif-path }}
+  sbom-path:
+    description: 'Path to the generated SBOM'
+    value: ${{ steps.scan.outputs.sbom-path }}
+  evidence-path:
+    description: 'Path to the signed evidence pack'
+    value: ${{ steps.scan.outputs.evidence-path }}
+  findings-count:
+    description: 'Total number of findings emitted'
+    value: ${{ steps.scan.outputs.findings-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Resolve target platform
+      id: platform
+      shell: bash
+      run: |
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)   echo "target=linux-amd64"  >> "$GITHUB_OUTPUT" ;;
+          Linux-aarch64)  echo "target=linux-arm64"  >> "$GITHUB_OUTPUT" ;;
+          Darwin-x86_64)  echo "target=darwin-amd64" >> "$GITHUB_OUTPUT" ;;
+          Darwin-arm64)   echo "target=darwin-arm64" >> "$GITHUB_OUTPUT" ;;
+          *)              echo "Unsupported host"; exit 1 ;;
+        esac
+
+    - name: Resolve euxis version
+      id: version
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        REQUESTED='${{ inputs.version }}'
+        if [ "$REQUESTED" = "latest" ]; then
+          TAG=$(gh release view --repo sebastienrousseau/euxis \
+                  --json tagName --jq .tagName)
+        else
+          TAG="$REQUESTED"
+        fi
+        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Cache scan results
+      if: inputs.cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/euxis
+        key: euxis-scan-${{ runner.os }}-${{ steps.version.outputs.tag }}-${{ hashFiles('**/*.{c,cc,cpp,h,hpp,rs,go,py,js,ts,java}') }}
+        restore-keys: |
+          euxis-scan-${{ runner.os }}-${{ steps.version.outputs.tag }}-
+
+    - name: Download euxis binary
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        TAG='${{ steps.version.outputs.tag }}'
+        TARGET='${{ steps.platform.outputs.target }}'
+        ARCHIVE="euxis-${TAG}-${TARGET}.tar.gz"
+        gh release download "$TAG" --repo sebastienrousseau/euxis \
+          --pattern "$ARCHIVE" --pattern "${ARCHIVE}.sha256" \
+          --pattern "${ARCHIVE}.cosign.bundle" --dir .
+        shasum -a 256 -c "${ARCHIVE}.sha256"
+        tar -xzf "$ARCHIVE"
+        mv "euxis-${TAG}-${TARGET}" euxis
+        chmod +x euxis
+        ./euxis --version
+
+    - name: Install cosign and verify binary signature
+      uses: sigstore/cosign-installer@v3
+    - name: Verify Sigstore bundle
+      shell: bash
+      run: |
+        TAG='${{ steps.version.outputs.tag }}'
+        TARGET='${{ steps.platform.outputs.target }}'
+        ARCHIVE="euxis-${TAG}-${TARGET}.tar.gz"
+        cosign verify-blob \
+          --bundle "${ARCHIVE}.cosign.bundle" \
+          --certificate-identity-regexp 'https://github.com/sebastienrousseau/euxis/' \
+          --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+          "$ARCHIVE"
+
+    - name: Run euxis scan
+      id: scan
+      shell: bash
+      run: |
+        set -o pipefail
+        ./euxis '${{ inputs.mode }}' '${{ inputs.target }}' \
+          --sarif '${{ inputs.sarif-output }}' \
+          --sbom  '${{ inputs.sbom-output }}'  \
+          --evidence '${{ inputs.evidence-output }}' \
+          --fail-on '${{ inputs.fail-on }}' | tee euxis-output.log
+        echo "sarif-path=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
+        echo "sbom-path=${{ inputs.sbom-output }}"  >> "$GITHUB_OUTPUT"
+        echo "evidence-path=${{ inputs.evidence-output }}" >> "$GITHUB_OUTPUT"
+        if [ -f '${{ inputs.sarif-output }}' ]; then
+          COUNT=$(jq '[.runs[].results[]] | length' '${{ inputs.sarif-output }}')
+          echo "findings-count=$COUNT" >> "$GITHUB_OUTPUT"
+        else
+          echo "findings-count=0" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Upload SARIF to GitHub Code Scanning
+      if: always() && hashFiles(inputs.sarif-output) != ''
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-output }}
+        category: euxis
+
+    - name: Upload evidence pack as workflow artifact
+      if: always() && hashFiles(inputs.evidence-output) != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: euxis-evidence-${{ github.run_id }}
+        path: |
+          ${{ inputs.evidence-output }}
+          ${{ inputs.sarif-output }}
+          ${{ inputs.sbom-output }}
+        if-no-files-found: warn
+        retention-days: 90
