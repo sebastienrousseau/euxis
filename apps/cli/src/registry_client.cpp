@@ -1,12 +1,62 @@
 #include "euxis/cli/registry_client.hpp"
 
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
 
+#include "euxis/cache/json_cache.hpp"
+
 namespace euxis::cli {
+
+namespace {
+
+/// Default cache database location for the JsonCache that accelerates
+/// the registry parse path. Mirrors libs/cache::ScanCache's resolver
+/// so the two caches share a parent directory.
+auto default_json_cache_path() -> std::filesystem::path {
+    const char* xdg = std::getenv("XDG_CACHE_HOME");
+    if (xdg != nullptr && *xdg != '\0') {
+        return std::filesystem::path{xdg} / "euxis" / "registry-cache.sqlite";
+    }
+    const char* home = std::getenv("HOME");
+    if (home != nullptr && *home != '\0') {
+        return std::filesystem::path{home} / ".cache" / "euxis"
+               / "registry-cache.sqlite";
+    }
+    return std::filesystem::temp_directory_path() /
+           "euxis-registry-cache.sqlite";
+}
+
+/// Pull the JSON content for `path` through `cache` if it is open;
+/// fall back to a direct `nlohmann::json::parse` otherwise. Returns
+/// `std::nullopt` when the file is unreadable or unparseable; logs
+/// the underlying error so degraded behaviour is visible without
+/// breaking startup.
+auto load_cached_or_parse(std::optional<euxis::cache::JsonCache>& cache,
+                          const std::filesystem::path& path,
+                          const char* what)
+    -> std::optional<nlohmann::json> {
+    if (!std::filesystem::exists(path)) return std::nullopt;
+    if (cache) {
+        auto cached = cache->get_or_load(path);
+        if (cached) return std::move(*cached);
+        spdlog::debug("{} cache load fell back to direct parse: {}",
+                      what, cached.error().message);
+    }
+    try {
+        std::ifstream f(path);
+        return nlohmann::json::parse(f);
+    } catch (const std::exception& e) {
+        spdlog::warn("{} parse error: {}", what, e.what());
+        return std::nullopt;
+    }
+}
+
+} // namespace
 
 // --- Impl (PIMPL for SQLite handle) ---
 
@@ -15,6 +65,12 @@ struct RegistryClient::Impl {
     sqlite3* db{nullptr};
     nlohmann::json registry_json;
     nlohmann::json squads_json;
+
+    /// Parsed-JSON cache shared across the three nlohmann::json::parse
+    /// call sites in this class. Constructed once at RegistryClient
+    /// startup; `std::nullopt` when the cache database could not be
+    /// opened (degrades to direct parse without breaking startup).
+    std::optional<euxis::cache::JsonCache> json_cache;
 
     ~Impl() {
         if (db) sqlite3_close(db);
@@ -26,6 +82,24 @@ struct RegistryClient::Impl {
 RegistryClient::RegistryClient(const std::string& data_dir)
     : impl_(std::make_unique<Impl>()) {
     impl_->data_dir = data_dir;
+
+    // Open the parsed-JSON cache up front. A failure here only
+    // disables the cache; we still parse directly below.
+    //
+    // Issue #60: this is the load-bearing change. On a warm cache
+    // both registry.json and squads.json (and every per-playbook
+    // file consulted by list_playbooks()) restore from msgpack
+    // instead of paying the nlohmann::json::parse cost — which was
+    // measured at ~5.7 % of CLI startup CPU pre-cache.
+    {
+        auto opened = euxis::cache::JsonCache::open(default_json_cache_path());
+        if (opened) {
+            impl_->json_cache = std::move(*opened);
+        } else {
+            spdlog::debug("registry JSON cache disabled: {}",
+                          opened.error().message);
+        }
+    }
 
     // Try SQLite first
     auto db_path = std::filesystem::path(data_dir) / "agents" / "registry.db";
@@ -39,27 +113,21 @@ RegistryClient::RegistryClient(const std::string& data_dir)
         }
     }
 
-    // Load JSON fallback
+    // Load JSON fallback (cached on warm path)
     auto json_path = std::filesystem::path(data_dir) / "agents" / "registry.json";
-    if (std::filesystem::exists(json_path)) {
-        try {
-            std::ifstream f(json_path);
-            impl_->registry_json = nlohmann::json::parse(f);
-        } catch (const std::exception& e) {
-            spdlog::warn("registry.json parse error: {}", e.what());
-        }
+    if (auto loaded = load_cached_or_parse(impl_->json_cache,
+                                            json_path, "registry.json")) {
+        impl_->registry_json = std::move(*loaded);
     }
 
-    // Load squads
+    // Load squads (cached on warm path)
     auto squads_path = std::filesystem::path(data_dir) / "../euxis-core/agents/squads.json";
     auto alt_squads = std::filesystem::path(data_dir) / "agents" / "squads.json";
     for (const auto& p : {squads_path, alt_squads}) {
-        if (std::filesystem::exists(p)) {
-            try {
-                std::ifstream f(p);
-                impl_->squads_json = nlohmann::json::parse(f);
-                break;
-            } catch (const std::exception& e) { spdlog::warn("squads.json parse error: {}", e.what()); }
+        if (auto loaded = load_cached_or_parse(impl_->json_cache,
+                                                p, "squads.json")) {
+            impl_->squads_json = std::move(*loaded);
+            break;
         }
     }
 }
@@ -274,16 +342,16 @@ auto RegistryClient::list_playbooks() const -> std::vector<PlaybookInfo> {
     if (std::filesystem::exists(pb_dir)) {
         for (const auto& entry : std::filesystem::directory_iterator(pb_dir)) {
             if (entry.path().extension() == ".json") {
-                try {
-                    std::ifstream f(entry.path());
-                    auto j = nlohmann::json::parse(f);
-                    PlaybookInfo pb;
-                    pb.id = j.value("id", entry.path().stem().string());
-                    pb.name = j.value("name", pb.id);
-                    pb.description = j.value("description", "");
-                    pb.file_path = entry.path().string();
-                    result.push_back(std::move(pb));
-                } catch (const std::exception& e) { spdlog::debug("playbook parse error {}: {}", entry.path().string(), e.what()); }
+                auto loaded = load_cached_or_parse(impl_->json_cache,
+                                                    entry.path(),
+                                                    "playbook");
+                if (!loaded) continue;
+                PlaybookInfo pb;
+                pb.id = loaded->value("id", entry.path().stem().string());
+                pb.name = loaded->value("name", pb.id);
+                pb.description = loaded->value("description", "");
+                pb.file_path = entry.path().string();
+                result.push_back(std::move(pb));
             }
         }
     }
