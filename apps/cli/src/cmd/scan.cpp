@@ -15,15 +15,23 @@
 #include <print>
 #include <sstream>
 #include <string>
+#include <memory>
 #include <unordered_set>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
+#include "euxis/cache/hash.hpp"
+#include "euxis/cache/key.hpp"
+#include "euxis/cache/store.hpp"
 #include "euxis/cpg/builder.hpp"
 #include "euxis/cpg/ddg.hpp"
+#include "euxis/ensemble/deterministic.hpp"
+#include "euxis/ensemble/runner.hpp"
 #include "euxis/parse/parser.hpp"
 #include "euxis/parse/types.hpp"
+#include "euxis/reach/callgraph.hpp"
+#include "euxis/reach/reachability.hpp"
 #include "euxis/scan/rule_engine.hpp"
 #include "euxis/scan/rule_loader.hpp"
 #include "euxis/security/finding.hpp"
@@ -44,10 +52,27 @@ struct ScanArgs {
     std::optional<euxis::parse::Language> language_filter;
     euxis::security::Severity fail_on{euxis::security::Severity::High};
     std::size_t max_files{10'000};
-    /// Whether to run the libs/taint forward-DDG analyzer alongside
-    /// the OpenGrep rule engine. Default: on. Findings from both
-    /// engines land in the same SARIF stream.
+
+    /// libs/taint forward-DDG analyzer toggle. Default: on.
     bool run_taint{true};
+
+    /// libs/reach call-graph + reachability annotation. Default: on.
+    /// Adds `euxis:reachable:{true,false,unknown}` to every Finding's
+    /// compliance_taxa.
+    bool run_reach{true};
+
+    /// libs/ensemble multi-verifier quorum runner. Default: off
+    /// (opt-in until real LLM providers ship). When on, every
+    /// Finding gets one or more EnsembleVote entries attached and
+    /// its confidence escalated or downgraded.
+    bool run_ensemble{false};
+
+    /// libs/cache incremental scan cache. Default: on. Re-runs over
+    /// unchanged files restore cached findings instead of re-parsing.
+    bool use_cache{true};
+
+    /// Cache database override. Empty = use the libs/cache default.
+    std::filesystem::path cache_db;
 };
 
 // Default exclude segments. Matches the libs/sca scanner so behaviour
@@ -82,8 +107,18 @@ auto parse_args(const std::vector<std::string>& argv)
     for (const auto& s : argv) {
         if (s == "--quiet")    { a.quiet = true;        continue; }
         if (s == "--no-sarif") { a.emit_sarif = false;  continue; }
-        if (s == "--no-taint") { a.run_taint = false;   continue; }
-        if (s == "--taint")    { a.run_taint = true;    continue; }
+        if (s == "--no-taint")    { a.run_taint = false;    continue; }
+        if (s == "--taint")       { a.run_taint = true;     continue; }
+        if (s == "--no-reach")    { a.run_reach = false;    continue; }
+        if (s == "--reach")       { a.run_reach = true;     continue; }
+        if (s == "--ensemble")    { a.run_ensemble = true;  continue; }
+        if (s == "--no-ensemble") { a.run_ensemble = false; continue; }
+        if (s == "--no-cache")    { a.use_cache = false;    continue; }
+        if (s == "--cache")       { a.use_cache = true;     continue; }
+        if (s.starts_with("--cache-db=")) {
+            a.cache_db = s.substr(11);
+            continue;
+        }
         if (s.starts_with("--rules=")) {
             a.rule_files.emplace_back(s.substr(8));
             continue;
@@ -143,6 +178,13 @@ void print_help() {
     std::println("  --rules=<path>       YAML rule pack (repeatable; optional if --taint is on)");
     std::println("  --taint              Run the forward-DDG taint analyzer (default: on)");
     std::println("  --no-taint           Disable the taint analyzer");
+    std::println("  --reach              Annotate findings with reachability taxa (default: on)");
+    std::println("  --no-reach           Disable reachability annotation");
+    std::println("  --ensemble           Run libs/ensemble multi-verifier quorum (default: off)");
+    std::println("  --no-ensemble        (explicit) disable ensemble");
+    std::println("  --cache              Use the incremental scan cache (default: on)");
+    std::println("  --no-cache           Disable the cache (every file re-parsed)");
+    std::println("  --cache-db=<path>    Override the cache database location");
     std::println("  --sarif=<path>       SARIF 2.1.0 output (default: euxis-scan.sarif.json)");
     std::println("  --no-sarif           Skip SARIF emission (text summary only)");
     std::println("  --language=<lang>    Restrict to one language (c, cpp, rust, ...)");
@@ -179,7 +221,130 @@ struct ScanContext {
     std::size_t rule_findings{0};
     std::size_t taint_findings{0};
     std::size_t taint_flows{0};
+    /// Cache + reach + ensemble accounting.
+    std::size_t cache_hits{0};
+    std::size_t cache_misses{0};
+    std::size_t ensemble_confirmed{0};
+    std::size_t ensemble_rejected{0};
+
+    /// Per-scan-invocation ruleset fingerprint — folded into the
+    /// cache key so a ruleset edit invalidates every prior entry.
+    std::string ruleset_hash;
+    /// Open cache handle (when use_cache=true). Set up once per
+    /// scan invocation by `cmd_scan`.
+    std::unique_ptr<euxis::cache::ScanCache> cache;
 };
+
+// ---- Cache-side helpers ---------------------------------------------------
+
+/// Minimal JSON serialisation of the subset of Finding fields we
+/// round-trip through the scan cache. The full canonical Finding
+/// carries fixes, ensemble votes, related_locations, etc.; for the
+/// v0.0.3 cache we keep only what `euxis scan` produces and what
+/// SARIF emission needs.
+auto serialize_findings(const std::vector<euxis::security::Finding>& findings)
+    -> std::string {
+    nlohmann::json arr = nlohmann::json::array();
+    for (const auto& f : findings) {
+        nlohmann::json item;
+        item["rule_id"]            = f.rule_id;
+        item["message"]            = f.message;
+        item["severity"]           = static_cast<int>(f.severity);
+        item["confidence"]         = static_cast<int>(f.confidence);
+        item["stable_fingerprint"] = f.stable_fingerprint;
+        item["primary_location"]   = {
+            {"path",         f.primary_location.path},
+            {"start_row",    f.primary_location.start_row},
+            {"start_column", f.primary_location.start_column},
+            {"end_row",      f.primary_location.end_row},
+            {"end_column",   f.primary_location.end_column},
+        };
+        if (f.cwe.has_value()) {
+            item["cwe"] = f.cwe->id;
+        }
+        item["owasp"]            = static_cast<int>(f.owasp);
+        item["compliance_taxa"]  = f.compliance_taxa;
+        arr.push_back(std::move(item));
+    }
+    nlohmann::json doc;
+    doc["findings"] = std::move(arr);
+    return doc.dump();
+}
+
+auto deserialize_findings(const std::string& json_str)
+    -> std::vector<euxis::security::Finding> {
+    std::vector<euxis::security::Finding> out;
+    try {
+        auto doc = nlohmann::json::parse(json_str);
+        if (!doc.contains("findings") || !doc["findings"].is_array()) return out;
+        for (const auto& item : doc["findings"]) {
+            if (!item.is_object()) continue;
+            euxis::security::Finding f;
+            f.rule_id            = item.value("rule_id", "");
+            f.message            = item.value("message", "");
+            f.severity           = static_cast<euxis::security::Severity>(
+                                    item.value("severity",
+                                        static_cast<int>(euxis::security::Severity::Medium)));
+            f.confidence         = static_cast<euxis::security::Confidence>(
+                                    item.value("confidence",
+                                        static_cast<int>(euxis::security::Confidence::Probable)));
+            f.stable_fingerprint = item.value("stable_fingerprint", "");
+            if (item.contains("cwe") && item["cwe"].is_string()) {
+                f.cwe = euxis::security::CweRef{
+                    .id = item["cwe"].get<std::string>(),
+                };
+            }
+            f.owasp = static_cast<euxis::security::OwaspCategory>(
+                          item.value("owasp",
+                              static_cast<int>(euxis::security::OwaspCategory::None)));
+            if (item.contains("primary_location") &&
+                item["primary_location"].is_object()) {
+                const auto& loc = item["primary_location"];
+                f.primary_location.path         = loc.value("path", "");
+                f.primary_location.start_row    = loc.value("start_row",    0);
+                f.primary_location.start_column = loc.value("start_column", 0);
+                f.primary_location.end_row      = loc.value("end_row",      0);
+                f.primary_location.end_column   = loc.value("end_column",   0);
+            }
+            if (item.contains("compliance_taxa") &&
+                item["compliance_taxa"].is_array()) {
+                for (const auto& t : item["compliance_taxa"]) {
+                    if (t.is_string()) f.compliance_taxa.push_back(t.get<std::string>());
+                }
+            }
+            out.push_back(std::move(f));
+        }
+    } catch (...) {
+        // Cache deserialisation failures are non-fatal — caller
+        // falls back to a fresh scan.
+    }
+    return out;
+}
+
+/// Compute a stable ruleset hash so a rule-pack edit invalidates
+/// the entire cache for this scan invocation.
+auto compute_ruleset_hash(const ScanArgs& args,
+                          const std::vector<euxis::scan::RulePack>& packs)
+    -> std::string {
+    euxis::cache::Hasher h;
+    h.update(std::string_view{"v0.0.3"});
+    h.update(std::string_view{args.run_taint ? "taint" : "no-taint"});
+    h.update(std::string_view{args.run_reach ? "reach" : "no-reach"});
+    h.update(std::string_view{args.run_ensemble ? "ensemble" : "no-ensemble"});
+    if (args.language_filter) {
+        h.update(std::string_view{
+            euxis::parse::language_str(*args.language_filter)});
+    }
+    for (const auto& pack : packs) {
+        h.update(std::string_view{pack.name});
+        for (const auto& rule : pack.rules) {
+            h.update(std::string_view{rule.id});
+            h.update(std::string_view{rule.message});
+            h.update(std::string_view{rule.pattern.text});
+        }
+    }
+    return h.finalize();
+}
 
 void scan_file(ScanContext& ctx,
                const std::filesystem::path& file,
@@ -194,6 +359,32 @@ void scan_file(ScanContext& ctx,
         return;
     }
 
+    // ---- Cache lookup --------------------------------------------------
+    std::string content_hash_str;
+    if (args.use_cache && ctx.cache) {
+        auto content_hash = euxis::cache::hash_file(file);
+        if (content_hash) {
+            content_hash_str = *content_hash;
+            euxis::cache::KeyInputs k{
+                .file         = file,
+                .content_hash = content_hash_str,
+                .ruleset_hash = ctx.ruleset_hash,
+                .tool_version = "0.0.3",
+            };
+            auto cached = ctx.cache->get(euxis::cache::compose_key(k));
+            if (cached && *cached) {
+                auto restored = deserialize_findings((*cached)->findings_json);
+                for (auto& f : restored) {
+                    ctx.findings.push_back(std::move(f));
+                }
+                ++ctx.cache_hits;
+                ++ctx.files_scanned;
+                return;
+            }
+        }
+    }
+
+    // ---- Cache miss / disabled: do the real work ---------------------
     euxis::parse::Parser parser(*lang);
     auto ast = parser.parse_file(file);
     if (!ast) {
@@ -207,6 +398,7 @@ void scan_file(ScanContext& ctx,
     }
 
     auto file_str = file.string();
+    std::size_t findings_before = ctx.findings.size();
 
     // OpenGrep rule engine — runs whenever any rule packs were
     // loaded.
@@ -218,10 +410,7 @@ void scan_file(ScanContext& ctx,
         }
     }
 
-    // Taint analyzer — runs whenever --taint is on. We have to
-    // build the DDG ourselves (the OpenGrep engine doesn't need
-    // it). The analyzer is function-local so running it per-file
-    // is the right granularity; cross-file flows land with P1.7.
+    // Taint analyzer — runs whenever --taint is on.
     if (args.run_taint) {
         euxis::cpg::build_ddg(*graph);
         auto taint_spec   = euxis::taint::builtin_specs();
@@ -233,6 +422,34 @@ void scan_file(ScanContext& ctx,
             ctx.findings.push_back(std::move(f));
             ++ctx.taint_findings;
         }
+    }
+
+    // Reachability annotation — runs whenever --reach is on.
+    if (args.run_reach && ctx.findings.size() > findings_before) {
+        auto cg = euxis::reach::build_call_graph(*graph, *ast);
+        auto r  = euxis::reach::compute_reachable(*graph, *ast, cg.graph);
+        euxis::reach::annotate_findings(
+            *graph, r,
+            ctx.findings.begin() + static_cast<std::ptrdiff_t>(findings_before),
+            ctx.findings.end());
+    }
+
+    // ---- Cache store for next time ----------------------------------
+    if (args.use_cache && ctx.cache && !content_hash_str.empty()) {
+        std::vector<euxis::security::Finding> file_findings(
+            ctx.findings.begin() + static_cast<std::ptrdiff_t>(findings_before),
+            ctx.findings.end());
+        euxis::cache::KeyInputs k{
+            .file         = file,
+            .content_hash = content_hash_str,
+            .ruleset_hash = ctx.ruleset_hash,
+            .tool_version = "0.0.3",
+        };
+        euxis::cache::CacheEntry e;
+        e.findings_json = serialize_findings(file_findings);
+        e.size_bytes    = static_cast<std::int64_t>(e.findings_json.size());
+        (void)ctx.cache->put(k, e);
+        ++ctx.cache_misses;
     }
 
     ++ctx.files_scanned;
@@ -320,10 +537,62 @@ int cmd_scan(Context& /*ctx*/, const std::vector<std::string>& argv) {
         ctx.packs.push_back(std::move(*pack));
     }
 
+    // Open the scan cache before any file is walked so the
+    // ruleset hash is computed once and reused per file.
+    if (a.use_cache) {
+        ctx.ruleset_hash = compute_ruleset_hash(a, ctx.packs);
+        std::filesystem::path db = a.cache_db;
+        if (db.empty()) {
+            const char* xdg = std::getenv("XDG_CACHE_HOME");
+            if (xdg != nullptr && *xdg != '\0') {
+                db = std::filesystem::path{xdg} / "euxis" / "scan-cache.sqlite";
+            } else if (const char* home = std::getenv("HOME");
+                        home != nullptr && *home != '\0') {
+                db = std::filesystem::path{home} / ".cache" / "euxis"
+                     / "scan-cache.sqlite";
+            } else {
+                db = std::filesystem::temp_directory_path() /
+                     "euxis-scan-cache.sqlite";
+            }
+        }
+        auto opened = euxis::cache::ScanCache::open(db);
+        if (opened) {
+            ctx.cache = std::make_unique<euxis::cache::ScanCache>(
+                std::move(*opened));
+        } else {
+            // Cache unavailability is non-fatal — we just skip
+            // caching and continue.
+            std::println(stderr,
+                "euxis scan: cache disabled ({}): {}",
+                db.string(), opened.error().message);
+        }
+    }
+
     auto walked = walk_target(ctx, a);
     if (!walked) {
         std::println(stderr, "euxis scan: {}", walked.error());
         return to_int(ExitCode::InfraError);
+    }
+
+    // Ensemble verification — runs after walk so verifiers see
+    // every finding from every engine.
+    if (a.run_ensemble && !ctx.findings.empty()) {
+        std::vector<euxis::ensemble::VerifierPtr> verifiers{
+            std::make_shared<euxis::ensemble::DeterministicVerifier>(
+                "euxis-deterministic-a"),
+            std::make_shared<euxis::ensemble::DeterministicVerifier>(
+                "euxis-deterministic-b",
+                [](const euxis::ensemble::VoteRequest& r) {
+                    return r.severity >= euxis::security::Severity::Medium;
+                }),
+        };
+        euxis::ensemble::EnsembleConfig cfg;
+        cfg.quorum = 2;
+        auto er = euxis::ensemble::verify(
+            std::move(ctx.findings), verifiers, cfg);
+        ctx.findings           = std::move(er.findings);
+        ctx.ensemble_confirmed = er.stats.confirmed;
+        ctx.ensemble_rejected  = er.stats.rejected;
     }
 
     // SARIF emission.
@@ -346,17 +615,23 @@ int cmd_scan(Context& /*ctx*/, const std::vector<std::string>& argv) {
 
     std::size_t blocking = count_at_or_above(ctx.findings, a.fail_on);
     std::println(
-        "euxis scan: scanned {} file(s) [{} skipped, {} parse failures], "
+        "euxis scan: scanned {} file(s) [{} skipped, {} parse failures, "
+        "{} cache hits, {} cache misses], "
         "{} rule pack(s), {} finding(s) ({} rule, {} taint from {} flow(s); "
+        "ensemble: {} confirmed / {} rejected; "
         "{} at/above {})",
         ctx.files_scanned,
         ctx.files_skipped,
         ctx.parse_failures,
+        ctx.cache_hits,
+        ctx.cache_misses,
         ctx.packs.size(),
         ctx.findings.size(),
         ctx.rule_findings,
         ctx.taint_findings,
         ctx.taint_flows,
+        ctx.ensemble_confirmed,
+        ctx.ensemble_rejected,
         blocking,
         euxis::security::severity_label(a.fail_on));
     if (a.emit_sarif) {
