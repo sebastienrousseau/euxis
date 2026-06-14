@@ -13,6 +13,7 @@
 #include "euxis/cli/cmd/certify.hpp"
 #include "euxis/cli/cmd/system_card.hpp"
 #include "euxis/cli/cmd/sdk.hpp"
+#include "euxis/cli/cmd/sbom.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -62,6 +63,7 @@ void Engine::register_commands() {
     commands_.push_back({"compare",            tr("Core"), tr("Compare triage vs deep verification"),   cmd::cmd_compare});
     commands_.push_back({"stats",              tr("Core"), tr("Validation metrics and drift history"),   cmd::cmd_stats});
     commands_.push_back({"policy",             tr("Core"), tr("Policy inspection and enforcement"),     cmd::cmd_policy});
+    commands_.push_back({"sbom",               tr("Core"), tr("Emit CycloneDX 1.6 / SPDX 3.0.1 / OpenVEX from a directory scan"), cmd::cmd_sbom});
 
     // Lifecycle (5) — installation and maintenance
     commands_.push_back({"install",    tr("Lifecycle"), tr("Bootstrap local Euxis installation"),    cmd::cmd_install});

@@ -26,6 +26,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/lifecycle.cpp
   src/cmd/certify.cpp
   src/cmd/system_card.cpp
+  src/cmd/sbom.cpp
   src/agent_mcp_context.cpp
   src/certification.cpp
   src/playbook_schema.cpp
@@ -68,6 +69,8 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-gateway-cpp
   euxis-metrics-cpp
   euxis-security-cpp
+  euxis-sbom-cpp
+  euxis-sca-cpp
   nlohmann_json::nlohmann_json
   spdlog::spdlog
   SQLite3::SQLite3
