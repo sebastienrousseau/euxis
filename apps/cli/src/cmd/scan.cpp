@@ -21,11 +21,15 @@
 #include <nlohmann/json.hpp>
 
 #include "euxis/cpg/builder.hpp"
+#include "euxis/cpg/ddg.hpp"
 #include "euxis/parse/parser.hpp"
 #include "euxis/parse/types.hpp"
 #include "euxis/scan/rule_engine.hpp"
 #include "euxis/scan/rule_loader.hpp"
 #include "euxis/security/finding.hpp"
+#include "euxis/taint/analyzer.hpp"
+#include "euxis/taint/builtin_specs.hpp"
+#include "euxis/taint/spec.hpp"
 
 namespace euxis::cli::cmd {
 
@@ -40,6 +44,10 @@ struct ScanArgs {
     std::optional<euxis::parse::Language> language_filter;
     euxis::security::Severity fail_on{euxis::security::Severity::High};
     std::size_t max_files{10'000};
+    /// Whether to run the libs/taint forward-DDG analyzer alongside
+    /// the OpenGrep rule engine. Default: on. Findings from both
+    /// engines land in the same SARIF stream.
+    bool run_taint{true};
 };
 
 // Default exclude segments. Matches the libs/sca scanner so behaviour
@@ -74,6 +82,8 @@ auto parse_args(const std::vector<std::string>& argv)
     for (const auto& s : argv) {
         if (s == "--quiet")    { a.quiet = true;        continue; }
         if (s == "--no-sarif") { a.emit_sarif = false;  continue; }
+        if (s == "--no-taint") { a.run_taint = false;   continue; }
+        if (s == "--taint")    { a.run_taint = true;    continue; }
         if (s.starts_with("--rules=")) {
             a.rule_files.emplace_back(s.substr(8));
             continue;
@@ -111,8 +121,12 @@ auto parse_args(const std::vector<std::string>& argv)
         if (!target_set) { a.target = s; target_set = true; continue; }
         return std::unexpected("Unexpected positional argument: " + s);
     }
-    if (a.rule_files.empty()) {
-        return std::unexpected("--rules=<path> is required");
+    // --rules is required UNLESS the taint analyzer is the only
+    // configured engine; the analyzer can stand on its own with
+    // builtin_specs() and still produce meaningful findings.
+    if (a.rule_files.empty() && !a.run_taint) {
+        return std::unexpected(
+            "either --rules=<path> or --taint (default) must produce findings");
     }
     return a;
 }
@@ -126,7 +140,9 @@ void print_help() {
     std::println("runs each rule's pattern against every node's source bytes.");
     std::println("");
     std::println("Options:");
-    std::println("  --rules=<path>       YAML rule pack (repeatable; required)");
+    std::println("  --rules=<path>       YAML rule pack (repeatable; optional if --taint is on)");
+    std::println("  --taint              Run the forward-DDG taint analyzer (default: on)");
+    std::println("  --no-taint           Disable the taint analyzer");
     std::println("  --sarif=<path>       SARIF 2.1.0 output (default: euxis-scan.sarif.json)");
     std::println("  --no-sarif           Skip SARIF emission (text summary only)");
     std::println("  --language=<lang>    Restrict to one language (c, cpp, rust, ...)");
@@ -157,6 +173,12 @@ struct ScanContext {
     std::size_t files_scanned{0};
     std::size_t files_skipped{0};
     std::size_t parse_failures{0};
+    /// Per-engine aggregate counts surfaced in the summary line so
+    /// the user can see at a glance whether the OpenGrep engine
+    /// (rule packs) or the taint analyzer contributed each finding.
+    std::size_t rule_findings{0};
+    std::size_t taint_findings{0};
+    std::size_t taint_flows{0};
 };
 
 void scan_file(ScanContext& ctx,
@@ -185,12 +207,34 @@ void scan_file(ScanContext& ctx,
     }
 
     auto file_str = file.string();
+
+    // OpenGrep rule engine — runs whenever any rule packs were
+    // loaded.
     for (const auto& pack : ctx.packs) {
         auto result = euxis::scan::apply_rules(pack, *ast, *graph, file_str);
         for (auto& f : result.findings) {
             ctx.findings.push_back(std::move(f));
+            ++ctx.rule_findings;
         }
     }
+
+    // Taint analyzer — runs whenever --taint is on. We have to
+    // build the DDG ourselves (the OpenGrep engine doesn't need
+    // it). The analyzer is function-local so running it per-file
+    // is the right granularity; cross-file flows land with P1.7.
+    if (args.run_taint) {
+        euxis::cpg::build_ddg(*graph);
+        auto taint_spec   = euxis::taint::builtin_specs();
+        auto taint_result = euxis::taint::analyze(*graph, *ast, taint_spec);
+        ctx.taint_flows += taint_result.stats.flows_emitted;
+        auto taint_findings =
+            euxis::taint::flows_to_findings(taint_result, *graph, file_str);
+        for (auto& f : taint_findings) {
+            ctx.findings.push_back(std::move(f));
+            ++ctx.taint_findings;
+        }
+    }
+
     ++ctx.files_scanned;
 }
 
@@ -303,12 +347,16 @@ int cmd_scan(Context& /*ctx*/, const std::vector<std::string>& argv) {
     std::size_t blocking = count_at_or_above(ctx.findings, a.fail_on);
     std::println(
         "euxis scan: scanned {} file(s) [{} skipped, {} parse failures], "
-        "{} rule pack(s), {} finding(s) ({} at/above {})",
+        "{} rule pack(s), {} finding(s) ({} rule, {} taint from {} flow(s); "
+        "{} at/above {})",
         ctx.files_scanned,
         ctx.files_skipped,
         ctx.parse_failures,
         ctx.packs.size(),
         ctx.findings.size(),
+        ctx.rule_findings,
+        ctx.taint_findings,
+        ctx.taint_flows,
         blocking,
         euxis::security::severity_label(a.fail_on));
     if (a.emit_sarif) {

@@ -81,6 +81,7 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-parse-cpp
   euxis-cpg-cpp
   euxis-scan-cpp
+  euxis-taint-cpp
   unofficial-sodium::sodium
   nlohmann_json::nlohmann_json
   spdlog::spdlog
