@@ -80,19 +80,60 @@ Pattern (3) above does not fire clang-tidy. The 21 sites in #57 are
 tui/palette.cpp:218}`) because they are pattern (3) (enum, size_t,
 string_view, intentional mutation).
 
-### How to find the real 21 sites
+### How to find — and fix — the real sites
 
-The clang-tidy gate needs a populated `cmake-build/compile_commands.json`:
+Two scoped Make targets do this in one command each:
 
 ```bash
-make cpp-configure   # writes the compile_commands.json
-make cpp-clang-tidy  # runs every enabled check, dumps to stdout
-make cpp-clang-tidy 2>&1 | grep 'performance-unnecessary-copy-initialization'
+make cpp-clang-tidy-perf       # read-only survey — prints flagged sites
+make cpp-clang-tidy-perf-fix   # applies clang-tidy --fix in place
 ```
 
-Apply the fix one at a time; the diff is `auto x =` → `const auto& x =`
-in 21 cases and a comment justifying the keep in any case that's
-actually pattern (2).
+Both targets wrap `scripts/quality/clang_tidy_perf.sh`, which:
+
+1. Requires `clang-tidy` in `$PATH` (LLVM 17+) and a configured
+   build (`build/cmake-build/compile_commands.json` — written by
+   `make cpp-configure`).
+2. Scans every `.cpp` under `apps/` + `libs/` (mirrors the existing
+   `cpp-clang-tidy` target's query).
+3. Restricts the check list to `-*,performance-unnecessary-copy-initialization`
+   so `--fix` only touches this one check.
+
+### Reviewing the fix diff
+
+After `make cpp-clang-tidy-perf-fix`:
+
+```bash
+git diff --stat
+```
+
+Walk the diff against the patterns enumerated above. Revert any
+**pattern (3)** site clang-tidy misidentified (enum, `size_t`,
+`string_view`, or intentional mutation paths). The four known
+false-positive sites the team identified during issue #57 triage —
+`apps/cli/src/{sarif.cpp:114, box.cpp:88, cmd/scan.cpp:205, tui/palette.cpp:218}` —
+are pattern (3); if they appear in the diff, drop them.
+
+The expected genuine fix is `auto x =` → `const auto& x =` in roughly
+21 cases. Any case that's actually **pattern (2)** (read+mutate)
+should be reverted **and** annotated with a one-line comment
+explaining the mutation, so a future contributor doesn't re-apply
+the fix.
+
+### Closing the loop
+
+After the diff is reviewed and the build + tests pass:
+
+```bash
+make cpp-build && make cpp-test
+git commit -m "fix(cpp): remediate performance-unnecessary-copy-initialization
+
+Closes #57"
+```
+
+CI continues to enforce `performance-unnecessary-copy-initialization`
+via the unrestricted `cpp-clang-tidy` target, so any regression after
+closure produces a build failure rather than silently re-accumulating.
 
 ## 3 — `performance-move-const-arg` and `bugprone-suspicious-stringview-data-usage` (issue #57 cont'd)
 
