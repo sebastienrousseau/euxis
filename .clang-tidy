@@ -1,6 +1,20 @@
 ---
 # Euxis clang-tidy configuration — security-focused SAST
 # Run: clang-tidy -p cmake-build/ src/file.cpp
+#
+# Policy decisions for which checks fire and when to NOLINT them
+# are documented at docs/development/clang-tidy-policy.md.
+# Key conventions, summarised:
+#   - concurrency-mt-unsafe: per-site NOLINT with justification
+#     (libs/), or NOLINTBEGIN/END at file scope for provably-
+#     single-threaded init code (apps/). Closes issue #56.
+#   - performance-unnecessary-copy-initialization: prefer
+#     `const auto& x = expr` over `auto x = expr` for non-trivial
+#     types; trivial types (enum, size_t, string_view) keep
+#     the copy. See policy doc for the 21-site cleanup plan
+#     against issue #57.
+#   - bugprone-branch-clone: per-site review for copy-paste vs
+#     intentional dead branch vs test fixture. Issue #55.
 
 Checks: >
   -*,

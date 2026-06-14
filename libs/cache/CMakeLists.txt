@@ -16,10 +16,13 @@ euxis_add_library(euxis-cache-cpp
     src/hash.cpp
     src/key.cpp
     src/store.cpp
+    src/json_cache.cpp
   DEPS
     unofficial-sodium::sodium
     SQLite3::SQLite3
+    nlohmann_json::nlohmann_json
   TEST_SOURCES
     tests/test_hash.cpp
     tests/test_store.cpp
+    tests/test_json_cache.cpp
 )
