@@ -19,7 +19,7 @@ void ensure_sodium() noexcept {
         // libraries. Returns 1 if already initialised, 0 on first
         // call, -1 on failure; we tolerate -1 because in that case
         // libsodium primitives still work but with degraded RNG.
-        sodium_init();
+        (void)sodium_init();
         sodium_inited = true;
     }
 }
