@@ -46,7 +46,7 @@ auto InteractionOrchestrator::run_sequential(
     const std::string& task) -> InteractionResult {
     InteractionResult result;
     result.success = true;
-    std::string current_input = task;
+    const std::string& current_input = task;
 
     for (const auto& agent_id : agent_ids) {
         AgentSession session("seq-" + agent_id, agent_id, provider_, store_);

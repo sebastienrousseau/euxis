@@ -61,7 +61,7 @@ TEST(BenchmarkResultMatrixTest, OutOfBoundsThrows) {
 
 TEST(BenchmarkResultMatrixTest, MetricNames) {
     BenchmarkResultMatrix mat(1, {"latency_ms", "throughput_rps", "error_rate"});
-    auto names = mat.metric_names();
+    const auto& names = mat.metric_names();
     ASSERT_EQ(names.size(), 3u);
     EXPECT_EQ(names[0], "latency_ms");
     EXPECT_EQ(names[2], "error_rate");

@@ -1022,7 +1022,7 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
     }
     if (args[0] == "register") {
         if (args.size() < 2) { std::cerr << tr("Usage: euxis agent register <manifest.json>") << "\n"; return 2; }
-        auto manifest_path = args[1];
+        const auto& manifest_path = args[1];
         if (!fs::exists(manifest_path)) { std::cerr << tr("File not found:") << " " << manifest_path << "\n"; return 1; }
         std::ifstream manifest_file(manifest_path);
         nlohmann::json manifest;
@@ -1130,8 +1130,8 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
     }
     if (args[0] == "deploy") {
         if (args.size() < 3) { std::cerr << tr("Usage: euxis squad deploy <squad-id> <task> [--mode parallel|sequential]") << "\n"; return 2; }
-        std::string squad_id = args[1];
-        std::string task = args[2];
+        const std::string& squad_id = args[1];
+        const std::string& task = args[2];
         for (const auto& s : squads) {
             if (s.id == squad_id) {
                 std::cout << term::bold("Deploying squad: " + s.name) << "\n";
@@ -1158,7 +1158,7 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
 // --- combo ---
 int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis combo <agent1,agent2,...> [task]") << "\n"; return 2; }
-    std::string agents_str = args[0];
+    const std::string& agents_str = args[0];
     std::string task = (args.size() > 1) ? args[1] : "Process sequentially";
     // Split by comma
     std::vector<std::string> agent_ids;
@@ -3237,7 +3237,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
 // --- dispatch ---
 int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis dispatch <manifest.json>") << "\n"; return 2; }
-    auto path = args[0];
+    const auto& path = args[0];
     if (!fs::exists(path)) { std::cerr << tr("File not found:") << " " << path << "\n"; return 1; }
     std::ifstream f(path);
     nlohmann::json manifest;
@@ -3268,8 +3268,8 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 // --- council ---
 int cmd_council(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) { std::cerr << tr("Usage: euxis council <topic> <agent1,agent2,...> [--rounds N]") << "\n"; return 2; }
-    std::string topic = args[0];
-    std::string agents_str = args[1];
+    const std::string& topic = args[0];
+    const std::string& agents_str = args[1];
     int rounds = 3;
     for (size_t i = 2; i < args.size(); ++i) {
         if (args[i] == "--rounds" && i + 1 < args.size()) rounds = std::stoi(args[++i]);
@@ -3302,8 +3302,8 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
 // --- loop ---
 int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) { std::cerr << tr("Usage: euxis loop <agent> <task> [--max-iterations N] [--threshold T]") << "\n"; return 2; }
-    std::string agent_id = args[0];
-    std::string task = args[1];
+    const std::string& agent_id = args[0];
+    const std::string& task = args[1];
     int max_iterations = 5;
     double threshold = 0.3;
     for (size_t i = 2; i < args.size(); ++i) {
@@ -3337,7 +3337,7 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
 // --- synthesize ---
 int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis synthesize <output-dir> [--agents <filter>] [--agent <synth-agent>]") << "\n"; return 2; }
-    auto dir = args[0];
+    const auto& dir = args[0];
     if (!fs::exists(dir)) { std::cerr << tr("Directory not found:") << " " << dir << "\n"; return 1; }
     std::string agent_filter, synth_agent;
     for (size_t i = 1; i < args.size(); ++i) {

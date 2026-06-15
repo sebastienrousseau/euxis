@@ -109,12 +109,12 @@ void ChatEngine::execute_async(const QString& prompt, const QString& agent_id,
     std::string full_prompt = cli::ProviderExecutor::build_prompt(
         system_prompt, prompt.toStdString(), memory_ctx);
 
-    auto sel = selection;
+    const auto& sel = selection;
     auto* exec = &executor_;
     auto* store = &auth_store_;
     auto* router = &router_;
     auto* engine = this;
-    auto aid = agent_id;
+    const auto& aid = agent_id;
 
     (void)QtConcurrent::run([exec, store, router, sel, full_prompt, engine, aid]() {
         auto original_provider = sel.provider;

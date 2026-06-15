@@ -425,7 +425,7 @@ int cmd_polish(Context& ctx, const std::vector<std::string>& args) {
         return 2;
     }
 
-    auto file_path = args[0];
+    const auto& file_path = args[0];
     std::string style = "formal";
     bool dry_run = false;
     for (size_t i = 1; i < args.size(); ++i) {
@@ -744,7 +744,7 @@ int cmd_certify(Context& ctx, const std::vector<std::string>& args) {
         return 2;
     }
 
-    std::string agent_id = args[0];
+    const std::string& agent_id = args[0];
     RegistryClient registry(ctx.data_dir);
     auto agent = registry.get_agent(agent_id);
 

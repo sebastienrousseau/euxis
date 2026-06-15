@@ -118,7 +118,7 @@ TEST_F(ModelRegistryTest, VerifyFailsAfterModification) {
     auto models = reg.discover();
     ASSERT_EQ(models.size(), 1u);
 
-    auto info = models[0];
+    const auto& info = models[0];
 
     // Modify the file content
     {

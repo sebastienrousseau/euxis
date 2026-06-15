@@ -607,7 +607,7 @@ int cmd_shell_lint(Context& ctx, const std::vector<std::string>& /*args*/) {
     int issues = 0;
     for (const auto& entry : fs::directory_iterator(bin_dir)) {
         if (!entry.is_regular_file()) continue;
-        auto path = entry.path();
+        const auto& path = entry.path();
         if (path.extension() == ".sh" || path.filename().string().starts_with("euxis-")) {
             auto result = Process::run("shellcheck", {"-S", "warning", path.string()});
             if (result.exit_code == 0) {

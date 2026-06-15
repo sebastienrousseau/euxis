@@ -317,7 +317,7 @@ int cmd_graph(Context& ctx, const std::vector<std::string>& args) {
     }
 
     if (args[0] == "export" && args.size() >= 2) {
-        auto output = args[1];
+        const auto& output = args[1];
         if (fs::is_directory(graph_dir)) {
             // Export graph data as JSON
             nlohmann::json j;
@@ -392,13 +392,13 @@ int cmd_codex(Context& ctx, const std::vector<std::string>& args) {
             std::cerr << tr("Usage: euxis codex render <template-name> [--var KEY=VALUE ...]") << "\n";
             return 2;
         }
-        auto template_name = args[1];
+        const auto& template_name = args[1];
 
         // Parse --var KEY=VALUE pairs
         std::map<std::string, std::string> vars;
         for (size_t i = 2; i < args.size(); ++i) {
             if (args[i] == "--var" && i + 1 < args.size()) {
-                auto kv = args[++i];
+                const auto& kv = args[++i];
                 auto eq_pos = kv.find('=');
                 if (eq_pos != std::string::npos) {
                     vars[kv.substr(0, eq_pos)] = kv.substr(eq_pos + 1);
@@ -542,7 +542,7 @@ int cmd_slash(Context& ctx, const std::vector<std::string>& args) {
             std::cerr << tr("Usage: euxis slash run <command-name> [args...]") << "\n";
             return 2;
         }
-        auto cmd_name = args[1];
+        const auto& cmd_name = args[1];
 
         auto config = loader.load("config/slash-commands.json");
         if (!config) {

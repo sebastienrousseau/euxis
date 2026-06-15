@@ -206,8 +206,8 @@ int cmd_bus(Context& ctx, const std::vector<std::string>& args) {
     }
 
     if (args[0] == "publish" && args.size() >= 3) {
-        auto pipe = args[1];
-        auto message = args[2];
+        const auto& pipe = args[1];
+        const auto& message = args[2];
         fs::create_directories(bus_dir);
         auto pipe_path = bus_dir / pipe;
         {
@@ -368,7 +368,7 @@ int cmd_deploy(Context& ctx, const std::vector<std::string>& args) {
         if (a == "--dry-run") dry_run = true;
     }
 
-    auto config_path = args[0];
+    const auto& config_path = args[0];
     if (!fs::exists(config_path)) {
         std::cerr << tr("Config not found:") << " " << config_path << "\n";
         return 1;
