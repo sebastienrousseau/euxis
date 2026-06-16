@@ -113,7 +113,9 @@ private:
         std::string p(path);
         size_t start = 0, end = 0;
         while ((end = p.find(':', start)) != std::string::npos) {
-            std::string dir = p.substr(start, end - start);
+            // `dir` is only consumed on Linux; on other platforms the
+            // loop walks PATH without probing each entry.
+            [[maybe_unused]] std::string dir = p.substr(start, end - start);
 #ifdef __linux__
             if (access((dir + "/nsjail").c_str(), X_OK) == 0) return true;
 #endif

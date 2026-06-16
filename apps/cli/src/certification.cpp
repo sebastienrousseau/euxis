@@ -186,12 +186,9 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
     }
 
     // Run tests
-    ProcessResult proc;
-    if (test_framework == "cmake/gtest") {
-        proc = Process::run(test_cmd, test_args, 300);
-    } else {
-        proc = Process::run(test_cmd, test_args, 300);
-    }
+    // (test_framework currently only drives wording elsewhere; the
+    // invocation here is framework-agnostic.)
+    ProcessResult proc = Process::run(test_cmd, test_args, 300);
 
     // Parse gtest output for pass/fail counts
     int passed = 0, failed = 0;

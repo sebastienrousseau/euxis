@@ -94,7 +94,8 @@ struct ModeSLA {
 auto get_mode_sla(const std::string& mode) -> ModeSLA {
     if (mode == "flash")    return {45000, 60000, 75000, 45};
     if (mode == "standard") return {180000, 300000, 600000, 120};
-    /* forensic */          return {600000, 900000, 1200000, 300};
+    // forensic (default)
+    return {600000, 900000, 1200000, 300};
 }
 
 // Agent terminal states — replaces generic "WARN"
@@ -1790,7 +1791,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                     std::chrono::steady_clock::now() - start_time).count();
                 int agent_timeout = std::min(sla.agent_timeout_s, std::max(1, (int)(remaining_ms / 1000.0)));
 
-                agent_threads.emplace_back([&, i, plan = plans[i], weight, agent_timeout]() {
+                agent_threads.emplace_back([&, plan = plans[i], weight, agent_timeout]() {
                     std::string context;
                     {
                         std::lock_guard<std::mutex> lk(mtx);
@@ -1826,10 +1827,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                             std::string raw_v = "WARN";
                             auto out_upper = response.output;
                             std::transform(out_upper.begin(), out_upper.end(), out_upper.begin(), ::toupper);
-                            // Primary: exact "VERDICT: PASS/FAIL/WARN"
+                            // Primary: exact "VERDICT: PASS/FAIL/WARN"; fallback chains
+                            // accept the common variations agents emit. Each variant
+                            // intentionally produces the same raw_v assignment as its
+                            // primary, which `bugprone-branch-clone` would otherwise flag.
+                            // NOLINTBEGIN(bugprone-branch-clone)
                             if (out_upper.find("VERDICT: PASS") != std::string::npos) raw_v = "PASS";
                             else if (out_upper.find("VERDICT: FAIL") != std::string::npos) raw_v = "FAIL";
-                            // Fallback: common variations agents emit
                             else if (out_upper.find("VERDICT:PASS") != std::string::npos ||
                                      out_upper.find("FINAL VERDICT: PASS") != std::string::npos ||
                                      out_upper.find("**VERDICT: PASS**") != std::string::npos ||
@@ -1842,6 +1846,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                                      out_upper.find("VERDICT:WARN") != std::string::npos ||
                                      out_upper.find("FINAL VERDICT: WARN") != std::string::npos ||
                                      out_upper.find("**VERDICT: WARN**") != std::string::npos) raw_v = "WARN";
+                            // NOLINTEND(bugprone-branch-clone)
 
                             // Map to explicit terminal state
                             std::string status = classify_agent_status(raw_v, timed_out, is_degraded,
@@ -2864,8 +2869,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         // Add exit_code to artifact for machine consumption
         int exit_code = 2;
         if (!evidence_log.empty()) {
-            if (effective_fails > 0 || has_contradiction) exit_code = 1;
-            else if (verdict_text == "CAUTION" || verdict_text == "BLOCKED" || verdict_text == "INCONCLUSIVE") exit_code = 1;
+            if (effective_fails > 0 || has_contradiction ||
+                verdict_text == "CAUTION" || verdict_text == "BLOCKED" ||
+                verdict_text == "INCONCLUSIVE") exit_code = 1;
             else exit_code = 0;
         }
         // Policy override: violations always force exit code 1

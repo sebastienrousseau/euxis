@@ -284,7 +284,7 @@ TEST_F(TaskTest, ToJsonComplete) {
 // ---------------------------------------------------------------------------
 TEST_F(TaskTest, UpdatedAtChanges) {
     auto task = create_task();
-    const auto original = task.updated_at;
+    [[maybe_unused]] const auto original = task.updated_at;
     // Note: within the same second this may be the same, but the field is set
     ASSERT_TRUE(transition_task(task, TaskStatus::Active).has_value());
     EXPECT_FALSE(task.updated_at.empty());

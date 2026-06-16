@@ -82,7 +82,7 @@ auto classify_failure(int http_status, std::string_view msg) noexcept
 auto recovery_for(FailoverReason r) noexcept -> RecoveryAction {
     switch (r) {
         case FailoverReason::None:            return RecoveryAction::Abort;
-        case FailoverReason::Auth:            return RecoveryAction::RotateCredential;
+        case FailoverReason::Auth:            // both auth + billing rotate the cred
         case FailoverReason::Billing:         return RecoveryAction::RotateCredential;
         case FailoverReason::RateLimit:       return RecoveryAction::Retry;
         case FailoverReason::ContextOverflow: return RecoveryAction::CompactContext;

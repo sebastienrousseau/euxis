@@ -60,7 +60,6 @@ int cmd_controls() {
         std::cout << term::cyan(std::string("Framework: ") + fw_name) << "\n";
         int i = 1;
         for (const auto& d : defs) {
-            std::string icon = d.critical ? term::icon_fail() : term::icon_info();
             std::string crit = d.critical ? term::red(" [CRITICAL]") : "";
             std::cout << "  " << std::to_string(i++) << ". " << d.name << crit << "\n";
             if (!d.required_signals.empty()) {
@@ -170,10 +169,11 @@ void print_result(const cert::RunResult& result, bool ci_mode) {
     out << tr("Target:") << "      " << result.target << "\n";
     out << tr("Framework:") << "   " << cert::framework_name(result.framework) << "\n";
 
-    // Status with color
+    // Status with color (any non-READY/BLOCKED status — including
+    // "READY WITH GAPS" and any future variant — falls through to
+    // yellow as the caution colour).
     std::string colored_status;
     if (result.status == "READY") colored_status = term::green(result.status);
-    else if (result.status == "READY WITH GAPS") colored_status = term::yellow(result.status);
     else if (result.status == "BLOCKED") colored_status = term::red(result.status);
     else colored_status = term::yellow(result.status);
     out << tr("Status:") << "      " << colored_status << "\n";

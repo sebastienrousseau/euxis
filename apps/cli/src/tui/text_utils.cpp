@@ -34,12 +34,16 @@ std::vector<std::string> wrap_text(std::string_view text, int width) {
                         current_line = current_word;
                     }
                     current_word.clear();
+                    // NOLINTBEGIN(bugprone-branch-clone) — distinct cases (mid-line
+                    // continuation vs leading-spaces) kept apart for documentation,
+                    // even though both append c.
                 } else if (!current_line.empty() && (int)current_line.size() < width) {
                     // Preserve consecutive spaces
                     current_line += c;
                 } else if (current_line.empty()) {
                     // Leading spaces
                     current_line += c;
+                    // NOLINTEND(bugprone-branch-clone)
                 }
             } else {
                 current_word += c;

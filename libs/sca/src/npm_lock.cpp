@@ -54,11 +54,16 @@ auto parse_integrity(std::string_view integrity)
 
     euxis::sbom::Hash h;
     h.value = std::string{digest};
+    // Unknown algorithms default to Sha256 (same as the explicit
+    // "sha256" branch). Kept as a separate else to document the
+    // fallback intent.
+    // NOLINTBEGIN(bugprone-branch-clone)
     if      (alg_str == "sha256") h.algorithm = euxis::sbom::HashAlgorithm::Sha256;
     else if (alg_str == "sha384") h.algorithm = euxis::sbom::HashAlgorithm::Sha384;
     else if (alg_str == "sha512") h.algorithm = euxis::sbom::HashAlgorithm::Sha512;
     else if (alg_str == "md5")    h.algorithm = euxis::sbom::HashAlgorithm::Md5;
     else                          h.algorithm = euxis::sbom::HashAlgorithm::Sha256;
+    // NOLINTEND(bugprone-branch-clone)
     return h;
 }
 

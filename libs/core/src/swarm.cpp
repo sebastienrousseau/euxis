@@ -62,10 +62,10 @@ SwarmOrchestrator::SwarmOrchestrator(const std::string& gateway_url,
       simulation_mode_(gateway_url.find("localhost") != std::string::npos) {}
 
 /// P10-R2: Maximum number of phases in a playbook.
-constexpr size_t kMaxPhases = 64;
+[[maybe_unused]] constexpr size_t kMaxPhases = 64;
 
 /// P10-R2: Maximum number of delegates per phase.
-constexpr size_t kMaxDelegatesPerPhase = 128;
+[[maybe_unused]] constexpr size_t kMaxDelegatesPerPhase = 128;
 
 auto SwarmOrchestrator::execute_playbook(const nlohmann::json& playbook,
                                          const std::string& goal)
@@ -84,7 +84,10 @@ auto SwarmOrchestrator::execute_playbook(const nlohmann::json& playbook,
 
 void SwarmOrchestrator::execute_phase(const nlohmann::json& phase,
                                       const std::string& goal) {
-    const auto mode = phase.value("mode", "sequential");
+    // `mode` is parsed for forward-compat; execution is currently
+    // forced sequential below (see the "Force sequential mode"
+    // comment). Kept here so JSON-shape validators stay green.
+    [[maybe_unused]] const auto mode = phase.value("mode", "sequential");
     const auto delegates = phase.value("delegates", nlohmann::json::array());
     assert(delegates.size() <= kMaxDelegatesPerPhase && "P10-R2: delegate count bounded");
 

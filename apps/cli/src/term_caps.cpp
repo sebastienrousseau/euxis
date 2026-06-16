@@ -30,12 +30,13 @@ auto detect() -> TermCaps {
         tc.truecolor = (ct == "truecolor" || ct == "24bit");
     }
 
-    // Kitty graphics protocol
+    // Kitty graphics protocol — detect via either KITTY_WINDOW_ID
+    // (set by the kitty terminal itself) or TERM containing "kitty"
+    // (set by some wrappers).
     const char* term = std::getenv("TERM");
     const char* kitty_id = std::getenv("KITTY_WINDOW_ID");
-    if (kitty_id) {
-        tc.kitty = true;
-    } else if (term && std::string_view(term).find("kitty") != std::string_view::npos) {
+    if (kitty_id ||
+        (term && std::string_view(term).find("kitty") != std::string_view::npos)) {
         tc.kitty = true;
     }
 

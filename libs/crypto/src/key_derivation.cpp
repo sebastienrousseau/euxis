@@ -77,12 +77,11 @@ auto derive_key(std::span<const std::byte> password,
         opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE;
     }
 
-    // Use MODERATE memory for SENSITIVE ops, INTERACTIVE memory otherwise,
-    // to keep runtime reasonable while still being secure.
+    // Use MODERATE memory for SENSITIVE and MODERATE ops alike,
+    // INTERACTIVE otherwise, to keep runtime reasonable while still
+    // being secure.
     size_t memlimit = 0;
-    if (opslimit >= crypto_pwhash_OPSLIMIT_SENSITIVE) {
-        memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
-    } else if (opslimit >= crypto_pwhash_OPSLIMIT_MODERATE) {
+    if (opslimit >= crypto_pwhash_OPSLIMIT_MODERATE) {
         memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
     } else {
         memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE;

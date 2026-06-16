@@ -29,7 +29,6 @@ auto ClawHubImporter::import_skill(const std::filesystem::path& skill_dir)
 
     auto entrypoint = frontmatter->get("entrypoint").value_or("index.js");
     auto resolved_entry = (skill_dir / entrypoint).lexically_normal();
-    auto skill_dir_str = skill_dir.lexically_normal().string() + "/";
     if (resolved_entry.string().find("..") != std::string::npos ||
         !resolved_entry.string().starts_with(skill_dir.lexically_normal().string())) {
         return std::unexpected("Entrypoint path escapes skill directory: " + entrypoint);

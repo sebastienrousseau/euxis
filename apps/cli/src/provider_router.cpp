@@ -204,14 +204,14 @@ auto ProviderRouter::route(const std::string& agent_tier,
     if (provider == "claude") {
         switch (effective) {
             case Tier::Routine: sel.model = "claude-haiku-4-5"; break;
-            case Tier::Data:    sel.model = models_.code; break;   // sonnet
-            case Tier::Code:    sel.model = models_.code; break;   // sonnet
+            case Tier::Data:    // intentional fall-through — data + code both run sonnet
+            case Tier::Code:    sel.model = models_.code; break;
             case Tier::Reason:  sel.model = models_.reason; break; // opus
         }
     } else if (provider == "gemini") {
         switch (effective) {
             case Tier::Routine: sel.model = models_.routine; break; // flash-lite
-            case Tier::Data:    sel.model = "gemini-2.5-flash"; break;
+            case Tier::Data:    // intentional fall-through — data + code both run flash
             case Tier::Code:    sel.model = "gemini-2.5-flash"; break;
             case Tier::Reason:  sel.model = "gemini-2.5-pro"; break;
         }
@@ -685,8 +685,6 @@ void ProviderRouter::print_status() const {
             {"terminal_automation",   "Kiro / ShellGPT"},
         };
         for (const auto& [cls, desc] : policy_summary) {
-            auto it = strategy_defaults_.find(cls);
-            std::string primary = it != strategy_defaults_.end() ? it->second.primary : "?";
             std::cout << "    " << cls;
             // Pad
             for (size_t i = cls.size(); i < 24; ++i) std::cout << ' ';

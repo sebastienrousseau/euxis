@@ -273,8 +273,8 @@ RGB SyntaxHighlighter::token_color(TokenType type) {
         case TokenType::Header:       return {255, 158, 100}; // tokyo orange
         case TokenType::Bold:         return {255, 255, 255}; // white
         case TokenType::Italic:       return {187, 154, 247}; // purple
-        case TokenType::CodeInline:   return {158, 206, 106}; // green
-        case TokenType::CodeBlock:    return {158, 206, 106}; // green
+        case TokenType::CodeInline:
+        case TokenType::CodeBlock:    return {158, 206, 106}; // green (shared)
         case TokenType::List:         return {122, 162, 247}; // blue
         case TokenType::Link:         return {125, 207, 255}; // light blue
         case TokenType::Quote:        return {68, 75, 106};   // dim

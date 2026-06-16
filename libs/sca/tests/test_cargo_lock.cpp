@@ -6,7 +6,7 @@ namespace euxis::sca {
 namespace {
 
 TEST(CargoLock, ParsesSinglePackage) {
-    std::string contents = R"(# auto-generated
+    [[maybe_unused]] std::string contents = R"toml(# auto-generated
 version = 3
 
 [[package]]
@@ -17,7 +17,7 @@ checksum = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 dependencies = [
     "serde_derive 1.0.197 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value()) << (p ? "" : p.error().message);
     ASSERT_EQ(p->entries.size(), 1U);
@@ -31,7 +31,7 @@ dependencies = [
 }
 
 TEST(CargoLock, ParsesMultiplePackages) {
-    std::string contents = R"(
+    [[maybe_unused]] std::string contents = R"toml(
 [[package]]
 name = "tokio"
 version = "1.0.0"
@@ -41,7 +41,7 @@ source = "registry+x"
 name = "futures"
 version = "0.3.0"
 source = "registry+x"
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value());
     ASSERT_EQ(p->entries.size(), 2U);
@@ -50,7 +50,7 @@ source = "registry+x"
 }
 
 TEST(CargoLock, DetectsWorkspaceRootBySourceAbsence) {
-    std::string contents = R"(
+    [[maybe_unused]] std::string contents = R"toml(
 [[package]]
 name = "my-workspace"
 version = "0.1.0"
@@ -60,7 +60,7 @@ dependencies = []
 name = "external"
 version = "1.0.0"
 source = "registry+x"
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value());
     ASSERT_TRUE(p->root.has_value());
@@ -68,7 +68,7 @@ source = "registry+x"
 }
 
 TEST(CargoLock, IgnoresMetadataSections) {
-    std::string contents = R"(
+    [[maybe_unused]] std::string contents = R"toml(
 [metadata]
 "checksum foo 1.0 (registry+x)" = "deadbeef"
 
@@ -76,7 +76,7 @@ TEST(CargoLock, IgnoresMetadataSections) {
 name = "ok"
 version = "1.0.0"
 source = "registry+x"
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value());
     ASSERT_EQ(p->entries.size(), 1U);
@@ -84,13 +84,13 @@ source = "registry+x"
 }
 
 TEST(CargoLock, SingleLineDependenciesArray) {
-    std::string contents = R"(
+    [[maybe_unused]] std::string contents = R"toml(
 [[package]]
 name = "a"
 version = "1.0.0"
 source = "registry+x"
 dependencies = ["b 1.0.0 (registry+x)", "c 2.0.0 (registry+x)"]
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value());
     ASSERT_EQ(p->entries.size(), 1U);
@@ -105,12 +105,12 @@ TEST(CargoLock, EmptyContentsFails) {
 }
 
 TEST(CargoLock, EcosystemSet) {
-    std::string contents = R"(
+    [[maybe_unused]] std::string contents = R"toml(
 [[package]]
 name = "x"
 version = "1"
 source = "registry+x"
-)";
+)toml";
     auto p = parse_cargo_lock(contents);
     ASSERT_TRUE(p.has_value());
     EXPECT_EQ(p->ecosystem, Ecosystem::Cargo);

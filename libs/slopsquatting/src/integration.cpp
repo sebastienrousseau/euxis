@@ -19,6 +19,13 @@ using euxis::security::SourceLocation;
 
 constexpr const char* kRuleId = "euxis/slopsquatting/EUXIS-SLOPSQ-001";
 
+// 1:1 identity mapping between two parallel enums; each case is
+// documentation that the link between Ecosystem and PurlType is
+// explicit (and audited), not the result of a default-int cast.
+// bugprone-branch-clone correctly notes the branches are
+// structurally identical at the integer level — that is the
+// invariant we want to preserve.
+// NOLINTBEGIN(bugprone-branch-clone)
 auto ecosystem_to_purl_type(euxis::sca::Ecosystem e) noexcept
     -> euxis::sbom::PurlType {
     switch (e) {
@@ -32,6 +39,7 @@ auto ecosystem_to_purl_type(euxis::sca::Ecosystem e) noexcept
     }
     return euxis::sbom::PurlType::Generic;
 }
+// NOLINTEND(bugprone-branch-clone)
 
 /// Produce a stable fingerprint that survives line moves and
 /// whitespace edits. The components of the hash are deterministic:

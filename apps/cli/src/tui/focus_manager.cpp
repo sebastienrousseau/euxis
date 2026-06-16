@@ -15,13 +15,12 @@ void FocusManager::remove(const std::shared_ptr<Widget>& widget) {
     int idx = static_cast<int>(std::distance(widgets_.begin(), it));
     widgets_.erase(it);
 
-    // Adjust current focus index
-    if (widgets_.empty()) {
+    // Adjust current focus index: empty list and "removed the focused
+    // widget" both collapse to "no focus".
+    if (widgets_.empty() || idx == current_) {
         current_ = -1;
     } else if (idx < current_) {
         current_--;
-    } else if (idx == current_) {
-        current_ = -1; // Lost focus
     }
 }
 
