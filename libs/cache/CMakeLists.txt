@@ -26,3 +26,8 @@ euxis_add_library(euxis-cache-cpp
     tests/test_store.cpp
     tests/test_json_cache.cpp
 )
+
+# Google Benchmark suite for the JsonCache primitive.
+# Honours the warm-vs-cold acceptance claim made in
+# libs/cache/include/euxis/cache/json_cache.hpp.
+add_subdirectory(bench)
