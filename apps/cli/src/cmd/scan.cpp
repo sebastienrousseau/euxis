@@ -11,11 +11,13 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <print>
 #include <sstream>
 #include <string>
 #include <memory>
+#include <thread>
 #include <unordered_set>
 #include <vector>
 
@@ -73,6 +75,14 @@ struct ScanArgs {
 
     /// Cache database override. Empty = use the libs/cache default.
     std::filesystem::path cache_db;
+
+    /// Parallel scan across `std::thread::hardware_concurrency()`
+    /// worker threads. Default: on. The migration to
+    /// `std::execution::par_unseq` waits for libc++ to ship a TBB-
+    /// backed parallel STL implementation on Apple Silicon; until
+    /// then the runner uses an explicit jthread pool which has the
+    /// same speedup profile without the parallel-STL dependency.
+    bool parallel{true};
 };
 
 // Default exclude segments. Matches the libs/sca scanner so behaviour
@@ -115,6 +125,8 @@ auto parse_args(const std::vector<std::string>& argv)
         if (s == "--no-ensemble") { a.run_ensemble = false; continue; }
         if (s == "--no-cache")    { a.use_cache = false;    continue; }
         if (s == "--cache")       { a.use_cache = true;     continue; }
+        if (s == "--no-parallel") { a.parallel  = false;    continue; }
+        if (s == "--parallel")    { a.parallel  = true;     continue; }
         if (s.starts_with("--cache-db=")) {
             a.cache_db = s.substr(11);
             continue;
@@ -185,6 +197,8 @@ void print_help() {
     std::println("  --cache              Use the incremental scan cache (default: on)");
     std::println("  --no-cache           Disable the cache (every file re-parsed)");
     std::println("  --cache-db=<path>    Override the cache database location");
+    std::println("  --parallel           Scan files in parallel across worker threads (default: on)");
+    std::println("  --no-parallel        Disable parallelism (single-threaded scan)");
     std::println("  --sarif=<path>       SARIF 2.1.0 output (default: euxis-scan.sarif.json)");
     std::println("  --no-sarif           Skip SARIF emission (text summary only)");
     std::println("  --language=<lang>    Restrict to one language (c, cpp, rust, ...)");
@@ -346,40 +360,61 @@ auto compute_ruleset_hash(const ScanArgs& args,
     return h.finalize();
 }
 
-void scan_file(ScanContext& ctx,
-               const std::filesystem::path& file,
-               const ScanArgs& args) {
+/// Per-file scan output collected by `scan_file_compute()`.
+/// Designed to be returned by value from a worker thread and
+/// merged into the shared ScanContext on the main thread, so the
+/// parallel scan loop touches no shared mutable state between
+/// threads except the cache (which is SQLite-WAL-serialised).
+struct FileScanResult {
+    enum class Outcome {
+        Scanned,      ///< File processed normally; counters + findings populated.
+        Skipped,      ///< Language detection or filter excluded the file.
+        ParseFailure, ///< Parser or CPG builder returned an error.
+        CacheHit,     ///< Restored from incremental scan cache.
+    };
+    Outcome outcome{Outcome::Skipped};
+    std::vector<euxis::security::Finding> findings;
+    std::size_t rule_findings{0};
+    std::size_t taint_findings{0};
+    std::size_t taint_flows{0};
+};
+
+/// Pure function that scans ONE file. The only shared mutable
+/// state touched is `cache` (when non-null) — the SQLite handle
+/// behind ScanCache is configured in SQLite's default serialised
+/// thread-safety mode, so concurrent get/put from multiple worker
+/// threads is safe. Everything else is local to this call and
+/// returned by value.
+auto scan_file_compute(const std::filesystem::path& file,
+                       const ScanArgs& args,
+                       const std::vector<euxis::scan::RulePack>& packs,
+                       const std::string& ruleset_hash,
+                       euxis::cache::ScanCache* cache) -> FileScanResult {
+    FileScanResult out;
+
     auto lang = euxis::parse::detect_language(file);
-    if (!lang) {
-        ++ctx.files_skipped;
-        return;
-    }
+    if (!lang) return out;  // Outcome::Skipped (default)
     if (args.language_filter && *lang != *args.language_filter) {
-        ++ctx.files_skipped;
-        return;
+        return out;
     }
 
     // ---- Cache lookup --------------------------------------------------
     std::string content_hash_str;
-    if (args.use_cache && ctx.cache) {
+    if (args.use_cache && cache != nullptr) {
         auto content_hash = euxis::cache::hash_file(file);
         if (content_hash) {
             content_hash_str = *content_hash;
             euxis::cache::KeyInputs k{
                 .file         = file,
                 .content_hash = content_hash_str,
-                .ruleset_hash = ctx.ruleset_hash,
+                .ruleset_hash = ruleset_hash,
                 .tool_version = "0.0.3",
             };
-            auto cached = ctx.cache->get(euxis::cache::compose_key(k));
+            auto cached = cache->get(euxis::cache::compose_key(k));
             if (cached && *cached) {
-                auto restored = deserialize_findings((*cached)->findings_json);
-                for (auto& f : restored) {
-                    ctx.findings.push_back(std::move(f));
-                }
-                ++ctx.cache_hits;
-                ++ctx.files_scanned;
-                return;
+                out.findings = deserialize_findings((*cached)->findings_json);
+                out.outcome  = FileScanResult::Outcome::CacheHit;
+                return out;
             }
         }
     }
@@ -388,25 +423,23 @@ void scan_file(ScanContext& ctx,
     euxis::parse::Parser parser(*lang);
     auto ast = parser.parse_file(file);
     if (!ast) {
-        ++ctx.parse_failures;
-        return;
+        out.outcome = FileScanResult::Outcome::ParseFailure;
+        return out;
     }
     auto graph = euxis::cpg::build(*ast);
     if (!graph) {
-        ++ctx.parse_failures;
-        return;
+        out.outcome = FileScanResult::Outcome::ParseFailure;
+        return out;
     }
 
     auto file_str = file.string();
-    std::size_t findings_before = ctx.findings.size();
 
-    // OpenGrep rule engine — runs whenever any rule packs were
-    // loaded.
-    for (const auto& pack : ctx.packs) {
+    // OpenGrep rule engine — runs whenever any rule packs were loaded.
+    for (const auto& pack : packs) {
         auto result = euxis::scan::apply_rules(pack, *ast, *graph, file_str);
         for (auto& f : result.findings) {
-            ctx.findings.push_back(std::move(f));
-            ++ctx.rule_findings;
+            out.findings.push_back(std::move(f));
+            ++out.rule_findings;
         }
     }
 
@@ -415,56 +448,85 @@ void scan_file(ScanContext& ctx,
         euxis::cpg::build_ddg(*graph);
         auto taint_spec   = euxis::taint::builtin_specs();
         auto taint_result = euxis::taint::analyze(*graph, *ast, taint_spec);
-        ctx.taint_flows += taint_result.stats.flows_emitted;
+        out.taint_flows += taint_result.stats.flows_emitted;
         auto taint_findings =
             euxis::taint::flows_to_findings(taint_result, *graph, file_str);
         for (auto& f : taint_findings) {
-            ctx.findings.push_back(std::move(f));
-            ++ctx.taint_findings;
+            out.findings.push_back(std::move(f));
+            ++out.taint_findings;
         }
     }
 
     // Reachability annotation — runs whenever --reach is on.
-    if (args.run_reach && ctx.findings.size() > findings_before) {
+    if (args.run_reach && !out.findings.empty()) {
         auto cg = euxis::reach::build_call_graph(*graph, *ast);
         auto r  = euxis::reach::compute_reachable(*graph, *ast, cg.graph);
         euxis::reach::annotate_findings(
-            *graph, r,
-            ctx.findings.begin() + static_cast<std::ptrdiff_t>(findings_before),
-            ctx.findings.end());
+            *graph, r, out.findings.begin(), out.findings.end());
     }
 
     // ---- Cache store for next time ----------------------------------
-    if (args.use_cache && ctx.cache && !content_hash_str.empty()) {
-        std::vector<euxis::security::Finding> file_findings(
-            ctx.findings.begin() + static_cast<std::ptrdiff_t>(findings_before),
-            ctx.findings.end());
+    if (args.use_cache && cache != nullptr && !content_hash_str.empty()) {
         euxis::cache::KeyInputs k{
             .file         = file,
             .content_hash = content_hash_str,
-            .ruleset_hash = ctx.ruleset_hash,
+            .ruleset_hash = ruleset_hash,
             .tool_version = "0.0.3",
         };
         euxis::cache::CacheEntry e;
-        e.findings_json = serialize_findings(file_findings);
+        e.findings_json = serialize_findings(out.findings);
         e.size_bytes    = static_cast<std::int64_t>(e.findings_json.size());
-        (void)ctx.cache->put(k, e);
-        ++ctx.cache_misses;
+        (void)cache->put(k, e);
     }
 
-    ++ctx.files_scanned;
+    out.outcome = FileScanResult::Outcome::Scanned;
+    return out;
 }
 
-auto walk_target(ScanContext& ctx, const ScanArgs& args)
-    -> std::expected<void, std::string> {
+/// Append one file's result into the shared context's counters and
+/// findings list. Must run on the main thread so no synchronisation
+/// is needed against ctx.
+void merge_file_result(ScanContext& ctx, FileScanResult&& r) {
+    switch (r.outcome) {
+        case FileScanResult::Outcome::Skipped:
+            ++ctx.files_skipped;
+            return;
+        case FileScanResult::Outcome::ParseFailure:
+            ++ctx.parse_failures;
+            return;
+        case FileScanResult::Outcome::CacheHit:
+            for (auto& f : r.findings) ctx.findings.push_back(std::move(f));
+            ++ctx.cache_hits;
+            ++ctx.files_scanned;
+            return;
+        case FileScanResult::Outcome::Scanned:
+            for (auto& f : r.findings) ctx.findings.push_back(std::move(f));
+            ctx.rule_findings  += r.rule_findings;
+            ctx.taint_findings += r.taint_findings;
+            ctx.taint_flows    += r.taint_flows;
+            ++ctx.cache_misses;
+            ++ctx.files_scanned;
+            return;
+    }
+}
+
+/// Collect every regular-file path the scanner should consider,
+/// respecting the directory-skip rules and the `--max-files` cap.
+/// Runs serially because the filesystem walk itself is not the
+/// hot path; the parallelism lives downstream in the per-file
+/// scan loop.
+auto collect_target_files(const ScanArgs& args)
+    -> std::expected<std::vector<std::filesystem::path>, std::string> {
     namespace fs = std::filesystem;
+    std::vector<fs::path> files;
+
     if (!fs::exists(args.target)) {
         return std::unexpected("scan target does not exist: " + args.target.string());
     }
 
     if (fs::is_regular_file(args.target)) {
-        scan_file(ctx, args.target, args);
-        return {};
+        files.push_back(args.target);
+        return files;
     }
 
     std::error_code ec;
@@ -478,14 +540,69 @@ auto walk_target(ScanContext& ctx, const ScanArgs& args)
     fs::recursive_directory_iterator end;
     for (; it != end; it.increment(ec)) {
         if (ec) { ec.clear(); continue; }
-        if (ctx.files_scanned >= args.max_files) break;
+        if (files.size() >= args.max_files) break;
         auto rel = it->path().lexically_relative(args.target);
         if (should_skip(rel)) {
             if (it->is_directory(ec)) it.disable_recursion_pending();
             continue;
         }
         if (!it->is_regular_file(ec)) continue;
-        scan_file(ctx, it->path(), args);
+        files.push_back(it->path());
+    }
+    return files;
+}
+
+auto walk_target(ScanContext& ctx, const ScanArgs& args)
+    -> std::expected<void, std::string> {
+    auto files_result = collect_target_files(args);
+    if (!files_result) return std::unexpected(files_result.error());
+    const auto& files = *files_result;
+
+    if (files.empty()) return {};
+
+    // Reserve a slot per file so workers can write into their
+    // owned index without synchronisation.
+    std::vector<FileScanResult> results(files.size());
+
+    const bool parallel_enabled =
+        args.parallel && files.size() > 1U;
+
+    if (!parallel_enabled) {
+        for (std::size_t i = 0; i < files.size(); ++i) {
+            results[i] = scan_file_compute(
+                files[i], args, ctx.packs, ctx.ruleset_hash, ctx.cache.get());
+        }
+    } else {
+        // Worker thread count = min(hardware concurrency, file count).
+        // 0 sentinel from hardware_concurrency() falls back to 1.
+        unsigned hw = std::thread::hardware_concurrency();
+        if (hw == 0U) hw = 1U;
+        std::size_t num_threads =
+            std::min(static_cast<std::size_t>(hw), files.size());
+
+        // Future migration: std::for_each(std::execution::par_unseq,
+        // indices.begin(), indices.end(), worker). Apple libc++ does
+        // not yet ship a TBB-backed parallel STL, so we use an
+        // explicit jthread pool with round-robin chunking — same
+        // speedup profile without the parallel-STL dependency.
+        std::vector<std::jthread> workers;
+        workers.reserve(num_threads);
+        for (std::size_t t = 0; t < num_threads; ++t) {
+            workers.emplace_back([&, t, num_threads]() {
+                for (std::size_t i = t; i < files.size(); i += num_threads) {
+                    results[i] = scan_file_compute(
+                        files[i], args, ctx.packs, ctx.ruleset_hash,
+                        ctx.cache.get());
+                }
+            });
+        }
+        // jthread destructors join here.
+    }
+
+    // Merge per-file results in source order so the SARIF output
+    // is deterministic regardless of worker interleaving.
+    for (auto& r : results) {
+        merge_file_result(ctx, std::move(r));
     }
     return {};
 }
