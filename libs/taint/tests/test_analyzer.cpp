@@ -147,7 +147,7 @@ def f():
     const auto& f = findings.front();
     EXPECT_EQ(f.rule_id,                    "euxis-taint/src->snk");
     EXPECT_EQ(f.primary_location.path,      "f.py");
-    EXPECT_GE(f.primary_location.start_row, 1);
+    EXPECT_GE(f.primary_location.start_line, 1);
     EXPECT_EQ(f.stable_fingerprint.size(),  32U);
     EXPECT_FALSE(f.related_locations.empty())
         << "expected source location to be recorded in related_locations";

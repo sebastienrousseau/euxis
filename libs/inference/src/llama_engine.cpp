@@ -175,7 +175,7 @@ auto LlamaEngine::generate(std::string_view prompt,
 // ---------------------------------------------------------------------------
 // episodic_generate
 // ---------------------------------------------------------------------------
-auto LlamaEngine::episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+auto LlamaEngine::episodic_generate(std::vector<euxis::runtime::SessionMessage> episodes,
                                     std::string_view system_prompt,
                                     uint32_t max_tokens)
     -> std::expected<InferenceResult, std::string> {

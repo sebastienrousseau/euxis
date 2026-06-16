@@ -33,6 +33,6 @@ int cmd_attest(Context& ctx, const std::vector<std::string>& args);
 /// the supplied public key. Returns Success (0) on a fully-valid
 /// bundle, PolicyViolation (4) on signature mismatch, InfraError
 /// (1) on malformed input.
-int cmd_verify(Context& ctx, const std::vector<std::string>& args);
+int cmd_verify_attest(Context& ctx, const std::vector<std::string>& args);
 
 } // namespace euxis::cli::cmd

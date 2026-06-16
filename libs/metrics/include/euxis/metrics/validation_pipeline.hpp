@@ -62,7 +62,7 @@ public:
         -> std::vector<std::string>;
 
 private:
-    EvidenceFramework* framework_;
+    [[maybe_unused]] EvidenceFramework* framework_;
     double pass_threshold_;
 
     std::vector<std::string> quantitative_patterns_;

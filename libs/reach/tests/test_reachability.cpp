@@ -88,12 +88,12 @@ int main(void) { return 0; }
     findings[0].rule_id   = "in-main";
     findings[0].message   = "in main";
     findings[0].primary_location.path      = "f.c";
-    findings[0].primary_location.start_row = 3;  // inside main()
+    findings[0].primary_location.start_line = 3;  // inside main()
 
     findings[1].rule_id   = "in-dead";
     findings[1].message   = "in dead helper";
     findings[1].primary_location.path      = "f.c";
-    findings[1].primary_location.start_row = 2;  // inside dead_helper
+    findings[1].primary_location.start_line = 2;  // inside dead_helper
 
     annotate_findings(pipe.graph, r, findings.begin(), findings.end());
 
@@ -128,7 +128,7 @@ int main(void) { return 0; }
     findings[0].rule_id   = "header";
     findings[0].message   = "in include";
     findings[0].primary_location.path      = "f.c";
-    findings[0].primary_location.start_row = 1;  // at the top of the file
+    findings[0].primary_location.start_line = 1;  // at the top of the file
 
     annotate_findings(pipe.graph, r, findings.begin(), findings.end());
 

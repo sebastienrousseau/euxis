@@ -34,8 +34,8 @@ NodeId find_finding_function(
     auto it = fn_by_path.find(f.primary_location.path);
     if (it == fn_by_path.end()) return kNullNode;
     const auto target_row =
-        static_cast<std::uint32_t>(f.primary_location.start_row > 0
-            ? f.primary_location.start_row - 1
+        static_cast<std::uint32_t>(f.primary_location.start_line > 0
+            ? f.primary_location.start_line - 1
             : 0);
 
     // Find a FunctionDef whose range contains the finding row.

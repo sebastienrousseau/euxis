@@ -85,9 +85,9 @@ auto make_finding(const Rule& r,
 
     SourceLocation loc;
     loc.path         = file;
-    loc.start_row    = static_cast<int>(node.range.start_row + 1);
+    loc.start_line   = static_cast<int>(node.range.start_row + 1);
     loc.start_column = static_cast<int>(node.range.start_column + 1);
-    loc.end_row      = static_cast<int>(node.range.end_row + 1);
+    loc.end_line     = static_cast<int>(node.range.end_row + 1);
     loc.end_column   = static_cast<int>(node.range.end_column + 1);
     f.primary_location = loc;
 

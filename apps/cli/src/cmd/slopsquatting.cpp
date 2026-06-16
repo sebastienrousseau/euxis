@@ -160,15 +160,15 @@ int cmd_slopsquatting(Context& /*ctx*/, const std::vector<std::string>& argv) {
             }
             ++lockfile_count;
             const auto name = p.filename().string();
-            std::expected<euxis::sca::ParsedManifest, euxis::sca::ParseError> parsed;
-            if      (name == "Cargo.lock")        parsed = euxis::sca::parse_cargo_lock_file(p);
-            else if (name == "package-lock.json") parsed = euxis::sca::parse_npm_lock_file(p);
-            else if (name == "Pipfile.lock")      parsed = euxis::sca::parse_pipfile_lock_file(p);
-            else if (name == "go.sum")            parsed = euxis::sca::parse_go_sum_file(p);
-            if (parsed) {
-                scan_owned.manifests.push_back(std::move(*parsed));
+            std::expected<euxis::sca::ParsedManifest, euxis::sca::ParseError> manifest;
+            if      (name == "Cargo.lock")        manifest = euxis::sca::parse_cargo_lock_file(p);
+            else if (name == "package-lock.json") manifest = euxis::sca::parse_npm_lock_file(p);
+            else if (name == "Pipfile.lock")      manifest = euxis::sca::parse_pipfile_lock_file(p);
+            else if (name == "go.sum")            manifest = euxis::sca::parse_go_sum_file(p);
+            if (manifest) {
+                scan_owned.manifests.push_back(std::move(*manifest));
             } else {
-                scan_owned.errors.push_back(parsed.error());
+                scan_owned.errors.push_back(manifest.error());
             }
         }
         if (lockfile_count == 0) {

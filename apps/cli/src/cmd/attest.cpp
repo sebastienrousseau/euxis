@@ -324,7 +324,7 @@ void print_verify_help() {
 
 } // namespace
 
-int cmd_verify(Context& /*ctx*/, const std::vector<std::string>& argv) {
+int cmd_verify_attest(Context& /*ctx*/, const std::vector<std::string>& argv) {
     auto parsed = parse_verify_args(argv);
     if (!parsed) {
         if (parsed.error() == "__help__") {
@@ -348,7 +348,7 @@ int cmd_verify(Context& /*ctx*/, const std::vector<std::string>& argv) {
         std::println(stderr, "euxis verify: bundle JSON parse: {}", e.what());
         return to_int(ExitCode::InfraError);
     }
-    auto bundle = euxis::attest::from_json(j);
+    auto bundle = euxis::attest::bundle_from_json(j);
     if (!bundle) {
         std::println(stderr, "euxis verify: bundle: {}", bundle.error().message);
         return to_int(ExitCode::InfraError);

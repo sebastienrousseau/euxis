@@ -5,7 +5,7 @@
 #include <expected>
 #include <string>
 #include <string_view>
-#include <generator>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -24,7 +24,7 @@ public:
                   uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;
 
-    auto episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+    auto episodic_generate(std::vector<euxis::runtime::SessionMessage> episodes,
                            std::string_view system_prompt,
                            uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;

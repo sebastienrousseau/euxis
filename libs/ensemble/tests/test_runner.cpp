@@ -22,7 +22,7 @@ Finding make_finding(const std::string& rule_id = "test/rule",
     f.severity  = sev;
     f.confidence = Confidence::Probable;
     f.primary_location.path = "f.cpp";
-    f.primary_location.start_row    = 5;
+    f.primary_location.start_line   = 5;
     f.primary_location.start_column = 1;
     return f;
 }

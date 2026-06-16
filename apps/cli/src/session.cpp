@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string_view>
+#include <vector>
 
 #if defined(__unix__) || defined(__APPLE__)
 #include <fcntl.h>

@@ -205,8 +205,8 @@ TEST(LlamaEngineTest, EpisodicGenerateFailsGracefully) {
     cfg.model_name = "episodic-test";
     LlamaEngine engine(cfg);
     
-    auto get_episodes = []() -> std::generator<euxis::runtime::SessionMessage> {
-        co_yield {.role = euxis::runtime::Role::Assistant, .content = "Trace", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}};
+    auto get_episodes = []() -> std::vector<euxis::runtime::SessionMessage> {
+        return {{.role = euxis::runtime::Role::Assistant, .content = "Trace", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}}};
     };
 
     auto result = engine.episodic_generate(get_episodes(), "System prompt", 32);

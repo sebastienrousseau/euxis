@@ -1,9 +1,15 @@
 #include "euxis/adapters/discord.hpp"
 
+// httplib.h triggers GCC's -Wmaybe-uninitialized. Clang has no such
+// flag and -Wunknown-warning-option is -Werror under AppleClang.
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <httplib.h>
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 #include <spdlog/spdlog.h>
 

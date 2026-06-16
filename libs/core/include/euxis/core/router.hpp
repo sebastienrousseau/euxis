@@ -64,7 +64,7 @@ public:
 private:
     void enforce_limits();
 
-    double budget_limit_;
+    [[maybe_unused]] double budget_limit_;
     double current_spend_{0.0};
     size_t session_limit_{100};
 

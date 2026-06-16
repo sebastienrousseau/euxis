@@ -50,7 +50,7 @@ TEST(Bundle, TlogEntriesEmittedAndRoundTrip) {
     EXPECT_EQ(j["verificationMaterial"]["tlogEntries"][0]["logIndex"], 42);
     EXPECT_EQ(j["verificationMaterial"]["tlogEntries"][0]["kindVersion"]["kind"], "dsse");
 
-    auto parsed = from_json(j);
+    auto parsed = bundle_from_json(j);
     ASSERT_TRUE(parsed.has_value());
     ASSERT_EQ(parsed->tlog_entries.size(), 1U);
     EXPECT_EQ(parsed->tlog_entries[0].log_index, 42);
@@ -59,7 +59,7 @@ TEST(Bundle, TlogEntriesEmittedAndRoundTrip) {
 TEST(Bundle, FromJsonRoundTripPreservesEnvelope) {
     auto b = make_minimal_bundle();
     auto j = to_json(b);
-    auto parsed = from_json(j);
+    auto parsed = bundle_from_json(j);
     ASSERT_TRUE(parsed.has_value());
     EXPECT_EQ(parsed->dsse_envelope.payload_type,
               "application/vnd.in-toto+json");

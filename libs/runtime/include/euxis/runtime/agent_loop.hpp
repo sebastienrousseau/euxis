@@ -76,8 +76,13 @@ public:
 
     AgentLoopHarness(const AgentLoopHarness&)            = delete;
     AgentLoopHarness& operator=(const AgentLoopHarness&) = delete;
-    AgentLoopHarness(AgentLoopHarness&&) noexcept            = default;
-    AgentLoopHarness& operator=(AgentLoopHarness&&) noexcept = default;
+    // Move would be a default-deletion: IterationBudget holds a
+    // std::atomic, which is non-movable. The harness is constructed
+    // in-place at every observed call site (test_agent_loop.cpp);
+    // delete move so the compiler stops trying to synthesise a
+    // broken one.
+    AgentLoopHarness(AgentLoopHarness&&)            = delete;
+    AgentLoopHarness& operator=(AgentLoopHarness&&) = delete;
 
     /// @brief Append a message to the conversation history.
     void add_message(ConversationMessage msg);

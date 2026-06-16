@@ -1,4 +1,5 @@
 #include "euxis/parse/ast.hpp"
+#include "ast_impl.hpp"
 
 #include <tree_sitter/api.h>
 
@@ -7,21 +8,6 @@
 #include <vector>
 
 namespace euxis::parse {
-
-struct Ast::Impl {
-    Language lang{Language::C};
-    TSTree* tree{nullptr};
-    std::string source;  // owned bytes the tree references
-
-    Impl() = default;
-    ~Impl() {
-        if (tree != nullptr) ts_tree_delete(tree);
-    }
-    Impl(const Impl&)            = delete;
-    Impl& operator=(const Impl&) = delete;
-    Impl(Impl&&) noexcept        = default;
-    Impl& operator=(Impl&&) noexcept = default;
-};
 
 namespace {
 

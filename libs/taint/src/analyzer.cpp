@@ -235,17 +235,17 @@ auto flows_to_findings(const AnalysisResult& result,
 
         euxis::security::SourceLocation primary;
         primary.path         = file_path;
-        primary.start_row    = static_cast<int>(sink_node->range.start_row + 1);
+        primary.start_line   = static_cast<int>(sink_node->range.start_row + 1);
         primary.start_column = static_cast<int>(sink_node->range.start_column + 1);
-        primary.end_row      = static_cast<int>(sink_node->range.end_row + 1);
+        primary.end_line     = static_cast<int>(sink_node->range.end_row + 1);
         primary.end_column   = static_cast<int>(sink_node->range.end_column + 1);
         f.primary_location = primary;
 
         euxis::security::SourceLocation src_loc;
         src_loc.path         = file_path;
-        src_loc.start_row    = static_cast<int>(source_node->range.start_row + 1);
+        src_loc.start_line   = static_cast<int>(source_node->range.start_row + 1);
         src_loc.start_column = static_cast<int>(source_node->range.start_column + 1);
-        src_loc.end_row      = static_cast<int>(source_node->range.end_row + 1);
+        src_loc.end_line     = static_cast<int>(source_node->range.end_row + 1);
         src_loc.end_column   = static_cast<int>(source_node->range.end_column + 1);
         f.related_locations.push_back(src_loc);
 
@@ -254,9 +254,9 @@ auto flows_to_findings(const AnalysisResult& result,
             if (hop == nullptr) continue;
             euxis::security::SourceLocation hop_loc;
             hop_loc.path         = file_path;
-            hop_loc.start_row    = static_cast<int>(hop->range.start_row + 1);
+            hop_loc.start_line   = static_cast<int>(hop->range.start_row + 1);
             hop_loc.start_column = static_cast<int>(hop->range.start_column + 1);
-            hop_loc.end_row      = static_cast<int>(hop->range.end_row + 1);
+            hop_loc.end_line     = static_cast<int>(hop->range.end_row + 1);
             hop_loc.end_column   = static_cast<int>(hop->range.end_column + 1);
             f.related_locations.push_back(hop_loc);
         }

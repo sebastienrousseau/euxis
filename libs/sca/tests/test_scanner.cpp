@@ -32,13 +32,13 @@ void write(const fs::path& p, const std::string& contents) {
 
 TEST(Scanner, FindsCargoLockAndPackageLockInSameTree) {
     TmpDir dir;
-    write(dir.path / "Cargo.lock", R"(
+    write(dir.path / "Cargo.lock", R"toml(
 [[package]]
 name = "serde"
 version = "1.0.197"
 source = "registry+x"
-)");
-    write(dir.path / "frontend" / "package-lock.json", R"({
+)toml");
+    write(dir.path / "frontend" / "package-lock.json", R"toml({
   "name": "fe",
   "version": "1.0.0",
   "lockfileVersion": 3,
@@ -46,7 +46,7 @@ source = "registry+x"
     "": {"name": "fe", "version": "1.0.0"},
     "node_modules/lodash": {"version": "4.17.21"}
   }
-})");
+})toml");
     auto res = scan_directory(dir.path);
     ASSERT_TRUE(res.has_value()) << res.error().message;
     EXPECT_EQ(res->manifests.size(), 2U);
@@ -54,18 +54,18 @@ source = "registry+x"
 
 TEST(Scanner, SkipsIgnoredDirectories) {
     TmpDir dir;
-    write(dir.path / "node_modules" / "Cargo.lock", R"(
+    write(dir.path / "node_modules" / "Cargo.lock", R"toml(
 [[package]]
 name = "ignored"
 version = "1"
 source = "x"
-)");
-    write(dir.path / "Cargo.lock", R"(
+)toml");
+    write(dir.path / "Cargo.lock", R"toml(
 [[package]]
 name = "kept"
 version = "1"
 source = "x"
-)");
+)toml");
     auto res = scan_directory(dir.path);
     ASSERT_TRUE(res.has_value());
     EXPECT_EQ(res->manifests.size(), 1U);
@@ -90,18 +90,18 @@ TEST(Scanner, SinglefileTargetDispatchesDirectly) {
 
 TEST(Scanner, ToSbomDocumentDedupesByPurl) {
     TmpDir dir;
-    write(dir.path / "a" / "Cargo.lock", R"(
+    write(dir.path / "a" / "Cargo.lock", R"toml(
 [[package]]
 name = "shared"
 version = "1.0.0"
 source = "registry+x"
-)");
-    write(dir.path / "b" / "Cargo.lock", R"(
+)toml");
+    write(dir.path / "b" / "Cargo.lock", R"toml(
 [[package]]
 name = "shared"
 version = "1.0.0"
 source = "registry+x"
-)");
+)toml");
     auto res = scan_directory(dir.path);
     ASSERT_TRUE(res.has_value());
     EXPECT_EQ(res->manifests.size(), 2U);
@@ -113,7 +113,7 @@ source = "registry+x"
 
 TEST(Scanner, ToSbomDocumentBuildsDepGraph) {
     TmpDir dir;
-    write(dir.path / "Cargo.lock", R"(
+    write(dir.path / "Cargo.lock", R"toml(
 [[package]]
 name = "a"
 version = "1"
@@ -124,7 +124,7 @@ dependencies = ["b 1 (registry+x)"]
 name = "b"
 version = "1"
 source = "registry+x"
-)");
+)toml");
     auto res = scan_directory(dir.path);
     ASSERT_TRUE(res.has_value());
     auto doc = to_sbom_document(*res, dir.path);
@@ -136,12 +136,12 @@ source = "registry+x"
 
 TEST(Scanner, ToSbomDocumentSetsRootProperties) {
     TmpDir dir;
-    write(dir.path / "Cargo.lock", R"(
+    write(dir.path / "Cargo.lock", R"toml(
 [[package]]
 name = "a"
 version = "1"
 source = "registry+x"
-)");
+)toml");
     auto res = scan_directory(dir.path);
     ASSERT_TRUE(res.has_value());
     auto doc = to_sbom_document(*res, dir.path);

@@ -56,8 +56,13 @@ auto FinOpsRouter::select_provider(const std::string& task_complexity,
     // Branchless SIMD-optimized scoring loop over SoA arrays
     std::vector<double> scores(n);
     
-    // Hardware-aware optimization: tell GCC to auto-vectorize this loop
+    // Hardware-aware optimization: tell GCC to auto-vectorize this loop.
+    // `#pragma GCC ivdep` is GCC-only; Clang has no equivalent and
+    // surfaces it as -Wunknown-pragmas (promoted to error under our
+    // -Werror gate).
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC ivdep
+#endif
     for (size_t i = 0; i < n; ++i) {
         scores[i] = (p_reliabilities_[i] * 10.0) - 
                     (p_costs_[i] * 500.0) - 

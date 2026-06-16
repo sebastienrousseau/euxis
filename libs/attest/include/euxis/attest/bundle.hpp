@@ -66,7 +66,12 @@ struct BundleError {
 };
 
 [[nodiscard]] auto to_json(const Bundle& b) -> nlohmann::json;
-[[nodiscard]] auto from_json(const nlohmann::json& j)
+// Renamed from `from_json` to disambiguate at link time from the
+// DSSE envelope's `from_json` (same namespace, identical signature
+// but Envelope return type). Both used to coexist as overloads on
+// return type — illegal C++. Pick `bundle_from_json` here and keep
+// the Envelope one as plain `from_json` in dsse.hpp.
+[[nodiscard]] auto bundle_from_json(const nlohmann::json& j)
     -> std::expected<Bundle, BundleError>;
 
 } // namespace euxis::attest

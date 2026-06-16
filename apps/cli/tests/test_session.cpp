@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "euxis/cli/session.hpp"
 
+#include <algorithm>
 #include <filesystem>
 
 namespace euxis::cli {

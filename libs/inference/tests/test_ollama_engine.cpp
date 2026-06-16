@@ -143,8 +143,8 @@ TEST(OllamaEngineTest, HealthStructure) {
 TEST(OllamaEngineTest, EpisodicGenerateFailsGracefully) {
     OllamaEngine engine("localhost", 19999);
     
-    auto get_episodes = []() -> std::generator<euxis::runtime::SessionMessage> {
-        co_yield {.role = euxis::runtime::Role::User, .content = "Hello", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}};
+    auto get_episodes = []() -> std::vector<euxis::runtime::SessionMessage> {
+        return {{.role = euxis::runtime::Role::User, .content = "Hello", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}}};
     };
 
     auto result = engine.episodic_generate(get_episodes(), "System prompt", 32);

@@ -29,7 +29,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "euxis/sbom/types.hpp"  // for euxis::sbom::PurlType
+#include "euxis/sbom/purl.hpp"  // for euxis::sbom::PurlType
 
 namespace euxis::slopsquatting {
 

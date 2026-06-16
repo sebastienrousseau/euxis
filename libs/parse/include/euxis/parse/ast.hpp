@@ -22,6 +22,11 @@
 
 namespace euxis::parse {
 
+// Forward declarations for the friend list below — parser.cpp pokes
+// Ast's private impl through this helper, keeping `Ast::Impl` out of
+// the public header.
+namespace detail { struct AstAccess; }
+
 class Ast {
 public:
     Ast() noexcept;
@@ -73,6 +78,7 @@ public:
 
 private:
     friend class Parser;
+    friend struct detail::AstAccess;
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };

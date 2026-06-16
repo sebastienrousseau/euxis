@@ -1,6 +1,7 @@
 #include "euxis/parse/parser.hpp"
 
 #include "euxis/parse/ast.hpp"
+#include "ast_impl.hpp"
 
 #include <tree_sitter/api.h>
 

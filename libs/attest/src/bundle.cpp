@@ -63,7 +63,7 @@ auto to_json(const Bundle& b) -> nlohmann::json {
     return out;
 }
 
-auto from_json(const nlohmann::json& j)
+auto bundle_from_json(const nlohmann::json& j)
     -> std::expected<Bundle, BundleError> {
     if (!j.is_object()) {
         return std::unexpected(BundleError{.message = "Bundle: not an object"});

@@ -254,9 +254,9 @@ auto serialize_findings(const std::vector<euxis::security::Finding>& findings)
         item["stable_fingerprint"] = f.stable_fingerprint;
         item["primary_location"]   = {
             {"path",         f.primary_location.path},
-            {"start_row",    f.primary_location.start_row},
+            {"start_row",    f.primary_location.start_line},
             {"start_column", f.primary_location.start_column},
-            {"end_row",      f.primary_location.end_row},
+            {"end_row",      f.primary_location.end_line},
             {"end_column",   f.primary_location.end_column},
         };
         if (f.cwe.has_value()) {
@@ -301,9 +301,9 @@ auto deserialize_findings(const std::string& json_str)
                 item["primary_location"].is_object()) {
                 const auto& loc = item["primary_location"];
                 f.primary_location.path         = loc.value("path", "");
-                f.primary_location.start_row    = loc.value("start_row",    0);
+                f.primary_location.start_line   = loc.value("start_row",    0);
                 f.primary_location.start_column = loc.value("start_column", 0);
-                f.primary_location.end_row      = loc.value("end_row",      0);
+                f.primary_location.end_line     = loc.value("end_row",      0);
                 f.primary_location.end_column   = loc.value("end_column",   0);
             }
             if (item.contains("compliance_taxa") &&
@@ -494,7 +494,7 @@ void print_finding(const euxis::security::Finding& f) {
     std::println("  [{}] {}:{}:{}: {}",
         euxis::security::severity_label(f.severity),
         f.primary_location.path,
-        f.primary_location.start_row,
+        f.primary_location.start_line,
         f.primary_location.start_column,
         f.message);
 }

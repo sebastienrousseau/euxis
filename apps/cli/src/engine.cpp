@@ -71,7 +71,7 @@ void Engine::register_commands() {
     commands_.push_back({"slopsquatting",      tr("Core"), tr("Guard against LLM-hallucinated package names"), cmd::cmd_slopsquatting});
     commands_.push_back({"cache",              tr("Core"), tr("Inspect / purge the incremental scan cache"), cmd::cmd_cache});
     commands_.push_back({"attest",             tr("Core"), tr("Produce a Sigstore-format signed in-toto evidence bundle"), cmd::cmd_attest});
-    commands_.push_back({"verify",             tr("Core"), tr("Verify a Sigstore-format signed evidence bundle"), cmd::cmd_verify});
+    commands_.push_back({"verify",             tr("Core"), tr("Verify a Sigstore-format signed evidence bundle"), cmd::cmd_verify_attest});
     commands_.push_back({"scan",               tr("Core"), tr("Apply YAML rule packs to a target directory (SARIF output)"), cmd::cmd_scan});
 
     // Lifecycle (5) — installation and maintenance

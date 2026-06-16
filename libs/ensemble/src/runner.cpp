@@ -12,7 +12,7 @@ auto build_request(const euxis::security::Finding& f,
     req.rule_id     = f.rule_id;
     req.message     = f.message;
     req.source_path = f.primary_location.path;
-    req.start_row    = f.primary_location.start_row;
+    req.start_row    = f.primary_location.start_line;
     req.start_column = f.primary_location.start_column;
     req.severity    = f.severity;
     if (!f.primary_location.snippet.empty()) {

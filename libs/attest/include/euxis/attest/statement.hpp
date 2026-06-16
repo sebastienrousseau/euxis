@@ -1,5 +1,12 @@
 /// @file
 /// @brief in-toto Statement v1 builder.
+#pragma once
+
+#include <expected>
+#include <string>
+#include <vector>
+
+#include <nlohmann/json.hpp>
 ///
 /// Implements the in-toto Attestation Framework Statement v1 layout:
 ///   https://github.com/in-toto/attestation/blob/main/spec/v1/statement.md

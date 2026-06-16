@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <fstream>
+
 #include "euxis/slopsquatting/guard.hpp"
 
 namespace euxis::slopsquatting {

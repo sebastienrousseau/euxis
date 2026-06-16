@@ -175,7 +175,7 @@ rules:
     EXPECT_EQ(result.findings.front().primary_location.path, "file.c");
     // Locations are 1-based on output (we converted from
     // tree-sitter's 0-based row/column).
-    EXPECT_GE(result.findings.front().primary_location.start_row, 1);
+    EXPECT_GE(result.findings.front().primary_location.start_line, 1);
 }
 
 TEST(Engine, EmptyPackProducesNoFindings) {

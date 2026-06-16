@@ -91,12 +91,11 @@ public:
         return sessions_.at(session_id).at(branch);
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
+    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::vector<SessionMessage> override {
         if (auto res = load(session_id, branch)) {
-            for (const auto& msg : res->messages) {
-                co_yield msg;
-            }
+            return std::move(res->messages);
         }
+        return {};
     }
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
@@ -182,13 +181,14 @@ public:
         }
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
-        // C++23 coroutine implementation for lazy, zero-allocation trace loading
+    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::vector<SessionMessage> override {
+        // Eager materialisation pending `std::generator` ship in libc++.
+        // The previous `co_yield` implementation provided zero-allocation
+        // lazy traces; restore it when `__cpp_lib_generator` is defined.
         if (auto res = load(session_id, branch)) {
-            for (const auto& msg : res->messages) {
-                co_yield msg;
-            }
+            return std::move(res->messages);
         }
+        return {};
     }
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {

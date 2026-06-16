@@ -111,7 +111,7 @@ TEST(PiiFilterTest, RedactCreditCard) {
 //  C1 — SARIF output
 // =====================================================================
 TEST(SarifTest, EmptyFindings) {
-    auto sarif = findings_to_sarif({});
+    auto sarif = findings_to_sarif(std::vector<SarifFinding>{});
     EXPECT_EQ(sarif["version"], "2.1.0");
     EXPECT_TRUE(sarif["runs"].is_array());
     EXPECT_EQ(sarif["runs"][0]["results"].size(), 0);

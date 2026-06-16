@@ -7,7 +7,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <generator>
 
 namespace euxis::runtime {
 
@@ -46,9 +45,16 @@ public:
     virtual auto load(const std::string& session_id, const std::string& branch = "main")
         -> std::expected<SessionSnapshot, std::string> = 0;
 
-    /// @brief Lazily stream session episodes for long-horizon reasoning.
+    /// @brief Stream session episodes for long-horizon reasoning.
+    ///
+    /// Returns a fully-materialised vector. The original signature
+    /// returned `std::generator<SessionMessage>` (C++23) for lazy
+    /// loading; the header is not yet shipped by AppleClang 21's
+    /// libc++ nor Homebrew LLVM 22's libc++, so we eagerly collect
+    /// pending toolchain support. Restore the lazy signature when
+    /// `__cpp_lib_generator` is defined.
     virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")
-        -> std::generator<SessionMessage> = 0;
+        -> std::vector<SessionMessage> = 0;
 
     /// @brief List all branches for a given session.
     virtual auto list_branches(const std::string& session_id)
