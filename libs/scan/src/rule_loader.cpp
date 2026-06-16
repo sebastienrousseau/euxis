@@ -1,6 +1,7 @@
 #include "euxis/scan/rule_loader.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
 
@@ -40,6 +41,15 @@ auto build_pattern_list(const YAML::Node& seq) -> std::vector<Pattern> {
     return out;
 }
 
+/// Wrap a child pattern as a single-element child list under the
+/// given kind. Used by `pattern-not` and `pattern-inside`.
+auto wrap_unary(PatternKind kind, const YAML::Node& child_node) -> Pattern {
+    Pattern p;
+    p.kind = kind;
+    p.children.push_back(build_pattern_from_node(child_node));
+    return p;
+}
+
 auto build_pattern_from_node(const YAML::Node& node) -> Pattern {
     Pattern p;
     if (!node) return p;
@@ -51,6 +61,25 @@ auto build_pattern_from_node(const YAML::Node& node) -> Pattern {
     }
 
     if (!node.IsMap()) return p;
+
+    // Negation: `pattern-not: <child>`. Child may be a scalar
+    // (treated as literal) or a nested map.
+    if (node["pattern-not"]) {
+        return wrap_unary(PatternKind::Negation, node["pattern-not"]);
+    }
+    // Scoping: `pattern-inside: <child>`. Same child shape.
+    if (node["pattern-inside"]) {
+        return wrap_unary(PatternKind::Inside, node["pattern-inside"]);
+    }
+    // Metavariable refinement keys are recognised but not yet
+    // evaluated by the engine. Surface a one-time warning so rule
+    // authors see that the field had no effect rather than
+    // wondering why their rule never matched.
+    if (node["metavariable-pattern"] || node["metavariable-regex"]) {
+        std::cerr << "euxis/scan: metavariable-pattern / "
+                     "metavariable-regex recognised but not yet "
+                     "evaluated by the engine — see rule.hpp\n";
+    }
 
     if (node["pattern-either"] && node["pattern-either"].IsSequence()) {
         p.kind     = PatternKind::Alternation;
@@ -72,8 +101,10 @@ auto build_pattern_from_node(const YAML::Node& node) -> Pattern {
     return p;
 }
 
-/// Parse the top-level `pattern` / `patterns` / `pattern-either`
-/// block of a Rule. We accept any of the three at the rule level.
+/// Parse the top-level `pattern` / `patterns` / `pattern-either` /
+/// `pattern-not` / `pattern-inside` block of a Rule. Any of those
+/// is accepted at the rule level; the engine evaluates whichever
+/// kind survives parsing.
 auto build_rule_pattern(const YAML::Node& rule_node) -> Pattern {
     Pattern p;
     if (!rule_node || !rule_node.IsMap()) return p;
@@ -86,6 +117,12 @@ auto build_rule_pattern(const YAML::Node& rule_node) -> Pattern {
         p.kind     = PatternKind::Composite;
         p.children = build_pattern_list(rule_node["patterns"]);
         return p;
+    }
+    if (rule_node["pattern-not"]) {
+        return wrap_unary(PatternKind::Negation, rule_node["pattern-not"]);
+    }
+    if (rule_node["pattern-inside"]) {
+        return wrap_unary(PatternKind::Inside, rule_node["pattern-inside"]);
     }
     if (rule_node["pattern"]) {
         p.kind = PatternKind::Literal;

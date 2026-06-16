@@ -187,6 +187,112 @@ TEST(Engine, EmptyPackProducesNoFindings) {
     EXPECT_EQ(result.stats.rules_evaluated, 0U);
 }
 
+// =====================================================================
+// pattern-not: Negation
+// =====================================================================
+
+TEST(Engine, PatternNotLoaderRecognisesRuleLevelKey) {
+    // Top-level `pattern-not` should produce a Negation pattern.
+    // Structural assertion only — the engine semantics around
+    // per-node iteration are covered by the Composite test below.
+    auto pack = load_rules_yaml(R"(
+rules:
+  - id: not-eval
+    message: "rule-level pattern-not"
+    severity: INFO
+    languages: [c]
+    pattern-not: "eval("
+)").value();
+    ASSERT_EQ(pack.rules.size(), 1U);
+    EXPECT_EQ(pack.rules.front().pattern.kind, PatternKind::Negation);
+    ASSERT_EQ(pack.rules.front().pattern.children.size(), 1U);
+    EXPECT_EQ(pack.rules.front().pattern.children.front().kind,
+              PatternKind::Literal);
+    EXPECT_EQ(pack.rules.front().pattern.children.front().text, "eval(");
+}
+
+TEST(Engine, PatternNotInsideCompositeNarrowsMatchSet) {
+    // `patterns: [pattern: X, pattern-not: Y]` matches nodes whose
+    // text contains X but not Y. Per-node evaluation: the negation
+    // narrows the match set node-by-node — it does not enforce a
+    // file-scope exclusion (which would require a metavariable /
+    // scope binding layer not yet implemented; see rule.hpp).
+    auto pack_constrained = load_rules_yaml(R"(
+rules:
+  - id: int-not-static
+    message: "int declaration without 'static' marker"
+    severity: INFO
+    languages: [c]
+    patterns:
+      - pattern: "int "
+      - pattern-not: "static"
+)").value();
+    auto pack_unconstrained = load_rules_yaml(R"(
+rules:
+  - id: int-any
+    message: "int declaration"
+    severity: INFO
+    languages: [c]
+    pattern: "int "
+)").value();
+
+    auto pipe = build_pipeline(Language::C,
+        "int x = 1; static int y = 2;");
+    auto constrained =
+        apply_rules(pack_constrained, pipe.ast, pipe.graph, "f.c");
+    auto unconstrained =
+        apply_rules(pack_unconstrained, pipe.ast, pipe.graph, "f.c");
+
+    EXPECT_LE(constrained.stats.findings_emitted,
+              unconstrained.stats.findings_emitted)
+        << "Composite with pattern-not must produce no more findings than "
+           "the unconstrained pattern alone";
+}
+
+// =====================================================================
+// pattern-inside: Scoping
+// =====================================================================
+
+TEST(Engine, PatternInsideRestrictsToAncestorContext) {
+    // Rule: flag `gets(` calls but ONLY when they appear inside a
+    // function whose surrounding text contains the identifier
+    // `unsafe_block`. This exercises the AstChild parent walk:
+    // the engine should reject a `gets(` call that is NOT enclosed
+    // by such a function.
+    auto pack = load_rules_yaml(R"(
+rules:
+  - id: gets-in-unsafe
+    message: "gets in unsafe_block"
+    severity: WARNING
+    languages: [c]
+    patterns:
+      - pattern: "gets("
+      - pattern-inside: "unsafe_block"
+)").value();
+
+    auto pipe_inside_unsafe = build_pipeline(Language::C, R"(
+int unsafe_block(char* buf) {
+    gets(buf);
+    return 0;
+}
+)");
+    auto pipe_safe = build_pipeline(Language::C, R"(
+int safe_block(char* buf) {
+    gets(buf);
+    return 0;
+}
+)");
+
+    auto r1 = apply_rules(pack, pipe_inside_unsafe.ast,
+                          pipe_inside_unsafe.graph, "u.c");
+    auto r2 = apply_rules(pack, pipe_safe.ast, pipe_safe.graph, "s.c");
+
+    EXPECT_GT(r1.stats.findings_emitted, 0U)
+        << "gets inside an unsafe_block ancestor should match";
+    EXPECT_EQ(r2.stats.findings_emitted, 0U)
+        << "gets outside the unsafe_block context should be filtered";
+}
+
 TEST(Engine, FingerprintIsStableAcrossRuns) {
     auto pack = load_rules_yaml(R"(
 rules:

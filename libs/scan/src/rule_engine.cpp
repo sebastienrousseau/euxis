@@ -10,10 +10,54 @@ namespace euxis::scan {
 
 namespace {
 
-/// Recursive literal-pattern evaluator. Composite (AND) requires
-/// every child to match somewhere in `text`; Alternation (OR)
-/// requires at least one. Literal does straight substring search.
-bool pattern_matches(const Pattern& p, std::string_view text) {
+/// Match context threaded through recursive evaluation. Carries
+/// just enough graph/ast state for the new Inside pattern kind
+/// to walk the AstChild parent chain. Literal / Composite /
+/// Alternation / Negation only consume `text`; only Inside reaches
+/// for the rest.
+struct MatchContext {
+    const euxis::cpg::Graph& graph;
+    const euxis::parse::Ast& ast;
+    euxis::cpg::NodeId current_node;
+};
+
+bool pattern_matches(const Pattern& p,
+                     std::string_view text,
+                     const MatchContext& ctx);
+
+/// Inside semantics: the pattern matches when ANY AstChild
+/// ancestor of `current_node` (excluding `current_node` itself)
+/// has source text that satisfies the nested child pattern.
+/// Bottom-up walk; bails the first time a child pattern matches.
+bool inside_matches(const Pattern& inside,
+                    const MatchContext& ctx) {
+    if (inside.children.empty()) return false;
+    const auto& child = inside.children.front();
+    auto parent = ctx.graph.parent(ctx.current_node);
+    while (parent.is_valid()) {
+        const auto* parent_node = ctx.graph.get(parent);
+        if (parent_node != nullptr) {
+            auto parent_text = ctx.ast.node_text(parent_node->range);
+            if (!parent_text.empty()) {
+                MatchContext climbed{ctx.graph, ctx.ast, parent};
+                if (pattern_matches(child, parent_text, climbed)) return true;
+            }
+        }
+        parent = ctx.graph.parent(parent);
+    }
+    return false;
+}
+
+/// Recursive pattern evaluator.
+///  - Literal     : straight substring search on `text`.
+///  - Composite   : AND of children.
+///  - Alternation : OR of children.
+///  - Negation    : NOT of the (single) child.
+///  - Inside      : child must match the text of an AstChild
+///                  ancestor of `current_node`.
+bool pattern_matches(const Pattern& p,
+                     std::string_view text,
+                     const MatchContext& ctx) {
     switch (p.kind) {
         case PatternKind::Literal:
             if (p.text.empty()) return false;
@@ -21,11 +65,16 @@ bool pattern_matches(const Pattern& p, std::string_view text) {
         case PatternKind::Composite:
             if (p.children.empty()) return false;
             return std::all_of(p.children.begin(), p.children.end(),
-                [&](const Pattern& c) { return pattern_matches(c, text); });
+                [&](const Pattern& c) { return pattern_matches(c, text, ctx); });
         case PatternKind::Alternation:
             if (p.children.empty()) return false;
             return std::any_of(p.children.begin(), p.children.end(),
-                [&](const Pattern& c) { return pattern_matches(c, text); });
+                [&](const Pattern& c) { return pattern_matches(c, text, ctx); });
+        case PatternKind::Negation:
+            if (p.children.empty()) return true;  // vacuous-not = true
+            return !pattern_matches(p.children.front(), text, ctx);
+        case PatternKind::Inside:
+            return inside_matches(p, ctx);
     }
     return false;
 }
@@ -129,7 +178,8 @@ auto apply_rules(const RulePack& pack,
             ++stats.nodes_visited;
             auto text = ast.node_text(node.range);
             if (text.empty()) continue;
-            if (!pattern_matches(rule.pattern, text)) continue;
+            MatchContext ctx{graph, ast, node.id};
+            if (!pattern_matches(rule.pattern, text, ctx)) continue;
             result.findings.push_back(make_finding(rule, pack, node, file));
             ++stats.findings_emitted;
         }

@@ -23,12 +23,28 @@
 ///   - `metadata.owasp`  string or list -> euxis::security::OwaspCategory
 ///   - `metadata.references` list of URLs
 ///
-/// What this batch deliberately defers
-/// -----------------------------------
-///   - `pattern-not`               needs negation
-///   - `pattern-inside`            needs scoping
+/// What the v2 engine adds (this commit)
+/// -------------------------------------
+///   - `pattern-not`               Negation kind; matches when the
+///                                 nested pattern does NOT match.
+///                                 Inside a Composite this gives
+///                                 "A and not B" semantics.
+///   - `pattern-inside`            Inside kind; matches only when
+///                                 the current node has an AstChild
+///                                 ancestor whose text satisfies the
+///                                 nested pattern. Used to scope a
+///                                 match to a containing construct
+///                                 (function body, class, etc.).
+///
+/// What this batch still defers
+/// ----------------------------
 ///   - `metavariable-pattern`      needs metavariable binding
 ///   - `metavariable-regex`        ditto + Vectorscan
+///   The YAML loader recognises both today and warns when they
+///   appear so rule authors don't think their rule was applied;
+///   the engine layer adds them in a focused follow-up because
+///   metavariables threading a binding context through every
+///   evaluation is a larger refactor.
 ///   - Real AST-based pattern matching (tree-sitter S-expression
 ///     queries). Lands when the security-rule corpus drives the
 ///     requirement — for the v0.0.3 surface a literal substring
@@ -70,9 +86,11 @@ enum class RuleSeverity {
 
 /// Pattern node kinds the engine understands today.
 enum class PatternKind {
-    Literal,       ///< `pattern: foo`  — substring match
-    Composite,     ///< `patterns: [...]`  — AND
-    Alternation,   ///< `pattern-either: [...]`  — OR
+    Literal,       ///< `pattern: foo`            — substring match
+    Composite,     ///< `patterns: [...]`         — AND
+    Alternation,   ///< `pattern-either: [...]`   — OR
+    Negation,      ///< `pattern-not: ...`        — child must NOT match
+    Inside,        ///< `pattern-inside: ...`     — child must match in an ancestor's text
 };
 
 /// One node in a rule's pattern tree.
@@ -85,6 +103,8 @@ struct Pattern {
     std::string text;
 
     /// For Composite and Alternation kinds: the operand patterns.
+    /// For Negation and Inside kinds: a single-element vector
+    /// containing the nested pattern.
     std::vector<Pattern> children;
 };
 
