@@ -103,6 +103,14 @@ if(TARGET yaml-cpp)
 endif()
 
 # spdlog (Use latest stable)
+#
+# SPDLOG_USE_STD_FORMAT routes spdlog through C++23 std::format
+# (from libc++) instead of its bundled fmt. Clang 21 / AppleClang 21
+# tightened consteval propagation in a way the pinned fmt rejects
+# (`logger-inl.h:139, :151` and `fmt_helper.h:91`); std::format
+# sidesteps the entire chain. Reversible by flipping the flag back
+# OFF once we bump the spdlog pin.
+set(SPDLOG_USE_STD_FORMAT ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
@@ -176,6 +184,16 @@ if(NOT TARGET httplib::httplib)
     add_library(httplib::httplib ALIAS httplib)
 endif()
 
+# Third-party dep warning relaxation — see cmake/EuxisDefaults.cmake
+# for the rationale. Must come AFTER every FetchContent_MakeAvailable
+# above so the imported targets exist when we touch them.
+euxis_relax_thirdparty_warnings(
+    spdlog fmt fmt::fmt
+    gtest gtest_main gmock gmock_main
+    benchmark benchmark_main
+    yaml-cpp ixwebsocket
+)
+
 # SQLite3
 #
 # CMake's FindSQLite3 module is supposed to create the SQLite3::SQLite3
@@ -218,9 +236,13 @@ else()
 endif()
 
 # --- Debug info compression for Release builds ---
+# GNU `--compress-debug-sections=zlib` is recognised by GNU ld / lld
+# only. macOS ld64 has no equivalent flag; skip silently on Apple.
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     add_compile_options(-g1)
-    add_link_options(-Wl,--compress-debug-sections=zlib)
+    if(NOT APPLE)
+        add_link_options(-Wl,--compress-debug-sections=zlib)
+    endif()
 endif()
 
 enable_testing()

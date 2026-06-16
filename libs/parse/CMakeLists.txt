@@ -14,11 +14,15 @@ enable_language(C)
 include(FetchContent)
 
 # ---- tree-sitter core ------------------------------------------------------
-# v0.24+ ships a CMakeLists.txt that builds a `tree-sitter` target.
+# v0.24+ ships its CMakeLists.txt under `lib/`, not at the repo
+# root, so the default auto-add_subdirectory() found nothing and
+# produced no `tree-sitter` library target. SOURCE_SUBDIR lib
+# tells FetchContent to add_subdirectory(lib) explicitly.
 FetchContent_Declare(
     tree-sitter
     GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter.git
     GIT_TAG        v0.24.6
+    SOURCE_SUBDIR  lib
     SYSTEM
 )
 FetchContent_MakeAvailable(tree-sitter)

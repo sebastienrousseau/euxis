@@ -6,8 +6,14 @@ add_compile_options(-fstack-protector-strong)
 add_compile_options(-Wformat-security)
 if(NOT WIN32)
   add_compile_options(-fPIE)
-  add_link_options(-Wl,-z,relro -Wl,-z,now)
-  add_link_options(-pie)
+  # macOS uses ld64 which does not recognise the GNU `-z relro`,
+  # `-z now`, or `-pie` ld options — these are Linux-only ld
+  # conventions. On Apple targets PIE is the default and RELRO is
+  # not applicable, so simply skip the flags.
+  if(NOT APPLE)
+    add_link_options(-Wl,-z,relro -Wl,-z,now)
+    add_link_options(-pie)
+  endif()
   # _FORTIFY_SOURCE requires optimization; only set for Release/RelWithDebInfo
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "")
     # Use _FORTIFY_SOURCE=3 on GCC 12+ / Clang 14+, fallback to 2
@@ -80,3 +86,27 @@ if(EUXIS_COVERAGE)
   add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
   add_link_options(--coverage)
 endif()
+
+# AppleClang 21+ promoted -Wcharacter-conversion to error. The
+# warning fires inside upstream googletest's pretty-printers
+# (intentional char8_t -> char32_t coercion). The header lands in
+# our test TUs so suppressing on the gtest target alone does not
+# help; relax the error promotion globally for this compiler band.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND
+   CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
+  add_compile_options(-Wno-error=character-conversion)
+endif()
+
+# Third-party FetchContent targets pinned at versions that predate
+# stricter Clang 22 / AppleClang 21 enforcement (spdlog 1.15.0 +
+# bundled fmt notably reject some consteval propagation).
+# Relax -Werror on their own TUs so our first-party -Werror gate
+# stays intact. Call from the root CMakeLists.txt AFTER the
+# FetchContent_MakeAvailable blocks so the targets exist.
+function(euxis_relax_thirdparty_warnings)
+  foreach(_ext_target IN LISTS ARGN)
+    if(TARGET ${_ext_target})
+      target_compile_options(${_ext_target} PRIVATE -Wno-error)
+    endif()
+  endforeach()
+endfunction()
