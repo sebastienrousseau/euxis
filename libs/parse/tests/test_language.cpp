@@ -34,8 +34,10 @@ TEST(LanguageDetect, CaseInsensitive) {
 }
 
 TEST(LanguageDetect, UnknownReturnsNullopt) {
-    EXPECT_FALSE(detect_language_by_extension(".rs").has_value());
-    EXPECT_FALSE(detect_language_by_extension(".py").has_value());
+    // `.rs` and `.py` were added when libs/parse expanded to 8
+    // grammars in Week 6-7; the original test predated that.
+    EXPECT_FALSE(detect_language_by_extension(".unknown").has_value());
+    EXPECT_FALSE(detect_language_by_extension(".xyz").has_value());
     EXPECT_FALSE(detect_language_by_extension("").has_value());
     EXPECT_FALSE(detect_language_by_extension("not-an-ext").has_value());
 }

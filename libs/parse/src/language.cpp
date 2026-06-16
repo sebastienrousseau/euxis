@@ -19,12 +19,17 @@ auto ascii_lower(std::string_view s) -> std::string {
 }
 
 // Extension → Language table. Order matters: longer extensions
-// (`.tpp`) are checked before shorter equivalents.
+// (`.tpp`) are checked before shorter equivalents. The array
+// size is intentionally left unspecified so adding or removing
+// an entry can't desync from the literal initialiser — a 28-slot
+// declaration with 27 initialised entries silently left a
+// default-constructed `{ext="", lang=C}` slot that matched empty
+// inputs and broke `LanguageDetect.UnknownReturnsNullopt`.
 struct ExtMap {
     std::string_view ext;
     Language lang;
 };
-constexpr std::array<ExtMap, 28> kExtensions{{
+constexpr std::array kExtensions = std::to_array<ExtMap>({
     // C
     {"c",  Language::C},
     {"h",  Language::C},  // ambiguous with C++ headers; the heuristic below promotes if a paired .cpp exists
@@ -62,7 +67,7 @@ constexpr std::array<ExtMap, 28> kExtensions{{
     {"cts", Language::TypeScript},
     // Java
     {"java", Language::Java},
-}};
+});
 
 } // namespace
 
@@ -85,6 +90,7 @@ auto detect_language_by_extension(std::string_view ext) noexcept
     if (!ext.empty() && ext.front() == '.') {
         ext.remove_prefix(1);
     }
+    if (ext.empty()) return std::nullopt;
     auto lower = ascii_lower(ext);
     for (const auto& entry : kExtensions) {
         if (lower == entry.ext) return entry.lang;

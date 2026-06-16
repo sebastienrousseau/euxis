@@ -127,24 +127,46 @@ auto Purl::to_string() const -> std::string {
     }
 
     if (!qualifiers.empty()) {
-        // Qualifier keys MUST be sorted alphabetically per spec for
-        // canonicalisation. std::map gives us ordered iteration.
-        std::map<std::string, std::string> sorted(qualifiers.begin(), qualifiers.end());
-        out.push_back('?');
-        bool first = true;
-        for (const auto& [k, v] : sorted) {
+        // Qualifier keys MUST be sorted alphabetically (lower-case)
+        // per the purl spec. std::map orders by raw bytes, so we
+        // lower-case keys *before* inserting — otherwise "arch" and
+        // "Repository_URL" sort as "R" < "a" (capital-letter ASCII
+        // is lower than lower-case), which violates the spec and
+        // surfaces a non-canonical purl.
+        std::map<std::string, std::string> sorted;
+        for (const auto& [k, v] : qualifiers) {
             if (k.empty() || v.empty()) continue;
-            if (!first) out.push_back('&');
-            out.append(ascii_lower(k));
-            out.push_back('=');
-            out.append(percent_encode_segment(v));
-            first = false;
+            sorted.emplace(ascii_lower(k), v);
+        }
+        if (!sorted.empty()) {
+            out.push_back('?');
+            bool first = true;
+            for (const auto& [k, v] : sorted) {
+                if (!first) out.push_back('&');
+                out.append(k);
+                out.push_back('=');
+                out.append(percent_encode_segment(v));
+                first = false;
+            }
         }
     }
 
     if (!subpath.empty()) {
         out.push_back('#');
-        out.append(percent_encode_segment(subpath));
+        // Per the purl spec, subpath segments are percent-encoded
+        // individually but the `/` separator stays raw — same shape
+        // as URL path encoding. Encoding the whole string at once
+        // (the previous behaviour) escaped `/` to `%2F`.
+        std::size_t start = 0;
+        for (std::size_t i = 0; i <= subpath.size(); ++i) {
+            if (i == subpath.size() || subpath[i] == '/') {
+                if (i > start) {
+                    out.append(percent_encode_segment(subpath.substr(start, i - start)));
+                }
+                if (i < subpath.size()) out.push_back('/');
+                start = i + 1;
+            }
+        }
     }
 
     return out;

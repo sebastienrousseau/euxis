@@ -76,6 +76,34 @@ auto compute_reachable(const Graph& graph,
         adj[e.caller.value].push_back(e.callee);
     }
 
+    // FunctionDef nodes carry an empty `name` (the builder only
+    // populates names for Identifier nodes). Resolve the function
+    // name by walking the FunctionDef's AstChild descendants and
+    // returning the first non-empty Identifier name encountered.
+    // For C the identifier sits inside `function_declarator`; for
+    // Rust / Go / Python / JS / Java it is typically a direct
+    // child. BFS-depth limit avoids walking into nested closures.
+    auto function_name = [&](NodeId fn) -> std::string {
+        std::queue<std::pair<NodeId, int>> q;
+        q.push({fn, 0});
+        constexpr int kMaxDepth = 3;
+        while (!q.empty()) {
+            auto [id, depth] = q.front();
+            q.pop();
+            if (depth > kMaxDepth) continue;
+            for (NodeId c : graph.children(id)) {
+                const cpg::Node* cn = graph.get(c);
+                if (cn == nullptr) continue;
+                if (cn->kind == NodeKind::Identifier && !cn->name.empty()) {
+                    return cn->name;
+                }
+                if (cn->kind == NodeKind::FunctionDef) continue;
+                q.push({c, depth + 1});
+            }
+        }
+        return {};
+    };
+
     // Compute entry-point set.
     std::queue<std::pair<NodeId, std::size_t>> frontier;
     for (NodeId fn : functions) {
@@ -85,14 +113,13 @@ auto compute_reachable(const Graph& graph,
             is_entry = true;
         }
         if (!is_entry && !config.entry_function_names.empty()) {
-            const auto* n = graph.get(fn);
-            if (n != nullptr) {
-                if (std::find(config.entry_function_names.begin(),
-                              config.entry_function_names.end(),
-                              n->name) !=
-                    config.entry_function_names.end()) {
-                    is_entry = true;
-                }
+            auto resolved_name = function_name(fn);
+            if (!resolved_name.empty() &&
+                std::find(config.entry_function_names.begin(),
+                          config.entry_function_names.end(),
+                          resolved_name) !=
+                config.entry_function_names.end()) {
+                is_entry = true;
             }
         }
         if (is_entry) {

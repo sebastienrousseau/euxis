@@ -106,17 +106,37 @@ void bfs_from_source(
         NodeId current = path.back();
         ++stats.bfs_nodes_visited;
 
-        // Reached a sink — emit a flow if the current node is the
-        // sink (not the source itself, which classify_all may have
-        // tagged as both).
+        // Reached a sink — emit a flow. Direct sink-tagged node
+        // wins; otherwise walk the AstChild parent chain looking
+        // for a sink-tagged ancestor (e.g. an Identifier use of
+        // a tainted variable inside a `call` node where the call
+        // itself is the sink-matched site).
+        NodeId sink_match = kNullNode;
         if (current != source && roles[current.value].role == Role::Sink) {
-            const auto& sink_spec = spec.sinks[roles[current.value].spec_index];
+            sink_match = current;
+        } else if (current != source) {
+            for (NodeId anc = graph.parent(current);
+                 anc.is_valid();
+                 anc = graph.parent(anc)) {
+                if (roles[anc.value].role == Role::Sink) {
+                    sink_match = anc;
+                    break;
+                }
+                if (roles[anc.value].role == Role::Sanitizer) break;
+            }
+        }
+        if (sink_match.is_valid()) {
+            const auto& sink_spec = spec.sinks[roles[sink_match.value].spec_index];
             const auto& source_spec =
                 spec.sources[roles[source.value].spec_index];
+            auto emitted_path = path;
+            if (emitted_path.back() != sink_match) {
+                emitted_path.push_back(sink_match);
+            }
             flows.push_back(TaintFlow{
                 .source_node    = source,
-                .sink_node      = current,
-                .path           = path,
+                .sink_node      = sink_match,
+                .path           = std::move(emitted_path),
                 .source_spec_id = source_spec.id,
                 .sink_spec_id   = sink_spec.id,
             });

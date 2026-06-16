@@ -106,8 +106,16 @@ auto generate_serial_number() -> std::string {
     std::uint64_t b = dis(gen);
 
     // RFC 4122 §4.4: set version (4) and variant (10) bits.
-    a = (a & 0xFFFFFFFFFFFF0FFFULL) | 0x0000000000004000ULL;
-    b = (b & 0x3FFFFFFFFFFFFFFFULL) | 0x8000000000000000ULL;
+    //
+    // The bit positions account for the big-endian print order
+    // used by `append_bytes()` below — bits 60-63 of `a` land at
+    // UUID char 14 (the version nibble), and bits 14-15 of `b`
+    // land at the high two bits of UUID byte 8 (the variant).
+    // Earlier masks targeted bit 14 of `a` and bit 63 of `b`,
+    // putting the version digit and variant bits in the wrong
+    // UUID positions — the bench/regex test caught it.
+    a = (a & 0x0FFFFFFFFFFFFFFFULL) | 0x4000000000000000ULL;
+    b = (b & 0xFFFFFFFFFFFF3FFFULL) | 0x0000000000008000ULL;
 
     const std::array<char, 16> hex{
         '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f',

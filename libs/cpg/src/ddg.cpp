@@ -42,18 +42,33 @@ struct DdgWalker {
         ++stats.definitions_recorded;
     }
 
-    /// Direct AstChild Identifier children of `node_id` with a
-    /// non-empty name. Used to locate the names being defined by
-    /// a Declaration or Assignment node without walking the whole
-    /// subtree (which would mis-attribute nested identifiers).
+    /// AstChild Identifier names defined by a Declaration or
+    /// Assignment node. tree-sitter grammars vary on whether the
+    /// identifier is a direct child (Rust `let_declaration` ->
+    /// `identifier`) or nested under a wrapper (C/Cpp `declaration`
+    /// -> `init_declarator` -> `identifier`; JS `lexical_declaration`
+    /// -> `variable_declarator` -> `identifier`). We collect direct
+    /// Identifier children first, then if none were found we descend
+    /// one level through every non-Identifier child to handle the
+    /// wrapped grammars. The single-level descent is conservative —
+    /// we never walk deep enough to mis-attribute nested
+    /// sub-expression identifiers as the LHS being defined.
     std::vector<std::pair<NodeId, std::string>> identifier_children(
             NodeId node_id) const {
         std::vector<std::pair<NodeId, std::string>> out;
-        for (NodeId c : graph.children(node_id)) {
+        auto try_collect = [&](NodeId c) -> bool {
             const Node* cn = graph.get(c);
             if (cn != nullptr && cn->kind == NodeKind::Identifier &&
                 !cn->name.empty()) {
                 out.emplace_back(c, cn->name);
+                return true;
+            }
+            return false;
+        };
+        for (NodeId c : graph.children(node_id)) {
+            if (try_collect(c)) continue;
+            for (NodeId gc : graph.children(c)) {
+                if (try_collect(gc)) break;
             }
         }
         return out;
@@ -62,12 +77,15 @@ struct DdgWalker {
     /// Recursive walk of an arbitrary subtree. Treats every
     /// Identifier as a use; dispatches Declaration and Assignment
     /// to their dedicated handlers so the LHS/RHS distinction is
-    /// preserved.
+    /// preserved. Parameter nodes are skipped because they were
+    /// already consumed by `register_parameters()`.
     void walk(NodeId id) {
         const Node* n = graph.get(id);
         if (n == nullptr) return;
 
         switch (n->kind) {
+            case NodeKind::Parameter:
+                return;
             case NodeKind::Identifier:
                 emit_use(id, n->name);
                 return;
@@ -140,24 +158,42 @@ struct DdgWalker {
         }
     }
 
+    /// Register every Parameter node found anywhere in the
+    /// subtree rooted at `root`, except inside Block bodies
+    /// (which contain *uses* of the parameter names, not
+    /// further definitions). Handles tree-sitter grammars
+    /// where Parameter nodes are nested under a wrapper
+    /// (C/C++ `function_declarator` -> `parameter_list`
+    /// -> `parameter_declaration`; JS `formal_parameters`).
+    void register_parameters(NodeId root) {
+        for (NodeId c : graph.children(root)) {
+            const Node* cn = graph.get(c);
+            if (cn == nullptr) continue;
+            if (cn->kind == NodeKind::Parameter) {
+                for (const auto& [pid, pname] : identifier_children(c)) {
+                    record_def(pname, c);
+                }
+            } else if (cn->kind != NodeKind::Block &&
+                       cn->kind != NodeKind::FunctionDef) {
+                register_parameters(c);
+            }
+        }
+    }
+
     void process_function(NodeId fn) {
         ++stats.functions_processed;
         // Each function gets a fresh local def map. Function-scope
         // is the unit of analysis the Week 10 approximation
         // commits to; parameter names land as initial bindings.
         def_map.clear();
+        register_parameters(fn);
 
         for (NodeId child : graph.children(fn)) {
             const Node* cn = graph.get(child);
             if (cn == nullptr) continue;
-            if (cn->kind == NodeKind::Parameter) {
-                // Parameters define their identifier children as
-                // bindings live throughout the function body.
-                for (const auto& [pid, pname] : identifier_children(child)) {
-                    record_def(pname, child);
-                }
-                continue;
-            }
+            // Parameters were registered above; skip them so their
+            // identifier children don't get walked as uses.
+            if (cn->kind == NodeKind::Parameter) continue;
             walk(child);
         }
     }

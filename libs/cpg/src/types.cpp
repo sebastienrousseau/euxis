@@ -42,7 +42,10 @@ namespace {
 auto classify_common(std::string_view k) noexcept -> NodeKind {
     if (k == "identifier")                          return NodeKind::Identifier;
     if (k == "call_expression" || k == "call")      return NodeKind::Call;
-    if (k == "block" || k == "compound_statement")  return NodeKind::Block;
+    // `statement_block` is the JavaScript/TypeScript spelling;
+    // `compound_statement` is C/C++; `block` covers Rust, Go, others.
+    if (k == "block" || k == "compound_statement" ||
+        k == "statement_block")                     return NodeKind::Block;
     if (k == "return_statement" || k == "return")   return NodeKind::Return;
     if (k == "if_statement" || k == "if_expression") return NodeKind::If;
     if (k == "for_statement"   || k == "for_expression" ||
@@ -82,8 +85,13 @@ auto classify(euxis::parse::Language lang,
     switch (lang) {
         case euxis::parse::Language::C:
         case euxis::parse::Language::Cpp:
-            if (raw_kind == "function_definition" ||
-                raw_kind == "function_declarator")  return NodeKind::FunctionDef;
+            // Only `function_definition` is the function unit.
+            // `function_declarator` is the signature wrapper that
+            // sits *inside* a function_definition; mapping it to
+            // FunctionDef confuses callers like
+            // `enclosing_function()` and produces double-counted
+            // entries in `find_by_kind(FunctionDef)`.
+            if (raw_kind == "function_definition")   return NodeKind::FunctionDef;
             if (raw_kind == "parameter_declaration") return NodeKind::Parameter;
             if (raw_kind == "preproc_include")       return NodeKind::PreprocInclude;
             if (raw_kind == "declaration")           return NodeKind::Declaration;
