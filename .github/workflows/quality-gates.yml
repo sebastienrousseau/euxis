@@ -1,0 +1,171 @@
+name: Quality Gates
+
+# Three lightweight gates that catch regressions the main build can miss:
+#   1. doc-honesty   — grep for patterns the team has explicitly retracted
+#                       (e.g. the JsonCache "warm < 5 %" claim, the
+#                       stream_episodes std::generator return type).
+#                       Instant; no build required.
+#   2. clang-tidy    — runs the scoped performance-unnecessary-copy-
+#                       initialization check across apps/ + libs/. The
+#                       script was added in Week 19a (issue #57); this
+#                       wires it as a CI gate so future drift fails the
+#                       PR.
+#   3. sast-floor    — asserts all 30 test suites are present and pass.
+#                       Defends against silent test-loss when someone
+#                       removes a suite without replacing it.
+
+on:
+  push:
+    branches: [main, feat/*]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  doc-honesty:
+    name: Documentation-vs-reality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No retracted claims
+        run: |
+          set -euo pipefail
+          # Pattern set built from claims the team explicitly retracted
+          # after measurement. New patterns join the list as the
+          # documentation honesty pass surfaces more lies.
+          #
+          # The grep filters out lines containing a magic sentinel
+          # `lint-retracted-ok` — use that on lines that legitimately
+          # quote a retracted claim (e.g. a retraction note that
+          # records what the assertion used to say).
+          BAD_PATTERNS=(
+            # JsonCache "warm < 5 % of cold" — invalidated by the
+            # Google Benchmark suite in libs/cache/bench/, measured
+            # at 30.9 %. Corrected header docstring lives in
+            # libs/cache/include/euxis/cache/json_cache.hpp.
+            "warm-cache should be < 5"
+
+            # stream_episodes / episodic_generate originally returned
+            # std::generator<SessionMessage>, but libc++ on AppleClang
+            # 21 and Homebrew LLVM 22 do not yet ship <generator>.
+            # The READMEs were rewritten to advertise the eager
+            # std::vector form. The exact original Postcondition
+            # phrasing must not return until __cpp_lib_generator is
+            # defined across supported toolchains.
+            "C++23 \`std::generator\` yielding"
+          )
+
+          fail=0
+          for pat in "${BAD_PATTERNS[@]}"; do
+            # Skip:
+            #   * .github (this workflow itself contains the patterns)
+            #   * build/ (FetchContent vendored upstream copies)
+            #   * node_modules
+            # Also skip lines marked with `lint-retracted-ok` — those
+            # are intentional historical citations.
+            if hits=$(grep -rnF "${pat}" \
+                          --include="*.md" \
+                          --include="*.hpp" \
+                          --include="*.cpp" \
+                          --exclude-dir=".github" \
+                          --exclude-dir="build" \
+                          --exclude-dir="node_modules" \
+                          . | grep -v 'lint-retracted-ok'); then
+              echo "::error::Retracted claim found: ${pat}"
+              echo "${hits}"
+              fail=1
+            fi
+          done
+
+          if [ "${fail}" -ne 0 ]; then
+            echo
+            echo "One or more documentation-vs-reality gates failed."
+            echo "If the claim is now true again, update this workflow"
+            echo "and explain why in the same PR."
+            echo "If the line legitimately cites a retracted claim,"
+            echo "append the magic sentinel \`lint-retracted-ok\` so this"
+            echo "gate stops flagging it."
+            exit 1
+          fi
+          echo "All ${#BAD_PATTERNS[@]} retracted-claim patterns are clear."
+
+  clang-tidy-perf:
+    name: clang-tidy perf scoped check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev nlohmann-json3-dev \
+            libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config \
+            clang-tidy-18
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+          # Symlink clang-tidy-18 so the script finds it via PATH.
+          sudo ln -sf /usr/bin/clang-tidy-18 /usr/local/bin/clang-tidy
+
+      - name: Configure (CMake compile_commands.json)
+        run: make cpp-configure
+
+      - name: Run perf-scoped survey (read-only)
+        run: |
+          # The driver returns non-zero only when the survey itself
+          # fails to start (missing toolchain, missing compile_commands).
+          # We capture warnings into a file and assert the count is zero.
+          scripts/quality/clang_tidy_perf.sh survey 2>&1 | tee /tmp/perf-survey.log
+          hits=$(grep -cE 'warning:.*performance-unnecessary-copy-initialization' /tmp/perf-survey.log || true)
+          if [ "${hits}" -gt 0 ]; then
+            echo "::error::clang-tidy found ${hits} performance-unnecessary-copy-initialization sites"
+            echo "Run 'make cpp-clang-tidy-perf-fix' locally to remediate;"
+            echo "see docs/development/clang-tidy-policy.md §2 for the policy."
+            exit 1
+          fi
+          echo "No performance-unnecessary-copy-initialization sites detected."
+
+  sast-floor:
+    name: SAST test floor (30+ suites)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev nlohmann-json3-dev \
+            libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Build + test
+        run: |
+          make cpp-build
+          ctest --test-dir build/cmake-build --output-on-failure 2>&1 | tee /tmp/ctest.log
+
+      - name: Assert all suites passed
+        run: |
+          # Pull the "X tests passed, Y failed" line that ctest prints
+          # at the end. Fail if Y > 0 or if X < 30 — the latter catches
+          # silent test-suite removal which the build itself won't notice.
+          summary=$(grep -E '^[0-9]+% tests passed' /tmp/ctest.log | tail -1)
+          echo "summary: ${summary}"
+          passed=$(echo "${summary}" | grep -oE '[0-9]+ tests passed' | grep -oE '[0-9]+' || true)
+          failed=$(echo "${summary}" | grep -oE '[0-9]+ tests failed' | grep -oE '[0-9]+' || true)
+          : "${passed:=0}"
+          : "${failed:=0}"
+          if [ "${failed}" -ne 0 ]; then
+            echo "::error::${failed} test suite(s) failed"
+            exit 1
+          fi
+          if [ "${passed}" -lt 30 ]; then
+            echo "::error::expected at least 30 test suites; only ${passed} ran. Was a suite removed?"
+            exit 1
+          fi
+          echo "All ${passed} test suites passed."
