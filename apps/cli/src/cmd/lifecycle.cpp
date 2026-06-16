@@ -801,7 +801,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
 
         if (json_out) {
             nlohmann::json j;
-            j["version"] = "v0.0.10";
+            j["version"] = "v0.1.2";
             j["euxis_home"] = ctx.euxis_home;
             j["euxis_home_exists"] = home_exists;
             j["binary_symlink"] = link_ok;
@@ -813,7 +813,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
             std::cout << j.dump(2) << "\n";
         } else {
             std::cout << term::bold(tr("Euxis Status")) << "\n\n";
-            std::cout << "  " << tr("Version:") << "       v0.0.10\n";
+            std::cout << "  " << tr("Version:") << "       v0.1.2\n";
             std::cout << "  " << tr("Mode:") << "          " << mode << "\n";
             std::cout << "  " << tr("EUXIS_HOME:") << "    "
                       << (home_exists ? term::icon_ok() : term::icon_fail())
@@ -868,7 +868,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
     if (sub == "version") {
         if (json_out) {
             nlohmann::json j;
-            j["version"] = "v0.0.10";
+            j["version"] = "v0.1.2";
             j["language"] = "C++23";
             j["protocol"] = "1.0";
             auto registry_path = fs::path(ctx.data_dir) / "agents" / "registry.json";
@@ -882,7 +882,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
             }
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cout << "Euxis v0.0.10 (C++23)\n";
+            std::cout << "Euxis v0.1.2 (C++23)\n";
             auto registry_path = fs::path(ctx.data_dir) / "agents" / "registry.json";
             if (fs::exists(registry_path)) {
                 std::ifstream f(registry_path);

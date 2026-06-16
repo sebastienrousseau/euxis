@@ -32,14 +32,14 @@ struct SarifFinding {
 /// Preserved for back-compat with the agent-driven verification path.
 [[nodiscard]] auto findings_to_sarif(
     const std::vector<SarifFinding>& findings,
-    const std::string& tool_version = "0.0.10") -> nlohmann::json;
+    const std::string& tool_version = "0.1.2") -> nlohmann::json;
 
 /// Convert the canonical Finding type to SARIF v2.1.0 JSON, including
 /// `taxonomies` entries for CWE Top 25:2025 and OWASP Top 10:2025, and
 /// `fixes[]` blocks for any deterministic codemods.
 [[nodiscard]] auto findings_to_sarif(
     const std::vector<euxis::security::Finding>& findings,
-    const std::string& tool_version = "0.0.10") -> nlohmann::json;
+    const std::string& tool_version = "0.1.2") -> nlohmann::json;
 
 /// Parse agent evidence output to extract SarifFinding objects.
 /// Attempts to extract file paths and line numbers from findings text.

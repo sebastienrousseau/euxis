@@ -1,9 +1,31 @@
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+
 #include "euxis/inference/llama_engine.hpp"
 
 namespace euxis::inference {
 namespace {
+
+/// Tests assume there's no llama-server listening. Localhost
+/// port 8080 (the default) is commonly held by other dev tooling
+/// (e.g. python -m http.server, dashboards). Pinning the engine
+/// to an ephemeral high port via the documented env-var override
+/// keeps the test deterministic regardless of the host's port
+/// landscape.
+class LlamaEnvFixture {
+public:
+    LlamaEnvFixture() {
+        ::setenv("LLAMA_SERVER_HOST", "127.0.0.1", 1);
+        ::setenv("LLAMA_SERVER_PORT", "1",         1);
+    }
+    ~LlamaEnvFixture() {
+        ::unsetenv("LLAMA_SERVER_HOST");
+        ::unsetenv("LLAMA_SERVER_PORT");
+    }
+};
+
+namespace { LlamaEnvFixture g_llama_env; } // file-scope auto-init
 
 // ---------------------------------------------------------------------------
 // Constructor works without crashing
@@ -76,7 +98,9 @@ TEST(LlamaEngineTest, HealthContainsConnectionInfo) {
     EXPECT_TRUE(h.contains("host"));
     EXPECT_TRUE(h.contains("port"));
     EXPECT_EQ(h["host"], "127.0.0.1");
-    EXPECT_EQ(h["port"], 8080);
+    // Port comes from the LLAMA_SERVER_PORT env override applied
+    // by the file-scope LlamaEnvFixture above (was 8080 default).
+    EXPECT_EQ(h["port"], 1);
 }
 
 // ---------------------------------------------------------------------------

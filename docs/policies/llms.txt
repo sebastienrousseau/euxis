@@ -117,4 +117,4 @@ Override: `euxis architect "task" gemini`
 - At least one AI provider (Ollama recommended for local)
 
 ---
-Euxis v0.0.10 | https://euxis.co/
+Euxis v0.1.2 | https://euxis.co/

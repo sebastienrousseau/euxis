@@ -219,4 +219,4 @@ python3 -m pytest --collect-only test_deterministic_concurrency.py
 
 ---
 
-*Euxis v0.0.10 · Build something that matters.*
+*Euxis v0.1.2 · Build something that matters.*

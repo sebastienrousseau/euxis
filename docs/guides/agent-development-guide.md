@@ -241,4 +241,4 @@ See the ADR documents for rationale behind key design decisions:
 
 ---
 
-*Euxis v0.0.10 · Build something that matters.*
+*Euxis v0.1.2 · Build something that matters.*
