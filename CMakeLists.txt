@@ -11,6 +11,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(EuxisDefaults)
 include(EuxisPackage)
+include(EuxisStdModule)
+# `import std;` ships as opt-in. Apple Clang's libc++ surfaces
+# std.cppm at /usr/share/libc++/v1/std.cppm but the file shape
+# precompiles cleanly only with Homebrew LLVM 19+. Defaulting OFF
+# keeps the cpp.yml matrix build green; pilot consumers flip
+# EUXIS_ENABLE_STD_MODULE=ON at configure to try the path.
+option(EUXIS_ENABLE_STD_MODULE
+       "Enable the precompiled C++23 std module pilot" OFF)
+if(EUXIS_ENABLE_STD_MODULE)
+    euxis_enable_std_module()
+endif()
 include(FetchContent)
 include(CheckIPOSupported)
 
