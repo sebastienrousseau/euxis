@@ -2,21 +2,25 @@
 
 The `euxis::runtime` module governs the lifecycle, context memory, and execution state of autonomous agents. It enforces the "Zero-Copy Mentality" and ensures memory-safe state transitions throughout the Agent OS.
 
-## Episodic Memory Streaming
+## Episodic Memory
 
-The `ISessionStore` interface provides high-performance, stateless access to historical agent sessions.
+The `ISessionStore` interface provides stateless access to historical agent sessions.
 
-* **Precondition**: A valid `.msgp` binary filter or memory map exists for the session ID.
-* **Postcondition**: Returns a C++23 `std::generator` yielding `SessionMessage` objects.
+* **Precondition**: A valid `.msgp` binary file or memory map exists for the session ID.
+* **Postcondition**: Returns a `std::vector<SessionMessage>` carrying every message in the requested session branch.
 
-For long-horizon reasoning, use the `stream_episodes` method. This allows the orchestrator to lazy-load semantic traces without blowing out the host's VRAM or the LLM's context window.
+For long-horizon reasoning, use the `stream_episodes` method. The orchestrator consumes the returned vector and may apply its own windowing / truncation before passing the slice to the LLM.
 
 ```cpp
-auto stream = store.stream_episodes("session-1");
-for (auto msg : stream) {
-    process(msg); // Lazy evaluation
+auto messages = store.stream_episodes("session-1");
+for (const auto& msg : messages) {
+    process(msg);
 }
 ```
+
+### Future restoration to lazy streaming
+
+The original `stream_episodes` signature returned `std::generator<SessionMessage>` (C++23) so a long history could be streamed without materialising the whole vector. AppleClang 21's libc++ and Homebrew LLVM 22's libc++ do not yet ship `<generator>`, so the signature was changed to eager `std::vector` and the implementation rewritten without `co_yield`. Restore the lazy form when `__cpp_lib_generator` is defined on the supported toolchains — the implementations already produce the messages in order and only need their `co_yield` body re-added.
 
 ## Binary Serialization
 

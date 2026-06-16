@@ -18,14 +18,28 @@
 /// schema lives under a dedicated table so cache lifetimes are
 /// independent of the scan cache's TTL.
 ///
-/// The Week 17 batch ships the primitive only — the
-/// `RegistryClient` swap-in lands in a follow-up that:
-///   1. Wraps each `nlohmann::json::parse(f)` call in a
-///      `cache.get_or_load(path, parse_fn)` helper.
-///   2. Asserts a regression test against the existing 53-file
-///      fixture (`docs/benchmarks/registry-parse.md`) — warm-cache
-///      should be < 5 % of cold-cache wall time.
-///   3. Drops issue #60 to the closed pile.
+/// The Week 17 batch shipped the primitive only; the
+/// `RegistryClient` swap-in landed in week 18 (issue #60 — see
+/// `apps/cli/src/registry_client.cpp`).
+///
+/// Measured performance (see `docs/benchmarks/registry-parse.md`
+/// for methodology and the reproduce recipe). On the 53-file
+/// registry fixture, files ~1 KiB each, macOS Apple Silicon:
+///
+///   | Scenario          | Wall (ms) | Items/s | vs DirectParse |
+///   | BM_DirectParse    |     3.18  |  26 239 | 1.00× baseline |
+///   | BM_WarmGetOrLoad  |     4.20  |  18 048 | 0.69× (slower) |
+///   | BM_ColdGetOrLoad  |    13.6   |   5 867 | 0.22× (slower) |
+///
+/// Honest reading: JsonCache is not a wall-time win over direct
+/// parse for sub-5-KiB JSON documents — BLAKE2b-256 hash + SQLite
+/// SELECT + msgpack decode together exceed the parse cost the
+/// cache saves. The primitive earns its place on larger corpora
+/// (>= ~100 KiB per file, or deep nesting where parse dominates)
+/// and on cross-process scenarios where the cache survives
+/// process exit and avoids the parse on the *next* CLI invocation.
+/// The original "warm < 5 % of cold" target the Week 17 commit
+/// asserted was invalidated by the bench and has been removed.
 #pragma once
 
 #include <cstdint>
