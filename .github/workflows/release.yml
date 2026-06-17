@@ -103,7 +103,7 @@ jobs:
             "${{ steps.package.outputs.archive }}"
 
       - name: Generate SLSA build provenance (in-toto Statement)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: ${{ steps.package.outputs.archive }}
 
