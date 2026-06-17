@@ -1,5 +1,3 @@
 # Quick Start
 
-This file has moved. See the canonical quick-start guide:
-
-**[Quick Start](essentials/quick-start.md)**
+The canonical Quick Start guide now lives at [`essentials/quick-start.md`](essentials/quick-start.md). This page is kept as a stable redirect target so older bookmarks and inbound links keep resolving.

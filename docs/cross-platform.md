@@ -1,5 +1,3 @@
 # Cross-Platform Guide
 
-This document has moved to `docs/guides/cross-platform.md`.
-
-- [Open the Cross-Platform Guide](guides/cross-platform.md)
+The canonical Cross-Platform Guide now lives at [`guides/cross-platform.md`](guides/cross-platform.md). This page is kept as a stable redirect target so older bookmarks and inbound links keep resolving.

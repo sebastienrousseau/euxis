@@ -1,70 +1,70 @@
 # Euxis User Guide
 
-**Enterprise Unified eXecution Intelligence System**
+Euxis runs cryptographically-signed code audits at native speed using a multi-agent fleet routed across multiple LLM providers. This page is the one-screen overview of the CLI surface; the deep reference (full flag listings, agent fleet matrix, provider routing rules) lives at [`guides/user-guide.md`](guides/user-guide.md).
 
-Version v0.1.2
-
-For the complete user guide with CLI reference, agent fleet details, and provider matrix, see [guides/user-guide.md](guides/user-guide.md).
+**Version:** v0.1.2
 
 ## Quick Start
 
 ```bash
-# Verify a repository
+# Verify a repository (standard mode)
 euxis check .
 
-# Fast triage (flash mode)
+# Fast bounded triage (flash mode)
 euxis triage .
 
-# Deep review
+# Deep verification with cross-checking
 euxis review .
 
-# Compare triage vs standard
+# Run a triage vs deep diff to see what flash missed
 euxis compare .
 
-# View metrics and drift
+# Inspect recent validation metrics and confidence drift
 euxis stats --last 5
 
-# Environment diagnostics
+# Environment diagnostics — call this first when anything misbehaves
 euxis doctor
 ```
 
 ## Core Commands
 
-| Command | Description |
-|---------|-------------|
-| `euxis check [target]` | Verify a repository or target (standard mode) |
-| `euxis triage [target]` | Fast bounded triage scan (flash mode) |
-| `euxis review [target]` | Deep verification (standard/forensic) |
-| `euxis compare <target>` | Compare triage vs deep verification |
-| `euxis stats` | Validation metrics and drift history |
-| `euxis policy <sub>` | Policy inspection and enforcement |
-| `euxis doctor` | Environment diagnostics |
+Each command takes an optional target path; absent it, the current directory is implied.
+
+| Command | What it does |
+|---------|--------------|
+| `euxis check [target]` | Standard verification — runs the full audit pipeline against the target |
+| `euxis triage [target]` | Bounded flash scan — fast, lower-coverage triage suitable for pre-commit hooks |
+| `euxis review [target]` | Deep verification — the slowest, highest-confidence mode (standard or forensic) |
+| `euxis compare <target>` | Runs both triage and standard and reports which findings differ |
+| `euxis stats` | Validation metrics + confidence-drift history across recent runs |
+| `euxis policy <sub>` | Inspect and enforce policy rules (allowlist, severity floor, scope) |
+| `euxis doctor` | Probe the environment — toolchain, model providers, credentials, cache health |
 
 ## Advanced Commands
 
 ```bash
-# Run a specific playbook
+# Run a playbook by name (composes multiple agents in a fixed sequence)
 euxis playbook verify-everything .
 
-# Run an individual agent
+# Invoke a single named agent directly
 euxis architect "Review the auth module"
 
-# Multi-agent combo
+# Multi-agent combo — fan-out + reconciliation
 euxis combo run envision "Design a notification system"
 
-# Launch desktop GUI
+# Launch the Qt6 desktop GUI
 euxis-etx
 ```
 
 ## Documentation Index
 
-| Guide | Description |
-|-------|-------------|
-| [CLI Reference](reference/cli-reference.md) | Complete CLI command reference |
-| [User Guide](guides/user-guide.md) | Full CLI reference, agent fleet, provider matrix |
-| [UI Guide](guides/ui-guide.md) | Terminal UI usage and navigation |
-| [API Architecture](api-architecture-design.md) | API design and architecture reference |
-| [Core Concepts](essentials/core-concepts/) | Branding, protocols, and conventions |
+| Page | What it covers |
+|------|---------------|
+| [CLI Reference](reference/cli-reference.md) | Full flag listing for every CLI command |
+| [User Guide](guides/user-guide.md) | Agent fleet, provider matrix, full configuration reference |
+| [UI Guide](guides/ui-guide.md) | Terminal UI and desktop GUI usage |
+| [API Architecture](api-architecture-design.md) | API-side design rationale and surface map |
+| [Core Concepts](essentials/core-concepts/) | Branding, protocols, and naming conventions |
 
 ---
 
