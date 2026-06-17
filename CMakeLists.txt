@@ -22,6 +22,19 @@ option(EUXIS_ENABLE_STD_MODULE
 if(EUXIS_ENABLE_STD_MODULE)
     euxis_enable_std_module()
 endif()
+
+# C++26 contracts pilot. The shim at libs/runtime/include/euxis/runtime/
+# contracts.hpp picks up native pre/post/contract_assert the day a compiler
+# ships P2900. Today, flipping this ON defines EUXIS_CONTRACTS_RUNTIME so
+# the annotations resolve to runtime checks that abort on violation —
+# useful for CI death tests and pilot validation. OFF (default) leaves the
+# annotations as C++23 [[assume]] hints with zero runtime cost.
+option(EUXIS_ENABLE_CXX26_CONTRACTS
+       "Pilot the C++26 contracts shim (libs/runtime) — runtime checks today, native pre/post the day a compiler ships them" OFF)
+if(EUXIS_ENABLE_CXX26_CONTRACTS)
+    add_compile_definitions(EUXIS_CONTRACTS_RUNTIME)
+    message(STATUS "Euxis: C++26 contracts pilot enabled (runtime-check mode)")
+endif()
 include(FetchContent)
 include(CheckIPOSupported)
 

@@ -5,6 +5,8 @@
 #include <atomic>
 #include <cstddef>
 
+#include "contracts.hpp"
+
 namespace euxis::runtime {
 
 /// @brief Thread-safe per-turn iteration counter for agent loops.
@@ -59,6 +61,15 @@ public:
     /// @return true on success, false if the budget is already full.
     auto refund() noexcept -> bool {
         std::size_t current = remaining_.load(std::memory_order_acquire);
+        // Precondition: there must be budget available to refund into.
+        // Calling refund on a full budget is a usage error — the caller
+        // either never consumed, or already refunded once. Note: we do
+        // NOT add a postcondition on remaining() here because the
+        // expression has a side effect (atomic load) which the [[assume]]
+        // path of the contracts shim explicitly rejects. The loop guard
+        // (current < max_) already structurally guarantees that any
+        // successful CAS yields current + 1 <= max_.
+        EUXIS_PRE(current < max_);
         while (current < max_) {
             if (remaining_.compare_exchange_weak(
                     current, current + 1,

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cstddef>
 
+#include "euxis/runtime/contracts.hpp"
+
 namespace euxis::runtime {
 
 WindowedContextEngine::WindowedContextEngine() noexcept
@@ -50,6 +52,11 @@ auto WindowedContextEngine::plan(
     plan.compact_start = head;
     plan.compact_end   = n - tail;
     plan.summary_role  = "system";
+    // Postcondition: when plan is non-empty the head/middle/tail
+    // partition is exhaustive over `messages`. Under the pilot flag
+    // (EUXIS_ENABLE_CXX26_CONTRACTS=ON) a future refactor that breaks
+    // this trips the runtime check; under defaults it is documentation.
+    EUXIS_POST(plan.keep_head + plan.compact_count() + plan.keep_tail == n);
     return plan;
 }
 

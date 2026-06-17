@@ -35,5 +35,6 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_context_engine.cpp
     tests/test_agent_loop.cpp
     tests/test_tool_calling_loop.cpp
+    tests/test_contracts.cpp
     tests/test_config.cpp
 )
