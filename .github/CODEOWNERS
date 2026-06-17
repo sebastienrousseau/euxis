@@ -1,0 +1,49 @@
+# CODEOWNERS for euxis.
+#
+# GitHub uses this file to auto-request reviews on pull requests and to
+# enforce code-owner approvals on protected branches. Single-maintainer
+# project today; expand the entries as contributors take ownership of
+# subsystems.
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-
+# repositorys-settings-and-features/customizing-your-repository/about-
+# code-owners
+
+# Default owner for everything not matched by a more-specific rule.
+* @sebastienrousseau
+
+# Build + CI infrastructure
+/.github/         @sebastienrousseau
+/cmake/           @sebastienrousseau
+/CMakeLists.txt   @sebastienrousseau
+
+# C++ runtime — agentic core
+/libs/runtime/    @sebastienrousseau
+/libs/core/       @sebastienrousseau
+/libs/ensemble/   @sebastienrousseau
+/libs/inference/  @sebastienrousseau
+
+# C++ verification stack
+/libs/scan/       @sebastienrousseau
+/libs/cpg/        @sebastienrousseau
+/libs/taint/      @sebastienrousseau
+/libs/reach/      @sebastienrousseau
+/libs/security/   @sebastienrousseau
+/libs/sbom/       @sebastienrousseau
+/libs/attest/     @sebastienrousseau
+
+# Foundation primitives
+/libs/crypto/     @sebastienrousseau
+/libs/cache/      @sebastienrousseau
+/libs/platform/   @sebastienrousseau
+
+# Apps
+/apps/cli/        @sebastienrousseau
+/apps/gateway/    @sebastienrousseau
+/apps/publisher/  @sebastienrousseau
+/apps/etx/        @sebastienrousseau
+
+# Documentation
+/docs/            @sebastienrousseau
+/README.md        @sebastienrousseau
+/SECURITY.md      @sebastienrousseau

@@ -1,0 +1,73 @@
+name: CodeQL
+
+# CodeQL static analysis. Uploads SARIF to the Security tab so Code
+# Scanning surfaces results without leaving the GitHub UI. Languages:
+# C++ (libs/ + apps/) and Python (data/config/ + scripts/).
+#
+# Triggers on push to main, every PR to main, and weekly so dependency
+# updates between PRs don't go unscanned.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly on Sundays at 03:00 UTC — offset from the Security Scan
+    # workflow's 02:00 UTC slot.
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: cpp
+            runner: ubuntu-24.04
+            build-mode: manual
+          - language: python
+            runner: ubuntu-24.04
+            build-mode: none
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialise CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended
+
+      - name: Install C++ build dependencies
+        if: matrix.language == 'cpp'
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev nlohmann-json3-dev \
+            libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Build C++ for CodeQL extraction
+        if: matrix.language == 'cpp'
+        run: |
+          cmake -B build/cmake-build -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          # CodeQL needs the build to walk the translation units; a
+          # parallel build of every static library is enough.
+          cmake --build build/cmake-build --parallel
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
