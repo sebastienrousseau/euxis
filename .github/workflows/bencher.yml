@@ -38,6 +38,10 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
+    env:
+      # Surfaced at job level so the conditional `env.BENCHER_API_TOKEN != ''`
+      # below sees it. Step-level env is not visible in `if:` expressions.
+      BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -91,6 +95,25 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      # bencher.dev trend ingest. Skips when BENCHER_API_TOKEN is not
+      # provisioned so the workflow stays green on forks / unconfigured
+      # repos. Only runs on push events; pull_request runs don't update
+      # the baseline.
+      - name: Setup Bencher CLI
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        uses: bencherdev/bencher@main
+
+      - name: Push scan-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/scan-bench.json
+
   agent-bench:
     name: agentic-core gbench (${{ matrix.os }})
     strategy:
@@ -98,6 +121,8 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
+    env:
+      BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -164,3 +189,33 @@ jobs:
             artifacts/ensemble-bench.json
           if-no-files-found: error
           retention-days: 90
+
+      # bencher.dev trend ingest — same pattern as the scan-bench job.
+      # Skips cleanly until BENCHER_API_TOKEN is provisioned in repo
+      # secrets. Pushes a separate testbed line per benchmark binary so
+      # the dashboard tracks agentic-core and ensemble independently.
+      - name: Setup Bencher CLI
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        uses: bencherdev/bencher@main
+
+      - name: Push agent-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}-agent" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/agent-bench.json
+
+      - name: Push ensemble-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}-ensemble" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/ensemble-bench.json
