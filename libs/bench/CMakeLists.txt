@@ -63,4 +63,16 @@ if(EUXIS_BUILD_GBENCH)
             benchmark::benchmark
             benchmark::benchmark_main
     )
+
+    # Ensemble verifier-quorum benchmarks. Distinct binary so the
+    # mock-Verifier fanout isn't tangled with the agentic-core
+    # timings consumed by the bencher dashboard.
+    add_executable(euxis_ensemble_gbench src/ensemble_bench.cpp)
+    target_link_libraries(euxis_ensemble_gbench
+        PRIVATE
+            euxis-ensemble-cpp
+            euxis-security-cpp
+            benchmark::benchmark
+            benchmark::benchmark_main
+    )
 endif()
