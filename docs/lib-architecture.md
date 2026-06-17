@@ -1,112 +1,158 @@
-# Euxis Library Architecture (`core/lib/`)
+# Euxis Library Architecture (`libs/`)
 
-> ⚠️ **Legacy shell-era document.** This page describes the Bash-script module layout under `core/lib/` (`common.sh`, `providers.sh`, `agents.sh`, etc.). The active codebase is C++23 — the equivalent libraries now live under `libs/` (`libs/runtime`, `libs/ensemble`, `libs/a2a`, `libs/inference`, …) with public headers under `libs/<lib>/include/euxis/<lib>/`. Read this doc for the conceptual module split; for the authoritative C++ surface, browse `libs/` or the Doxygen output produced by `EUXIS_BUILD_DOCS=ON`. Tracked as a follow-up to the 2026 ecosystem-alignment sweep.
+The Euxis C++ runtime is 27 static libraries under `libs/`, each owning one domain. Every library follows the same layout convention (`include/euxis/<name>/` for public headers, `src/` for implementations, `tests/` for GTest sources) and is wired into the build through the `euxis_add_library()` CMake macro.
 
-## Modules
+**Version:** v0.1.2 · **Test files across libs/:** 137 · **Build tree:** `build/cmake-build/`
 
-| Module | Domain | Key Functions |
-|--------|--------|---------------|
-| `common.sh` | Logging, UI & Perf | `log_info`, `log_error`, `log_debug`, `log_warn`, `start_spinner`, `stop_spinner`, `_perf_start`, `_perf_elapsed_ms`, `_perf_check_budget`, `_perf_record` |
-| `providers.sh` | Provider routing | `resolve_tiered_provider`, `resolve_provider_config`, `run_*`, `execute_provider` |
-| `agents.sh` | Agent discovery, lifecycle & plugins | `resolve_agent_path`, `list_agents`, `agent_lifecycle_transition`, `agent_get_state`, `list_active_agents`, `count_active_agents`, `cleanup_stale_agents`, `register_agent_plugin`, `unregister_agent_plugin`, `list_plugins`, `agent_probe_liveness`, `agent_probe_readiness`, `agent_health_report` |
-| `memory.sh` | Tiered memory, pruning & drift | `get_hot_memory`, `get_relevant_memory`, `get_cross_agent_memory`, `build_tiered_memory`, `_extract_keywords`, `prune_memory`, `prune_project_memory`, `detect_semantic_drift`, `resolve_memory_contradiction`, `auto_evolve_graph` |
-| `session.sh` | Project/session | `get_project_name`, `get_session_id`, `ensure_project_dirs`, `get_memory_context` |
-| `template.sh` | Variable substitution | `template_substitute`, `estimate_tokens` |
-| `skill-detector.sh` | Auto-detection | `detect_project_domain`, `detect_project_type` |
-| `prompt.sh` | Prompt assembly | `resolve_protocols`, `prepare_prompt`, `_proto_fingerprint`, `_get_fleet_roster` |
+## Layout convention
 
-## Code Metrics
-
-The framework core consists of:
-- **8 library modules** in `core/lib/` (~870 LOC)
-- **1 main entry point** `euxis-bin/euxis.sh` (~400 LOC)
-- **20+ CLI tools** in `euxis-bin/` (dispatch, loop, council, bench, lint, etc.)
-- **6 test files** in `tests/` (E2E, concurrency, integration)
-- **11 validation patterns** in `config/patterns/`
-- **35 agent prompts** in `agents/prompts/core/` and `agents/prompts/fleet/`
-- **11 protocol files** in `agents/prompts/protocols/`
-- **6 templates** in `config/templates/`
-- **6 ADRs** in `docs/adr/`
-
-Note: `.venv-voice/` contains a Python virtualenv for the voice interface feature. These ~17K files are third-party dependencies, not framework code. They are excluded via `.euxisignore` and should not be counted in framework metrics.
-
-## Include Guard Pattern
-
-Every lib file uses a guard to prevent double-sourcing:
-
-```bash
-#!/usr/bin/env bash
-[[ -n "${_EUXIS_LIB_<NAME>:-}" ]] && return; _EUXIS_LIB_<NAME>=1
-
-EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-```
-
-This ensures:
-- Safe to source the same lib multiple times (idempotent)
-- `EUXIS_HOME` always has a sane default regardless of load order
-- No duplicate function definitions or variable resets
-
-## Dependency Graph
+Every library directory follows the same shape:
 
 ```
-euxis.sh
-  ├── lib/common.sh            (no dependencies)
-  ├── lib/providers.sh          → lib/common.sh
-  ├── lib/agents.sh             (no dependencies)
-  ├── lib/memory.sh             (no dependencies)
-  ├── lib/session.sh            (no dependencies)
-  ├── lib/template.sh           (no dependencies)
-  ├── lib/skill-detector.sh     (no dependencies)
-  └── lib/prompt.sh             → lib/agents.sh, lib/memory.sh, lib/template.sh
+libs/<name>/
+├── include/euxis/<name>/   Public headers (consumers see euxis/<name>/<header>.hpp)
+├── src/                     Implementation files (.cpp)
+├── tests/                   GTest sources (test_*.cpp)
+├── CMakeLists.txt           Calls euxis_add_library(euxis-<name>-cpp ...)
+└── README.md (optional)     Lib-specific contributor notes
 ```
 
-Internal dependencies are resolved via `EUXIS_HOME`:
+The macro takes three sections — `SOURCES`, `DEPS`, `TEST_SOURCES` — and produces both the lib target and a `*_tests` executable in one call. Warnings-as-errors, C++23 standard, LTO settings, and GTest linkage are inherited from the root configuration.
 
-```bash
-source "${EUXIS_HOME}/euxis-bin/lib/common.sh"
+## Libraries by domain
+
+### Agentic core (5 libs)
+
+| Lib | What it owns |
+|-----|--------------|
+| `runtime` | `AgentLoopHarness`, `IterationBudget`, `IContextEngine`, `IToolRegistry`, `IStreamingProvider`, `ISessionStore`, `classify_approval()`, the contracts shim, the reflection schema scaffolding |
+| `core` | `Router`, `Supervisor`, `Swarm`, `CredentialPool`, `DelegationCoordinator` — the orchestration primitives |
+| `ensemble` | Verifier-quorum runner + real Claude/OpenAI/Gemini HTTP verifiers + deterministic mock verifier |
+| `inference` | `IInferenceEngine`, model registry, Anthropic prompt-cache discipline, llama.cpp + Ollama backends |
+| `bench` | Custom benchmark runner, reporter, result matrix, plus three opt-in Google Benchmark binaries (`euxis_perf_gbench`, `euxis_scan_gbench`, `euxis_agent_gbench`, `euxis_ensemble_gbench`) |
+
+### Protocol + transport (4 libs)
+
+| Lib | What it owns |
+|-----|--------------|
+| `a2a` | A2A v0.2 JSON-RPC server, HTTP transport, WebSocket transport, msgpack-encoded agent card + task lifecycle |
+| `a2a-types` | Shared wire types — `A2AMessage`, `BidRequest`, `BidResponse`, `TransportError`, `ITransport` |
+| `network` | `acp.hpp` (OpenClaw-style control-plane state machine), HTTP/WS transport helpers, resilience primitives (re-exported from `euxis::core::contracts`) |
+| `adapters` | Channel adapters — Slack, Discord, Telegram, WhatsApp |
+
+### Verification + analysis (8 libs)
+
+| Lib | What it owns |
+|-----|--------------|
+| `scan` | OpenGrep-compatible rule-pack ingester + engine v2 (`pattern-not`, `pattern-inside`) |
+| `parse` | Tree-sitter parsers for C, C++, Rust, Go, Python, JavaScript, TypeScript, Java |
+| `cpg` | Code-property graph: AST projection + intra-procedural CFG + DDG |
+| `taint` | Forward data-dependency graph (DDG) taint analyzer |
+| `reach` | Reachability analysis for the audit phase + ensemble scaffolding integration |
+| `security` | Canonical `Finding` type, SARIF taxa, `Severity`, `Confidence`, `EnsembleVote` |
+| `sbom` | CycloneDX 1.6, SPDX 3.0.1, OpenVEX emission |
+| `sca` | Cargo.lock and package-lock.json parsers feeding the SBOM stack |
+| `slopsquatting` | Typosquat / package-name confusion guard (Spracklen USENIX 2025) |
+| `attest` | DSSE signing, in-toto statements, SLSA, Sigstore signed evidence bundles |
+
+### Foundation primitives (7 libs)
+
+| Lib | What it owns |
+|-----|--------------|
+| `crypto` | AES-GCM (cached key schedule, +33% throughput), BLAKE2b derivation, Ed25519 signing, libsodium primitives |
+| `cache` | Libsodium-protected scan cache, content-hashed keys, SQLite-backed storage, `JsonCache` microbench |
+| `memory` | Tiered-memory abstractions (hot / warm / cold) |
+| `identity` | Identity and credential helpers |
+| `bridge` | Inter-process bridge abstractions |
+| `platform` | Local + Docker execution backends (`IExecutionBackend`, `LocalBackend`, `DockerBackend`) |
+| `metrics` | `UsageRecord`, `ProviderPricing`, `aggregate()`, `SessionInsights` |
+
+### Output (1 lib)
+
+| Lib | What it owns |
+|-----|--------------|
+| `publisher` | Release packaging — TeX template substitution via inja, PDF emission, signed-artifact bundles |
+
+## Dependency graph
+
+Strictly downward; no cycles. Verified by grepping every `CMakeLists.txt` `DEPS` block in this tree.
+
+```
+                                    ┌─────────────┐
+                                    │ apps/{cli,  │
+                                    │ gateway,    │
+                                    │ publisher,  │
+                                    │ etx}        │
+                                    └──────┬──────┘
+                                           │
+       ┌───────────────────────────────────┼───────────────────────────────────┐
+       ▼                                   ▼                                   ▼
+  ┌──────────┐   ┌──────────┐    ┌─────────────────┐               ┌─────────────────┐
+  │ runtime  │   │ core     │    │ ensemble        │               │ scan/cpg/taint  │
+  │          │◄──┤          │    │  → security     │               │  → parse, sec.  │
+  │  → sec.  │   │  → crypto│    └────────┬────────┘               └────────┬────────┘
+  └────┬─────┘   │    metrics│             │                                  │
+       │         │    network │             ▼                                  ▼
+       │         └────────────┘    ┌─────────────────┐               ┌─────────────────┐
+       │                           │ slopsquatting   │               │ reach           │
+       │                           │  → sbom, sca,   │               │  → cpg, parse,  │
+       │                           │    security     │               │    security     │
+       │                           └────────┬────────┘               └─────────────────┘
+       │                                    │
+       ▼                                    ▼
+  ┌──────────┐                       ┌──────────┐
+  │ inference│                       │ sca      │
+  │  →runtime│                       │  → sbom  │
+  └──────────┘                       └──────────┘
+
+  Foundation tier (no euxis-internal deps):
+  crypto · cache · memory · identity · network · bridge · a2a-types · sbom · platform · adapters
 ```
 
-## How euxis.sh Sources Libraries
+The edges that matter most for refactoring: `runtime → security` (the agentic loop assembles `Finding` objects), `inference → runtime` (model engines consume `IContextEngine` / token estimation), `ensemble → security` (votes attach to findings), and `scan/cpg/taint/reach → parse + security` (the static-analysis stack).
 
-```bash
-EUXIS_HOME="${HOME}/.euxis"
+## The `euxis_add_library` macro
 
-source "${EUXIS_HOME}/euxis-bin/lib/common.sh"
-source "${EUXIS_HOME}/euxis-bin/lib/providers.sh"
-# ... etc
+The macro is the standard wiring. Every lib uses it; consumers should too.
+
+```cmake
+euxis_add_library(euxis-runtime-cpp
+  SOURCES
+    src/agent_loop.cpp
+    src/context_engine.cpp
+    src/tool_manifest.cpp
+    src/tool_registry.cpp
+    # … etc
+  DEPS
+    nlohmann_json::nlohmann_json
+    spdlog::spdlog
+    yaml-cpp
+    euxis-security-cpp
+  TEST_SOURCES
+    tests/test_agent_loop.cpp
+    tests/test_context_engine.cpp
+    # … etc
+)
 ```
 
-All paths are anchored to `EUXIS_HOME` for portability. This works correctly whether `euxis` is invoked via `~/.euxis/euxis-bin/euxis.sh`, a hardlink at `~/.euxis/euxis-bin/euxis`, or any other location.
+The macro creates the library target, links GTest into a `<target>_tests` executable, applies warnings-as-errors, registers the install target, and adds the test binary to CTest. Consumers don't have to hand-roll any of that.
 
-## Extension Guidelines
+## Extension guidelines
 
-### Adding a New Library Module
+### Adding a new library
 
-1. Create `core/lib/<name>.sh` with the guard pattern:
-   ```bash
-   #!/usr/bin/env bash
-   [[ -n "${_EUXIS_LIB_<NAME>:-}" ]] && return; _EUXIS_LIB_<NAME>=1
-   EUXIS_HOME="${EUXIS_HOME:-${HOME}/.euxis}"
-   ```
-
-2. Source any dependencies at the top:
-   ```bash
-   source "${EUXIS_HOME}/euxis-bin/lib/common.sh"
-   ```
-
-3. Add a `source` line in `euxis-bin/euxis.sh` (after existing sources).
-
-4. Set permissions: `chmod 755 core/lib/<name>.sh`
-
-5. Run `bash -n euxis-bin/euxis.sh` to verify syntax.
+1. Create `libs/<name>/{include/euxis/<name>/,src/,tests/}` and `libs/<name>/CMakeLists.txt`.
+2. Inside the CMakeLists, call `euxis_add_library(euxis-<name>-cpp ...)` with the three sections.
+3. Add `add_subdirectory(libs/<name>)` to the root `CMakeLists.txt` in dependency order (libs that depend on yours must come after).
+4. Public headers live under `include/euxis/<name>/` so consumers include them as `#include "euxis/<name>/<header>.hpp"`.
 
 ### Rules
 
-- **One domain per module.** Don't add provider logic to `memory.sh`.
-- **No circular dependencies.** If A sources B, B must not source A.
-- **Always use the guard.** Other scripts (dispatch, loop, combo) may source the same libs.
-- **Keep the interface stable.** Function signatures are the API — changing them breaks callers.
-- **Export nothing.** Libraries define functions, not exported variables. Callers set their own state.
+- **One domain per library.** Don't park HTTP transport in `crypto`; spin up `network` or extend `a2a`.
+- **No circular dependencies.** If `runtime` depends on `security`, then `security` must not depend on `runtime` even transitively.
+- **Stable public surface.** The headers under `include/euxis/<name>/` are the API contract. Move implementation details into the `src/` tree, not into headers.
+- **Tests opt in.** Every lib carries at least one test source; the `_tests` target is created automatically by the macro.
+- **Forward-compat hooks live in the consuming lib.** When a feature needs `__cpp_lib_generator` / `__cpp_lib_reflection` / `__cpp_contracts`, the guard goes in the consuming lib's header. See `libs/runtime/include/euxis/runtime/streaming.hpp` for the pattern.
 
 ---
 
