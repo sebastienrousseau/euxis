@@ -142,7 +142,7 @@ jobs:
             dist/SHA256SUMS
 
       - name: Publish to GitHub Releases
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.EUXIS_VERSION }}
           generate_release_notes: true
