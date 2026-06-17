@@ -7,20 +7,19 @@ The `euxis::runtime` module governs the lifecycle, context memory, and execution
 The `ISessionStore` interface provides stateless access to historical agent sessions.
 
 * **Precondition**: A valid `.msgp` binary file or memory map exists for the session ID.
-* **Postcondition**: Returns a `std::vector<SessionMessage>` carrying every message in the requested session branch.
+* **Postcondition**: Returns `std::generator<SessionMessage>` on toolchains that ship `<generator>` (GCC 14's libstdc++), or `std::vector<SessionMessage>` as a fallback on toolchains that don't (AppleClang 21 / Homebrew LLVM 22 libc++ as of 2026-06). Range-for at the call site is identical either way.
 
-For long-horizon reasoning, use the `stream_episodes` method. The orchestrator consumes the returned vector and may apply its own windowing / truncation before passing the slice to the LLM.
+For long-horizon reasoning, use the `stream_episodes` method. On the lazy path the implementation `co_yield`s one message at a time so a multi-thousand-message branch does not have to materialise into a vector before iteration begins.
 
 ```cpp
-auto messages = store.stream_episodes("session-1");
-for (const auto& msg : messages) {
+for (auto&& msg : store.stream_episodes("session-1")) {
     process(msg);
 }
 ```
 
-### Future restoration to lazy streaming
+### Lazy vs eager — picked at compile time
 
-The original `stream_episodes` signature returned `std::generator<SessionMessage>` (C++23) so a long history could be streamed without materialising the whole vector. AppleClang 21's libc++ and Homebrew LLVM 22's libc++ do not yet ship `<generator>`, so the signature was changed to eager `std::vector` and the implementation rewritten without `co_yield`. Restore the lazy form when `__cpp_lib_generator` is defined on the supported toolchains — the implementations already produce the messages in order and only need their `co_yield` body re-added.
+The header signature flips behind `EUXIS_HAS_STD_GENERATOR`, set by `libs/runtime/include/euxis/runtime/streaming.hpp` when `__cpp_lib_generator >= 202207L` is defined. When a toolchain catches up to the standard, no call site has to move — only the guard.
 
 ## Binary Serialization
 

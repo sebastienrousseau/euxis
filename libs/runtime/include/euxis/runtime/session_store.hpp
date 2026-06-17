@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "streaming.hpp"  // EUXIS_HAS_STD_GENERATOR
+
 namespace euxis::runtime {
 
 /// @brief roles in a conversation.
@@ -47,14 +49,18 @@ public:
 
     /// @brief Stream session episodes for long-horizon reasoning.
     ///
-    /// Returns a fully-materialised vector. The original signature
-    /// returned `std::generator<SessionMessage>` (C++23) for lazy
-    /// loading; the header is not yet shipped by AppleClang 21's
-    /// libc++ nor Homebrew LLVM 22's libc++, so we eagerly collect
-    /// pending toolchain support. Restore the lazy signature when
-    /// `__cpp_lib_generator` is defined.
+    /// Lazy return shape under `EUXIS_HAS_STD_GENERATOR` (GCC 14's
+    /// libstdc++ defines `__cpp_lib_generator`; libc++ does not as
+    /// of 2026-06). On toolchains without `<generator>` the same
+    /// method returns a fully-materialised vector instead. Range-for
+    /// at the call site is identical either way.
+#if defined(EUXIS_HAS_STD_GENERATOR)
+    virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")
+        -> std::generator<SessionMessage> = 0;
+#else
     virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")
         -> std::vector<SessionMessage> = 0;
+#endif
 
     /// @brief List all branches for a given session.
     virtual auto list_branches(const std::string& session_id)

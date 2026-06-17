@@ -91,12 +91,24 @@ public:
         return sessions_.at(session_id).at(branch);
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::vector<SessionMessage> override {
+#if defined(EUXIS_HAS_STD_GENERATOR)
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::generator<SessionMessage> override {
+        auto loaded = load(session_id, branch);
+        if (!loaded) co_return;
+        for (auto& m : loaded->messages) {
+            co_yield std::move(m);
+        }
+    }
+#else
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::vector<SessionMessage> override {
         if (auto res = load(session_id, branch)) {
             return std::move(res->messages);
         }
         return {};
     }
+#endif
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
         std::vector<std::string> res;
@@ -181,15 +193,25 @@ public:
         }
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::vector<SessionMessage> override {
+#if defined(EUXIS_HAS_STD_GENERATOR)
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::generator<SessionMessage> override {
+        auto res = load(session_id, branch);
+        if (!res) co_return;
+        for (auto& m : res->messages) {
+            co_yield std::move(m);
+        }
+    }
+#else
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::vector<SessionMessage> override {
         // Eager materialisation pending `std::generator` ship in libc++.
-        // The previous `co_yield` implementation provided zero-allocation
-        // lazy traces; restore it when `__cpp_lib_generator` is defined.
         if (auto res = load(session_id, branch)) {
             return std::move(res->messages);
         }
         return {};
     }
+#endif
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
         std::vector<std::string> branches;
