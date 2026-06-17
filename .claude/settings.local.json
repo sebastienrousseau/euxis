@@ -77,7 +77,31 @@
       "Bash(/home/seb/.euxis/euxis-cpp/build-cov/euxis-core-cpp/euxis-core-cpp_tests --gtest_filter=\"CircuitBreakerTest.RecoverAfterTimeout\" 2>&1 | tail -15)",
       "Bash(./build-cov/euxis-gateway-cpp/euxis-gateway-cpp_tests 2>&1 | grep -B3 \"FAILED\" | head -15)",
       "Bash(ctest --test-dir euxis-cpp/build --output-on-failure 2>&1)",
-      "Bash(ls -la /home/seb/.euxis/euxis-examples/ 2>/dev/null && ls /home/seb/.euxis/euxis-examples/*/ 2>/dev/null | head -40)"
+      "Bash(ls -la /home/seb/.euxis/euxis-examples/ 2>/dev/null && ls /home/seb/.euxis/euxis-examples/*/ 2>/dev/null | head -40)",
+      "Bash(git push origin main --tags)",
+      "Bash(cmake-build/libs/bridge/euxis-bridge-cpp_tests 2>&1)",
+      "Bash(EUXIS_TEST_MOCK_EXECUTION=1 /home/seb/.euxis/cmake-build/apps/cli/euxis-cli-cpp_tests --gtest_filter=\"ProviderExecutorCircuit*\" 2>&1)",
+      "Bash(cmake --build /home/seb/.euxis/cmake-build/ --target euxis-gateway-cpp_tests 2>&1 | tail -30)",
+      "Bash(cmake-build/apps/cli/euxis-cli-cpp_tests --gtest_filter='McpProviderTest*' 2>&1)",
+      "Bash(cmake-build/apps/cli/euxis-cli-cpp_tests 2>&1 | tail -5)",
+      "Bash(ldconfig -p 2>/dev/null | grep z3 || echo \"No Z3 libraries in ldconfig\")",
+      "Bash(pacman -Q z3 2>/dev/null || echo \"z3 not installed\"; pacman -Ss z3 2>/dev/null | head -10)",
+      "Bash(sudo pacman -S --noconfirm z3)",
+      "Bash(build/cmake-build/apps/gateway/euxis-gateway-cpp_tests --gtest_filter='*McpFleetTools*' 2>&1)",
+      "Bash(git push origin feat/v0.0.3 2>&1)",
+      "Bash(grep -r \"metrics/\" --include=\"*.cpp\" --include=\"*.hpp\" apps/ libs/ 2>/dev/null | head -20)",
+      "Bash(grep -l \"doctest\\\\|catch2\\\\|googletest\\\\|gtest\" /home/seb/.euxis/apps/cli/tests/test_*.cpp | head -1 | xargs head -30)",
+      "Bash(cmake --build build/cmake-build --parallel 4 --target euxis-cli-cpp_tests 2>&1 | tail -30)",
+      "WebFetch(domain:docs.rs)",
+      "Bash(find /home/seb/.euxis/docs/euxis-sdk -name \"*test*\" -o -name \"*tests*\" 2>/dev/null | head -20)",
+      "Bash(cd /home/seb/.euxis/docs/euxis-sdk && cargo test 2>&1)",
+      "Bash(cd /home/seb/.euxis/docs/euxis-sdk && cargo doc --no-deps 2>&1 | grep -c warning && cd /home/seb/.euxis/docs/examples/rust-agent && cargo doc --no-deps 2>&1 | grep -c warning)",
+      "Bash(wc -l /home/seb/.euxis/apps/cli/src/cmd/*.cpp | tail -15)",
+      "Bash(ls -1 /home/seb/.euxis/libs/*/README.md 2>/dev/null | head -10)",
+      "Bash(grep -c \"^[[:space:]]*///\" /home/seb/.euxis/apps/cli/src/*.cpp | head -5)",
+      "Bash(grep -l \"TODO\\\\|FIXME\\\\|XXX\\\\|DEPRECATED\\\\|OUTDATED\" /home/seb/.euxis/docs/**/*.md 2>/dev/null | head -10)",
+      "Bash(grep -r \"v0\\\\.0\\\\.10\\\\|v0\\\\.0\\\\.9\" /home/seb/.euxis/docs/*.md 2>/dev/null | head -10)",
+      "Bash(make cpp-clean 2>&1 | tail -1 && make cpp-build 2>&1 | tail -30)"
     ]
   }
 }

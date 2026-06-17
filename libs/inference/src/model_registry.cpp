@@ -84,7 +84,7 @@ auto ModelRegistry::compute_sha256(const std::filesystem::path& path)
         return {};
     }
 
-    constexpr size_t buf_size = 64 * 1024; // 64 KiB chunks
+    constexpr size_t buf_size = 64ULL * 1024; // 64 KiB chunks
     std::vector<unsigned char> buf(buf_size);
 
     while (file.read(reinterpret_cast<char*>(buf.data()),

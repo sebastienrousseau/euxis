@@ -259,9 +259,9 @@ private slots:
     }
 
 private:
-    ChatEngine* chat_;
-    QListWidget* profile_list_;
-    QLabel* fallback_label_;
+    ChatEngine* chat_ = nullptr;
+    QListWidget* profile_list_ = nullptr;
+    QLabel* fallback_label_ = nullptr;
 };
 
 QDialog* create_provider_select_dialog(ChatEngine* chat, QWidget* parent) {

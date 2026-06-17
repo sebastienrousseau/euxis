@@ -116,7 +116,7 @@ public:
 private:
     struct SessionData {
         std::string agent_id;
-        double start_time;
+        double start_time = 0.0;
         std::string correlation_id;
         std::string task_type;
         std::string priority;

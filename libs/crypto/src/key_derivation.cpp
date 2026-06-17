@@ -17,8 +17,14 @@ auto derive_key(std::span<const std::byte> password,
                 size_t key_size)
     -> std::expected<DerivedKey, CryptoError> {
 
-    assert(!password.empty() && "P10-R5: password/seed must not be empty");
-    assert(key_size > 0 && key_size <= kMaxKeySize && "P10-R2: key_size bounded");
+    // Bounded-input contract: callers may pass any size; out-of-range values yield an
+    // explicit error (matches the documented std::expected return type — historically
+    // these were assert()s, but tests like KeySizeTooSmall verify the error path).
+    if (key_size == 0 || key_size > kMaxKeySize) {
+        return std::unexpected(CryptoError::KeyDerivationFailed);
+    }
+    // Note: empty password is allowed (see KeyDerivationTest.EmptyPasswordWorks);
+    // libsodium handles it via the underlying KDF.
 
     // Fast-path: if iterations is 0, use BLAKE2b (crypto_generichash) instead of Argon2id.
     // WARNING: BLAKE2b is NOT memory-hard. Only use iterations==0 for deterministic
@@ -62,7 +68,7 @@ auto derive_key(std::span<const std::byte> password,
     //   >= 100'000  -> SENSITIVE  (4)
     //   >= 10'000   -> MODERATE   (3)
     //   otherwise   -> INTERACTIVE (2, libsodium minimum)
-    unsigned long long opslimit;
+    unsigned long long opslimit = 0;
     if (iterations >= 100'000) {
         opslimit = crypto_pwhash_OPSLIMIT_SENSITIVE;
     } else if (iterations >= 10'000) {
@@ -71,12 +77,11 @@ auto derive_key(std::span<const std::byte> password,
         opslimit = crypto_pwhash_OPSLIMIT_INTERACTIVE;
     }
 
-    // Use MODERATE memory for SENSITIVE ops, INTERACTIVE memory otherwise,
-    // to keep runtime reasonable while still being secure.
-    size_t memlimit;
-    if (opslimit >= crypto_pwhash_OPSLIMIT_SENSITIVE) {
-        memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
-    } else if (opslimit >= crypto_pwhash_OPSLIMIT_MODERATE) {
+    // Use MODERATE memory for SENSITIVE and MODERATE ops alike,
+    // INTERACTIVE otherwise, to keep runtime reasonable while still
+    // being secure.
+    size_t memlimit = 0;
+    if (opslimit >= crypto_pwhash_OPSLIMIT_MODERATE) {
         memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
     } else {
         memlimit = crypto_pwhash_MEMLIMIT_INTERACTIVE;

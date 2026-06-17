@@ -9,18 +9,19 @@
 
 namespace euxis::cli {
 
-// Default fallback chains
-static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
-    {"claude",    {"openai", "gemini", "ollama"}},
-    {"anthropic", {"openai", "gemini", "ollama"}},
-    {"openai",    {"claude", "gemini", "ollama"}},
-    {"gemini",    {"claude", "openai", "ollama"}},
-    {"ollama",    {"claude", "openai", "gemini"}},
-};
-
 AuthProfileStore::AuthProfileStore(const std::string& data_dir)
     : data_dir_(data_dir)
 {
+    // Function-local static: lazy init avoids throwing during static-init phase
+    // (bugprone-throwing-static-initialization).
+    static const std::map<std::string, std::vector<std::string>> kDefaultFallbacks = {
+        {"claude",    {"openai", "gemini", "ollama"}},
+        {"anthropic", {"openai", "gemini", "ollama"}},
+        {"openai",    {"claude", "gemini", "ollama"}},
+        {"gemini",    {"claude", "openai", "ollama"}},
+        {"ollama",    {"claude", "openai", "gemini"}},
+    };
+
     auto config_dir = std::filesystem::path(data_dir) / "config";
     std::filesystem::create_directories(config_dir);
     store_path_ = (config_dir / "auth_profiles.json").string();
@@ -470,7 +471,7 @@ auto AuthProfileStore::compute_cooldown_ms(CooldownReason reason, int consecutiv
     }
 
     // RateLimit / AuthError: 1m → 5m → 25m → 60m cap
-    constexpr int64_t base = 60 * 1000;  // 1 minute
+    constexpr int64_t base = 60LL * 1000;  // 1 minute
     constexpr int64_t cap = 60LL * 60 * 1000;  // 60 minutes
     int64_t ms = base;
     for (int i = 1; i < consecutive; ++i) ms *= 5;

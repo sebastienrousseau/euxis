@@ -13,8 +13,8 @@ namespace euxis::metrics {
 /// @brief A potential claim extracted from raw text.
 struct ExtractedClaim {
     std::string matched_text;
-    int position_start;
-    int position_end;
+    int position_start = 0;
+    int position_end = 0;
     std::string context;
     std::optional<double> value;
     std::optional<std::string> unit;
@@ -62,7 +62,7 @@ public:
         -> std::vector<std::string>;
 
 private:
-    EvidenceFramework* framework_;
+    [[maybe_unused]] EvidenceFramework* framework_;
     double pass_threshold_;
 
     std::vector<std::string> quantitative_patterns_;

@@ -7,7 +7,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <generator>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -19,8 +19,8 @@ namespace euxis::inference {
 /// @brief metadata and content of a successful inference generation.
 struct InferenceResult {
     std::string text;
-    uint32_t tokens_generated;
-    float tokens_per_second;
+    uint32_t tokens_generated = 0;
+    float tokens_per_second = 0.0F;
     std::string engine_name;
     std::string model_name;
 };
@@ -36,7 +36,7 @@ public:
         -> std::expected<InferenceResult, std::string> = 0;
 
     /// @brief generate a completion using a stream of episodic context.
-    virtual auto episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+    virtual auto episodic_generate(std::vector<euxis::runtime::SessionMessage> episodes,
                                    std::string_view system_prompt,
                                    uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> = 0;
@@ -66,7 +66,7 @@ public:
                   uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;
 
-    auto episodic_generate(std::generator<euxis::runtime::SessionMessage> episodes,
+    auto episodic_generate(std::vector<euxis::runtime::SessionMessage> episodes,
                            std::string_view system_prompt,
                            uint32_t max_tokens = 512)
         -> std::expected<InferenceResult, std::string> override;

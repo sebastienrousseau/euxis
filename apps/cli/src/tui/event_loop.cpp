@@ -11,7 +11,8 @@ namespace euxis::cli::tui {
 
 namespace {
 // Global signal pipe for SIGWINCH forwarding.
-int g_signal_pipe_write = -1;
+// Must be volatile sig_atomic_t for async-signal-safety (accessed from handler + dtor).
+volatile sig_atomic_t g_signal_pipe_write = -1;
 
 void sigwinch_handler(int) {
     if (g_signal_pipe_write >= 0) {
@@ -33,10 +34,22 @@ void set_nonblocking(int fd) {
 }
 } // namespace
 
+/// Create a pipe with O_CLOEXEC to prevent FD leaks into child processes.
+auto cloexec_pipe(int fds[2]) -> int {
+#ifdef __linux__
+    return ::pipe2(fds, O_CLOEXEC);
+#else
+    if (::pipe(fds) != 0) return -1;
+    fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+    fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+    return 0;
+#endif
+}
+
 EventLoop::EventLoop() : handlers_(5) {
     // Create self-pipe for cross-thread posting.
     int pipe_fds[2];
-    if (::pipe(pipe_fds) == 0) {
+    if (cloexec_pipe(pipe_fds) == 0) {
         self_pipe_read_ = pipe_fds[0];
         self_pipe_write_ = pipe_fds[1];
         set_nonblocking(self_pipe_read_);
@@ -44,7 +57,7 @@ EventLoop::EventLoop() : handlers_(5) {
     }
 
     // Create signal pipe for SIGWINCH.
-    if (::pipe(pipe_fds) == 0) {
+    if (cloexec_pipe(pipe_fds) == 0) {
         signal_pipe_read_ = pipe_fds[0];
         signal_pipe_write_ = pipe_fds[1];
         set_nonblocking(signal_pipe_read_);
@@ -178,7 +191,7 @@ void EventLoop::quit() {
 }
 
 void EventLoop::process_stdin() {
-    unsigned char c;
+    unsigned char c = 0;
     if (::read(STDIN_FILENO, &c, 1) == 1) {
         Event ev{EventType::Key, static_cast<int>(c)};
 
@@ -209,10 +222,11 @@ void EventLoop::process_stdin() {
                                         case '5': ev.key = 1012; break; // PgUp
                                         case '6': ev.key = 1013; break; // PgDn
                                         case '3': ev.key = 1014; break; // Delete
+                                        default: break;                 // unknown VT seq — leave ev.key unset
                                     }
                                 } else if (seq[1] == '1' && seq[2] == ';') {
                                     // ESC [ 1 ; <mod> <dir> (Ctrl/Shift+arrow)
-                                    unsigned char mod_byte, dir_byte;
+                                    unsigned char mod_byte = 0, dir_byte = 0;
                                     if (::read(STDIN_FILENO, &mod_byte, 1) == 1 &&
                                         ::read(STDIN_FILENO, &dir_byte, 1) == 1) {
                                         int mod = mod_byte - '0';
@@ -224,7 +238,7 @@ void EventLoop::process_stdin() {
                                 }
                                 // F-keys: ESC [ 1 5 ~ = F5, etc.
                                 else if (seq[2] >= '0' && seq[2] <= '9') {
-                                    unsigned char tilde;
+                                    unsigned char tilde = 0;
                                     if (::read(STDIN_FILENO, &tilde, 1) == 1 && tilde == '~') {
                                         int code = (seq[1] - '0') * 10 + (seq[2] - '0');
                                         // Map CSI codes to sequential F-key constants

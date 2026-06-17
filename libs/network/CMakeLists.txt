@@ -4,6 +4,7 @@ euxis_add_library(euxis-network-cpp
     src/topology_grid.cpp
     src/resilience.cpp
     src/mcp_client.cpp
+    src/acp.cpp
   DEPS
     ixwebsocket::ixwebsocket
     spdlog::spdlog
@@ -14,4 +15,5 @@ euxis_add_library(euxis-network-cpp
     tests/test_topology_grid.cpp
     tests/test_resilience.cpp
     tests/test_mcp_client.cpp
+    tests/test_acp.cpp
 )

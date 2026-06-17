@@ -68,7 +68,10 @@ auto WebSocketClient::send_and_wait(const nlohmann::json& message, int timeout_s
     });
 
     if (!signaled) return std::unexpected("WebSocket request timed out");
-    return *last_response_;
+    // cv_.wait_for predicate guarantees has_value() == true here; .value() makes
+    // that visible to clang-tidy without changing behaviour (throws only on logic
+    // bug in the wait predicate, which would already be a programming error).
+    return last_response_.value();
 }
 
 bool WebSocketClient::is_connected() const {

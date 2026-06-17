@@ -1,10 +1,18 @@
 #include "euxis/adapters/slack.hpp"
 
 #include <spdlog/spdlog.h>
+// httplib.h triggers GCC's -Wmaybe-uninitialized inside its template
+// chains. Clang does not have that warning, so silencing it under
+// the GCC pragma block raises -Wunknown-warning-option under
+// AppleClang's -Werror. Guard the suppression to GCC-only.
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <httplib.h>
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 namespace euxis::adapters {
 

@@ -482,10 +482,22 @@ TEST_F(InfraCmdTest, DaemonStartWithStalePid) {
 
 // --- Coverage: bus publish and subscribe round-trip ---
 TEST_F(InfraCmdTest, BusPublishAndSubscribe) {
-    auto code1 = cmd_bus(ctx_, {"publish", "round-trip-pipe", "msg1"});
-    EXPECT_EQ(code1, 0);
+    // Use a per-test pipe name so the file path is unique even within the
+    // same test binary across re-runs or potential future fixture sharing.
+    const std::string pipe_name =
+        "round-trip-pipe-" + std::to_string(::getpid());
 
-    auto code2 = cmd_bus(ctx_, {"subscribe", "round-trip-pipe"});
+    auto code1 = cmd_bus(ctx_, {"publish", pipe_name, "msg1"});
+    ASSERT_EQ(code1, 0);
+
+    // The earlier version checked only return codes; that left publish/
+    // subscribe internal failures invisible if either silently returned 0.
+    // Assert the pipe file exists with the expected content.
+    const auto pipe_path = fs::path(ctx_.euxis_home) /
+                           "data/runtime" / "data" / "bus" / "pipes" / pipe_name;
+    ASSERT_TRUE(fs::exists(pipe_path)) << "publish did not create the pipe file";
+
+    auto code2 = cmd_bus(ctx_, {"subscribe", pipe_name});
     EXPECT_EQ(code2, 0);
 }
 

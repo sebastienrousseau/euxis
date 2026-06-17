@@ -1,0 +1,80 @@
+# Doxygen configuration for Euxis. Curated, not the full default file.
+# Generated from Doxyfile.in via CMake configure_file().
+
+PROJECT_NAME           = "@PROJECT_NAME@"
+PROJECT_NUMBER         = "@PROJECT_VERSION@"
+PROJECT_BRIEF          = "High-performance agent OS — C++23 SDK reference"
+OUTPUT_DIRECTORY       = @CMAKE_BINARY_DIR@/docs
+CREATE_SUBDIRS         = NO
+ALLOW_UNICODE_NAMES    = YES
+OUTPUT_LANGUAGE        = English
+
+# Input
+INPUT                  = @CMAKE_SOURCE_DIR@/libs \
+                         @CMAKE_SOURCE_DIR@/apps
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.h *.cpp *.md
+EXCLUDE_PATTERNS       = */tests/* \
+                         */build/* \
+                         */_deps/* \
+                         */.git/* \
+                         */CMakeFiles/*
+EXCLUDE_SYMLINKS       = YES
+
+# Source-level
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = NO
+MULTILINE_CPP_IS_BRIEF = YES
+INHERIT_DOCS           = YES
+INLINE_INFO            = YES
+SORT_MEMBER_DOCS       = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+# Build / output
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+# doxygen-awesome-css requires HTML_COLORSTYLE = LIGHT (Doxygen >= 1.9.5)
+HTML_COLORSTYLE        = LIGHT
+HTML_EXTRA_STYLESHEET  = @DOXYGEN_AWESOME_DIR@/doxygen-awesome.css \
+                         @DOXYGEN_AWESOME_DIR@/doxygen-awesome-sidebar-only.css
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+
+# Diagrams (only if graphviz is available — EuxisDocs.cmake validates it)
+HAVE_DOT               = @DOXYGEN_HAVE_DOT@
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+
+# Warnings
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_AS_ERROR          = NO
+WARN_LOGFILE           = @CMAKE_BINARY_DIR@/docs/doxygen.warn
+
+# Preprocessor
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = @CMAKE_SOURCE_DIR@/libs
+PREDEFINED             = __cplusplus=202302L \
+                         __linux__=1
+
+# C++23 specifics
+CPP_CLI_SUPPORT        = NO
+BUILTIN_STL_SUPPORT    = YES

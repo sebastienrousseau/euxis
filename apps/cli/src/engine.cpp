@@ -1,4 +1,5 @@
 #include "euxis/cli/engine.hpp"
+#include "euxis/cli/exit_codes.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/terminal.hpp"
 #include "euxis/cli/cmd/system.hpp"
@@ -11,6 +12,12 @@
 #include "euxis/cli/cmd/lifecycle.hpp"
 #include "euxis/cli/cmd/certify.hpp"
 #include "euxis/cli/cmd/system_card.hpp"
+#include "euxis/cli/cmd/sdk.hpp"
+#include "euxis/cli/cmd/sbom.hpp"
+#include "euxis/cli/cmd/slopsquatting.hpp"
+#include "euxis/cli/cmd/cache.hpp"
+#include "euxis/cli/cmd/attest.hpp"
+#include "euxis/cli/cmd/scan.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -26,7 +33,7 @@ using euxis::cli::i18n::tr;
 
 namespace {
 
-constexpr auto kVersion = "v0.0.10";
+constexpr auto kVersion = "v0.1.2";
 
 } // namespace
 
@@ -60,6 +67,12 @@ void Engine::register_commands() {
     commands_.push_back({"compare",            tr("Core"), tr("Compare triage vs deep verification"),   cmd::cmd_compare});
     commands_.push_back({"stats",              tr("Core"), tr("Validation metrics and drift history"),   cmd::cmd_stats});
     commands_.push_back({"policy",             tr("Core"), tr("Policy inspection and enforcement"),     cmd::cmd_policy});
+    commands_.push_back({"sbom",               tr("Core"), tr("Emit CycloneDX 1.6 / SPDX 3.0.1 / OpenVEX from a directory scan"), cmd::cmd_sbom});
+    commands_.push_back({"slopsquatting",      tr("Core"), tr("Guard against LLM-hallucinated package names"), cmd::cmd_slopsquatting});
+    commands_.push_back({"cache",              tr("Core"), tr("Inspect / purge the incremental scan cache"), cmd::cmd_cache});
+    commands_.push_back({"attest",             tr("Core"), tr("Produce a Sigstore-format signed in-toto evidence bundle"), cmd::cmd_attest});
+    commands_.push_back({"verify",             tr("Core"), tr("Verify a Sigstore-format signed evidence bundle"), cmd::cmd_verify_attest});
+    commands_.push_back({"scan",               tr("Core"), tr("Apply YAML rule packs to a target directory (SARIF output)"), cmd::cmd_scan});
 
     // Lifecycle (5) — installation and maintenance
     commands_.push_back({"install",    tr("Lifecycle"), tr("Bootstrap local Euxis installation"),    cmd::cmd_install});
@@ -114,6 +127,7 @@ void Engine::register_commands() {
     commands_.push_back({"docs-test",          tr("Development"),    tr("Test documentation examples"),               cmd::cmd_docs_test});
     commands_.push_back({"sync-docs",          tr("Development"),    tr("Sync docs to latest code state"),            cmd::cmd_sync_docs});
     commands_.push_back({"test-infra",         tr("Development"),    tr("Run infrastructure test suite"),             cmd::cmd_test_infra});
+    commands_.push_back({"sdk-demo",           tr("Development"),    tr("Drive AgentLoopHarness end-to-end (mock)"),  cmd::cmd_sdk_demo});
 
     // Specialized (12)
     commands_.push_back({"voice",            tr("Specialized"),    tr("Voice interface mode"),                       cmd::cmd_voice});
@@ -128,6 +142,7 @@ void Engine::register_commands() {
     commands_.push_back({"gym",              tr("Specialized"),    tr("Agent training gym (eval + drill)"),          cmd::cmd_gym});
     commands_.push_back({"replay",           tr("Specialized"),    tr("Replay agent session from log"),             cmd::cmd_replay});
     commands_.push_back({"context-worker",   tr("Specialized"),    tr("Background context enrichment worker"),      cmd::cmd_context_worker});
+    commands_.push_back({"lsp",              tr("Specialized"),    tr("Emit LSP-compatible diagnostics JSON"),      cmd::cmd_lsp});
 }
 
 auto Engine::run(const std::vector<std::string>& args) -> int {
@@ -192,7 +207,7 @@ auto Engine::run(const std::vector<std::string>& args) -> int {
 
     std::println(stderr, "{} {}", tr("Unknown command:"), cmd);
     std::println(stderr, "{}", tr("Run 'euxis help' for available commands."));
-    return 1;
+    return to_int(ExitCode::InfraError);
 }
 
 void Engine::print_version() {

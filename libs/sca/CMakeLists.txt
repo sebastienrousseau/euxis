@@ -1,0 +1,18 @@
+euxis_add_library(euxis-sca-cpp
+  SOURCES
+    src/manifest.cpp
+    src/cargo_lock.cpp
+    src/npm_lock.cpp
+    src/pipfile_lock.cpp
+    src/go_sum.cpp
+    src/scanner.cpp
+  DEPS
+    nlohmann_json::nlohmann_json
+    euxis-sbom-cpp
+  TEST_SOURCES
+    tests/test_cargo_lock.cpp
+    tests/test_npm_lock.cpp
+    tests/test_pipfile_lock.cpp
+    tests/test_go_sum.cpp
+    tests/test_scanner.cpp
+)

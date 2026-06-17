@@ -32,7 +32,7 @@ public:
                   const std::optional<SkillExecutionPolicy>& policy = std::nullopt) -> AdmissionResult;
 
 private:
-    double reputation_threshold_;
+    [[maybe_unused]] double reputation_threshold_;
 
     auto check_structure(const BridgedSkill& skill) -> bool;
     auto check_static_analysis(const BridgedSkill& skill) -> std::pair<bool, std::vector<AnalysisFinding>>;

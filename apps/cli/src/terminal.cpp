@@ -65,8 +65,8 @@ void spinner_clear() {
 
 void progress_bar(int current, int total, std::string_view label) {
     int width = 20;
-    float progress = total > 0 ? (float)current / total : 0.0f;
-    int filled = (int)(width * progress);
+    float progress = total > 0 ? static_cast<float>(current) / static_cast<float>(total) : 0.0F;
+    int filled = static_cast<int>(static_cast<float>(width) * progress);
     std::string bar = "[";
     for (int i = 0; i < width; ++i) bar += (i < filled) ? "■" : " ";
     bar += "]";
@@ -120,21 +120,21 @@ void disable_raw_mode() {
 }
 
 int read_key() {
-    unsigned char c;
+    unsigned char c = 0;
     if (::read(STDIN_FILENO, &c, 1) != 1) return 0;
     return static_cast<int>(c);
 }
 
 void get_terminal_size(int& w, int& h) {
-    struct winsize ws;
+    struct winsize ws{};
     if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) { w = 80; h = 24; }
     else { w = ws.ws_col; h = ws.ws_row; }
 }
 
 TerminalScreen::TerminalScreen() {
     get_terminal_size(width_, height_);
-    front_buffer_.assign(width_ * height_, Cell{.ch = 0xFFFFFFFF});
-    back_buffer_.resize(width_ * height_);
+    front_buffer_.assign(static_cast<size_t>(width_) * height_, Cell{.ch = 0xFFFFFFFF});
+    back_buffer_.resize(static_cast<size_t>(width_) * height_);
 }
 
 TerminalScreen::~TerminalScreen() { disable_raw_mode(); }
@@ -142,8 +142,8 @@ TerminalScreen::~TerminalScreen() { disable_raw_mode(); }
 void TerminalScreen::resize(int w, int h) {
     if (w == width_ && h == height_) return;
     width_ = w; height_ = h;
-    front_buffer_.assign(w * h, Cell{.ch = 0xFFFFFFFF});
-    back_buffer_.assign(w * h, Cell{});
+    front_buffer_.assign(static_cast<size_t>(w) * h, Cell{.ch = 0xFFFFFFFF});
+    back_buffer_.assign(static_cast<size_t>(w) * h, Cell{});
 }
 
 void TerminalScreen::clear() { for (auto& c : back_buffer_) c = Cell{}; }
@@ -163,7 +163,7 @@ void TerminalScreen::write_text(int x, int y, std::string_view text, uint8_t fr,
                 std::string_view sgr = text.substr(i + 2, m_pos - (i + 2));
                 if (sgr == "0") { curr_fr = fr; curr_fg = fg; curr_fb = fb; }
                 else if (sgr.starts_with("38;2;")) {
-                    int r, g, b; if (std::sscanf(std::string(sgr).c_str(), "38;2;%d;%d;%d", &r, &g, &b) == 3) {
+                    int r = 0, g = 0, b = 0; if (std::sscanf(std::string(sgr).c_str(), "38;2;%d;%d;%d", &r, &g, &b) == 3) {
                         curr_fr = (uint8_t)r; curr_fg = (uint8_t)g; curr_fb = (uint8_t)b;
                     }
                 }
@@ -219,8 +219,10 @@ void TerminalScreen::write_gradient(int x, int y, std::string_view text, uint8_t
         cps.push_back(cp); i += len;
     }
     for (size_t i = 0; i < cps.size(); ++i) {
-        float t = (cps.size() > 1) ? (float)i / (cps.size() - 1) : 0;
-        uint8_t r = (uint8_t)(r1 + t * (r2 - r1)), g = (uint8_t)(g1 + t * (g2 - g1)), b = (uint8_t)(b1 + t * (b2 - b1));
+        float t = (cps.size() > 1) ? static_cast<float>(i) / static_cast<float>(cps.size() - 1) : 0.0F;
+        uint8_t r = (uint8_t)(static_cast<float>(r1) + t * static_cast<float>(r2 - r1));
+        uint8_t g = (uint8_t)(static_cast<float>(g1) + t * static_cast<float>(g2 - g1));
+        uint8_t b = (uint8_t)(static_cast<float>(b1) + t * static_cast<float>(b2 - b1));
         set_cell(x + (int)i, y, cps[i], r, g, b, 0, 0, 0, true);
     }
 }

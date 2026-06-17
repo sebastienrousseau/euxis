@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(euxis VERSION 0.0.10 LANGUAGES CXX)
+project(euxis VERSION 0.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,27 +11,79 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(EuxisDefaults)
 include(EuxisPackage)
+include(EuxisStdModule)
+# `import std;` ships as opt-in. Apple Clang's libc++ surfaces
+# std.cppm at /usr/share/libc++/v1/std.cppm but the file shape
+# precompiles cleanly only with Homebrew LLVM 19+. Defaulting OFF
+# keeps the cpp.yml matrix build green; pilot consumers flip
+# EUXIS_ENABLE_STD_MODULE=ON at configure to try the path.
+option(EUXIS_ENABLE_STD_MODULE
+       "Enable the precompiled C++23 std module pilot" OFF)
+if(EUXIS_ENABLE_STD_MODULE)
+    euxis_enable_std_module()
+endif()
+
+# C++26 contracts pilot. The shim at libs/runtime/include/euxis/runtime/
+# contracts.hpp picks up native pre/post/contract_assert the day a compiler
+# ships P2900. Today, flipping this ON defines EUXIS_CONTRACTS_RUNTIME so
+# the annotations resolve to runtime checks that abort on violation —
+# useful for CI death tests and pilot validation. OFF (default) leaves the
+# annotations as C++23 [[assume]] hints with zero runtime cost.
+option(EUXIS_ENABLE_CXX26_CONTRACTS
+       "Pilot the C++26 contracts shim (libs/runtime) — runtime checks today, native pre/post the day a compiler ships them" OFF)
+if(EUXIS_ENABLE_CXX26_CONTRACTS)
+    add_compile_definitions(EUXIS_CONTRACTS_RUNTIME)
+    message(STATUS "Euxis: C++26 contracts pilot enabled (runtime-check mode)")
+endif()
 include(FetchContent)
 include(CheckIPOSupported)
 
 # --- Performance Optimizations ---
+option(EUXIS_NATIVE_ARCH "Use -march=native for dev builds" OFF)
+
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     check_ipo_supported(RESULT lto_supported OUTPUT error)
     if(lto_supported)
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+        # Use fat LTO objects: native code + LTO IR in every .o file.
+        # Required so test targets (linked via GTest which may not use LTO)
+        # can still resolve symbols from static libraries built with LTO.
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            add_compile_options(-ffat-lto-objects)
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        add_compile_options(-march=native -O3 -flto)
+        if(EUXIS_NATIVE_ARCH)
+            add_compile_options(-march=native)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+            add_compile_options(-march=x86-64-v3)
+        elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+            # Apple Silicon (M1+) and Linux ARM64 servers ship ARMv8.4-A
+            # with crypto and CRC extensions; -mcpu=apple-m1 is also
+            # acceptable on Darwin but armv8.4-a is portable to Graviton3,
+            # Ampere Altra, and aarch64 Linux runners.
+            add_compile_options(-march=armv8.4-a+crypto+crc)
+        endif()
+        add_compile_options(-O3)
     endif()
 endif()
 
-# Disable warnings-as-errors for external dependencies that might trigger modern compiler diagnostics
-set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
+# Warnings-as-errors for euxis targets; SYSTEM-marked FetchContent deps are excluded automatically.
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 # --- Unified Dependency Resolution via FetchContent ---
 
 # nlohmann_json
+#
+# NOTE: we deliberately do NOT use FIND_PACKAGE_ARGS here. inja v3.4.0's
+# CMakeLists.txt has unguarded `install(TARGETS nlohmann_json EXPORT
+# injaTargets)` calls (lines 52, 63) that run regardless of INJA_INSTALL.
+# Those need `nlohmann_json` to be a real, installable target — which
+# FetchContent gives us. find_package produces only the namespaced
+# `nlohmann_json::nlohmann_json` imported alias, and the unprefixed
+# `nlohmann_json` target does not exist, which breaks the configure
+# step in CI environments that have nlohmann-json3-dev installed.
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -50,6 +102,7 @@ FetchContent_Declare(
     inja
     GIT_REPOSITORY https://github.com/pantor/inja.git
     GIT_TAG        v3.4.0
+    SYSTEM
 )
 FetchContent_MakeAvailable(inja)
 
@@ -60,14 +113,33 @@ FetchContent_Declare(
     yaml-cpp
     GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
     GIT_TAG        0.8.0
+    SYSTEM
 )
 FetchContent_MakeAvailable(yaml-cpp)
+if(TARGET yaml-cpp)
+    # Mirrors the ixwebsocket workaround below: the global
+    # CMAKE_COMPILE_WARNING_AS_ERROR ON injects -Werror after any
+    # PRIVATE flags, so target-level -Wno-error is overridden. Use the
+    # property-based form. yaml-cpp 0.8.0 has -Wshadow false positives
+    # under Apple Clang.
+    set_target_properties(yaml-cpp PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+    target_compile_options(yaml-cpp PRIVATE -Wno-shadow)
+endif()
 
 # spdlog (Use latest stable)
+#
+# SPDLOG_USE_STD_FORMAT routes spdlog through C++23 std::format
+# (from libc++) instead of its bundled fmt. Clang 21 / AppleClang 21
+# tightened consteval propagation in a way the pinned fmt rejects
+# (`logger-inl.h:139, :151` and `fmt_helper.h:91`); std::format
+# sidesteps the entire chain. Reversible by flipping the flag back
+# OFF once we bump the spdlog pin.
+set(SPDLOG_USE_STD_FORMAT ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG        v1.15.0
+    FIND_PACKAGE_ARGS NAMES spdlog
 )
 FetchContent_MakeAvailable(spdlog)
 
@@ -76,6 +148,7 @@ FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG        v1.14.0
+    FIND_PACKAGE_ARGS NAMES GTest
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
@@ -83,14 +156,42 @@ if(NOT TARGET GTest::gtest_main)
     add_library(GTest::gtest_main ALIAS gtest_main)
 endif()
 
+# Google Benchmark (opt-in for libs/bench statistical harness)
+option(EUXIS_BUILD_GBENCH "Fetch Google Benchmark and build the gbench harness" OFF)
+if(EUXIS_BUILD_GBENCH)
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        benchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG        v1.9.1
+        SYSTEM
+    )
+    FetchContent_MakeAvailable(benchmark)
+endif()
+
 # ixwebsocket (With specific patch for missing cstdint in some versions)
+find_package(OpenSSL QUIET)
 FetchContent_Declare(
     ixwebsocket
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG        v11.4.4
 )
-set(USE_TLS OFF CACHE BOOL "" FORCE)
+if(OpenSSL_FOUND)
+    set(USE_TLS ON CACHE BOOL "" FORCE)
+    message(STATUS "Euxis: IXWebSocket TLS enabled (OpenSSL ${OPENSSL_VERSION})")
+else()
+    set(USE_TLS OFF CACHE BOOL "" FORCE)
+    message(STATUS "Euxis: IXWebSocket TLS disabled (OpenSSL not found)")
+endif()
 FetchContent_MakeAvailable(ixwebsocket)
+if(TARGET ixwebsocket)
+    # CMAKE_COMPILE_WARNING_AS_ERROR injects -Werror after PRIVATE flags, so
+    # target-level -Wno-error is overridden. Property-based opt-out wins.
+    set_target_properties(ixwebsocket PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+    target_compile_options(ixwebsocket PRIVATE -Wno-shadow -Wno-array-bounds)
+endif()
 if(NOT TARGET ixwebsocket::ixwebsocket)
     add_library(ixwebsocket::ixwebsocket ALIAS ixwebsocket)
 endif()
@@ -107,8 +208,38 @@ if(NOT TARGET httplib::httplib)
     add_library(httplib::httplib ALIAS httplib)
 endif()
 
+# Third-party dep warning relaxation — see cmake/EuxisDefaults.cmake
+# for the rationale. Must come AFTER every FetchContent_MakeAvailable
+# above so the imported targets exist when we touch them.
+euxis_relax_thirdparty_warnings(
+    spdlog fmt fmt::fmt
+    gtest gtest_main gmock gmock_main
+    benchmark benchmark_main
+    yaml-cpp ixwebsocket
+)
+
 # SQLite3
+#
+# CMake's FindSQLite3 module is supposed to create the SQLite3::SQLite3
+# IMPORTED target whenever SQLite3 is found. In practice, this is not
+# uniform across CMake versions and runner configurations — some
+# environments find the library, set SQLite3_FOUND=TRUE, but do not
+# materialise the imported target. The fallback below mirrors what
+# modern FindSQLite3 modules do: synthesise the imported target from
+# the variables that find_package always populates.
 find_package(SQLite3 REQUIRED)
+if(NOT TARGET SQLite3::SQLite3)
+    add_library(SQLite3::SQLite3 INTERFACE IMPORTED)
+    if(DEFINED SQLite3_INCLUDE_DIRS)
+        set_target_properties(SQLite3::SQLite3 PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIRS}")
+    endif()
+    if(DEFINED SQLite3_LIBRARIES)
+        set_target_properties(SQLite3::SQLite3 PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${SQLite3_LIBRARIES}")
+    endif()
+    message(STATUS "Euxis: synthesised SQLite3::SQLite3 imported target")
+endif()
 
 # Libsodium
 find_package(unofficial-sodium CONFIG QUIET)
@@ -116,6 +247,26 @@ if(NOT unofficial-sodium_FOUND)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
     add_library(unofficial-sodium::sodium ALIAS PkgConfig::SODIUM)
+endif()
+
+# --- RPATH settings for installed binaries ---
+set(CMAKE_SKIP_BUILD_RPATH OFF)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+set(CMAKE_INSTALL_RPATH_USE_LINK_LIBRARIES TRUE)
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
+else()
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+endif()
+
+# --- Debug info compression for Release builds ---
+# GNU `--compress-debug-sections=zlib` is recognised by GNU ld / lld
+# only. macOS ld64 has no equivalent flag; skip silently on Apple.
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-g1)
+    if(NOT APPLE)
+        add_link_options(-Wl,--compress-debug-sections=zlib)
+    endif()
 endif()
 
 enable_testing()
@@ -129,6 +280,17 @@ add_subdirectory(libs/inference)
 add_subdirectory(libs/a2a-types)
 add_subdirectory(libs/a2a)
 add_subdirectory(libs/security)
+add_subdirectory(libs/sbom)
+add_subdirectory(libs/sca)
+add_subdirectory(libs/slopsquatting)
+add_subdirectory(libs/cache)
+add_subdirectory(libs/attest)
+add_subdirectory(libs/parse)
+add_subdirectory(libs/cpg)
+add_subdirectory(libs/scan)
+add_subdirectory(libs/taint)
+add_subdirectory(libs/ensemble)
+add_subdirectory(libs/reach)
 add_subdirectory(libs/platform)
 add_subdirectory(libs/runtime)
 add_subdirectory(libs/metrics)
@@ -141,3 +303,24 @@ add_subdirectory(apps/cli)
 add_subdirectory(apps/publisher)
 add_subdirectory(libs/bench)
 add_subdirectory(apps/etx)
+
+# Optional: SDK examples (opt-in to avoid slowing default builds)
+option(EUXIS_BUILD_EXAMPLES "Build C++ SDK examples under docs/examples/cpp/" OFF)
+if(EUXIS_BUILD_EXAMPLES)
+    add_subdirectory(docs/examples/cpp)
+endif()
+
+# Optional: Doxygen API reference target (auto-skips if doxygen absent)
+option(EUXIS_BUILD_DOCS "Generate API docs with Doxygen if available" ON)
+include(EuxisDocs)
+
+# --- CPack packaging ---
+set(CPACK_PACKAGE_NAME "euxis")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Euxis — multi-agent code certification CLI")
+set(CPACK_GENERATOR "TGZ")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND CPACK_GENERATOR "DEB" "RPM")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "euxis maintainers")
+endif()
+include(CPack)

@@ -1,0 +1,44 @@
+# Drop-in include for GitLab pipelines:
+#
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/sebastienrousseau/euxis/main/templates/gitlab-ci/.gitlab-ci.euxis.yml'
+#
+# Variables you can override at the project level:
+#   EUXIS_VERSION (default: latest)
+#   EUXIS_MODE    (default: check)   triage | check | review | forensic
+#   EUXIS_TARGET  (default: .)
+#   EUXIS_FAIL_ON (default: high)    critical | high | medium | low | none
+
+variables:
+  EUXIS_VERSION: "latest"
+  EUXIS_MODE: "check"
+  EUXIS_TARGET: "."
+  EUXIS_FAIL_ON: "high"
+
+euxis_audit:
+  stage: test
+  image:
+    name: ghcr.io/sebastienrousseau/euxis:${EUXIS_VERSION}
+    entrypoint: [""]
+  script:
+    - /euxis "$EUXIS_MODE" "$EUXIS_TARGET"
+        --sarif euxis-results.sarif
+        --sbom  euxis-sbom.cdx.json
+        --gitlab-codequality gl-sast-report.json
+        --evidence euxis-evidence.tar.gz
+        --fail-on "$EUXIS_FAIL_ON"
+  artifacts:
+    name: "euxis-evidence-$CI_PIPELINE_ID"
+    when: always
+    expire_in: 90 days
+    paths:
+      - euxis-evidence.tar.gz
+      - euxis-results.sarif
+      - euxis-sbom.cdx.json
+    reports:
+      sast: gl-sast-report.json
+      cyclonedx: euxis-sbom.cdx.json
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG

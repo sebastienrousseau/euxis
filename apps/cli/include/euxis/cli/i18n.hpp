@@ -48,6 +48,7 @@ public:
             }
         } catch (const nlohmann::json::exception&) {
             // Malformed translation file — fall back to English
+            (void)0;  // swallowed: best-effort
         }
     }
 

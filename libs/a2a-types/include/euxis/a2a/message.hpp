@@ -41,7 +41,7 @@ struct Artifact {
 struct BidRequest {
     std::string task_id;
     std::string capability_required;
-    int max_latency_ms;
+    int max_latency_ms = 0;
 
     [[nodiscard]] nlohmann::json to_json() const;
     [[nodiscard]] static auto from_json(const nlohmann::json& j) -> BidRequest;
@@ -51,9 +51,9 @@ struct BidRequest {
 struct BidResponse {
     std::string task_id;
     std::string agent_id;
-    double estimated_cost;
-    int estimated_latency_ms;
-    bool accepted;
+    double estimated_cost = 0.0;
+    int estimated_latency_ms = 0;
+    bool accepted = false;
 
     [[nodiscard]] nlohmann::json to_json() const;
     [[nodiscard]] static auto from_json(const nlohmann::json& j) -> BidResponse;

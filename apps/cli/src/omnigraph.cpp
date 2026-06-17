@@ -24,8 +24,13 @@ auto GraphAdapter::format_system_prompt(const nlohmann::json& graph)
     -> std::string {
     std::string output = "# EUXIS OMNIGRAPH: WORKSPACE CONTEXT\n\n";
 
-    for (auto& [node, data] :
-         graph.value("nodes", nlohmann::json::object()).items()) {
+    // Materialise the temporary into a named local before iterating —
+    // graph.value(...) returns by value, and .items() yields a view over
+    // that temporary, which would expire at the end of the for-init
+    // statement (GCC 14 -Werror=dangling-reference).
+    const auto nodes_obj =
+        graph.value("nodes", nlohmann::json::object());
+    for (auto& [node, data] : nodes_obj.items()) {
         auto node_type = data.value("type", "unknown");
         output += "## " + node + " (" + node_type + ")\n";
 
@@ -63,8 +68,10 @@ auto GraphAdapter::format_json(const nlohmann::json& graph) -> std::string {
 
 auto GraphAdapter::format_minimal(const nlohmann::json& graph) -> std::string {
     std::string output = "# Workspace Map\n\n";
-    for (const auto& [node, _] :
-         graph.value("nodes", nlohmann::json::object()).items()) {
+    // Same dangling-reference fix as format_system_prompt above.
+    const auto nodes_obj =
+        graph.value("nodes", nlohmann::json::object());
+    for (const auto& [node, _] : nodes_obj.items()) {
         output += "- " + node + "\n";
     }
     return output;

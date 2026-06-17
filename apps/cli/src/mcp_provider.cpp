@@ -76,7 +76,7 @@ auto McpProviderBridge::execute(const std::string& server_name,
     nlohmann::json init_req = {
         {"jsonrpc", "2.0"}, {"id", 0}, {"method", "initialize"},
         {"params", {{"protocolVersion", "2024-11-05"}, {"capabilities", {}},
-                     {"clientInfo", {{"name", "euxis"}, {"version", "0.0.10"}}}}}
+                     {"clientInfo", {{"name", "euxis"}, {"version", "0.1.2"}}}}}
     };
     std::string init_body = init_req.dump();
     std::string init_framed = "Content-Length: " + std::to_string(init_body.size()) + "\r\n\r\n" + init_body;
@@ -87,13 +87,26 @@ auto McpProviderBridge::execute(const std::string& server_name,
 
     std::string full_input = init_framed + ack_framed + framed;
 
-    // Set env vars
+    // Q2: Set env vars with allowlist validation — reject shell metacharacters
+    static const std::string_view allowed_key_chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
     std::map<std::string, std::string> env_map;
     for (const auto& e : cfg.env) {
         auto eq = e.find('=');
-        if (eq != std::string::npos) {
-            env_map[e.substr(0, eq)] = e.substr(eq + 1);
+        if (eq == std::string::npos) continue;
+        auto key = e.substr(0, eq);
+        auto val = e.substr(eq + 1);
+        // Reject keys with non-identifier characters
+        if (key.find_first_not_of(allowed_key_chars) != std::string::npos) continue;
+        // Reject values with shell metacharacters
+        bool safe = true;
+        for (char c : val) {
+            if (c == '`' || c == '$' || c == ';' || c == '|' || c == '\n' || c == '\r' || c == '\0') {
+                safe = false;
+                break;
+            }
         }
+        if (safe) env_map[key] = val;
     }
 
     auto result = Process::run_with_input(cfg.command, cfg.args, full_input,
@@ -123,7 +136,7 @@ auto McpProviderBridge::execute(const std::string& server_name,
         if (body_start + cl_val > output.size()) break;
 
         std::string response_body = output.substr(body_start, cl_val);
-        try { last_response = nlohmann::json::parse(response_body); } catch (...) {}
+        try { last_response = nlohmann::json::parse(response_body); } catch (...) { /* swallowed: best-effort path */ (void)0; }
 
         pos = body_start + cl_val;
     }

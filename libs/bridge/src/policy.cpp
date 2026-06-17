@@ -167,6 +167,15 @@ auto verify_capability_token(
     const AgentCapabilityToken& token,
     const unsigned char* signing_key) -> bool {
 
+    // S7: Check expiration before verifying HMAC — reject expired tokens
+    if (!token.expires_at.empty()) {
+        auto now = now_iso8601();
+        // ISO 8601 strings are lexicographically comparable
+        if (now >= token.expires_at) {
+            return false;  // token expired
+        }
+    }
+
     auto canonical = token.canonical_string();
     unsigned char expected_mac[crypto_auth_hmacsha256_BYTES];
 

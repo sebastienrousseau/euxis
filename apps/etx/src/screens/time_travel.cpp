@@ -123,10 +123,10 @@ QWidget* create_time_travel_screen(QWidget* parent) {
 
     // Sample events for mission run-0042
     struct Event {
-        QString type_icon;
-        QString timestamp;
-        QString agent;
-        QString data;
+        QString type_icon{};
+        QString timestamp{};
+        QString agent{};
+        QString data{};
     };
 
     QList<Event> events = {
@@ -169,13 +169,13 @@ QWidget* create_time_travel_screen(QWidget* parent) {
         type_font.setPointSize(11);
         type_label->setFont(type_font);
 
-        // Color-code by type
+        // Color-code by type. START and DONE share green to mark the
+        // run's edges; PLAN/EXEC/HITL get their own colours.
         QString type_color = "#888";
-        if (evt.type_icon.contains("START")) type_color = "#4caf50";
+        if (evt.type_icon.contains("START") || evt.type_icon.contains("DONE")) type_color = "#4caf50";
         else if (evt.type_icon.contains("PLAN")) type_color = "#2196f3";
         else if (evt.type_icon.contains("EXEC")) type_color = "#ff9800";
         else if (evt.type_icon.contains("HITL")) type_color = "#f44336";
-        else if (evt.type_icon.contains("DONE")) type_color = "#4caf50";
         type_label->setStyleSheet(QString("color: %1;").arg(type_color));
         header_row->addWidget(type_label);
 

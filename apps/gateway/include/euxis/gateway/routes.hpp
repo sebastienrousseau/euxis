@@ -4,17 +4,23 @@
 
 #include <string>
 
+// httplib.h triggers GCC's -Wmaybe-uninitialized; Clang has no such
+// flag and -Wunknown-warning-option is -Werror under AppleClang.
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <httplib.h>
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 #include <nlohmann/json.hpp>
 
 namespace euxis::gateway {
 
 /// Maximum allowed request body size (1 MB).
-constexpr size_t kMaxRequestBodySize = 1 * 1024 * 1024;
+constexpr size_t kMaxRequestBodySize = 1ULL * 1024 * 1024;
 
 /// Shared route context with auth token from config.
 struct RouteContext {

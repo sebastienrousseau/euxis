@@ -122,7 +122,7 @@ protected:
 
 TEST_F(MemorySessionStoreTest, AllPaths) {
     SessionSnapshot snap{.session_id = "s1", .branch_id = "b1", .agent_id = {}, .messages = {}};
-    store_->save(snap);
+    ASSERT_TRUE(store_->save(snap).has_value());
     
     EXPECT_TRUE(store_->load("s1", "b1").has_value());
     EXPECT_FALSE(store_->load("s1", "b2").has_value());
@@ -138,7 +138,7 @@ TEST_F(MemorySessionStoreTest, EpisodicStreaming) {
     SessionSnapshot snap{.session_id = "stream-test", .branch_id = "main", .agent_id = {}, .messages = {}};
     snap.messages.push_back({.role = Role::User, .content = "ep1", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}});
     snap.messages.push_back({.role = Role::Assistant, .content = "ep2", .agent_id = {}, .model = {}, .timestamp = {}, .duration_ms = 0.0, .decision_trace_hash = {}});
-    store_->save(snap);
+    ASSERT_TRUE(store_->save(snap).has_value());
     
     int count = 0;
     for (auto msg : store_->stream_episodes("stream-test")) {

@@ -4,10 +4,16 @@
 #include <thread>
 
 #include <spdlog/spdlog.h>
+// httplib.h triggers GCC's -Wmaybe-uninitialized. Clang has no such
+// flag and -Wunknown-warning-option is -Werror under AppleClang.
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <httplib.h>
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 
 namespace euxis::adapters {
 
@@ -116,7 +122,7 @@ auto TelegramAdapter::api_call(const std::string& method,
     auto path = "/bot" + config_.token + "/" + method;
     auto res = cli.Post(path, data.dump(), "application/json");
     if (res && !res->body.empty()) {
-        try { return nlohmann::json::parse(res->body); } catch (const std::exception&) {}
+        try { return nlohmann::json::parse(res->body); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
     return {};
 }

@@ -77,4 +77,117 @@ auto validate_tool_manifest(const ToolManifest& manifest,
     return {};
 }
 
+namespace {
+
+// classify_approval() recognises the following read-only verb prefixes,
+// dispatched by ASCII-folded first byte below: check / count (c),
+// describe (d), fetch (f), get (g), list / lookup (l), query (q),
+// read (r), show / status / scan / search (s), validate / view (v).
+// Names are case-insensitive ASCII; non-ASCII names fall through to
+// ExecCapable.
+
+[[nodiscard]] auto starts_with_ci(std::string_view s, std::string_view prefix) noexcept
+    -> bool {
+    if (s.size() < prefix.size()) return false;
+    for (size_t i = 0; i < prefix.size(); ++i) {
+        const char a = s[i];
+        const char b = prefix[i];
+        const char la = (a >= 'A' && a <= 'Z') ? static_cast<char>(a + 32) : a;
+        const char lb = (b >= 'A' && b <= 'Z') ? static_cast<char>(b + 32) : b;
+        if (la != lb) return false;
+    }
+    return true;
+}
+
+[[nodiscard]] auto contains_ci(std::string_view s, std::string_view needle) noexcept
+    -> bool {
+    if (needle.empty() || s.size() < needle.size()) return false;
+    for (size_t i = 0; i + needle.size() <= s.size(); ++i) {
+        bool match = true;
+        for (size_t j = 0; j < needle.size(); ++j) {
+            const char a = s[i + j];
+            const char b = needle[j];
+            const char la = (a >= 'A' && a <= 'Z') ? static_cast<char>(a + 32) : a;
+            const char lb = (b >= 'A' && b <= 'Z') ? static_cast<char>(b + 32) : b;
+            if (la != lb) { match = false; break; }
+        }
+        if (match) return true;
+    }
+    return false;
+}
+
+} // namespace
+
+auto classify_approval(const ToolDeclaration_v2& decl,
+                       std::string_view required_scope) noexcept
+    -> ApprovalClass {
+    // 1. Scope override: anything in admin / control / policy land is
+    //    ControlPlane regardless of the name.
+    if (contains_ci(required_scope, "admin") ||
+        contains_ci(required_scope, "control") ||
+        contains_ci(required_scope, "policy")) {
+        return ApprovalClass::ControlPlane;
+    }
+
+    // 2. First-byte dispatch into a small per-letter sub-table.
+    //
+    // The original implementation walked the full 15-prefix readonly
+    // verb table on every classification, which made ExecCapable
+    // (no match, full traversal) ~3x slower than Readonly in the
+    // microbench. Dispatching on the ASCII-folded first byte cuts
+    // the worst-case scan to 4 prefixes and turns the no-match path
+    // into a direct return — verbs starting with `w` (write_*),
+    // `e` (exec_*), `r` not followed by `read*`, etc., now skip the
+    // table entirely.
+    const std::string_view name{decl.name};
+    if (name.empty()) return ApprovalClass::ExecCapable;
+
+    const auto check = [&](std::string_view prefix) noexcept -> bool {
+        if (!starts_with_ci(name, prefix)) return false;
+        // Word boundary: end-of-name or '_' to reject false positives
+        // like "getup_destructive_action".
+        return name.size() == prefix.size() || name[prefix.size()] == '_';
+    };
+
+    const char c0 = name[0];
+    const char first = (c0 >= 'A' && c0 <= 'Z')
+        ? static_cast<char>(c0 + 32) : c0;
+
+    switch (first) {
+        case 'c':
+            if (check("check") || check("count")) return ApprovalClass::Readonly;
+            break;
+        case 'd':
+            if (check("describe")) return ApprovalClass::Readonly;
+            break;
+        case 'f':
+            if (check("fetch")) return ApprovalClass::Readonly;
+            break;
+        case 'g':
+            if (check("get")) return ApprovalClass::Readonly;
+            break;
+        case 'l':
+            if (check("list") || check("lookup")) return ApprovalClass::Readonly;
+            break;
+        case 'q':
+            if (check("query")) return ApprovalClass::Readonly;
+            break;
+        case 'r':
+            if (check("read")) return ApprovalClass::Readonly;
+            break;
+        case 's':
+            if (check("show") || check("status") ||
+                check("scan") || check("search")) return ApprovalClass::Readonly;
+            break;
+        case 'v':
+            if (check("validate") || check("view")) return ApprovalClass::Readonly;
+            break;
+        default:
+            break;
+    }
+
+    // 3. Conservative fallback.
+    return ApprovalClass::ExecCapable;
+}
+
 } // namespace euxis::runtime

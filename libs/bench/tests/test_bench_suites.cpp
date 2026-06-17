@@ -139,7 +139,7 @@ TEST_F(BenchSuiteTest, PerformanceCryptoThroughput) {
     register_performance_benchmarks(runner);
 
     auto report = runner.run_suite("performance");
-    EXPECT_GE(report.results.size(), 3u);
+    EXPECT_GE(report.results.size(), 4u);
 
     bool found = false;
     for (const auto& r : report.results) {
@@ -151,6 +151,24 @@ TEST_F(BenchSuiteTest, PerformanceCryptoThroughput) {
         }
     }
     EXPECT_TRUE(found) << "crypto_throughput benchmark not found";
+}
+
+TEST_F(BenchSuiteTest, PerformanceCryptoThroughputCached) {
+    BenchmarkRunner runner;
+    register_performance_benchmarks(runner);
+
+    auto report = runner.run_suite("performance");
+
+    bool found = false;
+    for (const auto& r : report.results) {
+        if (r.name == "crypto_throughput_cached") {
+            found = true;
+            EXPECT_EQ(r.suite, "performance");
+            EXPECT_EQ(r.unit, "ops/sec");
+            EXPECT_GT(r.value, 0.0);
+        }
+    }
+    EXPECT_TRUE(found) << "crypto_throughput_cached benchmark not found";
 }
 
 TEST_F(BenchSuiteTest, PerformanceKeyDerivationP95) {

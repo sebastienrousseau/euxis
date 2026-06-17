@@ -31,7 +31,8 @@ static int count_cortex_entries(const QString& runtime_dir) {
         if (doc.is_array()) return static_cast<int>(doc.size());
         if (doc.is_object()) return static_cast<int>(doc.size());
     } catch (const json::exception&) {
-        // ignore
+        // ignore — swallowed: best-effort
+        (void)0;
     }
     return 0;
 }
@@ -67,6 +68,7 @@ QWidget* create_cortex_screen(ETXConfig* /*config*/, QWidget* parent) {
 
     // Status label — real entry count
     QString runtime_dir = ETXConfig::runtime_dir();
+    // NOLINTNEXTLINE(cppcoreguidelines-init-variables): function-call init not detected
     int entry_count = count_cortex_entries(runtime_dir);
     auto* status_label = new QLabel(widget);
     status_label->setObjectName("cortex_status");

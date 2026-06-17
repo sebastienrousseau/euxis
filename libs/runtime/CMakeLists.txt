@@ -9,9 +9,16 @@ euxis_add_library(euxis-runtime-cpp
     src/tool_manifest.cpp
     src/interaction.cpp
     src/platform.cpp
+    src/context_engine.cpp
+    src/agent_loop.cpp
+    src/config.cpp
   DEPS
     nlohmann_json::nlohmann_json
     spdlog::spdlog
+    # yaml-cpp is fetched at the root CMakeLists.txt; the unprefixed
+    # target is reliably present across 0.7.0 and 0.8.0.
+    yaml-cpp
+    euxis-security-cpp
   TEST_SOURCES
     tests/test_validator.cpp
     tests/test_lifecycle.cpp
@@ -23,4 +30,13 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_interaction.cpp
     tests/test_interaction_extended.cpp
     tests/test_platform.cpp
+    tests/test_approval_classifier.cpp
+    tests/test_iteration_budget.cpp
+    tests/test_context_engine.cpp
+    tests/test_agent_loop.cpp
+    tests/test_tool_calling_loop.cpp
+    tests/test_contracts.cpp
+    tests/test_reflect_schema.cpp
+    tests/test_streaming.cpp
+    tests/test_config.cpp
 )

@@ -5,4 +5,5 @@ euxis_add_library(euxis-a2a-types-cpp
     nlohmann_json::nlohmann_json
   TEST_SOURCES
     tests/test_message.cpp
+    tests/test_transport.cpp
 )

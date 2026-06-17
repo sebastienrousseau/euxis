@@ -113,7 +113,7 @@ namespace {
     inline void read_into(const uint8_t*& p, const uint8_t* end, std::string& dest) {
         if (end - p < 4) [[unlikely]]
             throw std::runtime_error("msgpack: truncated string length");
-        uint32_t len;
+        uint32_t len = 0;
         std::memcpy(&len, p, 4);
         p += 4;
         if (len > static_cast<uint32_t>(end - p)) [[unlikely]]
@@ -156,7 +156,7 @@ auto AgentCard::from_msgpack(const std::vector<uint8_t>& data) -> AgentCard {
 
     if (end - p < 4)
         throw std::runtime_error("msgpack: truncated capability count");
-    uint32_t num_caps;
+    uint32_t num_caps = 0;
     std::memcpy(&num_caps, p, 4);
     p += 4;
 

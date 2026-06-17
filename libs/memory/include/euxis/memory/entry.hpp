@@ -11,7 +11,7 @@ namespace euxis::memory {
 
 struct EncryptedMemoryEntry {
     std::string entry_id;       // UUID hex
-    MemoryTier tier;
+    MemoryTier tier{};
     std::string ciphertext_b64; // Base64-encoded ciphertext
     std::string created_at;     // UTC ISO-8601
     std::string agent_did;

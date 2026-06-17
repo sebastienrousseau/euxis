@@ -59,8 +59,8 @@ protected:
     }
 
 private:
-    float viewport_start_;
-    float viewport_size_;
+    float viewport_start_ = 0.0F;
+    float viewport_size_ = 0.0F;
     QVector<float> active_positions_;
 };
 

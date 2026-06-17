@@ -13,6 +13,9 @@
 
 namespace euxis::cli {
 
+// P5: Static cache for tool availability — avoids PATH scan + stat on every route call
+static std::unordered_map<std::string, bool> s_tool_cache;
+
 using euxis::cli::i18n::tr;
 
 auto tier_label(Tier t) -> std::string {
@@ -201,14 +204,14 @@ auto ProviderRouter::route(const std::string& agent_tier,
     if (provider == "claude") {
         switch (effective) {
             case Tier::Routine: sel.model = "claude-haiku-4-5"; break;
-            case Tier::Data:    sel.model = models_.code; break;   // sonnet
-            case Tier::Code:    sel.model = models_.code; break;   // sonnet
+            case Tier::Data:    // intentional fall-through — data + code both run sonnet
+            case Tier::Code:    sel.model = models_.code; break;
             case Tier::Reason:  sel.model = models_.reason; break; // opus
         }
     } else if (provider == "gemini") {
         switch (effective) {
             case Tier::Routine: sel.model = models_.routine; break; // flash-lite
-            case Tier::Data:    sel.model = "gemini-2.5-flash"; break;
+            case Tier::Data:    // intentional fall-through — data + code both run flash
             case Tier::Code:    sel.model = "gemini-2.5-flash"; break;
             case Tier::Reason:  sel.model = "gemini-2.5-pro"; break;
         }
@@ -259,9 +262,10 @@ auto ProviderRouter::route_forensic(const std::string& agent_id,
 }
 
 auto ProviderRouter::analyze_task_tier(const std::string& task) const -> Tier {
-    static const std::vector<std::string> reason_keywords = {"architect", "design", "plan", "strategy", "complex", "critical", "security", "audit", "review"};
-    static const std::vector<std::string> code_keywords = {"code", "implement", "refactor", "debug", "test", "build", "fix", "optimize", "develop"};
-    static const std::vector<std::string> data_keywords = {"data", "analyze", "summarize", "report", "aggregate", "query", "extract", "parse", "transform"};
+    // P3: string_view keywords — no allocations in hot path
+    static constexpr std::string_view reason_keywords[] = {"architect", "design", "plan", "strategy", "complex", "critical", "security", "audit", "review"};
+    static constexpr std::string_view code_keywords[] = {"code", "implement", "refactor", "debug", "test", "build", "fix", "optimize", "develop"};
+    static constexpr std::string_view data_keywords[] = {"data", "analyze", "summarize", "report", "aggregate", "query", "extract", "parse", "transform"};
     std::string lower = task;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     for (const auto& kw : reason_keywords) if (lower.find(kw) != std::string::npos) return Tier::Reason;
@@ -508,26 +512,99 @@ auto ProviderRouter::reload_config() -> bool {
     auto router_path   = fs::path(data_dir_) / "config" / "router.json";
     auto strategy_path = fs::path(data_dir_) / "config" / "provider_strategy.json";
 
-    // Snapshot previous state to detect changes
-    auto old_config   = config_;
-    auto old_strategy = strategy_config_;
+    // Build new state in temporaries — live maps untouched until both succeed
+    nlohmann::json new_config;
+    nlohmann::json new_strategy_config;
+    bool new_strategy_loaded = false;
+    TierModels new_models{
+        "gemini-2.5-flash-lite", "gemini-2.5-flash",
+        "claude-sonnet-4-6", "claude-opus-4-6"
+    };
+    std::unordered_map<std::string, ModeOverride> new_flash, new_standard, new_forensic;
+    std::unordered_map<std::string, TaskClassRoute> new_strategy_defaults;
+    std::unordered_map<std::string, std::string> new_agent_class_hints;
+    std::unordered_map<std::string, std::vector<std::string>> new_classification_keywords;
 
-    // Clear mutable maps before re-loading
-    flash_overrides_.clear();
-    standard_overrides_.clear();
-    forensic_overrides_.clear();
-    strategy_defaults_.clear();
-    agent_class_hints_.clear();
-    classification_keywords_.clear();
+    // Parse router.json into temporaries
+    try {
+        if (fs::exists(router_path)) {
+            std::ifstream f(router_path);
+            new_config = nlohmann::json::parse(f);
+            if (new_config.contains("models")) {
+                auto& m = new_config["models"];
+                if (m.contains("routine")) new_models.routine = m["routine"].get<std::string>();
+                if (m.contains("data"))    new_models.data = m["data"].get<std::string>();
+                if (m.contains("code"))    new_models.code = m["code"].get<std::string>();
+                if (m.contains("reason"))  new_models.reason = m["reason"].get<std::string>();
+            }
+            if (new_config.contains("flash_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["flash_overrides"].items()) {
+                    new_flash[agent_id] = {ovr.value("provider", "gemini"), ovr.value("model", "gemini-2.5-flash"), ovr.value("cost", 0.5)};
+                }
+            }
+            if (new_config.contains("standard_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["standard_overrides"].items()) {
+                    new_standard[agent_id] = {ovr.value("provider", "claude"), ovr.value("model", "claude-sonnet-4-6"), ovr.value("cost", 3.0)};
+                }
+            }
+            if (new_config.contains("forensic_overrides")) {
+                for (auto& [agent_id, ovr] : new_config["forensic_overrides"].items()) {
+                    new_forensic[agent_id] = {ovr.value("provider", "claude"), ovr.value("model", "claude-opus-4-6"), ovr.value("cost", 15.0)};
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        spdlog::warn("router.json parse error during reload: {}", e.what());
+        return false;  // live maps unchanged
+    }
 
-    // Reset defaults in case the config no longer overrides them
-    models_.routine = "gemini-2.5-flash-lite";
-    models_.data    = "gemini-2.5-flash";
-    models_.code    = "claude-sonnet-4-6";
-    models_.reason  = "claude-opus-4-6";
+    // Parse provider_strategy.json into temporaries
+    try {
+        if (fs::exists(strategy_path)) {
+            std::ifstream f(strategy_path);
+            new_strategy_config = nlohmann::json::parse(f);
+            new_strategy_loaded = true;
+            if (new_strategy_config.contains("defaults")) {
+                for (auto& [tc, route] : new_strategy_config["defaults"].items()) {
+                    TaskClassRoute tcr;
+                    tcr.primary = route.value("primary", "claude");
+                    if (route.contains("fallback")) {
+                        for (const auto& fb : route["fallback"])
+                            tcr.fallback.push_back(fb.get<std::string>());
+                    }
+                    new_strategy_defaults[tc] = std::move(tcr);
+                }
+            }
+            if (new_strategy_config.contains("agent_class_hints")) {
+                for (auto& [agent, cls] : new_strategy_config["agent_class_hints"].items())
+                    new_agent_class_hints[agent] = cls.get<std::string>();
+            }
+            if (new_strategy_config.contains("classification_keywords")) {
+                for (auto& [cls, kws] : new_strategy_config["classification_keywords"].items()) {
+                    std::vector<std::string> keywords;
+                    for (const auto& kw : kws) keywords.push_back(kw.get<std::string>());
+                    new_classification_keywords[cls] = std::move(keywords);
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        spdlog::warn("provider_strategy.json parse error during reload: {}", e.what());
+        return false;  // live maps unchanged
+    }
 
-    load_config();
-    load_strategy_config();
+    // Both parsed successfully — swap all live state
+    bool changed = (new_config != config_) || (new_strategy_config != strategy_config_);
+
+    config_ = std::move(new_config);
+    strategy_config_ = std::move(new_strategy_config);
+    strategy_loaded_ = new_strategy_loaded;
+    models_ = new_models;
+    flash_overrides_ = std::move(new_flash);
+    standard_overrides_ = std::move(new_standard);
+    forensic_overrides_ = std::move(new_forensic);
+    strategy_defaults_ = std::move(new_strategy_defaults);
+    agent_class_hints_ = std::move(new_agent_class_hints);
+    classification_keywords_ = std::move(new_classification_keywords);
 
     // Update stored timestamps
     std::error_code ec;
@@ -536,8 +613,8 @@ auto ProviderRouter::reload_config() -> bool {
     if (fs::exists(strategy_path, ec))
         strategy_last_modified_ = fs::last_write_time(strategy_path, ec);
 
-    bool changed = (config_ != old_config) || (strategy_config_ != old_strategy);
     if (changed) {
+        s_tool_cache.clear();  // P5: invalidate tool availability cache on reload
         spdlog::info("provider config hot-reloaded");
     }
     return changed;
@@ -571,7 +648,11 @@ void ProviderRouter::check_and_reload() {
 auto ProviderRouter::local_available() const -> bool { return Process::available("ollama"); }
 
 auto ProviderRouter::tool_available(const std::string& tool) const -> bool {
-    return Process::available(tool);
+    auto it = s_tool_cache.find(tool);
+    if (it != s_tool_cache.end()) return it->second;
+    bool avail = Process::available(tool);
+    s_tool_cache[tool] = avail;
+    return avail;
 }
 
 auto ProviderRouter::available_providers() const -> std::vector<std::string> {
@@ -604,8 +685,6 @@ void ProviderRouter::print_status() const {
             {"terminal_automation",   "Kiro / ShellGPT"},
         };
         for (const auto& [cls, desc] : policy_summary) {
-            auto it = strategy_defaults_.find(cls);
-            std::string primary = it != strategy_defaults_.end() ? it->second.primary : "?";
             std::cout << "    " << cls;
             // Pad
             for (size_t i = cls.size(); i < 24; ++i) std::cout << ' ';
@@ -629,35 +708,36 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
         return chain;
     }
 
-    // Default fallback chains by provider
-    if (model.find("claude") != std::string::npos || model.find("anthropic") != std::string::npos) {
-        return {
-            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-            {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    if (model.find("gpt") != std::string::npos || model.find("openai") != std::string::npos) {
-        return {
-            {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-            {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    if (model.find("gemini") != std::string::npos) {
-        return {
-            {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-            {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-            {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
-        };
-    }
-    // Generic: try all major providers
-    return {
+    // P6: Pre-built static chains — avoid repeated vector construction
+    static const std::vector<ModelSelection> claude_chain = {
+        {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
+        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> openai_chain = {
+        {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
+        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> gemini_chain = {
+        {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
+        {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
+        {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
+    };
+    static const std::vector<ModelSelection> generic_chain = {
         {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
         {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
         {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };
+
+    if (model.find("claude") != std::string::npos || model.find("anthropic") != std::string::npos)
+        return claude_chain;
+    if (model.find("gpt") != std::string::npos || model.find("openai") != std::string::npos)
+        return openai_chain;
+    if (model.find("gemini") != std::string::npos)
+        return gemini_chain;
+    return generic_chain;
 }
 
 } // namespace euxis::cli

@@ -5,9 +5,14 @@ euxis_add_library(euxis-platform-cpp
     src/sys/linux/sandbox.cpp
     src/sys/macos/platform.cpp
     src/sys/wsl/platform.cpp
+    src/execution_backend.cpp
   DEPS
     euxis-runtime-cpp
   TEST_SOURCES
+    # NB: test_execution_backend runs first because test_sandbox /
+    # test_linux_hardening apply seccomp filters to the test process
+    # and break subsequent fork+exec calls.
+    tests/test_execution_backend.cpp
     tests/test_linux_hardening.cpp
     tests/test_sandbox.cpp
 )

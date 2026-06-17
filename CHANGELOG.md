@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **SARIF Output**: `--format sarif` flag for CI/CD integration with GitHub/GitLab security tabs (SARIF v2.1.0)
+- **Autofix Suggestions**: `--fix` flag requests targeted fix suggestions from agents, output as unified diffs
+- **LSP Diagnostics Bridge**: `euxis lsp` subcommand emits LSP-compatible diagnostics JSON for IDE integration
+- **Language Detection**: Explicit language/framework detection via file extensions and config files (package.json, Cargo.toml, go.mod, pyproject.toml, etc.)
+- **Man Page**: `data/docs/man/euxis.1` covering all commands, options, environment variables, and exit codes
+- **Documentation Guides**: certify-readiness, forensic-mode, and provider-strategy user guides
 - **CLI Surface Layer**: Verb-first Core command group (`check`, `triage`, `review`, `compare`, `stats`, `policy`) as the primary user-facing interface
 - **Certification Readiness** (`certify-readiness`): 18-domain certification assessment with framework overlays (general, SOC2, ISO 27001), 5 hard gates, quality risk analysis, and structured JSON artifacts
 - **Provider Strategy Routing**: Semantic task classification with 11 task classes routing to optimal providers (OpenAI for research, Claude for coding, Gemini for security, Ollama for local). Configuration via `data/config/provider_strategy.json`
@@ -34,9 +40,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**: Updated ~40 doc files from v0.0.4 footers/badges to v0.0.10, fixed `euxis-cpp/` monorepo paths to `apps/`/`libs/`
 
 ### Security
+- **SSE Buffer Race (CRITICAL)**: Removed static SSE buffer in `execute_claude()` — was shared across concurrent streams causing data corruption
+- **Thread Safety**: Replaced `std::thread::detach()` with managed `std::jthread` vector in fleet orchestration — prevents use-after-free on early exit
+- **Shell Injection**: `shell_interactive()` now uses `Process::run()` instead of `std::system()`, inheriting setsid/timeout/kill-group protections
+- **Audit Log Permissions**: Audit files created with 0600 mode (was 0644 world-readable)
+- **Credential Gitignore**: Added `auth_profiles.json` to `.gitignore`
+- **libsodium Init**: Added `sodium_init()` call at program start — required for defined HMAC behavior
+- **Token Expiration**: `verify_capability_token()` now rejects expired tokens (was ignoring `expires_at` field)
+- **Sandbox Hardening**: Added `execveat`, `memfd_create`, `userfaultfd` to seccomp blocklist; replaced raw `new[]`/`delete[]` with `std::unique_ptr`
+- **MCP Env Sanitization**: Environment variables passed to MCP subprocesses validated against allowlist, shell metacharacters rejected
+- **PII Filter**: Added patterns for JWTs, SSNs, and credit card numbers
 - **CWE-78 Mitigation**: `shell_interactive()` rejects shell metacharacters (`$(`, `` ` ``, `;`, `&&`, `||`, `|`, `>>`, `<<`) with 12 new tests
-- **SOUP Register**: Formal Software of Unknown Provenance classification for all 9 dependencies per IEC 62304 (`data/docs/compliance/soup-classification.md`)
-- **Software Validation Procedure**: ISO 13485 SVP with traceability matrix, release checklist, and non-conformance handling (`data/docs/compliance/software-validation-procedure.md`)
+- **SOUP Register**: Formal Software of Unknown Provenance classification for all 9 dependencies per IEC 62304 (`docs/compliance/soup-classification.md`)
+- **Software Validation Procedure**: ISO 13485 SVP with traceability matrix, release checklist, and non-conformance handling (`docs/compliance/software-validation-procedure.md`)
 - **SAST**: `.clang-tidy` config with security-focused checks (bugprone-*, cert-*, concurrency-*, use-after-move as error)
 - **Credential Exclusion**: `.gitignore` expanded with `.env*`, `*.key`, `*.pem`, `credentials*`, `*.p12`, `*.pfx`, `*.keystore`
 

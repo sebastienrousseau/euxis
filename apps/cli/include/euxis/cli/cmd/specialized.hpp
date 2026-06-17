@@ -25,5 +25,6 @@ int cmd_evidence_verify(Context& ctx, const std::vector<std::string>& args);
 int cmd_gym(Context& ctx, const std::vector<std::string>& args);
 int cmd_replay(Context& ctx, const std::vector<std::string>& args);
 int cmd_context_worker(Context& ctx, const std::vector<std::string>& args);
+int cmd_lsp(Context& ctx, const std::vector<std::string>& args);
 
 } // namespace euxis::cli::cmd

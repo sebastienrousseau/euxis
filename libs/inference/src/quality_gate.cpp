@@ -173,7 +173,7 @@ auto QualityGate::compute_repetition(std::string_view text) -> float {
 // ---------------------------------------------------------------------------
 auto QualityGate::evaluate(std::string_view prompt,
                            std::string_view response) -> QualityScore {
-    QualityScore score;
+    QualityScore score{};
     score.coherence        = compute_coherence(response);
     score.relevance        = compute_relevance(prompt, response);
     score.repetition_ratio = compute_repetition(response);

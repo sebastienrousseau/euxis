@@ -92,6 +92,49 @@ TEST_F(McpFleetToolsTest, ToolsList) {
     EXPECT_GE(resp["result"]["tools"].size(), 6u);
 }
 
+// --- P0-1: Injection rejection tests ---
+
+TEST_F(McpFleetToolsTest, CheckRejectsSemicolonInTarget) {
+    // Initialize + notify
+    host_->handle_request({{"jsonrpc", "2.0"}, {"id", 1}, {"method", "initialize"},
+        {"params", {{"protocolVersion", "2024-11-05"}, {"capabilities", {}},
+                     {"clientInfo", {{"name", "test"}, {"version", "1.0"}}}}}});
+    host_->handle_request({{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}});
+
+    nlohmann::json call_req = {
+        {"jsonrpc", "2.0"}, {"id", 10}, {"method", "tools/call"},
+        {"params", {{"name", "euxis.check"}, {"arguments", {{"target", "/tmp; rm -rf /"}}}}}
+    };
+    auto resp = host_->handle_request(call_req);
+    // The tool should return an error about unsafe argument
+    ASSERT_TRUE(resp.contains("result"));
+    auto content = resp["result"]["content"][0]["text"].get<std::string>();
+    auto result_json = nlohmann::json::parse(content);
+    EXPECT_TRUE(result_json.contains("error"));
+    EXPECT_NE(result_json["error"].get<std::string>().find("unsafe"), std::string::npos);
+}
+
+TEST_F(McpFleetToolsTest, PlaybookRejectsCommandSubstitutionInGoal) {
+    host_->handle_request({{"jsonrpc", "2.0"}, {"id", 1}, {"method", "initialize"},
+        {"params", {{"protocolVersion", "2024-11-05"}, {"capabilities", {}},
+                     {"clientInfo", {{"name", "test"}, {"version", "1.0"}}}}}});
+    host_->handle_request({{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}});
+
+    nlohmann::json call_req = {
+        {"jsonrpc", "2.0"}, {"id", 11}, {"method", "tools/call"},
+        {"params", {{"name", "euxis.playbook"}, {"arguments", {
+            {"manifest", "verify-everything"},
+            {"goal", "$(cat /etc/passwd)"}
+        }}}}
+    };
+    auto resp = host_->handle_request(call_req);
+    ASSERT_TRUE(resp.contains("result"));
+    auto content = resp["result"]["content"][0]["text"].get<std::string>();
+    auto result_json = nlohmann::json::parse(content);
+    EXPECT_TRUE(result_json.contains("error"));
+    EXPECT_NE(result_json["error"].get<std::string>().find("unsafe"), std::string::npos);
+}
+
 // --- Stdio framing tests ---
 
 TEST(McpStdioTest, WriteFrame) {

@@ -54,8 +54,8 @@ QWidget* create_help_screen(QWidget* parent) {
     table->setShowGrid(false);
 
     struct Shortcut {
-        QString key;
-        QString action;
+        QString key{};
+        QString action{};
     };
 
     QList<Shortcut> shortcuts = {

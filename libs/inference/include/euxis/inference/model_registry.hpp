@@ -13,9 +13,9 @@ namespace euxis::inference {
 struct ModelInfo {
     std::string name;
     std::filesystem::path path;
-    size_t file_size;
+    size_t file_size = 0;
     std::string sha256;
-    bool verified;
+    bool verified = false;
 };
 
 /// Scans a directory for GGUF model files and verifies their integrity

@@ -18,7 +18,7 @@ The `LlamaEngine` and `OllamaEngine` implementations abstract the underlying com
 * **Postcondition**: Return a monadic `std::expected` resolving to an `InferenceResult`.
 * **Zero-Copy**: Map binary context directly without intermediate strings.
 
-To execute long-horizon reasoning tasks without blowing out VRAM, always use the `episodic_generate` method. This consumes a `std::generator<SessionMessage>` to stream semantic context lazily.
+To execute long-horizon reasoning tasks, use the `episodic_generate` method. This consumes a `std::vector<SessionMessage>` carrying the conversation history the caller wants stitched into the prompt. The original signature was `std::generator<SessionMessage>` for lazy streaming; the eager vector form was adopted because `<generator>` is not yet shipped in AppleClang 21's libc++. Restoration tracks the toolchain feature flag `__cpp_lib_generator`.
 
 ## Monadic Quality Gates
 

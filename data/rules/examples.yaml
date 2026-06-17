@@ -1,0 +1,64 @@
+# Example OpenGrep-format rule pack shipped with euxis so the
+# `euxis scan` command has something concrete to demonstrate the
+# rule engine against. These rules are intentionally minimal — they
+# exercise the three Pattern kinds the Week 11 engine supports
+# (Literal, Composite=AND, Alternation=OR) and the metadata fields
+# the SARIF emitter consumes.
+#
+# Real rule packs live under data/rules/<category>/ (added in
+# follow-up batches). This file is the smoke-test pack the
+# integration tests pin against.
+#
+# Reference syntax:
+#   https://semgrep.dev/docs/writing-rules/rule-syntax
+
+rules:
+  - id: dangerous-eval
+    message: "Use of eval() is dangerous; treat input as untrusted."
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern: eval
+    metadata:
+      cwe: "CWE-94"
+      owasp: "A03:2025"
+      references:
+        - https://owasp.org/Top10/2025/A03_2025-Software_Supply_Chain_Failures/
+
+  - id: hashlib-weak-hash
+    message: "Weak cryptographic hash (MD5 / SHA-1). Prefer SHA-256."
+    severity: WARNING
+    languages: [python]
+    pattern-either:
+      - pattern: md5
+      - pattern: sha1
+    metadata:
+      cwe: "CWE-327"
+      owasp: "A02:2025"
+
+  - id: pickle-loads
+    message: "Insecure deserialisation via pickle.loads."
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: pickle
+      - pattern: loads
+    metadata:
+      cwe: "CWE-502"
+      owasp: "A08:2025"
+
+  - id: aws-access-key-id
+    message: "Possible hard-coded AWS access key id."
+    severity: ERROR
+    # No `languages:` block — applies universally as a text sentinel.
+    pattern: AKIA
+    metadata:
+      cwe: "CWE-798"
+      owasp: "A02:2025"
+
+  - id: unsafe-rust-block
+    message: "Unsafe block — review carefully."
+    severity: INFO
+    languages: [rust]
+    pattern: unsafe
+    metadata:
+      cwe: "CWE-1357"

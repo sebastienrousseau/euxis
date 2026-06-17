@@ -10,7 +10,7 @@
 
 ## Documentation
 
-- Module docs page: `data/docs/modules/euxis-core-cpp.md`
+- Module docs page: `docs/modules/euxis-core-cpp.md`
 
 ## Tests
 

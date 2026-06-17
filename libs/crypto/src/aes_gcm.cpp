@@ -8,7 +8,10 @@
 namespace euxis::crypto {
 
 /// P10-R2: Maximum plaintext size for a single encryption (64 MB).
-constexpr size_t kMaxPlaintextSize = 64 * 1024 * 1024;
+/// [[maybe_unused]] because some configurations don't reference this
+/// constant directly (encryption length check elsewhere); kept here as
+/// the canonical documentation of the policy.
+[[maybe_unused]] constexpr size_t kMaxPlaintextSize = 64ULL * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
 // to_base64  (defined here because it depends on libsodium)
@@ -207,6 +210,166 @@ auto decrypt_aad(std::span<const std::byte> ciphertext,
         return std::unexpected(CryptoError::AuthenticationFailed);
     }
 
+    result.plaintext.resize(static_cast<size_t>(actual_pt_len));
+    result.algorithm = "AES-256-GCM";
+    return result;
+}
+
+// ===========================================================================
+// AesGcmContext  —  precomputed key schedule
+// ===========================================================================
+//
+// Wraps libsodium's `crypto_aead_aes256gcm_state` (an opaque 512-byte buffer
+// holding the expanded AES round keys). `beforenm` is run once at create()
+// time, then every encrypt/decrypt uses the `_afternm` variants which skip
+// key expansion. Profile delta: see header.
+
+struct AesGcmContext::State {
+    crypto_aead_aes256gcm_state s;
+};
+
+AesGcmContext::AesGcmContext(std::unique_ptr<State> state) noexcept
+    : state_(std::move(state)) {}
+
+// Out-of-line so unique_ptr<State> sees the complete type.
+AesGcmContext::~AesGcmContext() = default;
+AesGcmContext::AesGcmContext(AesGcmContext&&) noexcept = default;
+AesGcmContext& AesGcmContext::operator=(AesGcmContext&&) noexcept = default;
+
+auto AesGcmContext::create(std::span<const std::byte, 32> key)
+    -> std::expected<AesGcmContext, CryptoError> {
+    if (sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)) {
+        return std::unexpected(CryptoError::EncryptionFailed);
+    }
+    auto state = std::make_unique<State>();
+    // crypto_aead_aes256gcm_beforenm returns 0 on success and writes the
+    // expanded round keys into state->s. (libsodium ≥ 1.0.18 always succeeds
+    // when AES-NI is available; the return is checked defensively.)
+    if (crypto_aead_aes256gcm_beforenm(
+            &state->s,
+            reinterpret_cast<const unsigned char*>(key.data())) != 0) {
+        return std::unexpected(CryptoError::EncryptionFailed);
+    }
+    return AesGcmContext{std::move(state)};
+}
+
+auto AesGcmContext::encrypt(std::span<const std::byte> data) const
+    -> std::expected<EncryptionResult, CryptoError> {
+    assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
+
+    EncryptionResult result;
+    generate_iv(result.iv);
+    result.algorithm = "AES-256-GCM";
+
+    const auto ct_len = data.size() + crypto_aead_aes256gcm_ABYTES;
+    result.ciphertext.resize(ct_len);
+    unsigned long long actual_ct_len = 0;
+
+    const int rc = crypto_aead_aes256gcm_encrypt_afternm(
+        reinterpret_cast<unsigned char*>(result.ciphertext.data()),
+        &actual_ct_len,
+        reinterpret_cast<const unsigned char*>(data.data()),
+        static_cast<unsigned long long>(data.size()),
+        nullptr, 0,                       // no AAD
+        nullptr,                          // nsec (unused)
+        reinterpret_cast<const unsigned char*>(result.iv.data()),
+        &state_->s);
+
+    if (rc != 0) {
+        return std::unexpected(CryptoError::EncryptionFailed);
+    }
+    result.ciphertext.resize(static_cast<size_t>(actual_ct_len));
+    return result;
+}
+
+auto AesGcmContext::encrypt_aad(std::span<const std::byte> data,
+                                std::span<const std::byte> aad) const
+    -> std::expected<EncryptionResult, CryptoError> {
+    assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
+
+    EncryptionResult result;
+    generate_iv(result.iv);
+    result.algorithm = "AES-256-GCM";
+
+    const auto ct_len = data.size() + crypto_aead_aes256gcm_ABYTES;
+    result.ciphertext.resize(ct_len);
+    unsigned long long actual_ct_len = 0;
+
+    const int rc = crypto_aead_aes256gcm_encrypt_afternm(
+        reinterpret_cast<unsigned char*>(result.ciphertext.data()),
+        &actual_ct_len,
+        reinterpret_cast<const unsigned char*>(data.data()),
+        static_cast<unsigned long long>(data.size()),
+        reinterpret_cast<const unsigned char*>(aad.data()),
+        static_cast<unsigned long long>(aad.size()),
+        nullptr,
+        reinterpret_cast<const unsigned char*>(result.iv.data()),
+        &state_->s);
+
+    if (rc != 0) {
+        return std::unexpected(CryptoError::EncryptionFailed);
+    }
+    result.ciphertext.resize(static_cast<size_t>(actual_ct_len));
+    return result;
+}
+
+auto AesGcmContext::decrypt(std::span<const std::byte> ciphertext,
+                            std::span<const std::byte, 12> iv) const
+    -> std::expected<DecryptionResult, CryptoError> {
+    if (ciphertext.size() < crypto_aead_aes256gcm_ABYTES) {
+        return std::unexpected(CryptoError::DecryptionFailed);
+    }
+
+    DecryptionResult result;
+    const auto pt_max = ciphertext.size() - crypto_aead_aes256gcm_ABYTES;
+    result.plaintext.resize(pt_max);
+    unsigned long long actual_pt_len = 0;
+
+    const int rc = crypto_aead_aes256gcm_decrypt_afternm(
+        reinterpret_cast<unsigned char*>(result.plaintext.data()),
+        &actual_pt_len,
+        nullptr,
+        reinterpret_cast<const unsigned char*>(ciphertext.data()),
+        static_cast<unsigned long long>(ciphertext.size()),
+        nullptr, 0,
+        reinterpret_cast<const unsigned char*>(iv.data()),
+        &state_->s);
+
+    if (rc != 0) {
+        return std::unexpected(CryptoError::AuthenticationFailed);
+    }
+    result.plaintext.resize(static_cast<size_t>(actual_pt_len));
+    result.algorithm = "AES-256-GCM";
+    return result;
+}
+
+auto AesGcmContext::decrypt_aad(std::span<const std::byte> ciphertext,
+                                std::span<const std::byte, 12> iv,
+                                std::span<const std::byte> aad) const
+    -> std::expected<DecryptionResult, CryptoError> {
+    if (ciphertext.size() < crypto_aead_aes256gcm_ABYTES) {
+        return std::unexpected(CryptoError::DecryptionFailed);
+    }
+
+    DecryptionResult result;
+    const auto pt_max = ciphertext.size() - crypto_aead_aes256gcm_ABYTES;
+    result.plaintext.resize(pt_max);
+    unsigned long long actual_pt_len = 0;
+
+    const int rc = crypto_aead_aes256gcm_decrypt_afternm(
+        reinterpret_cast<unsigned char*>(result.plaintext.data()),
+        &actual_pt_len,
+        nullptr,
+        reinterpret_cast<const unsigned char*>(ciphertext.data()),
+        static_cast<unsigned long long>(ciphertext.size()),
+        reinterpret_cast<const unsigned char*>(aad.data()),
+        static_cast<unsigned long long>(aad.size()),
+        reinterpret_cast<const unsigned char*>(iv.data()),
+        &state_->s);
+
+    if (rc != 0) {
+        return std::unexpected(CryptoError::AuthenticationFailed);
+    }
     result.plaintext.resize(static_cast<size_t>(actual_pt_len));
     result.algorithm = "AES-256-GCM";
     return result;

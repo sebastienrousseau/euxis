@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string_view>
+#include <vector>
 
 #if defined(__unix__) || defined(__APPLE__)
 #include <fcntl.h>
@@ -71,6 +72,10 @@ auto Session::ensure_project_dirs(const std::string& agent_id) const -> std::str
     if (audit.is_open() && std::filesystem::file_size(audit_path) == 0) {
         audit << "# Audit Log: " << agent_id << "\n";
     }
+    // S3: Restrict audit log permissions — may contain verdicts and provider context
+    std::filesystem::permissions(audit_path,
+        std::filesystem::perms::owner_read | std::filesystem::perms::owner_write,
+        std::filesystem::perm_options::replace);
     auto memory_path = agent_dir / "memory.md";
     std::ofstream mem(memory_path, std::ios::app);
     if (mem.is_open() && std::filesystem::file_size(memory_path) == 0) {
@@ -93,7 +98,7 @@ auto Session::get_memory_context(const std::string& agent_id, int max_lines) con
     int fd = ::open(memory_path.c_str(), O_RDONLY);
     if (fd == -1) return {};
 
-    struct stat sb;
+    struct stat sb{};
     if (::fstat(fd, &sb) == -1 || sb.st_size == 0) {
         ::close(fd);
         return {};

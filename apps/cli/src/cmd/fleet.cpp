@@ -94,7 +94,8 @@ struct ModeSLA {
 auto get_mode_sla(const std::string& mode) -> ModeSLA {
     if (mode == "flash")    return {45000, 60000, 75000, 45};
     if (mode == "standard") return {180000, 300000, 600000, 120};
-    /* forensic */          return {600000, 900000, 1200000, 300};
+    // forensic (default)
+    return {600000, 900000, 1200000, 300};
 }
 
 // Agent terminal states — replaces generic "WARN"
@@ -122,10 +123,15 @@ auto format_agent_status(const std::string& status) -> std::string {
     return term::dim(status);
 }
 
-// Critical pillars that must be checked for high-confidence verdicts
-const std::vector<std::string> CRITICAL_PILLARS = {
-    "security", "testing", "build", "architecture"
-};
+// Critical pillars that must be checked for high-confidence verdicts.
+// Function-local static: lazy init avoids throwing during the static-init phase
+// (bugprone-throwing-static-initialization).
+auto critical_pillars() -> const std::vector<std::string>& {
+    static const std::vector<std::string> kCriticalPillars = {
+        "security", "testing", "build", "architecture"
+    };
+    return kCriticalPillars;
+}
 
 // Canonicalize pillar names so manifest aliases map to critical pillars
 auto canonicalize_pillar(const std::string& raw) -> std::string {
@@ -329,14 +335,12 @@ auto extract_findings(const std::string& output) -> std::vector<std::string> {
         }
     }
 
-    // Deduplicate (preserve order)
+    // P2: O(n) deduplication (was O(n²) nested loop)
     std::vector<std::string> unique;
-    for (const auto& f : findings) {
-        bool dup = false;
-        for (const auto& u : unique) {
-            if (u == f) { dup = true; break; }
-        }
-        if (!dup) unique.push_back(f);
+    std::unordered_set<std::string> seen;
+    unique.reserve(findings.size());
+    for (auto& f : findings) {
+        if (seen.insert(f).second) unique.push_back(std::move(f));
     }
     return unique;
 }
@@ -635,7 +639,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
                         }
                     }
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             if (found_test_binary) tests_detected = true;
         }
     }
@@ -688,7 +692,7 @@ auto run_testing_pillar_checks(const std::string& repo_root) -> std::vector<Pill
             }
             if (test_file_count >= 200) break; // Bounded
         }
-    } catch (const std::exception&) {}
+    } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
 
     results.push_back({"test-file-count", test_file_count > 0 ? "detected" : "missing",
                         std::to_string(test_file_count) + " test files found", 0.0, 1,
@@ -724,7 +728,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                 while (std::getline(gi, line)) {
                     if (line.find(".env") != std::string::npos) { env_in_gitignore = true; break; }
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
         }
 
         if (has_env_file && !env_in_gitignore) {
@@ -791,7 +795,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
                     std::string content((std::istreambuf_iterator<char>(f)),
                                          std::istreambuf_iterator<char>());
                     if (content.find("FetchContent") != std::string::npos) has_fetch = true;
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::string detail;
             if (has_vcpkg) detail = "vcpkg.json present — use 'vcpkg x-ci-verify-versions' for audit";
@@ -858,7 +862,7 @@ auto run_security_pillar_checks(const std::string& repo_root) -> std::vector<Pil
             results.push_back({"build-flags", has_unsafe ? "failing" : "passing",
                                 has_unsafe ? issue : "No unsafe build flags detected",
                                 0.0, 1, 1});
-        } catch (const std::exception&) {}
+        } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
     }
 
     return results;
@@ -1019,11 +1023,11 @@ int cmd_agent(Context& ctx, const std::vector<std::string>& args) {
     }
     if (args[0] == "register") {
         if (args.size() < 2) { std::cerr << tr("Usage: euxis agent register <manifest.json>") << "\n"; return 2; }
-        auto manifest_path = args[1];
+        const auto& manifest_path = args[1];
         if (!fs::exists(manifest_path)) { std::cerr << tr("File not found:") << " " << manifest_path << "\n"; return 1; }
-        std::ifstream f(manifest_path);
+        std::ifstream manifest_file(manifest_path);
         nlohmann::json manifest;
-        try { manifest = nlohmann::json::parse(f); }
+        try { manifest = nlohmann::json::parse(manifest_file); }
         catch (const std::exception&) { std::cerr << tr("Invalid JSON:") << " " << manifest_path << "\n"; return 1; }
         std::string agent_id = manifest.value("agent_id", manifest.value("id", ""));
         if (agent_id.empty()) { std::cerr << tr("Missing agent_id in manifest") << "\n"; return 1; }
@@ -1127,8 +1131,8 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
     }
     if (args[0] == "deploy") {
         if (args.size() < 3) { std::cerr << tr("Usage: euxis squad deploy <squad-id> <task> [--mode parallel|sequential]") << "\n"; return 2; }
-        std::string squad_id = args[1];
-        std::string task = args[2];
+        const std::string& squad_id = args[1];
+        const std::string& task = args[2];
         for (const auto& s : squads) {
             if (s.id == squad_id) {
                 std::cout << term::bold("Deploying squad: " + s.name) << "\n";
@@ -1155,7 +1159,7 @@ int cmd_squad(Context& ctx, const std::vector<std::string>& args) {
 // --- combo ---
 int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis combo <agent1,agent2,...> [task]") << "\n"; return 2; }
-    std::string agents_str = args[0];
+    const std::string& agents_str = args[0];
     std::string task = (args.size() > 1) ? args[1] : "Process sequentially";
     // Split by comma
     std::vector<std::string> agent_ids;
@@ -1297,10 +1301,10 @@ auto detect_agent_drift(const std::string& euxis_home,
         // Compute mean and stddev for latency
         double sum = 0;
         for (double l : hist_latencies) sum += l;
-        double mean = sum / hist_latencies.size();
+        double mean = sum / static_cast<double>(hist_latencies.size());
         double var_sum = 0;
         for (double l : hist_latencies) var_sum += (l - mean) * (l - mean);
-        double stddev = std::sqrt(var_sum / hist_latencies.size());
+        double stddev = std::sqrt(var_sum / static_cast<double>(hist_latencies.size()));
 
         // Check latency deviation
         if (stddev > 0 && std::abs(ev.duration_ms - mean) > 2 * stddev) {
@@ -1533,9 +1537,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     auto manifest_path = fs::path(ctx.data_dir) / "config" / "playbooks" / (manifest_name + ".json");
     if (!fs::exists(manifest_path)) manifest_path = manifest_name;
 
-    std::ifstream f(manifest_path);
+    std::ifstream manifest_file(manifest_path);
     nlohmann::json manifest;
-    try { manifest = nlohmann::json::parse(f); }
+    try { manifest = nlohmann::json::parse(manifest_file); }
     catch (const std::exception&) { std::cerr << "Invalid Manifest\n"; return 1; }
 
     RegistryClient registry(ctx.data_dir);
@@ -1646,6 +1650,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::unordered_map<std::string, bool> agent_retried;  // P1-2: max 1 retry per agent
     std::vector<nlohmann::json> reflexion_log;  // P1-2: reflexion outcomes
     std::vector<std::string> critical_gaps; // Concrete gap reasons
+    std::vector<std::jthread> agent_threads;  // S5/P1: managed threads (was detach())
 
     auto start_time = std::chrono::steady_clock::now();
 
@@ -1786,7 +1791,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                     std::chrono::steady_clock::now() - start_time).count();
                 int agent_timeout = std::min(sla.agent_timeout_s, std::max(1, (int)(remaining_ms / 1000.0)));
 
-                std::thread([&, i, plan = plans[i], weight, agent_timeout]() {
+                agent_threads.emplace_back([&, plan = plans[i], weight, agent_timeout]() {
                     std::string context;
                     {
                         std::lock_guard<std::mutex> lk(mtx);
@@ -1822,10 +1827,13 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                             std::string raw_v = "WARN";
                             auto out_upper = response.output;
                             std::transform(out_upper.begin(), out_upper.end(), out_upper.begin(), ::toupper);
-                            // Primary: exact "VERDICT: PASS/FAIL/WARN"
+                            // Primary: exact "VERDICT: PASS/FAIL/WARN"; fallback chains
+                            // accept the common variations agents emit. Each variant
+                            // intentionally produces the same raw_v assignment as its
+                            // primary, which `bugprone-branch-clone` would otherwise flag.
+                            // NOLINTBEGIN(bugprone-branch-clone)
                             if (out_upper.find("VERDICT: PASS") != std::string::npos) raw_v = "PASS";
                             else if (out_upper.find("VERDICT: FAIL") != std::string::npos) raw_v = "FAIL";
-                            // Fallback: common variations agents emit
                             else if (out_upper.find("VERDICT:PASS") != std::string::npos ||
                                      out_upper.find("FINAL VERDICT: PASS") != std::string::npos ||
                                      out_upper.find("**VERDICT: PASS**") != std::string::npos ||
@@ -1838,6 +1846,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                                      out_upper.find("VERDICT:WARN") != std::string::npos ||
                                      out_upper.find("FINAL VERDICT: WARN") != std::string::npos ||
                                      out_upper.find("**VERDICT: WARN**") != std::string::npos) raw_v = "WARN";
+                            // NOLINTEND(bugprone-branch-clone)
 
                             // Map to explicit terminal state
                             std::string status = classify_agent_status(raw_v, timed_out, is_degraded,
@@ -1923,7 +1932,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                         completed.insert(plan.name); completed_count++; used_slots -= weight;
                     }
                     cv.notify_all();
-                }).detach();
+                });
             }
         }
         if (!launched && completed_count < (int)plans.size()) {
@@ -1931,11 +1940,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    // Wait for all detached threads to finish their critical sections
-    {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [&]{ return completed_count >= (int)plans.size(); });
-    }
+    // Join all agent threads — replaces old detach()+cv.wait pattern
+    // jthread destructor calls request_stop() + join(), so this is safe
+    agent_threads.clear();
 
     auto elapsed = std::chrono::steady_clock::now() - start_time;
     double total_s = std::chrono::duration<double>(elapsed).count();
@@ -2110,11 +2117,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     for (const auto& ev : evidence_log) pillar_evidence[ev.pillar].push_back(&ev);
 
     int critical_covered = 0;
-    for (const auto& cp : CRITICAL_PILLARS) {
+    for (const auto& cp : critical_pillars()) {
         if (pillar_evidence.count(cp) && !pillar_evidence[cp].empty()) critical_covered++;
     }
-    double critical_coverage = CRITICAL_PILLARS.empty() ? 1.0
-        : static_cast<double>(critical_covered) / CRITICAL_PILLARS.size();
+    double critical_coverage = critical_pillars().empty() ? 1.0
+        : static_cast<double>(critical_covered) / static_cast<double>(critical_pillars().size());
 
     // 4. Degradation penalty
     int degraded_agents = 0;
@@ -2139,7 +2146,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // Factor: Critical pillar coverage (weight: 25)
     int coverage_penalty = static_cast<int>((1.0 - critical_coverage) * 25);
     confidence -= coverage_penalty;
-    if (coverage_penalty > 0) confidence_factors.push_back("Coverage: -" + std::to_string(coverage_penalty) + " (" + std::to_string(critical_covered) + "/" + std::to_string(CRITICAL_PILLARS.size()) + " critical pillars)");
+    if (coverage_penalty > 0) confidence_factors.push_back("Coverage: -" + std::to_string(coverage_penalty) + " (" + std::to_string(critical_covered) + "/" + std::to_string(critical_pillars().size()) + " critical pillars)");
 
     // Factor: Degradation (weight: 15)
     int degradation_penalty = static_cast<int>(degradation_ratio * 15);
@@ -2264,7 +2271,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     {
         std::unordered_set<std::string> seen_pillars;
         for (const auto& ev : evidence_log) seen_pillars.insert(ev.pillar);
-        for (const auto& cp : CRITICAL_PILLARS) seen_pillars.insert(cp);
+        for (const auto& cp : critical_pillars()) seen_pillars.insert(cp);
 
         for (const auto& pname : seen_pillars) {
             PillarScore ps;
@@ -2275,15 +2282,15 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
                 ps.coverage = 0; ps.agreement = 0; ps.evidence_density = 0;
             } else {
                 const auto& agents = pillar_evidence[pname];
-                int p = 0, f = 0, incomplete = 0, pex = 0, pinf = 0, pcl = 0;
+                int p = 0, f = 0, incomplete = 0, pex = 0, pcl = 0;
                 for (const auto* a : agents) {
                     if (a->verdict == "PASS" || a->verdict == "DEGRADED") p++;
                     else if (a->verdict == "FAILED") f++;
                     else incomplete++; // PARTIAL, TIMEOUT
-                    pex += a->execution_backed; pinf += a->inferred; pcl += a->total_claims;
+                    pex += a->execution_backed; pcl += a->total_claims;
                 }
                 ps.coverage = std::min(100, (int)agents.size() * 50); // 2+ agents = full coverage
-                ps.agreement = (int)(static_cast<double>(std::max({p, f, incomplete})) / agents.size() * 100);
+                ps.agreement = (int)(static_cast<double>(std::max({p, f, incomplete})) / static_cast<double>(agents.size()) * 100);
                 ps.evidence_density = (pcl > 0) ? (int)(static_cast<double>(pex) / pcl * 100) : 0;
                 ps.status = (p > 0 && f > 0) ? "Conflict" : (f > 0 ? "Issue" : (incomplete > 0 ? "Gaps" : "Verified"));
             }
@@ -2311,7 +2318,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     bench.agents_executed = (int)evidence_log.size();
     bench.agents_skipped = agents_skipped;
     bench.estimated_cost_usd = total_estimated_cost;
-    bench.critical_checks_expected = (int)CRITICAL_PILLARS.size();
+    bench.critical_checks_expected = (int)critical_pillars().size();
     bench.critical_checks_present = critical_covered;
     bench.coverage_ratio = critical_coverage;
     double p95_latency_ms = 0.0;
@@ -2319,7 +2326,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         auto sorted_lat = agent_latencies;
         std::sort(sorted_lat.begin(), sorted_lat.end());
         bench.median_agent_latency_ms = sorted_lat[sorted_lat.size() / 2];
-        size_t p95_idx = std::min(sorted_lat.size() - 1, (size_t)(sorted_lat.size() * 0.95));
+        size_t p95_idx = std::min(sorted_lat.size() - 1, (size_t)(static_cast<double>(sorted_lat.size()) * 0.95));
         p95_latency_ms = sorted_lat[p95_idx];
     }
 
@@ -2349,7 +2356,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- Collect all key findings ---
     std::vector<std::string> all_findings;
     for (const auto& ev : evidence_log) {
-        for (const auto& f : ev.key_findings) all_findings.push_back("[" + ev.agent_name + "] " + f);
+        for (const auto& finding : ev.key_findings) all_findings.push_back("[" + ev.agent_name + "] " + finding);
     }
 
     // =====================================================================
@@ -2445,11 +2452,11 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- Claim Verification Results in Artifact ---
     if (!verifications.empty()) {
         artifact["claim_verification"] = nlohmann::json::array();
-        for (const auto& vr : verifications) {
+        for (const auto& ver : verifications) {
             artifact["claim_verification"].push_back({
-                {"check", vr.check_name}, {"command", vr.command},
-                {"verified", vr.success}, {"duration_ms", vr.duration_ms},
-                {"claims_upgraded", vr.claims_upgraded}
+                {"check", ver.check_name}, {"command", ver.command},
+                {"verified", ver.success}, {"duration_ms", ver.duration_ms},
+                {"claims_upgraded", ver.claims_upgraded}
             });
         }
         artifact["claims_upgraded"] = claims_upgraded;
@@ -2593,7 +2600,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- P1-7: Machine-Readable Provenance (SLSA v1) ---
     {
         nlohmann::json provenance;
-        provenance["builder"] = {{"id", "euxis-cli/v0.0.10"}};
+        provenance["builder"] = {{"id", "euxis-cli/v0.1.2"}};
         provenance["build_type"] = "https://slsa.dev/provenance/v1";
         provenance["invocation"] = {
             {"parameters", {
@@ -2862,8 +2869,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         // Add exit_code to artifact for machine consumption
         int exit_code = 2;
         if (!evidence_log.empty()) {
-            if (effective_fails > 0 || has_contradiction) exit_code = 1;
-            else if (verdict_text == "CAUTION" || verdict_text == "BLOCKED" || verdict_text == "INCONCLUSIVE") exit_code = 1;
+            if (effective_fails > 0 || has_contradiction ||
+                verdict_text == "CAUTION" || verdict_text == "BLOCKED" ||
+                verdict_text == "INCONCLUSIVE") exit_code = 1;
             else exit_code = 0;
         }
         // Policy override: violations always force exit code 1
@@ -2981,7 +2989,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     auto compute_percentile = [](std::vector<double> vals, double pct) -> double {
         if (vals.empty()) return 0.0;
         std::sort(vals.begin(), vals.end());
-        size_t idx = std::min(vals.size() - 1, (size_t)(vals.size() * pct));
+        size_t idx = std::min(vals.size() - 1, (size_t)(static_cast<double>(vals.size()) * pct));
         return vals[idx];
     };
 
@@ -3021,7 +3029,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
         // SLA hit rate
         int sla_met = 0;
         for (const auto* r : flash_runs) if (r->latency_ms <= 45000 + SLA_TOLERANCE_MS) sla_met++;
-        int sla_rate = (int)(100.0 * sla_met / flash_runs.size());
+        int sla_rate = (int)(100.0 * sla_met / static_cast<double>(flash_runs.size()));
         int sla_target = targets.value("flash_sla_hit_rate", 90);
         std::cout << "    " << term::bold("SLA hit rate:") << "   "
                   << sla_met << "/" << flash_runs.size() << " ("
@@ -3053,7 +3061,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     } else {
         int early_stops = 0;
         for (const auto* r : flash_runs) if (r->early_stopped) early_stops++;
-        int rate = (int)(100.0 * early_stops / flash_runs.size());
+        int rate = (int)(100.0 * early_stops / static_cast<double>(flash_runs.size()));
         int es_target = targets.value("early_stop_rate", 60);
         std::string es_label = (rate >= es_target) ? term::green("INFO") : term::yellow("INFO");
         std::cout << "    " << term::bold("Early-stops:") << "  "
@@ -3076,7 +3084,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
     } else {
         int escalations = 0;
         for (const auto* r : flash_runs) if (r->escalated) escalations++;
-        int rate = (int)(100.0 * escalations / flash_runs.size());
+        int rate = (int)(100.0 * escalations / static_cast<double>(flash_runs.size()));
         int esc_target = targets.value("max_escalation_rate", 20);
         std::string color = (rate > 30) ? term::red(std::to_string(rate) + "%")
                           : (rate > 10) ? term::yellow(std::to_string(rate) + "%")
@@ -3111,12 +3119,12 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
 
         std::cout << "    " << term::bold("Flash verdict distribution:") << "\n";
         for (const auto& [v, c] : flash_verdicts) {
-            int pct = (int)(100.0 * c / flash_runs.size());
+            int pct = (int)(100.0 * c / static_cast<double>(flash_runs.size()));
             std::cout << "      " << v << ": " << c << " (" << pct << "%)\n";
         }
         std::cout << "    " << term::bold("Standard verdict distribution:") << "\n";
         for (const auto& [v, c] : standard_verdicts) {
-            int pct = (int)(100.0 * c / standard_runs.size());
+            int pct = (int)(100.0 * c / static_cast<double>(standard_runs.size()));
             std::cout << "      " << v << ": " << c << " (" << pct << "%)\n";
         }
 
@@ -3135,15 +3143,14 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
                   << term::dim(" (target: <=" + std::to_string(drift_target) + "pt)") << "\n";
 
         if (std::abs((int)drift) > drift_target) {
-            // Classify drift: compare median agent counts and timeout rates
+            // Classify drift: compare median agent counts and standard timeout rate
             double flash_median_agents = 0, std_median_agents = 0;
-            double flash_timeout_rate = 0, std_timeout_rate = 0;
-            for (const auto* r : flash_runs) { flash_median_agents += r->agents_executed; flash_timeout_rate += r->timeout_count; }
+            double std_timeout_rate = 0;
+            for (const auto* r : flash_runs) { flash_median_agents += r->agents_executed; }
             for (const auto* r : standard_runs) { std_median_agents += r->agents_executed; std_timeout_rate += r->timeout_count; }
-            flash_median_agents /= flash_runs.size();
-            std_median_agents /= standard_runs.size();
-            flash_timeout_rate /= flash_runs.size();
-            std_timeout_rate /= standard_runs.size();
+            flash_median_agents /= static_cast<double>(flash_runs.size());
+            std_median_agents /= static_cast<double>(standard_runs.size());
+            std_timeout_rate /= static_cast<double>(standard_runs.size());
 
             bool deeper = std_median_agents > flash_median_agents + 1;
             bool low_timeouts = std_timeout_rate <= 2.0;
@@ -3196,7 +3203,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
                 auto violations = evaluate_policy(run_artifact, *policy_opt);
                 if (violations.empty()) policy_passed++;
             }
-            int compliance = (int)(100.0 * policy_passed / history.size());
+            int compliance = (int)(100.0 * policy_passed / static_cast<double>(history.size()));
             std::cout << "\n" << term::bold(term::cyan("  --- Policy Compliance ---")) << "\n";
             std::string comp_color = (compliance >= 90) ? term::green(std::to_string(compliance) + "%")
                                    : (compliance >= 70) ? term::yellow(std::to_string(compliance) + "%")
@@ -3236,7 +3243,7 @@ bool print_playbook_stats(Context& ctx, const std::string& since, int last_n) {
 // --- dispatch ---
 int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis dispatch <manifest.json>") << "\n"; return 2; }
-    auto path = args[0];
+    const auto& path = args[0];
     if (!fs::exists(path)) { std::cerr << tr("File not found:") << " " << path << "\n"; return 1; }
     std::ifstream f(path);
     nlohmann::json manifest;
@@ -3267,8 +3274,8 @@ int cmd_dispatch(Context& ctx, const std::vector<std::string>& args) {
 // --- council ---
 int cmd_council(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) { std::cerr << tr("Usage: euxis council <topic> <agent1,agent2,...> [--rounds N]") << "\n"; return 2; }
-    std::string topic = args[0];
-    std::string agents_str = args[1];
+    const std::string& topic = args[0];
+    const std::string& agents_str = args[1];
     int rounds = 3;
     for (size_t i = 2; i < args.size(); ++i) {
         if (args[i] == "--rounds" && i + 1 < args.size()) rounds = std::stoi(args[++i]);
@@ -3301,8 +3308,8 @@ int cmd_council(Context& ctx, const std::vector<std::string>& args) {
 // --- loop ---
 int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
     if (args.size() < 2) { std::cerr << tr("Usage: euxis loop <agent> <task> [--max-iterations N] [--threshold T]") << "\n"; return 2; }
-    std::string agent_id = args[0];
-    std::string task = args[1];
+    const std::string& agent_id = args[0];
+    const std::string& task = args[1];
     int max_iterations = 5;
     double threshold = 0.3;
     for (size_t i = 2; i < args.size(); ++i) {
@@ -3336,7 +3343,7 @@ int cmd_loop(Context& ctx, const std::vector<std::string>& args) {
 // --- synthesize ---
 int cmd_synthesize(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) { std::cerr << tr("Usage: euxis synthesize <output-dir> [--agents <filter>] [--agent <synth-agent>]") << "\n"; return 2; }
-    auto dir = args[0];
+    const auto& dir = args[0];
     if (!fs::exists(dir)) { std::cerr << tr("Directory not found:") << " " << dir << "\n"; return 1; }
     std::string agent_filter, synth_agent;
     for (size_t i = 1; i < args.size(); ++i) {

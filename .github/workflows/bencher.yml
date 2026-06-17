@@ -1,0 +1,221 @@
+name: Bencher (scan + evidence pipeline)
+
+# Captures the runtime metrics that back the "ultra-fast" claim:
+# SBOM emission, SCA parsing, DSSE sign/verify, slopsquatting lookup,
+# and ScanCache get/put. Results are uploaded as a workflow artifact
+# so a follow-up bencher.dev push can ingest the JSON without any
+# secret management in this workflow.
+#
+# Methodology and target numbers are documented at
+# docs/benchmarks/methodology.md; the latest published baseline lives
+# at docs/benchmarks/baseline.md.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "libs/bench/**"
+      - "libs/sbom/**"
+      - "libs/sca/**"
+      - "libs/slopsquatting/**"
+      - "libs/cache/**"
+      - "libs/attest/**"
+      - "libs/runtime/**"
+      - "libs/ensemble/**"
+      - "libs/security/**"
+      - ".github/workflows/bencher.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  scan-bench:
+    name: scan + evidence pipeline (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    env:
+      # Surfaced at job level so the conditional `env.BENCHER_API_TOKEN != ''`
+      # below sees it. Step-level env is not visible in `if:` expressions.
+      BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
+            pkg-config
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Configure (Release + GBench)
+        run: |
+          cmake -B cmake-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_BUILD_GBENCH=ON
+
+      - name: Build scan-bench target
+        run: cmake --build cmake-build --parallel --target euxis_scan_gbench
+
+      - name: Run scan-bench (5s/case, JSON output)
+        run: |
+          mkdir -p artifacts
+          ./cmake-build/libs/bench/euxis_scan_gbench \
+            --benchmark_min_time=5s \
+            --benchmark_format=json \
+            --benchmark_out=artifacts/scan-bench.json \
+            --benchmark_out_format=json
+          # Also print a human-readable summary into the job log
+          ./cmake-build/libs/bench/euxis_scan_gbench \
+            --benchmark_min_time=0.5s \
+            --benchmark_format=console
+
+      - name: Append benchmark summary to the job step output
+        run: |
+          {
+            echo "## scan + evidence pipeline benchmarks"
+            echo ""
+            echo "Runner: \`${{ matrix.os }}\`  ·  Build: Release + -O3 + LTO"
+            echo ""
+            echo "See \`artifacts/scan-bench.json\` for the raw Google Benchmark JSON."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload scan-bench JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-bench-${{ matrix.os }}
+          path: artifacts/scan-bench.json
+          if-no-files-found: error
+          retention-days: 90
+
+      # bencher.dev trend ingest. Skips when BENCHER_API_TOKEN is not
+      # provisioned so the workflow stays green on forks / unconfigured
+      # repos. Only runs on push events; pull_request runs don't update
+      # the baseline.
+      - name: Setup Bencher CLI
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        uses: bencherdev/bencher@main
+
+      - name: Push scan-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/scan-bench.json
+
+  agent-bench:
+    name: agentic-core gbench (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    env:
+      BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
+            pkg-config
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Configure (Release + GBench)
+        run: |
+          cmake -B cmake-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_BUILD_GBENCH=ON
+
+      - name: Build agent + ensemble gbench targets
+        run: |
+          cmake --build cmake-build --parallel \
+            --target euxis_agent_gbench euxis_ensemble_gbench
+
+      - name: Run agent gbench (5s/case, JSON output)
+        run: |
+          mkdir -p artifacts
+          ./cmake-build/libs/bench/euxis_agent_gbench \
+            --benchmark_min_time=5s \
+            --benchmark_format=json \
+            --benchmark_out=artifacts/agent-bench.json \
+            --benchmark_out_format=json
+          ./cmake-build/libs/bench/euxis_agent_gbench \
+            --benchmark_min_time=0.5s \
+            --benchmark_format=console
+
+      - name: Run ensemble gbench (5s/case, JSON output)
+        run: |
+          ./cmake-build/libs/bench/euxis_ensemble_gbench \
+            --benchmark_min_time=5s \
+            --benchmark_format=json \
+            --benchmark_out=artifacts/ensemble-bench.json \
+            --benchmark_out_format=json
+          ./cmake-build/libs/bench/euxis_ensemble_gbench \
+            --benchmark_min_time=0.5s \
+            --benchmark_format=console
+
+      - name: Append benchmark summary to the job step output
+        run: |
+          {
+            echo "## agentic-core + ensemble benchmarks"
+            echo ""
+            echo "Runner: \`${{ matrix.os }}\`  ·  Build: Release + -O3 + LTO"
+            echo ""
+            echo "Artifacts: \`agent-bench.json\` + \`ensemble-bench.json\` (raw Google Benchmark JSON)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload agent + ensemble JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-bench-${{ matrix.os }}
+          path: |
+            artifacts/agent-bench.json
+            artifacts/ensemble-bench.json
+          if-no-files-found: error
+          retention-days: 90
+
+      # bencher.dev trend ingest — same pattern as the scan-bench job.
+      # Skips cleanly until BENCHER_API_TOKEN is provisioned in repo
+      # secrets. Pushes a separate testbed line per benchmark binary so
+      # the dashboard tracks agentic-core and ensemble independently.
+      - name: Setup Bencher CLI
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        uses: bencherdev/bencher@main
+
+      - name: Push agent-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}-agent" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/agent-bench.json
+
+      - name: Push ensemble-bench results to bencher.dev
+        if: github.event_name == 'push' && env.BENCHER_API_TOKEN != ''
+        run: |
+          bencher run \
+            --project euxis \
+            --branch "${{ github.ref_name }}" \
+            --testbed "${{ matrix.os }}-ensemble" \
+            --adapter cpp_google \
+            --err \
+            --file artifacts/ensemble-bench.json

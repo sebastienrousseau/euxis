@@ -35,9 +35,33 @@ data/projects/.euxis/
 !data/runtime/README.md
 !data/runtime/gateway.json
 
-# --- SQLite WAL ---
+# --- SQLite ---
 *.db-shm
 *.db-wal
+data/agents/registry.db
+data/agents/registry.db.backup.*
+
+# --- Gateway runtime logs ---
+data/gateway/**/*.jsonl
+
+# --- Unused root dirs ---
+# These are legacy or transient on-disk directories that must never be
+# tracked. Some predate the C++23 rewrite (the Python TUI in tui/ was
+# superseded by apps/cli/src/tui/); others are tool caches that
+# shouldn't be re-introduced. See docs/architecture/legacy-cleanup-2026.md
+# for the full rationale.
+/bin/
+/metrics/
+/tui/
+/bus/
+/packages/
+/prompts/
+/codex/
+/.venv/
+/.venv-voice/
+/.pytest_cache/
+__pycache__/
+*.pyc
 
 # --- Dependencies ---
 node_modules/
@@ -48,11 +72,13 @@ _deps/
 .env.*
 *.key
 *.pem
-!data/docs/**/*.pem
+!docs/**/*.pem
 credentials*
 *.p12
 *.pfx
 *.keystore
+auth_profiles.json
+data/runtime/auth_profiles.json
 
 # --- Coverage ---
 *.gcda

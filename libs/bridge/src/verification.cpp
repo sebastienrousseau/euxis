@@ -33,7 +33,7 @@ auto verify_skill_signature(
         return std::unexpected("Invalid signature size: expected 64 bytes, got "
                                + std::to_string(sig_str.size()));
     }
-    std::array<std::byte, 64> signature;
+    std::array<std::byte, 64> signature{};
     std::memcpy(signature.data(), sig_str.data(), 64);
 
     bool valid = euxis::crypto::verify(
@@ -61,7 +61,7 @@ auto load_public_key(const std::filesystem::path& key_path)
 
     if (data.size() == 32) {
         // Raw binary key
-        std::array<std::byte, 32> key;
+        std::array<std::byte, 32> key{};
         std::memcpy(key.data(), data.data(), 32);
         return key;
     }
@@ -74,7 +74,7 @@ auto load_public_key(const std::filesystem::path& key_path)
                           nullptr, &decoded_len, nullptr,
                           sodium_base64_VARIANT_ORIGINAL) == 0
         && decoded_len == 32) {
-        std::array<std::byte, 32> key;
+        std::array<std::byte, 32> key{};
         std::memcpy(key.data(), decoded.data(), 32);
         return key;
     }

@@ -10,13 +10,6 @@
 
 namespace euxis::metrics {
 
-const std::unordered_map<EvidenceGrade, int> EvidenceFramework::decay_days_ = {
-    {EvidenceGrade::Verified, 1},
-    {EvidenceGrade::Measured, 1},
-    {EvidenceGrade::Observed, 7},
-    {EvidenceGrade::Inferred, 30},
-};
-
 auto grade_to_string(EvidenceGrade g) -> std::string {
     switch (g) {
         case EvidenceGrade::Verified: return "E1";
@@ -151,8 +144,17 @@ auto EvidenceFramework::check_decay(const Evidence& evidence) const -> bool {
     // E5 evidence is always decayed (forbidden)
     if (evidence.grade == EvidenceGrade::Speculated) return true;
 
-    auto it = decay_days_.find(evidence.grade);
-    if (it == decay_days_.end()) return true;
+    // Function-local static: lazy-init avoids throwing during static-init phase
+    // (bugprone-throwing-static-initialization).
+    static const std::unordered_map<EvidenceGrade, int> kDecayDays = {
+        {EvidenceGrade::Verified, 1},
+        {EvidenceGrade::Measured, 1},
+        {EvidenceGrade::Observed, 7},
+        {EvidenceGrade::Inferred, 30},
+    };
+
+    auto it = kDecayDays.find(evidence.grade);
+    if (it == kDecayDays.end()) return true;
 
     // Parse ISO-8601 timestamp (YYYY-MM-DDTHH:MM:SS or YYYY-MM-DD)
     std::tm tm{};

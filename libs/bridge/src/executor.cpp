@@ -9,11 +9,18 @@
 
 #include <spdlog/spdlog.h>
 
-#ifdef __linux__
+#if defined(__linux__)
 #include <poll.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#elif defined(__APPLE__)
+#include <poll.h>
+#include <signal.h>
+#include <spawn.h>
+#include <sys/wait.h>
+#include <unistd.h>
+extern char **environ;
 #endif
 
 namespace euxis::bridge {
@@ -27,7 +34,7 @@ constexpr int kMaxPollIterations = 6000;
 constexpr int kPollIntervalMs = 100;
 
 /// P10-R2: Maximum output buffer size (16 MB).
-constexpr size_t kMaxOutputBytes = 16 * 1024 * 1024;
+constexpr size_t kMaxOutputBytes = 16ULL * 1024 * 1024;
 
 /// P10-R5: Environment variable names that must never be overridden.
 constexpr std::array kDeniedEnvVars = {
@@ -41,8 +48,7 @@ constexpr std::array kDeniedEnvVars = {
                        [&](const char* denied) { return name == denied; });
 }
 
-#ifdef __linux__
-/// Safe process spawner using fork/execvp (no shell involved).
+/// Result of a subprocess spawn (shared across platforms).
 struct SpawnResult {
     int exit_code{-1};
     std::string stdout_output;
@@ -50,6 +56,7 @@ struct SpawnResult {
     std::chrono::milliseconds duration{0};
 };
 
+#ifdef __linux__
 auto safe_spawn(const std::vector<std::string>& argv,
                 const std::vector<std::string>& env_vars,
                 int timeout_seconds = 60)
@@ -105,7 +112,7 @@ auto safe_spawn(const std::vector<std::string>& argv,
     close(stdout_pipe[1]);
 
     std::string output;
-    output.reserve(64 * 1024);  // Pre-allocate 64KB to avoid early reallocations
+    output.reserve(64ULL * 1024);  // Pre-allocate 64KB to avoid early reallocations
     std::array<char, 4096> buffer{};
 
     struct pollfd pfd{};
@@ -137,6 +144,105 @@ auto safe_spawn(const std::vector<std::string>& argv,
     auto end = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
+    int exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+
+    return SpawnResult{
+        .exit_code = exit_code,
+        .stdout_output = output,
+        .stderr_output = "",
+        .duration = duration,
+    };
+}
+#endif
+
+#ifdef __APPLE__
+auto safe_spawn_posix(const std::vector<std::string>& argv,
+                      const std::vector<std::string>& env_vars,
+                      int timeout_seconds = 60)
+    -> std::expected<SpawnResult, std::string> {
+
+    assert(!argv.empty() && "argv must contain at least a program name");
+    assert(timeout_seconds > 0 && "timeout must be positive");
+
+    int stdout_pipe[2];
+    if (pipe(stdout_pipe) != 0) {
+        return std::unexpected("pipe() failed: " + std::string(strerror(errno)));
+    }
+
+    // Set up file actions: redirect stdout+stderr to pipe
+    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_init(&actions);
+    posix_spawn_file_actions_addclose(&actions, stdout_pipe[0]);
+    posix_spawn_file_actions_adddup2(&actions, stdout_pipe[1], STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&actions, stdout_pipe[1], STDERR_FILENO);
+    posix_spawn_file_actions_addclose(&actions, stdout_pipe[1]);
+
+    // Build C argv
+    std::vector<const char*> c_argv;
+    for (const auto& a : argv) c_argv.push_back(a.c_str());
+    c_argv.push_back(nullptr);
+
+    // Build environment: start from current environ, overlay filtered vars
+    std::vector<std::string> env_storage;
+    std::vector<const char*> c_env;
+    for (char** e = environ; *e; ++e) env_storage.emplace_back(*e);
+    for (const auto& e : env_vars) {
+        auto eq = e.find('=');
+        if (eq != std::string::npos && !is_denied_env(e.substr(0, eq))) {
+            env_storage.push_back(e);
+        }
+    }
+    for (const auto& s : env_storage) c_env.push_back(s.c_str());
+    c_env.push_back(nullptr);
+
+    auto start = std::chrono::steady_clock::now();
+    pid_t pid = 0;
+    int rc = posix_spawnp(&pid,
+                          c_argv[0],
+                          &actions,
+                          nullptr,
+                          const_cast<char* const*>(c_argv.data()),
+                          const_cast<char* const*>(c_env.data()));
+    posix_spawn_file_actions_destroy(&actions);
+
+    if (rc != 0) {
+        close(stdout_pipe[0]);
+        close(stdout_pipe[1]);
+        return std::unexpected("posix_spawnp() failed: " + std::string(strerror(rc)));
+    }
+
+    // Parent: read output via poll loop (same pattern as Linux path)
+    close(stdout_pipe[1]);
+
+    std::string output;
+    output.reserve(64 * 1024);
+    std::array<char, 4096> buffer{};
+
+    struct pollfd pfd{};
+    pfd.fd = stdout_pipe[0];
+    pfd.events = POLLIN;
+
+    const int max_iterations = std::min(
+        kMaxPollIterations,
+        (timeout_seconds * 1000) / kPollIntervalMs);
+    int poll_count = 0;
+
+    while (poll_count++ < max_iterations) {
+        int ret = poll(&pfd, 1, kPollIntervalMs);
+        if (ret <= 0) break;
+        ssize_t n = read(stdout_pipe[0], buffer.data(), buffer.size());
+        if (n <= 0) break;
+        output.append(buffer.data(), static_cast<size_t>(n));
+        if (output.size() > kMaxOutputBytes) break;
+    }
+
+    close(stdout_pipe[0]);
+
+    int status = 0;
+    waitpid(pid, &status, 0);
+
+    auto end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     int exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 
     return SpawnResult{
@@ -230,7 +336,7 @@ auto SkillExecutor::spawn_direct(
     const std::filesystem::path& entrypoint,
     const std::vector<std::string>& env
 ) -> std::expected<ExecutionResult, std::string> {
-#ifdef __linux__
+#if defined(__linux__)
     auto runtime = runtime_command(
         entrypoint.extension().string() == ".py" ? "python" : "node"
     );
@@ -239,6 +345,23 @@ auto SkillExecutor::spawn_direct(
 
     const int timeout = policy_ ? static_cast<int>(policy_->resources.timeout_seconds) : 60;
     auto result = safe_spawn(argv, env, timeout);
+    if (!result) return std::unexpected(result.error());
+
+    return ExecutionResult{
+        .exit_code = result->exit_code,
+        .stdout_output = result->stdout_output,
+        .stderr_output = result->stderr_output,
+        .duration = result->duration,
+    };
+#elif defined(__APPLE__)
+    auto runtime = runtime_command(
+        entrypoint.extension().string() == ".py" ? "python" : "node"
+    );
+
+    std::vector<std::string> argv = {runtime, entrypoint.string()};
+
+    const int timeout = policy_ ? static_cast<int>(policy_->resources.timeout_seconds) : 60;
+    auto result = safe_spawn_posix(argv, env, timeout);
     if (!result) return std::unexpected(result.error());
 
     return ExecutionResult{

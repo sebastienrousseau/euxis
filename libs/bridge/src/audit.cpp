@@ -4,6 +4,9 @@
 #include <iomanip>
 #include <sstream>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <sodium.h>
 
 namespace euxis::bridge {
@@ -122,12 +125,28 @@ void AuditLogger::append(const nlohmann::json& entry) {
     chained["prev_hash"] = prev_hash_;
 
     std::string serialized = chained.dump();
-    prev_hash_ = compute_hash(serialized);
+    std::string line = serialized + '\n';
+    std::string new_hash = compute_hash(serialized);
 
-    std::ofstream file(log_path_, std::ios::app);
-    if (file.is_open()) {
-        file << serialized << '\n';
+    // POSIX atomic append: open → write → fsync → update hash
+    int fd = ::open(log_path_.c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644);
+    if (fd < 0) return;  // write failed — prev_hash_ unchanged, safe to retry
+
+    ssize_t written = ::write(fd, line.data(), line.size());
+    if (written < 0 || static_cast<size_t>(written) != line.size()) {
+        ::close(fd);
+        return;  // partial write — prev_hash_ unchanged
     }
+
+    if (::fsync(fd) != 0) {
+        ::close(fd);
+        return;  // fsync failed — prev_hash_ unchanged
+    }
+
+    ::close(fd);
+
+    // Only update chain head after confirmed durable write
+    prev_hash_ = std::move(new_hash);
 }
 
 auto AuditLogger::now_iso8601() -> std::string {

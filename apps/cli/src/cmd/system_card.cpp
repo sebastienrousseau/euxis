@@ -34,7 +34,7 @@ int cmd_system_card(Context& ctx, const std::vector<std::string>& args) {
     // Identity
     card["identity"] = {
         {"name", "euxis"},
-        {"version", "0.0.10"},
+        {"version", "0.1.2"},
         {"build_date", __DATE__},
         {"compiler",
 #if defined(__clang__)

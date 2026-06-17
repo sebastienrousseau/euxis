@@ -1,0 +1,57 @@
+# Azure DevOps Pipelines template. Reference from your azure-pipelines.yml:
+#
+#   resources:
+#     repositories:
+#       - repository: euxis
+#         type: github
+#         name: sebastienrousseau/euxis
+#         endpoint: github-service-connection
+#   steps:
+#     - template: templates/azure-pipelines/euxis-task.yml@euxis
+#       parameters:
+#         mode: check
+#         failOn: high
+
+parameters:
+  - name: mode
+    type: string
+    default: 'check'
+    values: ['triage', 'check', 'review', 'forensic']
+  - name: target
+    type: string
+    default: '.'
+  - name: version
+    type: string
+    default: 'latest'
+  - name: failOn
+    type: string
+    default: 'high'
+    values: ['critical', 'high', 'medium', 'low', 'none']
+
+steps:
+  - task: Bash@3
+    displayName: 'euxis ${{ parameters.mode }}'
+    inputs:
+      targetType: 'inline'
+      script: |
+        set -euo pipefail
+        IMAGE='ghcr.io/sebastienrousseau/euxis:${{ parameters.version }}'
+        docker pull "$IMAGE"
+        docker run --rm \
+          -v "$(System.DefaultWorkingDirectory)":/workspace \
+          -w /workspace \
+          --entrypoint /euxis \
+          "$IMAGE" \
+          '${{ parameters.mode }}' '${{ parameters.target }}' \
+          --sarif euxis-results.sarif \
+          --sbom euxis-sbom.cdx.json \
+          --evidence euxis-evidence.tar.gz \
+          --fail-on '${{ parameters.failOn }}'
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish euxis evidence pack'
+    condition: always()
+    inputs:
+      targetPath: '$(System.DefaultWorkingDirectory)'
+      artifactName: 'euxis-evidence-$(Build.BuildId)'
+      publishLocation: 'pipeline'
+    continueOnError: true

@@ -71,6 +71,10 @@ void ChatWidget::render(terminal::TerminalScreen& screen, Rect area) {
                 continue;
             }
 
+            // Distinct layout cases that happen to share the same height
+            // delta (1) — kept as named branches for readability rather than
+            // collapsed, so bugprone-branch-clone is silenced locally.
+            // NOLINTBEGIN(bugprone-branch-clone)
             if (in_code_block) {
                 // Optimization: Rough line count for code blocks
                 h++;
@@ -84,6 +88,7 @@ void ChatWidget::render(terminal::TerminalScreen& screen, Rect area) {
                 // Heuristic: estimate wrapped height to avoid expensive string splitting on every frame
                 h += static_cast<int>(std::max(1UL, (raw_line.size() + content_width - 1) / content_width));
             }
+            // NOLINTEND(bugprone-branch-clone)
         }
         
         if (msg.is_thinking) h++;
@@ -169,7 +174,7 @@ void ChatWidget::render_message(terminal::TerminalScreen& screen, const ChatMess
         screen.write_text(area.x + 5, y, msg.sender, pr, pg, pb, 0, 0, 0, true);
         
         if (!msg.model.empty()) {
-            screen.write_text(area.x + 5 + msg.sender.size() + 2, y, std::format("[{}]", msg.model), muted_r, muted_g, muted_b);
+            screen.write_text(area.x + 5 + static_cast<int>(msg.sender.size()) + 2, y, std::format("[{}]", msg.model), muted_r, muted_g, muted_b);
         }
     }
     y++;

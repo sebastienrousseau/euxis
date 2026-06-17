@@ -11,7 +11,7 @@ auto GatewayConfig::from_json(const nlohmann::json& j) -> GatewayConfig {
     c.host = j.value("host", "0.0.0.0");
     c.raw = j;
     if (j.contains("timeouts")) {
-        auto t = j["timeouts"];
+        const auto& t = j["timeouts"];
         c.timeouts.webhook = t.value("webhook", 5);
         c.timeouts.health_check = t.value("health_check", 2);
         c.timeouts.api_call = t.value("api_call", 10);

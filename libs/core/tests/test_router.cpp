@@ -63,5 +63,35 @@ TEST(FinOpsRouterTest, EmptyProviderScoring) {
     EXPECT_FALSE(r.select_provider("medium", "unknown_priority").empty());
 }
 
+// --- F2: swarm priority exercises the round-robin atomic counter ---
+TEST(FinOpsRouterTest, SwarmPriorityRoundRobinsAcrossProviders) {
+    FinOpsRouter r;
+    std::set<std::string> seen;
+    // 3 providers; iterate N>3 times to guarantee every slot is visited.
+    for (int i = 0; i < 9; ++i) {
+        seen.insert(r.select_provider("high", "swarm"));
+    }
+    EXPECT_EQ(seen.size(), 3u) << "swarm priority must cycle through all providers";
+    EXPECT_TRUE(seen.count("ollama"));
+    EXPECT_TRUE(seen.count("claude"));
+    EXPECT_TRUE(seen.count("gemini"));
+}
+
+// --- F3: track_session_usage with a model name that matches no known
+//         provider exercises the cost-fallback branch (router.cpp:107-109). ---
+TEST(FinOpsRouterTest, UnknownModelStillProducesNonZeroCost) {
+    FinOpsRouter r;
+    r.track_session_usage("s-unknown", "agent-x", "totally-fictional-model",
+                          250, 250);
+    EXPECT_GT(r.session_cost("s-unknown"), 0.0);
+}
+
+// --- F3 cont'd: zero-token call still costs the floor (max(1, total)) ---
+TEST(FinOpsRouterTest, ZeroTokensFallbackHitsFloor) {
+    FinOpsRouter r;
+    r.track_session_usage("s-zero", "agent-x", "no-match-model", 0, 0);
+    EXPECT_GT(r.session_cost("s-zero"), 0.0);
+}
+
 } // namespace
 } // namespace euxis::core

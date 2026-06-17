@@ -550,5 +550,154 @@ TEST_F(RegistryClientSqliteTest, MoveAssignmentPreservesSqlite) {
     std::filesystem::remove_all(other_dir);
 }
 
+// --- Issue #60: JsonCache regression ----------------------------------------
+//
+// First construction parses registry.json + squads.json from disk and
+// populates the JsonCache. Second construction (with the registry files
+// unchanged) restores from the cache without re-parsing. The on-disk
+// cache database is what the test inspects, since the cache is owned
+// inside RegistryClient::Impl.
+
+} // namespace
+} // namespace euxis::cli
+
+#include "euxis/cache/json_cache.hpp"
+
+namespace euxis::cli {
+namespace {
+
+class RegistryClientCacheTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        cache_home_ = "/tmp/euxis_test_cachehome_" +
+                      std::to_string(getpid()) + "_" +
+                      std::to_string(::testing::UnitTest::GetInstance()
+                                         ->current_test_info()
+                                         ->result()
+                                         ->total_part_count());
+        std::filesystem::create_directories(cache_home_);
+        prev_xdg_ = std::getenv("XDG_CACHE_HOME");
+        ::setenv("XDG_CACHE_HOME", cache_home_.c_str(), /*overwrite=*/1);
+
+        test_dir_ = "/tmp/euxis_test_regcache_" +
+                    std::to_string(getpid()) + "_" +
+                    std::to_string(::testing::UnitTest::GetInstance()
+                                       ->current_test_info()
+                                       ->result()
+                                       ->total_part_count());
+        auto agents_dir = std::filesystem::path(test_dir_) / "agents";
+        std::filesystem::create_directories(agents_dir);
+
+        nlohmann::json reg;
+        reg["agents"] = nlohmann::json::array({
+            {{"agent_id", "alpha"}, {"role", "tester"}, {"version", "1.0"},
+             {"tier", "code"}, {"tags", {"ci"}}, {"capabilities", {"testing"}}},
+        });
+        std::ofstream(agents_dir / "registry.json") << reg.dump(2);
+
+        nlohmann::json squads;
+        squads["squads"] = nlohmann::json::array({
+            {{"id", "s1"}, {"name", "S1"}, {"purpose", "test"},
+             {"lead", "alpha"}, {"members", {"alpha"}}},
+        });
+        std::ofstream(agents_dir / "squads.json") << squads.dump(2);
+    }
+
+    void TearDown() override {
+        if (prev_xdg_ != nullptr) {
+            ::setenv("XDG_CACHE_HOME", prev_xdg_, /*overwrite=*/1);
+        } else {
+            ::unsetenv("XDG_CACHE_HOME");
+        }
+        std::filesystem::remove_all(test_dir_);
+        std::filesystem::remove_all(cache_home_);
+    }
+
+    [[nodiscard]] auto cache_db_path() const -> std::filesystem::path {
+        return std::filesystem::path{cache_home_} / "euxis" /
+               "registry-cache.sqlite";
+    }
+
+    std::string test_dir_;
+    std::string cache_home_;
+    const char* prev_xdg_{nullptr};
+};
+
+// First construction must populate the cache with the registry.json
+// payload; the entry must be readable through a sibling JsonCache.
+TEST_F(RegistryClientCacheTest, FirstConstructionPopulatesJsonCache) {
+    {
+        RegistryClient reg(test_dir_);
+        EXPECT_TRUE(reg.has_json());
+        EXPECT_GE(reg.agent_count(), 1);
+    }
+
+    ASSERT_TRUE(std::filesystem::exists(cache_db_path()))
+        << "Expected the cache db at " << cache_db_path();
+
+    auto cache = euxis::cache::JsonCache::open(cache_db_path());
+    ASSERT_TRUE(cache.has_value()) << cache.error().message;
+
+    auto registry_path =
+        std::filesystem::path{test_dir_} / "agents" / "registry.json";
+    auto hit = cache->get(registry_path);
+    ASSERT_TRUE(hit.has_value()) << hit.error().message;
+    ASSERT_TRUE(hit->has_value())
+        << "registry.json was not cached on first construction";
+
+    EXPECT_EQ((**hit).at("agents").at(0).at("agent_id").get<std::string>(),
+              "alpha");
+    EXPECT_GE(cache->stats().hits, 1u);
+}
+
+// Second construction with the source files unchanged must NOT grow the
+// cache db on disk. A grown db means the warm path re-parsed and
+// re-stored — i.e. the cache lookup missed when it shouldn't have. This
+// is the regression test #60 asks for.
+TEST_F(RegistryClientCacheTest, SecondConstructionDoesNotRewriteCache) {
+    {
+        RegistryClient reg1(test_dir_);
+        EXPECT_GE(reg1.agent_count(), 1);
+    }
+    ASSERT_TRUE(std::filesystem::exists(cache_db_path()));
+    auto size_after_cold = std::filesystem::file_size(cache_db_path());
+
+    {
+        RegistryClient reg2(test_dir_);
+        EXPECT_GE(reg2.agent_count(), 1);
+    }
+    auto size_after_warm = std::filesystem::file_size(cache_db_path());
+
+    EXPECT_EQ(size_after_cold, size_after_warm)
+        << "Warm construction grew the cache db from " << size_after_cold
+        << " to " << size_after_warm
+        << " bytes — JsonCache failed to hit on registry.json/squads.json";
+}
+
+// Editing the source file between constructions must invalidate the
+// cache entry — the content-hash check inside JsonCache::get is the
+// defence. Verifies the invariant the cache primitive promised.
+TEST_F(RegistryClientCacheTest, SourceEditInvalidatesCacheEntry) {
+    {
+        RegistryClient reg(test_dir_);
+        EXPECT_GE(reg.agent_count(), 1);
+    }
+    auto registry_path =
+        std::filesystem::path{test_dir_} / "agents" / "registry.json";
+
+    nlohmann::json reg2;
+    reg2["agents"] = nlohmann::json::array({
+        {{"agent_id", "alpha"}, {"role", "tester"}, {"version", "1.0"},
+         {"tier", "code"}, {"tags", {"ci"}}, {"capabilities", {"testing"}}},
+        {{"agent_id", "beta"}, {"role", "auditor"}, {"version", "1.1"},
+         {"tier", "routine"}, {"tags", {"sec"}}, {"capabilities", {"audit"}}},
+    });
+    std::ofstream(registry_path) << reg2.dump(2);
+
+    RegistryClient reg(test_dir_);
+    EXPECT_GE(reg.agent_count(), 2)
+        << "Edited registry.json was not re-parsed — cache returned stale";
+}
+
 } // namespace
 } // namespace euxis::cli

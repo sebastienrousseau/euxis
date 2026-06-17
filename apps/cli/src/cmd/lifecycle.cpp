@@ -315,11 +315,9 @@ int cmd_install(Context& ctx, const std::vector<std::string>& args) {
     static const std::vector<std::pair<std::string, bool>> providers = {
         {"ollama", false}, {"claude", false}, {"gemini", false}, {"codex", false}
     };
-    int providers_found = 0;
     std::cout << "\n  " << term::bold(tr("Providers:")) << "\n";
     for (const auto& [name, _] : providers) {
         bool found = Process::available(name);
-        if (found) ++providers_found;
         std::cout << "  " << (found ? term::icon_ok() : term::icon_warn())
                   << " " << name << " " << (found ? term::dim(tr("(available)")) : term::dim(tr("(not found, optional)"))) << "\n";
     }
@@ -796,14 +794,14 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                 if (j.contains("agents") && j["agents"].is_array()) {
                     agents = static_cast<int>(j["agents"].size());
                 }
-            } catch (const std::exception&) {}
+            } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
         }
 
         auto mode = detect_install_mode(ctx.euxis_home);
 
         if (json_out) {
             nlohmann::json j;
-            j["version"] = "v0.0.10";
+            j["version"] = "v0.1.2";
             j["euxis_home"] = ctx.euxis_home;
             j["euxis_home_exists"] = home_exists;
             j["binary_symlink"] = link_ok;
@@ -815,7 +813,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
             std::cout << j.dump(2) << "\n";
         } else {
             std::cout << term::bold(tr("Euxis Status")) << "\n\n";
-            std::cout << "  " << tr("Version:") << "       v0.0.10\n";
+            std::cout << "  " << tr("Version:") << "       v0.1.2\n";
             std::cout << "  " << tr("Mode:") << "          " << mode << "\n";
             std::cout << "  " << tr("EUXIS_HOME:") << "    "
                       << (home_exists ? term::icon_ok() : term::icon_fail())
@@ -870,7 +868,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
     if (sub == "version") {
         if (json_out) {
             nlohmann::json j;
-            j["version"] = "v0.0.10";
+            j["version"] = "v0.1.2";
             j["language"] = "C++23";
             j["protocol"] = "1.0";
             auto registry_path = fs::path(ctx.data_dir) / "agents" / "registry.json";
@@ -880,11 +878,11 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto rj = nlohmann::json::parse(f);
                     if (rj.contains("version"))
                         j["registry_version"] = rj["version"].get<std::string>();
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::cout << j.dump(2) << "\n";
         } else {
-            std::cout << "Euxis v0.0.10 (C++23)\n";
+            std::cout << "Euxis v0.1.2 (C++23)\n";
             auto registry_path = fs::path(ctx.data_dir) / "agents" / "registry.json";
             if (fs::exists(registry_path)) {
                 std::ifstream f(registry_path);
@@ -892,7 +890,7 @@ int cmd_self(Context& ctx, const std::vector<std::string>& args) {
                     auto j = nlohmann::json::parse(f);
                     if (j.contains("version"))
                         std::cout << tr("Registry:") << " " << j["version"].get<std::string>() << "\n";
-                } catch (const std::exception&) {}
+                } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; }
             }
             std::cout << tr("Protocol:") << " 1.0\n";
         }

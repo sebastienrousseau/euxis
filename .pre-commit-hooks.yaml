@@ -1,0 +1,42 @@
+# pre-commit framework hook definition.
+# Consumers add this to their .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/sebastienrousseau/euxis
+#       rev: v0.1.0
+#       hooks:
+#         - id: euxis-triage
+#         - id: euxis-secrets
+
+- id: euxis-triage
+  name: euxis triage
+  description: Ultra-fast bounded triage scan (default ~45s wall clock).
+  entry: euxis triage .
+  language: system
+  pass_filenames: false
+  stages: [pre-commit]
+  require_serial: true
+
+- id: euxis-secrets
+  name: euxis secrets
+  description: Scan staged changes for secrets, API keys, and credentials.
+  entry: euxis secrets --staged
+  language: system
+  pass_filenames: false
+  stages: [pre-commit]
+
+- id: euxis-sbom-gate
+  name: euxis SBOM gate
+  description: Refuse the commit if any lockfile mutation breaks SBOM constraints.
+  entry: euxis sbom-gate
+  language: system
+  pass_filenames: false
+  stages: [pre-push]
+
+- id: euxis-slopsquatting
+  name: euxis slopsquatting guard
+  description: Detect LLM-hallucinated package names in dependency manifests.
+  entry: euxis slopsquatting
+  language: system
+  files: '(package(-lock)?\.json|requirements.*\.txt|Pipfile\.lock|pyproject\.toml|Cargo\.toml|go\.mod)$'
+  stages: [pre-commit]

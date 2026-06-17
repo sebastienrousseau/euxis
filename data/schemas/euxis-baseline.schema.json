@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://euxis.co/schemas/euxis-baseline.schema.json",
+  "title": ".euxis-baseline.json",
+  "description": "Baseline file. Findings whose stable_fingerprint matches an entry here are suppressed from gates but still emitted with status=baselined in the evidence pack.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "findings"],
+  "properties": {
+    "version": { "type": "string", "const": "1" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generated_by": { "type": "string", "description": "euxis CLI version string" },
+    "comment": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stable_fingerprint", "rule_id", "path"],
+        "properties": {
+          "stable_fingerprint": {
+            "type": "string",
+            "description": "BLAKE2b-128 of (rule_id, normalised path, AST-shape hash). Survives line moves and whitespace changes.",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "rule_id": { "type": "string" },
+          "path":    { "type": "string" },
+          "line":    { "type": "integer", "minimum": 1 },
+          "reason":  { "type": "string", "description": "Why this finding is acceptable to ignore." },
+          "expires_at": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}

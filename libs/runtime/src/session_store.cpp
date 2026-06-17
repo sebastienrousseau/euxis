@@ -91,13 +91,24 @@ public:
         return sessions_.at(session_id).at(branch);
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
-        if (auto res = load(session_id, branch)) {
-            for (const auto& msg : res->messages) {
-                co_yield msg;
-            }
+#if defined(EUXIS_HAS_STD_GENERATOR)
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::generator<SessionMessage> override {
+        auto loaded = load(session_id, branch);
+        if (!loaded) co_return;
+        for (auto& m : loaded->messages) {
+            co_yield std::move(m);
         }
     }
+#else
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::vector<SessionMessage> override {
+        if (auto res = load(session_id, branch)) {
+            return std::move(res->messages);
+        }
+        return {};
+    }
+#endif
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
         std::vector<std::string> res;
@@ -111,7 +122,7 @@ public:
         return load(session_id, "main")
             .and_then([&](SessionSnapshot&& snap) -> std::expected<void, std::string> {
                 if (snap.messages.size() > keep_last_n) {
-                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + (snap.messages.size() - keep_last_n));
+                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + static_cast<std::ptrdiff_t>(snap.messages.size() - keep_last_n));
                 }
                 return save(snap);
             });
@@ -151,7 +162,7 @@ public:
 #ifndef _WIN32
         int fd = open(path.c_str(), O_RDONLY);
         if (fd != -1) {
-            struct stat sb;
+            struct stat sb{};
             if (fstat(fd, &sb) == 0 && sb.st_size > 0) {
                 void* mapped = mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
                 if (mapped != MAP_FAILED) {
@@ -182,14 +193,25 @@ public:
         }
     }
 
-    auto stream_episodes(const std::string& session_id, const std::string& branch) -> std::generator<SessionMessage> override {
-        // C++23 coroutine implementation for lazy, zero-allocation trace loading
-        if (auto res = load(session_id, branch)) {
-            for (const auto& msg : res->messages) {
-                co_yield msg;
-            }
+#if defined(EUXIS_HAS_STD_GENERATOR)
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::generator<SessionMessage> override {
+        auto res = load(session_id, branch);
+        if (!res) co_return;
+        for (auto& m : res->messages) {
+            co_yield std::move(m);
         }
     }
+#else
+    auto stream_episodes(const std::string& session_id, const std::string& branch)
+        -> std::vector<SessionMessage> override {
+        // Eager materialisation pending `std::generator` ship in libc++.
+        if (auto res = load(session_id, branch)) {
+            return std::move(res->messages);
+        }
+        return {};
+    }
+#endif
 
     auto list_branches(const std::string& session_id) -> std::vector<std::string> override {
         std::vector<std::string> branches;
@@ -205,7 +227,7 @@ public:
         return load(session_id, "main")
             .and_then([&](SessionSnapshot&& snap) -> std::expected<void, std::string> {
                 if (snap.messages.size() > keep_last_n) {
-                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + (snap.messages.size() - keep_last_n));
+                    snap.messages.erase(snap.messages.begin(), snap.messages.begin() + static_cast<std::ptrdiff_t>(snap.messages.size() - keep_last_n));
                 }
                 return save(snap);
             });

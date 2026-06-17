@@ -46,6 +46,11 @@ auto InteractionOrchestrator::run_sequential(
     const std::string& task) -> InteractionResult {
     InteractionResult result;
     result.success = true;
+    // current_input is reseated per iteration on success (see
+    // `current_input = response.output;` below); kept as a value
+    // copy rather than a reference even though Week-19 clang-tidy
+    // surveyed it as "never modified" — that survey predated the
+    // assignment path being exercised.
     std::string current_input = task;
 
     for (const auto& agent_id : agent_ids) {

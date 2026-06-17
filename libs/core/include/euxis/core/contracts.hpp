@@ -8,7 +8,10 @@
  * core SDK, including swarm orchestration, FinOps routing, and resilience patterns.
  */
 
-#include "resilience.hpp"
 #include "router.hpp"
 #include "swarm.hpp"
 #include "types.hpp"
+
+// Resilience primitives live in libs/network; re-exported here so callers can
+// use the umbrella header without a second include.
+#include <euxis/network/resilience.hpp>

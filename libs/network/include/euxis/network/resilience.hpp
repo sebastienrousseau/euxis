@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <exception>
 #include <functional>
 #include <optional>
 #include <stdexcept>

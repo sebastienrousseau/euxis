@@ -104,6 +104,7 @@ void FastMetricsCollector::background_flush_loop(std::stop_token stop) {
             flush();
         } catch (const std::exception&) {
             // Don't let flush errors break the loop
+            (void)0;  // swallowed: best-effort
         }
     }
 }

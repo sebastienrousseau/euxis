@@ -37,7 +37,7 @@ enum class TaskStatus {
 /// @brief A multi-step task involving one or more agents.
 struct A2ATask {
     std::string id;
-    TaskStatus status;
+    TaskStatus status{};
     std::string created_at;
     std::string updated_at;
     std::vector<A2AMessage> messages;

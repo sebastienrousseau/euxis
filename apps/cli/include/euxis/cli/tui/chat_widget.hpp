@@ -52,7 +52,7 @@ private:
     std::vector<ChatMessage> messages_;
     int scroll_offset_{0};
     const ColorSystem* color_system_{nullptr};
-    SyntaxHighlighter highlighter_;
+    [[maybe_unused]] SyntaxHighlighter highlighter_;
 
     /** @brief Internally render a single message block. */
     void render_message(terminal::TerminalScreen& screen, const ChatMessage& msg, int& y, Rect area) const;

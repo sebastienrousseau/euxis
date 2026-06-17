@@ -245,5 +245,22 @@ TEST(ProcessTest, ShellInteractiveAllowsPathWithSpaces) {
     EXPECT_EQ(Process::shell_interactive("ls /tmp"), 0);
 }
 
+// --- P2-2: Newline, carriage return, and null byte injection ---
+
+TEST(ProcessTest, ShellInteractiveRejectsNewline) {
+    EXPECT_EQ(Process::shell_interactive("echo hello\nrm -rf /"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsCarriageReturn) {
+    EXPECT_EQ(Process::shell_interactive("echo hello\rrm -rf /"), -1);
+}
+
+TEST(ProcessTest, ShellInteractiveRejectsEmbeddedNull) {
+    std::string cmd("echo hello");
+    cmd.push_back('\0');
+    cmd.append("rm -rf /");
+    EXPECT_EQ(Process::shell_interactive(cmd), -1);
+}
+
 } // namespace
 } // namespace euxis::cli
