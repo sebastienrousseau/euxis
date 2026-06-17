@@ -1,5 +1,7 @@
 # Euxis Architecture
 
+> ⚠️ **Legacy shell-era document.** This page describes Euxis as a Bash-script orchestration framework (`cli.sh`, `dispatch.sh`, `core/lib/*.sh`). The active codebase is C++23 (`libs/`, `apps/`) and this doc has not yet been rewritten to match it. Read it for the conceptual model only; for the current module layout, browse `libs/` directly or wait for the C++-era successor under `docs/architecture/`. Tracked as a follow-up to the 2026 ecosystem-alignment sweep.
+
 ## Overview
 
 Euxis is a multi-provider AI agent orchestration framework with a two-tier agent hierarchy, tiered memory system, and capability-based task routing.

@@ -1,8 +1,6 @@
 # Euxis Library Architecture (`core/lib/`)
 
-## Overview
-
-Euxis v0.1.2 modularized the monolithic `euxis.sh` (~940 lines) into 6 focused library modules under `core/lib/`. The main script (`euxis-bin/euxis.sh`) retains only bootstrapping, routing, and top-level orchestration (~400 lines). Each library owns a single domain and can be sourced independently by other scripts.
+> ⚠️ **Legacy shell-era document.** This page describes the Bash-script module layout under `core/lib/` (`common.sh`, `providers.sh`, `agents.sh`, etc.). The active codebase is C++23 — the equivalent libraries now live under `libs/` (`libs/runtime`, `libs/ensemble`, `libs/a2a`, `libs/inference`, …) with public headers under `libs/<lib>/include/euxis/<lib>/`. Read this doc for the conceptual module split; for the authoritative C++ surface, browse `libs/` or the Doxygen output produced by `EUXIS_BUILD_DOCS=ON`. Tracked as a follow-up to the 2026 ecosystem-alignment sweep.
 
 ## Modules
 
