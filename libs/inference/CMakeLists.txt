@@ -7,6 +7,8 @@ euxis_add_library(euxis-inference-cpp
     src/ollama_engine.cpp
     src/cache_control.cpp
     src/claude_streaming.cpp
+    src/openai_streaming.cpp
+    src/gemini_streaming.cpp
   DEPS
     euxis-runtime-cpp
     unofficial-sodium::sodium
@@ -23,4 +25,6 @@ euxis_add_library(euxis-inference-cpp
     tests/test_ollama_engine_api.cpp
     tests/test_cache_control.cpp
     tests/test_claude_streaming.cpp
+    tests/test_openai_streaming.cpp
+    tests/test_gemini_streaming.cpp
 )
