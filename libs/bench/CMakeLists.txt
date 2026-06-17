@@ -51,4 +51,16 @@ if(EUXIS_BUILD_GBENCH)
             benchmark::benchmark
             benchmark::benchmark_main
     )
+
+    # Agentic-core microbenchmarks: context engine, iteration budget,
+    # approval classifier, tool dispatch. Separate binary so the
+    # crypto and scan suites stay focused on their own slices.
+    add_executable(euxis_agent_gbench src/agent_bench.cpp)
+    target_link_libraries(euxis_agent_gbench
+        PRIVATE
+            euxis-runtime-cpp
+            nlohmann_json::nlohmann_json
+            benchmark::benchmark
+            benchmark::benchmark_main
+    )
 endif()
