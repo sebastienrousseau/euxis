@@ -108,7 +108,7 @@ jobs:
           subject-path: ${{ steps.package.outputs.archive }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: euxis-${{ matrix.target }}
           path: dist/*

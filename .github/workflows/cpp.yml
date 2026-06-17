@@ -56,14 +56,14 @@ jobs:
         run: make cpp-bench
       - name: Upload benchmark results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cpp-benchmark-${{ matrix.os }}
           path: fixtures/benchmarks/cpp-benchmark-results.json
           if-no-files-found: ignore
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cpp-test-logs-${{ matrix.os }}
           path: build/cmake-build/Testing/
@@ -98,7 +98,7 @@ jobs:
         run: ./build/cmake-build/libs/runtime/euxis-runtime-cpp_tests
       - name: Upload test logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: contracts-pilot-test-logs
           path: build/cmake-build/Testing/
