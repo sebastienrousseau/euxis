@@ -35,7 +35,23 @@
 
 #include "euxis/runtime/agent_loop.hpp"
 #include "euxis/runtime/agent_session.hpp"   // IToolRegistry, ToolDeclaration, ToolHandler
+#include "euxis/runtime/reflect_schema.hpp"  // SchemaBuilder, derive_input_schema
 #include "euxis/runtime/tool_manifest.hpp"   // ApprovalClass, classify_approval
+
+// ---------------------------------------------------------------------------
+// Tool argument structs. Each names the fields the corresponding tool
+// expects. The derive_input_schema<T> specialisations below the
+// anonymous namespace consume these to emit the JSON schema that lives
+// in ToolDeclaration::input_schema — no hand-written JSON.
+//
+// The day a compiler ships C++26 reflection (P2996), these
+// specialisations go away and reflect_schema.hpp's default template
+// picks the fields up automatically.
+// ---------------------------------------------------------------------------
+struct ListFilesArgs    { std::string path; };
+struct ScanArgs         { std::string path; int depth; };
+struct WriteFileArgs    { std::string path; std::string content; };
+struct SetStrictModeArgs{ bool enabled; };
 
 namespace {
 
@@ -217,6 +233,46 @@ void print_messages_tail(const std::vector<ConversationMessage>& msgs,
 
 } // namespace
 
+// ---------------------------------------------------------------------------
+// derive_input_schema specialisations — one per tool argument struct.
+// Each replaces an inline `input_schema = { ... }` JSON literal from
+// the original version of this example.
+// ---------------------------------------------------------------------------
+template<>
+auto euxis::runtime::derive_input_schema<ListFilesArgs>() -> nlohmann::json {
+    return euxis::runtime::SchemaBuilder{}
+        .field<std::string>("path", "Directory to list")
+        .required("path")
+        .build();
+}
+
+template<>
+auto euxis::runtime::derive_input_schema<ScanArgs>() -> nlohmann::json {
+    return euxis::runtime::SchemaBuilder{}
+        .field<std::string>("path", "Path to scan")
+        .field<int>("depth", "Recursion depth")
+        .required("path")
+        .build();
+}
+
+template<>
+auto euxis::runtime::derive_input_schema<WriteFileArgs>() -> nlohmann::json {
+    return euxis::runtime::SchemaBuilder{}
+        .field<std::string>("path", "Output path")
+        .field<std::string>("content", "Bytes to write")
+        .required("path")
+        .required("content")
+        .build();
+}
+
+template<>
+auto euxis::runtime::derive_input_schema<SetStrictModeArgs>() -> nlohmann::json {
+    return euxis::runtime::SchemaBuilder{}
+        .field<bool>("enabled", "Strict-mode flag")
+        .required("enabled")
+        .build();
+}
+
 auto main() -> int {
     // -----------------------------------------------------------------------
     // 1. Registry: four tools spanning every ApprovalClass band.
@@ -224,8 +280,7 @@ auto main() -> int {
     LocalToolRegistry registry;
     registry.register_tool(
         {.name = "list_files", .description = "List entries in a directory",
-         .input_schema = {{"type","object"},{"properties",
-            {{"path",{{"type","string"}}}}}}},
+         .input_schema = euxis::runtime::derive_input_schema<ListFilesArgs>()},
         [](const nlohmann::json& args)
             -> std::expected<nlohmann::json, std::string> {
             return nlohmann::json{
@@ -234,8 +289,7 @@ auto main() -> int {
         });
     registry.register_tool(
         {.name = "scan", .description = "Scan a path for findings",
-         .input_schema = {{"type","object"},{"properties",
-            {{"path",{{"type","string"}}},{"depth",{{"type","integer"}}}}}}},
+         .input_schema = euxis::runtime::derive_input_schema<ScanArgs>()},
         [](const nlohmann::json& args)
             -> std::expected<nlohmann::json, std::string> {
             return nlohmann::json{
@@ -245,8 +299,7 @@ auto main() -> int {
         });
     registry.register_tool(
         {.name = "write_file", .description = "Write content to a file",
-         .input_schema = {{"type","object"},{"properties",
-            {{"path",{{"type","string"}}},{"content",{{"type","string"}}}}}}},
+         .input_schema = euxis::runtime::derive_input_schema<WriteFileArgs>()},
         [](const nlohmann::json& args)
             -> std::expected<nlohmann::json, std::string> {
             return nlohmann::json{
@@ -256,8 +309,7 @@ auto main() -> int {
     registry.register_tool(
         {.name = "set_strict_mode",
          .description = "Toggle strict policy enforcement",
-         .input_schema = {{"type","object"},{"properties",
-            {{"enabled",{{"type","boolean"}}}}}}},
+         .input_schema = euxis::runtime::derive_input_schema<SetStrictModeArgs>()},
         [](const nlohmann::json& args)
             -> std::expected<nlohmann::json, std::string> {
             return nlohmann::json{{"enabled", args.value("enabled", false)}};
