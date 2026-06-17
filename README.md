@@ -1,5 +1,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
+  <p align="center"><img src="https://cloudcdn.pro/euxis/v1/logos/euxis.svg" alt="Euxis logo" width="128" /></p>
+
 <h1 align="center">euxis</h1>
 
 <p align="center">
