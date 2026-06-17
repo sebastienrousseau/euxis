@@ -68,3 +68,38 @@ jobs:
           name: cpp-test-logs-${{ matrix.os }}
           path: build/cmake-build/Testing/
           if-no-files-found: ignore
+
+  # C++26 contracts pilot — runs the runtime suite with the pilot flag
+  # ON so the death tests in libs/runtime/tests/test_contracts.cpp stay
+  # honest. Single OS to keep CI cost bounded; the contract logic is
+  # platform-agnostic so a 1-OS variant catches regressions reliably.
+  build-contracts-pilot:
+    name: contracts pilot (ubuntu-24.04)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev nlohmann-json3-dev \
+            libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+      - name: Configure with contracts pilot ON
+        run: |
+          cmake -B build/cmake-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_ENABLE_CXX26_CONTRACTS=ON
+      - name: Build runtime test binary
+        run: cmake --build build/cmake-build --parallel --target euxis-runtime-cpp_tests
+      - name: Run runtime suite (death tests included)
+        run: ./build/cmake-build/libs/runtime/euxis-runtime-cpp_tests
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts-pilot-test-logs
+          path: build/cmake-build/Testing/
+          if-no-files-found: ignore
