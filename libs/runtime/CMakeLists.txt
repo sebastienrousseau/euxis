@@ -37,5 +37,6 @@ euxis_add_library(euxis-runtime-cpp
     tests/test_tool_calling_loop.cpp
     tests/test_contracts.cpp
     tests/test_reflect_schema.cpp
+    tests/test_streaming.cpp
     tests/test_config.cpp
 )

@@ -11,6 +11,7 @@ links against the same static libraries shipped with the `euxis` binary.
 | [`a2a_minimal_server/`](a2a_minimal_server/) | Minimal A2A v0.2 server handler — card, validation, full task lifecycle |
 | [`agent_loop_demo/`](agent_loop_demo/) | `AgentLoopHarness` + `CredentialPool` + per-session insights wired end-to-end |
 | [`tool_calling_loop/`](tool_calling_loop/) | Closed tool-calling loop with `classify_approval` gating and `IToolRegistry` dispatch |
+| [`streaming_loop/`](streaming_loop/) | Coroutine-based streaming provider feeding the agent loop (requires `<generator>` — GCC 14 / libstdc++ 14) |
 
 ## Building
 
