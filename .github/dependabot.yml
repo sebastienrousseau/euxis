@@ -12,6 +12,16 @@ updates:
       timezone: "Etc/UTC"
     open-pull-requests-limit: 5
     labels: ["dependencies", "python"]
+    ignore:
+      # chromadb is used only by docs/benchmarks/performance-verification.py
+      # — a documentation benchmark script. It is NOT shipped in the C++
+      # binaries (apps/cli, apps/gateway, apps/publisher, apps/etx) and
+      # the runtime never instantiates a chromadb client. The standing
+      # GHSA-rhcg-vfgg-c2c3 alert ("pre-authentication code injection",
+      # affects 1.0.0 .. 1.5.9 with no patched version yet) cannot be
+      # remediated by a version bump as of 2026-06. Suppress the alert
+      # until upstream ships a fix; documented in SECURITY.md.
+      - dependency-name: "chromadb"
     groups:
       python-security:
         applies-to: security-updates

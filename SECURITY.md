@@ -126,6 +126,12 @@ This security policy applies to:
 - Official Euxis repositories on GitHub
 - Associated build and release infrastructure
 
+## Known acceptable risks
+
+Some dependencies carry standing security advisories that we have evaluated and accepted as not affecting the shipped product. Each one is documented inline in `.github/dependabot.yml` so it is also visible to automated tooling.
+
+- **`chromadb` 1.x** — GHSA-rhcg-vfgg-c2c3 (critical, pre-authentication code injection). Used only by `docs/benchmarks/performance-verification.py`, a benchmark script in the documentation tree. The shipped C++ binaries (`apps/cli`, `apps/gateway`, `apps/publisher`, `apps/etx`) do not link or load `chromadb`, and the runtime never instantiates a `chromadb` client. No patched upstream version exists as of 2026-06; the Dependabot alert is suppressed via `ignore` until one ships. Re-evaluate on every chromadb minor release.
+
 ## Contact
 
 For general security questions (not vulnerability reports), you may reach out to:
