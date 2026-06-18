@@ -8,8 +8,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <print>
 
 #include <nlohmann/json.hpp>
+
+#include "euxis/sbom/openvex.hpp"
+#include "euxis/sca/scanner.hpp"
+#include "euxis/vulndb/enricher.hpp"
+#include "euxis/vulndb/osv_client.hpp"
 
 using euxis::cli::i18n::tr;
 
@@ -73,12 +79,46 @@ auto build_playbook_args(const std::string& mode,
     return pb_args;
 }
 
+/// Run the OSV.dev enrichment side-effect for `check --enrich`:
+/// walk the target, build a canonical SBOM, cross-reference each
+/// component against OSV.dev, and write `euxis-vex.openvex.json` to
+/// the current working directory. Failure is non-fatal — a stderr
+/// line is emitted and the playbook continues.
+void run_enrichment(const std::string& target) {
+    auto dir = target.empty() ? std::string{"."} : target;
+    auto scan = euxis::sca::scan_directory(dir);
+    if (!scan) {
+        std::println(stderr, "euxis check: --enrich scan failed: {}", scan.error().message);
+        return;
+    }
+    auto doc = euxis::sca::to_sbom_document(*scan, dir);
+
+    euxis::vulndb::OsvClient client;
+    euxis::vulndb::Enricher  enricher{client};
+    auto enriched = enricher.enrich(doc);
+    if (!enriched) {
+        std::println(stderr, "euxis check: --enrich OSV.dev lookup failed: {}",
+                     enriched.error().message);
+        return;
+    }
+
+    auto j = euxis::sbom::to_openvex(enriched->vex);
+    std::ofstream out{"euxis-vex.openvex.json"};
+    if (!out.is_open()) {
+        std::println(stderr, "euxis check: --enrich could not write euxis-vex.openvex.json");
+        return;
+    }
+    out << j.dump(2) << '\n';
+    std::println("euxis check: enriched {} component(s); {} VEX statement(s) → euxis-vex.openvex.json",
+                 doc.components.size(), enriched->vex.statements.size());
+}
+
 } // namespace
 
 // --- check: primary repo verification ---
 
 int cmd_check(Context& ctx, const std::vector<std::string>& args) {
-    // euxis check [target] [--triage] [--standard] [--forensic] [--policy [path]] [--ci] [--json]
+    // euxis check [target] [--triage] [--standard] [--forensic] [--enrich] [--policy [path]] [--ci] [--json]
     for (const auto& a : args) {
         if (a == "--help" || a == "-h") {
             std::cerr << tr("Verify a repository or target.") << "\n\n"
@@ -88,6 +128,7 @@ int cmd_check(Context& ctx, const std::vector<std::string>& args) {
                       << "  --triage          " << tr("Run fast triage instead of standard verification") << "\n"
                       << "  --standard        " << tr("Force standard mode (default)") << "\n"
                       << "  --forensic        " << tr("Run the most exhaustive verification") << "\n"
+                      << "  --enrich          " << tr("Cross-reference SBOM components against OSV.dev and write euxis-vex.openvex.json") << "\n"
                       << "  --policy [path]   " << tr("Apply policy evaluation") << "\n"
                       << "  --ci              " << tr("Emit CI-safe output") << "\n"
                       << "  --json            " << tr("Emit artifact JSON to stdout") << "\n"
@@ -98,13 +139,18 @@ int cmd_check(Context& ctx, const std::vector<std::string>& args) {
     }
 
     std::string mode = "standard";
+    bool enrich = false;
     for (const auto& a : args) {
         if (a == "--triage")   mode = "flash";
         if (a == "--standard") mode = "standard";
         if (a == "--forensic") mode = "forensic";
+        if (a == "--enrich")   enrich = true;
     }
 
-    auto parsed = parse_common(args, {"--triage", "--standard", "--forensic"});
+    auto parsed = parse_common(args, {"--triage", "--standard", "--forensic", "--enrich"});
+    if (enrich) {
+        run_enrichment(parsed.target);
+    }
     auto pb_args = build_playbook_args(mode, parsed.target, parsed.passthrough);
     return cmd_playbook(ctx, pb_args);
 }
