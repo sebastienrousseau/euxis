@@ -65,6 +65,7 @@ Pipe the output into your CI gate, or hand the evidence pack to a regulator. See
 
 - [Install](#install) — prerequisites, build, verify
 - [Quick start](#quick-start) — first verification in five minutes
+- [Ten-minute tour](docs/getting-started.md) — `vulndb` + `sbom` + multi-agent triage, with the actual output
 
 **Command surface**
 
@@ -182,6 +183,8 @@ euxis stats --last 5                        # recent metrics + drift history
 ```
 
 The triage path is bounded for CI. The full review path is bounded for human review. The certification path emits a reproducible evidence pack.
+
+For a step-by-step tour with real output — `doctor`, `vulndb query`, `sbom --enrich`, and the multi-agent verdict — see [`docs/getting-started.md`](docs/getting-started.md).
 
 ---
 
