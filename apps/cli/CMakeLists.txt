@@ -31,6 +31,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/cache.cpp
   src/cmd/attest.cpp
   src/cmd/scan.cpp
+  src/cmd/vulndb.cpp
   src/agent_mcp_context.cpp
   src/certification.cpp
   src/playbook_schema.cpp
@@ -75,6 +76,7 @@ target_link_libraries(euxis-cli-lib PUBLIC
   euxis-security-cpp
   euxis-sbom-cpp
   euxis-sca-cpp
+  euxis-vulndb-cpp
   euxis-slopsquatting-cpp
   euxis-cache-cpp
   euxis-attest-cpp

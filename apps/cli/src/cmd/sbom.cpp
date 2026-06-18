@@ -25,6 +25,8 @@
 #include "euxis/sbom/openvex.hpp"
 #include "euxis/sbom/spdx.hpp"
 #include "euxis/sca/scanner.hpp"
+#include "euxis/vulndb/enricher.hpp"
+#include "euxis/vulndb/osv_client.hpp"
 
 namespace euxis::cli::cmd {
 
@@ -42,6 +44,7 @@ struct Args {
     Format format{Format::CycloneDx};
     std::filesystem::path output;
     bool pretty{true};
+    bool enrich{false};   // run OSV.dev cross-reference + auto-VEX
 };
 
 auto parse_args(const std::vector<std::string>& argv) -> std::expected<Args, std::string> {
@@ -50,6 +53,7 @@ auto parse_args(const std::vector<std::string>& argv) -> std::expected<Args, std
     for (const auto& s : argv) {
         if (s == "--pretty")       { a.pretty = true;  continue; }
         if (s == "--no-pretty")    { a.pretty = false; continue; }
+        if (s == "--enrich")       { a.enrich = true;  continue; }
         if (s.starts_with("--format=")) {
             auto v = s.substr(9);
             if      (v == "cyclonedx" || v == "cyclonedx-1.6") a.format = Format::CycloneDx;
@@ -100,6 +104,9 @@ void print_help() {
     std::println("  --format=<cyclonedx|spdx|both|openvex>  default: cyclonedx");
     std::println("  --output=<path>                         override default filename");
     std::println("  --pretty / --no-pretty                  pretty-print JSON (default: pretty)");
+    std::println("  --enrich                                cross-reference each Component PURL against");
+    std::println("                                          OSV.dev and auto-emit VexStatement{{Affected}}");
+    std::println("                                          (only applies when --format=openvex)");
     std::println("");
     std::println("Default output filenames:");
     std::println("  cyclonedx -> euxis-sbom.cdx.json");
@@ -136,6 +143,20 @@ int cmd_sbom(Context& /*ctx*/, const std::vector<std::string>& argv) {
             case Format::Spdx:      j = euxis::sbom::to_spdx_3_0_1(doc);     break;
             case Format::OpenVex:   {
                 euxis::sbom::VexDocument vex;
+                if (a.enrich) {
+                    euxis::vulndb::OsvClient client;
+                    euxis::vulndb::Enricher enricher{client};
+                    auto enriched = enricher.enrich(doc);
+                    if (enriched) {
+                        vex = std::move(enriched->vex);
+                        std::println("euxis sbom: enriched {} component(s); {} VEX statement(s)",
+                                     doc.components.size(),
+                                     vex.statements.size());
+                    } else {
+                        std::println(stderr, "euxis sbom: --enrich failed: {} — falling back to empty VEX",
+                                     enriched.error().message);
+                    }
+                }
                 j = euxis::sbom::to_openvex(vex);
                 break;
             }
