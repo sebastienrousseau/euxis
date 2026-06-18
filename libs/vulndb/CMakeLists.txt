@@ -1,0 +1,12 @@
+euxis_add_library(euxis-vulndb-cpp
+  SOURCES
+    src/osv_client.cpp
+    src/enricher.cpp
+  DEPS
+    euxis-sbom-cpp
+    nlohmann_json::nlohmann_json
+    httplib::httplib
+  TEST_SOURCES
+    tests/test_osv_client.cpp
+    tests/test_enricher.cpp
+)
