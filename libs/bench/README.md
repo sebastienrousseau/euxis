@@ -1,90 +1,118 @@
-# Euxis Bench C++
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
-The `euxis::bench` module provides benchmarking for the Agent OS across two
-complementary harnesses.
+<p align="center">
+  <img src="https://cloudcdn.pro/euxis/v1/logos/euxis.svg" alt="Euxis logo" width="128" />
+</p>
+
+<h1 align="center">euxis::bench</h1>
+
+<p align="center">
+  Benchmark harnesses for euxis: a custom runner that validates against
+  hardcoded SLO targets in CI, and four opt-in Google Benchmark binaries
+  that feed bencher.dev / github-action-benchmark trend dashboards.
+</p>
+
+<p align="center">
+  <a href="https://github.com/sebastienrousseau/euxis/actions/workflows/cpp.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/euxis/cpp.yml?style=for-the-badge&logo=github" alt="Build" /></a>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue?style=for-the-badge&logo=cplusplus" alt="C++23" />
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=for-the-badge" alt="License" /></a>
+</p>
+
+---
+
+## Contents
+
+- [Install](#install)
+- [Two harnesses, two jobs](#two-harnesses-two-jobs)
+- [Custom harness](#custom-harness)
+- [Google Benchmark harnesses](#google-benchmark-harnesses)
+- [Public surface](#public-surface)
+- [Caveat](#caveat)
+- [License](#license)
+
+---
+
+## Install
+
+```cmake
+add_subdirectory(libs/bench)
+target_link_libraries(my_app PRIVATE euxis-bench-cpp)
+```
+
+The Google Benchmark binaries are opt-in:
+
+```bash
+cmake -B build/cmake-build -DEUXIS_BUILD_GBENCH=ON
+cmake --build build/cmake-build --target euxis_agent_gbench
+```
 
 ## Two harnesses, two jobs
 
 | Harness | Use for | Output |
 |---|---|---|
-| **Custom (`euxis-bench-cpp`)** | Smoke-testing all 5 suites (autonomy, interop, performance, portability, security) against hardcoded SLO targets in CI. Cheap per-bench cost (fixed wall-clock budget). | JSON via `ResultMatrix` |
-| **Google Benchmark (`euxis_perf_gbench`)** | Statistical analysis of the `performance` suite. Auto-tunes iteration count, reports stddev and CV, integrates with bencher.dev / GitHub Actions trend dashboards. Slower per-run but rigorous. | Standard `benchmark::` text/JSON/CSV/console |
+| **Custom (`euxis-bench-cpp`)** | Smoke-testing all 5 suites (autonomy, interop, performance, portability, security) against hardcoded SLO targets in CI. Cheap per-bench cost (fixed wall-clock budget). | JSON via `BenchmarkResultMatrix` |
+| **Google Benchmark** (4 opt-in binaries) | Statistical analysis. Auto-tunes iteration count, reports stddev and CV, integrates with bencher.dev / GitHub Actions trend dashboards. | Standard `benchmark::` text / JSON / CSV |
 
-Both harnesses link the same underlying `libs/crypto` and `libs/a2a` code, so
-their numbers should agree on a quiet machine.
-
-## Custom harness — continuous performance validation
-
-The `Runner` orchestrates hardware-native microbenchmarks.
-
-* **Precondition**: Ensure test suites are isolated from the host OS scheduler noise.
-* **Postcondition**: Synthesizes structured JSON profiling output for pipeline consumption.
-
-For extreme resolution, use `std::chrono::steady_clock` to mitigate integer rounding in sub-millisecond ranges. The benchmarker relies on cache-warmed paths to measure zero-copy C++23 implementations cleanly.
-
-### Matrix Validation
-
-The `ResultMatrix` aggregates metrics across autonomy, interop, portability, and security axes.
-
-* **SoA**: Structure of Arrays — Flat memory tracking for optimized scoring.
-* **std::span**: Bounds-checked memory view — Safe vector ingestion.
+## Custom harness
 
 ```cpp
-auto res = benchmark.run_all(filter_span)
-    .and_then([](auto&& results) { return assert_bounds(results); })
-    .or_else([](auto&& err) { return halt_pipeline(err); });
+#include <iostream>
+
+#include "euxis/bench/runner.hpp"
+
+int main() {
+    using namespace euxis::bench;
+
+    BenchmarkRunner runner;
+    runner.register_defaults();                          // wires the 5 default suites
+
+    const auto reports = runner.run_all();
+    for (const auto& r : reports) {
+        std::cout << r.suite_name
+                  << " — passed " << r.passed
+                  << " / failed " << r.failed << '\n';
+    }
+}
 ```
 
-Utilize C++23 monadic operations to guarantee that any benchmark failing the baseline (e.g., memory residency > 5MB, or routing > 10ms) immediately fails the pipeline execution.
+## Google Benchmark harnesses
 
-## Google Benchmark harness
+Four binaries, one per surface area. Each runs independently and emits bencher.dev-compatible JSON:
 
-Built only when `-DEUXIS_BUILD_GBENCH=ON` is passed at configure time. The
-`euxis_perf_gbench` binary mirrors `performance_bench.cpp` 1:1 (four
-benchmarks: AES-256-GCM throughput simple + cached, BLAKE2b key derivation,
-agent-card msgpack round-trip) so results cross-validate against the custom
-harness.
-
-### Building
-
-```bash
-cmake -B build/cmake-build \
-  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-  -DEUXIS_BUILD_GBENCH=ON
-cmake --build build/cmake-build --target euxis_perf_gbench
-```
+| Binary | What it measures |
+|---|---|
+| `euxis_perf_gbench`     | Crypto primitives — AES-GCM (simple + cached schedule), BLAKE2b key derivation, AgentCard msgpack round-trip |
+| `euxis_scan_gbench`     | SCA parsers, SBOM emission (CycloneDX / SPDX / OpenVEX), DSSE sign/verify, slopsquatting lookup, ScanCache get/put |
+| `euxis_agent_gbench`    | Agentic core — `estimate_tokens`, `WindowedContextEngine::plan`, contended `IterationBudget`, `classify_approval`, tool dispatch |
+| `euxis_ensemble_gbench` | Verifier-quorum runner across 1/2/3 verifiers, finding-count Range(16..1024) |
 
 ### Running
 
 ```bash
-# Default text output
-./build/cmake-build/libs/bench/euxis_perf_gbench
-
-# Filter to a single benchmark
-./build/cmake-build/libs/bench/euxis_perf_gbench \
-  --benchmark_filter=BM_CryptoThroughput_Cached
-
-# JSON output for trend tracking
-./build/cmake-build/libs/bench/euxis_perf_gbench \
-  --benchmark_format=json \
-  --benchmark_out=perf.json --benchmark_out_format=json
-
-# Tighter statistical bounds (10 repetitions, drop outliers)
-./build/cmake-build/libs/bench/euxis_perf_gbench \
-  --benchmark_repetitions=10 \
-  --benchmark_report_aggregates_only=true
+./build/cmake-build/libs/bench/euxis_agent_gbench
+./build/cmake-build/libs/bench/euxis_agent_gbench --benchmark_filter=BM_ClassifyApproval
+./build/cmake-build/libs/bench/euxis_agent_gbench \
+    --benchmark_format=json \
+    --benchmark_out=agent-bench.json \
+    --benchmark_out_format=json
 ```
 
 ### CI integration
 
-The JSON output is consumed directly by
-[github-action-benchmark](https://github.com/benchmark-action/github-action-benchmark).
-Wire it into a workflow step that runs on `main` and stores results in
-`gh-pages` — automatic regression alerts on PRs.
+The JSON output is consumed by [github-action-benchmark](https://github.com/benchmark-action/github-action-benchmark) and by bencher.dev. The `.github/workflows/bencher.yml` workflow runs all four binaries with `--benchmark_min_time=5s`, uploads the JSON as workflow artifacts, and pushes to bencher.dev when `BENCHER_API_TOKEN` is provisioned.
+
+## Public surface
+
+| Header | What it owns |
+|---|---|
+| `runner.hpp` | `BenchmarkResult`, `SuiteReport`, `BenchmarkRunner` (`register_benchmark`, `run_suite`, `run_all`, `register_defaults`) |
+| `reporter.hpp` | `BenchmarkReporter` — formats `SuiteReport`s as text/JSON |
+| `result_matrix.hpp` | `BenchmarkResultMatrix` — multi-suite aggregation |
 
 ## Caveat
 
-Synthetic microbenchmarks measure *library overhead*, not user-visible
-performance. Before optimizing a hot path that a bench identifies, profile
-a real `euxis-cli` workload (`perf record euxis-cli triage .`) and confirm
-the function appears in the production call graph.
+Synthetic microbenchmarks measure *library overhead*, not user-visible performance. Before optimising a hot path that a bench identifies, profile a real `euxis check .` invocation (`perf record`, `Instruments`, or similar) and confirm the function appears in the production call graph.
+
+## License
+
+AGPL-3.0-only. See [`LICENSE`](../../LICENSE).
