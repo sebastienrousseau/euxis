@@ -106,7 +106,17 @@ endif()
 function(euxis_relax_thirdparty_warnings)
   foreach(_ext_target IN LISTS ARGN)
     if(TARGET ${_ext_target})
-      target_compile_options(${_ext_target} PRIVATE -Wno-error)
+      # IMPORTED targets (system packages found via apt + find_package on
+      # Ubuntu CI) only accept INTERFACE-scoped properties from
+      # target_compile_options. FetchContent-built targets (the macOS
+      # path) are non-imported and want PRIVATE so the relaxation does
+      # not leak to dependents.
+      get_target_property(_is_imported ${_ext_target} IMPORTED)
+      if(_is_imported)
+        target_compile_options(${_ext_target} INTERFACE -Wno-error)
+      else()
+        target_compile_options(${_ext_target} PRIVATE -Wno-error)
+      endif()
     endif()
   endforeach()
 endfunction()

@@ -74,13 +74,17 @@ jobs:
     name: Branding footer on tip commit
     runs-on: ubuntu-24.04
     # Skip on PRs from forks where we can't always rewrite a
-    # contributor's commit message. The branding-check.yml workflow
-    # continues to enforce this on main and feat/* branches.
+    # contributor's commit message.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
+      # On pull_request events the default ref is GitHub's synthetic
+      # merge commit, which has an auto-generated body that never
+      # contains the branding signature. Check out the PR's actual tip
+      # so the python script inspects the contributor's commit message.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
