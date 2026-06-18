@@ -472,12 +472,26 @@ TEST_F(InfraCmdTest, OptimizeWithLargeCacheDir) {
 TEST_F(InfraCmdTest, DaemonStartWithStalePid) {
     auto pid_dir = fs::path(ctx_.euxis_home) / "data/runtime";
     fs::create_directories(pid_dir);
-    std::ofstream(pid_dir / "daemon.pid") << "999999999";
+    auto pid_file = pid_dir / "daemon.pid";
+    std::ofstream(pid_file) << "999999999";
 
     auto code = cmd_daemon(ctx_, {"start"});
-    // Should detect stale PID, remove it, and start
-    // Since fork() is involved we just check it doesn't crash
+    // Should detect stale PID, remove it, and fork.
     EXPECT_GE(code, 0);
+
+    // Wait briefly for the daemon child (detached via setsid) to write its
+    // real PID, then stop it. Without this, the child concurrently writes
+    // into euxis_home while TearDown calls remove_all → ENOTEMPTY.
+    for (int i = 0; i < 100; ++i) {
+        std::ifstream f(pid_file);
+        std::string s;
+        std::getline(f, s);
+        if (!s.empty() && s != "999999999") break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    cmd_daemon(ctx_, {"stop"});
+    // Give the child a moment to exit and stop writing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 // --- Coverage: bus publish and subscribe round-trip ---

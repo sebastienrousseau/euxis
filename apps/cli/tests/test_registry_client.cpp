@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <optional>
+#include <string>
 
 #include <sqlite3.h>
 
@@ -576,7 +578,14 @@ protected:
                                          ->result()
                                          ->total_part_count());
         std::filesystem::create_directories(cache_home_);
-        prev_xdg_ = std::getenv("XDG_CACHE_HOME");
+        // setenv() can realloc the environ block, invalidating any pointer
+        // returned by an earlier getenv(). Snapshot to owned storage before
+        // the setenv() below to avoid a heap-use-after-free on TearDown.
+        if (const char* p = std::getenv("XDG_CACHE_HOME")) {
+            prev_xdg_ = std::string{p};
+        } else {
+            prev_xdg_.reset();
+        }
         ::setenv("XDG_CACHE_HOME", cache_home_.c_str(), /*overwrite=*/1);
 
         test_dir_ = "/tmp/euxis_test_regcache_" +
@@ -604,8 +613,8 @@ protected:
     }
 
     void TearDown() override {
-        if (prev_xdg_ != nullptr) {
-            ::setenv("XDG_CACHE_HOME", prev_xdg_, /*overwrite=*/1);
+        if (prev_xdg_) {
+            ::setenv("XDG_CACHE_HOME", prev_xdg_->c_str(), /*overwrite=*/1);
         } else {
             ::unsetenv("XDG_CACHE_HOME");
         }
@@ -620,7 +629,7 @@ protected:
 
     std::string test_dir_;
     std::string cache_home_;
-    const char* prev_xdg_{nullptr};
+    std::optional<std::string> prev_xdg_;
 };
 
 // First construction must populate the cache with the registry.json
