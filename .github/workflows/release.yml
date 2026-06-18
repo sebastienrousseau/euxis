@@ -113,9 +113,63 @@ jobs:
           name: euxis-${{ matrix.target }}
           path: dist/*
 
+  linux-packages:
+    name: Build .deb + .rpm packages
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            cmake_arch_flag: ""
+          - arch: arm64
+            cmake_arch_flag: ""
+            runner_override: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
+            pkg-config rpm
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+
+      - name: Configure (Release + install prefix)
+        run: |
+          cmake -B cmake-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_NATIVE_ARCH=OFF \
+            ${{ matrix.cmake_arch_flag }}
+
+      - name: Build CLI target
+        run: cmake --build cmake-build --parallel --target euxis-cli
+
+      - name: Emit .deb + .rpm via CPack
+        run: |
+          mkdir -p dist
+          cd cmake-build
+          cpack -G DEB -D CPACK_PACKAGE_FILE_NAME="euxis-${EUXIS_VERSION}-linux-${{ matrix.arch }}"
+          cpack -G RPM -D CPACK_PACKAGE_FILE_NAME="euxis-${EUXIS_VERSION}-linux-${{ matrix.arch }}"
+          mv *.deb *.rpm ../dist/ 2>/dev/null || true
+          cd ../dist
+          ls -la
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: euxis-packages-linux-${{ matrix.arch }}
+          path: dist/*
+
   publish:
     name: Publish release
-    needs: build
+    needs: [build, linux-packages]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -151,6 +205,8 @@ jobs:
             dist/*.tar.gz
             dist/*.tar.gz.sha256
             dist/*.cosign.bundle
+            dist/*.deb
+            dist/*.rpm
             dist/SHA256SUMS
             dist/SHA256SUMS.cosign.bundle
 

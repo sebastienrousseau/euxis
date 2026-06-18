@@ -100,7 +100,30 @@ Pipe the output into your CI gate, or hand the evidence pack to a regulator. See
 
 ## Install
 
-Euxis builds from source. Pre-built packages are not yet published; the build is one command on macOS, Linux, and WSL2.
+Choose one of three paths. The first is the recommended default; the build-from-source path stays available for developers.
+
+### One-liner (Linux + macOS, all four architectures)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sebastienrousseau/euxis/main/scripts/release/install.sh | sh
+```
+
+Detects the platform, downloads the matching tarball from the GitHub Release, verifies the SHA-256, optionally verifies the cosign keyless signature if `cosign` is on `PATH`, and drops the binary at `~/.local/bin/euxis`. Set `EUXIS_VERSION=v0.1.x` to pin a specific tag, or `EUXIS_INSTALL_DIR=/usr/local/bin` to install system-wide.
+
+### Native packages
+
+| Channel | Install |
+|---|---|
+| **Homebrew (personal tap)** | `brew tap sebastienrousseau/tap && brew install euxis` |
+| **Debian / Ubuntu (`.deb`)** | `curl -fsSL -O https://github.com/sebastienrousseau/euxis/releases/latest/download/euxis-linux-amd64.deb && sudo dpkg -i euxis-linux-amd64.deb` |
+| **RHEL / Fedora / openSUSE (`.rpm`)** | `sudo rpm -i https://github.com/sebastienrousseau/euxis/releases/latest/download/euxis-linux-amd64.rpm` |
+| **Docker (GHCR, multi-arch)** | `docker run --rm ghcr.io/sebastienrousseau/euxis:latest --version` |
+
+The `.deb` / `.rpm` packages and the multi-arch Docker image are produced by [`.github/workflows/release.yml`](.github/workflows/release.yml) on every `v*` tag push, signed via Sigstore keyless OIDC, and attested with GitHub-native SLSA build provenance.
+
+### Build from source
+
+Build from source when you need an unreleased commit, want a custom build mode (sanitizers, gbench, GUI), or are running a platform without a pre-built tarball (FreeBSD, NixOS, Windows-native).
 
 ### Prerequisites
 
