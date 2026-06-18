@@ -100,6 +100,30 @@ TEST_F(SurfaceCmdTest, CheckHelp) {
     EXPECT_EQ(code, 0);
 }
 
+TEST_F(SurfaceCmdTest, CheckEnrichWritesOpenVexInCwd) {
+    // Run cmd_check with --enrich against an empty target — no manifests
+    // means no OSV.dev calls and a deterministic, network-free test that
+    // still exercises run_enrichment end-to-end.
+    auto scan_target = fs::path{ctx_.euxis_home} / "enrich-target";
+    fs::create_directories(scan_target);
+
+    auto cwd_before = fs::current_path();
+    auto cwd_test   = fs::path{ctx_.euxis_home} / "enrich-cwd";
+    fs::create_directories(cwd_test);
+    fs::current_path(cwd_test);
+
+    auto code = cmd_check(ctx_, {scan_target.string(), "--triage", "--enrich"});
+
+    fs::current_path(cwd_before);
+
+    auto vex = cwd_test / "euxis-vex.openvex.json";
+    EXPECT_TRUE(fs::exists(vex)) << "expected --enrich to write " << vex;
+    if (fs::exists(vex)) {
+        EXPECT_GT(fs::file_size(vex), 0);
+    }
+    EXPECT_TRUE(code == 0 || code == 1);
+}
+
 // ---- triage command ----
 
 TEST_F(SurfaceCmdTest, TriageAlwaysFlash) {
