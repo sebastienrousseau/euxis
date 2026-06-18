@@ -11,6 +11,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
   - Quick Start: quick-start.md
   - User Guide: user-guide.md
   - Architecture: architecture.md
