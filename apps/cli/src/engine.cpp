@@ -18,6 +18,7 @@
 #include "euxis/cli/cmd/cache.hpp"
 #include "euxis/cli/cmd/attest.hpp"
 #include "euxis/cli/cmd/scan.hpp"
+#include "euxis/cli/cmd/vulndb.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -73,6 +74,7 @@ void Engine::register_commands() {
     commands_.push_back({"attest",             tr("Core"), tr("Produce a Sigstore-format signed in-toto evidence bundle"), cmd::cmd_attest});
     commands_.push_back({"verify",             tr("Core"), tr("Verify a Sigstore-format signed evidence bundle"), cmd::cmd_verify_attest});
     commands_.push_back({"scan",               tr("Core"), tr("Apply YAML rule packs to a target directory (SARIF output)"), cmd::cmd_scan});
+    commands_.push_back({"vulndb",             tr("Core"), tr("Query OSV.dev for vulnerabilities by Package URL"), cmd::cmd_vulndb});
 
     // Lifecycle (5) — installation and maintenance
     commands_.push_back({"install",    tr("Lifecycle"), tr("Bootstrap local Euxis installation"),    cmd::cmd_install});
