@@ -11,7 +11,10 @@ namespace {
 constexpr std::string_view kBase64Alphabet =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-auto base64_index_table() {
+// noexcept: only std::array value-init + integer ops, no allocation, no throws.
+// Required so static-storage initialisation cannot throw an uncatchable
+// exception (clang-tidy bugprone-throwing-static-initialization).
+constexpr auto base64_index_table() noexcept -> std::array<int, 256> {
     std::array<int, 256> table{};
     for (auto& v : table) v = -1;
     for (std::size_t i = 0; i < kBase64Alphabet.size(); ++i) {
@@ -20,7 +23,7 @@ auto base64_index_table() {
     return table;
 }
 
-const auto kBase64Lookup = base64_index_table();
+constexpr auto kBase64Lookup = base64_index_table();
 
 } // namespace
 

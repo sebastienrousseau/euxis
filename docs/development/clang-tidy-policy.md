@@ -188,6 +188,65 @@ parser speedup still pays the parse cost on every CLI invocation,
 while the cache eliminates it. simdjson can be revisited as a
 separate optimisation if the cold-cache cost grows.
 
+## 6 — Baseline (2026-06-18)
+
+A full sweep against the May 2026 reconnaissance baseline (LLVM 22.1.7,
+`-DEUXIS_DISABLE_SANITIZERS=ON` build, deduped by `file:line:col:check`).
+
+| Metric | 2026-05-23 baseline | 2026-06-18 sweep |
+|---|---|---|
+| User-code .cpp files scanned | 182 | 468 |
+| Unique user-code warnings | 338 | 686 |
+| Raw user-code warning lines | n/a | 2 210 |
+
+Dominant check by raw count: `cppcoreguidelines-pro-type-member-init`
+(1 865 raw, P2 — member field default-init style). The growth from
+338 → 686 unique tracks codebase growth (2.6× more .cpp files).
+
+### P0 status
+
+- `bugprone-throwing-static-initialization` at `libs/attest/src/dsse.cpp:23`
+  — **fixed**: `base64_index_table()` is now `constexpr` + `noexcept`,
+  `kBase64Lookup` is `constexpr` (compile-time init, cannot throw).
+- `bugprone-std-namespace-modification` (6 raw, all on `std::milli` in
+  `<double, std::milli>` template arguments to `std::chrono::duration`)
+  — **LLVM 22 upstream false positive**: `std::milli` is a `<ratio>`
+  type alias, not a namespace modification. Pending upstream fix; not
+  patched in source.
+- `bugprone-throwing-static-initialization` at
+  `libs/inference/tests/test_llama_engine.cpp:28` — test-side only,
+  not a shipping P0.
+
+### P1 raw counts (work remaining for issue #42)
+
+- `bugprone-empty-catch` × 31 — review each call site (rethrow / log /
+  delete the try-catch).
+- `bugprone-branch-clone` × 72 — covered by the policy at §4 and
+  issue [#55](https://github.com/sebastienrousseau/euxis/issues/55).
+- `bugprone-derived-method-shadowing-base-method` × 6 — all in
+  `libs/ensemble/include/euxis/ensemble/providers/{claude,gemini,openai}.hpp`
+  `request_headers` overrides. Likely real (missing `override` or
+  intentional shadowing of a non-virtual base method).
+- `bugprone-narrowing-conversions` × 3 — two `int → float` in
+  `apps/etx/src/widgets/scroll_minimap.cpp`, one `double → bool` in
+  `apps/cli/tests/test_color_system.cpp` (likely a typo for `!= 0.0`).
+- `bugprone-implicit-widening-of-multiplication-result` × 1 in
+  `libs/crypto/tests/test_aes_gcm.cpp:102`.
+
+### How to re-measure
+
+```bash
+PATH=/opt/homebrew/opt/llvm/bin:$PATH \
+  find apps/ libs/ -name '*.cpp' | grep -v build/ \
+  | xargs -P8 -I{} clang-tidy -p cmake-build-san {} --quiet 2>&1 \
+  | tee /tmp/euxis-clangtidy.log
+
+grep -E "warning:" /tmp/euxis-clangtidy.log \
+  | grep -v "_deps/" \
+  | awk -F: '{print $1":"$2":"$3":"$NF}' \
+  | sort -u | wc -l    # unique user-code warnings
+```
+
 ## See also
 
 - Issue [#42](https://github.com/sebastienrousseau/euxis/issues/42) — Phase-1 reconnaissance epic
