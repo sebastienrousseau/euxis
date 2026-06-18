@@ -1,35 +1,103 @@
-# Euxis Bridge C++
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
-The `euxis::bridge` module securely connects the core C++23 orchestrator to external Agent capabilities and execution bounds. It serves as the primary ingress for foreign skills and sandboxed binaries.
+<p align="center">
+  <img src="https://cloudcdn.pro/euxis/v1/logos/euxis.svg" alt="Euxis logo" width="128" />
+</p>
 
-## The Skill Importer
+<h1 align="center">euxis::bridge</h1>
 
-The `SkillImporter` ingests OpenClaw-compatible `SKILL.md` configurations.
+<p align="center">
+  Foreign-skill ingestion for euxis: imports OpenClaw / ClawHub
+  <code>SKILL.md</code> bundles, runs static analysis on them, admits them
+  against a policy, executes them sandboxed, and signs their provenance.
+</p>
 
-* **Precondition**: The skill file must pass initial JSON-Schema structure checks.
-* **Postcondition**: Synthesizes the logic into a typed `BridgedSkill` definition.
+<p align="center">
+  <a href="https://github.com/sebastienrousseau/euxis/actions/workflows/cpp.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/euxis/cpp.yml?style=for-the-badge&logo=github" alt="Build" /></a>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue?style=for-the-badge&logo=cplusplus" alt="C++23" />
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=for-the-badge" alt="License" /></a>
+</p>
 
-For safety, the module uses static analysis to strip unverified markdown. Extract dependencies strictly, ensuring no malicious shell directives leak into the parser.
+---
 
-## Verification & Admission
+## Contents
 
-The `AdmissionController` enforces hardware-native execution bounds on all imported logic.
+- [Install](#install)
+- [Pipeline at a glance](#pipeline-at-a-glance)
+- [Public surface](#public-surface)
+- [Examples](#examples)
+- [License](#license)
 
-* **Type Erasure**: Hiding concrete implementations — Unified interface for disparate skill schemas.
-* **RAII**: Resource-bound lifetime management.
+---
 
-```cpp
-auto res = admission.evaluate_skill(bridged_skill)
-    .and_then([](auto&& validated_skill) { return enqueue_for_execution(validated_skill); })
-    .or_else([](auto&& err) { return reject_skill(err); });
+## Install
+
+```cmake
+add_subdirectory(libs/bridge)
+target_link_libraries(my_app PRIVATE euxis-bridge-cpp)
 ```
 
-Utilize C++23 monadic chains to guarantee `BridgedSkill` isolation. The controller invokes the `Platform` abstraction to verify that host-level eBPF or micro-kernel sandboxes are active prior to yielding execution.
+## Pipeline at a glance
 
-## Sandboxed Execution
+```
+SKILL.md (ClawHub bundle)
+    │
+    ▼
+ClawHubImporter ── parse frontmatter ──▶ BridgedSkill
+    │
+    ▼
+SkillStaticAnalyzer ──▶ AnalysisReport (findings, severity)
+    │
+    ▼
+AdmissionPipeline ── checks policy + reputation ──▶ AdmissionResult
+    │ (admitted)
+    ▼
+SkillExecutor ── sandboxed exec via libs/platform ──▶ ExecutionResult
+    │
+    ▼
+AuditLogger ── stream events ──▶ ProvenanceChain (signed)
+```
 
-The `SkillExecutor` runs admitted skills securely.
+## Public surface
 
-* **UB**: Undefined Behavior — Avoid unchecked memory bounds.
+| Header | What it owns |
+|---|---|
+| `parser.hpp` | `Frontmatter` parser for `SKILL.md` |
+| `skill.hpp` | `BridgedSkill` — the canonical imported skill record |
+| `importer.hpp` | `ClawHubImporter` — fetches and parses ClawHub skill bundles |
+| `static_analysis.hpp` | `SkillStaticAnalyzer`, `AnalysisFinding`, `AnalysisReport`, `Severity` |
+| `policy.hpp` | `ResourceLimits`, `FilesystemPolicy`, `NetworkPolicy`, `SkillExecutionPolicy`, `AgentCapabilityToken` |
+| `admission.hpp` | `AdmissionPipeline` — policy + reputation + static-analysis gate; returns `AdmissionResult` |
+| `executor.hpp` | `SkillExecutor` — runs admitted skills via `libs/platform` execution backends; returns `ExecutionResult` |
+| `audit.hpp` | `AuditLogger` — streams execution events |
+| `provenance.hpp` | `ProvenanceEntry`, `ProvenanceChain` — signed chain of skill imports + executions |
+| `reputation.hpp` | `AuthorReputation`, `ReputationStore` — tracks per-author trust signals |
+| `verification.hpp` | `VerificationResult` — output of cryptographic skill-bundle verification |
+| `platform.hpp` | `PlatformInfo` — environment probe consumed by the policy stage |
 
-The executor never grants direct filesystem access. Utilize `std::expected` to capture and surface sandbox violations or runtime panics back to the orchestrator layer without halting the primary thread.
+## Examples
+
+### Full ingest → admit → execute round-trip
+
+```cpp
+#include "euxis/bridge/importer.hpp"
+#include "euxis/bridge/admission.hpp"
+#include "euxis/bridge/executor.hpp"
+
+using namespace euxis::bridge;
+
+ClawHubImporter importer;
+auto bundle = importer.import_local("./vendor-skill.md");
+if (!bundle) { /* handle parse failure */ }
+
+AdmissionPipeline admission{/*default policy*/};
+auto verdict = admission.evaluate(*bundle);
+if (verdict.admitted) {
+    SkillExecutor exec;
+    const auto out = exec.run(*bundle, /*input=*/"audit src/");
+}
+```
+
+## License
+
+AGPL-3.0-only. See [`LICENSE`](../../LICENSE).

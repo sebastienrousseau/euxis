@@ -1,90 +1,107 @@
-# Euxis Publisher: C++23 High-Performance Rendering
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
-The Euxis Publisher module implements a hardware-native document generation pipeline. It replaces legacy Python bottlenecks with C++23 velocity. Use this module to render LaTeX, Markdown, or JSON from structured YAML data.
+<p align="center">
+  <img src="https://cloudcdn.pro/euxis/v1/logos/euxis.svg" alt="Euxis logo" width="128" />
+</p>
 
-## Core Architectural Requirements
+<h1 align="center">euxis::publisher</h1>
 
-For low-latency execution, the publisher utilizes `inja` for templating and `yaml-cpp` for data parsing. Access these capabilities via the `euxis::publisher::Publisher` class. 
+<p align="center">
+  Document rendering pipeline for euxis. Renders LaTeX, Markdown, and JSON
+  from structured YAML data using <code>inja</code> templates with
+  LaTeX-safe delimiters.
+</p>
 
-*   **Precondition**: Ensure the `content_root` contains valid `data/meta.yaml` and `templates/` directories.
-*   **Postcondition**: Return a `std::expected` containing the rendered artifact or a descriptive error string.
+<p align="center">
+  <a href="https://github.com/sebastienrousseau/euxis/actions/workflows/cpp.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/euxis/cpp.yml?style=for-the-badge&logo=github" alt="Build" /></a>
+  <img src="https://img.shields.io/badge/C%2B%2B-23-blue?style=for-the-badge&logo=cplusplus" alt="C++23" />
+  <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=for-the-badge" alt="License" /></a>
+</p>
 
-## Template Engine & Delimiters
+---
 
-LaTeX templates often conflict with default Jinja2 delimiters like `{{` and `{%`. The Euxis Publisher enforces custom sequences to ensure **zero escape character collisions**.
+## Contents
 
-*   **Expression**: `<< variable >>`
-*   **Statement**: `<% block %>`
-*   **Comment**: `<# note #>`
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Public surface](#public-surface)
+- [Template delimiters](#template-delimiters)
+- [Examples](#examples)
+- [License](#license)
+
+---
+
+## Install
+
+```cmake
+add_subdirectory(libs/publisher)
+target_link_libraries(my_app PRIVATE euxis-publisher-cpp)
+```
+
+## Quick start
 
 ```cpp
-#include <inja/inja.hpp>
+#include <iostream>
 
-// Configure environment with LaTeX-safe delimiters
-auto configure_env() -> inja::Environment {
-    inja::Environment env;
-    env.set_expression("<<", ">>"); // variable equivalent
-    env.set_statement("<%", "%>");   // block equivalent
-    env.set_comment("<#", "#>");
-    return env;
+#include "euxis/publisher/publisher.hpp"
+
+int main() {
+    using namespace euxis::publisher;
+
+    Publisher pub{
+        Publisher::Config{
+            .content_root = "./content",                 // holds data/meta.yaml + templates/
+            .build_mode   = BuildMode::Draft,
+        },
+    };
+
+    auto rendered = pub.render("cv-doc", OutputFormat::LaTeX);
+    if (!rendered) {
+        std::cerr << "render failed: " << rendered.error() << '\n';
+        return 1;
+    }
+    std::cout << "rendered " << rendered->size() << " bytes of LaTeX\n";
 }
 ```
 
-## Monadic Error Handling
+## Public surface
 
-Eliminate legacy `try-catch` blocks in your hot paths. Utilize C++23 monadic operations to chain rendering steps. This pattern ensures **memory safety** by preventing access to uninitialized results.
+| Header | What it owns |
+|---|---|
+| `publisher.hpp` | `Publisher` (`render`, `build_pdf`), `OutputFormat` (LaTeX, Markdown, JSON), `BuildMode` (Draft, Submission, CameraReady), `DataNode` concept |
 
-*   **RAII**: Resource-bound lifetime management.
-*   **std::expected**: Monadic error container — Success or failure.
+`Publisher::render` returns `std::expected<std::string, std::string>` so callers chain `.and_then` / `.transform` instead of catching exceptions.
 
-```cpp
-auto result = publisher.render("cv-doc")
-    .and_then([](std::string&& latex) {
-        return validate_syntax(latex); // Ensure LaTeX integrity
-    })
-    .transform([](std::string&& valid_latex) {
-        return compress_payload(valid_latex); // Post-process result
-    });
-```
+## Template delimiters
 
-## Memory Residency & Zero-Copy I/O
+LaTeX clashes with the default `{{` / `{%` Jinja delimiters. The publisher configures `inja` with LaTeX-safe sequences:
 
-The publisher aligns with the **ZeroClaw <5MB footprint benchmark**. It avoids redundant heap allocations by mapping binary snapshots directly to memory via `mmap`.
+| Role | Delimiter |
+|---|---|
+| Expression | `<< variable >>` |
+| Statement  | `<% if cond %> … <% endif %>` |
+| Comment    | `<# author note #>` |
 
-*   **std::string_view**: Non-owning string reference — Zero-allocation string views.
-*   **std::span**: Bounds-checked memory view — Safe contiguous access.
+A template stays compilable by `latexmk` even before substitution.
 
-> **Warning: Never return a `std::string_view` to a local temporary string. Doing so triggers Use-After-Free Undefined Behavior (UB).**
+## Examples
 
-## SIMD-Aware Data Translation
-
-Data ingestion utilizes a `yaml_to_json` recursive visitor. For large-scale batch publishing, organize your YAML sequences to exploit **Structure-of-Arrays (SoA)** cache locality.
-
-*   **SoA**: Hardware-friendly data layout — Cache-optimized memory alignment.
-*   **Concepts**: Compile-time template constraints.
+### Chain a render through a syntax-validation step
 
 ```cpp
-/**
- * @brief Constraint for valid YAML/JSON data nodes.
- */
-template <typename T>
-concept DataNode = requires(T t) {
-    { t.IsMap() } -> std::convertible_to<bool>;
-    { t.IsSequence() } -> std::convertible_to<bool>;
-};
-
-// Map YAML nodes to JSON for Inja ingestion
-auto load_safe(const DataNode auto& node) -> nlohmann::json {
-    return yaml_to_json(node); // Execute recursive conversion
-}
+auto result = publisher.render("cv-doc", OutputFormat::LaTeX)
+    .and_then([](std::string&& tex) { return validate_latex(tex); })
+    .transform([](std::string&& valid_tex) { return compress(valid_tex); });
 ```
 
-## Binary Artifact Generation
+### Build a PDF
 
-The `build_pdf` method orchestrates the transition from LaTeX to PDF. It utilizes memory-mapped `.msgp` files to maintain **state-aware idempotency**.
+```cpp
+auto pdf_path = publisher.build_pdf("cv-doc");
+```
 
-*   **Type Erasure**: Hiding concrete implementations — Abstract interface dispatch.
+`build_pdf` requires `latexmk` on `PATH`. The output PDF is materialised in `content_root/build/<name>.pdf`.
 
-**Precondition**: A valid LaTeX installation (`latexmk`) must be present in the system `PATH`. 
+## License
 
-**All core logic refactors must be secured via signed commits to maintain the performance baseline integrity.**
+AGPL-3.0-only. See [`LICENSE`](../../LICENSE).
