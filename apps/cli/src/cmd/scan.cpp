@@ -583,9 +583,12 @@ auto walk_target(ScanContext& ctx, const ScanArgs& args)
         // Future migration: std::for_each(std::execution::par_unseq,
         // indices.begin(), indices.end(), worker). Apple libc++ does
         // not yet ship a TBB-backed parallel STL, so we use an
-        // explicit jthread pool with round-robin chunking — same
+        // explicit thread pool with round-robin chunking — same
         // speedup profile without the parallel-STL dependency.
-        std::vector<std::jthread> workers;
+        // (was std::jthread; Apple Clang's libc++ has not shipped
+        // <stop_token>/jthread as of 2026-06, and we never use the
+        // stop-request feature here.)
+        std::vector<std::thread> workers;
         workers.reserve(num_threads);
         for (std::size_t t = 0; t < num_threads; ++t) {
             workers.emplace_back([&, t, num_threads]() {
@@ -596,7 +599,7 @@ auto walk_target(ScanContext& ctx, const ScanArgs& args)
                 }
             });
         }
-        // jthread destructors join here.
+        for (auto& w : workers) w.join();
     }
 
     // Merge per-file results in source order so the SARIF output

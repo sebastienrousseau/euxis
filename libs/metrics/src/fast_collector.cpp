@@ -83,22 +83,21 @@ auto FastMetricsCollector::flush() -> int {
 
 void FastMetricsCollector::start_background_flush() {
     if (flush_thread_.joinable()) return;
-    flush_thread_ = std::jthread([this](std::stop_token stop) {
-        background_flush_loop(stop);
+    flush_thread_ = std::thread([this] {
+        background_flush_loop();
     });
 }
 
 void FastMetricsCollector::shutdown() {
     shutdown_.store(true);
     if (flush_thread_.joinable()) {
-        flush_thread_.request_stop();
         flush_thread_.join();
     }
     flush(); // Final drain
 }
 
-void FastMetricsCollector::background_flush_loop(std::stop_token stop) {
-    while (!stop.stop_requested() && !shutdown_.load()) {
+void FastMetricsCollector::background_flush_loop() {
+    while (!shutdown_.load()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         try {
             flush();

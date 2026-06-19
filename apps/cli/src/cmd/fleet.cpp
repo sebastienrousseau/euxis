@@ -1650,7 +1650,10 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     std::unordered_map<std::string, bool> agent_retried;  // P1-2: max 1 retry per agent
     std::vector<nlohmann::json> reflexion_log;  // P1-2: reflexion outcomes
     std::vector<std::string> critical_gaps; // Concrete gap reasons
-    std::vector<std::jthread> agent_threads;  // S5/P1: managed threads (was detach())
+    // S5/P1: managed threads (was detach()). std::thread + explicit
+    // join below; Apple Clang's libc++ has not shipped jthread as of
+    // 2026-06 and the request_stop() facility was never wired up here.
+    std::vector<std::thread> agent_threads;
 
     auto start_time = std::chrono::steady_clock::now();
 
@@ -1940,8 +1943,12 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         }
     }
 
-    // Join all agent threads — replaces old detach()+cv.wait pattern
-    // jthread destructor calls request_stop() + join(), so this is safe
+    // Join all agent threads — replaces old detach()+cv.wait pattern.
+    // std::thread destructor terminates if not joined, so we join
+    // explicitly before clearing.
+    for (auto& t : agent_threads) {
+        if (t.joinable()) t.join();
+    }
     agent_threads.clear();
 
     auto elapsed = std::chrono::steady_clock::now() - start_time;

@@ -32,7 +32,9 @@ private:
     MessageHandler on_message_;
     std::unordered_map<std::string, nlohmann::json> session_meta_;
     std::atomic<bool> stop_{false};
-    std::jthread poll_thread_;
+    // std::thread + the stop_ atomic instead of std::jthread; Apple
+    // Clang's libc++ has not shipped <stop_token>/jthread as of 2026-06.
+    std::thread poll_thread_;
     int offset_{0};
 
     auto resolve_chat_id(const std::string& session_id) -> std::optional<int64_t>;
