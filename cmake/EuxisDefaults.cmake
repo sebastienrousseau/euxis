@@ -32,6 +32,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
   # -Wuninitialized and -Wmaybe-uninitialized is the upstream-recommended
   # workaround for the json iterator chains.
   add_compile_options(-Wno-uninitialized -Wno-maybe-uninitialized)
+  # The codebase uses designated initializers extensively on aggregate
+  # types with default member initialisers (e.g. SbomDocument::Component,
+  # ParseError). Apple Clang treats omitted-by-designation fields as
+  # value-initialised and stays silent; GCC's -Werror=missing-field-
+  # initializers rejects them. Keep the warning visible but non-fatal —
+  # the fields are zero/default-initialised, so there is no UB.
+  add_compile_options(-Wno-error=missing-field-initializers)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "16")

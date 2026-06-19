@@ -133,7 +133,7 @@ auto cmd_vulndb(Context& /*ctx*/, const std::vector<std::string>& args) -> int {
         print_top_usage();
         return to_int(ExitCode::Success);
     }
-    const auto sub = args.front();
+    const auto& sub = args.front();
     const std::vector<std::string> rest{args.begin() + 1, args.end()};
 
     if (sub == "query") return run_query(rest);
