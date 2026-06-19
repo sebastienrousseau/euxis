@@ -46,18 +46,21 @@ struct MockServer {
 [[nodiscard]] auto make_doc() -> euxis::sbom::SbomDocument {
     using namespace euxis::sbom;
     SbomDocument doc;
-    doc.components.push_back(Component{
-        .purl    = "pkg:pypi/requests@2.20.0",
-        .name    = "requests",
-        .version = "2.20.0",
-        .type    = ComponentType::Library,
-    });
-    doc.components.push_back(Component{
-        .purl    = "pkg:cargo/serde@1.0.150",
-        .name    = "serde",
-        .version = "1.0.150",
-        .type    = ComponentType::Library,
-    });
+    // Imperative init: GCC's -Werror=missing-field-initializers fires on
+    // designated initializers that skip fields, even when the omitted
+    // ones have default member initialisers.
+    Component a;
+    a.purl    = "pkg:pypi/requests@2.20.0";
+    a.name    = "requests";
+    a.version = "2.20.0";
+    a.type    = ComponentType::Library;
+    doc.components.push_back(std::move(a));
+    Component b;
+    b.purl    = "pkg:cargo/serde@1.0.150";
+    b.name    = "serde";
+    b.version = "1.0.150";
+    b.type    = ComponentType::Library;
+    doc.components.push_back(std::move(b));
     return doc;
 }
 
@@ -160,12 +163,13 @@ TEST(Enricher, ComponentWithoutPurlIsRecordedAsEmptyMatch) {
     Enricher enricher{client, EnricherConfig{}};
 
     euxis::sbom::SbomDocument doc;
-    doc.components.push_back(euxis::sbom::Component{
-        .purl    = "",                        // no PURL — skip query
-        .name    = "no-purl-component",
-        .version = "0.0.0",
-        .type    = euxis::sbom::ComponentType::Library,
-    });
+    // Imperative init — see make_doc() for the rationale.
+    euxis::sbom::Component c;
+    c.purl    = "";  // no PURL — skip query
+    c.name    = "no-purl-component";
+    c.version = "0.0.0";
+    c.type    = euxis::sbom::ComponentType::Library;
+    doc.components.push_back(std::move(c));
 
     auto report = enricher.enrich(doc);
     ASSERT_TRUE(report.has_value());

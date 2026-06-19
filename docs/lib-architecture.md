@@ -2,7 +2,7 @@
 
 The Euxis C++ runtime is 27 static libraries under `libs/`, each owning one domain. Every library follows the same layout convention (`include/euxis/<name>/` for public headers, `src/` for implementations, `tests/` for GTest sources) and is wired into the build through the `euxis_add_library()` CMake macro.
 
-**Version:** v0.1.2 · **Test files across libs/:** 137 · **Build tree:** `build/cmake-build/`
+**Version:** v0.0.2 · **Test files across libs/:** 137 · **Build tree:** `build/cmake-build/`
 
 ## Layout convention
 
@@ -156,4 +156,4 @@ The macro creates the library target, links GTest into a `<target>_tests` execut
 
 ---
 
-*Euxis v0.1.2 · Build something that matters.*
+*Euxis v0.0.2 · Build something that matters.*

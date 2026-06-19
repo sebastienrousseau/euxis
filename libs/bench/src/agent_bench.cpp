@@ -20,8 +20,8 @@
 ///
 /// Run:
 ///   ./build/cmake-build/libs/bench/euxis_agent_gbench
-///   ./build/cmake-build/libs/bench/euxis_agent_gbench \
-///       --benchmark_format=json --benchmark_out=agent_bench.json
+///   ./build/cmake-build/libs/bench/euxis_agent_gbench --benchmark_format=json
+///       --benchmark_out=agent_bench.json
 ///
 /// Built only when `-DEUXIS_BUILD_GBENCH=ON` is passed.
 

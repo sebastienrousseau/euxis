@@ -424,4 +424,4 @@ Security disclosures: see [`SECURITY.md`](SECURITY.md) for the coordinated-discl
 
 AGPL-3.0 — see [LICENSE](LICENSE).
 
-Euxis v0.1.2 · [euxis.co](https://euxis.co)
+Euxis v0.0.2 · [euxis.co](https://euxis.co)

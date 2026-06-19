@@ -288,42 +288,42 @@ void FleetRegistry::load_defaults() {
     agents_.push_back({
         "code-agent", "Code Agent",
         "Autonomous code generation, review, and refactoring with WASM sandboxing",
-        "idle", "agent", "core", "v0.1.2", "core", {}, {}, {}
+        "idle", "agent", "core", "v0.0.2", "core", {}, {}, {}
     });
     agents_.push_back({
         "research-agent", "Research Agent",
         "Web research, summarization, and knowledge synthesis with citation tracking",
-        "running", "agent", "fleet", "v0.1.2", "default", {}, {}, {}
+        "running", "agent", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "security-agent", "Security Agent",
         "Supply chain verification, vulnerability scanning, and threat assessment",
-        "idle", "agent", "fleet", "v0.1.2", "default", {}, {}, {}
+        "idle", "agent", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "bridge-squad", "Bridge Squad",
         "OpenClaw/ClawHub interop squad for skill import, verification, and deployment",
-        "idle", "squad", "fleet", "v0.1.2", "default", {}, {}, {}
+        "idle", "squad", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "ops-combo", "Ops Combo",
         "Combined operations: deployment, monitoring, incident response, and rollback",
-        "running", "combo", "fleet", "v0.1.2", "default", {}, {}, {}
+        "running", "combo", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "inference-agent", "Inference Agent",
         "Local and remote LLM inference routing with FinOps cost optimization",
-        "idle", "agent", "fleet", "v0.1.2", "default", {}, {}, {}
+        "idle", "agent", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "identity-agent", "Identity Agent",
         "KYA/DID identity management, ERC-8004 registration, and credential issuance",
-        "error", "agent", "fleet", "v0.1.2", "default", {}, {}, {}
+        "error", "agent", "fleet", "v0.0.2", "default", {}, {}, {}
     });
     agents_.push_back({
         "memory-agent", "Memory Agent",
         "AES-256-GCM encrypted memory with checkpoint/resume and context windowing",
-        "idle", "agent", "fleet", "v0.1.2", "default", {}, {}, {}
+        "idle", "agent", "fleet", "v0.0.2", "default", {}, {}, {}
     });
 }
 

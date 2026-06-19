@@ -1,7 +1,7 @@
 ---
 agent_id: deep-researcher
 role: "CTO-grade strategic research, technical briefs, and cross-validated investigations"
-version: "v0.1.2"
+version: "v0.0.2"
 tags: [research, strategy, analysis, deep-dive]
 tier: on-demand
 activation: explicit-invocation

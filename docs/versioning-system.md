@@ -10,7 +10,7 @@ The **single source of truth** for the Euxis system version is:
 agents/registry.json → "protocol_version" field
 ```
 
-**Current version: v0.1.2**
+**Current version: v0.0.2**
 
 All other version references MUST derive from this source.
 

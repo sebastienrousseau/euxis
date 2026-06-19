@@ -196,7 +196,7 @@ int cmd_tui_ex(Context& ctx, const std::vector<std::string>& args, std::istream&
         sys_body << term::dim(providers[i]);
     }
     
-    term::print_box("EUXIS TERMINAL UI (v0.1.2)", sys_body.str());
+    term::print_box("EUXIS TERMINAL UI (v0.0.2)", sys_body.str());
     std::cout << "\n";
 
     // Determine model selection & initial message

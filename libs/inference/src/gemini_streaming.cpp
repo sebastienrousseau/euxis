@@ -171,20 +171,15 @@ auto GeminiStreamingProvider::execute_stream(const std::string& model,
     const auto body = build_request_body(prompt);
     const auto path = build_path(cfg_, model, resolved_key_);
 
-    auto result = client.Post(
-        path.c_str(),
-        headers,
-        body,
-        "application/json",
-        [&](const char* data, std::size_t length) {
-            parser.feed(std::string_view{data, length},
-                        [&](std::string_view payload) {
-                            dispatch_event(payload, buffered);
-                        });
-            return true;
-        });
-
-    (void)result;
+    // cpp-httplib 0.18.7 has no Post(... ContentReceiver) overload; buffer
+    // the response and dispatch SSE events at end-of-stream.
+    auto result = client.Post(path.c_str(), headers, body, "application/json");
+    if (result && result->status >= 200 && result->status < 300) {
+        parser.feed(result->body,
+                    [&](std::string_view payload) {
+                        dispatch_event(payload, buffered);
+                    });
+    }
 
     for (auto& d : buffered) {
         co_yield std::move(d);

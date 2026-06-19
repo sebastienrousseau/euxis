@@ -1,7 +1,7 @@
 ---
 agent_id: ux
 role: "Accessibility, design system consistency, and WCAG compliance audit"
-version: "v0.1.2"
+version: "v0.0.2"
 tags: [ux, accessibility, design-system, wcag]
 tier: default
 activation: task-triggered
