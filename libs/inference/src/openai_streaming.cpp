@@ -186,20 +186,15 @@ auto OpenAIStreamingProvider::execute_stream(const std::string& model,
     std::unordered_map<int, std::pair<std::string, std::string>> tool_ctx;
     const auto body = build_request_body(cfg_, model, prompt);
 
-    auto result = client.Post(
-        "/v1/chat/completions",
-        headers,
-        body,
-        "application/json",
-        [&](const char* data, std::size_t length) {
-            parser.feed(std::string_view{data, length},
-                        [&](std::string_view payload) {
-                            dispatch_event(payload, buffered, tool_ctx);
-                        });
-            return true;
-        });
-
-    (void)result;  // Non-2xx or network failure: yield whatever buffered.
+    // cpp-httplib 0.18.7 has no Post(... ContentReceiver) overload; buffer
+    // the response and dispatch SSE events at end-of-stream.
+    auto result = client.Post("/v1/chat/completions", headers, body, "application/json");
+    if (result && result->status >= 200 && result->status < 300) {
+        parser.feed(result->body,
+                    [&](std::string_view payload) {
+                        dispatch_event(payload, buffered, tool_ctx);
+                    });
+    }
 
     for (auto& d : buffered) {
         co_yield std::move(d);

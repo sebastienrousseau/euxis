@@ -213,22 +213,19 @@ auto ClaudeStreamingProvider::execute_stream(const std::string& model,
 
     const auto body = build_request_body(cfg_, model, prompt);
 
-    // POST with a content receiver that streams the response body
-    // as it arrives. The receiver feeds the SSE parser, which calls
-    // the dispatcher per event, which fills `buffered`. The HTTP call
-    // returns once the server closes the stream.
-    auto result = client.Post(
-        "/v1/messages",
-        headers,
-        body,
-        "application/json",
-        [&](const char* data, std::size_t length) {
-            parser.feed(std::string_view{data, length},
-                        [&](std::string_view payload) {
-                            dispatch_event(payload, buffered, tool_ctx);
-                        });
-            return true;  // keep reading
-        });
+    // POST and parse the SSE response at end-of-stream.
+    // cpp-httplib 0.18.7 has no Post(... ContentReceiver) overload, so
+    // true progressive streaming is not available here; the response is
+    // buffered fully then dispatched event-by-event. Acceptable for
+    // SSE bodies that are emitted entirely before the server closes
+    // the connection; consumers see all events at the end.
+    auto result = client.Post("/v1/messages", headers, body, "application/json");
+    if (result && result->status >= 200 && result->status < 300) {
+        parser.feed(result->body,
+                    [&](std::string_view payload) {
+                        dispatch_event(payload, buffered, tool_ctx);
+                    });
+    }
 
     if (!result || result->status < 200 || result->status >= 300) {
         // Network failure or non-2xx — emit whatever we have and stop.
