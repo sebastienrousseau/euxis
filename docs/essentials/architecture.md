@@ -2,7 +2,7 @@
 
 Comprehensive architectural documentation for the Euxis multi-provider AI agent orchestration framework.
 
-**Version:** v0.1.2
+**Version:** v0.0.2
 **Framework Size:** ~1,270 LOC (8 library modules + main entry point)
 **Agent Count:** 50 (12 core + 38 fleet)
 
@@ -12,7 +12,7 @@ Comprehensive architectural documentation for the Euxis multi-provider AI agent 
 
 The Euxis framework is organized into five distinct layers, each with specific responsibilities. The CLI layer provides the user interface, shell libraries handle core logic, the optional Python TUI offers rich visualization, the data layer manages persistence, and the provider layer abstracts AI model interactions.
 
-## Gateway Control Plane (v0.1.2)
+## Gateway Control Plane (v0.0.2)
 
 Euxis introduces a minimal Gateway control plane to front agent execution with a WebSocket surface and health endpoint. The Gateway is a thin runtime that delegates execution to existing Euxis CLI entry points.
 
@@ -731,7 +731,7 @@ make cpp-bench    # Run benchmark suites against performance targets
 
 ---
 
-*Euxis v0.1.2 - Build something that matters.*
+*Euxis v0.0.2 - Build something that matters.*
 
 ### Observability (metrics/src/metrics/)
 Euxis records fleet events and performance data in `~/.euxis/metrics/events.jsonl` for analysis and dashboards.

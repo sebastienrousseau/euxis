@@ -2600,7 +2600,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- P1-7: Machine-Readable Provenance (SLSA v1) ---
     {
         nlohmann::json provenance;
-        provenance["builder"] = {{"id", "euxis-cli/v0.1.2"}};
+        provenance["builder"] = {{"id", "euxis-cli/v0.0.2"}};
         provenance["build_type"] = "https://slsa.dev/provenance/v1";
         provenance["invocation"] = {
             {"parameters", {
