@@ -33,27 +33,17 @@ jobs:
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Homebrew LLVM ships a clang/libc++ with <generator> (C++23).
-          # Apple Clang on macos-13 and macos-14 lags upstream LLVM and
-          # does not provide that header; libs/runtime/include/euxis/
-          # runtime/session_store.hpp requires it.
-          brew install llvm libsodium nlohmann-json spdlog fmt googletest \
+          # Apple Clang ships with the SDK so libc++'s header wrappers
+          # always resolve. Homebrew LLVM 22.1.7 was tried earlier and
+          # broke on macos-14/15 with "<cstring> tried including
+          # <string.h> but didn't find libc++'s <string.h>" — the
+          # Homebrew libc++ expects features from a newer SDK than the
+          # GitHub runners ship. The trade-off: Apple Clang lacks
+          # <generator>, so EUXIS_HAS_STD_GENERATOR is off and the
+          # streaming/session-store generator paths are skipped on
+          # macOS. Ubuntu GCC 14 carries that coverage.
+          brew install libsodium nlohmann-json spdlog fmt googletest \
             sqlite pkg-config
-      - name: Select Homebrew Clang (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          LLVM_PREFIX="$(brew --prefix llvm)"
-          echo "CC=${LLVM_PREFIX}/bin/clang"   >> "$GITHUB_ENV"
-          echo "CXX=${LLVM_PREFIX}/bin/clang++" >> "$GITHUB_ENV"
-          # libc++ from Homebrew LLVM is at ${LLVM_PREFIX}/lib/c++.
-          echo "LDFLAGS=-L${LLVM_PREFIX}/lib/c++ -L${LLVM_PREFIX}/lib/unwind -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lunwind" >> "$GITHUB_ENV"
-          # CPPFLAGS deliberately unset. Homebrew clang knows its own
-          # -isysroot and built-in -internal-isystem c++/v1 paths in the
-          # correct order (verified with `clang++ -E -x c++ - -v`).
-          # Adding -I${LLVM_PREFIX}/include or a stale -isysroot here
-          # shadows the SDK and triggers
-          # "<cstring> tried including <string.h> but didn't find libc++'s
-          # <string.h> header" — see issue #97.
       - name: Build
         run: make cpp-build
       - name: Test

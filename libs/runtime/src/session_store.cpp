@@ -102,7 +102,7 @@ public:
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wmismatched-new-delete"
 #  endif
-    auto stream_episodes(const std::string& session_id, const std::string& branch)
+    auto stream_episodes(std::string session_id, std::string branch)
         -> std::generator<SessionMessage> override {
         auto loaded = load(session_id, branch);
         if (!loaded) co_return;
@@ -217,7 +217,7 @@ public:
 #    pragma GCC diagnostic push
 #    pragma GCC diagnostic ignored "-Wmismatched-new-delete"
 #  endif
-    auto stream_episodes(const std::string& session_id, const std::string& branch)
+    auto stream_episodes(std::string session_id, std::string branch)
         -> std::generator<SessionMessage> override {
         auto res = load(session_id, branch);
         if (!res) co_return;
