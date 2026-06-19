@@ -163,12 +163,13 @@ TEST(Enricher, ComponentWithoutPurlIsRecordedAsEmptyMatch) {
     Enricher enricher{client, EnricherConfig{}};
 
     euxis::sbom::SbomDocument doc;
-    doc.components.push_back(euxis::sbom::Component{
-        .purl    = "",                        // no PURL — skip query
-        .name    = "no-purl-component",
-        .version = "0.0.0",
-        .type    = euxis::sbom::ComponentType::Library,
-    });
+    // Imperative init — see make_doc() for the rationale.
+    euxis::sbom::Component c;
+    c.purl    = "";  // no PURL — skip query
+    c.name    = "no-purl-component";
+    c.version = "0.0.0";
+    c.type    = euxis::sbom::ComponentType::Library;
+    doc.components.push_back(std::move(c));
 
     auto report = enricher.enrich(doc);
     ASSERT_TRUE(report.has_value());
