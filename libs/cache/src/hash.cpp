@@ -19,7 +19,10 @@ void ensure_sodium() noexcept {
         // libraries. Returns 1 if already initialised, 0 on first
         // call, -1 on failure; we tolerate -1 because in that case
         // libsodium primitives still work but with degraded RNG.
-        (void)sodium_init();
+        // GCC's -Werror=unused-result is not silenced by `(void)` on
+        // libsodium's warn_unused_result attribute; use the named-var
+        // idiom instead. Matches the pattern in libs/bridge/tests/.
+        [[maybe_unused]] int rc = sodium_init();
         sodium_inited = true;
     }
 }

@@ -92,6 +92,16 @@ public:
     }
 
 #if defined(EUXIS_HAS_STD_GENERATOR)
+    // GCC 14's libstdc++ <generator> emits a -Wmismatched-new-delete on
+    // the implicit destructor of the coroutine frame because
+    // _Promise_alloc<void>::operator delete(void*, size_t) is paired
+    // with a sized-mismatched operator new in the shipped header.
+    // First-party code is built with -Werror so we suppress locally
+    // until libstdc++ ships the fix (GCC bug 113979 / similar).
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wmismatched-new-delete"
+#  endif
     auto stream_episodes(const std::string& session_id, const std::string& branch)
         -> std::generator<SessionMessage> override {
         auto loaded = load(session_id, branch);
@@ -100,6 +110,9 @@ public:
             co_yield std::move(m);
         }
     }
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic pop
+#  endif
 #else
     auto stream_episodes(const std::string& session_id, const std::string& branch)
         -> std::vector<SessionMessage> override {
@@ -194,6 +207,16 @@ public:
     }
 
 #if defined(EUXIS_HAS_STD_GENERATOR)
+    // GCC 14's libstdc++ <generator> emits a -Wmismatched-new-delete on
+    // the implicit destructor of the coroutine frame because
+    // _Promise_alloc<void>::operator delete(void*, size_t) is paired
+    // with a sized-mismatched operator new in the shipped header.
+    // First-party code is built with -Werror so we suppress locally
+    // until libstdc++ ships the fix (GCC bug 113979 / similar).
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wmismatched-new-delete"
+#  endif
     auto stream_episodes(const std::string& session_id, const std::string& branch)
         -> std::generator<SessionMessage> override {
         auto res = load(session_id, branch);
@@ -202,6 +225,9 @@ public:
             co_yield std::move(m);
         }
     }
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic pop
+#  endif
 #else
     auto stream_episodes(const std::string& session_id, const std::string& branch)
         -> std::vector<SessionMessage> override {
