@@ -43,16 +43,17 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           LLVM_PREFIX="$(brew --prefix llvm)"
-          SDK_PATH="$(xcrun --show-sdk-path)"
           echo "CC=${LLVM_PREFIX}/bin/clang"   >> "$GITHUB_ENV"
           echo "CXX=${LLVM_PREFIX}/bin/clang++" >> "$GITHUB_ENV"
           # libc++ from Homebrew LLVM is at ${LLVM_PREFIX}/lib/c++.
           echo "LDFLAGS=-L${LLVM_PREFIX}/lib/c++ -L${LLVM_PREFIX}/lib/unwind -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lunwind" >> "$GITHUB_ENV"
-          # Anchor to the macOS SDK so libc++'s <cstring>/<cmath>/<cstddef>
-          # wrappers can find the C headers via the SDK rather than a
-          # bare -I${LLVM_PREFIX}/include (which on Apple Silicon shadows
-          # the SDK and triggers "didn't find libc++'s <string.h>").
-          echo "CPPFLAGS=-isysroot ${SDK_PATH}" >> "$GITHUB_ENV"
+          # CPPFLAGS deliberately unset. Homebrew clang knows its own
+          # -isysroot and built-in -internal-isystem c++/v1 paths in the
+          # correct order (verified with `clang++ -E -x c++ - -v`).
+          # Adding -I${LLVM_PREFIX}/include or a stale -isysroot here
+          # shadows the SDK and triggers
+          # "<cstring> tried including <string.h> but didn't find libc++'s
+          # <string.h> header" — see issue #97.
       - name: Build
         run: make cpp-build
       - name: Test
