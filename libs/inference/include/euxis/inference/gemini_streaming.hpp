@@ -56,8 +56,8 @@ class GeminiStreamingProvider final : public euxis::runtime::IStreamingProvider 
 public:
     explicit GeminiStreamingProvider(GeminiStreamingConfig cfg = {});
 
-    [[nodiscard]] auto execute_stream(const std::string& model,
-                                      const std::string& prompt,
+    [[nodiscard]] auto execute_stream(std::string model,
+                                      std::string prompt,
                                       int timeout_ms = 30'000)
         -> std::generator<euxis::runtime::ProviderDelta> override;
 

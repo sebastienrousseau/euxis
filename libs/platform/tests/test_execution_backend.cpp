@@ -23,18 +23,21 @@ TEST(ExecLocalBackendTest, NameIsLocal) {
 }
 
 TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"echo", "hello"};
 
     auto res = b.execute(req);
     EXPECT_FALSE(res.error.has_value()) << *res.error;
-    EXPECT_EQ(res.exit_code, 0);
+    // If exec failed the child printed "execvp failed: <strerror>" to
+    // stderr before _exit(127). Surface that in the assertion message so
+    // CI logs tell us *why* on Linux (issue #96).
+    EXPECT_EQ(res.exit_code, 0)
+        << "stderr=\"" << res.stderr_text << "\""
+        << " stdout=\"" << res.stdout_text << "\""
+        << " PATH=\"" << (std::getenv("PATH") ? std::getenv("PATH") : "<unset>") << "\"";
     EXPECT_EQ(res.stdout_text, "hello\n");
-    EXPECT_TRUE(res.stderr_text.empty());
+    EXPECT_TRUE(res.stderr_text.empty()) << res.stderr_text;
     EXPECT_EQ(res.backend_name, "local");
 }
 
