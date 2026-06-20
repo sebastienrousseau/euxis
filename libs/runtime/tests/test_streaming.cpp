@@ -47,8 +47,8 @@ TEST(StreamingWireFormat, AllDeltaKindsAreDistinct) {
 // ---------------------------------------------------------------------------
 class MockStreamingProvider final : public IStreamingProvider {
 public:
-    auto execute_stream(const std::string& /*model*/,
-                        const std::string& /*prompt*/,
+    auto execute_stream(std::string /*model*/,
+                        std::string /*prompt*/,
                         int /*timeout_ms*/ = 30'000)
         -> std::generator<ProviderDelta> override {
         ProviderDelta d;
