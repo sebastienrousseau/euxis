@@ -32,9 +32,10 @@ jobs:
           - target: linux-arm64
             os: ubuntu-24.04-arm
             cmake_args: -DEUXIS_NATIVE_ARCH=OFF
-          - target: darwin-amd64
-            os: macos-13
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF
+          # darwin-amd64 (Intel) was sourced from macos-13. That runner pool
+          # is starved (GitHub's Intel sunset) and PR #99 dropped it from
+          # the regular C++ CI for the same reason. Drop here too; Apple
+          # Silicon coverage via macos-15 is the path forward.
           - target: darwin-arm64
             os: macos-15
             cmake_args: -DEUXIS_NATIVE_ARCH=OFF
@@ -57,12 +58,13 @@ jobs:
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install llvm libsodium sqlite pkg-config
-          LLVM_PREFIX="$(brew --prefix llvm)"
-          echo "CC=${LLVM_PREFIX}/bin/clang"   >> "$GITHUB_ENV"
-          echo "CXX=${LLVM_PREFIX}/bin/clang++" >> "$GITHUB_ENV"
-          echo "LDFLAGS=-L${LLVM_PREFIX}/lib/c++ -L${LLVM_PREFIX}/lib/unwind -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lunwind" >> "$GITHUB_ENV"
-          echo "CPPFLAGS=-I${LLVM_PREFIX}/include" >> "$GITHUB_ENV"
+          # Use Apple Clang (matches the SDK) instead of Homebrew LLVM 22.
+          # PR #99 found that Homebrew LLVM 22.1.7's libc++ wrappers can't
+          # find <string.h> via the GitHub runner SDK — same root cause
+          # surfaced on the release.yml v0.1.2 darwin-arm64 build. Apple
+          # Clang lacks <generator> but the CLI binary does not need that
+          # path (it's only exercised by the streaming test code).
+          brew install libsodium sqlite pkg-config
 
       - name: Configure (Release + LTO)
         run: |
