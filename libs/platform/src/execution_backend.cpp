@@ -17,6 +17,10 @@
 #include <unistd.h>
 #include <vector>
 
+#if defined(__linux__)
+#  include <sys/prctl.h>
+#endif
+
 namespace euxis::platform {
 
 namespace {
@@ -147,6 +151,19 @@ struct DrainResult {
         ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
         ::close(out_pipe[0]);   ::close(out_pipe[1]);
         ::close(err_pipe[0]);   ::close(err_pipe[1]);
+
+#if defined(__linux__)
+        // AddressSanitizer's RTL sets PR_SET_DUMPABLE=0 in the process
+        // (so shadow memory cannot be leaked via core dumps). Ubuntu
+        // 24.04's kernel hardening + AppArmor profile then treats
+        // execve() from a non-dumpable process as a privilege boundary
+        // and returns EPERM ("Operation not permitted"), even for
+        // benign targets like /usr/bin/echo. Restore dumpable in the
+        // child before exec; the parent stays restricted. See issue
+        // #96 for the original CI-side diagnostic. No-op when ASan
+        // is not present.
+        (void)::prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
+#endif
 
         if (req.working_dir) {
             if (::chdir(req.working_dir->c_str()) != 0) {
