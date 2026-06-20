@@ -153,22 +153,9 @@ struct DrainResult {
         ::close(err_pipe[0]);   ::close(err_pipe[1]);
 
 #if defined(__linux__)
-        // AddressSanitizer's RTL sets PR_SET_DUMPABLE=0 in the process
-        // (so shadow memory cannot be leaked via core dumps). Ubuntu
-        // 24.04's kernel hardening + AppArmor profile then treats
-        // execve() from a non-dumpable process as a privilege boundary
-        // and returns EPERM ("Operation not permitted"), even for
-        // benign targets like /usr/bin/echo. Restore dumpable in the
-        // child before exec; the parent stays restricted. See issue
-        // #96 for the original CI-side diagnostic. No-op when ASan
-        // is not present.
-        const int dumpable_before = ::prctl(PR_GET_DUMPABLE);
-        const int nnp_before      = ::prctl(PR_GET_NO_NEW_PRIVS);
+        // Restore PR_SET_DUMPABLE in case the parent was ASan-instrumented
+        // and zeroed it. No-op otherwise. See issue #96.
         (void)::prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
-        const int dumpable_after  = ::prctl(PR_GET_DUMPABLE);
-        std::fprintf(stderr,
-                     "child diag: dumpable=%d->%d nnp=%d\n",
-                     dumpable_before, dumpable_after, nnp_before);
 #endif
 
         if (req.working_dir) {
@@ -180,12 +167,56 @@ struct DrainResult {
         for (const auto& [k, v] : req.env) {
             ::setenv(k.c_str(), v.c_str(), /*overwrite=*/1);
         }
+
+        // Resolve argv[0] against PATH ourselves rather than relying on
+        // execvp's libc-internal resolver. GitHub Actions' ubuntu-24.04
+        // runner has been observed returning EPERM from execvp("echo")
+        // even when /usr/bin/echo is present, executable, and ACL-clean
+        // (issue #96 round-6 confirmed dumpable=1, AppArmor relaxed).
+        // Calling execv() with the resolved absolute path skips
+        // the libc PATH search and the kernel boundary check that
+        // triggers the EPERM. Falls through to the original execvp
+        // behaviour if the argv[0] already contains a '/' or PATH is
+        // unset.
         auto argv_c = to_execvp_argv(req.argv);
-        ::execvp(argv_c[0], argv_c.data());
+        std::string resolved;
+        if (argv_c[0] != nullptr && std::strchr(argv_c[0], '/') == nullptr) {
+            const char* path_env = std::getenv("PATH");
+            if (path_env != nullptr) {
+                std::string_view path_view{path_env};
+                while (!path_view.empty()) {
+                    const auto colon = path_view.find(':');
+                    const auto dir   = path_view.substr(0,
+                        colon == std::string_view::npos ? path_view.size() : colon);
+                    std::string candidate{dir};
+                    if (!candidate.empty() && candidate.back() != '/') {
+                        candidate.push_back('/');
+                    }
+                    candidate.append(argv_c[0]);
+                    if (::access(candidate.c_str(), X_OK) == 0) {
+                        resolved = std::move(candidate);
+                        break;
+                    }
+                    if (colon == std::string_view::npos) break;
+                    path_view.remove_prefix(colon + 1);
+                }
+            }
+        }
+        if (!resolved.empty()) {
+            ::execv(resolved.c_str(), argv_c.data());
+        } else {
+            ::execvp(argv_c[0], argv_c.data());
+        }
         // exec failed — diagnose and exit with the canonical "127".
+        // Prefix "execvp failed" is load-bearing: a test in this suite
+        // asserts on that exact phrase (NonexistentBinaryProducesNonZero
+        // ExitCode → stderr.find("execvp failed")). Keep it even though
+        // we may have used execv() on a resolved path.
         const int exec_errno = errno;
-        std::fprintf(stderr, "execvp failed: %s (errno=%d argv[0]=%s)\n",
-                     std::strerror(exec_errno), exec_errno, argv_c[0]);
+        std::fprintf(stderr,
+                     "execvp failed: %s (errno=%d argv[0]=%s resolved=%s)\n",
+                     std::strerror(exec_errno), exec_errno, argv_c[0],
+                     resolved.empty() ? "<unresolved>" : resolved.c_str());
         _exit(127);
     }
 
