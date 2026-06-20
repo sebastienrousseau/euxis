@@ -14,8 +14,12 @@ if(NOT WIN32)
     add_link_options(-Wl,-z,relro -Wl,-z,now)
     add_link_options(-pie)
   endif()
-  # _FORTIFY_SOURCE requires optimization; only set for Release/RelWithDebInfo
-  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "")
+  # _FORTIFY_SOURCE requires optimization; only set for Release/RelWithDebInfo.
+  # Skip on AppleClang — the macOS SDK predefines _FORTIFY_SOURCE itself, so
+  # adding our own -D triggers "-Werror,-Wmacro-redefined" (release.yml
+  # darwin-arm64 build, 2026-06).
+  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL ""
+     AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     # Use _FORTIFY_SOURCE=3 on GCC 12+ / Clang 14+, fallback to 2
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14"))
