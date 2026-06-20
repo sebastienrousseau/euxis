@@ -2,7 +2,7 @@
 
 Euxis runs cryptographically-signed code audits at native speed using a multi-agent fleet routed across multiple LLM providers. This page is the one-screen overview of the CLI surface; the deep reference (full flag listings, agent fleet matrix, provider routing rules) lives at [`guides/user-guide.md`](guides/user-guide.md).
 
-**Version:** v0.0.2
+**Version:** v0.1.3
 
 ## Quick Start
 

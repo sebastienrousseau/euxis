@@ -104,8 +104,17 @@ public:
     ///                    that exceed it should stop yielding and let
     ///                    the generator return naturally so the loop
     ///                    terminates without exceptions.
-    [[nodiscard]] virtual auto execute_stream(const std::string& model,
-                                              const std::string& prompt,
+    ///
+    /// Both string parameters are taken **by value**. C++ coroutines
+    /// do NOT extend the lifetime of reference parameters across
+    /// suspensions (only the *frame* is moved into the promise; the
+    /// referent stays at its original location). A `const std::string&`
+    /// bound to a temporary at the call site dangles the first time the
+    /// generator yields, and ASan catches the dispatch reading dead
+    /// stack memory as `[json.exception.type_error.316]` with random
+    /// high-bit bytes. See issue #95.
+    [[nodiscard]] virtual auto execute_stream(std::string model,
+                                              std::string prompt,
                                               int timeout_ms = 30'000)
         -> std::generator<ProviderDelta> = 0;
 };

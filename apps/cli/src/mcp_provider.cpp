@@ -76,7 +76,7 @@ auto McpProviderBridge::execute(const std::string& server_name,
     nlohmann::json init_req = {
         {"jsonrpc", "2.0"}, {"id", 0}, {"method", "initialize"},
         {"params", {{"protocolVersion", "2024-11-05"}, {"capabilities", {}},
-                     {"clientInfo", {{"name", "euxis"}, {"version", "0.0.2"}}}}}
+                     {"clientInfo", {{"name", "euxis"}, {"version", "0.1.3"}}}}}
     };
     std::string init_body = init_req.dump();
     std::string init_framed = "Content-Length: " + std::to_string(init_body.size()) + "\r\n\r\n" + init_body;

@@ -440,10 +440,10 @@ euxis architect "Your task" ollama
 euxis --help 2>&1 | grep -A 100 "Available Agents"
 
 # Check registry (SQLite)
-python3 -c "import sqlite3; conn = sqlite3.connect('$HOME/.euxis/agents/registry.db'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id')]))"
+python3 -c "import sqlite3; conn = sqlite3.connect('$HOME/.euxis/data/agents/registry.db'); print('\n'.join([r[0] for r in conn.execute('SELECT id FROM agents ORDER BY id')]))"
 
 # Check registry (JSON fallback)
-jq -r '.agents[].id' ~/.euxis/agents/registry.json | sort
+jq -r '.agents[].id' ~/.euxis/data/agents/registry.json | sort
 ```
 
 **Solutions:**

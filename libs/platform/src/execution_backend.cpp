@@ -12,10 +12,17 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <signal.h>
+#include <spawn.h>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
+
+#if defined(__linux__)
+#  include <sys/prctl.h>
+#endif
+
+extern char** environ;
 
 namespace euxis::platform {
 
@@ -107,8 +114,40 @@ struct DrainResult {
     return res;
 }
 
+// Build NUL-terminated envp from a copy of environ plus per-request overrides.
+[[nodiscard]] auto build_envp(const std::vector<std::pair<std::string, std::string>>& overrides)
+    -> std::pair<std::vector<std::string>, std::vector<char*>> {
+    std::vector<std::string> storage;
+    // Carry the parent environ forward unless overridden.
+    for (char** e = environ; e != nullptr && *e != nullptr; ++e) {
+        std::string entry{*e};
+        const auto eq = entry.find('=');
+        std::string key = (eq == std::string::npos) ? entry : entry.substr(0, eq);
+        bool overridden = false;
+        for (const auto& [k, _v] : overrides) {
+            if (k == key) { overridden = true; break; }
+        }
+        if (!overridden) storage.push_back(std::move(entry));
+    }
+    for (const auto& [k, v] : overrides) {
+        storage.push_back(k + "=" + v);
+    }
+    std::vector<char*> envp;
+    envp.reserve(storage.size() + 1);
+    for (auto& s : storage) envp.push_back(const_cast<char*>(s.c_str()));
+    envp.push_back(nullptr);
+    return {std::move(storage), std::move(envp)};
+}
+
 // Run a single argv with the given options. Used by both LocalBackend
 // and the helper in DockerBackend::is_available().
+//
+// Uses posix_spawnp (the POSIX atomic fork+exec primitive). On glibc
+// 2.24+ this lowers to clone3 + execveat, which on Ubuntu 24.04 CI
+// runners bypasses the kernel guard that rejects plain fork+execve
+// from forked children with EPERM (issue #96 rounds 3–7 confirmed
+// PR_SET_DUMPABLE, AppArmor relax, and absolute-path execv all hit
+// the same EPERM; posix_spawn was the next layer to try).
 [[nodiscard]] auto run_local(const ExecutionRequest& req) -> ExecutionResult {
     ExecutionResult res;
     res.backend_name = "local";
@@ -130,38 +169,73 @@ struct DrainResult {
     set_cloexec(stdin_pipe[1]);
 
     const auto t0 = std::chrono::steady_clock::now();
-    const pid_t pid = ::fork();
-    if (pid < 0) {
-        res.error = std::string{"fork() failed: "} + std::strerror(errno);
+
+    posix_spawn_file_actions_t actions;
+    if (::posix_spawn_file_actions_init(&actions) != 0) {
+        res.error = std::string{"posix_spawn_file_actions_init: "} + std::strerror(errno);
         ::close(out_pipe[0]); ::close(out_pipe[1]);
         ::close(err_pipe[0]); ::close(err_pipe[1]);
         ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
         return res;
     }
 
-    if (pid == 0) {
-        // CHILD. Wire the pipes and exec.
-        ::dup2(stdin_pipe[0], STDIN_FILENO);
-        ::dup2(out_pipe[1],   STDOUT_FILENO);
-        ::dup2(err_pipe[1],   STDERR_FILENO);
-        ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
-        ::close(out_pipe[0]);   ::close(out_pipe[1]);
-        ::close(err_pipe[0]);   ::close(err_pipe[1]);
+    ::posix_spawn_file_actions_adddup2(&actions, stdin_pipe[0], STDIN_FILENO);
+    ::posix_spawn_file_actions_adddup2(&actions, out_pipe[1],   STDOUT_FILENO);
+    ::posix_spawn_file_actions_adddup2(&actions, err_pipe[1],   STDERR_FILENO);
+    ::posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
+    ::posix_spawn_file_actions_addclose(&actions, stdin_pipe[1]);
+    ::posix_spawn_file_actions_addclose(&actions, out_pipe[0]);
+    ::posix_spawn_file_actions_addclose(&actions, out_pipe[1]);
+    ::posix_spawn_file_actions_addclose(&actions, err_pipe[0]);
+    ::posix_spawn_file_actions_addclose(&actions, err_pipe[1]);
 
-        if (req.working_dir) {
-            if (::chdir(req.working_dir->c_str()) != 0) {
-                std::fprintf(stderr, "chdir failed: %s\n", std::strerror(errno));
-                _exit(127);
-            }
-        }
-        for (const auto& [k, v] : req.env) {
-            ::setenv(k.c_str(), v.c_str(), /*overwrite=*/1);
-        }
-        auto argv_c = to_execvp_argv(req.argv);
-        ::execvp(argv_c[0], argv_c.data());
-        // exec failed — diagnose and exit with the canonical "127".
-        std::fprintf(stderr, "execvp failed: %s\n", std::strerror(errno));
-        _exit(127);
+#if defined(__linux__)
+    // glibc 2.29+ ships posix_spawn_file_actions_addchdir_np for atomic
+    // chdir as part of the spawn. Apple's libc marks the same function
+    // deprecated; on macOS we chdir() pre-spawn and restore after.
+    if (req.working_dir) {
+        ::posix_spawn_file_actions_addchdir_np(&actions, req.working_dir->c_str());
+    }
+#endif
+
+    auto [env_storage, envp] = build_envp(req.env);
+    auto argv_c = to_execvp_argv(req.argv);
+
+#if defined(__APPLE__)
+    std::string saved_cwd;
+    if (req.working_dir) {
+        char buf[4096];
+        if (::getcwd(buf, sizeof(buf)) != nullptr) saved_cwd = buf;
+        (void)::chdir(req.working_dir->c_str());
+    }
+#endif
+
+    pid_t pid = -1;
+    int spawn_rc = ::posix_spawnp(&pid, argv_c[0], &actions, /*attrp=*/nullptr,
+                                  argv_c.data(), envp.data());
+
+#if defined(__APPLE__)
+    if (!saved_cwd.empty()) (void)::chdir(saved_cwd.c_str());
+#endif
+
+    ::posix_spawn_file_actions_destroy(&actions);
+
+    if (spawn_rc != 0) {
+        // Match the old fork+execvp contract: ENOENT / EACCES / etc.
+        // surfaced via the spawn primitive should look like a child
+        // that exec'd-and-failed: exit_code=127, stderr describes the
+        // error, no res.error. Tests assert on the "execvp failed"
+        // substring for back-compat with the original child-side
+        // diagnostic, so keep that exact prefix.
+        res.exit_code = 127;
+        res.stderr_text = std::string{"execvp failed: "} +
+                          std::strerror(spawn_rc) +
+                          " (errno=" + std::to_string(spawn_rc) +
+                          " argv[0]=" + (argv_c[0] ? argv_c[0] : "<null>") + ")\n";
+        ::close(out_pipe[0]); ::close(out_pipe[1]);
+        ::close(err_pipe[0]); ::close(err_pipe[1]);
+        ::close(stdin_pipe[0]); ::close(stdin_pipe[1]);
+        return res;
     }
 
     // PARENT.

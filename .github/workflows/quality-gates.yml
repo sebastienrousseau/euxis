@@ -143,6 +143,12 @@ jobs:
             libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
           echo "CC=gcc-14"  >> "$GITHUB_ENV"
           echo "CXX=g++-14" >> "$GITHUB_ENV"
+          # See issue #96 — Ubuntu 24.04's AppArmor + kernel hardening
+          # combination rejects execve() from forked test children with
+          # EPERM. Last resort: stop the AppArmor service entirely.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          sudo systemctl stop apparmor.service || true
+          sudo aa-teardown || true
 
       - name: Build + test
         run: |
@@ -173,3 +179,18 @@ jobs:
             exit 1
           fi
           echo "All ${passed} test suites passed."
+
+  docs-build:
+    name: Sphinx documentation build gate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install sphinx furo myst-parser
+      - name: Build documentation
+        run: |
+          sphinx-build -b html docs/ docs/_build/html

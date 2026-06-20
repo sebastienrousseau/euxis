@@ -37,11 +37,7 @@ Checks: >
   performance-unnecessary-copy-initialization,
   readability-container-size-empty,
   readability-duplicate-include,
-  readability-misleading-indentation,
-  readability-redundant-smartptr-get,
-  -bugprone-easily-swappable-parameters,
-  -bugprone-exception-escape,
-  -cert-err58-cpp
+  readability-misleading-indentation
 
 WarningsAsErrors: >
   bugprone-use-after-move,

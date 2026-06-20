@@ -84,7 +84,7 @@ last_updated: "<YYYY-MM-DD>"
 
 ### Step 2: Add to Registry
 
-Add the agent entry to `~/.euxis/agents/registry.json`:
+Add the agent entry to `~/.euxis/data/agents/registry.json`:
 
 ```json
 {
@@ -241,4 +241,4 @@ See the ADR documents for rationale behind key design decisions:
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.1.3 · Build something that matters.*

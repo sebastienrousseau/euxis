@@ -150,4 +150,4 @@ euxis responder "Production alert: 500 errors spiking on /api/checkout"
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.1.3 · Build something that matters.*

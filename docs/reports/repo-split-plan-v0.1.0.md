@@ -43,7 +43,7 @@ No module-level circular imports were detected in Python packages (Gateway, Adap
 ### Shared Utilities & Types
 - `core/lib/*` provides shared shell utilities and validation (used by CLI).
 - `euxis-policy/gateway.json` defines approval policy defaults (consumed by Gateway).
-- `agents/registry.json` and `agents/squads.json` provide agent metadata (consumed by CLI and TUI).
+- `data/agents/registry.json` and `data/agents/squads.json` provide agent metadata (consumed by CLI and TUI).
 
 ### Data Flow (runtime)
 - Gateway writes session, approvals, audit, transcripts to `~/.euxis/data/runtime/gateway/*` via `api/src/gateway/utils.py`.
@@ -331,7 +331,7 @@ git filter-repo --path packages/crypto-lib --path packages/crypto-server --force
 - **CLI ↔ Core**
   - CLI scripts should validate `core/lib` functions via smoke tests.
 - **TUI ↔ Core**
-  - Mock `agents/registry.json` and ensure TUI screens load registry.
+  - Mock `data/agents/registry.json` and ensure TUI screens load registry.
 - **Metrics ↔ Core**
   - Validate metrics schema and event shape stability.
 

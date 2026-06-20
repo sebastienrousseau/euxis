@@ -337,7 +337,7 @@ TEST(DocTest, ManPageExists) {
         std::ifstream f(man_path);
         std::string content((std::istreambuf_iterator<char>(f)),
                             std::istreambuf_iterator<char>());
-        EXPECT_NE(content.find("v0.0.2"), std::string::npos);
+        EXPECT_NE(content.find("v0.1.3"), std::string::npos);
         EXPECT_NE(content.find("certify"), std::string::npos);
         EXPECT_NE(content.find("system"), std::string::npos);
     }

@@ -144,8 +144,8 @@ GeminiStreamingProvider::GeminiStreamingProvider(GeminiStreamingConfig cfg)
     : cfg_{std::move(cfg)},
       resolved_key_{resolve_api_key(cfg_)} {}
 
-auto GeminiStreamingProvider::execute_stream(const std::string& model,
-                                              const std::string& prompt,
+auto GeminiStreamingProvider::execute_stream(std::string model,
+                                              std::string prompt,
                                               int timeout_ms)
     -> std::generator<runtime::ProviderDelta> {
     std::vector<runtime::ProviderDelta> buffered;

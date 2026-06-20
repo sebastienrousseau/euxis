@@ -13,24 +13,22 @@ namespace {
 /// to an ephemeral high port via the documented env-var override
 /// keeps the test deterministic regardless of the host's port
 /// landscape.
-class LlamaEnvFixture {
-public:
-    LlamaEnvFixture() {
+class LlamaEngineTest : public ::testing::Test {
+protected:
+    void SetUp() override {
         ::setenv("LLAMA_SERVER_HOST", "127.0.0.1", 1);
         ::setenv("LLAMA_SERVER_PORT", "1",         1);
     }
-    ~LlamaEnvFixture() {
+    void TearDown() override {
         ::unsetenv("LLAMA_SERVER_HOST");
         ::unsetenv("LLAMA_SERVER_PORT");
     }
 };
 
-namespace { LlamaEnvFixture g_llama_env; } // file-scope auto-init
-
 // ---------------------------------------------------------------------------
 // Constructor works without crashing
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, ConstructorWorks) {
+TEST_F(LlamaEngineTest, ConstructorWorks) {
     LocalModelConfig cfg;
     cfg.model_name   = "test-model";
     cfg.model_path   = "/tmp/nonexistent.gguf";
@@ -42,7 +40,7 @@ TEST(LlamaEngineTest, ConstructorWorks) {
 // ---------------------------------------------------------------------------
 // Generate returns error when llama-server is unavailable
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, GenerateReturnsErrorWhenServerUnavailable) {
+TEST_F(LlamaEngineTest, GenerateReturnsErrorWhenServerUnavailable) {
     LocalModelConfig cfg;
     cfg.model_name = "stub-model";
 
@@ -56,7 +54,7 @@ TEST(LlamaEngineTest, GenerateReturnsErrorWhenServerUnavailable) {
 // ---------------------------------------------------------------------------
 // supports_model matches config when server is unavailable
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, SupportsModelMatchesConfig) {
+TEST_F(LlamaEngineTest, SupportsModelMatchesConfig) {
     LocalModelConfig cfg;
     cfg.model_name = "llama3-8b";
 
@@ -70,7 +68,7 @@ TEST(LlamaEngineTest, SupportsModelMatchesConfig) {
 // ---------------------------------------------------------------------------
 // health() returns valid JSON with expected keys
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, HealthReturnsJson) {
+TEST_F(LlamaEngineTest, HealthReturnsJson) {
     LocalModelConfig cfg;
     cfg.model_name   = "health-test";
     cfg.context_size = 4096;
@@ -88,10 +86,7 @@ TEST(LlamaEngineTest, HealthReturnsJson) {
 // ---------------------------------------------------------------------------
 // health() contains connection info (host and port)
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, HealthContainsConnectionInfo) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #98 — LLAMA_SERVER_PORT env fixture fails on Ubuntu CI";
-#endif
+TEST_F(LlamaEngineTest, HealthContainsConnectionInfo) {
     LocalModelConfig cfg;
     cfg.model_name = "conn-test";
 
@@ -109,7 +104,7 @@ TEST(LlamaEngineTest, HealthContainsConnectionInfo) {
 // ---------------------------------------------------------------------------
 // Move construction works
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, MoveConstruction) {
+TEST_F(LlamaEngineTest, MoveConstruction) {
     LocalModelConfig cfg;
     cfg.model_name = "movable";
 
@@ -124,7 +119,7 @@ TEST(LlamaEngineTest, MoveConstruction) {
 // ---------------------------------------------------------------------------
 // Move assignment works
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, MoveAssignment) {
+TEST_F(LlamaEngineTest, MoveAssignment) {
     LocalModelConfig cfg_a;
     cfg_a.model_name = "model-a";
 
@@ -141,7 +136,7 @@ TEST(LlamaEngineTest, MoveAssignment) {
 // ---------------------------------------------------------------------------
 // Generate with various max_tokens values
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, GenerateWithDifferentMaxTokens) {
+TEST_F(LlamaEngineTest, GenerateWithDifferentMaxTokens) {
     LocalModelConfig cfg;
     cfg.model_name = "token-test";
     LlamaEngine engine(cfg);
@@ -160,7 +155,7 @@ TEST(LlamaEngineTest, GenerateWithDifferentMaxTokens) {
 // ---------------------------------------------------------------------------
 // supports_model with empty string
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, SupportsModelEmptyString) {
+TEST_F(LlamaEngineTest, SupportsModelEmptyString) {
     LocalModelConfig cfg;
     cfg.model_name = "my-model";
     LlamaEngine engine(cfg);
@@ -171,7 +166,7 @@ TEST(LlamaEngineTest, SupportsModelEmptyString) {
 // ---------------------------------------------------------------------------
 // health() with different config values
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, HealthWithLargeContextSize) {
+TEST_F(LlamaEngineTest, HealthWithLargeContextSize) {
     LocalModelConfig cfg;
     cfg.model_name = "large-ctx";
     cfg.context_size = 131072;
@@ -184,7 +179,7 @@ TEST(LlamaEngineTest, HealthWithLargeContextSize) {
 // ---------------------------------------------------------------------------
 // Config with temperature and top_p
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, ConfigWithCustomTemperature) {
+TEST_F(LlamaEngineTest, ConfigWithCustomTemperature) {
     LocalModelConfig cfg;
     cfg.model_name = "temp-model";
     cfg.temperature = 0.0f;
@@ -200,7 +195,7 @@ TEST(LlamaEngineTest, ConfigWithCustomTemperature) {
 // ---------------------------------------------------------------------------
 // Repeated health checks return consistent results
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, RepeatedHealthChecks) {
+TEST_F(LlamaEngineTest, RepeatedHealthChecks) {
     LocalModelConfig cfg;
     cfg.model_name = "repeat-check";
     LlamaEngine engine(cfg);
@@ -215,7 +210,7 @@ TEST(LlamaEngineTest, RepeatedHealthChecks) {
 // ---------------------------------------------------------------------------
 // Generate after health check returns consistent error
 // ---------------------------------------------------------------------------
-TEST(LlamaEngineTest, GenerateAfterHealthCheck) {
+TEST_F(LlamaEngineTest, GenerateAfterHealthCheck) {
     LocalModelConfig cfg;
     cfg.model_name = "sequence-test";
     LlamaEngine engine(cfg);
@@ -227,7 +222,7 @@ TEST(LlamaEngineTest, GenerateAfterHealthCheck) {
     ASSERT_FALSE(r.has_value());
 }
 
-TEST(LlamaEngineTest, EpisodicGenerateFailsGracefully) {
+TEST_F(LlamaEngineTest, EpisodicGenerateFailsGracefully) {
     LocalModelConfig cfg;
     cfg.model_name = "episodic-test";
     LlamaEngine engine(cfg);

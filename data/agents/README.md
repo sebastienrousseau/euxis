@@ -18,13 +18,13 @@ Agents is the source of truth for the fleet: prompts, protocols, squads, and reg
 ## Usage
 ```bash
 # Inspect registry
-jq '.agents | length' agents/registry.json
+jq '.agents | length' registry.json
 ```
 
 ## Development
 ```bash
 # Validate registry
-python3 -m json.tool agents/registry.json
+python3 -m json.tool registry.json
 ```
 
 ## Testing
@@ -34,4 +34,4 @@ bash tests/lib/test_registry.sh
 ```
 
 ## API / Exports
-Agents are referenced by ID in `agents/registry.json` and loaded via `core/lib/agents.sh`.
+Agents are referenced by ID in `registry.json` and loaded via `core/lib/agents.sh`.

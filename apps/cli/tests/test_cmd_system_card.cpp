@@ -50,7 +50,7 @@ TEST_F(SystemCardTest, VersionMatches) {
     std::cout.rdbuf(old);
 
     auto parsed = nlohmann::json::parse(buffer.str());
-    EXPECT_EQ(parsed["identity"]["version"], "0.0.2");
+    EXPECT_EQ(parsed["identity"]["version"], "0.1.3");
 }
 
 TEST_F(SystemCardTest, ProviderListPopulated) {

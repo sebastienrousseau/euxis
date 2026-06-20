@@ -82,15 +82,15 @@ config.add_recent_command(command)      # Track a recently used command
 
 **Module:** `tui.core.registry`
 
-Loads agents, squads, and combos from `~/.euxis/agents/registry.json` and
-`~/.euxis/agents/squads.json`.
+Loads agents, squads, and combos from `~/.euxis/data/agents/registry.json` and
+`~/.euxis/data/agents/squads.json`.
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `agents` | `list[Agent]` | All registered agents |
 | `squads` | `list[Squad]` | All squad configurations |
 | `combos` | `list[Combo]` | All combo chains |
-| `version` | `str` | Protocol version (default `"v0.0.2"`) |
+| `version` | `str` | Protocol version (default `"v0.1.3"`) |
 
 ### Loading
 

@@ -120,7 +120,7 @@ struct ToolCallContext {
 void dispatch_event(std::string_view payload,
                     std::vector<ProviderDelta>& out,
                     std::vector<ToolCallContext>& tool_ctx) {
-    auto j = nlohmann::json::parse(payload, nullptr, /*allow_exceptions=*/false);
+    auto j = nlohmann::json::parse(std::string{payload}, nullptr, /*allow_exceptions=*/false);
     if (j.is_discarded() || !j.is_object()) return;
 
     const auto type = j.value("type", std::string{});
@@ -180,8 +180,8 @@ ClaudeStreamingProvider::ClaudeStreamingProvider(ClaudeStreamingConfig cfg)
     : cfg_{std::move(cfg)},
       resolved_key_{resolve_api_key(cfg_)} {}
 
-auto ClaudeStreamingProvider::execute_stream(const std::string& model,
-                                             const std::string& prompt,
+auto ClaudeStreamingProvider::execute_stream(std::string model,
+                                             std::string prompt,
                                              int timeout_ms)
     -> std::generator<runtime::ProviderDelta> {
     std::vector<runtime::ProviderDelta> buffered;

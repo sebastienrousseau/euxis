@@ -166,7 +166,7 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 | `resolve_protocols` | `resolve_protocols "task"` | Loads mandatory protocols (_common.txt, _protocol.txt) plus conditional protocols based on task keywords. Token-budgeted and cached by keyword fingerprint. |
 | `prepare_prompt` | `prepare_prompt "agent" "task" "audit" "memory" "session" "model"` | Full prompt assembly: protocols + agent prompt + template substitution + tiered memory + fleet roster + dispatch directive |
 | `_proto_fingerprint` | `_proto_fingerprint "task"` | Generates deterministic cache key from task keyword categories |
-| `_get_fleet_roster` | `_get_fleet_roster` | Returns comma-separated agent IDs from agents/registry.json (memoized by file mtime) |
+| `_get_fleet_roster` | `_get_fleet_roster` | Returns comma-separated agent IDs from data/agents/registry.json (memoized by file mtime) |
 
 **Environment Variables:**
 - `EUXIS_PROTOCOL_TOKEN_BUDGET` — Max tokens for optional protocol loading (default: 12000)
@@ -203,4 +203,4 @@ Depends on: `agents.sh`, `memory.sh`, `template.sh`
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.1.3 · Build something that matters.*

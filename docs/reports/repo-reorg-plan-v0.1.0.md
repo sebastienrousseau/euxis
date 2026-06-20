@@ -60,7 +60,7 @@ tests/       # Cross-module integration tests only
 
 ### `agents/`
 - **Purpose**: Agent definitions, prompts, squads, combos.
-- **Contains**: `agents/prompts/`, `agents/squads.json`, `agents/registry.json`.
+- **Contains**: `data/agents/prompts/`, `data/agents/squads.json`, `data/agents/registry.json`.
 - **Depends on**: `core/`, `config/`.
 
 ### `api/src/gateway/`
@@ -105,7 +105,7 @@ tests/       # Cross-module integration tests only
 - `euxis-bin/*` → `euxis-bin/*`
 - `core/lib/*` → `core/lib/*`
 - `prompts/*` → `agents/prompts/*`
-- `agents/registry.json`, `agents/registry.db`, `agents/squads.json` → `agents/`
+- `data/agents/registry.json`, `data/agents/registry.db`, `data/agents/squads.json` → `data/agents/`
 - `euxis-ops/gateway_*` → `api/src/gateway/`
 - `adapters/src/adapters/*` → `adapters/src/adapters/`
 - `config/gateway.json` → `euxis-policy/gateway.json`
