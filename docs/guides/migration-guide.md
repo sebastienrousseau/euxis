@@ -7,7 +7,7 @@ This guide provides step-by-step instructions for upgrading between Euxis versio
 ## Table of Contents
 
 1. [Version History](#version-history)
-2. [Migrating from v0.0.9 to v0.0.2](#migrating-from-v009-to-v0010)
+2. [Migrating from v0.0.9 to v0.1.3](#migrating-from-v009-to-v0010)
 3. [Migrating from v0.0.6 to v0.0.7](#migrating-from-v006-to-v007)
 4. [General Migration Checklist](#general-migration-checklist)
 5. [Troubleshooting Common Migration Issues](#troubleshooting-common-migration-issues)
@@ -27,7 +27,7 @@ This guide provides step-by-step instructions for upgrading between Euxis versio
 
 ---
 
-## Migrating from v0.0.9 to v0.0.2
+## Migrating from v0.0.9 to v0.1.3
 
 ### Breaking Changes
 
@@ -92,7 +92,7 @@ euxis certify-readiness .
 
 ### Configuration Changes
 
-All data config files (`registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json`) are bumped from `v0.0.3` to `v0.0.2`. These update automatically when you pull the latest code.
+All data config files (`registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json`) are bumped from `v0.0.3` to `v0.1.3`. These update automatically when you pull the latest code.
 
 ---
 

@@ -90,7 +90,7 @@ Loads agents, squads, and combos from `~/.euxis/data/agents/registry.json` and
 | `agents` | `list[Agent]` | All registered agents |
 | `squads` | `list[Squad]` | All squad configurations |
 | `combos` | `list[Combo]` | All combo chains |
-| `version` | `str` | Protocol version (default `"v0.0.2"`) |
+| `version` | `str` | Protocol version (default `"v0.1.3"`) |
 
 ### Loading
 

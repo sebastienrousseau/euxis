@@ -255,4 +255,4 @@ Phase 4 (Weeks 12-15): P2-3 → P2-4 → P2-5 → P2-6
 
 ---
 
-*Generated 2026-03-29. Euxis v0.0.2.*
+*Generated 2026-03-29. Euxis v0.1.3.*

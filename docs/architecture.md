@@ -2,7 +2,7 @@
 
 Euxis is a C++23 multi-agent code-certification toolkit. The system is a stack of 27 static libraries under `libs/` feeding four binaries under `apps/`, all driven by CMake 3.28 with FetchContent for third-party dependencies. The same agent fleet (53 agents, 6 squads under `data/agents/`) the original shell prototype defined now executes against the C++ runtime.
 
-**Version:** v0.0.2
+**Version:** v0.1.3
 
 ## System layers
 
@@ -120,7 +120,7 @@ Capabilities are tags attached to each agent in `registry.json`. `libs/core/rout
 │   ├── crypto/, cache/         Foundation primitives
 │   └── ...                     and 8 more
 ├── apps/cli/CMakeLists.txt     The wiring is CMake, not shell sourcing
-├── CMakeLists.txt              Root: project(euxis VERSION 0.0.2 LANGUAGES CXX)
+├── CMakeLists.txt              Root: project(euxis VERSION 0.1.3 LANGUAGES CXX)
 ├── cmake/                      Custom modules (EuxisStdModule, EuxisDocs, ...)
 ├── build/cmake-build/          Default build tree
 ├── data/agents/                Registry, squads, prompts
@@ -156,4 +156,4 @@ Add the capability identifier to `data/agents/registry.json` on the agents that 
 
 ---
 
-*Euxis v0.0.2 · Build something that matters.*
+*Euxis v0.1.3 · Build something that matters.*

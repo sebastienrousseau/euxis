@@ -19,7 +19,7 @@ to delete the on-disk leftovers via `./.git/cleanup-stale-dirs.sh`.
 
 | Path | What it was | Replacement |
 |---|---|---|
-| `tui/` | Python `Textual` TUI from the v0.0.2-era prototype | `apps/cli/src/tui/` (native C++ TUI: chat widget, diff view, syntax, event loop, keybindings, palette) |
+| `tui/` | Python `Textual` TUI from the v0.1.3-era prototype | `apps/cli/src/tui/` (native C++ TUI: chat widget, diff view, syntax, event loop, keybindings, palette) |
 | `.venv/` | Local Python virtualenv used while the project was Python-first | None — the C++23 binary is the only runtime now. Contributors who still want Python tooling for ancillary scripts should keep their venv outside the repo (e.g. `~/.venvs/euxis-tooling`). |
 | `.venv-voice/` | Separate virtualenv from the abandoned voice-interface experiment | None — `euxis voice` is in the [aspirational](../reference/cli-reference.md) command tier; if it ships it will be a C++23 native module, not a Python overlay. |
 | `bin/` | Pre-rewrite hand-rolled Python `euxis` wrapper | `apps/cli/euxis-cli` (built into `cmake-build/apps/cli/euxis-cli`, installed to `/usr/local/bin/euxis` per `make cpp-build && sudo ln -sf`). |

@@ -63,9 +63,9 @@ TEST(PurlBuild, SubpathAppended) {
     p.type = "github";
     p.ns = "sebastienrousseau";
     p.name = "euxis";
-    p.version = "v0.0.2";
+    p.version = "v0.1.3";
     p.subpath = "libs/sbom";
-    EXPECT_EQ(p.to_string(), "pkg:github/sebastienrousseau/euxis@v0.0.2#libs/sbom");
+    EXPECT_EQ(p.to_string(), "pkg:github/sebastienrousseau/euxis@v0.1.3#libs/sbom");
 }
 
 TEST(PercentEncode, UnreservedPassThrough) {

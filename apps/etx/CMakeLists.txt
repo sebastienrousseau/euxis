@@ -209,8 +209,14 @@ if(Qt6_FOUND)
       resources/icons/euxis-logo.svg
     )
     add_test(NAME euxis-etx-tests COMMAND euxis-etx-tests)
+    # QT_QPA_PLATFORM=offscreen — Qt's default platform plugin tries to talk
+    # to a real display, which (a) doesn't exist on Linux CI runners and
+    # (b) flakes the ScreenTest cases under ASan on macOS by leaving Qt
+    # widgets in a half-rendered state when the test tears them down.
+    # The offscreen plugin renders into a pixmap; everything else is
+    # identical behaviour.
     set_tests_properties(euxis-etx-tests PROPERTIES
-      ENVIRONMENT "LSAN_OPTIONS=suppressions=${CMAKE_CURRENT_SOURCE_DIR}/tests/lsan_suppressions.txt"
+      ENVIRONMENT "QT_QPA_PLATFORM=offscreen;LSAN_OPTIONS=suppressions=${CMAKE_CURRENT_SOURCE_DIR}/tests/lsan_suppressions.txt"
     )
   else()
     message(STATUS "Qt6::Test not found, skipping euxis-etx tests")
