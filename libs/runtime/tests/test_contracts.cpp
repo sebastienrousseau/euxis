@@ -32,24 +32,16 @@ TEST(ContractsShim, TruePredicateNeverFires) {
 
 // IterationBudget::refund on a full budget — caller's mistake.
 //
-// Under EUXIS_CONTRACTS_RUNTIME this aborts (death test below); under
-// default mode the precondition is a no-op or [[assume]] and refund()
-// returns false safely.
-TEST(ContractsPilot, RefundFromFullBudgetReturnsFalseInQuietMode) {
-#if !defined(EUXIS_CONTRACTS_RUNTIME)
+// PR #94 removed the EUXIS_PRE(current < max_) precondition from
+// IterationBudget::refund() because it contradicted the documented
+// contract ("returns false if the budget is already full"). The
+// function now returns false safely under every contracts mode,
+// including EUXIS_CONTRACTS_RUNTIME. The matching death test was
+// dropped with that change.
+TEST(ContractsPilot, RefundFromFullBudgetReturnsFalse) {
     IterationBudget b{10};
     EXPECT_FALSE(b.refund());
-#else
-    GTEST_SKIP() << "death-test handled separately under EUXIS_CONTRACTS_RUNTIME";
-#endif
 }
-
-#if defined(EUXIS_CONTRACTS_RUNTIME)
-TEST(ContractsPilotDeath, RefundFromFullBudgetAborts) {
-    IterationBudget b{10};
-    EXPECT_DEATH(b.refund(), "contract violation");
-}
-#endif
 
 // Plan postcondition holds across a representative spread of inputs.
 TEST(ContractsPilot, WindowedPlanPartitionIsExhaustive) {

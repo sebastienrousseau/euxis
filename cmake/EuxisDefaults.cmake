@@ -26,6 +26,17 @@ if(NOT WIN32)
   endif()
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  # Apple Clang on macos-14 still emits -Wpre-c++2b-compat for the
+  # multi-argument subscript operator (libs/metrics/mdspan_views.hpp)
+  # even when the compile mode IS C++23. Apple Clang on macos-15 no
+  # longer has that flag at all and rejects it under -Werror as an
+  # unknown warning. Suppress the unknown-flag error so the flag is
+  # silently ignored on newer Clang while still demoting the warning
+  # on macos-14.
+  add_compile_options(-Wno-unknown-warning-option -Wno-pre-c++2b-compat)
+endif()
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14")
   # GCC 14 false-positive in nlohmann_json iter_impl.hpp; same family of
   # warning as the GCC 15 <regex>/<functional> case. Suppressing both

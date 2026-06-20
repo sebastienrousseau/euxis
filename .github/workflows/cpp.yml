@@ -5,10 +5,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-15 is Apple Silicon (arm64); macos-13/14 are Intel (x86_64).
-        # Keeping all three so the build is exercised on both architectures
-        # while CMakeLists.txt drives the right -march per host.
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, macos-15]
+        # macos-14 (Apple Silicon, older Apple Clang) + macos-15 (Apple
+        # Silicon, newer Apple Clang) cover the macOS surface. macos-13
+        # is the last Intel runner SKU and GitHub's allocation pool for
+        # it is so starved that jobs sit queued for hours — even with
+        # the matrix green on every other entry, the PR can't merge
+        # while macos-13 hangs in QUEUED state. Drop it; coverage stays
+        # on two Apple Silicon SKUs that exercise both Apple Clang
+        # generations, and Ubuntu carries the Linux side.
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -33,21 +38,17 @@ jobs:
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          # Homebrew LLVM ships a clang/libc++ with <generator> (C++23).
-          # Apple Clang on macos-13 and macos-14 lags upstream LLVM and
-          # does not provide that header; libs/runtime/include/euxis/
-          # runtime/session_store.hpp requires it.
-          brew install llvm libsodium nlohmann-json spdlog fmt googletest \
+          # Apple Clang ships with the SDK so libc++'s header wrappers
+          # always resolve. Homebrew LLVM 22.1.7 was tried earlier and
+          # broke on macos-14/15 with "<cstring> tried including
+          # <string.h> but didn't find libc++'s <string.h>" — the
+          # Homebrew libc++ expects features from a newer SDK than the
+          # GitHub runners ship. The trade-off: Apple Clang lacks
+          # <generator>, so EUXIS_HAS_STD_GENERATOR is off and the
+          # streaming/session-store generator paths are skipped on
+          # macOS. Ubuntu GCC 14 carries that coverage.
+          brew install libsodium nlohmann-json spdlog fmt googletest \
             sqlite pkg-config
-      - name: Select Homebrew Clang (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          LLVM_PREFIX="$(brew --prefix llvm)"
-          echo "CC=${LLVM_PREFIX}/bin/clang"   >> "$GITHUB_ENV"
-          echo "CXX=${LLVM_PREFIX}/bin/clang++" >> "$GITHUB_ENV"
-          # libc++ from Homebrew LLVM is at ${LLVM_PREFIX}/lib/c++.
-          echo "LDFLAGS=-L${LLVM_PREFIX}/lib/c++ -L${LLVM_PREFIX}/lib/unwind -Wl,-rpath,${LLVM_PREFIX}/lib/c++ -lunwind" >> "$GITHUB_ENV"
-          echo "CPPFLAGS=-I${LLVM_PREFIX}/include" >> "$GITHUB_ENV"
       - name: Build
         run: make cpp-build
       - name: Test

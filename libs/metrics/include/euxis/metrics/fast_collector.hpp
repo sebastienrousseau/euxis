@@ -77,10 +77,15 @@ public:
 private:
     FastMetricsBuffer buffer_;
     std::filesystem::path events_file_;
-    std::jthread flush_thread_;
+    // Plain std::thread + the shutdown_ atomic instead of std::jthread:
+    // Apple Clang 21 / libc++ has not shipped <stop_token> or
+    // std::jthread as of 2026-06, so the jthread path won't compile
+    // on macOS. The atomic gives us the same semantics with one less
+    // dependency on libc++ catch-up.
+    std::thread flush_thread_;
     std::atomic<bool> shutdown_{false};
 
-    void background_flush_loop(std::stop_token stop);
+    void background_flush_loop();
     void write_jsonl(const std::vector<MetricEvent>& events);
 };
 

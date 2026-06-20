@@ -36,8 +36,8 @@ void TelegramAdapter::connect() {
     }
     // Long-polling mode: spawn a background thread calling getUpdates
     spdlog::info("Telegram adapter starting long-poll loop");
-    poll_thread_ = std::jthread([this](std::stop_token stoken) {
-        while (!stoken.stop_requested() && !stop_.load(std::memory_order_relaxed)) {
+    poll_thread_ = std::thread([this] {
+        while (!stop_.load(std::memory_order_relaxed)) {
             auto resp = api_call("getUpdates",
                                  {{"offset", offset_},
                                   {"timeout", config_.poll_timeout}});
@@ -96,7 +96,6 @@ void TelegramAdapter::ack(const std::string& /*message_id*/) {}
 void TelegramAdapter::disconnect() {
     stop_.store(true, std::memory_order_relaxed);
     if (poll_thread_.joinable()) {
-        poll_thread_.request_stop();
         poll_thread_.join();
     }
     if (config_.mode == "webhook" && !config_.token.empty()) {

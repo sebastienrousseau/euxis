@@ -54,8 +54,16 @@ public:
     /// of 2026-06). On toolchains without `<generator>` the same
     /// method returns a fully-materialised vector instead. Range-for
     /// at the call site is identical either way.
+    ///
+    /// Note: under EUXIS_HAS_STD_GENERATOR the params are taken by
+    /// value, not by const&. C++ coroutines do NOT extend the
+    /// lifetime of reference parameters across suspensions, so a
+    /// reference into the caller's stack would dangle the first time
+    /// the generator suspends and resumes (caught as ASan stack-
+    /// use-after-scope on Ubuntu GCC 14, see commit 73ed3b6). The
+    /// non-coroutine vector overload keeps `const&` for parity.
 #if defined(EUXIS_HAS_STD_GENERATOR)
-    virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")
+    virtual auto stream_episodes(std::string session_id, std::string branch = "main")
         -> std::generator<SessionMessage> = 0;
 #else
     virtual auto stream_episodes(const std::string& session_id, const std::string& branch = "main")

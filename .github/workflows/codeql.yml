@@ -62,10 +62,16 @@ jobs:
         if: matrix.language == 'cpp'
         run: |
           cmake -B build/cmake-build -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-          # CodeQL needs the build to walk the translation units; a
-          # parallel build of every static library is enough.
-          cmake --build build/cmake-build --parallel
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_DISABLE_SANITIZERS=ON
+          # ubuntu-24.04 standard runners have 7 GB / 2 vCPUs. Each C++
+          # translation unit needs ~2 GB peak with the agentic/runtime
+          # generator code paths under -g, so `--parallel` (defaults to
+          # nproc) OOMs and the runner gets killed by the host. Pin to
+          # 2 jobs — finishes inside the 6-hour CodeQL window with
+          # headroom and stops the "runner received a shutdown signal"
+          # cascade tracked under the CodeQL failure cluster.
+          cmake --build build/cmake-build --parallel 2
 
       - name: CodeQL analysis
         uses: github/codeql-action/analyze@v4
