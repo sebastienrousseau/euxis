@@ -5,10 +5,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-15 is Apple Silicon (arm64); macos-13/14 are Intel (x86_64).
-        # Keeping all three so the build is exercised on both architectures
-        # while CMakeLists.txt drives the right -march per host.
-        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, macos-15]
+        # macos-14 (Apple Silicon, older Apple Clang) + macos-15 (Apple
+        # Silicon, newer Apple Clang) cover the macOS surface. macos-13
+        # is the last Intel runner SKU and GitHub's allocation pool for
+        # it is so starved that jobs sit queued for hours — even with
+        # the matrix green on every other entry, the PR can't merge
+        # while macos-13 hangs in QUEUED state. Drop it; coverage stays
+        # on two Apple Silicon SKUs that exercise both Apple Clang
+        # generations, and Ubuntu carries the Linux side.
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
