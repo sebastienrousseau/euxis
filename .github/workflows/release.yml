@@ -242,11 +242,16 @@ jobs:
 
       - name: Extract binaries for image build context
         run: |
-          mkdir -p ctx/linux-amd64 ctx/linux-arm64
-          tar -xzf dist/euxis-${EUXIS_VERSION}-linux-amd64.tar.gz -C ctx/linux-amd64 --strip-components=0
-          tar -xzf dist/euxis-${EUXIS_VERSION}-linux-arm64.tar.gz -C ctx/linux-arm64 --strip-components=0
-          mv "ctx/linux-amd64/euxis-${EUXIS_VERSION}-linux-amd64" ctx/linux-amd64/euxis
-          mv "ctx/linux-arm64/euxis-${EUXIS_VERSION}-linux-arm64" ctx/linux-arm64/euxis
+          # The Dockerfile uses COPY ctx/${TARGETPLATFORM}/euxis /euxis
+          # where TARGETPLATFORM is "linux/amd64" or "linux/arm64" —
+          # slash-separated, NOT "linux-amd64" with a hyphen. The old
+          # form caused: 'failed to calculate checksum of ref ...
+          # "/ctx/linux/amd64/euxis": not found'. Use the slashed paths.
+          mkdir -p ctx/linux/amd64 ctx/linux/arm64
+          tar -xzf dist/euxis-${EUXIS_VERSION}-linux-amd64.tar.gz -C ctx/linux/amd64 --strip-components=0
+          tar -xzf dist/euxis-${EUXIS_VERSION}-linux-arm64.tar.gz -C ctx/linux/arm64 --strip-components=0
+          mv "ctx/linux/amd64/euxis-${EUXIS_VERSION}-linux-amd64" ctx/linux/amd64/euxis
+          mv "ctx/linux/arm64/euxis-${EUXIS_VERSION}-linux-arm64" ctx/linux/arm64/euxis
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
