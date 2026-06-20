@@ -84,7 +84,7 @@ last_updated: "<YYYY-MM-DD>"
 
 ### Step 2: Add to Registry
 
-Add the agent entry to `~/.euxis/agents/registry.json`:
+Add the agent entry to `~/.euxis/data/agents/registry.json`:
 
 ```json
 {

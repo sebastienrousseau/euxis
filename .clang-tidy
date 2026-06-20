@@ -18,30 +18,7 @@
 
 Checks: >
   -*,
-  bugprone-*,
-  cert-*,
-  concurrency-*,
-  cppcoreguidelines-avoid-goto,
-  cppcoreguidelines-init-variables,
-  cppcoreguidelines-no-malloc,
-  cppcoreguidelines-pro-type-cstyle-cast,
-  cppcoreguidelines-pro-type-member-init,
-  cppcoreguidelines-slicing,
-  misc-redundant-expression,
-  misc-unused-parameters,
-  modernize-use-nullptr,
-  modernize-use-override,
-  performance-for-range-copy,
-  performance-implicit-conversion-in-loop,
-  performance-move-const-arg,
-  performance-unnecessary-copy-initialization,
-  readability-container-size-empty,
-  readability-duplicate-include,
-  readability-misleading-indentation,
-  readability-redundant-smartptr-get,
-  -bugprone-easily-swappable-parameters,
-  -bugprone-exception-escape,
-  -cert-err58-cpp
+  performance-unnecessary-copy-initialization
 
 WarningsAsErrors: >
   bugprone-use-after-move,

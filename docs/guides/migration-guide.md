@@ -138,13 +138,13 @@ The fleet registry now uses SQLite as the primary storage format with JSON fallb
 
 **Registry location:**
 ```
-~/.euxis/agents/registry.db      # Primary (SQLite)
-~/.euxis/agents/registry.json    # Fallback (JSON)
+~/.euxis/data/agents/registry.db      # Primary (SQLite)
+~/.euxis/data/agents/registry.json    # Fallback (JSON)
 ```
 
 **Query agents directly:**
 ```bash
-sqlite3 ~/.euxis/agents/registry.db "SELECT id, tier, activation FROM agents_complete;"
+sqlite3 ~/.euxis/data/agents/registry.db "SELECT id, tier, activation FROM agents_complete;"
 ```
 
 **Expected output:**
@@ -203,12 +203,12 @@ Significant performance improvements for voice/audio features:
 
 #### 1. Registry Format Migration
 
-**Impact:** Scripts that directly parse `agents/registry.json` may need updates.
+**Impact:** Scripts that directly parse `data/agents/registry.json` may need updates.
 
 **Before (v0.0.6):**
 ```python
 import json
-with open("~/.euxis/agents/registry.json") as f:
+with open("~/.euxis/data/agents/registry.json") as f:
     agents = json.load(f)["agents"]
 ```
 
@@ -299,7 +299,7 @@ mv ~/.euxis/capabilities.json ~/.euxis/config/ 2>/dev/null || true
 cp -r ~/.euxis ~/.euxis.backup.$(date +%Y%m%d)
 
 # 2. Check current version
-cat ~/.euxis/agents/registry.json | jq -r '.protocol_version'
+cat ~/.euxis/data/agents/registry.json | jq -r '.protocol_version'
 # Expected: 0.0.6
 
 # 3. Verify git status
@@ -408,7 +408,7 @@ python -m pytest tests/ -v
 
 ### Backward Compatibility Notes
 
-1. **JSON Registry Fallback:** If `agents/registry.db` is missing or corrupted, the system automatically loads from `agents/registry.json`.
+1. **JSON Registry Fallback:** If `data/agents/registry.db` is missing or corrupted, the system automatically loads from `data/agents/registry.json`.
 
 2. **Provider Fallback:** If the specified provider is unavailable, the system attempts providers in this order:
    ```
@@ -471,7 +471,7 @@ Use this checklist template for any version migration:
 
 **Symptoms:**
 ```
-Warning: agents/registry.db not found, falling back to JSON
+Warning: data/agents/registry.db not found, falling back to JSON
 ```
 
 **Solution:**
@@ -483,7 +483,7 @@ import sqlite3
 import json
 
 # Load JSON registry
-with open('~/.euxis/agents/registry.json'.replace('~', '$HOME')) as f:
+with open('~/.euxis/data/agents/registry.json'.replace('~', '$HOME')) as f:
     data = json.load(f)
 
 # The registry module handles creation automatically
@@ -544,11 +544,11 @@ Expected 40 agents, found 35
 **Solution:**
 ```bash
 # Verify registry files
-jq '.agents | length' ~/.euxis/agents/registry.json
-sqlite3 ~/.euxis/agents/registry.db "SELECT COUNT(*) FROM agents_complete;"
+jq '.agents | length' ~/.euxis/data/agents/registry.json
+sqlite3 ~/.euxis/data/agents/registry.db "SELECT COUNT(*) FROM agents_complete;"
 
 # If mismatch, re-sync from JSON
-rm ~/.euxis/agents/registry.db
+rm ~/.euxis/data/agents/registry.db
 python -c "from tui.core.registry import FleetRegistry; FleetRegistry.load()"
 ```
 
@@ -583,7 +583,7 @@ rm -rf ~/.euxis
 mv ~/.euxis.backup.YYYYMMDD ~/.euxis
 
 # 3. Verify restoration
-cat ~/.euxis/agents/registry.json | jq -r '.protocol_version'
+cat ~/.euxis/data/agents/registry.json | jq -r '.protocol_version'
 ```
 
 ### Git-Based Rollback
@@ -598,7 +598,7 @@ git tag -l
 git checkout v0.0.6
 
 # 3. Remove v0.0.7 artifacts
-rm -f ~/.euxis/agents/registry.db
+rm -f ~/.euxis/data/agents/registry.db
 rm -rf ~/.euxis/config/etx-settings.json
 
 # 4. Verify rollback
@@ -611,8 +611,8 @@ If only specific components need rollback:
 
 ```bash
 # Rollback registry only
-git checkout v0.0.6 -- agents/registry.json
-rm ~/.euxis/agents/registry.db
+git checkout v0.0.6 -- data/agents/registry.json
+rm ~/.euxis/data/agents/registry.db
 
 # Rollback playbooks only
 git checkout v0.0.6 -- playbooks/
@@ -625,7 +625,7 @@ mv ~/.euxis/tui ~/.euxis/tui.disabled
 
 ```bash
 # 1. Verify version
-cat ~/.euxis/agents/registry.json | jq -r '.protocol_version'
+cat ~/.euxis/data/agents/registry.json | jq -r '.protocol_version'
 # Expected: 0.0.6
 
 # 2. Run health check

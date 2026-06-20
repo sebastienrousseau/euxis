@@ -69,7 +69,7 @@ flowchart TB
 
     subgraph Data["Data Layer"]
         direction LR
-        registry[(agents/registry.db<br/>SQLite Agent Registry)]
+        registry[(data/agents/registry.db<br/>SQLite Agent Registry)]
         memory_files[(memory.md<br/>Per-Agent Memory)]
         lifecycle[(lifecycle/<br/>Agent State)]
         projects[(projects/<br/>Session Data)]
@@ -109,7 +109,7 @@ flowchart TB
 | **CLI** | `euxis`, `euxis-dispatch`, `euxis-squad`, `euxis-combo`, `euxis-playbook` | User-facing commands for agent invocation and orchestration |
 | **Shell Libraries** | `cli.sh`, `dispatch.sh`, `agents.sh`, `providers.sh`, `memory.sh` | Core framework logic implemented in pure Bash |
 | **Python TUI** | `euxis-cortex`, `euxis-synthesize`, `euxis-ui` | Optional rich interfaces requiring Python venv |
-| **Data Layer** | `agents/registry.db`, `memory.md`, `lifecycle/`, `projects/` | Persistent storage for agents, memory, and sessions |
+| **Data Layer** | `data/agents/registry.db`, `memory.md`, `lifecycle/`, `projects/` | Persistent storage for agents, memory, and sessions |
 | **C++23 Runtime** | `euxis-crypto-cpp`, `euxis-bridge-cpp`, `euxis-memory-cpp`, `euxis-identity-cpp`, `euxis-inference-cpp`, `euxis-a2a-cpp`, `euxis-etx` | High-performance native modules for crypto, skill sandboxing, encrypted memory, identity, local inference, A2A protocol, and Qt6 desktop GUI |
 | **Provider Layer** | Claude, Gemini, Goose, Ollama, Qwen, OpenAI | External AI model backends |
 
@@ -699,13 +699,14 @@ make cpp-bench    # Run benchmark suites against performance targets
 │   ├── projects/                # Project-specific data
 │   └── registry_pool/           # Connection pool locks
 ├── docs/                         # Documentation
-├── agents/prompts/                      # Agent prompts
-│   ├── core/                    # Core tier (9 agents)
-│   ├── fleet/                   # Fleet tier (32 agents)
-│   └── protocols/               # Shared protocol fragments
-├── agents/registry.db                   # SQLite agent registry
-├── agents/registry.json                 # JSON registry (fallback)
-├── agents/squads.json                   # Squad/combo definitions
+├── data/agents/                  # Agent prompts, registries, and squads
+│   ├── prompts/
+│   │   ├── core/                # Core tier (9 agents)
+│   │   ├── fleet/               # Fleet tier (32 agents)
+│   │   └── protocols/           # Shared protocol fragments
+│   ├── registry.db              # SQLite agent registry
+│   ├── registry.json            # JSON registry (fallback)
+│   └── squads.json              # Squad/combo definitions
 ├── libs/                                # C++23 Libraries
 │   ├── crypto/                      # AES-256-GCM, Ed25519, Argon2id
 │   ├── bridge/                      # Skill import, sandbox execution

@@ -162,7 +162,7 @@ cp ~/.euxis/config/templates/agent-prompt.txt \
 # Edit with your agent details
 $EDITOR ~/.euxis/agents/prompts/fleet/my-agent.txt
 
-# Register in agents/registry.json
+# Register in data/agents/registry.json
 # (add entry with agent ID matching filename)
 ```
 

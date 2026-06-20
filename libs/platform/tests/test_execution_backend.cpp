@@ -23,12 +23,9 @@ TEST(ExecLocalBackendTest, NameIsLocal) {
 }
 
 TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
-    req.argv = {"/bin/echo", "hello"};
+    req.argv = {"echo", "hello"};
 
     auto res = b.execute(req);
     EXPECT_FALSE(res.error.has_value()) << *res.error;
@@ -41,7 +38,7 @@ TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
 TEST(ExecLocalBackendTest, FalseReturnsNonZeroExitCode) {
     LocalBackend b;
     ExecutionRequest req;
-    req.argv = {"/bin/false"};
+    req.argv = {"false"};
 
     auto res = b.execute(req);
     EXPECT_FALSE(res.error.has_value()) << *res.error;
@@ -49,12 +46,9 @@ TEST(ExecLocalBackendTest, FalseReturnsNonZeroExitCode) {
 }
 
 TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
-    req.argv = {"/bin/cat"};
+    req.argv = {"cat"};
     req.stdin_text = "feed me\nbye\n";
 
     auto res = b.execute(req);
@@ -64,14 +58,11 @@ TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
 }
 
 TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
     // Use sh -c to print the env var so we don't depend on `env` being
     // installed at a specific path.
-    req.argv = {"/bin/sh", "-c", "echo $EUXIS_TEST_VAR"};
+    req.argv = {"sh", "-c", "echo $EUXIS_TEST_VAR"};
     req.env  = {{"EUXIS_TEST_VAR", "value-42"}};
 
     auto res = b.execute(req);
@@ -81,12 +72,9 @@ TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
 }
 
 TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
-    req.argv = {"/bin/pwd"};
+    req.argv = {"pwd"};
     req.working_dir = std::filesystem::path{"/tmp"};
 
     auto res = b.execute(req);
@@ -98,12 +86,9 @@ TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
 }
 
 TEST(ExecLocalBackendTest, TimeoutKillsLongProcess) {
-#if defined(__linux__)
-    GTEST_SKIP() << "tracked in issue #96 — execvp returns 127 on Ubuntu CI";
-#endif
     LocalBackend b;
     ExecutionRequest req;
-    req.argv    = {"/bin/sleep", "5"};
+    req.argv    = {"sleep", "5"};
     req.timeout = std::chrono::milliseconds{200};
 
     const auto t0 = std::chrono::steady_clock::now();

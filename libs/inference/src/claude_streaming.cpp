@@ -120,7 +120,7 @@ struct ToolCallContext {
 void dispatch_event(std::string_view payload,
                     std::vector<ProviderDelta>& out,
                     std::vector<ToolCallContext>& tool_ctx) {
-    auto j = nlohmann::json::parse(payload, nullptr, /*allow_exceptions=*/false);
+    auto j = nlohmann::json::parse(std::string{payload}, nullptr, /*allow_exceptions=*/false);
     if (j.is_discarded() || !j.is_object()) return;
 
     const auto type = j.value("type", std::string{});

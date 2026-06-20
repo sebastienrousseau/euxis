@@ -119,9 +119,6 @@ data: {"type":"message_stop"}
 )sse";
 
 TEST(ClaudeStreaming, TextOnlyStreamYieldsExpectedDeltas) {
-#if defined(__linux__) && defined(__GNUC__) && !defined(__clang__)
-    GTEST_SKIP() << "tracked in issue #95 — json UTF-8 type_error.316 on Ubuntu GCC 14";
-#endif
     MockSseServer mock{kTextOnlySse};
     ClaudeStreamingProvider p{make_config(mock.base_url())};
 
@@ -176,9 +173,6 @@ data: {"type":"message_stop"}
 )sse";
 
 TEST(ClaudeStreaming, ToolCallPartialsCarryIdAndNameAndReassemble) {
-#if defined(__linux__) && defined(__GNUC__) && !defined(__clang__)
-    GTEST_SKIP() << "tracked in issue #95 — json UTF-8 type_error.316 on Ubuntu GCC 14";
-#endif
     MockSseServer mock{kToolCallSse};
     ClaudeStreamingProvider p{make_config(mock.base_url())};
 
@@ -254,9 +248,6 @@ struct MockErrorServer {
 };
 
 TEST(ClaudeStreaming, Non2xxResponseYieldsEmptyStream) {
-#if defined(__linux__) && defined(__GNUC__) && !defined(__clang__)
-    GTEST_SKIP() << "tracked in issue #95 — json UTF-8 type_error.316 on Ubuntu GCC 14";
-#endif
     MockErrorServer mock;
     ClaudeStreamingProvider p{make_config(mock.base_url())};
 

@@ -255,8 +255,8 @@ validation_error() # (message: string) -> void
 ### Agent Registry Contract
 
 The TUI reads agent configuration from:
-- `$EUXIS_HOME/agents/registry.json` (JSON format)
-- `$EUXIS_HOME/agents/registry.db` (SQLite format)
+- `$EUXIS_HOME/data/agents/registry.json` (JSON format)
+- `$EUXIS_HOME/data/agents/registry.db` (SQLite format)
 
 ```python
 # Expected registry.json structure
@@ -281,7 +281,7 @@ The TUI reads agent configuration from:
 # tests/contracts/test_tui_core.py
 def test_registry_json_structure():
     import json
-    with open("agents/registry.json") as f:
+    with open("data/agents/registry.json") as f:
         registry = json.load(f)
     assert "schema_version" in registry
     assert "protocol_version" in registry
