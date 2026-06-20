@@ -35,6 +35,18 @@ jobs:
         run: |
           echo "CC=gcc-14"  >> "$GITHUB_ENV"
           echo "CXX=g++-14" >> "$GITHUB_ENV"
+      - name: Relax AppArmor unprivileged-userns restriction (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          # Ubuntu 24.04 ships kernel.apparmor_restrict_unprivileged_userns=1.
+          # That blocks user-namespace clones, which the AddressSanitizer
+          # runtime uses for shadow memory. The downstream symptom is
+          # execve() returning EPERM ("Operation not permitted") from a
+          # forked child even for benign binaries like /usr/bin/echo —
+          # see libs/platform/tests/test_execution_backend.cpp + issue #96.
+          # Relax it for the runner shell; the kernel default returns on
+          # reboot and the runner is ephemeral.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -87,6 +99,9 @@ jobs:
             libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
           echo "CC=gcc-14"  >> "$GITHUB_ENV"
           echo "CXX=g++-14" >> "$GITHUB_ENV"
+          # See issue #96 — Ubuntu 24.04's AppArmor unprivileged-userns
+          # restriction blocks ASan-instrumented execve().
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
       - name: Configure with contracts pilot ON
         run: |
           cmake -B build/cmake-build \

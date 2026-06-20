@@ -143,6 +143,9 @@ jobs:
             libspdlog-dev libfmt-dev libgtest-dev libsqlite3-dev pkg-config
           echo "CC=gcc-14"  >> "$GITHUB_ENV"
           echo "CXX=g++-14" >> "$GITHUB_ENV"
+          # See issue #96 — Ubuntu 24.04's AppArmor unprivileged-userns
+          # restriction blocks ASan-instrumented execve().
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
 
       - name: Build + test
         run: |
