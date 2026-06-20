@@ -74,7 +74,12 @@ jobs:
             ${{ matrix.cmake_args }}
 
       - name: Build
-        run: cmake --build cmake-build --parallel --target euxis-cli
+        # `--parallel` defaults to nproc which on ubuntu-24.04-arm (4 vCPU
+        # / 16 GB) OOM-kills the runner under Release builds — the heavy
+        # generator / runtime TUs alone need ~3 GB peak each. Pinning to
+        # `--parallel 2` keeps the build under the memory ceiling and
+        # finishes inside the release-window budget.
+        run: cmake --build cmake-build --parallel 2 --target euxis-cli
 
       - name: Smoke test
         run: ./cmake-build/apps/cli/euxis-cli --version
