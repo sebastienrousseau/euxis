@@ -162,7 +162,13 @@ struct DrainResult {
         // child before exec; the parent stays restricted. See issue
         // #96 for the original CI-side diagnostic. No-op when ASan
         // is not present.
+        const int dumpable_before = ::prctl(PR_GET_DUMPABLE);
+        const int nnp_before      = ::prctl(PR_GET_NO_NEW_PRIVS);
         (void)::prctl(PR_SET_DUMPABLE, 1, 0, 0, 0);
+        const int dumpable_after  = ::prctl(PR_GET_DUMPABLE);
+        std::fprintf(stderr,
+                     "child diag: dumpable=%d->%d nnp=%d\n",
+                     dumpable_before, dumpable_after, nnp_before);
 #endif
 
         if (req.working_dir) {
@@ -177,7 +183,9 @@ struct DrainResult {
         auto argv_c = to_execvp_argv(req.argv);
         ::execvp(argv_c[0], argv_c.data());
         // exec failed — diagnose and exit with the canonical "127".
-        std::fprintf(stderr, "execvp failed: %s\n", std::strerror(errno));
+        const int exec_errno = errno;
+        std::fprintf(stderr, "execvp failed: %s (errno=%d argv[0]=%s)\n",
+                     std::strerror(exec_errno), exec_errno, argv_c[0]);
         _exit(127);
     }
 
