@@ -184,6 +184,11 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
+          # Only the euxis-* artifacts; the docker/buildx job uploads a
+          # zero-byte attestation artifact with tildes in its name
+          # ("…~…~…dockerbuild") that breaks download-artifact@v4's
+          # extraction path, failing the whole step "after 5 retries".
+          pattern: "euxis-*"
           path: dist
           merge-multiple: true
 
