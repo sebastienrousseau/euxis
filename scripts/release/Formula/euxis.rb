@@ -4,11 +4,8 @@
 # Homebrew formula for the `euxis` CLI from
 # https://github.com/sebastienrousseau/euxis
 #
-# This file is the template the release pipeline rewrites per tag:
-# .github/workflows/release.yml emits per-platform tarballs at
-#   https://github.com/sebastienrousseau/euxis/releases/download/<tag>/
-# and a small bumper Action in the tap repo swaps the four `sha256`
-# lines below before opening a PR against sebastienrousseau/homebrew-tap.
+# Updated per release by the bumper Action in the tap repo (it rewrites
+# the `version` line and the per-platform `sha256` lines).
 #
 # Verify locally with:
 #   brew install --build-from-source euxis.rb && euxis --version
@@ -20,24 +17,23 @@ class Euxis < Formula
   version '0.1.3'
 
   on_macos do
+    # macOS Intel (macos-13) was dropped from the release matrix because
+    # GitHub Actions' Intel runner pool is starved; only Apple Silicon
+    # tarballs ship today. See .github/workflows/release.yml.
     on_arm do
       url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-darwin-arm64.tar.gz"
-      sha256 'REPLACE_WITH_darwin-arm64_SHA256'
-    end
-    on_intel do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-darwin-amd64.tar.gz"
-      sha256 'REPLACE_WITH_darwin-amd64_SHA256'
+      sha256 'c596155859215e386a0aff5125914fe28fc66ac05a96edbbb9806d23b544d251'
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-linux-arm64.tar.gz"
-      sha256 'REPLACE_WITH_linux-arm64_SHA256'
+      sha256 'b813765647a9de85934ed95a1e8ad2b6634db9e434fa1576650e8aa016cb961e'
     end
     on_intel do
       url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-linux-amd64.tar.gz"
-      sha256 'REPLACE_WITH_linux-amd64_SHA256'
+      sha256 '05eaad3775e59b586096f4c28c517ed0d9f05592d68a842232213c5daa180fbc'
     end
   end
 
