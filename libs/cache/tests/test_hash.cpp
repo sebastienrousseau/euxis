@@ -66,7 +66,7 @@ TEST(Hash, FileMissingReturnsError) {
 }
 
 TEST(Hash, FileLargerThanChunkBuffer) {
-    std::string big(200 * 1024, 'A');  // 200 KiB, > 64 KiB chunk
+    std::string big(std::size_t{200} * 1024, 'A');  // 200 KiB, > 64 KiB chunk
     TmpFile f{"big.bin", big};
     auto h_file = hash_file(f.path);
     ASSERT_TRUE(h_file.has_value());

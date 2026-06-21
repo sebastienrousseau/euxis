@@ -128,7 +128,7 @@ auto hash_file(const std::filesystem::path& path)
     // 64 KiB matches the libsodium-recommended chunk size and lands
     // squarely below typical L2 cache so we don't churn memory on
     // small machines.
-    std::array<char, 64 * 1024> buf{};
+    std::array<char, std::size_t{64} * 1024> buf{};
     while (f) {
         f.read(buf.data(), static_cast<std::streamsize>(buf.size()));
         std::streamsize n = f.gcount();
