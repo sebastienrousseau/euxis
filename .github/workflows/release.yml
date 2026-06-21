@@ -176,7 +176,15 @@ jobs:
 
   publish:
     name: Publish release
-    needs: [build, linux-packages]
+    # linux-packages is intentionally not in `needs:` — the CPack
+    # invocation hangs indefinitely on the ubuntu-24.04 + ubuntu-24.04-arm
+    # runners (110+ min observed on run #27888557585 with no recovery).
+    # The .tar.gz + .sha256 + cosign bundles + Docker image are the
+    # primary distribution channel; .deb/.rpm packaging is tracked as a
+    # separate follow-up. The linux-packages job still runs in parallel
+    # so its eventual fix can be validated without re-running the whole
+    # workflow.
+    needs: [build]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
