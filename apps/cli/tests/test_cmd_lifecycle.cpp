@@ -10,6 +10,10 @@
 #include <unistd.h>
 #include <nlohmann/json.hpp>
 
+// NOLINTBEGIN(cert-err33-c) — test scratch I/O (tempfile setup, fclose
+// teardown) intentionally discards return; tests can blanket-disable per
+// docs/development/clang-tidy-policy.md.
+
 namespace euxis::cli::cmd {
 namespace {
 
@@ -392,3 +396,5 @@ TEST_F(EngineLifecycleTest, HelpShowsLifecycleGroup) {
 
 } // namespace
 } // namespace euxis::cli
+
+// NOLINTEND(cert-err33-c)

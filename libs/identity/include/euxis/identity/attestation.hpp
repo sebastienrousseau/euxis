@@ -15,7 +15,7 @@ struct Attestation {
     std::string attester_did;
     std::string subject_did;
     std::string attestation_type;
-    double confidence;
+    double confidence{0.0};
     std::string created_at;
     std::string evidence;
 
