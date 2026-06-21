@@ -319,7 +319,7 @@ auto LocalBackend::execute(const ExecutionRequest& req) -> ExecutionResult {
 
 auto DockerBackend::name() const noexcept -> std::string_view { return "docker"; }
 
-auto DockerBackend::is_available() noexcept -> bool {
+auto DockerBackend::is_available() -> bool {
     ExecutionRequest probe;
     probe.argv = {"docker", "info"};
     probe.timeout = std::chrono::milliseconds{2000};

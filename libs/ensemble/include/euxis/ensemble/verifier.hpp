@@ -83,7 +83,7 @@ public:
     /// Stable identifier the runner stores in the EnsembleVote.
     /// e.g. "claude-opus-4-7", "deterministic/always-true",
     /// "static/known-cwe-79".
-    [[nodiscard]] virtual auto provider_id() const noexcept -> std::string = 0;
+    [[nodiscard]] virtual auto provider_id() const -> std::string = 0;
 
     /// Cast the vote. Implementations must be thread-safe — the
     /// runner may call multiple verifiers concurrently in a

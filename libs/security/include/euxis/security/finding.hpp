@@ -189,6 +189,6 @@ struct Finding {
 
 /// Parse a `Severity` from a CLI-style string. Returns Severity::None
 /// on no match so the caller can detect bad input.
-[[nodiscard]] auto parse_severity(const std::string& s) noexcept -> Severity;
+[[nodiscard]] auto parse_severity(const std::string& s) -> Severity;
 
 } // namespace euxis::security

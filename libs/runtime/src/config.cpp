@@ -168,11 +168,11 @@ auto expand_home(std::string path) -> std::string {
 
 } // namespace
 
-auto default_config() noexcept -> RuntimeConfig {
+auto default_config() -> RuntimeConfig {
     return RuntimeConfig{};
 }
 
-auto parse_scan_mode(const std::string& s) noexcept -> ScanMode {
+auto parse_scan_mode(const std::string& s) -> ScanMode {
     std::string lower;
     lower.reserve(s.size());
     for (char c : s) lower.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
@@ -245,7 +245,7 @@ auto load_yaml_file(const std::filesystem::path& path)
     return cfg;
 }
 
-void apply_env_overrides(RuntimeConfig& config) noexcept {
+void apply_env_overrides(RuntimeConfig& config) {
     auto env = [](const char* k) -> std::optional<std::string> {
         const char* v = std::getenv(k);
         return v != nullptr ? std::optional<std::string>{v} : std::nullopt;
@@ -267,7 +267,7 @@ void apply_env_overrides(RuntimeConfig& config) noexcept {
     }
 }
 
-void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay) noexcept {
+void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay) {
     const RuntimeConfig zero{};
 
     // Project

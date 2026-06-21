@@ -18,7 +18,7 @@ DeterministicVerifier::DeterministicVerifier(
       rationale_when_true_(std::move(rationale_when_true)),
       rationale_when_false_(std::move(rationale_when_false)) {}
 
-auto DeterministicVerifier::provider_id() const noexcept -> std::string {
+auto DeterministicVerifier::provider_id() const -> std::string {
     return provider_id_;
 }
 

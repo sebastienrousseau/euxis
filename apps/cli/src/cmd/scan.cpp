@@ -476,6 +476,7 @@ auto scan_file_compute(const std::filesystem::path& file,
         euxis::cache::CacheEntry e;
         e.findings_json = serialize_findings(out.findings);
         e.size_bytes    = static_cast<std::int64_t>(e.findings_json.size());
+        // NOLINTNEXTLINE(bugprone-unused-return-value) — best-effort cache write; scan succeeds regardless
         (void)cache->put(k, e);
     }
 

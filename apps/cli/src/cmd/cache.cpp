@@ -57,7 +57,7 @@ auto format_iso(std::int64_t unix_sec) -> std::string {
     gmtime_r(&t, &tm);
 #endif
     char buf[32]{};
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
     return std::string{buf};
 }
 
@@ -66,13 +66,13 @@ auto human_bytes(std::int64_t bytes) -> std::string {
     constexpr std::int64_t mib = 1024 * 1024;
     if (bytes >= mib) {
         char buf[32]{};
-        std::snprintf(buf, sizeof(buf), "%.2f MiB",
+        (void) std::snprintf(buf, sizeof(buf), "%.2f MiB",
             static_cast<double>(bytes) / static_cast<double>(mib));
         return buf;
     }
     if (bytes >= kib) {
         char buf[32]{};
-        std::snprintf(buf, sizeof(buf), "%.2f KiB",
+        (void) std::snprintf(buf, sizeof(buf), "%.2f KiB",
             static_cast<double>(bytes) / static_cast<double>(kib));
         return buf;
     }

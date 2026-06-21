@@ -86,7 +86,7 @@ auto Guard::size() const noexcept -> std::size_t {
 }
 
 auto Guard::contains(std::string_view name,
-                     euxis::sbom::PurlType ecosystem) const noexcept -> bool {
+                     euxis::sbom::PurlType ecosystem) const -> bool {
     const auto* b = bucket_for(ecosystem);
     if (b == nullptr) return false;
 

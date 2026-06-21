@@ -85,7 +85,7 @@ auto language_str(Language lang) noexcept -> const char* {
     return "unknown";
 }
 
-auto detect_language_by_extension(std::string_view ext) noexcept
+auto detect_language_by_extension(std::string_view ext)
     -> std::optional<Language> {
     if (!ext.empty() && ext.front() == '.') {
         ext.remove_prefix(1);
@@ -98,7 +98,7 @@ auto detect_language_by_extension(std::string_view ext) noexcept
     return std::nullopt;
 }
 
-auto detect_language(const std::filesystem::path& path) noexcept
+auto detect_language(const std::filesystem::path& path)
     -> std::optional<Language> {
     auto ext = path.extension().string();
     return detect_language_by_extension(ext);
