@@ -38,12 +38,12 @@ protected:
         if (values_.size() < 2) return;
 
         float max_val = 100.0f;
-        double step_x = static_cast<double>(width()) / (values_.size() - 1);
+        double step_x = static_cast<double>(width()) / static_cast<double>(values_.size() - 1);
 
         QVector<QPointF> points;
         for (int i = 0; i < values_.size(); ++i) {
             double x = i * step_x;
-            double y = height() - (values_[i] / max_val * height());
+            double y = height() - (static_cast<float>(values_[i]) / max_val * static_cast<float>(height()));
             points.append(QPointF(x, y));
         }
 

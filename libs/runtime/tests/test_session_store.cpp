@@ -59,7 +59,7 @@ TEST_F(SessionStoreTest, UnknownRoleDefaultsToUser) {
     
     auto packed = nlohmann::json::to_msgpack(j);
     std::ofstream f(path, std::ios::binary);
-    f.write(reinterpret_cast<const char*>(packed.data()), packed.size());
+    f.write(reinterpret_cast<const char*>(packed.data()), static_cast<std::streamsize>(packed.size()));
     f.close();
 
     auto load_result = store_->load("custom-role", "main");
