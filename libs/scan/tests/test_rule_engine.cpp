@@ -6,6 +6,10 @@
 #include "euxis/scan/rule_engine.hpp"
 #include "euxis/scan/rule_loader.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::scan {
 namespace {
 
@@ -339,3 +343,5 @@ rules:
 
 } // namespace
 } // namespace euxis::scan
+
+// NOLINTEND(bugprone-unchecked-optional-access)

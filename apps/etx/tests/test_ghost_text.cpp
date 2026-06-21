@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 #include <euxis/etx/ghost_text.hpp>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::etx {
 namespace {
 
@@ -82,3 +86,5 @@ TEST(GhostTextTest, RecordEmptyStringIgnored) {
 
 } // namespace
 } // namespace euxis::etx
+
+// NOLINTEND(bugprone-unchecked-optional-access)

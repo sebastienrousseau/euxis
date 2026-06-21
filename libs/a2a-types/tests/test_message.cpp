@@ -4,6 +4,10 @@
 
 #include "euxis/a2a/message.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::a2a {
 namespace {
 
@@ -285,3 +289,5 @@ TEST(MessageTest, MultipleArtifacts) {
 
 } // namespace
 } // namespace euxis::a2a
+
+// NOLINTEND(bugprone-unchecked-optional-access)

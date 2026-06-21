@@ -68,9 +68,13 @@ auto WebSocketClient::send_and_wait(const nlohmann::json& message, int timeout_s
     });
 
     if (!signaled) return std::unexpected("WebSocket request timed out");
-    // cv_.wait_for predicate guarantees has_value() == true here; .value() makes
-    // that visible to clang-tidy without changing behaviour (throws only on logic
-    // bug in the wait predicate, which would already be a programming error).
+    // cv_.wait_for predicate guarantees has_value() == true here; the
+    // explicit re-check makes it visible to clang-tidy's dataflow without
+    // changing behaviour. The unexpected branch is unreachable barring a
+    // logic bug in the wait predicate.
+    if (!last_response_.has_value()) {
+        return std::unexpected("WebSocket response missing after signal");
+    }
     return last_response_.value();
 }
 

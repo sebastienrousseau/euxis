@@ -2,6 +2,10 @@
 #include "euxis/runtime/interaction.hpp"
 #include <memory>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::runtime {
 namespace {
 
@@ -88,3 +92,5 @@ TEST(InteractionExtendedTest, SequentialFailure) {
 
 } // namespace
 } // namespace euxis::runtime
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -4,6 +4,10 @@
 #include <filesystem>
 #include <fstream>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::bridge {
 
 TEST(ParserTest, ParseFrontmatter) {
@@ -110,3 +114,5 @@ TEST(ParserTest, WhitespaceOnlyValue) {
 }
 
 }  // namespace euxis::bridge
+
+// NOLINTEND(bugprone-unchecked-optional-access)

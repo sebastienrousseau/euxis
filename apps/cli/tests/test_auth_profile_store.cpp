@@ -6,6 +6,10 @@
 
 #include <gtest/gtest.h>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 using namespace euxis::cli;
 
 class AuthProfileStoreTest : public ::testing::Test {
@@ -535,3 +539,5 @@ TEST_F(AuthProfileStoreTest, RateLimitEscalation) {
     EXPECT_GT(remaining2, remaining1);
     EXPECT_GT(remaining3, remaining2);
 }
+
+// NOLINTEND(bugprone-unchecked-optional-access)

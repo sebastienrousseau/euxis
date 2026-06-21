@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 #include <euxis/bridge/reputation.hpp>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::bridge {
 
 TEST(ReputationTest, DefaultScore) {
@@ -87,3 +91,5 @@ TEST(ReputationTest, ScoreUnknownAuthorReturnsDefault) {
 }
 
 }  // namespace euxis::bridge
+
+// NOLINTEND(bugprone-unchecked-optional-access)
