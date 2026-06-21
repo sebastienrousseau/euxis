@@ -220,13 +220,19 @@ jobs:
         with:
           tag_name: ${{ env.EUXIS_VERSION }}
           generate_release_notes: true
+          # `dist/*.deb` and `dist/*.rpm` are intentionally absent: the
+          # linux-packages job hangs in CPack and is decoupled from
+          # publish (see PR #106). The .tar.gz / .sha256 / cosign
+          # bundles + Docker image are the v0.1.3 distribution channel;
+          # .deb/.rpm will land via a separate run once the CPack hang
+          # is diagnosed. Keeping fail_on_unmatched_files=true so an
+          # unintentional regression on the *present* artifacts still
+          # surfaces immediately.
           fail_on_unmatched_files: true
           files: |
             dist/*.tar.gz
             dist/*.tar.gz.sha256
             dist/*.cosign.bundle
-            dist/*.deb
-            dist/*.rpm
             dist/SHA256SUMS
             dist/SHA256SUMS.cosign.bundle
 
