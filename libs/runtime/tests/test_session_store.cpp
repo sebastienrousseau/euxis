@@ -141,7 +141,7 @@ TEST_F(MemorySessionStoreTest, EpisodicStreaming) {
     ASSERT_TRUE(store_->save(snap).has_value());
     
     int count = 0;
-    for (auto msg : store_->stream_episodes("stream-test")) {
+    for (const auto& msg : store_->stream_episodes("stream-test")) {
         count++;
         if (count == 1) { EXPECT_EQ(msg.content, "ep1"); }
         if (count == 2) { EXPECT_EQ(msg.content, "ep2"); }

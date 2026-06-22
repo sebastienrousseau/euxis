@@ -127,7 +127,7 @@ void EventLoop::remove_timer(int id) {
 void EventLoop::post(Event event) {
     {
         std::lock_guard lock(post_mutex_);
-        posted_events_.push(std::move(event));
+        posted_events_.push(event);  // Event is trivially copyable; std::move is a no-op
     }
     // Wake up poll() via self-pipe.
     if (self_pipe_write_ >= 0) {

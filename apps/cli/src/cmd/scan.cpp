@@ -147,7 +147,7 @@ auto parse_args(const std::vector<std::string>& argv)
                 return std::unexpected(
                     "--language=<x>: unknown language token '" + s.substr(11) + "'");
             }
-            a.language_filter = *lang;
+            a.language_filter = lang;
             continue;
         }
         if (s.starts_with("--fail-on=")) {
