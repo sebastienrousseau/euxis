@@ -170,7 +170,7 @@ auto safe_spawn_posix(const std::vector<std::string>& argv,
     }
 
     // Set up file actions: redirect stdout+stderr to pipe
-    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_t actions{};
     posix_spawn_file_actions_init(&actions);
     posix_spawn_file_actions_addclose(&actions, stdout_pipe[0]);
     posix_spawn_file_actions_adddup2(&actions, stdout_pipe[1], STDOUT_FILENO);
@@ -215,7 +215,7 @@ auto safe_spawn_posix(const std::vector<std::string>& argv,
     close(stdout_pipe[1]);
 
     std::string output;
-    output.reserve(64 * 1024);
+    output.reserve(std::size_t{64} * 1024);
     std::array<char, 4096> buffer{};
 
     struct pollfd pfd{};

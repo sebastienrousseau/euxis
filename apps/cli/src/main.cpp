@@ -9,6 +9,10 @@
 
 #include <sodium.h>
 
+// Top-level fail-fast: if the CLI bootstrap throws (allocator failure, FS
+// unwritable), terminate is the documented exit path. The C++ runtime emits
+// the exception details via the OS abort handler.
+// NOLINTBEGIN(bugprone-exception-escape)
 int main(int argc, char* argv[]) {
     // S6: Initialize libsodium before any crypto operations (HMAC, signing).
     // sodium_init() is idempotent: returns 0 on first call, 1 on subsequent.
@@ -50,3 +54,4 @@ int main(int argc, char* argv[]) {
     euxis::cli::Engine engine(euxis_home);
     return engine.run(args);
 }
+// NOLINTEND(bugprone-exception-escape)

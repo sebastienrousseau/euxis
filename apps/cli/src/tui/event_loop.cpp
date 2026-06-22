@@ -69,7 +69,7 @@ EventLoop::~EventLoop() {
     quit();
     // Restore default SIGWINCH handler if we installed ours.
     if (g_signal_pipe_write == signal_pipe_write_) {
-        std::signal(SIGWINCH, SIG_DFL);
+        (void) std::signal(SIGWINCH, SIG_DFL);
         g_signal_pipe_write = -1;
     }
     if (self_pipe_read_ >= 0) ::close(self_pipe_read_);
@@ -127,7 +127,7 @@ void EventLoop::remove_timer(int id) {
 void EventLoop::post(Event event) {
     {
         std::lock_guard lock(post_mutex_);
-        posted_events_.push(std::move(event));
+        posted_events_.push(event);  // Event is trivially copyable; std::move is a no-op
     }
     // Wake up poll() via self-pipe.
     if (self_pipe_write_ >= 0) {

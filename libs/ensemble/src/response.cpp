@@ -78,7 +78,9 @@ float coerce_confidence(const nlohmann::json& v) {
             if (c < 0.0) c = 0.0;
             if (c > 1.0) c = 1.0;
             return static_cast<float>(c);
-        } catch (...) {}
+        } catch (...) {
+            (void)0;  // swallowed: best-effort — fall through to default
+        }
     }
     return 0.0F;
 }

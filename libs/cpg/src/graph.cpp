@@ -89,7 +89,7 @@ auto Graph::parent(NodeId child) const noexcept -> NodeId {
     return kNullNode;
 }
 
-auto Graph::descendant_count(NodeId root_id) const noexcept -> std::size_t {
+auto Graph::descendant_count(NodeId root_id) const -> std::size_t {
     if (!root_id.is_valid()) return 0;
     std::size_t total = 1;  // include `root_id` itself
     // Frontier DFS keeps recursion bounded. The dense edge vector

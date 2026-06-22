@@ -22,7 +22,7 @@ class OAuthFlow;
 struct ChatMessage {
     /// The role of the message sender.
     enum Role { User, Assistant, System };
-    Role role;
+    Role role{User};
     QString agent_id;
     QString text;
     QString model;

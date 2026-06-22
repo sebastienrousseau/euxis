@@ -6,6 +6,10 @@
 
 #include "euxis/metrics/evidence.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::metrics {
 namespace {
 
@@ -320,3 +324,5 @@ TEST_F(EvidenceFrameworkTest, ConstructorWithEmptyPath) {
 
 } // namespace
 } // namespace euxis::metrics
+
+// NOLINTEND(bugprone-unchecked-optional-access)

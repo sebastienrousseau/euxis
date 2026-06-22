@@ -59,7 +59,7 @@ TEST_F(SessionStoreTest, UnknownRoleDefaultsToUser) {
     
     auto packed = nlohmann::json::to_msgpack(j);
     std::ofstream f(path, std::ios::binary);
-    f.write(reinterpret_cast<const char*>(packed.data()), packed.size());
+    f.write(reinterpret_cast<const char*>(packed.data()), static_cast<std::streamsize>(packed.size()));
     f.close();
 
     auto load_result = store_->load("custom-role", "main");
@@ -141,7 +141,7 @@ TEST_F(MemorySessionStoreTest, EpisodicStreaming) {
     ASSERT_TRUE(store_->save(snap).has_value());
     
     int count = 0;
-    for (auto msg : store_->stream_episodes("stream-test")) {
+    for (const auto& msg : store_->stream_episodes("stream-test")) {
         count++;
         if (count == 1) { EXPECT_EQ(msg.content, "ep1"); }
         if (count == 2) { EXPECT_EQ(msg.content, "ep2"); }

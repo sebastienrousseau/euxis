@@ -147,7 +147,7 @@ auto parse_args(const std::vector<std::string>& argv)
                 return std::unexpected(
                     "--language=<x>: unknown language token '" + s.substr(11) + "'");
             }
-            a.language_filter = *lang;
+            a.language_filter = lang;
             continue;
         }
         if (s.starts_with("--fail-on=")) {
@@ -306,6 +306,7 @@ auto deserialize_findings(const std::string& json_str)
             if (item.contains("cwe") && item["cwe"].is_string()) {
                 f.cwe = euxis::security::CweRef{
                     .id = item["cwe"].get<std::string>(),
+                    .short_name = "",
                 };
             }
             f.owasp = static_cast<euxis::security::OwaspCategory>(
@@ -331,6 +332,7 @@ auto deserialize_findings(const std::string& json_str)
     } catch (...) {
         // Cache deserialisation failures are non-fatal — caller
         // falls back to a fresh scan.
+        (void)0;  // swallowed: best-effort
     }
     return out;
 }
@@ -476,6 +478,7 @@ auto scan_file_compute(const std::filesystem::path& file,
         euxis::cache::CacheEntry e;
         e.findings_json = serialize_findings(out.findings);
         e.size_bytes    = static_cast<std::int64_t>(e.findings_json.size());
+        // NOLINTNEXTLINE(bugprone-unused-return-value) — best-effort cache write; scan succeeds regardless
         (void)cache->put(k, e);
     }
 

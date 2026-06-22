@@ -17,7 +17,7 @@ enum class Role { User, Assistant, System };
 
 /// @brief A single message in a session.
 struct SessionMessage {
-    Role role;
+    Role role{Role::User};
     std::string content;
     std::string agent_id;
     std::string model;
