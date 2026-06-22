@@ -79,11 +79,11 @@ QWidget* create_squad_detail_screen(FleetRegistry* registry, QWidget* parent) {
     // Build function to populate squads and combos
     auto build_content = [content_layout, scroll_content, section_font, registry]() {
         // Clear existing content
-        QLayoutItem* child;
+        QLayoutItem* child = nullptr;
         while ((child = content_layout->takeAt(0)) != nullptr) {
             if (child->widget()) child->widget()->deleteLater();
             if (child->layout()) {
-                QLayoutItem* inner;
+                QLayoutItem* inner = nullptr;
                 while ((inner = child->layout()->takeAt(0)) != nullptr) {
                     if (inner->widget()) inner->widget()->deleteLater();
                     delete inner;

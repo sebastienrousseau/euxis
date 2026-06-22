@@ -91,7 +91,7 @@ public:
     [[nodiscard]] auto parent(NodeId child) const noexcept -> NodeId;
 
     /// Sum-of-AstChild-descendants count of `root` (inclusive).
-    [[nodiscard]] auto descendant_count(NodeId root) const noexcept
+    [[nodiscard]] auto descendant_count(NodeId root) const
         -> std::size_t;
 
 private:

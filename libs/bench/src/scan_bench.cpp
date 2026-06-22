@@ -288,7 +288,7 @@ void BM_Hash_File_64KiB(benchmark::State& state) {
     auto path = dir / "blob.bin";
     {
         std::ofstream f(path, std::ios::binary);
-        std::string blob(64 * 1024, 'A');
+        std::string blob(std::size_t{64} * 1024, 'A');
         f.write(blob.data(), static_cast<std::streamsize>(blob.size()));
     }
     for (auto _ : state) {

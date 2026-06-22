@@ -74,7 +74,7 @@ enum class RuleSeverity {
 /// lower-case variants for forgiving rule writers) into the enum.
 /// Returns `std::nullopt` for unknown input so the loader can
 /// surface a parse error.
-[[nodiscard]] auto parse_severity(std::string_view s) noexcept
+[[nodiscard]] auto parse_severity(std::string_view s)
     -> std::optional<RuleSeverity>;
 
 /// Map RuleSeverity onto euxis::security::Severity for Finding
@@ -154,12 +154,12 @@ struct RulePack {
 /// Parse the language token vocabulary OpenGrep uses (`c`, `cpp`,
 /// `rust`, `go`, `python`, `js`, `ts`, `java`, …). Returns the
 /// matching `euxis::parse::Language` or `std::nullopt`.
-[[nodiscard]] auto parse_language_token(std::string_view s) noexcept
+[[nodiscard]] auto parse_language_token(std::string_view s)
     -> std::optional<euxis::parse::Language>;
 
 /// Translate an OWASP token like "A03:2025" or "A03" into the
 /// canonical enum. Year-less tokens default to the 2025 mapping.
-[[nodiscard]] auto parse_owasp_token(std::string_view s) noexcept
+[[nodiscard]] auto parse_owasp_token(std::string_view s)
     -> std::optional<euxis::security::OwaspCategory>;
 
 } // namespace euxis::scan

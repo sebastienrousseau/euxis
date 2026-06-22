@@ -16,10 +16,10 @@ namespace euxis::bridge {
 
 /// @brief Captured output and status from a skill execution.
 struct ExecutionResult {
-    int exit_code;
+    int exit_code{0};
     std::string stdout_output;
     std::string stderr_output;
-    std::chrono::milliseconds duration;
+    std::chrono::milliseconds duration{0};
 };
 
 /// @brief Handles the spawning and lifecycle of a skill process.

@@ -24,6 +24,7 @@ protected:
     // Helper: create a simple passing benchmark function.
     static auto make_passing_bench(const std::string& name,
                                     const std::string& suite) -> BenchmarkFn {
+        // NOLINTNEXTLINE(bugprone-exception-escape) — test fixture
         return [name, suite]() -> BenchmarkResult {
             return BenchmarkResult{
                 .name = name,
@@ -41,6 +42,7 @@ protected:
     // Helper: create a simple failing benchmark function.
     static auto make_failing_bench(const std::string& name,
                                     const std::string& suite) -> BenchmarkFn {
+        // NOLINTNEXTLINE(bugprone-exception-escape) — test fixture
         return [name, suite]() -> BenchmarkResult {
             return BenchmarkResult{
                 .name = name,

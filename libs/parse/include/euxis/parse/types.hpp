@@ -44,13 +44,13 @@ enum class Language : std::uint8_t {
 /// Detect a Language from a file extension. Returns std::nullopt for
 /// unknown extensions so callers can degrade gracefully (e.g. skip
 /// the file rather than treating it as C).
-[[nodiscard]] auto detect_language(const std::filesystem::path& path) noexcept
+[[nodiscard]] auto detect_language(const std::filesystem::path& path)
     -> std::optional<Language>;
 
 /// Detect a Language from a file extension string. The leading dot
 /// is optional. Useful when the caller has the extension in hand
 /// without a real path.
-[[nodiscard]] auto detect_language_by_extension(std::string_view ext) noexcept
+[[nodiscard]] auto detect_language_by_extension(std::string_view ext)
     -> std::optional<Language>;
 
 /// Source-code byte range. All offsets are zero-based. `row` /

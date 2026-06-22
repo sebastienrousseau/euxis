@@ -10,6 +10,10 @@
 
 #include "euxis/platform/execution_backend.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::platform {
 namespace {
 
@@ -238,3 +242,5 @@ TEST(DockerBackendTest, EmptyArgvReportsBackendError) {
 
 } // namespace
 } // namespace euxis::platform
+
+// NOLINTEND(bugprone-unchecked-optional-access)

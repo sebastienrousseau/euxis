@@ -37,7 +37,7 @@ void BreadcrumbWidget::reset(int screen_index, const QString& screen_name) {
 }
 
 int BreadcrumbWidget::count() const {
-    return trail_.size();
+    return static_cast<int>(trail_.size());
 }
 
 void BreadcrumbWidget::rebuild() {

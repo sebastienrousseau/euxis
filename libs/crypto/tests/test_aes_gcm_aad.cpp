@@ -144,7 +144,7 @@ TEST_F(AesGcmAadTest, LargeAad) {
     const auto plaintext = as_bytes("small payload");
 
     // 64 KB of AAD
-    std::vector<std::byte> large_aad(64 * 1024);
+    std::vector<std::byte> large_aad(std::size_t{64} * 1024);
     randombytes_buf(large_aad.data(), large_aad.size());
 
     auto enc = encrypt_aad(plaintext, key, large_aad);

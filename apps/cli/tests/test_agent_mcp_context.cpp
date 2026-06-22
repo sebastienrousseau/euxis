@@ -4,6 +4,10 @@
 #include <thread>
 #include <vector>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::cli {
 
 TEST(AgentMcpContextTest, PublishAndQuery) {
@@ -102,3 +106,5 @@ TEST(AgentMcpContextTest, FindingsInSummary) {
 }
 
 } // namespace euxis::cli
+
+// NOLINTEND(bugprone-unchecked-optional-access)

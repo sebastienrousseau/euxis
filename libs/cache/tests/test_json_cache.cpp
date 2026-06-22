@@ -6,6 +6,10 @@
 
 #include "euxis/cache/json_cache.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::cache {
 namespace {
 
@@ -137,3 +141,5 @@ TEST(JsonCache, MoveConstructorPreservesHandle) {
 
 } // namespace
 } // namespace euxis::cache
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -63,23 +63,23 @@ auto builtin_specs() -> TaintSpec {
                        .severity = Severity::High});
     t.sinks.push_back({.id = "c.sprintf",  .languages = {L::C, L::Cpp},
                        .pattern = "sprintf", .description = "Unsafe sprintf — buffer overflow risk",
-                       .cwe = "CWE-120", .severity = Severity::High});
+                       .cwe = "CWE-120", .owasp = std::nullopt, .severity = Severity::High});
 
     // Rust.
     t.sinks.push_back({.id = "rs.command", .languages = {L::Rust},
                        .pattern = "Command::new", .description = "Process spawn",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "rs.unsafe",  .languages = {L::Rust},
                        .pattern = "unsafe", .description = "Unsafe block — manual review required",
-                       .cwe = "CWE-1357", .severity = Severity::Medium});
+                       .cwe = "CWE-1357", .owasp = std::nullopt, .severity = Severity::Medium});
 
     // Go.
     t.sinks.push_back({.id = "go.exec",       .languages = {L::Go},
                        .pattern = "exec.Command", .description = "Process spawn",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "go.sql_exec",   .languages = {L::Go},
                        .pattern = ".Exec(", .description = "Raw SQL exec",
-                       .cwe = "CWE-89", .severity = Severity::High});
+                       .cwe = "CWE-89", .owasp = std::nullopt, .severity = Severity::High});
 
     // Python.
     t.sinks.push_back({.id = "py.eval",       .languages = {L::Python},
@@ -88,13 +88,13 @@ auto builtin_specs() -> TaintSpec {
                        .severity = Severity::Critical});
     t.sinks.push_back({.id = "py.exec",       .languages = {L::Python},
                        .pattern = "exec(", .description = "Python exec()",
-                       .cwe = "CWE-94", .severity = Severity::Critical});
+                       .cwe = "CWE-94", .owasp = std::nullopt, .severity = Severity::Critical});
     t.sinks.push_back({.id = "py.subprocess", .languages = {L::Python},
                        .pattern = "subprocess.", .description = "Subprocess call",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "py.os_system",  .languages = {L::Python},
                        .pattern = "os.system", .description = "Shell command",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "py.pickle",     .languages = {L::Python},
                        .pattern = "pickle.loads", .description = "Insecure deserialization",
                        .cwe = "CWE-502", .owasp = OwaspCategory::A08_DataIntegrityFailures,
@@ -103,24 +103,24 @@ auto builtin_specs() -> TaintSpec {
     // JavaScript / TypeScript.
     t.sinks.push_back({.id = "js.eval",       .languages = {L::JavaScript, L::TypeScript},
                        .pattern = "eval(", .description = "JS eval()",
-                       .cwe = "CWE-94", .severity = Severity::Critical});
+                       .cwe = "CWE-94", .owasp = std::nullopt, .severity = Severity::Critical});
     t.sinks.push_back({.id = "js.innerhtml",  .languages = {L::JavaScript, L::TypeScript},
                        .pattern = "innerHTML", .description = "DOM XSS sink",
-                       .cwe = "CWE-79", .severity = Severity::High});
+                       .cwe = "CWE-79", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "js.document_write", .languages = {L::JavaScript, L::TypeScript},
                        .pattern = "document.write", .description = "document.write XSS sink",
-                       .cwe = "CWE-79", .severity = Severity::High});
+                       .cwe = "CWE-79", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "js.exec_sync",  .languages = {L::JavaScript, L::TypeScript},
                        .pattern = "execSync", .description = "child_process.execSync",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
 
     // Java.
     t.sinks.push_back({.id = "java.runtime_exec", .languages = {L::Java},
                        .pattern = "Runtime.getRuntime().exec", .description = "Runtime exec",
-                       .cwe = "CWE-78", .severity = Severity::High});
+                       .cwe = "CWE-78", .owasp = std::nullopt, .severity = Severity::High});
     t.sinks.push_back({.id = "java.stmt_exec", .languages = {L::Java},
                        .pattern = "Statement", .description = "JDBC Statement (use PreparedStatement)",
-                       .cwe = "CWE-89", .severity = Severity::High});
+                       .cwe = "CWE-89", .owasp = std::nullopt, .severity = Severity::High});
 
     // ---- Sanitizers -------------------------------------------------------
     // Cross-language: HTML escape, URL encode, parameterised SQL.

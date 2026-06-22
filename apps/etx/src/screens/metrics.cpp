@@ -131,7 +131,7 @@ QWidget* create_metrics_screen(FleetRegistry* registry, ETXConfig* /*config*/,
             auto costs = doc.value("cost_estimates", json::object());
 
             QStringList tiers = {"routine", "data", "code", "reason"};
-            router_table->setRowCount(tiers.size());
+            router_table->setRowCount(static_cast<int>(tiers.size()));
 
             for (int i = 0; i < tiers.size(); ++i) {
                 std::string tier = tiers[i].toStdString();

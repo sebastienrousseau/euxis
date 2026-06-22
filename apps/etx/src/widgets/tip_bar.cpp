@@ -59,7 +59,7 @@ public:
 
 private slots:
     void rotate_tip() {
-        current_index_ = (current_index_ + 1) % tips_.size();
+        current_index_ = (current_index_ + 1) % static_cast<int>(tips_.size());
         update_tip();
     }
 

@@ -420,8 +420,13 @@ auto AuthProfileStore::pick_best(const std::string& provider) const
         }
     }
 
-    // Sort: CLI Imports > other OAuth > ApiKey > everything else
-    std::sort(candidates.begin(), candidates.end(),
+    // Sort: CLI Imports > other OAuth > ApiKey > everything else.
+    // The comparator orders by deterministic profile fields (source,
+    // type, last_used_at); stable_sort preserves discovery order for
+    // equal-priority profiles, so the final ordering is independent
+    // of the underlying pointer values.
+    // NOLINTNEXTLINE(bugprone-nondeterministic-pointer-iteration-order)
+    std::stable_sort(candidates.begin(), candidates.end(),
         [](const AuthProfile* a, const AuthProfile* b) {
             bool a_cli = (a->source == "claude_code_import" || a->source == "gemini_import");
             bool b_cli = (b->source == "claude_code_import" || b->source == "gemini_import");

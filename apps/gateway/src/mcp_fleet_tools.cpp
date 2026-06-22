@@ -166,6 +166,12 @@ auto run_euxis_command(const std::string& euxis_home,
 
 } // namespace
 
+// NOLINTBEGIN(bugprone-exception-escape) — each lambda body may throw
+// (std::string allocations, run_euxis_command's I/O paths), but every
+// handler call funnels through McpHost::handle_tools_call which wraps
+// it in try/catch and converts to a JSON-RPC -32603 error response
+// (apps/gateway/src/mcp.cpp:140-148). The gateway therefore cannot
+// crash on a handler throw; clang-tidy doesn't model the catch site.
 void register_fleet_tools(McpHost& host, const std::string& euxis_home) {
     // euxis.check — run a standard check
     host.register_tool(
@@ -217,6 +223,7 @@ void register_fleet_tools(McpHost& host, const std::string& euxis_home) {
         [euxis_home](const nlohmann::json&) -> nlohmann::json {
             return run_euxis_command(euxis_home, "stats");
         }
+
     );
 
     // euxis.agent_list — list registered agents
@@ -335,5 +342,6 @@ void register_fleet_tools(McpHost& host, const std::string& euxis_home) {
         }
     );
 }
+// NOLINTEND(bugprone-exception-escape)
 
 } // namespace euxis::gateway

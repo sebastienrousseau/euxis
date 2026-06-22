@@ -25,8 +25,8 @@ void ThemeEngine::apply_theme(const QString& name) {
 }
 
 void ThemeEngine::cycle_theme() {
-    int idx = themes_.indexOf(current_);
-    idx = (idx + 1) % themes_.size();
+    int idx = static_cast<int>(themes_.indexOf(current_));
+    idx = (idx + 1) % static_cast<int>(themes_.size());
     apply_theme(themes_.at(idx));
 }
 

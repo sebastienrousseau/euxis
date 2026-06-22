@@ -101,7 +101,7 @@ public:
     /// @brief True when the docker CLI is on PATH and the daemon
     ///        responds to `docker info`. Cheap to call (forks once,
     ///        timeout 2s).
-    [[nodiscard]] static auto is_available() noexcept -> bool;
+    [[nodiscard]] static auto is_available() -> bool;
 };
 
 } // namespace euxis::platform
