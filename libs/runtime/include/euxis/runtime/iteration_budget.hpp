@@ -44,7 +44,7 @@ public:
     [[nodiscard]] auto try_consume() noexcept -> bool {
         // Decrement only if the current value is > 0. Compare-and-swap loop
         // gives strict bounding under contention without locks.
-        std::size_t current = remaining_.load(std::memory_order_acquire);
+        auto current = remaining_.load(std::memory_order_acquire);
         while (current > 0) {
             if (remaining_.compare_exchange_weak(
                     current, current - 1,
@@ -60,7 +60,7 @@ public:
     ///        against the agentic-loop limit (e.g. `execute_code` shims).
     /// @return true on success, false if the budget is already full.
     auto refund() noexcept -> bool {
-        std::size_t current = remaining_.load(std::memory_order_acquire);
+        auto current = remaining_.load(std::memory_order_acquire);
         // No precondition: callers may invoke refund() on a full budget
         // (the contract docs the return value as "false if the budget is
         // already full"). The CAS loop guard (current < max_) already

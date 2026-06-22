@@ -70,7 +70,9 @@ void progress_bar(int current, int total, std::string_view label) {
     std::string bar = "[";
     for (int i = 0; i < width; ++i) bar += (i < filled) ? "■" : " ";
     bar += "]";
-    (void) std::fprintf(stderr, "\r%s %s %d/%d", label.data(), bar.c_str(), current, total);
+    (void) std::fprintf(stderr, "\r%.*s %s %d/%d",
+                        static_cast<int>(label.size()), label.data(),
+                        bar.c_str(), current, total);
     (void) std::fflush(stderr);
 }
 

@@ -170,7 +170,7 @@ struct DrainResult {
 
     const auto t0 = std::chrono::steady_clock::now();
 
-    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_t actions{};
     if (::posix_spawn_file_actions_init(&actions) != 0) {
         res.error = std::string{"posix_spawn_file_actions_init: "} + std::strerror(errno);
         ::close(out_pipe[0]); ::close(out_pipe[1]);

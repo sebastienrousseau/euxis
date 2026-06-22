@@ -119,6 +119,7 @@ using ApprovalCallback = std::function<bool(ApprovalClass, std::string_view)>;
         return false;
     }
     auto r = reg.invoke(name, args);
+    // NOLINTNEXTLINE(bugprone-branch-clone) — branches differ in keys (result vs error) and source (*r vs r.error()); the parallel shape is intentional.
     if (r.has_value()) {
         tm.content = nlohmann::json{
             {"tool",name},{"status","ok"},{"result",*r}}.dump();
