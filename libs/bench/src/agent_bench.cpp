@@ -96,7 +96,7 @@ public:
     }
     void remove_tool(const std::string& n) override { m_.erase(n); }
 private:
-    struct E { ToolDeclaration decl; ToolHandler h; };
+    struct E { ToolDeclaration decl{}; ToolHandler h{}; };
     std::unordered_map<std::string, E> m_;
 };
 

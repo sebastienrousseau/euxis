@@ -19,7 +19,7 @@ namespace {
     std::tm utc{};
     gmtime_r(&tt, &utc);
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &utc);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &utc);
     return std::string{buf};
 }
 

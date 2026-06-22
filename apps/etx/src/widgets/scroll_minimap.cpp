@@ -44,15 +44,15 @@ protected:
         painter.drawRoundedRect(0, 0, w, h, 4, 4);
 
         // Viewport indicator
-        int vp_y = static_cast<int>(viewport_start_ * h);
-        int vp_h = qMax(8, static_cast<int>(viewport_size_ * h));
+        int vp_y = static_cast<int>(viewport_start_ * static_cast<float>(h));
+        int vp_h = qMax(8, static_cast<int>(viewport_size_ * static_cast<float>(h)));
         painter.setBrush(QColor(255, 255, 255, 30));
         painter.drawRoundedRect(2, vp_y, w - 4, vp_h, 3, 3);
 
         // Agent position markers
         for (float pos : active_positions_) {
             float clamped = qBound(0.0f, pos, 1.0f);
-            int marker_y = static_cast<int>(clamped * h);
+            int marker_y = static_cast<int>(clamped * static_cast<float>(h));
             painter.setBrush(QColor("#4fc3f7"));
             painter.drawEllipse(QPointF(w / 2.0, marker_y), 3, 3);
         }

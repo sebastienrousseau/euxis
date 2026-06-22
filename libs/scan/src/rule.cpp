@@ -19,7 +19,7 @@ auto ascii_lower(std::string_view s) -> std::string {
 
 } // namespace
 
-auto parse_severity(std::string_view s) noexcept
+auto parse_severity(std::string_view s)
     -> std::optional<RuleSeverity> {
     auto lower = ascii_lower(s);
     if (lower == "info" || lower == "informational") return RuleSeverity::Info;
@@ -39,7 +39,7 @@ auto to_security_severity(RuleSeverity s) noexcept
     return Sev::Medium;
 }
 
-auto parse_language_token(std::string_view s) noexcept
+auto parse_language_token(std::string_view s)
     -> std::optional<euxis::parse::Language> {
     using L = euxis::parse::Language;
     auto lower = ascii_lower(s);
@@ -54,7 +54,7 @@ auto parse_language_token(std::string_view s) noexcept
     return std::nullopt;
 }
 
-auto parse_owasp_token(std::string_view s) noexcept
+auto parse_owasp_token(std::string_view s)
     -> std::optional<euxis::security::OwaspCategory> {
     using Cat = euxis::security::OwaspCategory;
 

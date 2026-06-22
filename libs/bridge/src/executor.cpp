@@ -215,7 +215,7 @@ auto safe_spawn_posix(const std::vector<std::string>& argv,
     close(stdout_pipe[1]);
 
     std::string output;
-    output.reserve(64 * 1024);
+    output.reserve(std::size_t{64} * 1024);
     std::array<char, 4096> buffer{};
 
     struct pollfd pfd{};

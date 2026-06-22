@@ -205,6 +205,7 @@ void FleetRegistry::load_agents() {
         }
     } catch (const json::exception&) {
         // Fall through — load_defaults() will be called if agents_ is empty
+        (void)0;  // swallowed: best-effort
     }
 }
 
@@ -252,6 +253,7 @@ void FleetRegistry::load_squads() {
         }
     } catch (const json::exception&) {
         // Ignore parse errors
+        (void)0;  // swallowed: best-effort
     }
 }
 

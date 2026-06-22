@@ -27,7 +27,7 @@ auto now_iso() -> std::string {
     std::tm tm{};
     gmtime_r(&t, &tm);
     char buf[64];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tm);
     return buf;
 }
 
@@ -37,7 +37,7 @@ auto now_formatted() -> std::string {
     std::tm tm{};
     gmtime_r(&t, &tm);
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tm);
     return buf;
 }
 

@@ -73,7 +73,7 @@ public:
     explicit HttpVerifier(HttpVerifierConfig cfg);
 
     [[nodiscard]] auto vote(const VoteRequest& req) -> VoteOutcome override;
-    [[nodiscard]] auto provider_id() const noexcept -> std::string override;
+    [[nodiscard]] auto provider_id() const -> std::string override;
 
 protected:
     /// Build the provider-specific JSON body from the assembled

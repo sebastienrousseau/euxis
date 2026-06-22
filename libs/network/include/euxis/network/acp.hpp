@@ -132,7 +132,7 @@ public:
 
     /// @brief True when @p agent_id is in the allowlist (or policy is
     ///        permissive).
-    [[nodiscard]] auto is_allowed(std::string_view agent_id) const noexcept
+    [[nodiscard]] auto is_allowed(std::string_view agent_id) const
         -> bool;
 
     /// @brief Number of allowed ids (0 means permissive — every id passes).

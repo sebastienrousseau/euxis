@@ -58,8 +58,9 @@ inline std::string run_command(const std::string& cmd) {
 inline bool run_pipe_command(const std::string& cmd, std::string_view input) {
     FILE* pipe = popen(cmd.c_str(), "w");
     if (!pipe) return false;
-    fwrite(input.data(), 1, input.size(), pipe);
-    return pclose(pipe) == 0;
+    const auto written = fwrite(input.data(), 1, input.size(), pipe);
+    const bool full_write = written == input.size();
+    return pclose(pipe) == 0 && full_write;
 }
 
 } // namespace euxis::runtime::detail

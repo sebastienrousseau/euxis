@@ -55,7 +55,7 @@ auto timestamp() -> std::string {
     std::tm tm{};
     localtime_r(&t, &tm);
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S%z", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S%z", &tm);
     return buf;
 }
 

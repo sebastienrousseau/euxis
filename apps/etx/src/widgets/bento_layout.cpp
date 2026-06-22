@@ -35,7 +35,7 @@ int BentoLayout::column_count() const {
 }
 
 int BentoLayout::card_count() const {
-    return cards_.size();
+    return static_cast<int>(cards_.size());
 }
 
 void BentoLayout::resizeEvent(QResizeEvent* event) {

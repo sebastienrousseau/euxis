@@ -54,7 +54,7 @@ auto quantum_label(QuantumDeprecation q) noexcept -> const char* {
     return "";
 }
 
-auto parse_severity(const std::string& s) noexcept -> Severity {
+auto parse_severity(const std::string& s) -> Severity {
     std::string lower;
     lower.reserve(s.size());
     for (char c : s) {

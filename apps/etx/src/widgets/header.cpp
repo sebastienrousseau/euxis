@@ -50,7 +50,7 @@ protected:
         painter.setPen(pen);
 
         QVector<QPointF> points;
-        double step_x = static_cast<double>(width()) / (data_points_.size() - 1);
+        double step_x = static_cast<double>(width()) / static_cast<double>(data_points_.size() - 1);
         for (int i = 0; i < data_points_.size(); ++i) {
             double x = i * step_x;
             double y = height() - (data_points_[i] / 100.0 * height());

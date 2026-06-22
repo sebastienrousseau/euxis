@@ -54,13 +54,13 @@ auto format_duration(double ms) -> std::string {
 
 void spinner_frame(int frame, std::string_view message) {
     static const char* frames[] = {"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"};
-    std::fprintf(stderr, "\r%s %.*s", frames[frame % 10], (int)message.size(), message.data());
-    std::fflush(stderr);
+    (void) std::fprintf(stderr, "\r%s %.*s", frames[frame % 10], (int)message.size(), message.data());
+    (void) std::fflush(stderr);
 }
 
 void spinner_clear() {
-    std::fprintf(stderr, "\r\033[K");
-    std::fflush(stderr);
+    (void) std::fprintf(stderr, "\r\033[K");
+    (void) std::fflush(stderr);
 }
 
 void progress_bar(int current, int total, std::string_view label) {
@@ -70,8 +70,10 @@ void progress_bar(int current, int total, std::string_view label) {
     std::string bar = "[";
     for (int i = 0; i < width; ++i) bar += (i < filled) ? "■" : " ";
     bar += "]";
-    std::fprintf(stderr, "\r%.*s %s %d/%d", static_cast<int>(label.size()), label.data(), bar.c_str(), current, total);
-    std::fflush(stderr);
+    (void) std::fprintf(stderr, "\r%.*s %s %d/%d",
+                        static_cast<int>(label.size()), label.data(),
+                        bar.c_str(), current, total);
+    (void) std::fflush(stderr);
 }
 
 void print_banner() {

@@ -3,6 +3,10 @@
 
 #include "euxis/gateway/auth.hpp"
 
+// NOLINTBEGIN(cert-err33-c) — test scratch I/O (tempfile setup, fclose
+// teardown) intentionally discards return; tests can blanket-disable per
+// docs/development/clang-tidy-policy.md.
+
 namespace euxis::gateway {
 namespace {
 
@@ -88,3 +92,5 @@ TEST_F(AuthTest, EmptyBearerTokenRejects) {
 
 } // namespace
 } // namespace euxis::gateway
+
+// NOLINTEND(cert-err33-c)
