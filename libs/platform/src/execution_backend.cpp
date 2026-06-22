@@ -170,7 +170,7 @@ struct DrainResult {
 
     const auto t0 = std::chrono::steady_clock::now();
 
-    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_t actions{};
     if (::posix_spawn_file_actions_init(&actions) != 0) {
         res.error = std::string{"posix_spawn_file_actions_init: "} + std::strerror(errno);
         ::close(out_pipe[0]); ::close(out_pipe[1]);
@@ -319,7 +319,7 @@ auto LocalBackend::execute(const ExecutionRequest& req) -> ExecutionResult {
 
 auto DockerBackend::name() const noexcept -> std::string_view { return "docker"; }
 
-auto DockerBackend::is_available() noexcept -> bool {
+auto DockerBackend::is_available() -> bool {
     ExecutionRequest probe;
     probe.argv = {"docker", "info"};
     probe.timeout = std::chrono::milliseconds{2000};

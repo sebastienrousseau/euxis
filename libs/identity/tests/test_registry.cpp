@@ -10,6 +10,10 @@
 
 #include "euxis/identity/registry.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::identity {
 namespace {
 
@@ -205,3 +209,5 @@ TEST_F(RegistryTest, RegisterDuplicateReturnsFalseWithExistingData) {
 
 } // namespace
 } // namespace euxis::identity
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+// Top-level fail-fast: see apps/cli/src/main.cpp for the rationale.
+// NOLINTBEGIN(bugprone-exception-escape)
 int main(int argc, char* argv[]) {
     std::string config_path;
 
@@ -36,3 +38,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+// NOLINTEND(bugprone-exception-escape)

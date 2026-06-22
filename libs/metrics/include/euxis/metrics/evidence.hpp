@@ -49,7 +49,7 @@ struct Evidence {
 struct Claim {
     std::string statement;
     std::vector<Evidence> supporting_evidence;
-    double confidence;
+    double confidence{0.0};
 
     /// @brief determine the strongest evidence grade available for this claim.
     auto highest_grade() const -> std::optional<EvidenceGrade>;

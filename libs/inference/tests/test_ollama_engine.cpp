@@ -106,7 +106,7 @@ TEST(OllamaEngineTest, MakeRequestBadHost) {
     // generate internally calls make_request; error is propagated
     auto result = engine.generate("test prompt", 10);
     ASSERT_FALSE(result.has_value());
-    auto err = result.error();
+    const auto& err = result.error();
     // Error should mention HTTP or connection failure
     EXPECT_FALSE(err.empty());
 }

@@ -70,7 +70,7 @@ protected:
         if (range < 0.001f) range = 1.0f;
 
         // Build points
-        double step_x = static_cast<double>(w) / (values_.size() - 1);
+        double step_x = static_cast<double>(w) / static_cast<double>(values_.size() - 1);
         QVector<QPointF> points;
         for (int i = 0; i < values_.size(); ++i) {
             double x = i * step_x;
@@ -98,7 +98,7 @@ protected:
         // Line
         QPen pen(accent_color_, 1.5);
         painter.setPen(pen);
-        painter.drawPolyline(points.data(), points.size());
+        painter.drawPolyline(points.data(), static_cast<int>(points.size()));
 
         // Label
         if (!label_.isEmpty()) {

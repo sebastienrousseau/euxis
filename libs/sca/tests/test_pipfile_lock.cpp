@@ -2,6 +2,10 @@
 
 #include "euxis/sca/pipfile_lock.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::sca {
 namespace {
 
@@ -82,3 +86,5 @@ TEST(PipfileLock, MalformedJsonReturnsError) {
 
 } // namespace
 } // namespace euxis::sca
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -71,7 +71,7 @@ auto estimate_cost(const ProviderPricing& pricing,
     return cost_fresh + cost_cached + cost_output;
 }
 
-auto lookup_pricing(std::string_view provider, std::string_view model) noexcept
+auto lookup_pricing(std::string_view provider, std::string_view model)
     -> ProviderPricing {
     const std::string p = to_lower(provider);
     for (const auto& row : kPriceTable) {

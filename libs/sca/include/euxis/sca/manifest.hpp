@@ -79,7 +79,8 @@ struct ManifestEntry {
 /// One parsed lockfile. The directory scanner emits one of these per
 /// file it dispatches to.
 struct ParsedManifest {
-    Ecosystem ecosystem;
+    Ecosystem ecosystem{};  // always overwritten by the parser; the brace-init
+                            // silences cppcoreguidelines-pro-type-member-init.
     std::filesystem::path source_file;
     std::vector<ManifestEntry> entries;
 

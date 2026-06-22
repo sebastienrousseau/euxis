@@ -70,7 +70,7 @@ QWidget* create_help_screen(QWidget* parent) {
         {"Escape",  QCoreApplication::translate("HelpScreen", "Close dialogs / Go back")},
     };
 
-    table->setRowCount(shortcuts.size());
+    table->setRowCount(static_cast<int>(shortcuts.size()));
     for (int i = 0; i < shortcuts.size(); ++i) {
         auto* key_item = new QTableWidgetItem(shortcuts[i].key);
         key_item->setTextAlignment(Qt::AlignCenter);

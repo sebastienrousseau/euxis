@@ -94,6 +94,7 @@ auto Parser::parse(std::string_view source)
     if (impl_ == nullptr || impl_->parser == nullptr) {
         return std::unexpected(ParseError{
             .message = "Parser not initialised",
+            .file = {},
         });
     }
 
@@ -113,6 +114,7 @@ auto Parser::parse(std::string_view source)
         return std::unexpected(ParseError{
             .message = "tree-sitter returned a null tree (parse timed out "
                        "or parser language not set)",
+            .file = {},
         });
     }
     return detail::AstAccess::build(lang_, tree, std::move(owned));

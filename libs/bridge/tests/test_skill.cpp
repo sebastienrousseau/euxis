@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 #include <euxis/bridge/skill.hpp>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::bridge {
 
 TEST(BridgedSkillTest, ToJson) {
@@ -188,3 +192,5 @@ TEST(BridgedSkillTest, FromJsonCompleteRoundtrip) {
 }
 
 }  // namespace euxis::bridge
+
+// NOLINTEND(bugprone-unchecked-optional-access)

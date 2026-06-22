@@ -34,7 +34,7 @@ private:
     void rebuild();
 
     struct Crumb {
-        int screen_index;
+        int screen_index{0};
         QString name;
     };
 

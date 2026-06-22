@@ -61,7 +61,7 @@ auto backoff(int attempt) -> std::chrono::milliseconds {
 HttpVerifier::HttpVerifier(HttpVerifierConfig cfg)
     : cfg_{std::move(cfg)}, resolved_key_{resolve_api_key(cfg_)} {}
 
-auto HttpVerifier::provider_id() const noexcept -> std::string {
+auto HttpVerifier::provider_id() const -> std::string {
     return cfg_.id;
 }
 

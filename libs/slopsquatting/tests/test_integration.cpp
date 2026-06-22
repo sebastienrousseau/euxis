@@ -5,6 +5,10 @@
 
 #include "euxis/sca/scanner.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::slopsquatting {
 namespace {
 
@@ -129,3 +133,5 @@ TEST(Integration, MessageMentionsPackageName) {
 
 } // namespace
 } // namespace euxis::slopsquatting
+
+// NOLINTEND(bugprone-unchecked-optional-access)
