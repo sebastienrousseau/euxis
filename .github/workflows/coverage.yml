@@ -1,0 +1,115 @@
+name: Coverage Floor
+
+# Measures gcovr line coverage on every push to main and fails when
+# the project drops below the documented floor. The current floor is
+# 79% (measured 2026-06-22 — see issue #42 status update). The
+# aspirational target on issue #42 is ≥98%; the floor enforces that
+# coverage can only go UP from where it is today while the
+# integration-test backfill closes the gap.
+#
+# Cost: one ~20 min run per merged PR on main. Skipped on PRs to
+# keep the open-PR feedback loop fast — cpp.yml's existing tests are
+# the per-PR safety net.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Weekly safety net — if a coverage build runs into a transient
+    # issue, the Monday 10:00 UTC run catches it.
+    - cron: '0 10 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  coverage-floor:
+    name: gcovr line coverage ≥ floor
+    runs-on: ubuntu-24.04
+    env:
+      # Tracks the measured floor. Move up — never down — as the
+      # integration-test backfill closes the gap to issue #42's 98%.
+      COVERAGE_FLOOR_PCT: "79"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build deps + gcovr
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
+            pkg-config nlohmann-json3-dev libspdlog-dev libfmt-dev libgtest-dev
+          echo "CC=gcc-14"  >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+          # gcovr 8.6 is the version used for the 2026-06-22 baseline.
+          # Pin so a future major change in gcovr's report-line layout
+          # doesn't silently move the measurement.
+          pip install --upgrade 'gcovr==8.6'
+          # See issue #96 — Ubuntu 24.04's AppArmor + kernel hardening
+          # combination rejects execve() from forked test children with
+          # EPERM. Last resort: stop the AppArmor service entirely so
+          # tests like libs/platform/test_execution_backend.cpp can run.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          sudo systemctl stop apparmor.service || true
+          sudo aa-teardown || true
+
+      - name: Configure (Debug + coverage)
+        run: |
+          cmake -B cmake-build-cov \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DEUXIS_COVERAGE=ON \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+      - name: Build (instrumented)
+        run: cmake --build cmake-build-cov --parallel --target all
+
+      - name: Run all ctest suites
+        # Populates the .gcda files alongside the .gcno files in the
+        # build tree. gcov needs both to compute hit counts.
+        run: |
+          ctest --test-dir cmake-build-cov --output-on-failure
+
+      - name: Aggregate with gcovr
+        run: |
+          mkdir -p coverage-report
+          gcovr \
+            --filter 'apps/' --filter 'libs/' \
+            --exclude '.*/tests/.*' --exclude '.*/_deps/.*' --exclude '.*/build/.*' \
+            --root . \
+            --html-details coverage-report/index.html \
+            --txt coverage-report/summary.txt \
+            --json-summary coverage-report/summary.json \
+            --fail-under-line "${COVERAGE_FLOOR_PCT}" \
+            cmake-build-cov
+
+      - name: Print coverage summary to the job step
+        if: always()
+        run: |
+          if [ -f coverage-report/summary.json ]; then
+            line_pct=$(python3 -c "import json; d=json.load(open('coverage-report/summary.json')); print(f\"{d.get('line_percent', 0):.2f}\")")
+            line_covered=$(python3 -c "import json; d=json.load(open('coverage-report/summary.json')); print(d.get('line_covered', 0))")
+            line_total=$(python3 -c "import json; d=json.load(open('coverage-report/summary.json')); print(d.get('line_total', 0))")
+            {
+              echo "## Coverage measurement"
+              echo ""
+              echo "**Line coverage: ${line_pct}%** (${line_covered} / ${line_total} lines)"
+              echo ""
+              echo "Floor: ${COVERAGE_FLOOR_PCT}% · Target (#42): ≥98%"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report/
+          if-no-files-found: error
+          retention-days: 30
