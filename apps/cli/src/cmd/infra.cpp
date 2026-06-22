@@ -160,8 +160,8 @@ int cmd_gateway(Context& /*ctx*/, const std::vector<std::string>& args) {
     euxis::gateway::GatewayServer server(config);
 
     static euxis::gateway::GatewayServer* server_ptr = &server;
-    std::signal(SIGINT, [](int) { server_ptr->stop(); });
-    std::signal(SIGTERM, [](int) { server_ptr->stop(); });
+    (void) std::signal(SIGINT, [](int) { server_ptr->stop(); });
+    (void) std::signal(SIGTERM, [](int) { server_ptr->stop(); });
 
     std::cout << tr("Starting gateway on") << " " << config.host << ":" << config.port << "\n";
     server.start();
@@ -324,8 +324,8 @@ int cmd_daemon(Context& ctx, const std::vector<std::string>& args) {
             f.close();
 
             // Install signal handlers for graceful shutdown
-            std::signal(SIGTERM, daemon_signal_handler);
-            std::signal(SIGINT, daemon_signal_handler);
+            (void) std::signal(SIGTERM, daemon_signal_handler);
+            (void) std::signal(SIGINT, daemon_signal_handler);
 
             // Run the daemon main loop (health checks, cleanup, etc.)
             daemon_main_loop(ctx.euxis_home, ctx.data_dir);

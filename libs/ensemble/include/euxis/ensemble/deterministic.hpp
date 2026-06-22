@@ -47,7 +47,7 @@ public:
     DeterministicVerifier(DeterministicVerifier&&) noexcept          = default;
     DeterministicVerifier& operator=(DeterministicVerifier&&) noexcept = default;
 
-    [[nodiscard]] auto provider_id() const noexcept -> std::string override;
+    [[nodiscard]] auto provider_id() const -> std::string override;
     [[nodiscard]] auto vote(const VoteRequest& req) -> VoteOutcome override;
 
 private:

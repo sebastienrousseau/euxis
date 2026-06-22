@@ -69,7 +69,7 @@ EventLoop::~EventLoop() {
     quit();
     // Restore default SIGWINCH handler if we installed ours.
     if (g_signal_pipe_write == signal_pipe_write_) {
-        std::signal(SIGWINCH, SIG_DFL);
+        (void) std::signal(SIGWINCH, SIG_DFL);
         g_signal_pipe_write = -1;
     }
     if (self_pipe_read_ >= 0) ::close(self_pipe_read_);

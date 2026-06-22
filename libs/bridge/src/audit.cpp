@@ -155,7 +155,7 @@ auto AuditLogger::now_iso8601() -> std::string {
     std::tm tm{};
     gmtime_r(&time_t, &tm);
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
     return buf;
 }
 

@@ -82,7 +82,7 @@ struct ProviderPricing {
 ///   google:    gemini-2.5-pro, gemini-2.5-flash
 ///   ollama:    "*" (local, no cost)
 [[nodiscard]] auto lookup_pricing(std::string_view provider,
-                                   std::string_view model) noexcept
+                                   std::string_view model)
     -> ProviderPricing;
 
 /// @brief Aggregated per-session rollup.

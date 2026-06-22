@@ -41,6 +41,7 @@ VerifierPtr matching(const std::string& rule_id_match,
                      std::string id = "matcher") {
     return std::make_shared<DeterministicVerifier>(
         std::move(id),
+        // NOLINTNEXTLINE(bugprone-exception-escape) — test fixture
         [rule_id_match](const VoteRequest& r) {
             return r.rule_id == rule_id_match;
         });

@@ -5,6 +5,8 @@
 
 namespace euxis::gateway {
 
+// NOLINTBEGIN(bugprone-exception-escape) — see routes_admin.cpp for
+// the cpp-httplib server-level catch rationale.
 void register_session_routes(httplib::Server& server, const RouteContext& ctx) {
     server.Get(R"(/api/sessions/(\w+))",
                [ctx](const httplib::Request& req, httplib::Response& res) {
@@ -49,5 +51,6 @@ void register_session_routes(httplib::Server& server, const RouteContext& ctx) {
                     }
                 });
 }
+// NOLINTEND(bugprone-exception-escape)
 
 } // namespace euxis::gateway
