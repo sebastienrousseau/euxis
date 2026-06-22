@@ -4,9 +4,11 @@
 
 #include <expected>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <nlohmann/json.hpp>
+
 ///
 /// Implements the in-toto Attestation Framework Statement v1 layout:
 ///   https://github.com/in-toto/attestation/blob/main/spec/v1/statement.md
@@ -25,12 +27,6 @@
 /// a signed envelope that any cosign / sigstore-go / TUF client can
 /// verify offline. Network upload to Rekor v2 lives in a separate
 /// follow-up batch.
-#pragma once
-
-#include <nlohmann/json.hpp>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace euxis::attest {
 

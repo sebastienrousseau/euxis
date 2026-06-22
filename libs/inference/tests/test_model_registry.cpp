@@ -10,6 +10,10 @@
 
 #include "euxis/inference/model_registry.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::inference {
 namespace {
 
@@ -208,7 +212,7 @@ TEST_F(ModelRegistryTest, ComputeSha256ExactChunkSize) {
     {
         std::ofstream out(path, std::ios::binary);
         // Write exactly 64 KiB (one full chunk, no partial read)
-        std::string data(64 * 1024, 'B');
+        std::string data(std::size_t{64} * 1024, 'B');
         out << data;
     }
 
@@ -225,7 +229,7 @@ TEST_F(ModelRegistryTest, ComputeSha256PartialFinalRead) {
     {
         std::ofstream out(path, std::ios::binary);
         // Write 64 KiB + 100 bytes (triggers partial read after full chunk)
-        std::string data(64 * 1024 + 100, 'C');
+        std::string data(std::size_t{64} * 1024 + 100, 'C');
         out << data;
     }
 
@@ -238,3 +242,5 @@ TEST_F(ModelRegistryTest, ComputeSha256PartialFinalRead) {
 
 } // anonymous namespace
 } // namespace euxis::inference
+
+// NOLINTEND(bugprone-unchecked-optional-access)

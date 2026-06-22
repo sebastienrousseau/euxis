@@ -99,7 +99,7 @@ TEST_F(Ed25519Test, EmptyMessage) {
 // ---------------------------------------------------------------------------
 TEST_F(Ed25519Test, LargeMessage) {
     auto kp = generate_keypair();
-    std::vector<std::byte> big(256 * 1024); // 256 KB
+    std::vector<std::byte> big(std::size_t{256} * 1024); // 256 KB
     randombytes_buf(big.data(), big.size());
 
     auto sig = sign(kp.secret_key, big);

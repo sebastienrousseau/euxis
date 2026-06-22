@@ -152,7 +152,7 @@ struct ConfigError {
 };
 
 /// Built-in defaults. Always returns the same struct.
-[[nodiscard]] auto default_config() noexcept -> RuntimeConfig;
+[[nodiscard]] auto default_config() -> RuntimeConfig;
 
 /// Parse a single YAML file into a `RuntimeConfig`. Missing fields
 /// keep their default values. Unknown fields are ignored (forward-
@@ -163,14 +163,14 @@ struct ConfigError {
 /// Apply environment-variable overrides to a config. Recognised vars
 /// match the convention used elsewhere in the codebase
 /// (`EUXIS_DEFAULT_RESEARCH_PROVIDER` etc.).
-void apply_env_overrides(RuntimeConfig& config) noexcept;
+void apply_env_overrides(RuntimeConfig& config);
 
 /// Merge `overlay` onto `base`. Vector and map fields are replaced
 /// wholesale when present in the overlay; scalar fields follow
 /// last-write-wins semantics. The merge respects the field-tag
 /// "present in overlay" — currently implemented by checking against
 /// the default value for the same field on a fresh `RuntimeConfig`.
-void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay) noexcept;
+void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay);
 
 /// Resolve the effective config for `project_root` by walking the
 /// precedence chain. Returns `default_config()` even when no file is
@@ -182,7 +182,7 @@ void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay) noexcept;
 
 /// Convert a CLI string to a ScanMode. Returns Check on unknown
 /// input so the caller can decide whether to error.
-[[nodiscard]] auto parse_scan_mode(const std::string& s) noexcept -> ScanMode;
+[[nodiscard]] auto parse_scan_mode(const std::string& s) -> ScanMode;
 
 /// Convert ScanMode → CLI string.
 [[nodiscard]] auto scan_mode_str(ScanMode m) noexcept -> const char*;

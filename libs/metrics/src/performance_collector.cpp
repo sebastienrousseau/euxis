@@ -22,7 +22,7 @@ auto now_iso() -> std::string {
     std::tm tm{};
     gmtime_r(&time_t, &tm);
     char buf[64];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S+00:00", &tm);
     return buf;
 }
 
@@ -49,8 +49,8 @@ auto PerformanceMetricsCollector::generate_correlation_id() -> std::string {
     std::uniform_int_distribution<uint64_t> dist;
     auto val = dist(rd);
     char buf[32];
-    std::snprintf(buf, sizeof(buf), "metrics-%012lx",
-                  static_cast<unsigned long>(val & 0xFFFFFFFFFFFFULL));
+    (void) std::snprintf(buf, sizeof(buf), "metrics-%012lx",
+                         static_cast<unsigned long>(val & 0xFFFFFFFFFFFFULL));
     return buf;
 }
 

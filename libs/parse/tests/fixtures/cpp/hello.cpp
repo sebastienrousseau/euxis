@@ -27,6 +27,7 @@ auto make_greeting(std::string subject) -> std::expected<Greeting, std::string> 
 
 } // namespace euxis::sample
 
+// NOLINTNEXTLINE(bugprone-exception-escape) — parse-test fixture, never built
 int main() {
     using namespace euxis::sample;
     if (auto g = make_greeting("world"); g) {

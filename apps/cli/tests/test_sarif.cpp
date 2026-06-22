@@ -143,6 +143,7 @@ TEST(SarifTaxa, DeterministicFixEmittedInFixesArray) {
             .start_column = 5,
             .end_line = 42,
             .end_column = 60,
+            .snippet = "",
         },
         .deterministic = true,
     });
