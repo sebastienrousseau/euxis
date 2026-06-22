@@ -306,6 +306,7 @@ auto deserialize_findings(const std::string& json_str)
             if (item.contains("cwe") && item["cwe"].is_string()) {
                 f.cwe = euxis::security::CweRef{
                     .id = item["cwe"].get<std::string>(),
+                    .short_name = "",
                 };
             }
             f.owasp = static_cast<euxis::security::OwaspCategory>(

@@ -239,6 +239,7 @@ auto load_rules_yaml(std::string_view yaml, std::string name)
     } catch (const YAML::Exception& e) {
         return std::unexpected(LoadError{
             .message = std::string{"YAML parse error: "} + e.what(),
+            .file    = {},
             .line    = static_cast<int>(e.mark.line + 1),
         });
     }
@@ -246,12 +247,14 @@ auto load_rules_yaml(std::string_view yaml, std::string name)
     if (!root || !root.IsMap()) {
         return std::unexpected(LoadError{
             .message = "rule pack root is not a YAML mapping",
+            .file    = {},
         });
     }
     auto rules_node = root["rules"];
     if (!rules_node || !rules_node.IsSequence()) {
         return std::unexpected(LoadError{
             .message = "rule pack missing top-level `rules:` sequence",
+            .file    = {},
         });
     }
 
@@ -262,6 +265,7 @@ auto load_rules_yaml(std::string_view yaml, std::string name)
         if (!built) {
             return std::unexpected(LoadError{
                 .message = "rules[" + std::to_string(idx) + "]: " + built.error(),
+                .file    = {},
             });
         }
         pack.rules.push_back(std::move(*built));
