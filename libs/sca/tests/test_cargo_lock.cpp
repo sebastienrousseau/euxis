@@ -2,6 +2,10 @@
 
 #include "euxis/sca/cargo_lock.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::sca {
 namespace {
 
@@ -118,3 +122,5 @@ source = "registry+x"
 
 } // namespace
 } // namespace euxis::sca
+
+// NOLINTEND(bugprone-unchecked-optional-access)

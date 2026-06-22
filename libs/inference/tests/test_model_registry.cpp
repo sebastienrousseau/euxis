@@ -10,6 +10,10 @@
 
 #include "euxis/inference/model_registry.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::inference {
 namespace {
 
@@ -238,3 +242,5 @@ TEST_F(ModelRegistryTest, ComputeSha256PartialFinalRead) {
 
 } // anonymous namespace
 } // namespace euxis::inference
+
+// NOLINTEND(bugprone-unchecked-optional-access)

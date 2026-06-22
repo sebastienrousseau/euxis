@@ -9,6 +9,10 @@
 
 #include <sqlite3.h>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::cli {
 namespace {
 
@@ -710,3 +714,5 @@ TEST_F(RegistryClientCacheTest, SourceEditInvalidatesCacheEntry) {
 
 } // namespace
 } // namespace euxis::cli
+
+// NOLINTEND(bugprone-unchecked-optional-access)
