@@ -63,7 +63,7 @@ auto format_iso(std::int64_t unix_sec) -> std::string {
 
 auto human_bytes(std::int64_t bytes) -> std::string {
     constexpr std::int64_t kib = 1024;
-    constexpr std::int64_t mib = 1024 * 1024;
+    constexpr std::int64_t mib = std::int64_t{1024} * 1024;
     if (bytes >= mib) {
         char buf[32]{};
         (void) std::snprintf(buf, sizeof(buf), "%.2f MiB",

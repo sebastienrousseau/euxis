@@ -46,7 +46,7 @@ TEST(Prompt, IncludesSnippetInCodeFence) {
 
 TEST(Prompt, CropsSnippetToConfiguredLimit) {
     VoteRequest r = make_req();
-    r.snippet = std::string(8 * 1024, 'A');
+    r.snippet = std::string(std::size_t{8} * 1024, 'A');
     PromptConfig cfg;
     cfg.max_snippet_bytes = 1024;
     auto p = build_prompt(r, cfg);

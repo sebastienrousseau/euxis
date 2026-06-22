@@ -141,7 +141,7 @@ TEST(Store, PurgeOlderThanRemovesOnlyExpired) {
     cache->put(inputs_for("/old", "1"),  CacheEntry{.findings_json = "stale", .created_at_unix = old});
     cache->put(inputs_for("/new", "2"),  CacheEntry{.findings_json = "fresh", .created_at_unix = now});
 
-    auto purged = cache->purge_older_than(/*ttl*/ 30 * 24 * 3600, now);
+    auto purged = cache->purge_older_than(/*ttl*/ std::int64_t{30} * 24 * 3600, now);
     ASSERT_TRUE(purged.has_value());
     EXPECT_EQ(*purged, 1);
 
