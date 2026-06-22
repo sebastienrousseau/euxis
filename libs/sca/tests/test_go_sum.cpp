@@ -2,6 +2,10 @@
 
 #include "euxis/sca/go_sum.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::sca {
 namespace {
 
@@ -79,3 +83,5 @@ TEST(GoSum, PreservesInsertionOrder) {
 
 } // namespace
 } // namespace euxis::sca
+
+// NOLINTEND(bugprone-unchecked-optional-access)

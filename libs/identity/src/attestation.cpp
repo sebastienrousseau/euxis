@@ -19,7 +19,7 @@ namespace {
     std::tm utc{};
     gmtime_r(&tt, &utc);
     char buf[32];
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &utc);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &utc);
     return std::string{buf};
 }
 
@@ -29,7 +29,7 @@ namespace {
     randombytes_buf(buf.data(), buf.size());
 
     char hex[37];
-    std::snprintf(hex, sizeof(hex),
+    (void) std::snprintf(hex, sizeof(hex),
         "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
         buf[0], buf[1], buf[2], buf[3],
         buf[4], buf[5],

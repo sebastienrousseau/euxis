@@ -74,7 +74,7 @@ public:
     /// registries are case-sensitive); pypi normalises to lower-
     /// case + underscore-as-hyphen per PEP 503 §normalised name.
     [[nodiscard]] auto contains(std::string_view name,
-                                euxis::sbom::PurlType ecosystem) const noexcept -> bool;
+                                euxis::sbom::PurlType ecosystem) const -> bool;
 
     /// Bulk add entries for a single ecosystem.
     void add(euxis::sbom::PurlType ecosystem, std::vector<std::string> names);

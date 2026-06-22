@@ -96,7 +96,7 @@ public:
     }
     void remove_tool(const std::string& n) override { m_.erase(n); }
 private:
-    struct E { ToolDeclaration decl; ToolHandler h; };
+    struct E { ToolDeclaration decl{}; ToolHandler h{}; };
     std::unordered_map<std::string, E> m_;
 };
 
@@ -119,6 +119,7 @@ using ApprovalCallback = std::function<bool(ApprovalClass, std::string_view)>;
         return false;
     }
     auto r = reg.invoke(name, args);
+    // NOLINTNEXTLINE(bugprone-branch-clone) — branches differ in keys (result vs error) and source (*r vs r.error()); the parallel shape is intentional.
     if (r.has_value()) {
         tm.content = nlohmann::json{
             {"tool",name},{"status","ok"},{"result",*r}}.dump();

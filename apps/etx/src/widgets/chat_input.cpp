@@ -174,7 +174,7 @@ void ChatInputBar::submit() {
     ghost_label_->hide();
 
     input_history_.append(text);
-    history_index_ = input_history_.size();
+    history_index_ = static_cast<int>(input_history_.size());
     input_->clear();
     autocomplete_->hide();
 
@@ -299,7 +299,7 @@ void ChatInputBar::show_command_autocomplete(const QString& prefix) {
 void ChatInputBar::navigate_history(int direction) {
     if (input_history_.isEmpty()) return;
     history_index_ += direction;
-    history_index_ = qBound(0, history_index_, input_history_.size());
+    history_index_ = qBound(0, history_index_, static_cast<int>(input_history_.size()));
 
     if (history_index_ < input_history_.size()) {
         input_->setPlainText(input_history_[history_index_]);

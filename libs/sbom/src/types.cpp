@@ -150,7 +150,7 @@ auto to_rfc3339(std::chrono::system_clock::time_point tp) -> std::string {
     gmtime_r(&t, &gm);
 #endif
     char buf[32]{};
-    std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &gm);
+    (void) std::strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &gm);
     return std::string{buf};
 }
 

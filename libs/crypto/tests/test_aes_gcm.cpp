@@ -99,7 +99,7 @@ TEST_F(AesGcmTest, EmptyData) {
 // ---------------------------------------------------------------------------
 TEST_F(AesGcmTest, LargeData) {
     const auto key = random_key();
-    constexpr size_t size = 1024 * 1024; // 1 MB
+    constexpr size_t size = std::size_t{1024} * 1024; // 1 MB
     std::vector<std::byte> big(size);
     randombytes_buf(big.data(), big.size());
 

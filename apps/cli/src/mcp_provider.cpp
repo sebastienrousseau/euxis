@@ -40,6 +40,7 @@ void McpProviderBridge::load_config(const std::string& data_dir) {
         }
     } catch (...) {
         // Config parse failure — no servers available
+        (void)0;  // swallowed: best-effort
     }
 }
 

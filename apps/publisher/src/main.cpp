@@ -16,6 +16,8 @@ Commands:
 )";
 }
 
+// Top-level fail-fast: see apps/cli/src/main.cpp for the rationale.
+// NOLINTBEGIN(bugprone-exception-escape)
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         print_usage();
@@ -77,3 +79,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+// NOLINTEND(bugprone-exception-escape)

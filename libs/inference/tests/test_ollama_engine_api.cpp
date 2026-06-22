@@ -24,7 +24,7 @@ public:
 
     httplib::Server server;
     std::string host;
-    int port;
+    int port{0};
     std::thread thread;
 };
 

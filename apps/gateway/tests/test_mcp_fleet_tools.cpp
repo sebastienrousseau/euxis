@@ -4,6 +4,10 @@
 
 #include <sstream>
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::gateway {
 
 class McpFleetToolsTest : public ::testing::Test {
@@ -197,3 +201,5 @@ TEST(McpStdioTest, ProcessOne) {
 }
 
 } // namespace euxis::gateway
+
+// NOLINTEND(bugprone-unchecked-optional-access)

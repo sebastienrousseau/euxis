@@ -50,7 +50,12 @@ FastMetricsCollector::FastMetricsCollector(
     events_file_ = dir / "events.jsonl";
 }
 
-FastMetricsCollector::~FastMetricsCollector() { shutdown(); }
+FastMetricsCollector::~FastMetricsCollector() {
+    // Destructors are implicitly noexcept; flush() can throw I/O errors.
+    // Swallow to honor the RAII contract — caller can call shutdown()
+    // explicitly to surface failures before destruction.
+    try { shutdown(); } catch (...) {}
+}
 
 void FastMetricsCollector::record(const std::string& event_type,
                                   const nlohmann::json& properties) {

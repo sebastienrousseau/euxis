@@ -104,7 +104,7 @@ auto AcpPolicy::permissive() -> AcpPolicy {
     return p;
 }
 
-auto AcpPolicy::is_allowed(std::string_view agent_id) const noexcept -> bool {
+auto AcpPolicy::is_allowed(std::string_view agent_id) const -> bool {
     if (permissive_) return true;
     // unordered_set::find requires a transparent comparator to take
     // string_view; build a std::string for the lookup. Allowlist sizes

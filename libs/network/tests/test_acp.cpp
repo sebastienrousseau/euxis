@@ -9,6 +9,10 @@
 
 #include "euxis/network/acp.hpp"
 
+// NOLINTBEGIN(bugprone-unchecked-optional-access) — gtest ASSERT_TRUE
+// guards are invisible to clang-tidy's dataflow; tests can blanket-
+// disable per docs/development/clang-tidy-policy.md.
+
 namespace euxis::network::acp {
 namespace {
 
@@ -251,3 +255,5 @@ TEST(AcpSessionManagerTest, ListReturnsSortedIds) {
 
 } // namespace
 } // namespace euxis::network::acp
+
+// NOLINTEND(bugprone-unchecked-optional-access)
