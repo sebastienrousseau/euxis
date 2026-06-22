@@ -10,6 +10,10 @@
 #include "euxis/memory/store.hpp"
 #include "euxis/memory/tier.hpp"
 
+// NOLINTBEGIN(bugprone-unused-return-value) — gtest-style discards on
+// EXPECT_*/ASSERT_* helpers are intentional; tests can blanket-disable
+// per docs/development/clang-tidy-policy.md.
+
 namespace euxis::memory {
 namespace {
 
@@ -159,3 +163,5 @@ TEST_F(DestroyKeysTest, DoubleDestroyIsSafe) {
 
 } // namespace
 } // namespace euxis::memory
+
+// NOLINTEND(bugprone-unused-return-value)

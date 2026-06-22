@@ -182,7 +182,7 @@ int cmd_attest(Context& /*ctx*/, const std::vector<std::string>& argv) {
     }
 
     // Resolve key: either generate or load.
-    euxis::crypto::Ed25519Keypair kp;
+    euxis::crypto::Ed25519Keypair kp{};
     if (!a.keygen_basename.empty()) {
         kp = euxis::crypto::generate_keypair();
         auto priv_path = a.keygen_basename; priv_path += ".priv";

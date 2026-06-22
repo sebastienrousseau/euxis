@@ -14,8 +14,8 @@ namespace euxis::crypto {
  * @brief Result of a key derivation operation.
  */
 struct DerivedKey {
-    std::vector<std::byte> key;  ///< The actual derived bytes.
-    std::vector<std::byte> salt; ///< The salt used (for persistence).
+    std::vector<std::byte> key{};  ///< The actual derived bytes.
+    std::vector<std::byte> salt{}; ///< The salt used (for persistence).
 };
 
 /**

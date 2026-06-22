@@ -9,6 +9,10 @@
 
 #include "euxis/a2a/transport.hpp"
 
+// NOLINTBEGIN(bugprone-unused-return-value) — gtest-style discards on
+// EXPECT_*/ASSERT_* helpers are intentional; tests can blanket-disable
+// per docs/development/clang-tidy-policy.md.
+
 namespace euxis::a2a {
 namespace {
 
@@ -136,3 +140,5 @@ TEST(ITransportTest, DestructorIsVirtual) {
 
 } // namespace
 } // namespace euxis::a2a
+
+// NOLINTEND(bugprone-unused-return-value)
