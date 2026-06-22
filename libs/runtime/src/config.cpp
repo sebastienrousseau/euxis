@@ -48,6 +48,7 @@ auto get_vector(const YAML::Node& node, const std::string& key,
             out.push_back(el.as<T>());
         } catch (const YAML::Exception&) {
             // skip malformed
+            (void)0;  // swallowed: best-effort
         }
     }
     return out;

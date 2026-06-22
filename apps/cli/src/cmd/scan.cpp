@@ -332,6 +332,7 @@ auto deserialize_findings(const std::string& json_str)
     } catch (...) {
         // Cache deserialisation failures are non-fatal — caller
         // falls back to a fresh scan.
+        (void)0;  // swallowed: best-effort
     }
     return out;
 }

@@ -56,7 +56,8 @@ auto build_pattern_from_node(const YAML::Node& node) -> Pattern {
 
     if (node.IsScalar()) {
         p.kind = PatternKind::Literal;
-        try { p.text = node.as<std::string>(); } catch (...) {}
+        try { p.text = node.as<std::string>(); }
+        catch (...) { (void)0; /* malformed scalar — leave p.text empty */ }
         return p;
     }
 
@@ -95,7 +96,9 @@ auto build_pattern_from_node(const YAML::Node& node) -> Pattern {
         p.kind = PatternKind::Literal;
         try {
             p.text = node["pattern"].as<std::string>();
-        } catch (...) {}
+        } catch (...) {
+            (void)0;  // malformed `pattern:` — leave p.text empty
+        }
         return p;
     }
     return p;
@@ -128,7 +131,9 @@ auto build_rule_pattern(const YAML::Node& rule_node) -> Pattern {
         p.kind = PatternKind::Literal;
         try {
             p.text = rule_node["pattern"].as<std::string>();
-        } catch (...) {}
+        } catch (...) {
+            (void)0;  // malformed `pattern:` — leave p.text empty
+        }
         return p;
     }
     return p;
@@ -144,7 +149,9 @@ auto extract_first_cwe(const YAML::Node& metadata) -> std::optional<std::string>
         if (cwe_node.IsSequence() && cwe_node.size() > 0) {
             return cwe_node[0].as<std::string>();
         }
-    } catch (...) {}
+    } catch (...) {
+        (void)0;  // malformed cwe node — return nullopt
+    }
     return std::nullopt;
 }
 
@@ -161,7 +168,9 @@ auto extract_first_owasp(const YAML::Node& metadata)
         if (owasp_node.IsSequence() && owasp_node.size() > 0) {
             return parse_owasp_token(owasp_node[0].as<std::string>());
         }
-    } catch (...) {}
+    } catch (...) {
+        (void)0;  // malformed owasp node — return nullopt
+    }
     return std::nullopt;
 }
 
@@ -178,7 +187,9 @@ auto extract_references(const YAML::Node& metadata) -> std::vector<std::string> 
                 if (r.IsScalar()) out.push_back(r.as<std::string>());
             }
         }
-    } catch (...) {}
+    } catch (...) {
+        (void)0;  // malformed refs node — return out as-is
+    }
     return out;
 }
 
@@ -192,7 +203,9 @@ auto extract_languages(const YAML::Node& rule_node)
         try {
             auto resolved = parse_language_token(l.as<std::string>());
             if (resolved) out.push_back(*resolved);
-        } catch (...) {}
+        } catch (...) {
+            (void)0;  // malformed language entry — skip
+        }
     }
     return out;
 }
