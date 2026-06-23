@@ -116,6 +116,7 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_surface.cpp
   tests/test_cmd_lifecycle.cpp
   tests/test_cmd_scan.cpp
+  tests/test_cmd_slopsquatting.cpp
   tests/test_cmd_certify.cpp
   tests/test_cmd_system_card.cpp
   tests/test_auth_profile_store.cpp
