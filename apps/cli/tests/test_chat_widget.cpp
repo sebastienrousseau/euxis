@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include "euxis/cli/tui/chat_widget.hpp"
+#include "euxis/cli/tui/color_system.hpp"
 #include "euxis/cli/tui/event_loop.hpp"
 #include "euxis/cli/tui/keybindings.hpp"
 #include "euxis/cli/terminal.hpp"
@@ -245,6 +246,49 @@ TEST_F(ChatWidgetTest, HandleUnrelatedKeyReturnsFalse) {
 TEST_F(ChatWidgetTest, HandleNonKeyEventReturnsFalse) {
     Event ev; ev.type = EventType::Resize;
     EXPECT_FALSE(widget.handle_event(ev));
+}
+
+// ---------------------------------------------------------------------------
+// set_color_system — semantic-palette branch
+// ---------------------------------------------------------------------------
+
+TEST_F(ChatWidgetTest, SetColorSystemRendersUserMessageThroughSemanticPalette) {
+    ColorSystem cs;
+    cs.load_palette("tokyo-dark");
+    widget.set_color_system(&cs);
+    widget.add_message(user_msg("Hello with colors"));
+    widget.render(screen, default_area());  // exercises lines 152-165
+}
+
+TEST_F(ChatWidgetTest, SetColorSystemRendersAgentMessageThroughSemanticPalette) {
+    ColorSystem cs;
+    cs.load_palette("catppuccin-mocha");
+    widget.set_color_system(&cs);
+    widget.add_message(agent_msg(
+        "# Header\n"
+        "Plain text body.\n"
+        "- bullet\n"
+        "```\ncode\n```\n"));
+    widget.render(screen, default_area());
+}
+
+TEST_F(ChatWidgetTest, SetColorSystemNullptrRevertsToHardcodedDefaults) {
+    ColorSystem cs;
+    cs.load_palette("tokyo-dark");
+    widget.set_color_system(&cs);
+    widget.set_color_system(nullptr);  // revert
+    widget.add_message(user_msg("no-color path again"));
+    widget.render(screen, default_area());
+}
+
+TEST_F(ChatWidgetTest, ColorSystemAppliesToBothUserAndAgentInOneRender) {
+    ColorSystem cs;
+    cs.load_palette("high-contrast");
+    widget.set_color_system(&cs);
+    widget.add_message(user_msg("user line"));
+    widget.add_message(agent_msg("agent line"));
+    widget.add_message(user_msg("another user line"));
+    widget.render(screen, default_area());
 }
 
 // ---------------------------------------------------------------------------

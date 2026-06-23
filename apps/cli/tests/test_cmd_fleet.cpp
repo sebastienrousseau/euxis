@@ -246,6 +246,52 @@ TEST_F(FleetCmdTest, SquadDeployNotFound) {
     EXPECT_EQ(code, 1);
 }
 
+// Targets the args.size() < 2 guard in cmd_squad info / members
+// branches (fleet.cpp:1094 + 1110) plus the args.size() < 3 guard
+// in deploy (fleet.cpp:1133) and the unknown-subcommand branch
+// (fleet.cpp:1155-1156). These are the small but frequently-missed
+// usage-error paths that the 2026-06-22 gcovr baseline flagged.
+
+TEST_F(FleetCmdTest, SquadInfoMissingSquadIdIsUsageError) {
+    auto code = cmd_squad(ctx_, {"info"});
+    EXPECT_EQ(code, 2);
+}
+
+TEST_F(FleetCmdTest, SquadMembersMissingSquadIdIsUsageError) {
+    auto code = cmd_squad(ctx_, {"members"});
+    EXPECT_EQ(code, 2);
+}
+
+TEST_F(FleetCmdTest, SquadDeployMissingTaskIsUsageError) {
+    auto code = cmd_squad(ctx_, {"deploy", "core-squad"});
+    EXPECT_EQ(code, 2);
+}
+
+TEST_F(FleetCmdTest, SquadDeployMissingSquadIdIsUsageError) {
+    auto code = cmd_squad(ctx_, {"deploy"});
+    EXPECT_EQ(code, 2);
+}
+
+TEST_F(FleetCmdTest, SquadUnknownSubcommandIsUsageError) {
+    auto code = cmd_squad(ctx_, {"nosuchaction"});
+    EXPECT_EQ(code, 2);
+}
+
+TEST_F(FleetCmdTest, SquadInfoJsonOutput) {
+    ctx_.json_output = true;
+    auto code = cmd_squad(ctx_, {"info", "core-squad"});
+    EXPECT_GE(code, 0);
+}
+
+TEST_F(FleetCmdTest, SquadListEmptyJsonOutput) {
+    ctx_.json_output = true;
+    nlohmann::json reg;
+    reg["agents"] = nlohmann::json::array();
+    std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+    auto code = cmd_squad(ctx_, {"list"});
+    EXPECT_EQ(code, 0);
+}
+
 TEST_F(FleetCmdTest, SquadDeploySuccess) {
     auto code = cmd_squad(ctx_, {"deploy", "core-squad", "build the app"});
     EXPECT_GE(code, 0);  // exercises squad deploy path

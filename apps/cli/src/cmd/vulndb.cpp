@@ -58,7 +58,19 @@ void print_query_usage() {
     }
 
     using namespace euxis::vulndb;
-    OsvClient client;
+    OsvClientConfig cfg;
+    // EUXIS_OSV_BASE_URL — testing / air-gapped override. Empty or
+    // unset falls back to the production OSV.dev endpoint baked into
+    // OsvClientConfig's default. Documented in
+    // docs/reference/env-vars.md (test fixtures in
+    // apps/cli/tests/test_cmd_vulndb.cpp set this to point at an
+    // httplib::Server fixture so the CLI's result-handling branches
+    // get exercised by ctest).
+    if (const char* env = std::getenv("EUXIS_OSV_BASE_URL");
+        env != nullptr && *env != '\0') {
+        cfg.base_url = env;
+    }
+    OsvClient client{cfg};
     auto result = client.query_by_purl(purl);
     if (!result) {
         std::cerr << "vulndb query: " << error_name(result.error().kind)
