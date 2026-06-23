@@ -39,8 +39,17 @@ jobs:
       #                    1.45 pp headroom for inter-run fluctuation.
       #   2026-06-23  83 — after #133 added TUI ChatWidget tests
       #                    (chat_widget.cpp 0% → 92%). Local gcovr
-      #                    measures 84.24%; 83 keeps 1.24 pp headroom.
-      COVERAGE_FLOOR_PCT: "83"
+      #                    measured 84.24%; 83 kept 1.24 pp headroom.
+      #   2026-06-23  84 — after #135 closed chat_widget to 99% and
+      #                    vulndb to 98% via EUXIS_OSV_BASE_URL + an
+      #                    httplib mock server. Project total holds
+      #                    at 84.20% locally; 84 keeps 0.20 pp
+      #                    headroom — tight, but the next backfill
+      #                    (deploy execution paths in fleet.cpp via
+      #                    ProviderRouter mocks) is expected to add
+      #                    another ~1.5 pp of headroom before this
+      #                    floor needs another bump.
+      COVERAGE_FLOOR_PCT: "84"
     steps:
       - uses: actions/checkout@v4
         with:
