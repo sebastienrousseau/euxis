@@ -39,9 +39,15 @@ public:
     
     /** @brief Toggle the thinking spinner for a specific agent. */
     void set_thinking(bool thinking, std::string agent_id = "");
-    
+
     /** @brief Remove all messages and reset scroll. */
     void clear();
+
+    /** @brief Bind a color system so renders pick up semantic palette
+     *         roles (Info / Accent / Warning / Success / Primary / Muted)
+     *         instead of the hard-coded defaults. Pass nullptr to revert.
+     *         Pointer must outlive the widget. */
+    void set_color_system(const ColorSystem* cs) { color_system_ = cs; }
 
     /** @brief Widget implementation. */
     Size preferred_size() const override;
