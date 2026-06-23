@@ -28,7 +28,7 @@ jobs:
     name: Gate-script unittests
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -39,7 +39,7 @@ jobs:
     name: Workflow integrity (no broken script refs)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -50,7 +50,7 @@ jobs:
     name: No stale directories tracked
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
       - uses: actions/setup-python@v5
@@ -63,7 +63,7 @@ jobs:
     name: libs/ layout audit
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -73,15 +73,22 @@ jobs:
   commit-branding:
     name: Branding footer on tip commit
     runs-on: ubuntu-24.04
-    # Skip on PRs from forks where we can't always rewrite a
-    # contributor's commit message.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Skip on PRs from:
+    #   1. forks (we can't always rewrite a contributor's commit message)
+    #   2. bot accounts (dependabot, renovate, etc. emit auto-generated
+    #      commits without the branding footer; bot attribution is
+    #      already enforced by GitHub's `<bot>[bot]` actor identity,
+    #      which is what the branding line records for human commits)
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       !endsWith(github.event.pull_request.user.login, '[bot]'))
     steps:
       # On pull_request events the default ref is GitHub's synthetic
       # merge commit, which has an auto-generated body that never
       # contains the branding signature. Check out the PR's actual tip
       # so the python script inspects the contributor's commit message.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
