@@ -117,10 +117,15 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_lifecycle.cpp
   tests/test_cmd_scan.cpp
 <<<<<<< HEAD
+  tests/test_cmd_vulndb.cpp
+||||||| 2c321be4e
+=======
+<<<<<<< HEAD
   tests/test_cmd_sdk.cpp
 ||||||| 2c321be4e
 =======
   tests/test_cmd_attest.cpp
+>>>>>>> origin/main
 >>>>>>> origin/main
   tests/test_cmd_certify.cpp
   tests/test_cmd_system_card.cpp
