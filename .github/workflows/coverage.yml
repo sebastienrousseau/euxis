@@ -30,7 +30,14 @@ jobs:
     env:
       # Tracks the measured floor. Move up — never down — as the
       # integration-test backfill closes the gap to issue #42's 98%.
-      COVERAGE_FLOOR_PCT: "79"
+      #
+      # Bump log:
+      #   2026-06-22  79 — initial baseline (#124)
+      #   2026-06-23  82 — after PRs #125-#131 added integration tests
+      #                    for scan/attest/sbom/sdk/slopsquatting/cache/
+      #                    vulndb. Local gcovr measures 83.45%; 82 keeps
+      #                    1.45 pp headroom for inter-run fluctuation.
+      COVERAGE_FLOOR_PCT: "82"
     steps:
       - uses: actions/checkout@v4
         with:

@@ -116,44 +116,12 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_surface.cpp
   tests/test_cmd_lifecycle.cpp
   tests/test_cmd_scan.cpp
-<<<<<<< HEAD
-<<<<<<< HEAD
-  tests/test_cmd_cache.cpp
-||||||| e0bfd8ce
-=======
-<<<<<<< HEAD
-  tests/test_cmd_slopsquatting.cpp
-||||||| e0bfd8ce
-=======
-<<<<<<< HEAD
-  tests/test_cmd_sbom.cpp
-||||||| c791913b
-=======
-  tests/test_cmd_vulndb.cpp
->>>>>>> origin/main
->>>>>>> origin/main
-||||||| 2c321be4e
-=======
-<<<<<<< HEAD
-  tests/test_cmd_sdk.cpp
->>>>>>> origin/main
-||||||| 2c321be4e
-=======
   tests/test_cmd_attest.cpp
->>>>>>> origin/main
-<<<<<<< HEAD
-||||||| e0bfd8ce
-=======
-<<<<<<< HEAD
-||||||| e0bfd8ce
-=======
-<<<<<<< HEAD
-||||||| c791913b
-=======
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+  tests/test_cmd_sbom.cpp
+  tests/test_cmd_sdk.cpp
+  tests/test_cmd_slopsquatting.cpp
+  tests/test_cmd_cache.cpp
+  tests/test_cmd_vulndb.cpp
   tests/test_cmd_certify.cpp
   tests/test_cmd_system_card.cpp
   tests/test_auth_profile_store.cpp
