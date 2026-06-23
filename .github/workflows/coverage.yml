@@ -35,9 +35,12 @@ jobs:
       #   2026-06-22  79 — initial baseline (#124)
       #   2026-06-23  82 — after PRs #125-#131 added integration tests
       #                    for scan/attest/sbom/sdk/slopsquatting/cache/
-      #                    vulndb. Local gcovr measures 83.45%; 82 keeps
+      #                    vulndb. Local gcovr measured 83.45%; 82 kept
       #                    1.45 pp headroom for inter-run fluctuation.
-      COVERAGE_FLOOR_PCT: "82"
+      #   2026-06-23  83 — after #133 added TUI ChatWidget tests
+      #                    (chat_widget.cpp 0% → 92%). Local gcovr
+      #                    measures 84.24%; 83 keeps 1.24 pp headroom.
+      COVERAGE_FLOOR_PCT: "83"
     steps:
       - uses: actions/checkout@v4
         with:
