@@ -122,6 +122,7 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_slopsquatting.cpp
   tests/test_cmd_cache.cpp
   tests/test_cmd_vulndb.cpp
+  tests/test_chat_widget.cpp
   tests/test_cmd_certify.cpp
   tests/test_cmd_system_card.cpp
   tests/test_auth_profile_store.cpp
