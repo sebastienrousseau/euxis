@@ -118,6 +118,10 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_scan.cpp
 <<<<<<< HEAD
 <<<<<<< HEAD
+  tests/test_cmd_cache.cpp
+||||||| e0bfd8ce
+=======
+<<<<<<< HEAD
   tests/test_cmd_slopsquatting.cpp
 ||||||| e0bfd8ce
 =======
@@ -126,6 +130,7 @@ add_executable(euxis-cli-cpp_tests
 ||||||| c791913b
 =======
   tests/test_cmd_vulndb.cpp
+>>>>>>> origin/main
 >>>>>>> origin/main
 ||||||| 2c321be4e
 =======
@@ -140,8 +145,12 @@ add_executable(euxis-cli-cpp_tests
 ||||||| e0bfd8ce
 =======
 <<<<<<< HEAD
+||||||| e0bfd8ce
+=======
+<<<<<<< HEAD
 ||||||| c791913b
 =======
+>>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
 >>>>>>> origin/main
