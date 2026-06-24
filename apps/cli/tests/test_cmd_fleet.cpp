@@ -292,6 +292,61 @@ TEST_F(FleetCmdTest, SquadListEmptyJsonOutput) {
     EXPECT_EQ(code, 0);
 }
 
+// EUXIS_TEST_MOCK_EXECUTION is already set in SetUp(), so the
+// ProviderExecutor's execute() short-circuits to a successful
+// mocked response without making any network calls. That lets us
+// exercise the full deploy loop in fleet.cpp:1136-1149 — building
+// ProviderRouter + ProviderExecutor, iterating squad members,
+// resolving each agent's tier, routing to a model, calling
+// execute(), and printing per-member OK/FAIL status.
+//
+// RegistryClient loads squads from `agents/squads.json` (a
+// separate file from `registry.json`), so these tests have to
+// write both files.
+
+TEST_F(FleetCmdTest, SquadDeploySuccessExercisesFullLoop) {
+    // Write a squads.json that references the two agents the
+    // base fixture's registry.json already defines.
+    nlohmann::json squads;
+    squads["squads"] = nlohmann::json::array({
+        {{"id", "core-squad"}, {"name", "Core Squad"},
+         {"purpose", "Core tasks"}, {"lead", "alpha"},
+         {"members", {"alpha", "beta"}}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/squads.json") << squads.dump();
+
+    auto code = cmd_squad(ctx_, {"deploy", "core-squad", "audit the repo"});
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(FleetCmdTest, SquadDeploySingleMemberSquad) {
+    nlohmann::json squads;
+    squads["squads"] = nlohmann::json::array({
+        {{"id", "solo-squad"}, {"name", "Solo"}, {"purpose", "lone wolf"},
+         {"lead", "alpha"}, {"members", {"alpha"}}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/squads.json") << squads.dump();
+
+    auto code = cmd_squad(ctx_, {"deploy", "solo-squad", "scan"});
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(FleetCmdTest, SquadDeployMemberWithoutAgentDefinitionStillRuns) {
+    // Squad references "ghost-agent" which isn't in registry.json,
+    // so registry.get_agent("ghost-agent") returns nullopt and
+    // the deploy loop falls back to tier="code" (fleet.cpp:1143).
+    // Exercises the "agent ? agent->tier : "code"" branch.
+    nlohmann::json squads;
+    squads["squads"] = nlohmann::json::array({
+        {{"id", "mixed-squad"}, {"name", "Mixed"}, {"purpose", "test"},
+         {"lead", "alpha"}, {"members", {"alpha", "ghost-agent"}}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/squads.json") << squads.dump();
+
+    auto code = cmd_squad(ctx_, {"deploy", "mixed-squad", "do work"});
+    EXPECT_EQ(code, 0);
+}
+
 TEST_F(FleetCmdTest, SquadDeploySuccess) {
     auto code = cmd_squad(ctx_, {"deploy", "core-squad", "build the app"});
     EXPECT_GE(code, 0);  // exercises squad deploy path
