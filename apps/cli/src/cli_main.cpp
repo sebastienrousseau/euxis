@@ -1,0 +1,56 @@
+#include "euxis/cli/main_entry.hpp"
+
+#include "euxis/cli/engine.hpp"
+#include "euxis/cli/i18n.hpp"
+
+#include <cstdlib>
+#include <filesystem>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <sodium.h>
+
+namespace euxis::cli {
+
+int cli_main(int argc, char* argv[]) {
+    // S6: Initialize libsodium before any crypto operations (HMAC, signing).
+    // sodium_init() is idempotent: returns 0 on first call, 1 on subsequent.
+    if (sodium_init() < 0) {
+        std::cerr << "error: libsodium initialization failed\n";
+        return 1;
+    }
+
+    std::vector<std::string> args(argv + 1, argv + argc);
+
+    const char* home = std::getenv("EUXIS_HOME");
+    std::string euxis_home;
+    if (home) {
+        euxis_home = home;
+    } else {
+        const char* user_home = std::getenv("HOME");
+        if (!user_home) {
+            std::cerr << "error: Neither EUXIS_HOME nor HOME is set\n";
+            return 1;
+        }
+        euxis_home = (std::filesystem::path(user_home) / ".euxis").string();
+    }
+
+    const char* lang_env = std::getenv("LC_ALL");
+    if (!lang_env) lang_env = std::getenv("LANG");
+    if (lang_env) {
+        std::string locale(lang_env);
+        auto dot = locale.find('.');
+        if (dot != std::string::npos) locale = locale.substr(0, dot);
+        auto underscore = locale.find('_');
+        if (underscore != std::string::npos) locale = locale.substr(0, underscore);
+
+        auto translations_dir = std::filesystem::path(euxis_home) / "translations" / "cli";
+        i18n::Catalog::instance().load(locale, translations_dir);
+    }
+
+    Engine engine(euxis_home);
+    return engine.run(args);
+}
+
+} // namespace euxis::cli
