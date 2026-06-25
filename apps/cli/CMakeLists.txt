@@ -18,6 +18,7 @@ add_library(euxis-cli-lib STATIC
   src/mcp_provider.cpp
   src/cmd/system.cpp
   src/cmd/fleet.cpp
+  src/cmd/playbook_verify.cpp
   src/cmd/knowledge.cpp
   src/cmd/infra.cpp
   src/cmd/dev.cpp
@@ -101,6 +102,7 @@ install(TARGETS euxis-cli RUNTIME DESTINATION bin)
 # Tests
 add_executable(euxis-cli-cpp_tests
   tests/test_main_entry.cpp
+  tests/test_playbook_verify.cpp
   tests/test_engine.cpp
   tests/test_omnigraph.cpp
   tests/test_terminal.cpp
