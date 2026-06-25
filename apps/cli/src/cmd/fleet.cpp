@@ -4,6 +4,7 @@
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/provider_executor.hpp"
+#include "euxis/cli/playbook_verify.hpp"
 #include "euxis/cli/provider_router.hpp"
 #include "euxis/cli/registry_client.hpp"
 #include "euxis/cli/session.hpp"
@@ -1184,151 +1185,14 @@ int cmd_combo(Context& ctx, const std::vector<std::string>& args) {
     return 0;
 }
 
-// --- P1-1: Deterministic Verdict Verification ---
-
-struct VerdictViolation {
-    std::string rule;
-    std::string detail;
-};
-
-auto verify_verdict_consistency(const std::string& verdict,
-                                 const std::vector<AgentEvidence>& evidence,
-                                 int confidence,
-                                 const std::vector<ContradictionEntry>& contradictions) -> std::vector<VerdictViolation> {
-    std::vector<VerdictViolation> violations;
-
-    int effective_fails = 0, timeout_count = 0, passes = 0;
-    for (const auto& ev : evidence) {
-        if (ev.verdict == "FAILED") effective_fails++;
-        if (ev.verdict == "TIMEOUT" && ev.raw_verdict == "FAIL") effective_fails++;
-        if (ev.verdict == "TIMEOUT") timeout_count++;
-        if (ev.verdict == "PASS") passes++;
+// Convert in-file AgentEvidence to the POD subset that playbook_verify uses.
+auto to_playbook_evidence(const std::vector<AgentEvidence>& src) -> std::vector<PlaybookEvidence> {
+    std::vector<PlaybookEvidence> out;
+    out.reserve(src.size());
+    for (const auto& ev : src) {
+        out.push_back({ev.agent_name, ev.agent_id, ev.verdict, ev.raw_verdict, ev.duration_ms});
     }
-    bool has_contradiction = !contradictions.empty();
-
-    // Rule 1: TRUSTED requires no contradictions, no fails, no timeouts, high confidence
-    if (verdict == "TRUSTED") {
-        if (has_contradiction) violations.push_back({"R1", "TRUSTED with contradictions"});
-        if (effective_fails > 0) violations.push_back({"R1", "TRUSTED with effective_fails > 0"});
-        if (timeout_count > 0) violations.push_back({"R1", "TRUSTED with timeouts"});
-        if (confidence < 80) violations.push_back({"R1", "TRUSTED with confidence < 80"});
-    }
-
-    // Rule 2: BLOCKED requires fails and no passes
-    if (verdict == "BLOCKED" && (effective_fails == 0 || passes > 0)) {
-        violations.push_back({"R2", "BLOCKED without unanimous failure"});
-    }
-
-    // Rule 3: INCONCLUSIVE requires contradiction
-    if (verdict == "INCONCLUSIVE" && !has_contradiction) {
-        violations.push_back({"R3", "INCONCLUSIVE without contradictions"});
-    }
-
-    // Rule 4: All-TIMEOUT cannot be TRUSTED
-    if (verdict == "TRUSTED" && timeout_count == (int)evidence.size() && !evidence.empty()) {
-        violations.push_back({"R4", "TRUSTED with all agents timed out"});
-    }
-
-    // Rule 5: Decisive negatives > 50% cannot be TRUSTED or TRUSTED WITH GAPS
-    if (!evidence.empty() && effective_fails > (int)evidence.size() / 2) {
-        if (verdict == "TRUSTED" || verdict == "TRUSTED WITH GAPS") {
-            violations.push_back({"R5", "Positive verdict with majority decisive negatives"});
-        }
-    }
-
-    return violations;
-}
-
-// --- P1-3: Cross-Fleet Drift Detection ---
-
-struct DriftAlert {
-    std::string agent_id;
-    std::string metric;  // "verdict_distribution", "latency", "evidence_density"
-    double baseline_value{0.0};
-    double current_value{0.0};
-    double deviation_pct{0.0};
-    std::string severity;  // "info", "warning", "alert"
-};
-
-auto detect_agent_drift(const std::string& euxis_home,
-                         const std::vector<AgentEvidence>& current_evidence) -> std::vector<DriftAlert> {
-    std::vector<DriftAlert> alerts;
-
-    auto history_path = fs::path(euxis_home) / "data" / "runtime" / "sessions" / "history.jsonl";
-    if (!fs::exists(history_path)) return alerts;
-
-    // Load last 10 runs
-    std::vector<nlohmann::json> history;
-    {
-        std::ifstream hf(history_path);
-        std::string line;
-        while (std::getline(hf, line)) {
-            if (line.empty()) continue;
-            try { history.push_back(nlohmann::json::parse(line)); }
-            catch (...) { continue; }
-        }
-    }
-    if (history.size() < 3) return alerts;  // Need at least 3 runs for baselines
-
-    // Take last 10
-    if (history.size() > 10) {
-        history = std::vector<nlohmann::json>(history.end() - 10, history.end());
-    }
-
-    // Per-agent analysis
-    for (const auto& ev : current_evidence) {
-        // Collect historical latencies for this agent from agent_status sections
-        std::vector<double> hist_latencies;
-        int hist_timeout_count = 0;
-        int hist_total = 0;
-
-        for (const auto& h : history) {
-            if (!h.contains("agent_status")) continue;
-            auto& status = h["agent_status"];
-            if (!status.contains(ev.agent_name)) continue;
-            auto& agent = status[ev.agent_name];
-            hist_total++;
-            if (agent.contains("duration_ms")) {
-                hist_latencies.push_back(agent["duration_ms"].get<double>());
-            }
-            if (agent.contains("status") && agent["status"] == "TIMEOUT") {
-                hist_timeout_count++;
-            }
-        }
-
-        if (hist_latencies.size() < 3) continue;
-
-        // Compute mean and stddev for latency
-        double sum = 0;
-        for (double l : hist_latencies) sum += l;
-        double mean = sum / static_cast<double>(hist_latencies.size());
-        double var_sum = 0;
-        for (double l : hist_latencies) var_sum += (l - mean) * (l - mean);
-        double stddev = std::sqrt(var_sum / static_cast<double>(hist_latencies.size()));
-
-        // Check latency deviation
-        if (stddev > 0 && std::abs(ev.duration_ms - mean) > 2 * stddev) {
-            double deviation = ((ev.duration_ms - mean) / mean) * 100.0;
-            alerts.push_back({
-                ev.agent_id, "latency", mean, ev.duration_ms, deviation,
-                std::abs(deviation) > 100 ? "alert" : "warning"
-            });
-        }
-
-        // Check timeout spike
-        if (hist_total > 0) {
-            double hist_timeout_rate = (double)hist_timeout_count / hist_total;
-            double current_timeout = (ev.verdict == "TIMEOUT") ? 1.0 : 0.0;
-            if (current_timeout > 0 && hist_timeout_rate < 0.3) {
-                alerts.push_back({
-                    ev.agent_id, "verdict_distribution", hist_timeout_rate * 100, 100.0,
-                    100.0 - hist_timeout_rate * 100, "warning"
-                });
-            }
-        }
-    }
-
-    return alerts;
+    return out;
 }
 
 // --- playbook ---
@@ -2649,7 +2513,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
     // --- P1-1: Deterministic Verdict Verification ---
     {
-        auto violations = verify_verdict_consistency(verdict_text, evidence_log, confidence, contradictions);
+        auto violations = verify_verdict_consistency(verdict_text, to_playbook_evidence(evidence_log), confidence, static_cast<int>(contradictions.size()));
         if (!violations.empty()) {
             artifact["verdict_violations"] = nlohmann::json::array();
             for (const auto& v : violations) {
@@ -2672,7 +2536,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
 
     // --- P1-3: Cross-Fleet Drift Detection ---
     {
-        auto drift_alerts = detect_agent_drift(ctx.euxis_home, evidence_log);
+        auto drift_alerts = detect_agent_drift(ctx.euxis_home, to_playbook_evidence(evidence_log));
         if (!drift_alerts.empty()) {
             artifact["drift_alerts"] = nlohmann::json::array();
             for (const auto& da : drift_alerts) {
