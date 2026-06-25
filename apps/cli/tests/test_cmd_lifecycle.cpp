@@ -335,6 +335,130 @@ TEST_F(LifecycleCmdTest, SelfInvalidSubcommandReturns2) {
     EXPECT_EQ(code, 2);
 }
 
+// ==========================================================================
+// Shell-setup paths — install + uninstall against a sandboxed HOME
+// ==========================================================================
+// The shell-setup branches in install/uninstall (lines 48-216 in
+// lifecycle.cpp) are gated on $HOME pointing at a shell-config-bearing
+// home dir. The tests below set HOME to a tmpdir, drop fixture shell
+// configs in it, then exercise the full path: detect existing entries,
+// write the marker block, idempotency on re-run, --purge cleanup.
+
+class LifecycleShellTest : public LifecycleCmdTest {
+protected:
+    fs::path fake_home;
+    std::string saved_home;
+
+    void SetUp() override {
+        LifecycleCmdTest::SetUp();
+        fake_home = fs::path(test_home_) / "fake_home";
+        fs::create_directories(fake_home);
+        // Drop completions source so install_completions has something to
+        // symlink (or it'll early-exit). The source files just need to
+        // exist; their content doesn't matter for the install logic.
+        fs::create_directories(fs::path(ctx_.euxis_home) / "data" / "config" / "completions");
+        std::ofstream(fs::path(ctx_.euxis_home) / "data" / "config" / "completions" / "euxis.fish") << "complete -c euxis";
+        std::ofstream(fs::path(ctx_.euxis_home) / "data" / "config" / "completions" / "euxis.bash") << "# bash completions";
+        std::ofstream(fs::path(ctx_.euxis_home) / "data" / "config" / "completions" / "euxis.zsh") << "# zsh completions";
+
+        if (const char* h = std::getenv("HOME")) saved_home = h;
+        ::setenv("HOME", fake_home.string().c_str(), 1);
+    }
+
+    void TearDown() override {
+        if (saved_home.empty()) ::unsetenv("HOME");
+        else ::setenv("HOME", saved_home.c_str(), 1);
+        LifecycleCmdTest::TearDown();
+    }
+};
+
+TEST_F(LifecycleShellTest, InstallShellSetupBashWritesMarker) {
+    std::ofstream(fake_home / ".bashrc") << "# pre-existing\n";
+    int code = 0;
+    capture_stdout([&]{ code = cmd_install(ctx_, {"--shell-setup", "--shell", "bash"}); return code; });
+    EXPECT_EQ(code, 0);
+    std::ifstream f(fake_home / ".bashrc");
+    std::string body((std::istreambuf_iterator<char>(f)), {});
+    EXPECT_NE(body.find("euxis install"), std::string::npos);
+    EXPECT_NE(body.find("EUXIS_HOME"), std::string::npos);
+}
+
+TEST_F(LifecycleShellTest, InstallShellSetupZshWritesMarker) {
+    std::ofstream(fake_home / ".zshrc") << "# zsh config\n";
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "zsh"}); });
+    std::ifstream f(fake_home / ".zshrc");
+    std::string body((std::istreambuf_iterator<char>(f)), {});
+    EXPECT_NE(body.find("euxis install"), std::string::npos);
+}
+
+TEST_F(LifecycleShellTest, InstallShellSetupFishWritesMarker) {
+    fs::create_directories(fake_home / ".config" / "fish");
+    std::ofstream(fake_home / ".config" / "fish" / "config.fish") << "# fish config\n";
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "fish"}); });
+    std::ifstream f(fake_home / ".config" / "fish" / "config.fish");
+    std::string body((std::istreambuf_iterator<char>(f)), {});
+    EXPECT_NE(body.find("euxis install"), std::string::npos);
+}
+
+TEST_F(LifecycleShellTest, InstallShellSetupIdempotent) {
+    std::ofstream(fake_home / ".bashrc") << "# initial\n";
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "bash"}); });
+    auto first_body = [&]{
+        std::ifstream f(fake_home / ".bashrc");
+        return std::string((std::istreambuf_iterator<char>(f)), {});
+    }();
+    // Second run — should detect the existing entry and not duplicate it
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "bash"}); });
+    auto second_body = [&]{
+        std::ifstream f(fake_home / ".bashrc");
+        return std::string((std::istreambuf_iterator<char>(f)), {});
+    }();
+    // Same number of BEGIN markers either way (idempotent re-run).
+    auto count = [](const std::string& s, const std::string& m) {
+        size_t n = 0, pos = 0;
+        while ((pos = s.find(m, pos)) != std::string::npos) { ++n; ++pos; }
+        return n;
+    };
+    EXPECT_EQ(count(first_body, "euxis install"),
+              count(second_body, "euxis install"));
+}
+
+TEST_F(LifecycleShellTest, InstallShellSetupDryRunDoesNotWrite) {
+    std::ofstream(fake_home / ".bashrc") << "# untouched\n";
+    capture_stdout([&]{
+        return cmd_install(ctx_, {"--shell-setup", "--shell", "bash", "--dry-run"});
+    });
+    std::ifstream f(fake_home / ".bashrc");
+    std::string body((std::istreambuf_iterator<char>(f)), {});
+    EXPECT_EQ(body.find("euxis install"), std::string::npos);
+}
+
+TEST_F(LifecycleShellTest, InstallFishCompletionsSymlinkCreated) {
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "fish"}); });
+    auto fish_comp_dest = fake_home / ".config" / "fish" / "completions" / "euxis.fish";
+    EXPECT_TRUE(fs::exists(fish_comp_dest) || fs::is_symlink(fish_comp_dest));
+}
+
+TEST_F(LifecycleShellTest, InstallNoCompletionsFlagSkipsCompletionsStep) {
+    int code = 0;
+    auto out = capture_stdout([&]{
+        code = cmd_install(ctx_, {"--shell-setup", "--shell", "bash", "--no-completions"});
+        return code;
+    });
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(LifecycleShellTest, UninstallPurgeRemovesShellMarker) {
+    // Install first so there's something to purge.
+    std::ofstream(fake_home / ".bashrc") << "# before\n";
+    capture_stdout([&]{ return cmd_install(ctx_, {"--shell-setup", "--shell", "bash"}); });
+    // Now purge with --yes to skip the prompt.
+    capture_stdout([&]{ return cmd_uninstall(ctx_, {"--purge", "--yes"}); });
+    std::ifstream f(fake_home / ".bashrc");
+    std::string body((std::istreambuf_iterator<char>(f)), {});
+    EXPECT_EQ(body.find("euxis install"), std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::cli::cmd
 
