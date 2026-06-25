@@ -468,6 +468,43 @@ TEST_F(SpecializedCmdTest, ReplayWithTypeField) {
     EXPECT_EQ(code, 0);
 }
 
+// Multi-turn conversation paths — exercise the loop bodies of
+// cmd_voice_ex and cmd_tui_ex.
+
+TEST_F(SpecializedCmdTest, VoiceMultiTurnConversation) {
+    std::istringstream input(
+        "what's the weather\n"
+        "tell me a joke\n"
+        "exit\n");
+    auto code = cmd_voice_ex(ctx_, {}, input);
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(SpecializedCmdTest, VoiceEmptyLinesSkipped) {
+    std::istringstream input(
+        "\n"
+        "   \n"
+        "actual question\n"
+        "exit\n");
+    auto code = cmd_voice_ex(ctx_, {}, input);
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(SpecializedCmdTest, TuiMultiTurnConversation) {
+    std::istringstream input(
+        "first message\n"
+        "second message\n"
+        "exit\n");
+    auto code = cmd_tui_ex(ctx_, {}, input);
+    EXPECT_EQ(code, 0);
+}
+
+TEST_F(SpecializedCmdTest, TuiEmptyLinesSkipped) {
+    std::istringstream input("\n\nreal input\nexit\n");
+    auto code = cmd_tui_ex(ctx_, {}, input);
+    EXPECT_EQ(code, 0);
+}
+
 // --- Coverage: audit-run full flag ---
 TEST_F(SpecializedCmdTest, AuditRunCreatesMultipleSensitiveFiles) {
     // Create sensitive files to exercise warning paths in audit
