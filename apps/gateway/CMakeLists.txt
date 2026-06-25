@@ -1,5 +1,6 @@
 euxis_add_library(euxis-gateway-cpp
   SOURCES
+    src/gateway_main.cpp
     src/config.cpp
     src/state.cpp
     src/auth.cpp
@@ -25,6 +26,7 @@ euxis_add_library(euxis-gateway-cpp
     nlohmann_json::nlohmann_json
     spdlog::spdlog
   TEST_SOURCES
+    tests/test_main_entry.cpp
     tests/test_config.cpp
     tests/test_auth.cpp
     tests/test_server.cpp
