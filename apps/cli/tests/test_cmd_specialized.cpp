@@ -516,5 +516,169 @@ TEST_F(SpecializedCmdTest, AuditRunCreatesMultipleSensitiveFiles) {
     EXPECT_EQ(code, 0);
 }
 
+// --- Deep-path coverage: provider-stream failure + PII + write-back ---
+
+// Scoped failure injection: sets EUXIS_TEST_MOCK_EXECUTION_FAIL for the
+// duration of the test, restoring on destruction. Pairs with the
+// `EUXIS_TEST_MOCK_EXECUTION` env that SetUp() leaves enabled.
+class MockFailScope {
+public:
+    explicit MockFailScope(const char* err) {
+        (void)::setenv("EUXIS_TEST_MOCK_EXECUTION_FAIL", err, 1);
+    }
+    ~MockFailScope() { (void)::unsetenv("EUXIS_TEST_MOCK_EXECUTION_FAIL"); }
+    MockFailScope(const MockFailScope&) = delete;
+    MockFailScope& operator=(const MockFailScope&) = delete;
+};
+
+TEST_F(SpecializedCmdTest, PolishProviderFailure) {
+    auto file_path = ctx_.euxis_home + "/polish_fail.txt";
+    std::ofstream(file_path) << "content";
+    MockFailScope fail{"provider unavailable"};
+    auto code = cmd_polish(ctx_, {file_path, "--dry-run"});
+    EXPECT_EQ(code, 1);
+}
+
+TEST_F(SpecializedCmdTest, PolishWritesBackWhenNotDryRun) {
+    auto file_path = ctx_.euxis_home + "/polish_writeback.txt";
+    {
+        std::ofstream f(file_path);
+        f << "original content";
+    }
+    auto code = cmd_polish(ctx_, {file_path});
+    EXPECT_EQ(code, 0);
+    std::ifstream f(file_path);
+    std::string body((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    EXPECT_NE(body.find("mocked response"), std::string::npos);
+}
+
+TEST_F(SpecializedCmdTest, PolishDetectsAndRedactsPii) {
+    auto file_path = ctx_.euxis_home + "/polish_pii.txt";
+    {
+        std::ofstream f(file_path);
+        // Email + phone — both should trip PiiFilter::redact().
+        f << "Contact alice@example.com or call 555-123-4567";
+    }
+    testing::internal::CaptureStdout();
+    auto code = cmd_polish(ctx_, {file_path, "--dry-run"});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("PII detected"), std::string::npos);
+}
+
+TEST_F(SpecializedCmdTest, KaizenFallbackOnProviderFailure) {
+    MockFailScope fail{"provider unavailable"};
+    testing::internal::CaptureStdout();
+    auto code = cmd_kaizen(ctx_, {});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("Local Suggestions"), std::string::npos);
+}
+
+TEST_F(SpecializedCmdTest, KaizenFallbackShowsBaselineWhenAllAgentsComplete) {
+    // Re-seed the registry with an agent that has all five quality fields set
+    // *and* a real prompt file on disk, so the fallback path hits the
+    // "All agents meet quality baseline" branch.
+    auto prompt_path_rel = std::string("agents/test-agent/prompt.md");
+    auto prompt_full = std::filesystem::path(ctx_.euxis_home) / prompt_path_rel;
+    std::filesystem::create_directories(prompt_full.parent_path());
+    std::ofstream(prompt_full) << "system prompt";
+
+    nlohmann::json reg;
+    reg["agents"] = nlohmann::json::array({
+        {{"agent_id", "test-agent"}, {"role", "tester"}, {"version", "1.0"},
+         {"tier", "code"}, {"tags", {"test"}}, {"prompt_path", prompt_path_rel}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+
+    MockFailScope fail{"provider unavailable"};
+    testing::internal::CaptureStdout();
+    auto code = cmd_kaizen(ctx_, {});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("All agents meet quality baseline"), std::string::npos);
+}
+
+// --- Audit: sensitive-file detection ---
+
+TEST_F(SpecializedCmdTest, AuditFlagsSensitiveFiles) {
+    std::ofstream(ctx_.euxis_home + "/.env") << "x";
+    std::ofstream(ctx_.euxis_home + "/credentials.json") << "{}";
+    testing::internal::CaptureStdout();
+    auto code = cmd_audit(ctx_, {});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("Found:"), std::string::npos);
+}
+
+TEST_F(SpecializedCmdTest, AuditFlagsWorldReadableConfig) {
+    auto config_dir = std::filesystem::path(ctx_.data_dir) / "config";
+    std::filesystem::create_directories(config_dir);
+    std::filesystem::permissions(config_dir,
+        std::filesystem::perms::owner_all |
+        std::filesystem::perms::group_read | std::filesystem::perms::group_exec |
+        std::filesystem::perms::others_read | std::filesystem::perms::others_exec,
+        std::filesystem::perm_options::replace);
+    testing::internal::CaptureStdout();
+    auto code = cmd_audit(ctx_, {});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("world-readable"), std::string::npos);
+}
+
+// --- Certify: per-field scoring branches ---
+
+TEST_F(SpecializedCmdTest, CertifyAgentMissingVersion) {
+    nlohmann::json reg;
+    reg["agents"] = nlohmann::json::array({
+        {{"agent_id", "partial-agent"}, {"role", "tester"},
+         {"tier", "code"}, {"tags", {"test"}}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+    auto code = cmd_certify(ctx_, {"partial-agent"});
+    EXPECT_EQ(code, 1);  // < 5/5 → not certified
+}
+
+TEST_F(SpecializedCmdTest, CertifyAgentFullyCompleteIsCertified) {
+    auto prompt_path = std::filesystem::path(ctx_.euxis_home) / "agents" / "full-agent" / "prompt.md";
+    std::filesystem::create_directories(prompt_path.parent_path());
+    std::ofstream(prompt_path) << "system prompt";
+
+    nlohmann::json reg;
+    reg["agents"] = nlohmann::json::array({
+        {{"agent_id", "full-agent"}, {"role", "tester"}, {"version", "1.0"},
+         {"tier", "code"}, {"tags", {"test"}}, {"prompt_path", "agents/full-agent/prompt.md"}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+    auto code = cmd_certify(ctx_, {"full-agent"});
+    EXPECT_EQ(code, 0);  // 5/5 → certified
+}
+
+TEST_F(SpecializedCmdTest, CertifyAgentWithMissingPromptFile) {
+    // prompt_path is set but the file doesn't exist → has_prompt = false
+    nlohmann::json reg;
+    reg["agents"] = nlohmann::json::array({
+        {{"agent_id", "noprompt-agent"}, {"role", "tester"}, {"version", "1.0"},
+         {"tier", "code"}, {"tags", {"test"}}, {"prompt_path", "agents/noprompt-agent/missing.md"}}
+    });
+    std::ofstream(ctx_.data_dir + "/agents/registry.json") << reg.dump();
+    auto code = cmd_certify(ctx_, {"noprompt-agent"});
+    EXPECT_EQ(code, 1);
+}
+
+// --- Evidence-verify: verify-with-files path ---
+
+TEST_F(SpecializedCmdTest, EvidenceVerifyWithEvidenceFiles) {
+    auto run_dir = std::filesystem::path(ctx_.euxis_home) / "data" / "audit" / "test-run-evidence";
+    std::filesystem::create_directories(run_dir);
+    std::ofstream(run_dir / "system-info.txt") << "linux test";
+    std::ofstream(run_dir / "registry-snapshot.json") << "[]";
+    testing::internal::CaptureStdout();
+    auto code = cmd_evidence_verify(ctx_, {"verify", "test-run-evidence"});
+    auto out = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(code, 0);
+    EXPECT_NE(out.find("evidence file(s) verified"), std::string::npos);
+}
+
 } // namespace
 } // namespace euxis::cli::cmd

@@ -60,8 +60,14 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         return {false, "", "Unknown provider: " + effective_provider, 1, 0.0, {}};
     }
 
-    // Mock mode for tests — must come AFTER provider validation
+    // Mock mode for tests — must come AFTER provider validation.
+    // Sibling env `EUXIS_TEST_MOCK_EXECUTION_FAIL`, when set to non-empty,
+    // returns a failure with that string as the error so failure-path tests
+    // can exercise the same call sites.
     if (std::getenv("EUXIS_TEST_MOCK_EXECUTION")) {
+        if (const char* fail = std::getenv("EUXIS_TEST_MOCK_EXECUTION_FAIL"); fail != nullptr && *fail != '\0') {
+            return {false, "", fail, 1, 0.0, {}};
+        }
         if (on_chunk) on_chunk("mocked response chunk");
         return {true, "mocked response for " + prompt, "", 0, 10.0, {}};
     }
