@@ -12,7 +12,7 @@ sqlalchemy==2.0.51
 
 # CLI
 rich==15.0.0
-textual==0.85.0
+textual==8.2.8
 
 # AI/ML
 chromadb==1.5.9
