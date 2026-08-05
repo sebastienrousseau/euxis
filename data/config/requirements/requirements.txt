@@ -19,7 +19,7 @@ chromadb==1.5.9
 tiktoken==0.13.0
 
 # Security
-cryptography==48.0.1
+cryptography==50.0.0
 PyJWT==2.13.0
 
 # Utilities
