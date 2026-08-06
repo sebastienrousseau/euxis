@@ -178,7 +178,7 @@ Data fields:
 - `reason`
 - `message`
 
-## Validation Rules (v0.1.3)
+## Validation Rules (v0.1.4)
 
 - Reject unknown `type` values.
 - Reject unknown `method` values.
