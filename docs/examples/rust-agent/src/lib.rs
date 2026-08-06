@@ -107,7 +107,7 @@ mod entry {
         let json = process_input(&input, metrics, |payload| {
             sign_payload(payload).ok()
         })
-        .map_err(|e| extism_pdk::Error::msg(e))?;
+        .map_err(extism_pdk::Error::msg)?;
         Ok(json)
     }
 }
