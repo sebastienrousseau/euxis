@@ -3,12 +3,12 @@
 
 # Core
 fastapi==0.141.1
-uvicorn==0.52.1
+uvicorn==0.52.3
 httpx==0.28.1
 pydantic==2.13.4
 
 # Database
-sqlalchemy==2.0.51
+sqlalchemy==2.0.52
 
 # CLI
 rich==15.0.0
