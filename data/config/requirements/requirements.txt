@@ -20,7 +20,7 @@ tiktoken==0.14.0
 
 # Security
 cryptography==50.0.0
-PyJWT==2.13.0
+PyJWT==2.15.0
 
 # Utilities
 python-dotenv==1.2.3
