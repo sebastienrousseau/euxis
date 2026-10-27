@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- `data/config/requirements/requirements.txt` drops chromadb, whose releases through 1.5.9 (the latest) have unfixed advisories (GHSA-xph7-9rjv-w5fr, GHSA-2wm9-hf6c-p5cr, GHSA-36p7-vc44-83pf); only `docs/benchmarks/performance-verification.py` uses it, and it reports `RECALL_ERROR` without it.
+
 ### Added
 - **SARIF Output**: `--format sarif` flag for CI/CD integration with GitHub/GitLab security tabs (SARIF v2.1.0)
 - **Autofix Suggestions**: `--fix` flag requests targeted fix suggestions from agents, output as unified diffs
