@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The Coverage Floor workflow builds with `cmake --build --parallel 2`, as `codeql.yml` and `release.yml` do; with an unbounded `--parallel` the instrumented build lost its runner mid-compile on every run.
+
 ### Security
 - `data/config/requirements/requirements.txt` drops chromadb, whose releases through 1.5.9 (the latest) have unfixed advisories (GHSA-xph7-9rjv-w5fr, GHSA-2wm9-hf6c-p5cr, GHSA-36p7-vc44-83pf); only `docs/benchmarks/performance-verification.py` uses it, and it reports `RECALL_ERROR` without it.
 
