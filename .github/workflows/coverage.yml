@@ -87,7 +87,9 @@ jobs:
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build (instrumented)
-        run: cmake --build cmake-build-cov --parallel --target all
+        # Two jobs, as codeql.yml and release.yml: an unbounded --parallel runs one
+        # compile per target at once and the instrumented build exhausts the runner.
+        run: cmake --build cmake-build-cov --parallel 2 --target all
 
       - name: Run all ctest suites
         # Populates the .gcda files alongside the .gcno files in the
