@@ -10,6 +10,7 @@
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
 #include "euxis/bridge/provenance.hpp"
+#include "euxis/runtime/config.hpp"
 
 #include <unistd.h>
 
@@ -522,6 +523,14 @@ struct VerificationResult {
 
 auto detect_project_verifiers(const std::string& repo_root) -> std::vector<std::pair<std::string, std::vector<std::string>>> {
     std::vector<std::pair<std::string, std::vector<std::string>>> verifiers;
+
+    // A project's own `verify:` commands (.euxis.yaml) replace detection: a
+    // detected `npm test` can be a suite far longer than the agent budget.
+    const fs::path root = repo_root.empty() ? fs::current_path() : fs::path(repo_root);
+    if (auto cfg = euxis::runtime::resolve_config(root, {}); cfg && !cfg->verify.commands.empty()) {
+        for (const auto& vc : cfg->verify.commands) verifiers.emplace_back(vc.name, vc.command);
+        return verifiers;
+    }
 
     // Detect project type from the repo being analyzed (use repo root, not cwd)
     auto check_file = [&repo_root](const std::string& path) {

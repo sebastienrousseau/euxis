@@ -294,14 +294,32 @@ Euxis routes inference work to the optimal provider based on task class. The map
 
 | Task class | Default provider | Fallbacks |
 |---|---|---|
-| Research / synthesis | OpenAI | Gemini, Claude |
-| Coding / architecture / audit | Claude | Gemini, Ollama |
-| Deep research / security | Gemini | OpenAI, Claude |
+| Research / synthesis | OpenAI | Claude |
+| Coding | Claude | Ollama |
+| Architecture / audit | Claude | OpenAI |
+| Deep research / security | Claude | OpenAI |
 | Private / local | Ollama | — |
 | Surgical edits | Aider | Claude, Ollama |
 | Terminal automation | Kiro | ShellGPT, Claude |
 
+Gemini is not a default: the `gemini` CLI's OAuth login for individuals is refused (`IneligibleTierError`), so a run that routes to it fails. With a Gemini API key it works again; add it back with `triage.ensemble.providers` in `.euxis.yaml` or `EUXIS_DEFAULT_RESEARCH_PROVIDER=gemini`.
+
 Environment overrides: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_PROVIDER`, `EUXIS_DEFAULT_SECURITY_PROVIDER`.
+
+### Claim verification commands
+
+After the agents report, euxis runs the project's own checks to confirm their claims. By default it picks them from the manifests it finds (`package.json` gives `npm test`, `Cargo.toml` gives `cargo test`, a `Makefile` gives `make check`), each within the agent budget (45 s in flash mode). Where that command is a long suite, list fast checks in `.euxis.yaml` instead; they replace the detected ones:
+
+```yaml
+version: "1"
+verify:
+  - name: lint
+    command: ["bash", "scripts/lint.sh", "--quick"]
+  - name: config
+    command: ["python3", "tools/check_config.py"]
+```
+
+An entry needs a `name` and a non-empty `command` (an argv, not a shell string); others are skipped. A project file's list replaces one in `~/.euxis/config.yaml`.
 
 The `FinOpsRouter` in [`libs/core/src/router.cpp`](libs/core/src/router.cpp) picks within each class using a Structure-of-Arrays scoring loop — branchless, SIMD-vectorizable, deterministic. The `swarm` priority cycles through providers via an atomic round-robin counter.
 

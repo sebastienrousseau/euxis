@@ -102,7 +102,9 @@ struct GatesConfig {
 };
 
 struct EnsembleConfig {
-    std::vector<std::string> providers{"claude", "openai", "gemini"};
+    // Gemini is opt-in: its CLI OAuth tier for individuals is refused
+    // (IneligibleTierError), so it is no longer a default ensemble member.
+    std::vector<std::string> providers{"claude", "openai"};
     int quorum{2};
     bool send_source_code{false};
 };
@@ -123,6 +125,20 @@ struct EvidenceConfig {
     std::vector<std::string> frameworks{"owasp-top-10-2025"};
 };
 
+/// One claim-verification command: a name for the report and an argv.
+struct VerifyCommand {
+    std::string name;
+    std::vector<std::string> command;
+};
+
+/// `verify:` in .euxis.yaml: the project's own claim-verification
+/// commands, replacing the ones euxis detects from its manifests
+/// (package.json gives `npm test`, which can be a suite far longer than
+/// the per-agent budget). Empty means detect as before.
+struct VerifyConfig {
+    std::vector<VerifyCommand> commands;
+};
+
 struct ProviderRouting {
     std::optional<std::string> research;
     std::optional<std::string> coding;
@@ -140,6 +156,7 @@ struct RuntimeConfig {
     TriageConfig triage;
     EvidenceConfig evidence;
     ProviderRouting providers;
+    VerifyConfig verify;
 
     /// Source files that contributed to this config (for diagnostics).
     std::vector<std::filesystem::path> sources;

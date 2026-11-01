@@ -39,9 +39,10 @@ auto parse_tier(const std::string& s) -> Tier {
 
 ProviderRouter::ProviderRouter(const std::string& data_dir)
     : data_dir_(data_dir), router_(std::make_unique<euxis::core::FinOpsRouter>(100.0)) {
-    // Defaults
-    models_.routine = "gemini-2.5-flash-lite";
-    models_.data    = "gemini-2.5-flash";
+    // Defaults (as data/config/router.json): Gemini is opt-in, since the
+    // gemini CLI's OAuth login for individuals is refused.
+    models_.routine = "claude-haiku-4-5";
+    models_.data    = "claude-haiku-4-5";
     models_.code    = "claude-sonnet-4-6";
     models_.reason  = "claude-opus-4-6";
 
@@ -75,9 +76,9 @@ void ProviderRouter::load_config() {
         if (config_.contains("flash_overrides")) {
             for (auto& [agent_id, ovr] : config_["flash_overrides"].items()) {
                 ModeOverride fo;
-                fo.provider = ovr.value("provider", "gemini");
-                fo.model = ovr.value("model", "gemini-2.5-flash");
-                fo.cost = ovr.value("cost", 0.5);
+                fo.provider = ovr.value("provider", "claude");
+                fo.model = ovr.value("model", "claude-haiku-4-5");
+                fo.cost = ovr.value("cost", 1.0);
                 flash_overrides_[agent_id] = fo;
             }
         }
@@ -539,7 +540,7 @@ auto ProviderRouter::reload_config() -> bool {
             }
             if (new_config.contains("flash_overrides")) {
                 for (auto& [agent_id, ovr] : new_config["flash_overrides"].items()) {
-                    new_flash[agent_id] = {ovr.value("provider", "gemini"), ovr.value("model", "gemini-2.5-flash"), ovr.value("cost", 0.5)};
+                    new_flash[agent_id] = {ovr.value("provider", "claude"), ovr.value("model", "claude-haiku-4-5"), ovr.value("cost", 1.0)};
                 }
             }
             if (new_config.contains("standard_overrides")) {
@@ -709,14 +710,14 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
     }
 
     // P6: Pre-built static chains — avoid repeated vector construction
+    // Gemini is not a fallback for the others: its CLI OAuth tier is refused,
+    // so it would only add a failed attempt before Ollama.
     static const std::vector<ModelSelection> claude_chain = {
         {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };
     static const std::vector<ModelSelection> openai_chain = {
         {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
-        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };
     static const std::vector<ModelSelection> gemini_chain = {
@@ -727,7 +728,6 @@ auto ProviderRouter::model_fallback_chain(const std::string& model) const -> std
     static const std::vector<ModelSelection> generic_chain = {
         {"claude", "claude-sonnet-4-6", Tier::Code, 3.0, "", ""},
         {"openai", "gpt-5.4", Tier::Code, 5.0, "", ""},
-        {"gemini", "gemini-2.5-flash", Tier::Code, 0.5, "", ""},
         {"ollama", "qwen2.5-coder:7b", Tier::Code, 0.0, "", ""}
     };
 

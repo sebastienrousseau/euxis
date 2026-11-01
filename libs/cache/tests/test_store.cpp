@@ -79,8 +79,8 @@ TEST(Store, PutOverwritesSameKey) {
     ASSERT_TRUE(cache.has_value());
 
     auto k = inputs_for("/tmp/x.cpp", "v1");
-    cache->put(k, CacheEntry{.findings_json = "first"});
-    cache->put(k, CacheEntry{.findings_json = "second"});
+    ASSERT_TRUE(cache->put(k, CacheEntry{.findings_json = "first"}).has_value());
+    ASSERT_TRUE(cache->put(k, CacheEntry{.findings_json = "second"}).has_value());
 
     auto got = cache->get(compose_key(k));
     ASSERT_TRUE(got.has_value() && got->has_value());
@@ -96,8 +96,8 @@ TEST(Store, DifferentContentHashGivesDifferentKey) {
     auto k2 = inputs_for("/tmp/x.cpp", "v2");
     EXPECT_NE(compose_key(k1), compose_key(k2));
 
-    cache->put(k1, CacheEntry{.findings_json = "first"});
-    cache->put(k2, CacheEntry{.findings_json = "second"});
+    ASSERT_TRUE(cache->put(k1, CacheEntry{.findings_json = "first"}).has_value());
+    ASSERT_TRUE(cache->put(k2, CacheEntry{.findings_json = "second"}).has_value());
 
     auto got1 = cache->get(compose_key(k1));
     auto got2 = cache->get(compose_key(k2));
@@ -122,8 +122,8 @@ TEST(Store, PurgeRemovesAllEntries) {
     auto cache = ScanCache::open(dir.path / "c.sqlite");
     ASSERT_TRUE(cache.has_value());
 
-    cache->put(inputs_for("/a", "1"), CacheEntry{.findings_json = "x"});
-    cache->put(inputs_for("/b", "2"), CacheEntry{.findings_json = "y"});
+    ASSERT_TRUE(cache->put(inputs_for("/a", "1"), CacheEntry{.findings_json = "x"}).has_value());
+    ASSERT_TRUE(cache->put(inputs_for("/b", "2"), CacheEntry{.findings_json = "y"}).has_value());
 
     auto removed = cache->purge();
     ASSERT_TRUE(removed.has_value());
@@ -142,8 +142,8 @@ TEST(Store, PurgeOlderThanRemovesOnlyExpired) {
     constexpr std::int64_t now = 2'000'000'000;
     constexpr std::int64_t old = 1'000'000'000;
 
-    cache->put(inputs_for("/old", "1"),  CacheEntry{.findings_json = "stale", .created_at_unix = old});
-    cache->put(inputs_for("/new", "2"),  CacheEntry{.findings_json = "fresh", .created_at_unix = now});
+    ASSERT_TRUE(cache->put(inputs_for("/old", "1"),  CacheEntry{.findings_json = "stale", .created_at_unix = old}).has_value());
+    ASSERT_TRUE(cache->put(inputs_for("/new", "2"),  CacheEntry{.findings_json = "fresh", .created_at_unix = now}).has_value());
 
     auto purged = cache->purge_older_than(/*ttl*/ std::int64_t{30} * 24 * 3600, now);
     ASSERT_TRUE(purged.has_value());
@@ -159,8 +159,8 @@ TEST(Store, StatsReflectInsertedEntries) {
     auto cache = ScanCache::open(dir.path / "c.sqlite");
     ASSERT_TRUE(cache.has_value());
 
-    cache->put(inputs_for("/a", "1"), CacheEntry{.findings_json = "abcd"});
-    cache->put(inputs_for("/b", "2"), CacheEntry{.findings_json = "efgh"});
+    ASSERT_TRUE(cache->put(inputs_for("/a", "1"), CacheEntry{.findings_json = "abcd"}).has_value());
+    ASSERT_TRUE(cache->put(inputs_for("/b", "2"), CacheEntry{.findings_json = "efgh"}).has_value());
 
     auto st = cache->stats();
     ASSERT_TRUE(st.has_value());

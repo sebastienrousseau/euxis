@@ -7,35 +7,35 @@
   "defaults": {
     "research": {
       "primary": "openai",
-      "fallback": ["gemini", "claude"]
+      "fallback": ["claude"]
     },
     "multilingual_analysis": {
       "primary": "openai",
-      "fallback": ["gemini", "claude"]
+      "fallback": ["claude"]
     },
     "policy_synthesis": {
       "primary": "openai",
-      "fallback": ["gemini", "claude"]
+      "fallback": ["claude"]
     },
     "coding": {
       "primary": "claude",
-      "fallback": ["gemini", "ollama"]
+      "fallback": ["ollama"]
     },
     "architecture": {
       "primary": "claude",
-      "fallback": ["gemini"]
+      "fallback": ["openai"]
     },
     "audit": {
       "primary": "claude",
-      "fallback": ["openai", "gemini"]
+      "fallback": ["openai"]
     },
     "deep_research": {
-      "primary": "gemini",
-      "fallback": ["openai", "claude"]
+      "primary": "claude",
+      "fallback": ["openai"]
     },
     "security": {
-      "primary": "gemini",
-      "fallback": ["claude", "openai"]
+      "primary": "claude",
+      "fallback": ["openai"]
     },
     "private_coding": {
       "primary": "ollama",
