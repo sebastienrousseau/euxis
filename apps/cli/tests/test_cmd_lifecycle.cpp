@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <sstream>
 #include <unistd.h>
 #include <nlohmann/json.hpp>
@@ -234,6 +235,22 @@ TEST_F(LifecycleCmdTest, UninstallPurgeWithYes) {
     auto code = cmd_uninstall(ctx_, {"--purge", "--yes"});
     EXPECT_EQ(code, 0);
     EXPECT_FALSE(fs::is_directory(test_home_));
+}
+
+TEST_F(LifecycleCmdTest, UninstallPurgeAbortsWithoutATerminal) {
+    // stdin is an open pipe nobody writes to, as under CI: no answer is a no.
+    int saved = dup(STDIN_FILENO);
+    int fds[2];
+    ASSERT_EQ(pipe(fds), 0);
+    dup2(fds[0], STDIN_FILENO);
+    auto out = capture_stdout([&]{ return cmd_uninstall(ctx_, {"--purge"}); });
+    dup2(saved, STDIN_FILENO);
+    close(saved);
+    close(fds[0]);
+    close(fds[1]);
+    std::cin.clear();
+    EXPECT_NE(out.find("stdin is not a terminal"), std::string::npos) << out;
+    EXPECT_TRUE(fs::is_directory(test_home_));
 }
 
 // ========== self tests ==========

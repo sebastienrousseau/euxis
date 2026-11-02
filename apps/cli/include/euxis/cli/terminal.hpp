@@ -18,6 +18,11 @@ bool colors_enabled();
 /// Returns true if running under CI (GITHUB_ACTIONS, CI, etc.).
 bool is_ci();
 
+/// Prints `question [y/N] ` and reads one line: true only for y or Y. When
+/// stdin is not a terminal nobody can answer, so it says so and returns
+/// false without reading: a pipe held open would otherwise block forever.
+bool confirm(std::string_view question);
+
 /// ANSI escape helpers (return empty if colors disabled).
 auto bold(std::string_view text) -> std::string;
 auto dim(std::string_view text) -> std::string;

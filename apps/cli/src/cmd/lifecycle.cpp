@@ -704,10 +704,7 @@ int cmd_uninstall(Context& ctx, const std::vector<std::string>& args) {
     if (purge) {
         if (!yes && !dry_run) {
             std::cout << "\n  " << term::yellow(tr("This will remove ALL data in") + " " + ctx.euxis_home) << "\n";
-            std::cout << "  " << tr("Continue?") << " [y/N] ";
-            std::string response;
-            std::getline(std::cin, response);
-            if (response != "y" && response != "Y") {
+            if (!term::confirm("  " + tr("Continue?"))) {
                 std::cout << "  " << tr("Aborted.") << "\n";
                 return 0;
             }

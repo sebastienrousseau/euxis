@@ -252,18 +252,12 @@ int cmd_doctor(Context& ctx, const std::vector<std::string>& args) {
         std::cout << "\n" << term::bold(tr("Auto-fix:")) << "\n";
         for (const auto& cmd : fixable) {
             if (cmd.starts_with("mkdir")) {
-                std::cout << "  " << tr("Proposing:") << " " << term::cyan(cmd) << " [y/N] ";
-                std::string response;
-                std::getline(std::cin, response);
-                if (response == "y" || response == "Y") {
+                if (term::confirm("  " + tr("Proposing:") + " " + term::cyan(cmd))) {
                     std::cout << "  " << tr("Running...") << "\n";
                     Process::shell(cmd);
                 }
             } else if (cmd.find("install") != std::string::npos || cmd.find("pacman") != std::string::npos || cmd.find("sudo") != std::string::npos) {
-                std::cout << "  " << tr("Proposing to run:") << " " << term::cyan(cmd) << " [y/N] ";
-                std::string response;
-                std::getline(std::cin, response);
-                if (response == "y" || response == "Y") {
+                if (term::confirm("  " + tr("Proposing to run:") + " " + term::cyan(cmd))) {
                     std::cout << "  " << tr("Executing command...") << "\n";
                     Process::shell_interactive(cmd);
                 }
