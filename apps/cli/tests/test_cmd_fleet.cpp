@@ -1285,6 +1285,36 @@ TEST_F(FleetCmdTest, EmptyManifestNoBuiltinChecks) {
 
 // ---- Builtin/Claim-Verifier Verdict Integration Tests ----
 
+TEST_F(FleetCmdTest, UnloadableProjectConfigIsReportedBeforeDetection) {
+    // A .euxis.yaml that does not parse must not read as "no verify list":
+    // euxis says so, then falls back to the detected Makefile.
+    auto repo = ctx_.euxis_home + "/bad-config-repo";
+    fs::create_directories(repo);
+    std::ofstream(repo + "/Makefile") << "check:\n\t@true\n";
+    std::ofstream(repo + "/.euxis.yaml") << "verify: [\n";
+
+    auto path = ctx_.euxis_home + "/playbook-bad-config.json";
+    nlohmann::json manifest;
+    manifest["steps"] = nlohmann::json::array({
+        {{"name", "check"}, {"agent", "alpha"}, {"task", "verify code"}}
+    });
+    std::ofstream(path) << manifest.dump();
+
+    auto saved_cwd = fs::current_path();
+    fs::current_path(repo);
+    std::stringstream out;
+    std::stringstream err;
+    auto* old_cout = std::cout.rdbuf(out.rdbuf());
+    auto* old_cerr = std::cerr.rdbuf(err.rdbuf());
+    cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    std::cerr.rdbuf(old_cerr);
+    std::cout.rdbuf(old_cout);
+    fs::current_path(saved_cwd);
+
+    EXPECT_NE(err.str().find(".euxis.yaml"), std::string::npos) << err.str();
+    EXPECT_NE(err.str().find("detecting verify commands instead"), std::string::npos) << err.str();
+}
+
 TEST_F(FleetCmdTest, BuildVerifierFailedNotTrusted) {
     // If claim-verifier FAILED but triage agents PASS,
     // the verdict must NOT be TRUSTED.

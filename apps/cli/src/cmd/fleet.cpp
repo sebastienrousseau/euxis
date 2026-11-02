@@ -527,7 +527,11 @@ auto detect_project_verifiers(const std::string& repo_root) -> std::vector<std::
     // A project's own `verify:` commands (.euxis.yaml) replace detection: a
     // detected `npm test` can be a suite far longer than the agent budget.
     const fs::path root = repo_root.empty() ? fs::current_path() : fs::path(repo_root);
-    if (auto cfg = euxis::runtime::resolve_config(root, {}); cfg && !cfg->verify.commands.empty()) {
+    if (auto cfg = euxis::runtime::resolve_config(root, {}); !cfg) {
+        // A config that does not load must not pass for "no verify list".
+        std::cerr << "euxis: " << cfg.error().file.string() << ": " << cfg.error().message
+                  << "; detecting verify commands instead\n";
+    } else if (!cfg->verify.commands.empty()) {
         for (const auto& vc : cfg->verify.commands) verifiers.emplace_back(vc.name, vc.command);
         return verifiers;
     }
