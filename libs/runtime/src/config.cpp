@@ -152,6 +152,19 @@ void parse_evidence(const YAML::Node& node, EvidenceConfig& cfg) {
     cfg.frameworks = get_vector<std::string>(node, "frameworks", cfg.frameworks);
 }
 
+// verify: a list of {name, command: [argv...]}; an entry with no name or an
+// empty command is skipped.
+void parse_verify(const YAML::Node& node, VerifyConfig& cfg) {
+    if (!node || !node.IsSequence()) return;
+    for (const auto& item : node) {
+        if (!item.IsMap()) continue;
+        VerifyCommand vc;
+        vc.name = get_or<std::string>(item, "name", "");
+        vc.command = get_vector<std::string>(item, "command", {});
+        if (!vc.name.empty() && !vc.command.empty()) cfg.commands.push_back(std::move(vc));
+    }
+}
+
 void parse_providers(const YAML::Node& node, ProviderRouting& cfg) {
     if (!node || !node.IsMap()) return;
     if (node["research"] && node["research"].IsScalar()) cfg.research = node["research"].as<std::string>();
@@ -240,6 +253,7 @@ auto load_yaml_file(const std::filesystem::path& path)
     parse_triage    (root["triage"],    cfg.triage);
     parse_evidence  (root["evidence"],  cfg.evidence);
     parse_providers (root["providers"], cfg.providers);
+    parse_verify    (root["verify"],    cfg.verify);
 
     cfg.cache.path = expand_home(cfg.cache.path);
     cfg.sources.push_back(path);
@@ -302,6 +316,8 @@ void merge_into(RuntimeConfig& base, const RuntimeConfig& overlay) {
     if (overlay.providers.research) base.providers.research = overlay.providers.research;
     if (overlay.providers.coding)   base.providers.coding   = overlay.providers.coding;
     if (overlay.providers.security) base.providers.security = overlay.providers.security;
+
+    if (!overlay.verify.commands.empty()) base.verify = overlay.verify;
 
     for (const auto& s : overlay.sources) base.sources.push_back(s);
 }

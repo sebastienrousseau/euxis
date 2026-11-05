@@ -118,6 +118,20 @@ TEST(ProviderRouterTest, ModelFallbackChainGemini) {
     EXPECT_FALSE(chain.empty());
 }
 
+TEST(ProviderRouterTest, GeminiIsNotADefaultOrAFallback) {
+    // The gemini CLI's OAuth login for individuals is refused, so a router
+    // with no config routes the cheap tiers to Claude and never falls back
+    // to Gemini from another provider.
+    ProviderRouter router("/tmp/euxis_nonexistent");
+    EXPECT_EQ(router.select_model(Tier::Routine).model, "claude-haiku-4-5");
+    EXPECT_EQ(router.select_model(Tier::Data).model, "claude-haiku-4-5");
+    for (const auto* model : {"claude-sonnet-4-6", "gpt-4o", "unknown-model"}) {
+        for (const auto& sel : router.model_fallback_chain(model)) {
+            EXPECT_NE(sel.provider, "gemini") << "fallback of " << model;
+        }
+    }
+}
+
 TEST(ProviderRouterTest, ModelFallbackChainUnknown) {
     ProviderRouter router("/tmp/euxis_nonexistent");
     auto chain = router.model_fallback_chain("unknown-model");

@@ -3,6 +3,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <sstream>
+#include <unistd.h>
 
 #include <nlohmann/json.hpp>
 
@@ -67,9 +70,39 @@ TEST_F(SystemCmdTest, CrossPlatformVerify) {
     EXPECT_EQ(code, 0);
 }
 
-TEST_F(SystemCmdTest, DoctorWithFix) {
+// stdin held open as a pipe nobody writes to: what CI, euxis's own claim
+// verifiers and `cmd | euxis` give a command. A prompt must not wait on it.
+class OpenPipeStdin {
+public:
+    OpenPipeStdin() {
+        saved_ = dup(STDIN_FILENO);
+        if (pipe(fds_) == 0) dup2(fds_[0], STDIN_FILENO);
+    }
+    ~OpenPipeStdin() {
+        dup2(saved_, STDIN_FILENO);
+        close(saved_);
+        close(fds_[0]);
+        close(fds_[1]);
+        std::cin.clear();
+    }
+    OpenPipeStdin(const OpenPipeStdin&) = delete;
+    OpenPipeStdin& operator=(const OpenPipeStdin&) = delete;
+
+private:
+    int saved_{-1};
+    int fds_[2]{-1, -1};
+};
+
+TEST_F(SystemCmdTest, DoctorWithFixDeclinesWithoutATerminal) {
+    // data/runtime is missing, so --fix proposes a mkdir.
+    OpenPipeStdin stdin_pipe;
+    std::ostringstream out;
+    auto* old = std::cout.rdbuf(out.rdbuf());
     auto code = cmd_doctor(ctx_, {"--fix"});
+    std::cout.rdbuf(old);
     EXPECT_GE(code, 0);
+    EXPECT_NE(out.str().find("stdin is not a terminal"), std::string::npos) << out.str();
+    EXPECT_FALSE(std::filesystem::exists(ctx_.data_dir + "/runtime"));
 }
 
 TEST_F(SystemCmdTest, HealthWithJsonOutput) {

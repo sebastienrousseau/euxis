@@ -5,15 +5,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-14 (Apple Silicon, older Apple Clang) + macos-15 (Apple
-        # Silicon, newer Apple Clang) cover the macOS surface. macos-13
+        # macos-15 + macos-26 (Apple Silicon; the two macOS versions GitHub
+        # supports, each with its own Apple Clang) cover the macOS surface.
+        # macos-14 is retired on 2026-11-02 (actions/runner-images#13518;
+        # its brownouts already fail the job before any step). macos-13
         # is the last Intel runner SKU and GitHub's allocation pool for
         # it is so starved that jobs sit queued for hours — even with
         # the matrix green on every other entry, the PR can't merge
         # while macos-13 hangs in QUEUED state. Drop it; coverage stays
         # on two Apple Silicon SKUs that exercise both Apple Clang
         # generations, and Ubuntu carries the Linux side.
-        os: [ubuntu-22.04, ubuntu-24.04, macos-14, macos-15]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-15, macos-26]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7

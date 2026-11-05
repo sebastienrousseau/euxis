@@ -201,6 +201,58 @@ scan:
     EXPECT_EQ(resolved->scan.mode, ScanMode::Forensic);
 }
 
+TEST(RuntimeConfig, DefaultEnsembleLeavesGeminiOut) {
+    const auto& providers = default_config().triage.ensemble.providers;
+    EXPECT_EQ(providers, (std::vector<std::string>{"claude", "openai"}));
+}
+
+TEST(RuntimeConfig, ParsesVerifyCommands) {
+    TmpDir dir;
+    write_file(dir.path / ".euxis.yaml", R"(
+version: "1"
+verify:
+  - name: lint
+    command: ["bash", "scripts/lint.sh", "--quick"]
+  - name: no-command
+  - command: ["true"]
+  - name: unit
+    command: ["make", "test-unit"]
+)");
+    auto loaded = load_yaml_file(dir.path / ".euxis.yaml");
+    ASSERT_TRUE(loaded.has_value());
+    ASSERT_EQ(loaded->verify.commands.size(), 2u) << "entries without a name or a command are skipped";
+    EXPECT_EQ(loaded->verify.commands[0].name, "lint");
+    EXPECT_EQ(loaded->verify.commands[0].command,
+              (std::vector<std::string>{"bash", "scripts/lint.sh", "--quick"}));
+    EXPECT_EQ(loaded->verify.commands[1].name, "unit");
+}
+
+TEST(RuntimeConfig, ProjectVerifyReplacesUserVerifyAndAbsentKeepsIt) {
+    TmpDir project_dir, home_dir;
+    fs::create_directories(home_dir.path / ".euxis");
+    write_file(home_dir.path / ".euxis" / "config.yaml", R"(
+version: "1"
+verify:
+  - name: user
+    command: ["true"]
+)");
+    auto user_only = resolve_config(project_dir.path, home_dir.path);
+    ASSERT_TRUE(user_only.has_value());
+    ASSERT_EQ(user_only->verify.commands.size(), 1u);
+    EXPECT_EQ(user_only->verify.commands[0].name, "user");
+
+    write_file(project_dir.path / ".euxis.yaml", R"(
+version: "1"
+verify:
+  - name: project
+    command: ["make", "check"]
+)");
+    auto both = resolve_config(project_dir.path, home_dir.path);
+    ASSERT_TRUE(both.has_value());
+    ASSERT_EQ(both->verify.commands.size(), 1u);
+    EXPECT_EQ(both->verify.commands[0].name, "project");
+}
+
 TEST(RuntimeConfig, ResolveReturnsDefaultsWhenNoFiles) {
     TmpDir project_dir, home_dir;
     auto resolved = resolve_config(project_dir.path, home_dir.path);

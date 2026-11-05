@@ -1,0 +1,10 @@
+# euxis runs these to confirm its agents' claims on this repository, in
+# place of the `make check` it would detect: that reconfigures, rebuilds
+# and runs every suite serially, which under a review's load passes the
+# 120 s per-check budget. These need a configured tree (`make cpp-build`).
+version: "1"
+verify:
+  - name: build
+    command: ["cmake", "--build", "build/cmake-build", "--parallel", "8"]
+  - name: tests
+    command: ["ctest", "--test-dir", "build/cmake-build", "-j", "8", "--output-on-failure"]

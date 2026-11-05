@@ -23,6 +23,17 @@ bool is_ci() {
     return std::getenv("GITHUB_ACTIONS") || std::getenv("CI");
 }
 
+bool confirm(std::string_view question) {
+    std::cout << question << " [y/N] ";
+    if (!isatty(STDIN_FILENO)) {
+        std::cout << "N (stdin is not a terminal)\n";
+        return false;
+    }
+    std::string response;
+    std::getline(std::cin, response);
+    return response == "y" || response == "Y";
+}
+
 auto bold(std::string_view text) -> std::string { return std::format("\033[1m{}\033[0m", text); }
 auto dim(std::string_view text) -> std::string { return std::format("\033[2m{}\033[0m", text); }
 auto red(std::string_view text) -> std::string { return std::format("\033[31m{}\033[0m", text); }
