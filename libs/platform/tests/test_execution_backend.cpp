@@ -3,9 +3,14 @@
 
 #include <gtest/gtest.h>
 
+#include <unistd.h>
+
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "euxis/platform/execution_backend.hpp"
@@ -201,14 +206,40 @@ TEST(DockerBackendTest, IsAvailableProbesQuickly) {
     (void)avail;
 }
 
-TEST(DockerBackendTest, ExecuteSkipsCleanlyWhenDockerAbsent) {
-    if (DockerBackend::is_available()) {
-        GTEST_SKIP() << "docker is available — covered by other tests";
+// Sets an environment variable for one scope, then puts back what was there.
+struct ScopedEnv {
+    std::string key;
+    std::optional<std::string> prev;
+    ScopedEnv(std::string k, const std::string& v) : key(std::move(k)) {
+        const char* p = std::getenv(key.c_str());
+        if (p) prev = std::string(p);
+        setenv(key.c_str(), v.c_str(), 1);
     }
-    DockerBackend b;
-    ExecutionRequest req;
-    req.argv = {"echo", "hi"};
-    auto res = b.execute(req);
+    ~ScopedEnv() {
+        if (prev) setenv(key.c_str(), prev->c_str(), 1);
+        else      unsetenv(key.c_str());
+    }
+    ScopedEnv(const ScopedEnv&) = delete;
+    ScopedEnv& operator=(const ScopedEnv&) = delete;
+};
+
+TEST(DockerBackendTest, ExecuteSkipsCleanlyWhenDockerAbsent) {
+    // docker is absent on an empty PATH, whatever the host has. Asking
+    // is_available() instead raced the daemon: a first probe that outlasted
+    // its 2 s timeout said absent, and execute()'s own probe then found
+    // docker and ran the command.
+    const auto empty = std::filesystem::temp_directory_path() /
+                       ("euxis-no-docker-" + std::to_string(::getpid()));
+    std::filesystem::create_directories(empty);
+    ExecutionResult res;
+    {
+        ScopedEnv path{"PATH", empty.string()};
+        DockerBackend b;
+        ExecutionRequest req;
+        req.argv = {"echo", "hi"};
+        res = b.execute(req);
+    }
+    std::filesystem::remove(empty);
     EXPECT_TRUE(res.error.has_value());
     EXPECT_EQ(res.backend_name, "docker");
 }
