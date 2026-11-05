@@ -101,7 +101,10 @@ jobs:
       - name: Aggregate with gcovr
         run: |
           mkdir -p coverage-report
+          # gcov-14 reads what g++-14 wrote; the default gcov is the
+          # runner's gcc-13, which refuses the newer .gcno format.
           gcovr \
+            --gcov-executable gcov-14 \
             --filter 'apps/' --filter 'libs/' \
             --exclude '.*/tests/.*' --exclude '.*/_deps/.*' --exclude '.*/build/.*' \
             --root . \
