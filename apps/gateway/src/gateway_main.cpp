@@ -33,8 +33,16 @@ int gateway_main(int argc, char* argv[], bool start_server) {
         std::cerr << "error: config not found: " << config_path << "\n";
         return 1;
     }
+    // The path comes from argv or the environment: resolve it and read only
+    // a regular file (a directory used to throw out of the file reader).
+    std::error_code ec;
+    const auto resolved = std::filesystem::weakly_canonical(config_path, ec);
+    if (ec || !std::filesystem::is_regular_file(resolved, ec)) {
+        std::cerr << "error: config is not a regular file: " << config_path << "\n";
+        return 1;
+    }
 
-    auto config = GatewayConfig::load_from_file(config_path);
+    auto config = GatewayConfig::load_from_file(resolved.string());
     if (!start_server) {
         return 0;
     }
