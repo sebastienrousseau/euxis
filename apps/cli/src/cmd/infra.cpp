@@ -16,6 +16,7 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <sys/stat.h>
@@ -55,7 +56,9 @@ void daemon_main_loop(const std::string& euxis_home, const std::string& data_dir
         std::ofstream log(log_dir / "daemon.log", std::ios::app);
         auto now = std::chrono::system_clock::now();
         auto tt  = std::chrono::system_clock::to_time_t(now);
-        log << std::put_time(std::localtime(&tt), "%Y-%m-%d %H:%M:%S")
+        std::tm tm{};
+        localtime_r(&tt, &tm);  // std::localtime shares one static buffer across threads
+        log << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
             << " " << msg << "\n";
     };
 

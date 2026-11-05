@@ -124,4 +124,18 @@ TEST(GatewayMainEntry, AcceptsExplicitConfigPathArgv) {
     EXPECT_EQ(rc, 0);
 }
 
+TEST(GatewayMainEntry, ExitsOneWhenConfigIsNotAFile) {
+    // The config path comes from argv or the environment: it has to name a
+    // regular file, not a directory or a device.
+    auto dir = std::filesystem::temp_directory_path() / "euxis-gw-config-dir";
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+
+    std::vector<std::string> args{"euxis-gateway", dir.string()};
+    auto argv = make_argv(args);
+    int rc = gateway_main(static_cast<int>(args.size()), argv.data(), /*start_server=*/false);
+    EXPECT_EQ(rc, 1);
+    std::filesystem::remove_all(dir);
+}
+
 } // namespace euxis::gateway

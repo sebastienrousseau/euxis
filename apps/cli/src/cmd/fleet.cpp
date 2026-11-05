@@ -20,6 +20,7 @@
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
@@ -2354,7 +2355,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     auto now = std::chrono::system_clock::now();
     auto now_t = std::chrono::system_clock::to_time_t(now);
     std::ostringstream ts_stream;
-    ts_stream << std::put_time(std::gmtime(&now_t), "%Y-%m-%dT%H:%M:%SZ");
+    std::tm utc{};
+    gmtime_r(&now_t, &utc);  // std::gmtime shares one static buffer across threads
+    ts_stream << std::put_time(&utc, "%Y-%m-%dT%H:%M:%SZ");
     std::string timestamp = ts_stream.str();
 
     // Append current run to history
