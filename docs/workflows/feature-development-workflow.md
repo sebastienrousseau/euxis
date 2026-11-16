@@ -254,4 +254,4 @@ euxis tester "Test migration on copy of production data"
 
 ---
 
-*Euxis v0.0.12 · Build something that matters.*
+*Euxis v0.0.14 · Build something that matters.*

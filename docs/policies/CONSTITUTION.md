@@ -1,4 +1,4 @@
-# The Euxis Fleet Constitution (v1.0 — Protocol v0.0.12)
+# The Euxis Fleet Constitution (v1.0 — Protocol v0.0.14)
 
 ## Purpose
 
@@ -120,4 +120,4 @@ New permanent agents are added only if they introduce a **new axis of responsibi
 
 ---
 
-*Euxis v0.0.12 · Build something that matters.*
+*Euxis v0.0.14 · Build something that matters.*
