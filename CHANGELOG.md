@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Directory Restructuring**: `cmd/`→`apps/`, `pkg/`→`libs/`, `internal/platform/`→`libs/platform/`, `build/cmake/`→`cmake/`
 - **Agent Tier Promotions**: sentinel, strategist, and investigator promoted from fleet to core tier for Reason-class model routing
 - **Version**: Bumped to v0.0.12 across CMakeLists.txt, engine, lifecycle, TUI, data configs, man page and docs. The releases tagged v0.1.2 and v0.1.3 are now v0.0.10 and v0.0.11; the v0.1.x line is retired
-- **Homebrew formula**: Pinned to the v0.0.11 release, whose assets keep their `euxis-v0.1.3-*` names
+- **Homebrew formula**: Points at the v0.0.12 release assets and checksums
 - **Help Output**: "Core" group now appears first in `euxis --help`, before System/Fleet/Knowledge groups
 - **README**: Rewritten with accurate C++23 build instructions, provider strategy overview, and complete Core commands table
 - **CONTRIBUTING.md**: Updated for C++23 workflow (CMake/GCC prerequisites, `make cpp-test`, AGPL-3.0 license, commit signing required)
@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Credential Exclusion**: `.gitignore` expanded with `.env*`, `*.key`, `*.pem`, `credentials*`, `*.p12`, `*.pfx`, `*.keystore`
 
 ### Fixed
+- **Release packaging**: the .deb/.rpm job caps its build at `--parallel 2` (an unbounded `make -j` got it killed on v0.0.12), builds arm64 on the arm64 runner, and runs on pull requests that change `release.yml`
+- **Release binaries**: built with `EUXIS_DISABLE_SANITIZERS=ON`. Through v0.0.12 every release binary shipped with ASan/UBSan, and the macOS one needed `libclang_rt.asan` from the build runner's Xcode to start; the build now fails if a sanitizer runtime is linked
 - **Security Hardening**: Auth profile store bounds checks, path traversal guards, command injection prevention, bare `catch(...)` elimination
 - **Circular Dependency**: Broke crypto↔identity circular include
 - **Dependency Vulnerabilities**: Patched flatted (CVE-2026-32141), PyJWT (CVE-2026-32597), removed `/tmp` fallback paths

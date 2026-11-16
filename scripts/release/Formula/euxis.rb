@@ -4,38 +4,35 @@
 # Homebrew formula for the `euxis` CLI from
 # https://github.com/sebastienrousseau/euxis
 #
-# Updated per release by the bumper Action in the tap repo (it rewrites
-# the `version` line and the per-platform `sha256` lines).
+# Updated by hand per release: the three `url` lines and their `sha256`
+# from the release's SHA256SUMS. The version is read from the URL.
 #
 # Verify locally with:
 #   brew install --build-from-source euxis.rb && euxis --version
 
 class Euxis < Formula
-  desc 'Ultra-fast open-source code security scanner'
-  homepage 'https://euxis.co'
-  license 'AGPL-3.0-only'
-  # The v0.1.3 build was re-tagged v0.0.11. Its assets and `--version`
-  # keep the 0.1.3 name, so the release tag is pinned until the next bump.
-  version '0.1.3'
+  desc "Ultra-fast open-source code security scanner"
+  homepage "https://euxis.co"
+  license "AGPL-3.0-only"
 
   on_macos do
     # macOS Intel (macos-13) was dropped from the release matrix because
     # GitHub Actions' Intel runner pool is starved; only Apple Silicon
     # tarballs ship today. See .github/workflows/release.yml.
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-darwin-arm64.tar.gz"
-      sha256 'c596155859215e386a0aff5125914fe28fc66ac05a96edbbb9806d23b544d251'
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.12/euxis-v0.0.12-darwin-arm64.tar.gz"
+      sha256 "049c2e23da8ee07c3990060ae5c830c9f6ea7ca249ed69660a19ebcae7770d2f"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-linux-arm64.tar.gz"
-      sha256 'b813765647a9de85934ed95a1e8ad2b6634db9e434fa1576650e8aa016cb961e'
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.12/euxis-v0.0.12-linux-arm64.tar.gz"
+      sha256 "335c17cef71d0bf18ca2c617578cd1b212daadb8937106eb832b39e8498c3e67"
     end
     on_intel do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-linux-amd64.tar.gz"
-      sha256 '05eaad3775e59b586096f4c28c517ed0d9f05592d68a842232213c5daa180fbc'
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.12/euxis-v0.0.12-linux-amd64.tar.gz"
+      sha256 "467c9adf6802df50d932e89ec5778228917ac1c1b1d4b1dcec5dc2de81e60ae4"
     end
   end
 
@@ -43,10 +40,10 @@ class Euxis < Formula
     # Release tarballs contain a single binary named
     # `euxis-v<version>-<target>`. Rename to `euxis` and drop it
     # into Homebrew's managed bin/ prefix.
-    bin_name = Dir['euxis-*'].first
-    raise 'euxis binary not found in tarball' unless bin_name
+    bin_name = Dir["euxis-*"].first
+    raise "euxis binary not found in tarball" unless bin_name
 
-    bin.install bin_name => 'euxis'
+    bin.install bin_name => "euxis"
   end
 
   test do
