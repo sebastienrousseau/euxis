@@ -10,6 +10,12 @@ on:
         description: 'Tag to build (e.g. v0.1.0-beta.1)'
         required: true
         type: string
+  # A change to this workflow runs only the linux-packages job, so the
+  # packaging path is checked before a tag depends on it. Build, publish
+  # and docker are skipped on pull requests: nothing is signed or pushed.
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
 
 permissions:
   contents: write       # Upload release assets
@@ -17,11 +23,14 @@ permissions:
   attestations: write   # GitHub-native attestation (in-toto Statement)
 
 env:
-  EUXIS_VERSION: ${{ github.event.inputs.tag || github.ref_name }}
+  # Pull requests have no tag (ref_name is "<n>/merge"), so they package
+  # under a placeholder version.
+  EUXIS_VERSION: ${{ github.event.inputs.tag || (github.event_name == 'pull_request' && 'v0.0.0-pr') || github.ref_name }}
 
 jobs:
   build:
     name: Build ${{ matrix.target }}
+    if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -122,7 +131,7 @@ jobs:
 
   linux-packages:
     name: Build .deb + .rpm packages
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runner_override || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
@@ -156,7 +165,10 @@ jobs:
             ${{ matrix.cmake_arch_flag }}
 
       - name: Build CLI target
-        run: cmake --build cmake-build --parallel --target euxis-cli
+        # A bare `--parallel` is an unbounded `make -j`: on v0.0.12 it
+        # started every euxis-cli-lib TU at once and the job was killed
+        # (exit 143) two minutes later. Same cap as the build job.
+        run: cmake --build cmake-build --parallel 2 --target euxis-cli
 
       - name: Emit .deb + .rpm via CPack
         run: |
@@ -176,14 +188,13 @@ jobs:
 
   publish:
     name: Publish release
-    # linux-packages is intentionally not in `needs:` — the CPack
-    # invocation hangs indefinitely on the ubuntu-24.04 + ubuntu-24.04-arm
-    # runners (110+ min observed on run #27888557585 with no recovery).
-    # The .tar.gz + .sha256 + cosign bundles + Docker image are the
-    # primary distribution channel; .deb/.rpm packaging is tracked as a
-    # separate follow-up. The linux-packages job still runs in parallel
-    # so its eventual fix can be validated without re-running the whole
-    # workflow.
+    # linux-packages is intentionally not in `needs:`. Its stalls and
+    # kills (run #27888557585, v0.0.12) came from an unbounded
+    # `make -j`, now capped; attaching .deb/.rpm to releases is a
+    # separate follow-up. The job still runs in parallel, and on pull
+    # requests that touch this file, so it is validated without
+    # re-running the whole workflow.
+    if: github.event_name != 'pull_request'
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
@@ -221,11 +232,10 @@ jobs:
           tag_name: ${{ env.EUXIS_VERSION }}
           generate_release_notes: true
           # `dist/*.deb` and `dist/*.rpm` are intentionally absent: the
-          # linux-packages job hangs in CPack and is decoupled from
-          # publish (see PR #106). The .tar.gz / .sha256 / cosign
-          # bundles + Docker image are the v0.1.4 distribution channel;
-          # .deb/.rpm will land via a separate run once the CPack hang
-          # is diagnosed. Keeping fail_on_unmatched_files=true so an
+          # linux-packages job is decoupled from publish (see PR #106).
+          # The .tar.gz / .sha256 / cosign bundles + Docker image are the
+          # distribution channel; attaching .deb/.rpm is a separate
+          # follow-up. Keeping fail_on_unmatched_files=true so an
           # unintentional regression on the *present* artifacts still
           # surfaces immediately.
           fail_on_unmatched_files: true
@@ -238,6 +248,7 @@ jobs:
 
   docker:
     name: Build and push Docker image
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
     permissions:
