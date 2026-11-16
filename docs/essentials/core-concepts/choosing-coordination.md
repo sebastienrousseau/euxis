@@ -232,4 +232,4 @@ euxis-combo run protect "Security review before release"
 
 ---
 
-*Euxis v0.1.4 · Build something that matters.*
+*Euxis v0.0.12 · Build something that matters.*

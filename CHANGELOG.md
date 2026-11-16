@@ -31,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Directory Restructuring**: `cmd/`→`apps/`, `pkg/`→`libs/`, `internal/platform/`→`libs/platform/`, `build/cmake/`→`cmake/`
 - **Agent Tier Promotions**: sentinel, strategist, and investigator promoted from fleet to core tier for Reason-class model routing
-- **Version**: Bumped to v0.0.10 across CMakeLists.txt, engine, lifecycle, and TUI
+- **Version**: Bumped to v0.0.12 across CMakeLists.txt, engine, lifecycle, TUI, data configs, man page and docs. The releases tagged v0.1.2 and v0.1.3 are now v0.0.10 and v0.0.11; the v0.1.x line is retired
+- **Homebrew formula**: Pinned to the v0.0.11 release, whose assets keep their `euxis-v0.1.3-*` names
 - **Help Output**: "Core" group now appears first in `euxis --help`, before System/Fleet/Knowledge groups
 - **README**: Rewritten with accurate C++23 build instructions, provider strategy overview, and complete Core commands table
 - **CONTRIBUTING.md**: Updated for C++23 workflow (CMake/GCC prerequisites, `make cpp-test`, AGPL-3.0 license, commit signing required)
@@ -39,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test Suite**: 1115 tests (up from 961), all passing
 - **CI Workflows**: Fixed stale artifact paths, added `cpp-bench` and `cpp-clang-tidy` Makefile targets, bumped release refs to v0.0.10
 - **TEMPLATE_CONFORMANCE**: Updated all 16 test path references from `euxis-cpp/` to `apps/`/`libs/`
-- **Data Config Versions**: Bumped `registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json` from v0.0.3 to v0.0.10
+- **Data Config Versions**: Bumped `registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json` from v0.0.3 to v0.0.12
 - **Documentation**: Updated ~40 doc files from v0.0.4 footers/badges to v0.0.10, fixed `euxis-cpp/` monorepo paths to `apps/`/`libs/`
 
 ### Security

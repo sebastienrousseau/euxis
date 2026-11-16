@@ -1,4 +1,4 @@
-# Shared Contracts (v0.1.4)
+# Shared Contracts (v0.0.12)
 
 This document defines the interface contracts between Euxis modules. These contracts must be honored during and after the multi-repo extraction to ensure compatibility.
 
@@ -328,7 +328,7 @@ Any contract test failure blocks extraction.
 
 | euxis-core | euxis-cli | euxis-ui | euxis-api | euxis-adapters |
 |------------|-----------|----------|-----------|----------------|
-| v0.1.4      | v0.1.4     | v0.1.4    | v0.1.4     | v0.1.4          |
+| v0.0.12      | v0.0.12     | v0.0.12    | v0.0.12     | v0.0.12          |
 
 All modules must maintain compatible versions during initial extraction. After extraction, semantic versioning will govern compatibility.
 

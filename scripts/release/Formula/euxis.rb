@@ -14,6 +14,8 @@ class Euxis < Formula
   desc 'Ultra-fast open-source code security scanner'
   homepage 'https://euxis.co'
   license 'AGPL-3.0-only'
+  # The v0.1.3 build was re-tagged v0.0.11. Its assets and `--version`
+  # keep the 0.1.3 name, so the release tag is pinned until the next bump.
   version '0.1.3'
 
   on_macos do
@@ -21,18 +23,18 @@ class Euxis < Formula
     # GitHub Actions' Intel runner pool is starved; only Apple Silicon
     # tarballs ship today. See .github/workflows/release.yml.
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-darwin-arm64.tar.gz"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-darwin-arm64.tar.gz"
       sha256 'c596155859215e386a0aff5125914fe28fc66ac05a96edbbb9806d23b544d251'
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-linux-arm64.tar.gz"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-linux-arm64.tar.gz"
       sha256 'b813765647a9de85934ed95a1e8ad2b6634db9e434fa1576650e8aa016cb961e'
     end
     on_intel do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v#{version}/euxis-v#{version}-linux-amd64.tar.gz"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.11/euxis-v#{version}-linux-amd64.tar.gz"
       sha256 '05eaad3775e59b586096f4c28c517ed0d9f05592d68a842232213c5daa180fbc'
     end
   end
