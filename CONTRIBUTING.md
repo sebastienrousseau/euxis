@@ -248,6 +248,10 @@ Follow the [Conventional Commits](https://www.conventionalcommits.org/) specific
 - No period at the end
 - Under 72 characters
 - Body explains *what* and *why*, not *how*
+- End every commit with the branding footer in
+  `data/config/branding/signature.txt`. The *Architecture and Quality
+  Gates* workflow checks the tip of `main` for it, so merge commits and
+  squash commits need it too
 
 ### Examples
 
@@ -279,7 +283,10 @@ Before submitting:
 1. **Automated checks**: CI must pass before review
 2. **Code review**: At least one maintainer reviews changes
 3. **Feedback**: Address requested changes
-4. **Approval**: A maintainer merges the PR (typically squash-merged)
+4. **Approval**: A maintainer merges the PR (typically squash-merged).
+   The merge or squash commit message must end with the branding footer;
+   with the GitHub CLI, pass it in the body:
+   `gh pr merge <n> --squash --body-file <message-with-footer>`
 
 ### What reviewers look for
 
