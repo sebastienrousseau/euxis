@@ -10,9 +10,10 @@ on:
         description: 'Tag to build (e.g. v0.1.0-beta.1)'
         required: true
         type: string
-  # A change to this workflow runs only the linux-packages job, so the
-  # packaging path is checked before a tag depends on it. Build, publish
-  # and docker are skipped on pull requests: nothing is signed or pushed.
+  # A change to this workflow builds every target and the packages, so a
+  # broken build is caught before a tag depends on it. On pull requests
+  # signing, attestation, publish and docker are skipped: nothing is
+  # signed or pushed.
   pull_request:
     paths:
       - '.github/workflows/release.yml'
@@ -30,7 +31,6 @@ env:
 jobs:
   build:
     name: Build ${{ matrix.target }}
-    if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -76,10 +76,15 @@ jobs:
           brew install libsodium sqlite pkg-config
 
       - name: Configure (Release + LTO)
+        # EuxisDefaults.cmake turns ASan/UBSan on unless told otherwise.
+        # Through v0.0.12 every release binary shipped instrumented, and
+        # the macOS one needed libclang_rt.asan from the build runner's
+        # Xcode to start at all.
         run: |
           cmake -B cmake-build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DEUXIS_DISABLE_SANITIZERS=ON \
             ${{ matrix.cmake_args }}
 
       - name: Build
@@ -92,6 +97,16 @@ jobs:
 
       - name: Smoke test
         run: ./cmake-build/apps/cli/euxis-cli --version
+
+      - name: No sanitizer runtime linked
+        run: |
+          bin=cmake-build/apps/cli/euxis-cli
+          if [ "$RUNNER_OS" = macOS ]; then libs=$(otool -L "$bin"); else libs=$(ldd "$bin"); fi
+          echo "$libs"
+          if echo "$libs" | grep -Ei 'asan|ubsan|tsan|lsan'; then
+            echo "::error::release binary links a sanitizer runtime"
+            exit 1
+          fi
 
       - name: Package
         id: package
@@ -106,11 +121,13 @@ jobs:
           echo "checksum=dist/${BIN}.tar.gz.sha256" >> "$GITHUB_OUTPUT"
 
       - name: Install cosign
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3
         with:
           cosign-release: 'v2.4.1'
 
       - name: Sign (keyless via Sigstore OIDC)
+        if: github.event_name != 'pull_request'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -119,6 +136,7 @@ jobs:
             "${{ steps.package.outputs.archive }}"
 
       - name: Generate SLSA build provenance (in-toto Statement)
+        if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: ${{ steps.package.outputs.archive }}
@@ -162,6 +180,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=/usr \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DEUXIS_NATIVE_ARCH=OFF \
+            -DEUXIS_DISABLE_SANITIZERS=ON \
             ${{ matrix.cmake_arch_flag }}
 
       - name: Build CLI target
@@ -169,6 +188,14 @@ jobs:
         # started every euxis-cli-lib TU at once and the job was killed
         # (exit 143) two minutes later. Same cap as the build job.
         run: cmake --build cmake-build --parallel 2 --target euxis-cli
+
+      - name: No sanitizer runtime linked
+        run: |
+          ldd cmake-build/apps/cli/euxis-cli
+          if ldd cmake-build/apps/cli/euxis-cli | grep -Ei 'asan|ubsan|tsan|lsan'; then
+            echo "::error::packaged binary links a sanitizer runtime"
+            exit 1
+          fi
 
       - name: Emit .deb + .rpm via CPack
         run: |

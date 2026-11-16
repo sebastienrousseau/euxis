@@ -62,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Release packaging**: the .deb/.rpm job caps its build at `--parallel 2` (an unbounded `make -j` got it killed on v0.0.12), builds arm64 on the arm64 runner, and runs on pull requests that change `release.yml`
+- **Release binaries**: built with `EUXIS_DISABLE_SANITIZERS=ON`. Through v0.0.12 every release binary shipped with ASan/UBSan, and the macOS one needed `libclang_rt.asan` from the build runner's Xcode to start; the build now fails if a sanitizer runtime is linked
 - **Security Hardening**: Auth profile store bounds checks, path traversal guards, command injection prevention, bare `catch(...)` elimination
 - **Circular Dependency**: Broke crypto↔identity circular include
 - **Dependency Vulnerabilities**: Patched flatted (CVE-2026-32141), PyJWT (CVE-2026-32597), removed `/tmp` fallback paths
