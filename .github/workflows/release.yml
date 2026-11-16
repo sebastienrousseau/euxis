@@ -98,6 +98,19 @@ jobs:
       - name: Smoke test
         run: ./cmake-build/apps/cli/euxis-cli --version
 
+      - name: Binary version matches the tag
+        # v0.0.13 was tagged before the source version moved and shipped
+        # binaries that print v0.0.12. Pull requests package under a
+        # placeholder version, so the check only applies to real tags.
+        if: github.event_name != 'pull_request'
+        run: |
+          out=$(./cmake-build/apps/cli/euxis-cli --version)
+          echo "$out"
+          case "$out" in
+            *"${EUXIS_VERSION}"*) ;;
+            *) echo "::error::euxis-cli --version does not report ${EUXIS_VERSION}"; exit 1 ;;
+          esac
+
       - name: No sanitizer runtime linked
         run: |
           bin=cmake-build/apps/cli/euxis-cli
@@ -266,12 +279,15 @@ jobs:
           # unintentional regression on the *present* artifacts still
           # surfaces immediately.
           fail_on_unmatched_files: true
+          # Each file must match exactly one pattern: v0.0.13 listed
+          # SHA256SUMS.cosign.bundle twice (here and via *.cosign.bundle),
+          # the duplicate upload replaced the first, and publish failed
+          # with a 404 on the asset it had just deleted.
           files: |
             dist/*.tar.gz
             dist/*.tar.gz.sha256
             dist/*.cosign.bundle
             dist/SHA256SUMS
-            dist/SHA256SUMS.cosign.bundle
 
   docker:
     name: Build and push Docker image
