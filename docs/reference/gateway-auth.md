@@ -1,6 +1,6 @@
 # Gateway Auth
 
-Guidance for authenticating against the Euxis Gateway in v0.0.14.
+Guidance for authenticating against the Euxis Gateway in v0.0.15.
 
 ## Default Mode
 

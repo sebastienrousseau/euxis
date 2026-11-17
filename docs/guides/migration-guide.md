@@ -92,7 +92,7 @@ euxis certify-readiness .
 
 ### Configuration Changes
 
-All data config files (`registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json`) are bumped from `v0.0.3` to `v0.0.14`. These update automatically when you pull the latest code.
+All data config files (`registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json`) are bumped from `v0.0.3` to `v0.0.15`. These update automatically when you pull the latest code.
 
 ---
 
