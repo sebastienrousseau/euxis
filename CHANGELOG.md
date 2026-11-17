@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Release packaging**: the .deb/.rpm job caps its build at `--parallel 2` (an unbounded `make -j` got it killed on v0.0.12), builds arm64 on the arm64 runner, and runs on pull requests that change `release.yml`
 - **Release binaries**: built with `EUXIS_DISABLE_SANITIZERS=ON`. Through v0.0.12 every release binary shipped with ASan/UBSan, and the macOS one needed `libclang_rt.asan` from the build runner's Xcode to start; the build now fails if a sanitizer runtime is linked
 - **Release publishing**: `SHA256SUMS.cosign.bundle` is matched by one upload pattern instead of two (the duplicate upload failed v0.0.13's publish), and the build fails if `euxis-cli --version` does not report the tag being released (v0.0.13 binaries printed v0.0.12)
+- **Linux release binaries**: libsodium is linked statically (`EUXIS_STATIC_SODIUM=ON`). Through v0.0.14 they needed Ubuntu's `libsodium.so.23` and failed to load on Arch, Fedora and other distros; the release build now runs the binary in a Fedora container
 - **Security Hardening**: Auth profile store bounds checks, path traversal guards, command injection prevention, bare `catch(...)` elimination
 - **Circular Dependency**: Broke crypto↔identity circular include
 - **Dependency Vulnerabilities**: Patched flatted (CVE-2026-32141), PyJWT (CVE-2026-32597), removed `/tmp` fallback paths

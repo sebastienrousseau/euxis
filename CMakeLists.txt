@@ -242,11 +242,31 @@ if(NOT TARGET SQLite3::SQLite3)
 endif()
 
 # Libsodium
+# Release binaries link it statically: the shared soname differs across
+# distros (Ubuntu 24.04 ships libsodium.so.23, Arch libsodium.so.26), so a
+# binary built on one fails to load on the other.
+option(EUXIS_STATIC_SODIUM "Link libsodium statically (portable release binaries)" OFF)
 find_package(unofficial-sodium CONFIG QUIET)
 if(NOT unofficial-sodium_FOUND)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
-    add_library(unofficial-sodium::sodium ALIAS PkgConfig::SODIUM)
+    if(EUXIS_STATIC_SODIUM)
+        find_library(EUXIS_SODIUM_STATIC_LIB NAMES libsodium.a
+            HINTS ${SODIUM_LIBRARY_DIRS} NO_CACHE)
+        if(NOT EUXIS_SODIUM_STATIC_LIB)
+            message(FATAL_ERROR
+                "EUXIS_STATIC_SODIUM=ON but libsodium.a was not found "
+                "(searched ${SODIUM_LIBRARY_DIRS} and the default paths)")
+        endif()
+        add_library(euxis_sodium_static STATIC IMPORTED GLOBAL)
+        set_target_properties(euxis_sodium_static PROPERTIES
+            IMPORTED_LOCATION "${EUXIS_SODIUM_STATIC_LIB}"
+            INTERFACE_INCLUDE_DIRECTORIES "${SODIUM_INCLUDE_DIRS}")
+        add_library(unofficial-sodium::sodium ALIAS euxis_sodium_static)
+        message(STATUS "Euxis: linking libsodium statically (${EUXIS_SODIUM_STATIC_LIB})")
+    else()
+        add_library(unofficial-sodium::sodium ALIAS PkgConfig::SODIUM)
+    endif()
 endif()
 
 # --- RPATH settings for installed binaries ---

@@ -35,12 +35,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # libsodium is linked statically on Linux: Ubuntu's soname
+          # (libsodium.so.23) is not what other distros ship, so through
+          # v0.0.14 the tarball binary failed to load off Ubuntu.
           - target: linux-amd64
             os: ubuntu-24.04
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF
+            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_STATIC_SODIUM=ON
           - target: linux-arm64
             os: ubuntu-24.04-arm
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF
+            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_STATIC_SODIUM=ON
           # darwin-amd64 (Intel) was sourced from macos-13. That runner pool
           # is starved (GitHub's Intel sunset) and PR #99 dropped it from
           # the regular C++ CI for the same reason. Drop here too; Apple
@@ -120,6 +123,18 @@ jobs:
             echo "::error::release binary links a sanitizer runtime"
             exit 1
           fi
+
+      - name: Runs off Ubuntu (Linux)
+        # Fedora ships different sonames for libsodium than Ubuntu; the
+        # binary must start there with only the base image's libraries.
+        if: runner.os == 'Linux'
+        run: |
+          if ldd cmake-build/apps/cli/euxis-cli | grep -i sodium; then
+            echo "::error::libsodium is linked dynamically"
+            exit 1
+          fi
+          docker run --rm -v "$PWD/cmake-build/apps/cli:/w:ro" \
+            fedora:42 /w/euxis-cli --version
 
       - name: Package
         id: package
