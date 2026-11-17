@@ -56,4 +56,4 @@ This means your agents get better over time. They don't repeat mistakes. They re
 
 ---
 
-*Euxis v0.0.12 · Build something that matters.*
+*Euxis v0.0.14 · Build something that matters.*

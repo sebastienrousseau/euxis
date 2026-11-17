@@ -1,7 +1,7 @@
 # CLI Surface Baseline
 
 **Date**: 2026-03-15
-**Version**: v0.0.12
+**Version**: v0.0.14
 **Status**: Frozen
 
 ## Command Surface
