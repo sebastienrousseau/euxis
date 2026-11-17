@@ -25,19 +25,19 @@ class Euxis < Formula
     # GitHub Actions' Intel runner pool is starved; only Apple Silicon
     # tarballs ship today. See .github/workflows/release.yml.
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.14/euxis-v0.0.14-darwin-arm64.tar.gz"
-      sha256 "2dee5be1c91262e0552bce6b8531bcca7c92a40f3cb9016a6857633a072f3054"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.15/euxis-v0.0.15-darwin-arm64.tar.gz"
+      sha256 "586bd754fb9934f0f26c8a4fa1c6dd99f2068e7002610e9efe2fbe6ce7086105"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.14/euxis-v0.0.14-linux-arm64.tar.gz"
-      sha256 "57d53bf39c6ce29958274f1899924e507bdcdb8c82e9a2e1ee814220cd1530de"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.15/euxis-v0.0.15-linux-arm64.tar.gz"
+      sha256 "b5e5f856741bd916ba39509d8c2cab7d5510bd06f0f527e2eaa14b3ec7e463c9"
     end
     on_intel do
-      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.14/euxis-v0.0.14-linux-amd64.tar.gz"
-      sha256 "92d345b2cdb09ce85538023a8610cc96ef0b15a6422be80799488ed034489ce7"
+      url "https://github.com/sebastienrousseau/euxis/releases/download/v0.0.15/euxis-v0.0.15-linux-amd64.tar.gz"
+      sha256 "ec7a5ee253635213a277348d898e69b1d8febda16809a5b53dbfeb9c6230d305"
     end
   end
 
