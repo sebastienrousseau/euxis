@@ -8,6 +8,8 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <fstream>
+#include <string>
 #endif
 
 namespace euxis::platform {
@@ -36,6 +38,28 @@ template <typename Fn>
 }
 
 enum Code : int { kOk = 0, kNotApplied = 101, kNotBlocked = 102, kWrongState = 103 };
+
+/// Seccomp filters installed on this process ("Seccomp_filters" in
+/// /proc/self/status, Linux 5.9+), or -1 if the kernel does not report it.
+/// Containers (Docker, podman) start processes with a filter already, so
+/// the tests compare against a baseline, never against zero.
+[[nodiscard]] auto seccomp_filter_count() -> int {
+    std::ifstream status("/proc/self/status");
+    for (std::string line; std::getline(status, line);) {
+        if (line.rfind("Seccomp_filters:", 0) == 0) return std::stoi(line.substr(16));
+    }
+    return -1;
+}
+
+/// Filters present when the test binary loaded, before any test ran.
+const int kBaselineFilters = seccomp_filter_count();
+const int kBaselineMode = ::prctl(PR_GET_SECCOMP);
+
+/// True if nothing added a filter since the binary loaded.
+[[nodiscard]] auto no_filter_added() -> bool {
+    return kBaselineFilters >= 0 ? seccomp_filter_count() == kBaselineFilters
+                                 : ::prctl(PR_GET_SECCOMP) == kBaselineMode;
+}
 
 class SandboxLinuxTest : public ::testing::Test {
 protected:
@@ -76,15 +100,15 @@ TEST_F(SandboxLinuxTest, PermissiveProfileSetsNoNewPrivsOnly) {
     const int code = exit_code_in_child([] {
         if (!apply_seccomp(SandboxProfile::Permissive).applied) return int{kNotApplied};
         if (::prctl(PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0) != 1) return int{kWrongState};
-        if (::prctl(PR_GET_SECCOMP) != 0) return int{kWrongState}; // no filter
+        if (!no_filter_added()) return int{kWrongState}; // no BPF filter
         return exec_true();
     });
     EXPECT_EQ(code, kOk);
 }
 
 TEST_F(SandboxLinuxTest, TestProcessIsNeverFiltered) {
-    // Regression guard for issue #96: nothing above leaks into this process.
-    EXPECT_EQ(::prctl(PR_GET_SECCOMP), 0);
+    // Regression guard for issue #96: no test installs a filter here.
+    EXPECT_TRUE(no_filter_added());
     EXPECT_EQ(exit_code_in_child(exec_true), kOk);
 }
 
