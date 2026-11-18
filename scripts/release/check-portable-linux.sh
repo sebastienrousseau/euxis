@@ -3,7 +3,8 @@
 #
 #   scripts/release/check-portable-linux.sh <build-dir>
 #
-# Runs on the GitHub runner (Docker and QEMU user mode available):
+# Needs QEMU user mode and a container engine: docker by default, or
+# EUXIS_CONTAINER=podman locally. Checks:
 #   1. static: no program interpreter, no DT_NEEDED entries;
 #   2. baseline ISA: no -march in any compile command;
 #   3. old CPU: runs under QEMU as a pre-AVX x86-64 / ARMv8.0 core;
@@ -45,9 +46,10 @@ echo "== distributions"
 # The PURL has known advisories, so a verified TLS round trip to
 # api.osv.dev returns a non-empty result.
 purl='pkg:npm/lodash@4.17.20'
+engine=${EUXIS_CONTAINER:-docker}
 run() { # image, setup command
   echo "-- $1"
-  docker run --rm -e HOME=/tmp -v "$bin_dir:/w:ro" "$1" sh -euc "
+  "$engine" run --rm -e HOME=/tmp -v "$bin_dir:/w:ro" "$1" sh -euc "
     $2
     /w/euxis-cli --version
     /w/euxis-cli vulndb query '$purl' --json > /tmp/osv.json
