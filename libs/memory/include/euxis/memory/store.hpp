@@ -37,6 +37,14 @@ public:
 
     [[nodiscard]] auto export_tier_encrypted(MemoryTier tier)
         -> std::vector<EncryptedMemoryEntry>;
+    /// Re-encrypt every legacy AES-256-GCM entry as XChaCha20-Poly1305,
+    /// keeping its id, tier and timestamp. The file is rewritten through a
+    /// temporary file and an atomic rename; lines it cannot parse are kept
+    /// verbatim. All or nothing: if any legacy entry fails to decrypt
+    /// (wrong key, or a CPU without AES instructions) nothing is written.
+    /// Returns the number of entries migrated.
+    [[nodiscard]] auto migrate_legacy_entries()
+        -> std::expected<std::size_t, std::string>;
 
 private:
     std::array<std::byte, 32> agent_key_;

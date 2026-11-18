@@ -2,11 +2,47 @@
 #include "euxis/cli/provider_router.hpp"
 #include "euxis/cli/process.hpp"
 
+#include <algorithm>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
+#include <initializer_list>
+#include <optional>
+#include <string>
 
 namespace euxis::cli {
 namespace {
+
+/// Puts no-op executables with the given names first on PATH for the
+/// test's lifetime, so routing that probes for provider CLIs does not
+/// depend on what the host has installed.
+class FakeToolsOnPath {
+public:
+    FakeToolsOnPath(const std::filesystem::path& dir, std::initializer_list<const char*> names)
+        : dir_(dir) {
+        std::filesystem::create_directories(dir_);
+        for (const auto* name : names) {
+            const auto tool = dir_ / name;
+            std::ofstream(tool) << "#!/bin/sh\nexit 0\n";
+            std::filesystem::permissions(tool, std::filesystem::perms::owner_all);
+        }
+        if (const char* old = std::getenv("PATH")) saved_ = old;
+        const auto path = dir_.string() + (saved_ ? ":" + *saved_ : std::string{});
+        (void)::setenv("PATH", path.c_str(), 1);
+    }
+    ~FakeToolsOnPath() {
+        if (saved_) (void)::setenv("PATH", saved_->c_str(), 1);
+        else (void)::unsetenv("PATH");
+        std::error_code ec;
+        std::filesystem::remove_all(dir_, ec);
+    }
+    FakeToolsOnPath(const FakeToolsOnPath&) = delete;
+    FakeToolsOnPath& operator=(const FakeToolsOnPath&) = delete;
+
+private:
+    std::filesystem::path dir_;
+    std::optional<std::string> saved_;
+};
 
 TEST(ProviderRouterTest, TierLabel) {
     EXPECT_EQ(tier_label(Tier::Routine), "routine");
@@ -529,9 +565,8 @@ TEST_F(StrategyRouterTest, RouteArchitectureToClaude) {
 }
 
 TEST_F(StrategyRouterTest, RoutePrivateCodingToOllama) {
-    if (!Process::available("ollama")) {
-        GTEST_SKIP() << "ollama not installed on this runner — model resolution falls back";
-    }
+    const FakeToolsOnPath tools(tmp_ / "bin", {"ollama"});
+    ASSERT_TRUE(Process::available("ollama"));
     ProviderRouter router(tmp_.string());
     auto sel = router.route_by_strategy("private_coding", "", "code", "private work");
     EXPECT_EQ(sel.provider, "ollama");
@@ -696,21 +731,14 @@ TEST_F(StrategyRouterTest, ToolAvailableDoesNotCrash) {
 }
 
 TEST_F(StrategyRouterTest, AvailableProvidersIncludesTools) {
-    // available_providers() probes for installed CLI tools (claude, gemini,
-    // ollama, opencode, aider, sgpt, kiro). Bare CI runners ship none of
-    // them, so this test is a no-op there. Run only when at least one of
-    // the probed binaries is actually on PATH.
-    bool any_tool = false;
-    for (const auto* p : {"claude", "gemini", "openai", "ollama",
-                          "opencode", "aider", "sgpt", "kiro"}) {
-        if (Process::available(p)) { any_tool = true; break; }
-    }
-    if (!any_tool) {
-        GTEST_SKIP() << "no provider CLI available on this runner";
-    }
+    // available_providers() probes PATH for provider CLIs (claude, gemini,
+    // ollama, opencode, aider, sgpt, kiro); fake two so the result does not
+    // depend on the host.
+    const FakeToolsOnPath tools(tmp_ / "bin", {"ollama", "aider"});
     ProviderRouter router(tmp_.string());
-    auto providers = router.available_providers();
-    EXPECT_GE(providers.size(), 1u);
+    const auto providers = router.available_providers();
+    EXPECT_NE(std::ranges::find(providers, "ollama"), providers.end());
+    EXPECT_NE(std::ranges::find(providers, "aider"), providers.end());
 }
 
 // --- Unknown task class falls back ---

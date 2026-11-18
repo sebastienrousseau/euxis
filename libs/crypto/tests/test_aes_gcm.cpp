@@ -24,6 +24,12 @@ protected:
         ASSERT_GE(sodium_init(), 0) << "sodium_init() failed";
     }
 
+    void SetUp() override {
+        if (!aes_gcm_available()) {
+            GTEST_SKIP() << "CPU has no AES instructions; see AesGcmUnsupported";
+        }
+    }
+
     /// Helper: generate a random 32-byte key.
     static auto random_key() -> std::array<std::byte, 32> {
         std::array<std::byte, 32> key{};
@@ -347,7 +353,8 @@ TEST_F(AesGcmTest, ContextMoveAssignable) {
 }
 
 // --- Coverage: errors.hpp lines 21-29 (to_string all CryptoError enum values) ---
-TEST_F(AesGcmTest, CryptoErrorToStringAllValues) {
+// Not AES-dependent: a plain TEST so it also runs where AesGcmTest skips.
+TEST(CryptoErrorStrings, CryptoErrorToStringAllValues) {
     EXPECT_EQ(to_string(CryptoError::InvalidKeySize), "Invalid key size");
     EXPECT_EQ(to_string(CryptoError::InvalidIVSize), "Invalid IV size");
     EXPECT_EQ(to_string(CryptoError::EncryptionFailed), "Encryption failed");
@@ -355,6 +362,32 @@ TEST_F(AesGcmTest, CryptoErrorToStringAllValues) {
     EXPECT_EQ(to_string(CryptoError::AuthenticationFailed), "Authentication failed");
     EXPECT_EQ(to_string(CryptoError::InvalidSignature), "Invalid signature");
     EXPECT_EQ(to_string(CryptoError::KeyDerivationFailed), "Key derivation failed");
+}
+
+} // namespace
+} // namespace euxis::crypto
+
+namespace euxis::crypto {
+namespace {
+
+// On a CPU without AES instructions every entry point reports Unsupported
+// instead of a generic failure (the other suites skip there).
+TEST(AesGcmUnsupported, ReportsUnsupportedWithoutAesInstructions) {
+    ASSERT_GE(sodium_init(), 0);
+    if (aes_gcm_available()) {
+        GTEST_SKIP() << "CPU has AES instructions";
+    }
+    std::array<std::byte, 32> key{};
+    key.fill(std::byte{0x42});
+    std::array<std::byte, 12> iv{};
+    iv.fill(std::byte{0x01});
+    const std::vector<std::byte> data(8, std::byte{0x07});
+
+    EXPECT_EQ(encrypt(data, key).error(), CryptoError::Unsupported);
+    EXPECT_EQ(decrypt(data, key, iv).error(), CryptoError::Unsupported);
+    EXPECT_EQ(encrypt_aad(data, key, data).error(), CryptoError::Unsupported);
+    EXPECT_EQ(decrypt_aad(data, key, iv, data).error(), CryptoError::Unsupported);
+    EXPECT_EQ(AesGcmContext::create(key).error(), CryptoError::Unsupported);
 }
 
 } // namespace

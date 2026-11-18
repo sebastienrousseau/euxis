@@ -13,6 +13,7 @@ auto to_string(CryptoError error) -> std::string {
         case CryptoError::KeyGenerationFailed: return "Key generation failed";
         case CryptoError::KeyDerivationFailed: return "Key derivation failed";
         case CryptoError::InvalidInput:        return "Invalid input";
+        case CryptoError::Unsupported:         return "Not supported on this CPU";
     }
     return "Unknown error";
 }

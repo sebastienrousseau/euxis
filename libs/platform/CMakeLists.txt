@@ -9,9 +9,8 @@ euxis_add_library(euxis-platform-cpp
   DEPS
     euxis-runtime-cpp
   TEST_SOURCES
-    # NB: test_execution_backend runs first because test_sandbox /
-    # test_linux_hardening apply seccomp filters to the test process
-    # and break subsequent fork+exec calls.
+    # test_sandbox applies seccomp filters only in forked children, so
+    # test order does not matter (issue #96).
     tests/test_execution_backend.cpp
     tests/test_linux_hardening.cpp
     tests/test_sandbox.cpp

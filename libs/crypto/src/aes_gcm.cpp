@@ -52,12 +52,23 @@ void generate_iv(std::array<std::byte, 12>& iv) {
 
 } // anonymous namespace
 
+auto aes_gcm_available() -> bool {
+    // CPU features are detected by sodium_init(); before it, libsodium
+    // reports AES-GCM as unavailable. sodium_init() is idempotent and
+    // thread-safe, so callers need not have run it.
+    static const bool ready = sodium_init() >= 0;
+    return ready && crypto_aead_aes256gcm_is_available() == 1;
+}
+
 // ---------------------------------------------------------------------------
 // encrypt
 // ---------------------------------------------------------------------------
 auto encrypt(std::span<const std::byte> data,
              std::span<const std::byte, 32> key)
     -> std::expected<EncryptionResult, CryptoError> {
+    if (!aes_gcm_available()) {
+        return std::unexpected(CryptoError::Unsupported);
+    }
 
     assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
     assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
@@ -98,6 +109,9 @@ auto decrypt(std::span<const std::byte> ciphertext,
              std::span<const std::byte, 32> key,
              std::span<const std::byte, 12> iv)
     -> std::expected<DecryptionResult, CryptoError> {
+    if (!aes_gcm_available()) {
+        return std::unexpected(CryptoError::Unsupported);
+    }
 
     assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
            && "P10-R5: decryption key must not be all zeros");
@@ -140,6 +154,9 @@ auto encrypt_aad(std::span<const std::byte> data,
                  std::span<const std::byte, 32> key,
                  std::span<const std::byte> aad)
     -> std::expected<EncryptionResult, CryptoError> {
+    if (!aes_gcm_available()) {
+        return std::unexpected(CryptoError::Unsupported);
+    }
 
     assert(data.size() <= kMaxPlaintextSize && "P10-R2: plaintext size bounded");
     assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
@@ -180,6 +197,9 @@ auto decrypt_aad(std::span<const std::byte> ciphertext,
                  std::span<const std::byte, 12> iv,
                  std::span<const std::byte> aad)
     -> std::expected<DecryptionResult, CryptoError> {
+    if (!aes_gcm_available()) {
+        return std::unexpected(CryptoError::Unsupported);
+    }
 
     assert(!sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)
            && "P10-R5: decryption key must not be all zeros");
@@ -238,6 +258,9 @@ AesGcmContext& AesGcmContext::operator=(AesGcmContext&&) noexcept = default;
 
 auto AesGcmContext::create(std::span<const std::byte, 32> key)
     -> std::expected<AesGcmContext, CryptoError> {
+    if (!aes_gcm_available()) {
+        return std::unexpected(CryptoError::Unsupported);
+    }
     if (sodium_is_zero(reinterpret_cast<const unsigned char*>(key.data()), 32)) {
         return std::unexpected(CryptoError::EncryptionFailed);
     }

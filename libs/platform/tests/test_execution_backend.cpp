@@ -31,36 +31,13 @@ TEST(ExecLocalBackendTest, NameIsLocal) {
     EXPECT_EQ(b.name(), "local");
 }
 
-// All ExecLocalBackend tests that actually spawn a subprocess return
-// EPERM on the GitHub Actions ubuntu-24.04 runner. After ten rounds
-// of investigation (PR #100) the conclusion is that the runner
-// kernel rejects *every* form of exec from a forked test child —
-// fork+execvp, fork+execv(absolute), and posix_spawn (clone3 +
-// execveat) all returned errno=1 ("Operation not permitted") on
-// /usr/bin/echo, with PR_SET_DUMPABLE=1 set, kernel.apparmor_
-// restrict_unprivileged_userns=0, and apparmor.service stopped.
-//
-// The library code is verified correct elsewhere: macOS Apple Clang
-// (10/10 tests pass under ASan/UBSan locally), and the same code
-// powers production CLI command execution on any normal Linux
-// install. The behaviour is specific to the runner image —
-// most likely an undocumented seccomp filter that returns EPERM
-// for execve / execveat from non-blessed processes.
-//
-// Skipped on Linux to keep CI green; the assertion semantics are
-// preserved for every other platform that will keep running them.
-// See issue #96 for the full investigation trail.
-#if defined(__linux__)
-#  define EUXIS_SKIP_EXEC_ON_LINUX                                          \
-    GTEST_SKIP() << "tracked in issue #96 — GitHub Actions ubuntu-24.04 "  \
-                    "runner rejects exec* from forked test children with " \
-                    "EPERM regardless of code path; verified correct on macOS"
-#else
-#  define EUXIS_SKIP_EXEC_ON_LINUX ((void)0)
-#endif
+// The ExecLocalBackend tests below spawn subprocesses. They used to be
+// skipped on Linux (issue #96) because SandboxTest installed seccomp filters
+// in the test process itself, and the Strict profile blocks execve for
+// everything that runs after it. test_sandbox.cpp now applies filters only
+// in forked children, so these run everywhere.
 
 TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"echo", "hello"};
@@ -84,7 +61,6 @@ TEST(ExecLocalBackendTest, FalseReturnsNonZeroExitCode) {
 }
 
 TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"cat"};
@@ -97,7 +73,6 @@ TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
 }
 
 TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
     LocalBackend b;
     ExecutionRequest req;
     // Use sh -c to print the env var so we don't depend on `env` being
@@ -112,7 +87,6 @@ TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
 }
 
 TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"pwd"};
@@ -127,7 +101,6 @@ TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
 }
 
 TEST(ExecLocalBackendTest, TimeoutKillsLongProcess) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
     LocalBackend b;
     ExecutionRequest req;
     req.argv    = {"sleep", "5"};

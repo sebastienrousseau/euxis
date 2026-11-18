@@ -155,10 +155,8 @@ TEST(PlaybookSchemaTest, BadIdFormat) {
 
 // Verify existing playbooks pass validation
 TEST(PlaybookSchemaTest, VerifyEverythingPasses) {
-    auto path = std::filesystem::path("/home/seb/.euxis/data/config/playbooks/verify-everything.json");
-    if (!std::filesystem::exists(path)) {
-        GTEST_SKIP() << "verify-everything.json not found";
-    }
+    const auto path = std::filesystem::path(EUXIS_PLAYBOOKS_DIR) / "verify-everything.json";
+    ASSERT_TRUE(std::filesystem::exists(path)) << path;
     std::ifstream f(path);
     auto pb = nlohmann::json::parse(f);
     auto result = validate_playbook(pb);
