@@ -17,6 +17,9 @@ on:
   pull_request:
     paths:
       - '.github/workflows/release.yml'
+      - 'scripts/release/build-static-linux.sh'
+      - 'scripts/release/check-portable-linux.sh'
+      - 'scripts/release/Dockerfile.scratch'
 
 permissions:
   contents: write       # Upload release assets
@@ -27,6 +30,9 @@ env:
   # Pull requests have no tag (ref_name is "<n>/merge"), so they package
   # under a placeholder version.
   EUXIS_VERSION: ${{ github.event.inputs.tag || (github.event_name == 'pull_request' && 'v0.0.0-pr') || github.ref_name }}
+  # Linux release binaries are built in Alpine (musl, fully static).
+  # Pinned by the multi-arch index digest; same pin as cpp.yml.
+  EUXIS_ALPINE_IMAGE: alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
 
 jobs:
   build:
@@ -35,37 +41,32 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # libsodium is linked statically on Linux: Ubuntu's soname
-          # (libsodium.so.23) is not what other distros ship, so through
-          # v0.0.14 the tarball binary failed to load off Ubuntu.
+          # Linux binaries are fully static (musl) and target the baseline
+          # ISA. Through v0.0.15 they needed glibc 2.38, libstdc++ 13+,
+          # OpenSSL 3 and SQLite from the host, plus AVX2 / ARMv8.4.
           - target: linux-amd64
             os: ubuntu-24.04
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_STATIC_SODIUM=ON
           - target: linux-arm64
             os: ubuntu-24.04-arm
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_STATIC_SODIUM=ON
           # darwin-amd64 (Intel) was sourced from macos-13. That runner pool
           # is starved (GitHub's Intel sunset) and PR #99 dropped it from
           # the regular C++ CI for the same reason. Drop here too; Apple
           # Silicon coverage via macos-15 is the path forward.
           - target: darwin-arm64
             os: macos-15
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF
+            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_PORTABLE_ARCH=ON
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Install dependencies (Ubuntu)
+      - name: Build static binary (Linux, Alpine musl)
         if: runner.os == 'Linux'
         run: |
-          # g++-14 comes from the Ubuntu 24.04 archive (no toolchain PPA).
-          sudo apt-get update
-          sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
-            pkg-config
-          echo "CC=gcc-14"  >> "$GITHUB_ENV"
-          echo "CXX=g++-14" >> "$GITHUB_ENV"
+          docker run --rm -v "$PWD:/src" -w /src \
+            -e EUXIS_UID="$(id -u)" -e EUXIS_GID="$(id -g)" "$EUXIS_ALPINE_IMAGE" \
+            scripts/release/build-static-linux.sh cmake-build
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
@@ -78,7 +79,8 @@ jobs:
           # path (it's only exercised by the streaming test code).
           brew install libsodium sqlite pkg-config
 
-      - name: Configure (Release + LTO)
+      - name: Configure (Release + LTO, macOS)
+        if: runner.os == 'macOS'
         # EuxisDefaults.cmake turns ASan/UBSan on unless told otherwise.
         # Through v0.0.12 every release binary shipped instrumented, and
         # the macOS one needed libclang_rt.asan from the build runner's
@@ -90,7 +92,8 @@ jobs:
             -DEUXIS_DISABLE_SANITIZERS=ON \
             ${{ matrix.cmake_args }}
 
-      - name: Build
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
         # `--parallel` defaults to nproc which on ubuntu-24.04-arm (4 vCPU
         # / 16 GB) OOM-kills the runner under Release builds — the heavy
         # generator / runtime TUs alone need ~3 GB peak each. Pinning to
@@ -117,24 +120,27 @@ jobs:
       - name: No sanitizer runtime linked
         run: |
           bin=cmake-build/apps/cli/euxis-cli
-          if [ "$RUNNER_OS" = macOS ]; then libs=$(otool -L "$bin"); else libs=$(ldd "$bin"); fi
+          if [ "$RUNNER_OS" = macOS ]; then
+            libs=$(otool -L "$bin")
+          else
+            # Static: a sanitizer would be linked in, so look for its symbols.
+            libs=$(nm "$bin" | grep -E ' __(a|ub|t|l)san_' || true)
+          fi
           echo "$libs"
           if echo "$libs" | grep -Ei 'asan|ubsan|tsan|lsan'; then
             echo "::error::release binary links a sanitizer runtime"
             exit 1
           fi
 
-      - name: Runs off Ubuntu (Linux)
-        # Fedora ships different sonames for libsodium than Ubuntu; the
-        # binary must start there with only the base image's libraries.
+      - name: Portable (Linux)
+        # Static, baseline ISA, runs on an old CPU under QEMU, and on
+        # Alpine, Debian 12, Rocky 8/9 and Fedora with a verified HTTPS
+        # request to OSV.dev using each host's CA bundle.
         if: runner.os == 'Linux'
         run: |
-          if ldd cmake-build/apps/cli/euxis-cli | grep -i sodium; then
-            echo "::error::libsodium is linked dynamically"
-            exit 1
-          fi
-          docker run --rm -v "$PWD/cmake-build/apps/cli:/w:ro" \
-            fedora:42 /w/euxis-cli --version
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-user >/dev/null
+          scripts/release/check-portable-linux.sh cmake-build
 
       - name: Package
         id: package

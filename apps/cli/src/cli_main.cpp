@@ -1,5 +1,6 @@
 #include "euxis/cli/main_entry.hpp"
 
+#include "euxis/cli/ca_bundle.hpp"
 #include "euxis/cli/engine.hpp"
 #include "euxis/cli/i18n.hpp"
 
@@ -20,6 +21,10 @@ int cli_main(int argc, char* argv[]) {
         std::cerr << "error: libsodium initialization failed\n";
         return 1;
     }
+
+    // Before any TLS client exists: find the host's CA bundle for the
+    // statically linked OpenSSL (no-op off Linux or if the user set one).
+    (void)ensure_ca_bundle();
 
     std::vector<std::string> args(argv + 1, argv + argc);
 

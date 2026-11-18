@@ -1,6 +1,7 @@
 # Static library with all sources except main.cpp (for test linking)
 add_library(euxis-cli-lib STATIC
   src/cli_main.cpp
+  src/ca_bundle.cpp
   src/engine.cpp
   src/omnigraph.cpp
   src/terminal.cpp
@@ -102,6 +103,7 @@ install(TARGETS euxis-cli RUNTIME DESTINATION bin)
 # Tests
 add_executable(euxis-cli-cpp_tests
   tests/test_main_entry.cpp
+  tests/test_ca_bundle.cpp
   tests/test_playbook_verify.cpp
   tests/test_engine.cpp
   tests/test_omnigraph.cpp

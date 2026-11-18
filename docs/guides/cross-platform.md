@@ -92,12 +92,17 @@ gh workflow run cross-platform-ci.yml --field version=v0.0.15
 - File path handling with BSD utilities
 
 ### Linux
-- APT package manager for system dependencies
+- Release binaries (`linux-amd64`, `linux-arm64`) are fully static (musl):
+  they need no shared library from the host and run on any distribution,
+  glibc- or musl-based, on any x86-64 or ARMv8 CPU
+- TLS uses the host's CA bundle (Debian, Fedora/RHEL, openSUSE and Alpine
+  locations are probed); set `SSL_CERT_FILE` or `SSL_CERT_DIR` to override
+- APT package manager for system dependencies when building from source
 - Native bash and Python from package manager
 - GNU utilities (readlink, realpath)
 
 ### WSL (Windows Subsystem for Linux)
-- Ubuntu 24.04 or newer (release binaries need glibc 2.38)
+- Any WSL distribution (the release binary is static)
 - APT package management within WSL environment
 - Windows/Linux path translation handled automatically
 
