@@ -353,7 +353,8 @@ TEST_F(AesGcmTest, ContextMoveAssignable) {
 }
 
 // --- Coverage: errors.hpp lines 21-29 (to_string all CryptoError enum values) ---
-TEST_F(AesGcmTest, CryptoErrorToStringAllValues) {
+// Not AES-dependent: a plain TEST so it also runs where AesGcmTest skips.
+TEST(CryptoErrorStrings, CryptoErrorToStringAllValues) {
     EXPECT_EQ(to_string(CryptoError::InvalidKeySize), "Invalid key size");
     EXPECT_EQ(to_string(CryptoError::InvalidIVSize), "Invalid IV size");
     EXPECT_EQ(to_string(CryptoError::EncryptionFailed), "Encryption failed");
