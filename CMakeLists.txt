@@ -192,12 +192,17 @@ if(EUXIS_BUILD_GBENCH)
     FetchContent_MakeAvailable(benchmark)
 endif()
 
-# ixwebsocket (With specific patch for missing cstdint in some versions)
+# ixwebsocket v11.4.4 (latest release). The patch stops it calling
+# freeaddrinfo(NULL) after a failed DNS lookup: glibc ignores that, musl
+# segfaults, so the static musl build crashed on any unresolvable host.
 find_package(OpenSSL QUIET)
 FetchContent_Declare(
     ixwebsocket
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
     GIT_TAG        v11.4.4
+    PATCH_COMMAND  ${CMAKE_COMMAND}
+                   -DPATCH_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/patches/ixwebsocket-null-addrinfo.patch
+                   -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ApplyPatch.cmake
 )
 if(OpenSSL_FOUND)
     set(USE_TLS ON CACHE BOOL "" FORCE)

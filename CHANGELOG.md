@@ -63,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Credential Exclusion**: `.gitignore` expanded with `.env*`, `*.key`, `*.pem`, `credentials*`, `*.p12`, `*.pfx`, `*.keystore`
 
 ### Fixed
+- **Static Linux binary crashed on an unresolvable host**: IXWebSocket v11.4.4 passed a null pointer to `freeaddrinfo` after a failed DNS lookup. glibc ignores that; musl dereferences it, so the static musl build segfaulted whenever a WebSocket host did not resolve. IXWebSocket is now patched at fetch time (`cmake/patches/ixwebsocket-null-addrinfo.patch`, applied once by `cmake/ApplyPatch.cmake`), and `DnsLookupTest.UnresolvableHostFailsCleanly` covers it
 - **Release packaging**: the .deb/.rpm job caps its build at `--parallel 2` (an unbounded `make -j` got it killed on v0.0.12), builds arm64 on the arm64 runner, and runs on pull requests that change `release.yml`
 - **Release binaries**: built with `EUXIS_DISABLE_SANITIZERS=ON`. Through v0.0.12 every release binary shipped with ASan/UBSan, and the macOS one needed `libclang_rt.asan` from the build runner's Xcode to start; the build now fails if a sanitizer runtime is linked
 - **Release publishing**: `SHA256SUMS.cosign.bundle` is matched by one upload pattern instead of two (the duplicate upload failed v0.0.13's publish), and the build fails if `euxis-cli --version` does not report the tag being released (v0.0.13 binaries printed v0.0.12)
