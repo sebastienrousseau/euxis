@@ -3,7 +3,6 @@
 
 #include <gtest/gtest.h>
 
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -32,33 +31,13 @@ TEST(ExecLocalBackendTest, NameIsLocal) {
     EXPECT_EQ(b.name(), "local");
 }
 
-// The ExecLocalBackend tests below spawn a subprocess. On the GitHub
-// Actions ubuntu-24.04 runner of issue #96 (PR #100), exec* from a forked
-// test child failed with EPERM whatever the code path. The library code is
-// fine there; the sandbox is not. So probe once: fork, exec /bin/sh, and
-// skip only where that actually fails, instead of skipping on all Linux.
-[[nodiscard]] auto exec_permitted() -> bool {
-    static const bool permitted = [] {
-        const pid_t pid = ::fork();
-        if (pid < 0) return false;
-        if (pid == 0) {
-            ::execl("/bin/sh", "sh", "-c", "exit 0", static_cast<char*>(nullptr));
-            ::_exit(127);
-        }
-        int status = 0;
-        if (::waitpid(pid, &status, 0) != pid) return false;
-        return WIFEXITED(status) && WEXITSTATUS(status) == 0;
-    }();
-    return permitted;
-}
-
-#define EUXIS_SKIP_UNLESS_EXEC_PERMITTED                                            \
-    if (!exec_permitted())                                                  \
-    GTEST_SKIP() << "exec* from a forked child is blocked in this sandbox " \
-                    "(issue #96)"
+// The ExecLocalBackend tests below spawn subprocesses. They used to be
+// skipped on Linux (issue #96) because SandboxTest installed seccomp filters
+// in the test process itself, and the Strict profile blocks execve for
+// everything that runs after it. test_sandbox.cpp now applies filters only
+// in forked children, so these run everywhere.
 
 TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
-    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"echo", "hello"};
@@ -82,7 +61,6 @@ TEST(ExecLocalBackendTest, FalseReturnsNonZeroExitCode) {
 }
 
 TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
-    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"cat"};
@@ -95,7 +73,6 @@ TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
 }
 
 TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
-    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     // Use sh -c to print the env var so we don't depend on `env` being
@@ -110,7 +87,6 @@ TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
 }
 
 TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
-    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"pwd"};
@@ -125,7 +101,6 @@ TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
 }
 
 TEST(ExecLocalBackendTest, TimeoutKillsLongProcess) {
-    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv    = {"sleep", "5"};
