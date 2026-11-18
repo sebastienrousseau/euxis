@@ -7,9 +7,11 @@
 <h1 align="center">euxis::memory</h1>
 
 <p align="center">
-  Tier-bound encrypted memory storage for euxis. AES-256-GCM AEAD with
-  tier-bound additional authenticated data prevents horizontal access
-  across tiers and agents.
+  Tier-bound encrypted memory storage for euxis. XChaCha20-Poly1305 AEAD
+  with tier-bound additional authenticated data prevents horizontal access
+  across tiers and agents. Entries written before the `alg` field were
+  sealed with AES-256-GCM; they stay readable on CPUs with AES instructions,
+  and `migrate_legacy_entries()` re-encrypts them.
 </p>
 
 <p align="center">

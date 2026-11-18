@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Security
+- **Memory store encryption runs on every CPU**: `EncryptedMemoryStore` seals new entries with XChaCha20-Poly1305 (libsodium, random 24-byte nonce) and records the algorithm in each entry's `alg` field. It used AES-256-GCM, which libsodium only provides with AES instructions, so it failed on Linux arm64 (no arm64 AES-GCM in Ubuntu's libsodium 1.0.18), on x86 CPUs without AES-NI and on the Raspberry Pi. Older entries (no `alg`) stay readable where AES is available; `migrate_legacy_entries()` re-encrypts them atomically, all or nothing, keeping unparsable lines verbatim. AES-GCM calls now return `CryptoError::Unsupported` instead of a generic failure where the CPU lacks AES instructions
 - `data/config/requirements/requirements.txt` drops chromadb, whose releases through 1.5.9 (the latest) have unfixed advisories (GHSA-xph7-9rjv-w5fr, GHSA-2wm9-hf6c-p5cr, GHSA-36p7-vc44-83pf); only `docs/benchmarks/performance-verification.py` uses it, and it reports `RECALL_ERROR` without it.
 
 ### Added

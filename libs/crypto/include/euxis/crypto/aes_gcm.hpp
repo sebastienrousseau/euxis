@@ -31,6 +31,12 @@ struct DecryptionResult {
     [[nodiscard]] std::string to_string() const;
 };
 
+/** @brief Whether this CPU can run AES-256-GCM (AES-NI, or ARMv8 crypto).
+ *  libsodium has no software AES; without the instructions every AES-GCM
+ *  call returns CryptoError::Unsupported. New data uses xchacha.hpp,
+ *  which runs everywhere; AES-GCM remains for existing ciphertext. */
+[[nodiscard]] auto aes_gcm_available() -> bool;
+
 /** @brief Encrypt data using AES-256-GCM. */
 [[nodiscard]] auto encrypt(std::span<const std::byte> data,
                            std::span<const std::byte, 32> key)

@@ -9,9 +9,12 @@
 #include <cstring>
 #include <format>
 #include <fstream>
+#include <optional>
+#include <sstream>
 
 #include "euxis/crypto/aes_gcm.hpp"
 #include "euxis/crypto/key_derivation.hpp"
+#include "euxis/crypto/xchacha.hpp"
 
 namespace euxis::memory {
 
@@ -109,6 +112,87 @@ namespace {
     return {reinterpret_cast<const std::byte*>(sv.data()), sv.size()};
 }
 
+using AgentKey = std::span<const std::byte, 32>;
+
+/// Seal content for `tier`: base64(nonce (24) || ciphertext+tag).
+[[nodiscard]] auto seal(std::string_view content, AgentKey key, MemoryTier tier)
+    -> std::expected<std::string, std::string> {
+    const auto aad = tier_label(tier);
+    auto box = euxis::crypto::xchacha_encrypt(as_byte_span(content), key,
+                                              as_byte_span(aad));
+    if (!box) {
+        return std::unexpected("Encryption failed: " +
+                               euxis::crypto::to_string(box.error()));
+    }
+    std::vector<std::byte> combined(box->nonce.begin(), box->nonce.end());
+    combined.insert(combined.end(), box->ciphertext.begin(), box->ciphertext.end());
+    return base64_encode(combined);
+}
+
+/// Split base64(prefix || ciphertext) into its nonce/IV and ciphertext.
+template <std::size_t N>
+[[nodiscard]] auto split_payload(const std::vector<std::byte>& raw)
+    -> std::optional<std::pair<std::array<std::byte, N>, std::span<const std::byte>>> {
+    if (raw.size() < N) {
+        return std::nullopt;
+    }
+    std::array<std::byte, N> prefix{};
+    std::memcpy(prefix.data(), raw.data(), N);
+    return std::pair{prefix, std::span<const std::byte>(raw).subspan(N)};
+}
+
+/// Decrypt an entry with the AEAD its `alg` names.
+[[nodiscard]] auto open_entry(const EncryptedMemoryEntry& entry, AgentKey key)
+    -> std::expected<std::string, std::string> {
+    const auto raw = base64_decode(entry.ciphertext_b64);
+    const auto aad = as_byte_span(tier_label(entry.tier));
+    std::expected<euxis::crypto::DecryptionResult, euxis::crypto::CryptoError> out =
+        std::unexpected(euxis::crypto::CryptoError::DecryptionFailed);
+    if (entry.alg == kAlgXChaCha) {
+        auto parts = split_payload<euxis::crypto::kXChaChaNonceBytes>(raw);
+        if (!parts) return std::unexpected(std::string("Invalid ciphertext: too short"));
+        out = euxis::crypto::xchacha_decrypt(parts->second, key, parts->first, aad);
+    } else if (entry.alg == kAlgLegacyAesGcm) {
+        auto parts = split_payload<12>(raw);
+        if (!parts) return std::unexpected(std::string("Invalid ciphertext: too short"));
+        out = euxis::crypto::decrypt_aad(parts->second, key, parts->first, aad);
+    } else {
+        return std::unexpected("Unsupported algorithm: " + entry.alg);
+    }
+    if (!out) {
+        return std::unexpected("Decryption failed: " +
+                               euxis::crypto::to_string(out.error()));
+    }
+    return out->to_string();
+}
+
+/// Migrate one JSONL line: the re-sealed line for a legacy entry, nullopt
+/// to keep the line as it is (current, unparsable or unknown entries).
+[[nodiscard]] auto migrate_line(const std::string& line, AgentKey key)
+    -> std::expected<std::optional<std::string>, std::string> {
+    EncryptedMemoryEntry entry;
+    try {
+        entry = EncryptedMemoryEntry::from_json(nlohmann::json::parse(line));
+    } catch (const std::exception&) {
+        return std::optional<std::string>{};
+    }
+    if (entry.alg != kAlgLegacyAesGcm) {
+        return std::optional<std::string>{};
+    }
+    auto plaintext = open_entry(entry, key);
+    if (!plaintext) {
+        return std::unexpected("entry " + entry.entry_id + ": " + plaintext.error());
+    }
+    auto sealed = seal(*plaintext, key, entry.tier);
+    sodium_memzero(plaintext->data(), plaintext->size());
+    if (!sealed) {
+        return std::unexpected("entry " + entry.entry_id + ": " + sealed.error());
+    }
+    entry.ciphertext_b64 = std::move(*sealed);
+    entry.alg = std::string{kAlgXChaCha};
+    return std::optional<std::string>{entry.to_json().dump()};
+}
+
 /// Check whether a 32-byte key is all zeros.
 [[nodiscard]] auto is_key_zeroed(const std::array<std::byte, 32>& key) -> bool {
     return sodium_is_zero(
@@ -186,42 +270,20 @@ auto EncryptedMemoryStore::store(std::string_view content, MemoryTier tier)
         return std::unexpected(std::string("Agent keys have been destroyed"));
     }
 
-    // Convert content to bytes.
-    const auto content_bytes = as_byte_span(content);
-
-    // AAD is the tier label.
-    const auto aad_str = tier_label(tier);
-    const auto aad_bytes = as_byte_span(aad_str);
-
-    // Encrypt with AAD.
-    auto enc_result = euxis::crypto::encrypt_aad(
-        content_bytes, agent_key_, aad_bytes);
-
-    if (!enc_result.has_value()) {
-        return std::unexpected(
-            std::string("Encryption failed: ") +
-            std::string(euxis::crypto::to_string(enc_result.error())));
+    // XChaCha20-Poly1305, AAD = tier label (runs on every CPU).
+    auto sealed = seal(content, agent_key_, tier);
+    if (!sealed) {
+        return std::unexpected(sealed.error());
     }
-
-    // Combine IV (12 bytes) + ciphertext into a single buffer, then base64.
-    std::vector<std::byte> combined(
-        enc_result->iv.size() + enc_result->ciphertext.size());
-    std::memcpy(combined.data(),
-                enc_result->iv.data(),
-                enc_result->iv.size());
-    std::memcpy(combined.data() + enc_result->iv.size(),
-                enc_result->ciphertext.data(),
-                enc_result->ciphertext.size());
-
-    const auto b64 = base64_encode(combined);
 
     // Build the entry.
     EncryptedMemoryEntry entry;
     entry.entry_id       = generate_entry_id();
     entry.tier           = tier;
-    entry.ciphertext_b64 = b64;
+    entry.ciphertext_b64 = std::move(*sealed);
     entry.created_at     = utc_now_iso8601();
     entry.agent_did      = agent_did_;
+    entry.alg            = std::string{kAlgXChaCha};
 
     // Persist.
     save_entry(entry);
@@ -252,34 +314,7 @@ auto EncryptedMemoryStore::retrieve(std::string_view entry_id)
         return std::unexpected(
             std::string("Entry not found: ") + id_str);
     }
-    auto it = all.begin() + static_cast<std::ptrdiff_t>(idx_it->second);
-
-    // Base64-decode.
-    auto raw = base64_decode(it->ciphertext_b64);
-    if (raw.size() < 12) {
-        return std::unexpected(std::string("Invalid ciphertext: too short"));
-    }
-
-    // Split: first 12 bytes = IV, rest = ciphertext.
-    std::array<std::byte, 12> iv{};
-    std::memcpy(iv.data(), raw.data(), 12);
-    std::span<const std::byte> ciphertext(raw.data() + 12, raw.size() - 12);
-
-    // AAD is the tier label.
-    const auto aad_str = tier_label(it->tier);
-    const auto aad_bytes = as_byte_span(aad_str);
-
-    // Decrypt.
-    auto dec_result = euxis::crypto::decrypt_aad(
-        ciphertext, agent_key_, iv, aad_bytes);
-
-    if (!dec_result.has_value()) {
-        return std::unexpected(
-            std::string("Decryption failed: ") +
-            std::string(euxis::crypto::to_string(dec_result.error())));
-    }
-
-    return dec_result->to_string();
+    return open_entry(all[idx_it->second], agent_key_);
 }
 
 // ---------------------------------------------------------------------------
@@ -300,22 +335,8 @@ auto EncryptedMemoryStore::retrieve_tier(MemoryTier tier, size_t limit)
         if (results.size() >= limit) break;
         if (entry.tier != tier) continue;
 
-        // Base64-decode.
-        auto raw = base64_decode(entry.ciphertext_b64);
-        if (raw.size() < 12) continue;
-
-        std::array<std::byte, 12> iv{};
-        std::memcpy(iv.data(), raw.data(), 12);
-        std::span<const std::byte> ciphertext(raw.data() + 12, raw.size() - 12);
-
-        const auto aad_str = tier_label(entry.tier);
-        const auto aad_bytes = as_byte_span(aad_str);
-
-        auto dec_result = euxis::crypto::decrypt_aad(
-            ciphertext, agent_key_, iv, aad_bytes);
-
-        if (dec_result.has_value()) {
-            results.push_back(dec_result->to_string());
+        if (auto content = open_entry(entry, agent_key_)) {
+            results.push_back(std::move(*content));
         }
     }
 
@@ -343,6 +364,55 @@ auto EncryptedMemoryStore::export_tier_encrypted(MemoryTier tier)
         [tier](const auto& e) { return e.tier == tier; });
 
     return filtered;
+}
+
+// ---------------------------------------------------------------------------
+// migrate_legacy_entries
+// ---------------------------------------------------------------------------
+auto EncryptedMemoryStore::migrate_legacy_entries()
+    -> std::expected<std::size_t, std::string> {
+    if (is_key_zeroed(agent_key_)) {
+        return std::unexpected(std::string("Agent keys have been destroyed"));
+    }
+    std::ifstream in(store_path_);
+    if (!in.is_open()) {
+        return std::size_t{0}; // no store file yet: nothing to migrate
+    }
+    std::ostringstream rewritten;
+    std::size_t migrated = 0;
+    for (std::string line; std::getline(in, line);) {
+        auto result = migrate_line(line, agent_key_);
+        if (!result) {
+            return std::unexpected("Migration aborted, store unchanged: " + result.error());
+        }
+        rewritten << result->value_or(line) << '\n';
+        migrated += result->has_value() ? 1 : 0;
+    }
+    in.close();
+    if (migrated == 0) {
+        return std::size_t{0};
+    }
+    auto tmp = store_path_;
+    tmp += ".migrating";
+    {
+        std::ofstream out(tmp, std::ios::trunc);
+        out << rewritten.str();
+        out.flush();
+        if (!out) {
+            std::filesystem::remove(tmp);
+            return std::unexpected(std::string("Migration aborted: cannot write ") + tmp.string());
+        }
+    }
+    std::error_code ec;
+    std::filesystem::rename(tmp, store_path_, ec); // atomic on POSIX
+    if (ec) {
+        std::filesystem::remove(tmp);
+        return std::unexpected("Migration aborted: " + ec.message());
+    }
+    invalidate_cache();
+    spdlog::info("Migrated {} memory entries to {} for {}", migrated,
+                 std::string(kAlgXChaCha), agent_did_);
+    return migrated;
 }
 
 // ---------------------------------------------------------------------------
