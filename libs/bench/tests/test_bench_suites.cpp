@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+
+#include "euxis/crypto/aes_gcm.hpp"
 #include <sodium.h>
 
 #include "euxis/bench/runner.hpp"
@@ -134,12 +136,40 @@ TEST_F(BenchSuiteTest, PerformanceRegistration) {
     EXPECT_EQ(suites[0], "performance");
 }
 
+TEST_F(BenchSuiteTest, PerformanceSuiteRegistersPerCpu) {
+    BenchmarkRunner runner;
+    register_performance_benchmarks(runner);
+    auto report = runner.run_suite("performance");
+    // xchacha + key derivation + serialization, plus the two AES-GCM
+    // benchmarks where the CPU has AES instructions.
+    const size_t expected = crypto::aes_gcm_available() ? 5u : 3u;
+    EXPECT_EQ(report.results.size(), expected);
+}
+
+TEST_F(BenchSuiteTest, PerformanceCryptoThroughputXChaCha) {
+    BenchmarkRunner runner;
+    register_performance_benchmarks(runner);
+    auto report = runner.run_suite("performance");
+    bool found = false;
+    for (const auto& r : report.results) {
+        if (r.name == "crypto_throughput_xchacha") {
+            found = true;
+            EXPECT_EQ(r.suite, "performance");
+            EXPECT_EQ(r.unit, "ops/sec");
+            EXPECT_GT(r.value, 0.0);
+        }
+    }
+    EXPECT_TRUE(found) << "crypto_throughput_xchacha benchmark not found";
+}
+
 TEST_F(BenchSuiteTest, PerformanceCryptoThroughput) {
+    if (!crypto::aes_gcm_available()) {
+        GTEST_SKIP() << "AES-256-GCM benchmarks need AES instructions";
+    }
     BenchmarkRunner runner;
     register_performance_benchmarks(runner);
 
     auto report = runner.run_suite("performance");
-    EXPECT_GE(report.results.size(), 4u);
 
     bool found = false;
     for (const auto& r : report.results) {
@@ -154,6 +184,9 @@ TEST_F(BenchSuiteTest, PerformanceCryptoThroughput) {
 }
 
 TEST_F(BenchSuiteTest, PerformanceCryptoThroughputCached) {
+    if (!crypto::aes_gcm_available()) {
+        GTEST_SKIP() << "AES-256-GCM benchmarks need AES instructions";
+    }
     BenchmarkRunner runner;
     register_performance_benchmarks(runner);
 

@@ -53,7 +53,11 @@ void generate_iv(std::array<std::byte, 12>& iv) {
 } // anonymous namespace
 
 auto aes_gcm_available() -> bool {
-    return crypto_aead_aes256gcm_is_available() == 1;
+    // CPU features are detected by sodium_init(); before it, libsodium
+    // reports AES-GCM as unavailable. sodium_init() is idempotent and
+    // thread-safe, so callers need not have run it.
+    static const bool ready = sodium_init() >= 0;
+    return ready && crypto_aead_aes256gcm_is_available() == 1;
 }
 
 // ---------------------------------------------------------------------------

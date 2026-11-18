@@ -18,6 +18,13 @@ auto as_uchar(std::span<const std::byte> s) -> const unsigned char* {
     return reinterpret_cast<const unsigned char*>(s.data());
 }
 
+/// libsodium must be initialised before use (randombytes, CPU dispatch);
+/// sodium_init() is idempotent and thread-safe.
+auto sodium_ready() -> bool {
+    static const bool ready = sodium_init() >= 0;
+    return ready;
+}
+
 auto is_zero_key(std::span<const std::byte, 32> key) -> bool {
     return sodium_is_zero(as_uchar(key), key.size()) == 1;
 }
@@ -28,6 +35,9 @@ auto xchacha_encrypt(std::span<const std::byte> data,
                      std::span<const std::byte, 32> key,
                      std::span<const std::byte> aad)
     -> std::expected<SealedBox, CryptoError> {
+    if (!sodium_ready()) {
+        return std::unexpected(CryptoError::EncryptionFailed);
+    }
     if (data.size() > kMaxPlaintextSize || is_zero_key(key)) {
         return std::unexpected(CryptoError::InvalidInput);
     }
@@ -52,7 +62,7 @@ auto xchacha_decrypt(std::span<const std::byte> ciphertext,
                      std::span<const std::byte, kXChaChaNonceBytes> nonce,
                      std::span<const std::byte> aad)
     -> std::expected<DecryptionResult, CryptoError> {
-    if (ciphertext.size() < kXChaChaTagBytes || is_zero_key(key)) {
+    if (!sodium_ready() || ciphertext.size() < kXChaChaTagBytes || is_zero_key(key)) {
         return std::unexpected(CryptoError::DecryptionFailed);
     }
     DecryptionResult result;

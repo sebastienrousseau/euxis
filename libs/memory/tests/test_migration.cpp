@@ -117,7 +117,14 @@ protected:
         std::ofstream(store_file(), std::ios::app) << line << '\n';
     }
 
-    void skip_without_aes() {
+};
+
+/// Tests that write legacy AES-256-GCM entries. GTEST_SKIP must run in
+/// SetUp or the test body: in a helper it only returns from the helper.
+class MemoryMigrationLegacyTest : public MemoryMigrationTest {
+protected:
+    void SetUp() override {
+        MemoryMigrationTest::SetUp();
         if (!euxis::crypto::aes_gcm_available()) {
             GTEST_SKIP() << "legacy AES-256-GCM needs AES instructions on this CPU";
         }
@@ -135,8 +142,7 @@ TEST_F(MemoryMigrationTest, NewEntriesAreXChaCha) {
     EXPECT_EQ(store.retrieve(e->entry_id).value(), "fresh");
 }
 
-TEST_F(MemoryMigrationTest, LegacyEntryIsReadable) {
-    skip_without_aes();
+TEST_F(MemoryMigrationLegacyTest, LegacyEntryIsReadable) {
     EncryptedMemoryStore store(dir_, master_, std::string(kDid));
     append_legacy(store, "legacy1", "old secret", MemoryTier::Relevant);
     EncryptedMemoryStore reopened(dir_, master_, std::string(kDid));
@@ -145,8 +151,7 @@ TEST_F(MemoryMigrationTest, LegacyEntryIsReadable) {
     EXPECT_EQ(*got, "old secret");
 }
 
-TEST_F(MemoryMigrationTest, MigrateRewritesLegacyAndKeepsEverythingElse) {
-    skip_without_aes();
+TEST_F(MemoryMigrationLegacyTest, MigrateRewritesLegacyAndKeepsEverythingElse) {
     EncryptedMemoryStore store(dir_, master_, std::string(kDid));
     auto current = store.store("current", MemoryTier::Hot);
     ASSERT_TRUE(current.has_value());
@@ -170,8 +175,7 @@ TEST_F(MemoryMigrationTest, MigrateRewritesLegacyAndKeepsEverythingElse) {
     EXPECT_FALSE(std::filesystem::exists(store_file().string() + ".migrating"));
 }
 
-TEST_F(MemoryMigrationTest, MigrateIsIdempotent) {
-    skip_without_aes();
+TEST_F(MemoryMigrationLegacyTest, MigrateIsIdempotent) {
     EncryptedMemoryStore store(dir_, master_, std::string(kDid));
     append_legacy(store, "legacy1", "x", MemoryTier::Hot);
     ASSERT_EQ(store.migrate_legacy_entries().value(), 1u);

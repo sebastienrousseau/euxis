@@ -9,6 +9,7 @@
 
 #include "euxis/crypto/aes_gcm.hpp"
 #include "euxis/crypto/key_derivation.hpp"
+#include "euxis/crypto/xchacha.hpp"
 #include "euxis/a2a/agent_card.hpp"
 
 #include <spdlog/spdlog.h>
@@ -32,7 +33,7 @@ static auto bench_crypto_throughput() -> BenchmarkResult {
 
     std::vector<std::byte> plaintext(1024);
     for (size_t i = 0; i < plaintext.size(); ++i) {
-        plaintext[i] = static_cast<std::byte>(i & 0xFF);
+        plaintext[i] = static_cast<std::byte>(i & 0xFFU);
     }
 
     // Encrypt/decrypt repeatedly for 1 second.
@@ -73,6 +74,49 @@ static auto bench_crypto_throughput() -> BenchmarkResult {
 }
 
 // ---------------------------------------------------------------------------
+// Benchmark: crypto_throughput_xchacha
+// The memory store's AEAD (XChaCha20-Poly1305): same 1 KB encrypt/decrypt
+// round trip as crypto_throughput. Runs on every CPU.
+// ---------------------------------------------------------------------------
+static auto bench_crypto_throughput_xchacha() -> BenchmarkResult {
+    BenchmarkResult result;
+    result.name = "crypto_throughput_xchacha";
+    result.suite = "performance";
+    result.unit = "ops/sec";
+    result.target = 50'000.0;
+
+    auto key_vec = crypto::generate_key(32);
+    std::array<std::byte, 32> key{};
+    std::copy_n(key_vec.begin(), 32, key.begin());
+    std::vector<std::byte> plaintext(1024);
+    for (size_t i = 0; i < plaintext.size(); ++i) {
+        plaintext[i] = static_cast<std::byte>(i & 0xFFU);
+    }
+
+    const auto start = std::chrono::steady_clock::now();
+    const auto deadline = start + std::chrono::seconds(1);
+    size_t ops = 0;
+    while (std::chrono::steady_clock::now() < deadline) {
+        auto box = crypto::xchacha_encrypt(plaintext, key);
+        if (!box || !crypto::xchacha_decrypt(box->ciphertext, key, box->nonce)) {
+            break;
+        }
+        ++ops;
+    }
+    const auto elapsed_us = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now() - start);
+    const double elapsed_sec = static_cast<double>(elapsed_us.count()) / 1'000'000.0;
+
+    result.duration = elapsed_us;
+    result.value = static_cast<double>(ops) / elapsed_sec;
+    result.passed = result.value >= result.target;
+    result.message = std::format("{} encrypt/decrypt ops in {:.3f}s = {:.0f} ops/sec",
+                                 ops, elapsed_sec, result.value);
+    spdlog::info("performance/crypto_throughput_xchacha: {}", result.message);
+    return result;
+}
+
+// ---------------------------------------------------------------------------
 // Benchmark: crypto_throughput_cached
 // Same workload as crypto_throughput, but uses AesGcmContext to amortize the
 // key-schedule cost (`beforenm`) across all encrypt/decrypt calls. Profile
@@ -99,7 +143,7 @@ static auto bench_crypto_throughput_cached() -> BenchmarkResult {
 
     std::vector<std::byte> plaintext(1024);
     for (size_t i = 0; i < plaintext.size(); ++i) {
-        plaintext[i] = static_cast<std::byte>(i & 0xFF);
+        plaintext[i] = static_cast<std::byte>(i & 0xFFU);
     }
 
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
@@ -253,10 +297,16 @@ static auto bench_serialization_speed() -> BenchmarkResult {
 // Registration
 // ---------------------------------------------------------------------------
 void register_performance_benchmarks(BenchmarkRunner& runner) {
-    runner.register_benchmark("performance", "crypto_throughput",
-                              bench_crypto_throughput);
-    runner.register_benchmark("performance", "crypto_throughput_cached",
-                              bench_crypto_throughput_cached);
+    // AES-256-GCM exists only with AES instructions (crypto::aes_gcm_available);
+    // without them those two would measure a failing call, not throughput.
+    if (crypto::aes_gcm_available()) {
+        runner.register_benchmark("performance", "crypto_throughput",
+                                  bench_crypto_throughput);
+        runner.register_benchmark("performance", "crypto_throughput_cached",
+                                  bench_crypto_throughput_cached);
+    }
+    runner.register_benchmark("performance", "crypto_throughput_xchacha",
+                              bench_crypto_throughput_xchacha);
     runner.register_benchmark("performance", "key_derivation_p95",
                               bench_key_derivation_p95);
     runner.register_benchmark("performance", "serialization_speed",
