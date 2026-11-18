@@ -97,7 +97,7 @@ gh workflow run cross-platform-ci.yml --field version=v0.0.15
 - GNU utilities (readlink, realpath)
 
 ### WSL (Windows Subsystem for Linux)
-- Ubuntu 22.04 distribution
+- Ubuntu 24.04 or newer (release binaries need glibc 2.38)
 - APT package management within WSL environment
 - Windows/Linux path translation handled automatically
 
