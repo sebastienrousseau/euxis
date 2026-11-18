@@ -47,11 +47,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          # 24.04 (noble) ships g++-14 in its own archive; only older
-          # releases need the toolchain PPA, which is not always reachable.
-          if [ "$(lsb_release -cs)" != noble ]; then
-            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          fi
+          # g++-14 comes from the Ubuntu 24.04 archive (no toolchain PPA).
           sudo apt-get update
           sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
             pkg-config
@@ -132,11 +128,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          # 24.04 (noble) ships g++-14 in its own archive; only older
-          # releases need the toolchain PPA, which is not always reachable.
-          if [ "$(lsb_release -cs)" != noble ]; then
-            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          fi
+          # g++-14 comes from the Ubuntu 24.04 archive (no toolchain PPA).
           sudo apt-get update
           sudo apt-get install -y g++-14 gcc-14 libsodium-dev libsqlite3-dev \
             pkg-config
