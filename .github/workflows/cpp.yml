@@ -148,9 +148,9 @@ jobs:
       - uses: actions/checkout@v7
       - name: Build and test (Alpine musl, static)
         run: |
-          docker run --rm -v "$PWD:/src" -w /src "$EUXIS_ALPINE_IMAGE" \
+          docker run --rm -v "$PWD:/src" -w /src \
+            -e EUXIS_UID="$(id -u)" -e EUXIS_GID="$(id -g)" "$EUXIS_ALPINE_IMAGE" \
             scripts/release/build-static-linux.sh cmake-build --with-tests
-          sudo chown -R "$(id -u):$(id -g)" cmake-build
       - name: Portable
         run: |
           sudo apt-get update -qq

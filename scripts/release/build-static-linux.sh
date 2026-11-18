@@ -3,13 +3,18 @@
 #
 # Runs inside Alpine (see EUXIS_ALPINE_IMAGE in release.yml and cpp.yml):
 #
-#   docker run --rm -v "$PWD:/src" -w /src "$EUXIS_ALPINE_IMAGE" \
+#   docker run --rm -v "$PWD:/src" -w /src \
+#     -e EUXIS_UID="$(id -u)" -e EUXIS_GID="$(id -g)" "$EUXIS_ALPINE_IMAGE" \
 #     scripts/release/build-static-linux.sh [build-dir] [--with-tests]
 #
 # The binary needs no shared library from the host (no glibc, libstdc++,
 # OpenSSL, SQLite or libsodium) and targets the baseline ISA (x86-64 or
 # armv8-a), so it runs on any Linux distribution and CPU of its arch.
 # --with-tests also builds and runs the full ctest suite under musl.
+#
+# Only package installation runs as root. With EUXIS_UID/EUXIS_GID set,
+# the build and the tests run as that user: the tree stays owned by the
+# caller, and permission tests are not bypassed by root.
 set -eu
 
 build_dir=${1:-cmake-build}
@@ -17,13 +22,23 @@ with_tests=${2:-}
 
 apk add --no-cache \
   build-base cmake samurai git linux-headers pkgconf perl python3 file \
+  setpriv \
   openssl-dev openssl-libs-static zlib-dev zlib-static \
   sqlite-dev sqlite-static libsodium-dev libsodium-static >/dev/null
 
-# The workspace is owned by the runner user, not root.
-git config --global --add safe.directory "$PWD"
+uid=${EUXIS_UID:-0}
+gid=${EUXIS_GID:-0}
+as_user() {
+  if [ "$uid" = 0 ]; then
+    "$@"
+  else
+    HOME=/tmp setpriv --reuid="$uid" --regid="$gid" --clear-groups -- "$@"
+  fi
+}
+# Root (uid 0) does not own the runner's checkout.
+git config --system --add safe.directory "$PWD"
 
-cmake -S . -B "$build_dir" -G Ninja \
+as_user cmake -S . -B "$build_dir" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
   -DEUXIS_DISABLE_SANITIZERS=ON \
@@ -35,10 +50,10 @@ cmake -S . -B "$build_dir" -G Ninja \
 # which is the limit on the 16 GB arm64 runner.
 jobs=${EUXIS_BUILD_JOBS:-2}
 if [ "$with_tests" = --with-tests ]; then
-  cmake --build "$build_dir" --parallel "$jobs"
-  ctest --test-dir "$build_dir" --output-on-failure --parallel "$jobs"
+  as_user cmake --build "$build_dir" --parallel "$jobs"
+  as_user ctest --test-dir "$build_dir" --output-on-failure --parallel "$jobs"
 else
-  cmake --build "$build_dir" --parallel "$jobs" --target euxis-cli
+  as_user cmake --build "$build_dir" --parallel "$jobs" --target euxis-cli
 fi
 
 bin="$build_dir/apps/cli/euxis-cli"

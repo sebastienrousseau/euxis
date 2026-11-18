@@ -56,7 +56,7 @@ run() { # image, setup command
   "
 }
 run alpine:3.22 'apk add -q --no-cache ca-certificates'
-run debian:11 'apt-get -qq update && apt-get -qq install -y ca-certificates >/dev/null'
+run debian:12 'apt-get -qq update && apt-get -qq install -y ca-certificates >/dev/null'
 run rockylinux:8 'true'
 run rockylinux:9 'rm -f /etc/ssl/cert.pem'
 run fedora:42 'rm -f /etc/ssl/cert.pem'
