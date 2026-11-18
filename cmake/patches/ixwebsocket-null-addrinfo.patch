@@ -1,0 +1,27 @@
+diff --git a/ixwebsocket/IXDNSLookup.cpp b/ixwebsocket/IXDNSLookup.cpp
+index b0283af7..22e5258d 100644
+--- a/ixwebsocket/IXDNSLookup.cpp
++++ b/ixwebsocket/IXDNSLookup.cpp
+@@ -62,7 +62,9 @@ namespace ix
+         if (getaddrinfo_result)
+         {
+             errMsg = gai_strerror(getaddrinfo_result);
+-            res = nullptr;
++            // shared_ptr calls its deleter even on nullptr, and musl's
++            // freeaddrinfo(NULL) dereferences it: return an empty pointer.
++            return nullptr;
+         }
+         return AddrInfoPtr{ res, freeaddrinfo };
+     }
+diff --git a/ixwebsocket/IXUdpSocket.cpp b/ixwebsocket/IXUdpSocket.cpp
+index d1248282..73d643a0 100644
+--- a/ixwebsocket/IXUdpSocket.cpp
++++ b/ixwebsocket/IXUdpSocket.cpp
+@@ -95,7 +95,6 @@ namespace ix
+         if (ret != 0)
+         {
+             errMsg = strerror(UdpSocket::getErrno());
+-            freeaddrinfo(result);
+             close();
+             return false;
+         }
