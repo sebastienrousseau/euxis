@@ -37,6 +37,15 @@ TEST(EncryptedMemoryEntryTest, ToJsonFieldNames) {
     EXPECT_EQ(j["ciphertext"], "ct");
     EXPECT_EQ(j["created_at"], "ts");
     EXPECT_EQ(j["agent_did"], "did");
+    EXPECT_EQ(j["alg"], "AES-256-GCM"); // default until the store sets it
+}
+
+TEST(EncryptedMemoryEntryTest, FromJsonWithoutAlgIsLegacyAesGcm) {
+    nlohmann::json j{{"entry_id", "a"}, {"tier", "hot"}, {"ciphertext", "ct"},
+                     {"created_at", "ts"}, {"agent_did", "did"}};
+    EXPECT_EQ(EncryptedMemoryEntry::from_json(j).alg, kAlgLegacyAesGcm);
+    j["alg"] = "XChaCha20-Poly1305";
+    EXPECT_EQ(EncryptedMemoryEntry::from_json(j).alg, kAlgXChaCha);
 }
 
 TEST(EncryptedMemoryEntryTest, CrossAgentTierRoundTrip) {

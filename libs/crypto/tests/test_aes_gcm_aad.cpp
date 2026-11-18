@@ -23,6 +23,12 @@ protected:
         ASSERT_GE(sodium_init(), 0) << "sodium_init() failed";
     }
 
+    void SetUp() override {
+        if (!aes_gcm_available()) {
+            GTEST_SKIP() << "CPU has no AES instructions; see AesGcmUnsupported";
+        }
+    }
+
     static auto random_key() -> std::array<std::byte, 32> {
         std::array<std::byte, 32> key{};
         randombytes_buf(key.data(), key.size());

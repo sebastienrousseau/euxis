@@ -26,7 +26,8 @@ nlohmann::json EncryptedMemoryEntry::to_json() const {
         {"tier",       std::string(tier_label(tier))},
         {"ciphertext", ciphertext_b64},
         {"created_at", created_at},
-        {"agent_did",  agent_did}
+        {"agent_did",  agent_did},
+        {"alg",        alg}
     };
 }
 
@@ -41,6 +42,7 @@ auto EncryptedMemoryEntry::from_json(const nlohmann::json& j)
     e.ciphertext_b64 = j.at("ciphertext").get<std::string>();
     e.created_at     = j.at("created_at").get<std::string>();
     e.agent_did      = j.at("agent_did").get<std::string>();
+    e.alg            = j.value("alg", std::string{kAlgLegacyAesGcm});
     return e;
 }
 

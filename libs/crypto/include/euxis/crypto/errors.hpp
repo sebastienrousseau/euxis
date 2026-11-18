@@ -17,6 +17,7 @@ enum class CryptoError {
     KeyGenerationFailed, ///< Secure random key generation failed.
     KeyDerivationFailed, ///< Argon2id or BLAKE2b derivation failed.
     InvalidInput,        ///< Buffer size mismatch or null data.
+    Unsupported,         ///< Algorithm unavailable on this CPU (AES-GCM without AES instructions).
 };
 
 /**
