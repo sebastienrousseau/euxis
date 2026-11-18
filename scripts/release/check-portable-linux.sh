@@ -57,9 +57,9 @@ run() { # image, setup command
     echo 'TLS ok'
   "
 }
-run alpine:3.22 'apk add -q --no-cache ca-certificates'
-run debian:12 'apt-get -qq update && apt-get -qq install -y ca-certificates >/dev/null'
-run rockylinux:8 'true'
-run rockylinux:9 'rm -f /etc/ssl/cert.pem'
-run fedora:42 'rm -f /etc/ssl/cert.pem'
+run docker.io/library/alpine:3.22 'apk add -q --no-cache ca-certificates'
+run docker.io/library/debian:12 'apt-get -qq update && apt-get -qq install -y ca-certificates >/dev/null'
+run docker.io/library/rockylinux:8 'true'
+run docker.io/library/rockylinux:9 'rm -f /etc/ssl/cert.pem'
+run registry.fedoraproject.org/fedora:42 'rm -f /etc/ssl/cert.pem'
 echo "ok: portable"
