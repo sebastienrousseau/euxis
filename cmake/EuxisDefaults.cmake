@@ -12,7 +12,13 @@ if(NOT WIN32)
   # not applicable, so simply skip the flags.
   if(NOT APPLE)
     add_link_options(-Wl,-z,relro -Wl,-z,now)
-    add_link_options(-pie)
+    # A fully static binary stays position-independent (ASLR) via
+    # -static-pie; plain -pie would make the linker want a loader.
+    if(EUXIS_STATIC_BINARY)
+      add_link_options(-static-pie)
+    else()
+      add_link_options(-pie)
+    endif()
   endif()
   # _FORTIFY_SOURCE requires optimization; only set for Release/RelWithDebInfo.
   # Skip on AppleClang — the macOS SDK predefines _FORTIFY_SOURCE itself, so
@@ -20,12 +26,14 @@ if(NOT WIN32)
   # darwin-arm64 build, 2026-06).
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL ""
      AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    # Use _FORTIFY_SOURCE=3 on GCC 12+ / Clang 14+, fallback to 2
+    # Use _FORTIFY_SOURCE=3 on GCC 12+ / Clang 14+, fallback to 2.
+    # Undefine first: distro compilers (Alpine, Ubuntu, Fedora) predefine
+    # their own level, and a different value is a -Werror redefinition.
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14"))
-      add_compile_definitions(_FORTIFY_SOURCE=3)
+      add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3)
     else()
-      add_compile_definitions(_FORTIFY_SOURCE=2)
+      add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
     endif()
   endif()
 endif()

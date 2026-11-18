@@ -126,3 +126,40 @@ jobs:
           name: contracts-pilot-test-logs
           path: build/cmake-build/Testing/
           if-no-files-found: ignore
+
+  # The Linux release binary: fully static (musl) and baseline ISA, built
+  # by the same script as release.yml. The whole suite runs under musl,
+  # then the binary must run on an old CPU and across distributions.
+  build-static-linux:
+    name: static linux (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            os: ubuntu-24.04
+          - arch: arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    env:
+      # Same pin as release.yml (multi-arch index digest).
+      EUXIS_ALPINE_IMAGE: alpine:3.22@sha256:49340b346798875b5592e5d420241f2f9cfba5f47e62ebb1446a1b34734e898f
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and test (Alpine musl, static)
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src "$EUXIS_ALPINE_IMAGE" \
+            scripts/release/build-static-linux.sh cmake-build --with-tests
+          sudo chown -R "$(id -u):$(id -g)" cmake-build
+      - name: Portable
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-user >/dev/null
+          scripts/release/check-portable-linux.sh cmake-build
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-linux-${{ matrix.arch }}-test-logs
+          path: cmake-build/Testing/
+          if-no-files-found: ignore

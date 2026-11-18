@@ -9,6 +9,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Point to cmake/ directory for cmake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# Distributed Linux binaries: one fully static, musl-linked executable
+# that needs no shared library from the host (not glibc, libstdc++,
+# OpenSSL, SQLite or libsodium). Built in Alpine; see
+# scripts/release/build-static-linux.sh. Must precede EuxisDefaults
+# (link mode) and every find_package (static archives only).
+option(EUXIS_STATIC_BINARY "Link euxis fully statically (portable Linux release binaries)" OFF)
+if(EUXIS_STATIC_BINARY)
+    if(APPLE OR WIN32)
+        message(FATAL_ERROR "EUXIS_STATIC_BINARY is for Linux (musl) builds only")
+    endif()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    set(OPENSSL_USE_STATIC_LIBS ON)
+    set(EUXIS_STATIC_SODIUM ON CACHE BOOL "" FORCE)
+endif()
+
 include(EuxisDefaults)
 include(EuxisPackage)
 include(EuxisStdModule)
@@ -40,6 +55,10 @@ include(CheckIPOSupported)
 
 # --- Performance Optimizations ---
 option(EUXIS_NATIVE_ARCH "Use -march=native for dev builds" OFF)
+# Release binaries run on any CPU of their architecture: the compiler's
+# baseline ISA (x86-64, armv8-a) instead of x86-64-v3 / armv8.4-a.
+# Through v0.0.15 linux-amd64 needed AVX2 and linux-arm64 ARMv8.4.
+option(EUXIS_PORTABLE_ARCH "Target the baseline ISA (distributed binaries)" OFF)
 
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     check_ipo_supported(RESULT lto_supported OUTPUT error)
@@ -56,6 +75,8 @@ if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Release")
     if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         if(EUXIS_NATIVE_ARCH)
             add_compile_options(-march=native)
+        elseif(EUXIS_PORTABLE_ARCH)
+            # No -march: the toolchain default is the portable baseline.
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
             add_compile_options(-march=x86-64-v3)
         elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
