@@ -3,6 +3,7 @@
 
 #include <gtest/gtest.h>
 
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -31,36 +32,33 @@ TEST(ExecLocalBackendTest, NameIsLocal) {
     EXPECT_EQ(b.name(), "local");
 }
 
-// All ExecLocalBackend tests that actually spawn a subprocess return
-// EPERM on the GitHub Actions ubuntu-24.04 runner. After ten rounds
-// of investigation (PR #100) the conclusion is that the runner
-// kernel rejects *every* form of exec from a forked test child —
-// fork+execvp, fork+execv(absolute), and posix_spawn (clone3 +
-// execveat) all returned errno=1 ("Operation not permitted") on
-// /usr/bin/echo, with PR_SET_DUMPABLE=1 set, kernel.apparmor_
-// restrict_unprivileged_userns=0, and apparmor.service stopped.
-//
-// The library code is verified correct elsewhere: macOS Apple Clang
-// (10/10 tests pass under ASan/UBSan locally), and the same code
-// powers production CLI command execution on any normal Linux
-// install. The behaviour is specific to the runner image —
-// most likely an undocumented seccomp filter that returns EPERM
-// for execve / execveat from non-blessed processes.
-//
-// Skipped on Linux to keep CI green; the assertion semantics are
-// preserved for every other platform that will keep running them.
-// See issue #96 for the full investigation trail.
-#if defined(__linux__)
-#  define EUXIS_SKIP_EXEC_ON_LINUX                                          \
-    GTEST_SKIP() << "tracked in issue #96 — GitHub Actions ubuntu-24.04 "  \
-                    "runner rejects exec* from forked test children with " \
-                    "EPERM regardless of code path; verified correct on macOS"
-#else
-#  define EUXIS_SKIP_EXEC_ON_LINUX ((void)0)
-#endif
+// The ExecLocalBackend tests below spawn a subprocess. On the GitHub
+// Actions ubuntu-24.04 runner of issue #96 (PR #100), exec* from a forked
+// test child failed with EPERM whatever the code path. The library code is
+// fine there; the sandbox is not. So probe once: fork, exec /bin/sh, and
+// skip only where that actually fails, instead of skipping on all Linux.
+[[nodiscard]] auto exec_permitted() -> bool {
+    static const bool permitted = [] {
+        const pid_t pid = ::fork();
+        if (pid < 0) return false;
+        if (pid == 0) {
+            ::execl("/bin/sh", "sh", "-c", "exit 0", static_cast<char*>(nullptr));
+            ::_exit(127);
+        }
+        int status = 0;
+        if (::waitpid(pid, &status, 0) != pid) return false;
+        return WIFEXITED(status) && WEXITSTATUS(status) == 0;
+    }();
+    return permitted;
+}
+
+#define EUXIS_SKIP_UNLESS_EXEC_PERMITTED                                            \
+    if (!exec_permitted())                                                  \
+    GTEST_SKIP() << "exec* from a forked child is blocked in this sandbox " \
+                    "(issue #96)"
 
 TEST(ExecLocalBackendTest, EchoReturnsStdoutAndExitZero) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
+    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"echo", "hello"};
@@ -84,7 +82,7 @@ TEST(ExecLocalBackendTest, FalseReturnsNonZeroExitCode) {
 }
 
 TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
+    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"cat"};
@@ -97,7 +95,7 @@ TEST(ExecLocalBackendTest, StdinIsPipedThrough) {
 }
 
 TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
+    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     // Use sh -c to print the env var so we don't depend on `env` being
@@ -112,7 +110,7 @@ TEST(ExecLocalBackendTest, EnvironmentIsPropagated) {
 }
 
 TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
+    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv = {"pwd"};
@@ -127,7 +125,7 @@ TEST(ExecLocalBackendTest, WorkingDirectoryIsHonoured) {
 }
 
 TEST(ExecLocalBackendTest, TimeoutKillsLongProcess) {
-    EUXIS_SKIP_EXEC_ON_LINUX;
+    EUXIS_SKIP_UNLESS_EXEC_PERMITTED;
     LocalBackend b;
     ExecutionRequest req;
     req.argv    = {"sleep", "5"};

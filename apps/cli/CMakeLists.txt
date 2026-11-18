@@ -161,4 +161,8 @@ target_link_libraries(euxis-cli-cpp_tests PRIVATE
   euxis-cli-lib
   GTest::gtest_main
 )
+# Repo data the tests validate (never a user's ~/.euxis).
+target_compile_definitions(euxis-cli-cpp_tests PRIVATE
+  EUXIS_PLAYBOOKS_DIR="${CMAKE_SOURCE_DIR}/data/config/playbooks"
+)
 add_test(NAME euxis-cli-cpp_tests COMMAND euxis-cli-cpp_tests)
