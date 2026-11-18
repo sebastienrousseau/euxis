@@ -25,6 +25,7 @@
 
 #include "euxis/a2a/agent_card.hpp"
 #include "euxis/crypto/aes_gcm.hpp"
+#include "euxis/crypto/xchacha.hpp"
 #include "euxis/crypto/key_derivation.hpp"
 
 namespace {
@@ -112,6 +113,29 @@ void BM_CryptoThroughput_Cached(benchmark::State& state) {
         static_cast<int64_t>(state.iterations() * kPayloadBytes));
 }
 BENCHMARK(BM_CryptoThroughput_Cached)->Unit(benchmark::kMicrosecond);
+
+// ---------------------------------------------------------------------------
+// Crypto throughput — XChaCha20-Poly1305 (memory store AEAD, every CPU).
+// ---------------------------------------------------------------------------
+void BM_CryptoThroughput_XChaCha(benchmark::State& state) {
+    const auto key = make_key();
+    const auto plaintext = make_payload();
+
+    for (auto _ : state) {
+        auto box = euxis::crypto::xchacha_encrypt(plaintext, key);
+        benchmark::DoNotOptimize(box);
+        if (!box.has_value()) {
+            state.SkipWithError("xchacha_encrypt failed");
+            break;
+        }
+        auto dec = euxis::crypto::xchacha_decrypt(box->ciphertext, key, box->nonce);
+        benchmark::DoNotOptimize(dec);
+    }
+    state.SetItemsProcessed(static_cast<int64_t>(state.iterations()));
+    state.SetBytesProcessed(
+        static_cast<int64_t>(state.iterations() * kPayloadBytes));
+}
+BENCHMARK(BM_CryptoThroughput_XChaCha)->Unit(benchmark::kMicrosecond);
 
 // ---------------------------------------------------------------------------
 // Key derivation — BLAKE2b fast path (iterations=0).

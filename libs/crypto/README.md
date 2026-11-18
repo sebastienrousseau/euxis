@@ -7,7 +7,8 @@
 <h1 align="center">euxis::crypto</h1>
 
 <p align="center">
-  Cryptographic primitives for euxis: AES-256-GCM (simple + cached schedule),
+  Cryptographic primitives for euxis: XChaCha20-Poly1305 (every CPU),
+  AES-256-GCM (CPUs with AES instructions; simple + cached schedule),
   Ed25519 signatures, BLAKE2b key derivation. libsodium-backed, C++23.
 </p>
 
@@ -79,7 +80,8 @@ int main() {
 
 | Header | What it owns |
 |---|---|
-| `aes_gcm.hpp` | `encrypt`/`decrypt` (simple) + `AesGcmContext::create` (cached key schedule, +33% throughput) |
+| `xchacha.hpp` | `xchacha_encrypt`/`xchacha_decrypt`: XChaCha20-Poly1305 with a random 24-byte nonce. The default AEAD for new data; pure software, runs on every CPU |
+| `aes_gcm.hpp` | `encrypt`/`decrypt` (simple) + `AesGcmContext::create` (cached key schedule, +33% throughput). libsodium only implements AES-GCM with AES-NI or ARMv8 crypto: check `aes_gcm_available()`; otherwise every call returns `CryptoError::Unsupported` |
 | `ed25519.hpp` | `generate_keypair`, `sign`, `verify` |
 | `key_derivation.hpp` | `derive_key(password, salt, iterations, length)` — BLAKE2b backend with a `iterations == 0` fast path |
 | `errors.hpp` | `Error` enum + `error_message(Error)` |

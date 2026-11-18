@@ -11,4 +11,5 @@ euxis_add_library(euxis-memory-cpp
     tests/test_tier_isolation.cpp
     tests/test_destroy_keys.cpp
     tests/test_entry.cpp
+    tests/test_migration.cpp
 )

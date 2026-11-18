@@ -16,6 +16,7 @@ TEST(CryptoErrorTest, AllEnumValuesHaveStrings) {
     EXPECT_EQ(to_string(CryptoError::KeyGenerationFailed), "Key generation failed");
     EXPECT_EQ(to_string(CryptoError::KeyDerivationFailed), "Key derivation failed");
     EXPECT_EQ(to_string(CryptoError::InvalidInput), "Invalid input");
+    EXPECT_EQ(to_string(CryptoError::Unsupported), "Not supported on this CPU");
 }
 
 TEST(CryptoErrorTest, UnknownValueReturnsUnknown) {
