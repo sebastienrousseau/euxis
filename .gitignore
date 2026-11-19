@@ -87,3 +87,6 @@ data/runtime/auth_profiles.json
 *.gcno
 coverage.info
 coverage-report/
+
+# Claude Code per-user settings
+.claude/settings.local.json
