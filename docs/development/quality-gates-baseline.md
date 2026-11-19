@@ -95,3 +95,36 @@ ctest --test-dir cmake-build-cov -j --output-on-failure
 
 The `--fail-under-line 98` flag in the `cpp-coverage` Makefile target
 will fail until the apps/ surface picks up its missing 18-20 %.
+
+## Gate 4 — complexity ratchet (2026-11-19)
+
+`scripts/architecture/check_complexity.py`, run by the
+`Architecture and Quality Gates` workflow, measures every tracked C++
+source under `apps/` and `libs/` with lizard 1.26.1
+(`-Ecognitive -Ehalstead`) against these ceilings:
+
+| Metric | Ceiling |
+| :--- | :--- |
+| Cyclomatic (McCabe), per function | 10 |
+| Cognitive (SonarSource), per function | 15 |
+| Halstead difficulty, per function | 30 |
+| Length, per function | 60 lines |
+| Length, per file | 500 lines |
+
+The first baseline (`scripts/architecture/complexity_baseline.json`)
+lists 374 of 5,957 functions and 25 of 729 files over a ceiling. Of
+those functions, 225 exceed cyclomatic, 190 cognitive, 288 Halstead
+difficulty and 140 length (a function can exceed several).
+
+The baseline may only shrink. CI fails when a function or file not in
+it crosses a ceiling, when a listed one gets worse on a metric already
+over its ceiling, or when a listed one has been fixed but is still
+listed. After bringing code under the ceilings, record it with:
+
+```bash
+python3 -m pip install lizard==1.26.1
+python3 scripts/architecture/check_complexity.py --update
+```
+
+`--update` refuses to write while any regression is present, so it
+cannot add entries. Work the backlog worst-first.
