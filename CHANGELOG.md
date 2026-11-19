@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Directory Restructuring**: `cmd/`→`apps/`, `pkg/`→`libs/`, `internal/platform/`→`libs/platform/`, `build/cmake/`→`cmake/`
 - **Agent Tier Promotions**: sentinel, strategist, and investigator promoted from fleet to core tier for Reason-class model routing
 - **Version**: Bumped to v0.0.16 across CMakeLists.txt, engine, lifecycle, TUI, data configs, man page and docs. The releases tagged v0.1.2 and v0.1.3 are now v0.0.10 and v0.0.11; the v0.1.x line is retired
-- **Homebrew formula**: Points at the v0.0.15 release assets and checksums, and declares the Homebrew libraries the macOS binary links (brotli, libsodium, openssl@4)
+- **Homebrew formula**: Points at the v0.0.16 release assets and checksums, and declares the Homebrew libraries the macOS binary links (brotli, libsodium, openssl@4); the Linux binaries are static and need none
 - **Help Output**: "Core" group now appears first in `euxis --help`, before System/Fleet/Knowledge groups
 - **README**: Rewritten with accurate C++23 build instructions, provider strategy overview, and complete Core commands table
 - **CONTRIBUTING.md**: Updated for C++23 workflow (CMake/GCC prerequisites, `make cpp-test`, AGPL-3.0 license, commit signing required)
