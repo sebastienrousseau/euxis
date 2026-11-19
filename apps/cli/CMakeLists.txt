@@ -98,6 +98,13 @@ target_link_libraries(euxis-cli-lib PUBLIC
 # Main executable
 add_executable(euxis-cli src/main.cpp)
 target_link_libraries(euxis-cli PRIVATE euxis-cli-lib)
+# With LTO, ld64 compiles to a temporary object and deletes it, taking the
+# debug info with it: dsymutil then writes an empty dSYM. Keep the object
+# (per target, so parallel links do not share it).
+if(APPLE AND CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+  target_link_options(euxis-cli PRIVATE
+    "LINKER:-object_path_lto,${CMAKE_CURRENT_BINARY_DIR}/euxis-cli-lto.o")
+endif()
 install(TARGETS euxis-cli RUNTIME DESTINATION bin)
 
 # Tests
