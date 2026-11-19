@@ -1,0 +1,14 @@
+/home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/deps/serde-1f29166016902659.d: /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/build/serde-c8451a9059985dd0/out/private.rs
+
+/home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/deps/libserde-1f29166016902659.rlib: /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/build/serde-c8451a9059985dd0/out/private.rs
+
+/home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/deps/libserde-1f29166016902659.rmeta: /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/build/serde-c8451a9059985dd0/out/private.rs
+
+/home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/home/seb/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/build/serde-c8451a9059985dd0/out/private.rs:
+
+# env-dep:OUT_DIR=/home/seb/team-rousseau-workspace/repos/public/cpp/euxis-deps/docs/euxis-sdk/target/debug/build/serde-c8451a9059985dd0/out
