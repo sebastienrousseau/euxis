@@ -10,7 +10,7 @@ We provide security updates for the following versions:
 
 | Version  | Supported          |
 | -------- | ------------------ |
-| v0.0.15  | :white_check_mark: |
+| v0.0.16  | :white_check_mark: |
 | v0.0.9   | :white_check_mark: |
 | < v0.0.9 | :x:                |
 

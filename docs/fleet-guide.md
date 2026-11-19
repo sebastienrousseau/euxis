@@ -1,6 +1,6 @@
-# Fleet Guide (v0.0.15)
+# Fleet Guide (v0.0.16)
 
-Version v0.0.15
+Version v0.0.16
 
 This document has moved to `docs/guides/fleet-guide.md`.
 
