@@ -129,9 +129,12 @@ TEST(SwarmOrchestratorTest, MultipleGoalSubstitutions) {
     EXPECT_EQ(history[0]["task"], "Start project then finish");
 }
 
+// Remote-gateway tests use ".invalid" hosts (RFC 6761: never resolve), so
+// the connection always fails the same way, on any network: a plain name
+// such as "remote-server" can resolve through a DNS search domain.
 TEST(SwarmOrchestratorTest, NonLocalhostUsesNonSimulation) {
     // Non-localhost URL should NOT trigger simulation mode
-    SwarmOrchestrator sw("http://remote-server:8080");
+    SwarmOrchestrator sw("http://remote-server.invalid:8080");
     nlohmann::json playbook = {
         {"name", "remote-test"},
         {"phases", {{
@@ -201,7 +204,7 @@ TEST(SwarmOrchestratorTest, ManyParallelTasks) {
 // --- Coverage: swarm.cpp line 25 (derive_ws_url with https:// URL) ---
 TEST(SwarmOrchestratorTest, HttpsUrlUsesWss) {
     // https URL should trigger wss:// prefix and non-simulation mode
-    SwarmOrchestrator sw("https://remote-server:8080");
+    SwarmOrchestrator sw("https://remote-server.invalid:8080");
     nlohmann::json playbook = {
         {"name", "https-test"},
         {"phases", {{
@@ -221,7 +224,7 @@ TEST(SwarmOrchestratorTest, HttpsUrlUsesWss) {
 
 // --- Coverage: swarm.cpp line 29 (derive_ws_url with no scheme prefix) ---
 TEST(SwarmOrchestratorTest, NoSchemeUrlGetsWsPrefix) {
-    SwarmOrchestrator sw("remote-host:9090");
+    SwarmOrchestrator sw("remote-host.invalid:9090");
     nlohmann::json playbook = {
         {"name", "no-scheme"},
         {"phases", {{
@@ -241,7 +244,7 @@ TEST(SwarmOrchestratorTest, NoSchemeUrlGetsWsPrefix) {
 
 // --- Coverage: swarm.cpp line 39 (port_str with slash in URL path) ---
 TEST(SwarmOrchestratorTest, UrlWithPathAfterPort) {
-    SwarmOrchestrator sw("http://remote-host:8080/api/v1");
+    SwarmOrchestrator sw("http://remote-host.invalid:8080/api/v1");
     nlohmann::json playbook = {
         {"name", "path-test"},
         {"phases", {{
@@ -261,7 +264,7 @@ TEST(SwarmOrchestratorTest, UrlWithPathAfterPort) {
 
 // --- Coverage: swarm.cpp line 44 (stoi exception catch, non-numeric port) ---
 TEST(SwarmOrchestratorTest, NonNumericPortInUrl) {
-    SwarmOrchestrator sw("http://remote-host:notaport");
+    SwarmOrchestrator sw("http://remote-host.invalid:notaport");
     nlohmann::json playbook = {
         {"name", "badport"},
         {"phases", {{
