@@ -2,13 +2,13 @@
 # All versions pinned for reproducibility
 
 # Core
-fastapi==0.162.5
+fastapi==0.165.0
 uvicorn==0.54.0
 httpx==0.28.1
-pydantic==2.14.3
+pydantic==2.14.4
 
 # Database
-sqlalchemy==2.1.8
+sqlalchemy==2.1.9
 
 # CLI
 rich==15.0.0
