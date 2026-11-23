@@ -279,10 +279,10 @@
       "length": 33
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_playbook( Context & ctx , const std :: vector<std::string> & args)": {
-      "ccn": 438,
-      "cognitive": 840,
-      "halstead_difficulty": 119.82,
-      "length": 1566
+      "ccn": 409,
+      "cognitive": 793,
+      "halstead_difficulty": 115.96,
+      "length": 1503
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_squad( Context & ctx , const std :: vector<std::string> & args)": {
       "ccn": 28,
@@ -301,12 +301,6 @@
       "cognitive": 28,
       "halstead_difficulty": 58.99,
       "length": 49
-    },
-    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::detect_project_verifiers( const std :: string & repo_root)": {
-      "ccn": 22,
-      "cognitive": 28,
-      "halstead_difficulty": 30.79,
-      "length": 56
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::evaluate_policy( const nlohmann :: json & artifact , const Policy & policy)": {
       "ccn": 16,
@@ -331,12 +325,6 @@
       "cognitive": 141,
       "halstead_difficulty": 88.17,
       "length": 319
-    },
-    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_claim_verifiers( const std :: vector<std::pair<std::string,std::vector<std::string>>> & verifiers , int timeout_per_check = 60)": {
-      "ccn": 9,
-      "cognitive": 15,
-      "halstead_difficulty": 41.9,
-      "length": 27
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_security_pillar_checks( const std :: string & repo_root)": {
       "ccn": 64,
@@ -609,10 +597,10 @@
       "length": 33
     },
     "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::parse_common( const std :: vector<std::string> & args , const std :: vector<std::string> & skip_flags = { })": {
-      "ccn": 17,
-      "cognitive": 23,
-      "halstead_difficulty": 58.79,
-      "length": 34
+      "ccn": 13,
+      "cognitive": 16,
+      "halstead_difficulty": 46.55,
+      "length": 27
     },
     "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_cross_platform_verify( Context & ctx , const std :: vector<std::string> &)": {
       "ccn": 10,
@@ -2256,7 +2244,7 @@
   "files": {
     "apps/cli/src/auth_profile_store.cpp": 573,
     "apps/cli/src/certification.cpp": 1147,
-    "apps/cli/src/cmd/fleet.cpp": 3276,
+    "apps/cli/src/cmd/fleet.cpp": 3217,
     "apps/cli/src/cmd/infra.cpp": 540,
     "apps/cli/src/cmd/knowledge.cpp": 620,
     "apps/cli/src/cmd/lifecycle.cpp": 919,

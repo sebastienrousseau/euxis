@@ -308,7 +308,7 @@ Environment overrides: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_
 
 ### Claim verification commands
 
-After the agents report, euxis runs the project's own checks to confirm their claims. By default it picks them from the manifests it finds (`package.json` gives `npm test`, `Cargo.toml` gives `cargo test`, a `Makefile` gives `make check`), each within the agent budget (45 s in flash mode). Where that command is a long suite, list fast checks in `.euxis.yaml` instead; they replace the detected ones:
+With `--run-verifiers`, after the agents report, euxis runs the project's own checks to confirm their claims. **This executes code from the repository being scanned**, so it is off by default: never enable it for untrusted code, such as pull requests from forks. euxis picks the checks from the manifests it finds (`package.json` gives `npm test`, `Cargo.toml` gives `cargo test`, a `Makefile` gives `make check`), each within the agent budget (45 s in flash mode). Where that command is a long suite, list fast checks in `.euxis.yaml` instead; they replace the detected ones:
 
 ```yaml
 version: "1"
