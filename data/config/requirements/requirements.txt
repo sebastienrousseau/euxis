@@ -25,6 +25,14 @@ tiktoken==0.14.0
 cryptography==50.0.2
 PyJWT==2.15.1
 
+# Transitive floors: no version with a published advisory may resolve.
+# requests (via tiktoken), anyio (via httpx/fastapi), certifi and idna
+# (via httpx/requests).
+requests>=2.33.0
+anyio>=4.14.2
+certifi>=2026.10.18
+idna>=3.15
+
 # Utilities
 python-dotenv==1.2.4
 pyyaml==6.0.3
