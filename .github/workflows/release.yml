@@ -19,6 +19,7 @@ on:
       - '.github/workflows/release.yml'
       - 'scripts/release/build-static-linux.sh'
       - 'scripts/release/check-portable-linux.sh'
+      - 'scripts/release/split-debug.sh'
       - 'scripts/release/Dockerfile.scratch'
 
 permissions:
@@ -52,9 +53,12 @@ jobs:
           # is starved (GitHub's Intel sunset) and PR #99 dropped it from
           # the regular C++ CI for the same reason. Drop here too; Apple
           # Silicon coverage via macos-15 is the path forward.
+          # Self-contained: OpenSSL and libsodium linked statically, so the
+          # binary needs only macOS's own libraries. Through v0.0.16 it
+          # loaded brotli, libsodium and openssl@4 from /opt/homebrew.
           - target: darwin-arm64
             os: macos-15
-            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_PORTABLE_ARCH=ON
+            cmake_args: -DEUXIS_NATIVE_ARCH=OFF -DEUXIS_PORTABLE_ARCH=ON -DEUXIS_STATIC_DEPS=ON
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -77,7 +81,8 @@ jobs:
           # surfaced on the release.yml v0.1.2 darwin-arm64 build. Apple
           # Clang lacks <generator> but the CLI binary does not need that
           # path (it's only exercised by the streaming test code).
-          brew install libsodium sqlite pkg-config
+          brew install libsodium sqlite pkg-config openssl@4
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@4)" >> "$GITHUB_ENV"
 
       - name: Configure (Release + LTO, macOS)
         if: runner.os == 'macOS'
@@ -90,6 +95,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
             -DEUXIS_DISABLE_SANITIZERS=ON \
+            -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR" \
             ${{ matrix.cmake_args }}
 
       - name: Build (macOS)
@@ -100,6 +106,30 @@ jobs:
         # `--parallel 2` keeps the build under the memory ceiling and
         # finishes inside the release-window budget.
         run: cmake --build cmake-build --parallel 2 --target euxis-cli
+
+      - name: No sanitizer runtime linked
+        run: |
+          bin=cmake-build/apps/cli/euxis-cli
+          if [ "$RUNNER_OS" = macOS ]; then
+            libs=$(otool -L "$bin")
+          else
+            # Static: a sanitizer would be linked in, so look for its symbols.
+            libs=$(nm "$bin" | grep -E ' __(a|ub|t|l)san_' || true)
+          fi
+          echo "$libs"
+          if echo "$libs" | grep -Ei 'asan|ubsan|tsan|lsan'; then
+            echo "::error::release binary links a sanitizer runtime"
+            exit 1
+          fi
+
+      - name: Split debug info and strip
+        # Ships a stripped binary (34 MB -> 21 MB on Linux) and its debug
+        # info as a separate -debug.tar.gz asset: <name>.debug (ELF, found
+        # through .gnu_debuglink or the build ID) or <name>.dSYM (macOS).
+        # Every later check runs on the stripped binary that ships.
+        run: |
+          scripts/release/split-debug.sh cmake-build/apps/cli/euxis-cli \
+            "euxis-${EUXIS_VERSION}-${{ matrix.target }}"
 
       - name: Smoke test
         run: ./cmake-build/apps/cli/euxis-cli --version
@@ -117,21 +147,6 @@ jobs:
             *) echo "::error::euxis-cli --version does not report ${EUXIS_VERSION}"; exit 1 ;;
           esac
 
-      - name: No sanitizer runtime linked
-        run: |
-          bin=cmake-build/apps/cli/euxis-cli
-          if [ "$RUNNER_OS" = macOS ]; then
-            libs=$(otool -L "$bin")
-          else
-            # Static: a sanitizer would be linked in, so look for its symbols.
-            libs=$(nm "$bin" | grep -E ' __(a|ub|t|l)san_' || true)
-          fi
-          echo "$libs"
-          if echo "$libs" | grep -Ei 'asan|ubsan|tsan|lsan'; then
-            echo "::error::release binary links a sanitizer runtime"
-            exit 1
-          fi
-
       - name: Portable (Linux)
         # Static, baseline ISA, runs on an old CPU under QEMU, and on
         # Alpine, Debian 12, Rocky 8/9 and Fedora with a verified HTTPS
@@ -142,6 +157,27 @@ jobs:
           sudo apt-get install -y -qq qemu-user >/dev/null
           scripts/release/check-portable-linux.sh cmake-build
 
+      - name: Self-contained (macOS)
+        # Only system libraries, and a verified HTTPS request (OSV.dev)
+        # with Homebrew's OpenSSL directory moved away, as on a Mac
+        # without Homebrew. TLS trusts the system Keychain (cpp-httplib
+        # loads its roots; IXWebSocket uses Secure Transport on Apple),
+        # so no CA bundle file is involved.
+        if: runner.os == 'macOS'
+        run: |
+          bin=cmake-build/apps/cli/euxis-cli
+          otool -L "$bin"
+          if otool -L "$bin" | tail -n +2 | awk '{print $1}' | grep -vE '^(/usr/lib/|/System/Library/)'; then
+            echo "::error::the macOS binary links libraries outside macOS (above)"
+            exit 1
+          fi
+          ossl_dir="$(brew --prefix)/etc/openssl@4"
+          sudo mv "$ossl_dir" "$ossl_dir.hidden"
+          purl='pkg:npm/lodash@4.17.20'
+          HOME=/tmp "$bin" vulndb query "$purl" --json | grep -q GHSA-
+          echo "TLS ok without Homebrew"
+          sudo mv "$ossl_dir.hidden" "$ossl_dir"
+
       - name: Package
         id: package
         run: |
@@ -150,9 +186,13 @@ jobs:
           cp cmake-build/apps/cli/euxis-cli "dist/${BIN}"
           (cd dist && tar -czf "${BIN}.tar.gz" "${BIN}")
           rm "dist/${BIN}"
+          if [ "$RUNNER_OS" = macOS ]; then DBG="${BIN}.dSYM"; else DBG="${BIN}.debug"; fi
+          tar -czf "dist/${BIN}-debug.tar.gz" -C cmake-build/apps/cli "$DBG"
           (cd dist && shasum -a 256 "${BIN}.tar.gz" > "${BIN}.tar.gz.sha256")
+          (cd dist && shasum -a 256 "${BIN}-debug.tar.gz" > "${BIN}-debug.tar.gz.sha256")
           echo "archive=dist/${BIN}.tar.gz" >> "$GITHUB_OUTPUT"
-          echo "checksum=dist/${BIN}.tar.gz.sha256" >> "$GITHUB_OUTPUT"
+          echo "debug_archive=dist/${BIN}-debug.tar.gz" >> "$GITHUB_OUTPUT"
+          ls -la dist
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
@@ -165,15 +205,17 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
-          cosign sign-blob --yes \
-            --bundle "${{ steps.package.outputs.archive }}.cosign.bundle" \
-            "${{ steps.package.outputs.archive }}"
+          for f in "${{ steps.package.outputs.archive }}" "${{ steps.package.outputs.debug_archive }}"; do
+            cosign sign-blob --yes --bundle "$f.cosign.bundle" "$f"
+          done
 
       - name: Generate SLSA build provenance (in-toto Statement)
         if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: ${{ steps.package.outputs.archive }}
+          subject-path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.debug_archive }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

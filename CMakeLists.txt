@@ -15,13 +15,25 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # scripts/release/build-static-linux.sh. Must precede EuxisDefaults
 # (link mode) and every find_package (static archives only).
 option(EUXIS_STATIC_BINARY "Link euxis fully statically (portable Linux release binaries)" OFF)
+# Distributed macOS binaries: link the third-party libraries (OpenSSL,
+# libsodium) statically and leave out optional ones (Brotli), so the
+# binary needs only the libraries macOS ships. Through v0.0.16 it loaded
+# brotli, libsodium and openssl@4 from /opt/homebrew. Implied by
+# EUXIS_STATIC_BINARY.
+option(EUXIS_STATIC_DEPS "Link third-party libraries statically (distributed binaries)" OFF)
 if(EUXIS_STATIC_BINARY)
     if(APPLE OR WIN32)
         message(FATAL_ERROR "EUXIS_STATIC_BINARY is for Linux (musl) builds only")
     endif()
     set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    set(EUXIS_STATIC_DEPS ON CACHE BOOL "" FORCE)
+endif()
+if(EUXIS_STATIC_DEPS)
     set(OPENSSL_USE_STATIC_LIBS ON)
     set(EUXIS_STATIC_SODIUM ON CACHE BOOL "" FORCE)
+    # cpp-httplib links Brotli when it finds it (Homebrew has it) for
+    # optional "br" response decoding; gzip still works through zlib.
+    set(HTTPLIB_USE_BROTLI_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
 endif()
 
 include(EuxisDefaults)
@@ -195,7 +207,12 @@ endif()
 # ixwebsocket v11.4.4 (latest release). The patch stops it calling
 # freeaddrinfo(NULL) after a failed DNS lookup: glibc ignores that, musl
 # segfaults, so the static musl build crashed on any unresolvable host.
-find_package(OpenSSL QUIET)
+# A distributed binary must have TLS: fail instead of building without it.
+if(EUXIS_STATIC_DEPS)
+    find_package(OpenSSL REQUIRED)
+else()
+    find_package(OpenSSL QUIET)
+endif()
 FetchContent_Declare(
     ixwebsocket
     GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
