@@ -158,12 +158,6 @@
       "halstead_difficulty": 48.32,
       "length": 125
     },
-    "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::cmd_verify_attest( Context & , const std :: vector<std::string> & argv)": {
-      "ccn": 18,
-      "cognitive": 23,
-      "halstead_difficulty": 38.91,
-      "length": 78
-    },
     "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::parse_attest_args( const std :: vector<std::string> & argv)": {
       "ccn": 12,
       "cognitive": 19,
@@ -1459,12 +1453,6 @@
       "cognitive": 20,
       "halstead_difficulty": 36.0,
       "length": 33
-    },
-    "libs/attest/src/signing.cpp::euxis::attest::verify_envelope( const Envelope & envelope , std :: span<const std::byte,32> public_key)": {
-      "ccn": 8,
-      "cognitive": 10,
-      "halstead_difficulty": 38.08,
-      "length": 45
     },
     "libs/attest/src/slsa.cpp::euxis::attest::to_json( const SlsaProvenance & p)": {
       "ccn": 9,

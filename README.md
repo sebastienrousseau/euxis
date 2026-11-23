@@ -51,7 +51,7 @@ euxis certify-readiness . --framework soc2  # SOC 2 readiness report
 euxis sbom . --format=both                  # CycloneDX 1.6 + SPDX 3.0.1
 euxis slopsquatting .                       # LLM-hallucinated-package guard
 euxis attest evidence.tar.gz                # Sigstore-signed evidence bundle
-euxis verify evidence.tar.gz.sigstore.json  # offline signature check
+euxis verify evidence.tar.gz.sigstore.json --key=signer.pub --artifact=evidence.tar.gz  # offline check
 euxis cache stats                           # incremental scan cache
 ```
 

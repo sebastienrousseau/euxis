@@ -31,37 +31,33 @@ collapses.
 The fastest path uses the in-tree CLI:
 
 ```bash
-euxis verify euxis-evidence.tar.gz.sigstore.json
-```
-
-When the bundle embeds the public key in `verificationMaterial.publicKey.rawBytes`,
-this is a one-shot offline check. Exit codes per
-[`docs/reference/exit-codes.md`](../reference/exit-codes.md):
-
-- `0` — signature verifies
-- `1` — bundle is malformed (truncated, wrong media type, …)
-- `4` — signature mismatch (the regulator-visible failure)
-
-To verify against a key you trust independently of the bundle:
-
-```bash
-# Extract the inline key from a trusted source bundle once.
-jq -r '.verificationMaterial.publicKey.rawBytes' \
-   trusted-bundle.sigstore.json > trusted-key.b64
-
-# Then verify any future bundle against it.
 euxis verify euxis-evidence.tar.gz.sigstore.json \
-  --key=trusted-key.b64
+  --key=signer.pub --artifact=euxis-evidence.tar.gz
 ```
 
-`--key=` accepts either a path on disk OR an inline base64 string.
+`--key` is required and names the signer's public key: a path to a
+file holding the base64 Ed25519 key (as `euxis attest --keygen`
+writes to `<name>.pub`), or the base64 string itself. Get it from a
+channel you trust independently of the bundle. The bundle's own
+`verificationMaterial.publicKey.rawBytes` is never used: whoever made
+the bundle chose that key, so a signature that matches it proves
+nothing about who signed.
 
-## Step 2 — Confirm the subject
+Exit codes per [`docs/reference/exit-codes.md`](../reference/exit-codes.md):
 
-`euxis verify` proves the bundle's signature is valid, but it does
-not re-hash the subject tarball. That step is yours — and exists
-specifically so that "the bundle says X" cannot be substituted for
-"X is on my disk".
+- `0` — the signature verifies against `--key`, the payloadType is
+  in-toto and, with `--artifact`, the file's sha256 matches a subject
+- `1` — `--key` missing, or the bundle or key is malformed
+- `4` — signature, payloadType or digest mismatch (the
+  regulator-visible failure)
+
+The transparency log is not checked.
+
+## Step 2 — Confirm the subject by hand (optional)
+
+`--artifact` already re-hashes the subject. To check it without
+euxis, so that "the bundle says X" cannot be substituted for "X is
+on my disk":
 
 ```bash
 # Extract the subject digest the bundle attests over.
