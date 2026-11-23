@@ -5,7 +5,7 @@ name: Architecture and Quality Gates
 # runtime; the workflow appeared green because the failure messages
 # never made it past `make gate-all` (which also did not exist).
 #
-# The new workflow runs five standalone gates, each backed by a script
+# The new workflow runs six standalone gates, each backed by a script
 # under scripts/architecture/ that has its own unittest coverage
 # (scripts/architecture/tests/test_gates.py).
 #
@@ -32,8 +32,28 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Install lizard (complexity ratchet end-to-end test)
+        run: python3 -m pip install --quiet lizard==1.26.1
       - name: Run gate unittests
         run: python3 -m unittest discover -s scripts/architecture/tests -v
+
+  complexity:
+    name: Complexity ratchet (baseline may only shrink)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install lizard
+        run: python3 -m pip install --quiet lizard==1.26.1
+      # Per function: cyclomatic 10, cognitive 15, Halstead difficulty 30,
+      # 60 lines; per file 500 lines. Existing offenders are listed in
+      # scripts/architecture/complexity_baseline.json; nothing new may
+      # cross a ceiling, nothing listed may get worse, and fixed entries
+      # must be removed (--update) in the same change.
+      - name: No new or worse offenders; baseline up to date
+        run: python3 scripts/architecture/check_complexity.py
 
   workflow-integrity:
     name: Workflow integrity (no broken script refs)
