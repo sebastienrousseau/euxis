@@ -48,6 +48,40 @@ TEST_F(StatePersistenceTest, MakeSessionIdEmptyThread) {
     EXPECT_EQ(make_session_id("ch", "chat", ""), "ch:chat");
 }
 
+TEST_F(StatePersistenceTest, StoreIdValidation) {
+    EXPECT_TRUE(is_valid_store_id("telegram:-100123:42"));
+    EXPECT_TRUE(is_valid_store_id("run_2026-11-23"));
+    EXPECT_FALSE(is_valid_store_id(""));
+    EXPECT_FALSE(is_valid_store_id("../escape"));
+    EXPECT_FALSE(is_valid_store_id("a/b"));
+    EXPECT_FALSE(is_valid_store_id("/etc/passwd"));
+    EXPECT_FALSE(is_valid_store_id("a.b"));
+    EXPECT_FALSE(is_valid_store_id(std::string("a\0b", 3)));
+    EXPECT_FALSE(is_valid_store_id(std::string(129, 'a')));
+}
+
+// Ids reach the store from HTTP bodies: a crafted id must never write
+// or read outside the store's own directory.
+TEST_F(StatePersistenceTest, UnsafeIdsNeverTouchFilesOutsideTheStore) {
+    const auto absolute = (tmp_ / "absolute").string();
+    for (const auto& id : {std::string("../escape"), std::string("../../escape"),
+                           std::string("../../../escape"), absolute}) {
+        persist_message(id, {{"role", "user"}});
+        persist_session_meta(id, {{"k", "v"}});
+        persist_run_event(id, {{"event", "x"}});
+        EXPECT_TRUE(load_session_from_disk(id).empty());
+        EXPECT_TRUE(load_session_meta(id).is_null());
+        EXPECT_TRUE(load_run_events(id).empty());
+    }
+    // No file from any of those ids, at any depth of EUXIS_HOME (which
+    // may not exist at all when nothing was written).
+    std::filesystem::create_directories(tmp_);
+    for (const auto& e : std::filesystem::recursive_directory_iterator(tmp_)) {
+        const auto name = e.path().filename().string();
+        EXPECT_FALSE(name.starts_with("escape") || name.starts_with("absolute")) << e.path();
+    }
+}
+
 TEST_F(StatePersistenceTest, PersistAndLoadMessages) {
     nlohmann::json msg1 = {{"role", "user"}, {"content", "hello"}};
     nlohmann::json msg2 = {{"role", "assistant"}, {"content", "hi"}};

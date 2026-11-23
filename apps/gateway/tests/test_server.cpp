@@ -204,5 +204,34 @@ TEST_F(GatewayServerTest, StartAndStopWithClient) {
     server_thread.join();
 }
 
+TEST_F(GatewayServerTest, SessionPostRejectsUnsafeSessionId) {
+    GatewayConfig config;
+    config.port = 0;
+    config.ws_port = 0;
+    config.host = "127.0.0.1";
+    config.raw = {{"gateway", {{"auth", {{"token", {{"value", "test-token-xyz"}}}}}}}};
+    GatewayServer srv(config);
+    auto& s = srv.server();
+    int port = s.bind_to_any_port("127.0.0.1");
+    ASSERT_GT(port, 0);
+    std::thread server_thread([&]() { s.listen_after_bind(); });
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    // The session id becomes a file name: path-shaped ids are rejected
+    // before anything is written.
+    httplib::Client cli("127.0.0.1", port);
+    cli.set_connection_timeout(2);
+    httplib::Headers auth_headers = {{"Authorization", "Bearer test-token-xyz"}};
+    for (const char* id : {"../../escape", "/tmp/euxis-escape", "a.b"}) {
+        nlohmann::json body = {{"session_id", id}, {"content", "x"}};
+        auto res = cli.Post("/api/sessions", auth_headers, body.dump(), "application/json");
+        ASSERT_TRUE(res != nullptr);
+        EXPECT_EQ(res->status, 400) << id;
+    }
+
+    s.stop();
+    server_thread.join();
+}
+
 } // namespace
 } // namespace euxis::gateway

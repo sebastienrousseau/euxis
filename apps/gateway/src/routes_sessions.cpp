@@ -10,7 +10,8 @@ namespace euxis::gateway {
 void register_session_routes(httplib::Server& server, const RouteContext& ctx) {
     server.Get(R"(/api/sessions/(\w+))",
                [ctx](const httplib::Request& req, httplib::Response& res) {
-                   if (!authorize_request(req, res, ctx)) return;
+                   if (!authorize_request(req, res, ctx))
+                       return;
                    auto session_id = req.matches[1].str();
                    auto history = load_session_from_disk(session_id);
                    nlohmann::json body = {
@@ -20,37 +21,37 @@ void register_session_routes(httplib::Server& server, const RouteContext& ctx) {
                    res.set_content(body.dump(), "application/json");
                });
 
-    server.Post("/api/sessions",
-                [ctx](const httplib::Request& req, httplib::Response& res) {
-                    if (!authorize_request(req, res, ctx)) return;
-                    try {
-                        auto j = nlohmann::json::parse(req.body);
-                        auto session_id = j.value("session_id", "");
-                        auto content = j.value("content", "");
-                        if (session_id.empty() || content.empty()) {
-                            res.status = 400;
-                            res.set_content(
-                                R"({"error":"session_id and content required"})",
+    server.Post("/api/sessions", [ctx](const httplib::Request& req, httplib::Response& res) {
+        if (!authorize_request(req, res, ctx))
+            return;
+        try {
+            auto j = nlohmann::json::parse(req.body);
+            auto session_id = j.value("session_id", "");
+            auto content = j.value("content", "");
+            // The id becomes a file name (see is_valid_store_id).
+            const bool valid = is_valid_store_id(session_id) && !content.empty();
+            if (!valid) {
+                res.status = 400;
+                res.set_content(R"({"error":"session_id and content required"})",
                                 "application/json");
-                            return;
-                        }
-                        nlohmann::json entry = {
-                            {"role", "user"},
-                            {"content", content},
-                            {"timestamp", timestamp()},
-                        };
-                        persist_message(session_id, entry);
-                        audit_log({{"event", "session.message"},
-                                   {"session_id", session_id},
-                                   {"timestamp", timestamp()}});
-                        res.set_content(entry.dump(), "application/json");
-                    } catch (const std::exception&) {
-                        res.status = 400;
-                        res.set_content(R"({"error":"invalid json"})",
-                                        "application/json");
-                    }
-                });
+                return;
+            }
+            nlohmann::json entry = {
+                {"role", "user"},
+                {"content", content},
+                {"timestamp", timestamp()},
+            };
+            persist_message(session_id, entry);
+            audit_log({{"event", "session.message"},
+                       {"session_id", session_id},
+                       {"timestamp", timestamp()}});
+            res.set_content(entry.dump(), "application/json");
+        } catch (const std::exception&) {
+            res.status = 400;
+            res.set_content(R"({"error":"invalid json"})", "application/json");
+        }
+    });
 }
 // NOLINTEND(bugprone-exception-escape)
 
-} // namespace euxis::gateway
+}  // namespace euxis::gateway

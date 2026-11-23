@@ -1,5 +1,7 @@
 #include "euxis/gateway/state.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -67,8 +69,19 @@ auto make_session_id(const std::string& channel_id,
     return base;
 }
 
+auto is_valid_store_id(std::string_view id) -> bool {
+    constexpr std::size_t kMaxIdLength = 128;
+    auto allowed = [](char ch) {
+        return std::isalnum(static_cast<unsigned char>(ch)) != 0 || ch == '_' || ch == ':' ||
+               ch == '-';
+    };
+    return !id.empty() && id.size() <= kMaxIdLength && std::ranges::all_of(id, allowed);
+}
+
 void persist_message(const std::string& session_id,
                      const nlohmann::json& entry) {
+    if (!is_valid_store_id(session_id))
+        return;
     auto path = sessions_dir() / (session_id + ".jsonl");
     std::ofstream f(path, std::ios::app);
     f << entry.dump() << '\n';
@@ -76,6 +89,8 @@ void persist_message(const std::string& session_id,
 
 auto load_session_from_disk(const std::string& session_id)
     -> std::vector<nlohmann::json> {
+    if (!is_valid_store_id(session_id))
+        return {};
     auto path = sessions_dir() / (session_id + ".jsonl");
     if (!std::filesystem::exists(path)) return {};
 
@@ -91,12 +106,16 @@ auto load_session_from_disk(const std::string& session_id)
 
 void persist_session_meta(const std::string& session_id,
                           const nlohmann::json& meta) {
+    if (!is_valid_store_id(session_id))
+        return;
     auto path = sessions_dir() / (session_id + ".meta.json");
     std::ofstream f(path);
     f << meta.dump(2);
 }
 
 auto load_session_meta(const std::string& session_id) -> nlohmann::json {
+    if (!is_valid_store_id(session_id))
+        return {};
     auto path = sessions_dir() / (session_id + ".meta.json");
     if (!std::filesystem::exists(path)) return {};
     std::ifstream f(path);
@@ -113,6 +132,8 @@ void audit_log(const nlohmann::json& event) {
 
 void persist_run_event(const std::string& run_id,
                        const nlohmann::json& entry) {
+    if (!is_valid_store_id(run_id))
+        return;
     auto path = runs_dir() / (run_id + ".jsonl");
     std::ofstream f(path, std::ios::app);
     f << entry.dump() << '\n';
@@ -120,6 +141,8 @@ void persist_run_event(const std::string& run_id,
 
 auto load_run_events(const std::string& run_id)
     -> std::vector<nlohmann::json> {
+    if (!is_valid_store_id(run_id))
+        return {};
     auto path = runs_dir() / (run_id + ".jsonl");
     if (!std::filesystem::exists(path)) return {};
 
