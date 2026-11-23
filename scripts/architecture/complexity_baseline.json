@@ -1,0 +1,2283 @@
+{
+  "tool": "lizard 1.26.1 -l cpp -Ecognitive -Ehalstead",
+  "ceilings": {
+    "ccn": 10,
+    "cognitive": 15,
+    "halstead_difficulty": 30,
+    "length": 60,
+    "file_lines": 500
+  },
+  "functions": {
+    "apps/cli/include/euxis/cli/verdict.hpp::euxis::cli::verdict::is_valid_verdict( State verdict , int effective_fails , int timeout_count , bool has_contradiction , int confidence , int total_agents)": {
+      "ccn": 14,
+      "cognitive": 16,
+      "halstead_difficulty": 28.41,
+      "length": 32
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::add_oauth( const std :: string & provider , const std :: string & access_token , const std :: string & refresh_token , int64_t expires_at , const std :: string & email)": {
+      "ccn": 4,
+      "cognitive": 3,
+      "halstead_difficulty": 31.0,
+      "length": 31
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::auto_import_claude_oauth()": {
+      "ccn": 12,
+      "cognitive": 12,
+      "halstead_difficulty": 29.42,
+      "length": 50
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::auto_import_gemini_oauth()": {
+      "ccn": 17,
+      "cognitive": 19,
+      "halstead_difficulty": 38.89,
+      "length": 58
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::load_from_json( const nlohmann :: json & j)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 24.6,
+      "length": 40
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::pick_best( const std :: string & provider) const": {
+      "ccn": 20,
+      "cognitive": 34,
+      "halstead_difficulty": 51.02,
+      "length": 73
+    },
+    "apps/cli/src/auth_profile_store.cpp::euxis::cli::AuthProfileStore::to_json() const": {
+      "ccn": 14,
+      "cognitive": 19,
+      "halstead_difficulty": 32.22,
+      "length": 45
+    },
+    "apps/cli/src/autofix.cpp::euxis::cli::parse_autofix_response( const std :: string & response , const std :: string & finding , const std :: string & file_path , const std :: string & agent_id)": {
+      "ccn": 12,
+      "cognitive": 17,
+      "halstead_difficulty": 36.11,
+      "length": 47
+    },
+    "apps/cli/src/box.cpp::euxis::cli::terminal::print_box( std :: string_view title , std :: string_view body)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 37.38,
+      "length": 38
+    },
+    "apps/cli/src/box.cpp::euxis::cli::terminal::print_boxed_table( const std :: vector<std::string> & headers , const std :: vector<TableRow> & rows)": {
+      "ccn": 16,
+      "cognitive": 26,
+      "halstead_difficulty": 73.2,
+      "length": 71
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::RunResult::to_json() const": {
+      "ccn": 6,
+      "cognitive": 7,
+      "halstead_difficulty": 25.52,
+      "length": 72
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::apply_framework_overlay( Framework f , std :: vector<DomainDefinition> & domains)": {
+      "ccn": 29,
+      "cognitive": 21,
+      "halstead_difficulty": 36.48,
+      "length": 50
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::analyze_quality_risk( const fs :: path & target)": {
+      "ccn": 16,
+      "cognitive": 29,
+      "halstead_difficulty": 36.4,
+      "length": 53
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::collect_evidence( const fs :: path & target , const std :: vector<GateResult> & gates , const QualityRisk & qr)": {
+      "ccn": 26,
+      "cognitive": 32,
+      "halstead_difficulty": 38.84,
+      "length": 141
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::evaluate_domains( std :: vector<DomainDefinition> & definitions , const std :: vector<Evidence> & evidence)": {
+      "ccn": 25,
+      "cognitive": 60,
+      "halstead_difficulty": 58.06,
+      "length": 78
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::finalize_result( RunResult & result)": {
+      "ccn": 38,
+      "cognitive": 53,
+      "halstead_difficulty": 52.76,
+      "length": 118
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_build_integrity( const fs :: path & target)": {
+      "ccn": 13,
+      "cognitive": 17,
+      "halstead_difficulty": 31.45,
+      "length": 43
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_commit_signing( const fs :: path & target , int window , const std :: string & since_ref , bool strict)": {
+      "ccn": 10,
+      "cognitive": 13,
+      "halstead_difficulty": 37.1,
+      "length": 51
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_docs_accuracy( const fs :: path & target , const std :: vector<std::string> & known_commands)": {
+      "ccn": 28,
+      "cognitive": 58,
+      "halstead_difficulty": 52.52,
+      "length": 89
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_security_critical( const fs :: path & target)": {
+      "ccn": 28,
+      "cognitive": 37,
+      "halstead_difficulty": 40.14,
+      "length": 91
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_unit_test_health( const fs :: path & target)": {
+      "ccn": 43,
+      "cognitive": 89,
+      "halstead_difficulty": 67.72,
+      "length": 147
+    },
+    "apps/cli/src/certification.cpp::euxis::cli::certification::run_certification( Context & , const std :: filesystem :: path & target , const RunOptions & opts)": {
+      "ccn": 5,
+      "cognitive": 7,
+      "halstead_difficulty": 21.05,
+      "length": 62
+    },
+    "apps/cli/src/cli_main.cpp::euxis::cli::cli_main( int argc , char * argv [ ])": {
+      "ccn": 8,
+      "cognitive": 11,
+      "halstead_difficulty": 31.14,
+      "length": 43
+    },
+    "apps/cli/src/cli_provider.cpp::euxis::cli::infer_provider( const std :: string & model)": {
+      "ccn": 13,
+      "cognitive": 7,
+      "halstead_difficulty": 16.61,
+      "length": 7
+    },
+    "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::cmd_attest( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 21,
+      "cognitive": 25,
+      "halstead_difficulty": 48.32,
+      "length": 125
+    },
+    "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::cmd_verify_attest( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 18,
+      "cognitive": 23,
+      "halstead_difficulty": 38.91,
+      "length": 78
+    },
+    "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::parse_attest_args( const std :: vector<std::string> & argv)": {
+      "ccn": 12,
+      "cognitive": 19,
+      "halstead_difficulty": 29.39,
+      "length": 20
+    },
+    "apps/cli/src/cmd/cache.cpp::euxis::cli::cmd::cmd_cache( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 11,
+      "cognitive": 10,
+      "halstead_difficulty": 25.82,
+      "length": 19
+    },
+    "apps/cli/src/cmd/cache.cpp::euxis::cli::cmd::human_bytes( std :: int64_t bytes)": {
+      "ccn": 3,
+      "cognitive": 2,
+      "halstead_difficulty": 35.94,
+      "length": 17
+    },
+    "apps/cli/src/cmd/certify.cpp::euxis::cli::cmd::cmd_certify_readiness( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 34,
+      "cognitive": 42,
+      "halstead_difficulty": 44.97,
+      "length": 92
+    },
+    "apps/cli/src/cmd/certify.cpp::euxis::cli::cmd::cmd_controls()": {
+      "ccn": 8,
+      "cognitive": 20,
+      "halstead_difficulty": 29.35,
+      "length": 32
+    },
+    "apps/cli/src/cmd/certify.cpp::euxis::cli::cmd::cmd_report( const std :: vector<std::string> & args)": {
+      "ccn": 20,
+      "cognitive": 30,
+      "halstead_difficulty": 48.31,
+      "length": 79
+    },
+    "apps/cli/src/cmd/certify.cpp::euxis::cli::cmd::print_result( const cert :: RunResult & result , bool ci_mode)": {
+      "ccn": 24,
+      "cognitive": 37,
+      "halstead_difficulty": 50.18,
+      "length": 95
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_bench( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 15,
+      "cognitive": 20,
+      "halstead_difficulty": 45.04,
+      "length": 54
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_docs_test( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 16,
+      "cognitive": 41,
+      "halstead_difficulty": 40.16,
+      "length": 54
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_git_guard( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 12,
+      "cognitive": 15,
+      "halstead_difficulty": 33.07,
+      "length": 47
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_hooks( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 8,
+      "cognitive": 13,
+      "halstead_difficulty": 33.02,
+      "length": 37
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_license_check( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 12,
+      "cognitive": 17,
+      "halstead_difficulty": 32.0,
+      "length": 45
+    },
+    "apps/cli/src/cmd/dev.cpp::euxis::cli::cmd::cmd_sync_docs( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 42.12,
+      "length": 73
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::build_step_plan( const nlohmann :: json & step , const std :: string & mode , const std :: string & goal , const RegistryClient & registry , ProviderRouter & router)": {
+      "ccn": 16,
+      "cognitive": 21,
+      "halstead_difficulty": 30.54,
+      "length": 95
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::canonicalize_pillar( const std :: string & raw)": {
+      "ccn": 15,
+      "cognitive": 8,
+      "halstead_difficulty": 11.76,
+      "length": 11
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_agent( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 21,
+      "cognitive": 44,
+      "halstead_difficulty": 49.71,
+      "length": 65
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_ci( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 7,
+      "cognitive": 10,
+      "halstead_difficulty": 35.0,
+      "length": 26
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_council( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 12,
+      "cognitive": 20,
+      "halstead_difficulty": 34.86,
+      "length": 32
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_loop( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 13,
+      "cognitive": 16,
+      "halstead_difficulty": 41.52,
+      "length": 33
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_playbook( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 438,
+      "cognitive": 840,
+      "halstead_difficulty": 119.82,
+      "length": 1566
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_squad( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 28,
+      "cognitive": 69,
+      "halstead_difficulty": 45.21,
+      "length": 81
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_synthesize( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 17,
+      "cognitive": 20,
+      "halstead_difficulty": 39.89,
+      "length": 44
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::compute_verdict_trend( const std :: vector<VerdictHistoryEntry> & history , const std :: string & current_verdict , int current_confidence)": {
+      "ccn": 17,
+      "cognitive": 28,
+      "halstead_difficulty": 58.99,
+      "length": 49
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::detect_project_verifiers( const std :: string & repo_root)": {
+      "ccn": 22,
+      "cognitive": 28,
+      "halstead_difficulty": 30.79,
+      "length": 56
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::evaluate_policy( const nlohmann :: json & artifact , const Policy & policy)": {
+      "ccn": 16,
+      "cognitive": 15,
+      "halstead_difficulty": 28.0,
+      "length": 50
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::extract_findings( const std :: string & output)": {
+      "ccn": 21,
+      "cognitive": 28,
+      "halstead_difficulty": 36.93,
+      "length": 64
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::parse_evidence_depth( const std :: string & output)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 29.52,
+      "length": 29
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::print_playbook_stats( Context & ctx , const std :: string & since , int last_n)": {
+      "ccn": 72,
+      "cognitive": 141,
+      "halstead_difficulty": 88.17,
+      "length": 319
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_claim_verifiers( const std :: vector<std::pair<std::string,std::vector<std::string>>> & verifiers , int timeout_per_check = 60)": {
+      "ccn": 9,
+      "cognitive": 15,
+      "halstead_difficulty": 41.9,
+      "length": 27
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_security_pillar_checks( const std :: string & repo_root)": {
+      "ccn": 64,
+      "cognitive": 102,
+      "halstead_difficulty": 76.25,
+      "length": 165
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_testing_pillar_checks( const std :: string & repo_root)": {
+      "ccn": 51,
+      "cognitive": 69,
+      "halstead_difficulty": 64.24,
+      "length": 94
+    },
+    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::verdict_converged( const std :: unordered_map<std::string,std::string> & verdicts , int min_agents = 3)": {
+      "ccn": 11,
+      "cognitive": 11,
+      "halstead_difficulty": 35.88,
+      "length": 12
+    },
+    "apps/cli/src/cmd/infra.cpp::euxis::cli::cmd::cmd_bus( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 19,
+      "cognitive": 37,
+      "halstead_difficulty": 45.41,
+      "length": 88
+    },
+    "apps/cli/src/cmd/infra.cpp::euxis::cli::cmd::cmd_daemon( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 13,
+      "cognitive": 23,
+      "halstead_difficulty": 34.05,
+      "length": 93
+    },
+    "apps/cli/src/cmd/infra.cpp::euxis::cli::cmd::cmd_deploy( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 25,
+      "cognitive": 49,
+      "halstead_difficulty": 58.61,
+      "length": 127
+    },
+    "apps/cli/src/cmd/infra.cpp::euxis::cli::cmd::cmd_gateway( Context & , const std :: vector<std::string> & args)": {
+      "ccn": 10,
+      "cognitive": 10,
+      "halstead_difficulty": 38.59,
+      "length": 25
+    },
+    "apps/cli/src/cmd/infra.cpp::euxis::cli::cmd::daemon_main_loop( const std :: string & euxis_home , const std :: string & data_dir)": {
+      "ccn": 21,
+      "cognitive": 64,
+      "halstead_difficulty": 46.71,
+      "length": 100
+    },
+    "apps/cli/src/cmd/knowledge.cpp::euxis::cli::cmd::cmd_codex( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 31,
+      "cognitive": 64,
+      "halstead_difficulty": 63.64,
+      "length": 119
+    },
+    "apps/cli/src/cmd/knowledge.cpp::euxis::cli::cmd::cmd_cortex( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 28,
+      "cognitive": 65,
+      "halstead_difficulty": 61.76,
+      "length": 172
+    },
+    "apps/cli/src/cmd/knowledge.cpp::euxis::cli::cmd::cmd_graph( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 22,
+      "cognitive": 53,
+      "halstead_difficulty": 52.19,
+      "length": 104
+    },
+    "apps/cli/src/cmd/knowledge.cpp::euxis::cli::cmd::cmd_slash( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 23,
+      "cognitive": 43,
+      "halstead_difficulty": 44.5,
+      "length": 106
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::cmd_install( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 40,
+      "cognitive": 87,
+      "halstead_difficulty": 60.46,
+      "length": 160
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::cmd_self( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 38,
+      "cognitive": 80,
+      "halstead_difficulty": 67.96,
+      "length": 176
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::cmd_uninstall( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 27,
+      "cognitive": 53,
+      "halstead_difficulty": 52.5,
+      "length": 113
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::cmd_update( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 27,
+      "cognitive": 54,
+      "halstead_difficulty": 48.78,
+      "length": 107
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::cmd_upgrade( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 25,
+      "cognitive": 46,
+      "halstead_difficulty": 46.53,
+      "length": 125
+    },
+    "apps/cli/src/cmd/lifecycle.cpp::euxis::cli::cmd::install_completions( const std :: string & euxis_home , const std :: string & shell , bool dry_run , bool force)": {
+      "ccn": 23,
+      "cognitive": 45,
+      "halstead_difficulty": 47.05,
+      "length": 87
+    },
+    "apps/cli/src/cmd/playbook_verify.cpp::euxis::cli::cmd::detect_agent_drift( const std :: string & euxis_home , const std :: vector<PlaybookEvidence> & current_evidence)": {
+      "ccn": 24,
+      "cognitive": 45,
+      "halstead_difficulty": 50.61,
+      "length": 75
+    },
+    "apps/cli/src/cmd/playbook_verify.cpp::euxis::cli::cmd::verify_verdict_consistency( const std :: string & verdict , const std :: vector<PlaybookEvidence> & evidence , int confidence , int contradiction_count)": {
+      "ccn": 24,
+      "cognitive": 31,
+      "halstead_difficulty": 33.39,
+      "length": 45
+    },
+    "apps/cli/src/cmd/sbom.cpp::euxis::cli::cmd::cmd_sbom( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 18,
+      "cognitive": 28,
+      "halstead_difficulty": 43.68,
+      "length": 73
+    },
+    "apps/cli/src/cmd/sbom.cpp::euxis::cli::cmd::parse_args( const std :: vector<std::string> & argv)": {
+      "ccn": 17,
+      "cognitive": 27,
+      "halstead_difficulty": 30.14,
+      "length": 24
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::cmd_scan( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 22,
+      "cognitive": 31,
+      "halstead_difficulty": 37.84,
+      "length": 128
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::collect_target_files( const ScanArgs & args)": {
+      "ccn": 10,
+      "cognitive": 15,
+      "halstead_difficulty": 33.82,
+      "length": 36
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::deserialize_findings( const std :: string & json_str)": {
+      "ccn": 14,
+      "cognitive": 22,
+      "halstead_difficulty": 42.23,
+      "length": 51
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::parse_args( const std :: vector<std::string> & argv)": {
+      "ccn": 29,
+      "cognitive": 55,
+      "halstead_difficulty": 39.51,
+      "length": 67
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::scan_file_compute( const std :: filesystem :: path & file , const ScanArgs & args , const std :: vector<euxis::scan::RulePack> & packs , const std :: string & ruleset_hash , euxis :: cache :: ScanCache * cache)": {
+      "ccn": 20,
+      "cognitive": 23,
+      "halstead_difficulty": 37.49,
+      "length": 98
+    },
+    "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::walk_target( ScanContext & ctx , const ScanArgs & args)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 44.03,
+      "length": 57
+    },
+    "apps/cli/src/cmd/sdk.cpp::euxis::cli::cmd::cmd_sdk_demo( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 24,
+      "cognitive": 37,
+      "halstead_difficulty": 49.7,
+      "length": 160
+    },
+    "apps/cli/src/cmd/slopsquatting.cpp::euxis::cli::cmd::cmd_slopsquatting( Context & , const std :: vector<std::string> & argv)": {
+      "ccn": 24,
+      "cognitive": 41,
+      "halstead_difficulty": 37.5,
+      "length": 117
+    },
+    "apps/cli/src/cmd/slopsquatting.cpp::euxis::cli::cmd::parse_args( const std :: vector<std::string> & argv)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 27.27,
+      "length": 17
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_audit( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 9,
+      "cognitive": 11,
+      "halstead_difficulty": 39.75,
+      "length": 43
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_certify( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 16,
+      "cognitive": 16,
+      "halstead_difficulty": 42.47,
+      "length": 61
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_context_worker( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 23,
+      "cognitive": 45,
+      "halstead_difficulty": 48.43,
+      "length": 211
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_evidence_verify( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 13,
+      "cognitive": 27,
+      "halstead_difficulty": 41.43,
+      "length": 46
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_gym( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 33,
+      "cognitive": 48,
+      "halstead_difficulty": 54.52,
+      "length": 175
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_kaizen( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 24,
+      "cognitive": 35,
+      "halstead_difficulty": 43.05,
+      "length": 130
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_lsp( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 14,
+      "cognitive": 26,
+      "halstead_difficulty": 34.63,
+      "length": 60
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_polish( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 11,
+      "cognitive": 12,
+      "halstead_difficulty": 40.07,
+      "length": 81
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_replay( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 7,
+      "cognitive": 10,
+      "halstead_difficulty": 30.97,
+      "length": 41
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_tui_ex( Context & ctx , const std :: vector<std::string> & args , std :: istream & input)": {
+      "ccn": 59,
+      "cognitive": 113,
+      "halstead_difficulty": 70.46,
+      "length": 220
+    },
+    "apps/cli/src/cmd/specialized.cpp::euxis::cli::cmd::cmd_voice_ex( Context & ctx , const std :: vector<std::string> & args , std :: istream & input)": {
+      "ccn": 27,
+      "cognitive": 34,
+      "halstead_difficulty": 41.08,
+      "length": 85
+    },
+    "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::build_playbook_args( const std :: string & mode , const std :: string & target , const std :: vector<std::string> & passthrough)": {
+      "ccn": 3,
+      "cognitive": 2,
+      "halstead_difficulty": 31.67,
+      "length": 10
+    },
+    "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::cmd_policy( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 32,
+      "cognitive": 66,
+      "halstead_difficulty": 58.16,
+      "length": 157
+    },
+    "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::cmd_stats( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 11,
+      "cognitive": 12,
+      "halstead_difficulty": 33.53,
+      "length": 33
+    },
+    "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::parse_common( const std :: vector<std::string> & args , const std :: vector<std::string> & skip_flags = { })": {
+      "ccn": 17,
+      "cognitive": 23,
+      "halstead_difficulty": 58.79,
+      "length": 34
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_cross_platform_verify( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 10,
+      "cognitive": 13,
+      "halstead_difficulty": 34.39,
+      "length": 47
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_doctor( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 51,
+      "cognitive": 73,
+      "halstead_difficulty": 60.71,
+      "length": 239
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_health( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 66,
+      "cognitive": 101,
+      "halstead_difficulty": 61.22,
+      "length": 202
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_lint( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 8,
+      "cognitive": 11,
+      "halstead_difficulty": 36.69,
+      "length": 38
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_shell_lint( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 12,
+      "cognitive": 19,
+      "halstead_difficulty": 34.2,
+      "length": 36
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_verify( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 12,
+      "cognitive": 31,
+      "halstead_difficulty": 33.18,
+      "length": 46
+    },
+    "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_verify_all( Context & ctx , const std :: vector<std::string> &)": {
+      "ccn": 7,
+      "cognitive": 7,
+      "halstead_difficulty": 31.67,
+      "length": 26
+    },
+    "apps/cli/src/cmd/system_card.cpp::euxis::cli::cmd::cmd_system_card( Context & ctx , const std :: vector<std::string> & args)": {
+      "ccn": 20,
+      "cognitive": 28,
+      "halstead_difficulty": 40.66,
+      "length": 149
+    },
+    "apps/cli/src/cmd/vulndb.cpp::euxis::cli::cmd::run_query( const std :: vector<std::string> & args)": {
+      "ccn": 20,
+      "cognitive": 30,
+      "halstead_difficulty": 35.13,
+      "length": 77
+    },
+    "apps/cli/src/engine.cpp::euxis::cli::Engine::register_commands()": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 11.37,
+      "length": 87
+    },
+    "apps/cli/src/engine.cpp::euxis::cli::Engine::run( const std :: vector<std::string> & args)": {
+      "ccn": 17,
+      "cognitive": 17,
+      "halstead_difficulty": 29.13,
+      "length": 64
+    },
+    "apps/cli/src/lang_detect.cpp::euxis::cli::detect_languages( const std :: string & root_dir)": {
+      "ccn": 21,
+      "cognitive": 26,
+      "halstead_difficulty": 29.73,
+      "length": 126
+    },
+    "apps/cli/src/mcp_provider.cpp::euxis::cli::McpProviderBridge::execute( const std :: string & server_name , const std :: string & tool_name , const nlohmann :: json & arguments , int timeout_seconds)": {
+      "ccn": 32,
+      "cognitive": 44,
+      "halstead_difficulty": 60.35,
+      "length": 121
+    },
+    "apps/cli/src/mcp_provider.cpp::euxis::cli::McpProviderBridge::load_config( const std :: string & data_dir)": {
+      "ccn": 12,
+      "cognitive": 17,
+      "halstead_difficulty": 29.3,
+      "length": 32
+    },
+    "apps/cli/src/omnigraph.cpp::euxis::cli::GraphAdapter::format_system_prompt( const nlohmann :: json & graph)": {
+      "ccn": 11,
+      "cognitive": 22,
+      "halstead_difficulty": 32.5,
+      "length": 41
+    },
+    "apps/cli/src/playbook_schema.cpp::euxis::cli::validate_playbook( const nlohmann :: json & playbook)": {
+      "ccn": 36,
+      "cognitive": 79,
+      "halstead_difficulty": 61.71,
+      "length": 113
+    },
+    "apps/cli/src/process.cpp::euxis::cli::Process::run( const std :: string & program , const std :: vector<std::string> & args , int timeout_seconds , const std :: map<std::string,std::string> & env_vars)": {
+      "ccn": 10,
+      "cognitive": 9,
+      "halstead_difficulty": 42.17,
+      "length": 50
+    },
+    "apps/cli/src/process.cpp::euxis::cli::Process::run_streaming( const std :: string & program , const std :: vector<std::string> & args , const std :: string & stdin_data , std :: function<void(const std::string&)> on_chunk , int timeout_seconds , const std :: map<std::string,std::string> & env_vars)": {
+      "ccn": 22,
+      "cognitive": 44,
+      "halstead_difficulty": 64.59,
+      "length": 66
+    },
+    "apps/cli/src/process.cpp::euxis::cli::Process::run_with_input( const std :: string & program , const std :: vector<std::string> & args , const std :: string & stdin_data , int timeout_seconds , const std :: map<std::string,std::string> & env_vars)": {
+      "ccn": 12,
+      "cognitive": 10,
+      "halstead_difficulty": 49.53,
+      "length": 52
+    },
+    "apps/cli/src/process.cpp::euxis::cli::Process::which( const std :: string & name)": {
+      "ccn": 6,
+      "cognitive": 7,
+      "halstead_difficulty": 30.64,
+      "length": 11
+    },
+    "apps/cli/src/process.cpp::euxis::cli::drain_pipes( int stdout_fd , int stderr_fd , TimePoint deadline)": {
+      "ccn": 13,
+      "cognitive": 35,
+      "halstead_difficulty": 42.55,
+      "length": 27
+    },
+    "apps/cli/src/process.cpp::euxis::cli::reap_child( pid_t pid , TimePoint deadline , int out_fd = - 1 , int err_fd = - 1 , std :: string * out_str = nullptr , std :: string * err_str = nullptr)": {
+      "ccn": 10,
+      "cognitive": 18,
+      "halstead_difficulty": 28.75,
+      "length": 23
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::classify_error( int http_status , const std :: string & body)": {
+      "ccn": 12,
+      "cognitive": 10,
+      "halstead_difficulty": 29.31,
+      "length": 23
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute( const ModelSelection & selection , const std :: string & prompt , int timeout_seconds , std :: optional<ResolvedAuth> auth , std :: function<void(const std::string&)> on_chunk , const bridge :: AgentCapabilityToken * capability_token)": {
+      "ccn": 29,
+      "cognitive": 32,
+      "halstead_difficulty": 55.4,
+      "length": 106
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_api( const std :: string & provider , const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
+      "ccn": 18,
+      "cognitive": 28,
+      "halstead_difficulty": 41.9,
+      "length": 44
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_claude( const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
+      "ccn": 19,
+      "cognitive": 53,
+      "halstead_difficulty": 50.42,
+      "length": 58
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_ollama( const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
+      "ccn": 13,
+      "cognitive": 26,
+      "halstead_difficulty": 44.43,
+      "length": 33
+    },
+    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_via_cli( const std :: string & provider , [ [ maybe_unused ] ] const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
+      "ccn": 11,
+      "cognitive": 12,
+      "halstead_difficulty": 32.27,
+      "length": 47
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::classify_task_class( const std :: string & task , const std :: string & agent_id , const std :: string & pillar) const": {
+      "ccn": 25,
+      "cognitive": 34,
+      "halstead_difficulty": 33.81,
+      "length": 56
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::load_config()": {
+      "ccn": 14,
+      "cognitive": 20,
+      "halstead_difficulty": 33.05,
+      "length": 42
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::load_strategy_config()": {
+      "ccn": 12,
+      "cognitive": 21,
+      "halstead_difficulty": 24.69,
+      "length": 44
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::model_fallback_chain( const std :: string & model) const": {
+      "ccn": 9,
+      "cognitive": 9,
+      "halstead_difficulty": 54.86,
+      "length": 45
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::reload_config()": {
+      "ccn": 29,
+      "cognitive": 65,
+      "halstead_difficulty": 45.28,
+      "length": 112
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::route( const std :: string & agent_tier , const std :: string & task , const std :: string & priority)": {
+      "ccn": 12,
+      "cognitive": 8,
+      "halstead_difficulty": 26.25,
+      "length": 40
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::route_by_strategy( const std :: string & task_class , const std :: string & , const std :: string & agent_tier , const std :: string & prompt , const RouteOptions & opts)": {
+      "ccn": 36,
+      "cognitive": 61,
+      "halstead_difficulty": 61.35,
+      "length": 104
+    },
+    "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::strategy_model( const std :: string & provider , const std :: string & task_class) const": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 30.77,
+      "length": 10
+    },
+    "apps/cli/src/registry_client.cpp::euxis::cli::RegistryClient::find_by_tag( const std :: string & tag) const": {
+      "ccn": 13,
+      "cognitive": 34,
+      "halstead_difficulty": 28.91,
+      "length": 38
+    },
+    "apps/cli/src/registry_client.cpp::euxis::cli::RegistryClient::get_agent( const std :: string & agent_id) const": {
+      "ccn": 14,
+      "cognitive": 37,
+      "halstead_difficulty": 30.97,
+      "length": 40
+    },
+    "apps/cli/src/registry_client.cpp::euxis::cli::RegistryClient::list_agents() const": {
+      "ccn": 10,
+      "cognitive": 25,
+      "halstead_difficulty": 28.42,
+      "length": 31
+    },
+    "apps/cli/src/sarif.cpp::euxis::cli::extract_sarif_findings( const std :: string & agent_output , const std :: string & agent_id , const std :: string & pillar , const std :: string & verdict)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 35.07,
+      "length": 50
+    },
+    "apps/cli/src/sarif.cpp::euxis::cli::findings_to_sarif( const std :: vector<euxis::security::Finding> & findings , const std :: string & tool_version)": {
+      "ccn": 21,
+      "cognitive": 37,
+      "halstead_difficulty": 44.03,
+      "length": 127
+    },
+    "apps/cli/src/session.cpp::euxis::cli::Session::get_memory_context( const std :: string & agent_id , int max_lines) const": {
+      "ccn": 14,
+      "cognitive": 13,
+      "halstead_difficulty": 50.43,
+      "length": 62
+    },
+    "apps/cli/src/term_caps.cpp::euxis::cli::terminal::detect()": {
+      "ccn": 25,
+      "cognitive": 32,
+      "halstead_difficulty": 38.26,
+      "length": 80
+    },
+    "apps/cli/src/terminal.cpp::euxis::cli::terminal::TerminalScreen::draw_box( int x , int y , int w , int h , std :: string_view title)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 32.91,
+      "length": 7
+    },
+    "apps/cli/src/terminal.cpp::euxis::cli::terminal::TerminalScreen::render()": {
+      "ccn": 15,
+      "cognitive": 17,
+      "halstead_difficulty": 54.15,
+      "length": 20
+    },
+    "apps/cli/src/terminal.cpp::euxis::cli::terminal::TerminalScreen::write_gradient( int x , int y , std :: string_view text , uint8_t r1 , uint8_t g1 , uint8_t b1 , uint8_t r2 , uint8_t g2 , uint8_t b2)": {
+      "ccn": 11,
+      "cognitive": 12,
+      "halstead_difficulty": 55.36,
+      "length": 19
+    },
+    "apps/cli/src/terminal.cpp::euxis::cli::terminal::TerminalScreen::write_text( int x , int y , std :: string_view text , uint8_t fr , uint8_t fg , uint8_t fb , uint8_t br , uint8_t bg , uint8_t bb , bool bld)": {
+      "ccn": 21,
+      "cognitive": 36,
+      "halstead_difficulty": 51.2,
+      "length": 32
+    },
+    "apps/cli/src/tui/chat_widget.cpp::euxis::cli::tui::ChatWidget::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 18,
+      "cognitive": 24,
+      "halstead_difficulty": 47.25,
+      "length": 63
+    },
+    "apps/cli/src/tui/chat_widget.cpp::euxis::cli::tui::ChatWidget::render_message( terminal :: TerminalScreen & screen , const ChatMessage & msg , int & y , Rect area) const": {
+      "ccn": 39,
+      "cognitive": 75,
+      "halstead_difficulty": 76.46,
+      "length": 112
+    },
+    "apps/cli/src/tui/collapsible.cpp::euxis::cli::tui::Collapsible::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 13,
+      "cognitive": 15,
+      "halstead_difficulty": 35.54,
+      "length": 55
+    },
+    "apps/cli/src/tui/color_system.cpp::euxis::cli::tui::APCA::enforce_contrast( RGB fg , RGB bg , double min_lc)": {
+      "ccn": 5,
+      "cognitive": 7,
+      "halstead_difficulty": 42.0,
+      "length": 22
+    },
+    "apps/cli/src/tui/context_sidebar.cpp::euxis::cli::tui::ContextSidebar::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 16,
+      "cognitive": 22,
+      "halstead_difficulty": 49.3,
+      "length": 96
+    },
+    "apps/cli/src/tui/diff_view.cpp::euxis::cli::tui::DiffView::handle_event( const Event & event)": {
+      "ccn": 13,
+      "cognitive": 14,
+      "halstead_difficulty": 31.25,
+      "length": 33
+    },
+    "apps/cli/src/tui/diff_view.cpp::euxis::cli::tui::DiffView::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 24,
+      "cognitive": 30,
+      "halstead_difficulty": 60.34,
+      "length": 77
+    },
+    "apps/cli/src/tui/diff_view.cpp::euxis::cli::tui::parse_unified_diff( std :: string_view diff_text)": {
+      "ccn": 11,
+      "cognitive": 17,
+      "halstead_difficulty": 42.14,
+      "length": 41
+    },
+    "apps/cli/src/tui/event_loop.cpp::euxis::cli::tui::EventLoop::process_stdin()": {
+      "ccn": 44,
+      "cognitive": 111,
+      "halstead_difficulty": 52.18,
+      "length": 84
+    },
+    "apps/cli/src/tui/event_loop.cpp::euxis::cli::tui::EventLoop::run()": {
+      "ccn": 14,
+      "cognitive": 19,
+      "halstead_difficulty": 29.63,
+      "length": 49
+    },
+    "apps/cli/src/tui/focus_manager.cpp::euxis::cli::tui::FocusManager::focus_next()": {
+      "ccn": 9,
+      "cognitive": 11,
+      "halstead_difficulty": 31.33,
+      "length": 19
+    },
+    "apps/cli/src/tui/focus_manager.cpp::euxis::cli::tui::FocusManager::focus_prev()": {
+      "ccn": 9,
+      "cognitive": 11,
+      "halstead_difficulty": 35.39,
+      "length": 19
+    },
+    "apps/cli/src/tui/keybindings.cpp::euxis::cli::tui::KeybindingEngine::action_name( Action action)": {
+      "ccn": 29,
+      "cognitive": 1,
+      "halstead_difficulty": 7.42,
+      "length": 33
+    },
+    "apps/cli/src/tui/keybindings.cpp::euxis::cli::tui::KeybindingEngine::key_name( int raw_key)": {
+      "ccn": 23,
+      "cognitive": 22,
+      "halstead_difficulty": 20.52,
+      "length": 39
+    },
+    "apps/cli/src/tui/keybindings.cpp::euxis::cli::tui::KeybindingEngine::parse_key_name( const std :: string & name)": {
+      "ccn": 31,
+      "cognitive": 33,
+      "halstead_difficulty": 29.21,
+      "length": 43
+    },
+    "apps/cli/src/tui/layout.cpp::euxis::cli::tui::HBox::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 10,
+      "cognitive": 13,
+      "halstead_difficulty": 40.5,
+      "length": 21
+    },
+    "apps/cli/src/tui/layout.cpp::euxis::cli::tui::VBox::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 10,
+      "cognitive": 13,
+      "halstead_difficulty": 40.5,
+      "length": 23
+    },
+    "apps/cli/src/tui/palette.cpp::euxis::cli::tui::FuzzyMatch::score( std :: string_view query , std :: string_view candidate)": {
+      "ccn": 18,
+      "cognitive": 19,
+      "halstead_difficulty": 55.0,
+      "length": 45
+    },
+    "apps/cli/src/tui/palette.cpp::euxis::cli::tui::Palette::handle_event( const Event & event)": {
+      "ccn": 17,
+      "cognitive": 22,
+      "halstead_difficulty": 34.0,
+      "length": 43
+    },
+    "apps/cli/src/tui/palette.cpp::euxis::cli::tui::Palette::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 17,
+      "cognitive": 31,
+      "halstead_difficulty": 46.85,
+      "length": 73
+    },
+    "apps/cli/src/tui/swarm_view.cpp::euxis::cli::tui::SwarmView::render_node( terminal :: TerminalScreen & screen , const SwarmNode & node , int x , int & y , int max_y , int depth , bool is_last , int max_w) const": {
+      "ccn": 17,
+      "cognitive": 21,
+      "halstead_difficulty": 47.39,
+      "length": 66
+    },
+    "apps/cli/src/tui/syntax.cpp::euxis::cli::tui::SyntaxHighlighter::token_color( TokenType type)": {
+      "ccn": 18,
+      "cognitive": 1,
+      "halstead_difficulty": 12.29,
+      "length": 22
+    },
+    "apps/cli/src/tui/syntax.cpp::euxis::cli::tui::SyntaxHighlighter::tokenize( std :: string_view line , Language lang) const": {
+      "ccn": 53,
+      "cognitive": 74,
+      "halstead_difficulty": 85.21,
+      "length": 131
+    },
+    "apps/cli/src/tui/syntax.cpp::euxis::cli::tui::detect_language( std :: string_view hint)": {
+      "ccn": 31,
+      "cognitive": 18,
+      "halstead_difficulty": 21.89,
+      "length": 20
+    },
+    "apps/cli/src/tui/text_utils.cpp::euxis::cli::tui::wrap_text( std :: string_view text , int width)": {
+      "ccn": 22,
+      "cognitive": 46,
+      "halstead_difficulty": 70.5,
+      "length": 75
+    },
+    "apps/cli/src/tui/workspace.cpp::euxis::cli::tui::AgentList::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 8,
+      "cognitive": 11,
+      "halstead_difficulty": 33.08,
+      "length": 30
+    },
+    "apps/cli/src/tui/workspace.cpp::euxis::cli::tui::FileTree::handle_event( const Event & event)": {
+      "ccn": 14,
+      "cognitive": 20,
+      "halstead_difficulty": 36.4,
+      "length": 29
+    },
+    "apps/cli/src/tui/workspace.cpp::euxis::cli::tui::FileTree::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 10,
+      "cognitive": 16,
+      "halstead_difficulty": 39.37,
+      "length": 43
+    },
+    "apps/cli/src/tui/workspace.cpp::euxis::cli::tui::Workspace::render( terminal :: TerminalScreen & screen , Rect area)": {
+      "ccn": 19,
+      "cognitive": 30,
+      "halstead_difficulty": 56.87,
+      "length": 63
+    },
+    "apps/cli/tests/test_cmd_certify.cpp::euxis::cli::cmd::TEST_F( CertifyCmdTest , ArtifactSchemaFullValidation)": {
+      "ccn": 12,
+      "cognitive": 5,
+      "halstead_difficulty": 30.14,
+      "length": 61
+    },
+    "apps/cli/tests/test_cmd_fleet.cpp::euxis::cli::cmd::TEST_F( FleetCmdTest , PolicyViolationRegression)": {
+      "ccn": 7,
+      "cognitive": 10,
+      "halstead_difficulty": 30.33,
+      "length": 57
+    },
+    "apps/cli/tests/test_provider_router.cpp::euxis::cli::StrategyRouterTest::SetUp()": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 12.01,
+      "length": 62
+    },
+    "apps/etx/src/app.cpp::euxis::etx::EuxisApp::EuxisApp( QWidget * parent)": {
+      "ccn": 2,
+      "cognitive": 1,
+      "halstead_difficulty": 27.46,
+      "length": 79
+    },
+    "apps/etx/src/app.cpp::euxis::etx::EuxisApp::on_command_palette()": {
+      "ccn": 20,
+      "cognitive": 21,
+      "halstead_difficulty": 28.35,
+      "length": 77
+    },
+    "apps/etx/src/app.cpp::euxis::etx::EuxisApp::show_agent( const std :: string & agent_id)": {
+      "ccn": 16,
+      "cognitive": 26,
+      "halstead_difficulty": 26.2,
+      "length": 53
+    },
+    "apps/etx/src/chat_engine.cpp::euxis::etx::ChatEngine::execute_async( const QString & prompt , const QString & agent_id , const cli :: ModelSelection & selection)": {
+      "ccn": 26,
+      "cognitive": 77,
+      "halstead_difficulty": 70.5,
+      "length": 208
+    },
+    "apps/etx/src/chat_engine.cpp::euxis::etx::ChatEngine::start_login( const QString & provider)": {
+      "ccn": 12,
+      "cognitive": 21,
+      "halstead_difficulty": 33.06,
+      "length": 56
+    },
+    "apps/etx/src/ghost_text.cpp::euxis::etx::GhostTextEngine::suggest( const std :: string & prefix) const": {
+      "ccn": 7,
+      "cognitive": 9,
+      "halstead_difficulty": 39.67,
+      "length": 28
+    },
+    "apps/etx/src/oauth_flow.cpp::euxis::etx::OAuthFlow::exchange_code( const QString & code)": {
+      "ccn": 6,
+      "cognitive": 14,
+      "halstead_difficulty": 20.73,
+      "length": 61
+    },
+    "apps/etx/src/oauth_flow.cpp::euxis::etx::OAuthFlow::start_login( const QString & provider)": {
+      "ccn": 4,
+      "cognitive": 3,
+      "halstead_difficulty": 22.2,
+      "length": 69
+    },
+    "apps/etx/src/registry.cpp::euxis::etx::FleetRegistry::load_agents()": {
+      "ccn": 13,
+      "cognitive": 19,
+      "halstead_difficulty": 31.44,
+      "length": 49
+    },
+    "apps/etx/src/registry.cpp::euxis::etx::FleetRegistry::load_squads()": {
+      "ccn": 15,
+      "cognitive": 26,
+      "halstead_difficulty": 35.57,
+      "length": 47
+    },
+    "apps/etx/src/screens/about.cpp::euxis::etx::create_about_screen( QWidget * parent)": {
+      "ccn": 5,
+      "cognitive": 2,
+      "halstead_difficulty": 28.62,
+      "length": 98
+    },
+    "apps/etx/src/screens/agent.cpp::euxis::etx::create_agent_screen( QWidget * parent)": {
+      "ccn": 5,
+      "cognitive": 13,
+      "halstead_difficulty": 40.47,
+      "length": 241
+    },
+    "apps/etx/src/screens/approvals.cpp::euxis::etx::create_approvals_screen( ETXConfig * , QWidget * parent)": {
+      "ccn": 13,
+      "cognitive": 24,
+      "halstead_difficulty": 54.49,
+      "length": 244
+    },
+    "apps/etx/src/screens/cortex.cpp::euxis::etx::create_cortex_screen( ETXConfig * , QWidget * parent)": {
+      "ccn": 9,
+      "cognitive": 16,
+      "halstead_difficulty": 35.47,
+      "length": 154
+    },
+    "apps/etx/src/screens/dashboard.cpp::euxis::etx::AgentSidebar::AgentSidebar( FleetRegistry * registry , EuxisApp * app , QWidget * parent = nullptr)": {
+      "ccn": 6,
+      "cognitive": 8,
+      "halstead_difficulty": 27.21,
+      "length": 114
+    },
+    "apps/etx/src/screens/dashboard.cpp::euxis::etx::DashboardScreen::DashboardScreen( EuxisApp * app , FleetRegistry * registry , ThemeEngine * theme , ETXConfig * , ChatEngine * chat , QWidget * parent = nullptr)": {
+      "ccn": 3,
+      "cognitive": 3,
+      "halstead_difficulty": 32.0,
+      "length": 130
+    },
+    "apps/etx/src/screens/dashboard.cpp::euxis::etx::DashboardScreen::on_slash_command( const QString & command , const QString & args)": {
+      "ccn": 14,
+      "cognitive": 19,
+      "halstead_difficulty": 22.53,
+      "length": 40
+    },
+    "apps/etx/src/screens/error_details.cpp::euxis::etx::create_error_details_screen( QWidget * parent)": {
+      "ccn": 4,
+      "cognitive": 6,
+      "halstead_difficulty": 34.82,
+      "length": 225
+    },
+    "apps/etx/src/screens/fleet_monitor.cpp::euxis::etx::create_fleet_monitor_screen( FleetRegistry * registry , QWidget * parent)": {
+      "ccn": 3,
+      "cognitive": 4,
+      "halstead_difficulty": 29.27,
+      "length": 106
+    },
+    "apps/etx/src/screens/help.cpp::euxis::etx::create_help_screen( QWidget * parent)": {
+      "ccn": 3,
+      "cognitive": 3,
+      "halstead_difficulty": 25.04,
+      "length": 87
+    },
+    "apps/etx/src/screens/logs.cpp::euxis::etx::create_logs_screen( ETXConfig * , QWidget * parent)": {
+      "ccn": 2,
+      "cognitive": 2,
+      "halstead_difficulty": 26.18,
+      "length": 81
+    },
+    "apps/etx/src/screens/metrics.cpp::euxis::etx::create_metrics_screen( FleetRegistry * registry , ETXConfig * , QWidget * parent)": {
+      "ccn": 8,
+      "cognitive": 12,
+      "halstead_difficulty": 48.33,
+      "length": 200
+    },
+    "apps/etx/src/screens/omnigraph.cpp::euxis::etx::create_omnigraph_screen( FleetRegistry * registry , QWidget * parent)": {
+      "ccn": 25,
+      "cognitive": 69,
+      "halstead_difficulty": 52.08,
+      "length": 255
+    },
+    "apps/etx/src/screens/playbooks.cpp::euxis::etx::create_playbooks_screen( FleetRegistry * registry , QWidget * parent)": {
+      "ccn": 18,
+      "cognitive": 57,
+      "halstead_difficulty": 44.29,
+      "length": 195
+    },
+    "apps/etx/src/screens/settings.cpp::euxis::etx::create_settings_screen( ThemeEngine * theme , ETXConfig * config , QWidget * parent)": {
+      "ccn": 2,
+      "cognitive": 2,
+      "halstead_difficulty": 28.17,
+      "length": 123
+    },
+    "apps/etx/src/screens/squad_detail.cpp::euxis::etx::create_squad_detail_screen( FleetRegistry * registry , QWidget * parent)": {
+      "ccn": 13,
+      "cognitive": 35,
+      "halstead_difficulty": 53.2,
+      "length": 221
+    },
+    "apps/etx/src/screens/time_travel.cpp::euxis::etx::create_time_travel_screen( QWidget * parent)": {
+      "ccn": 16,
+      "cognitive": 27,
+      "halstead_difficulty": 50.55,
+      "length": 288
+    },
+    "apps/etx/src/screens/tool_runner.cpp::euxis::etx::create_tool_runner_screen( QWidget * parent)": {
+      "ccn": 6,
+      "cognitive": 11,
+      "halstead_difficulty": 40.51,
+      "length": 174
+    },
+    "apps/etx/src/semantic_colors.cpp::euxis::etx::status_to_severity( const QString & status)": {
+      "ccn": 17,
+      "cognitive": 10,
+      "halstead_difficulty": 14.71,
+      "length": 19
+    },
+    "apps/etx/src/widgets/agent_card.cpp::euxis::etx::AgentCardWidget::AgentCardWidget( const AgentInfo & agent , EuxisApp * app , QWidget * parent = nullptr)": {
+      "ccn": 7,
+      "cognitive": 8,
+      "halstead_difficulty": 26.34,
+      "length": 104
+    },
+    "apps/etx/src/widgets/breadcrumb.cpp::euxis::etx::BreadcrumbWidget::rebuild()": {
+      "ccn": 6,
+      "cognitive": 9,
+      "halstead_difficulty": 32.14,
+      "length": 58
+    },
+    "apps/etx/src/widgets/chat_input.cpp::euxis::etx::ChatInputBar::ChatInputBar( FleetRegistry * registry , QWidget * parent)": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 16.95,
+      "length": 100
+    },
+    "apps/etx/src/widgets/chat_input.cpp::euxis::etx::ChatInputBar::eventFilter( QObject * obj , QEvent * event)": {
+      "ccn": 17,
+      "cognitive": 27,
+      "halstead_difficulty": 23.42,
+      "length": 36
+    },
+    "apps/etx/src/widgets/conversation.cpp::euxis::etx::make_bubble( ChatMessage :: Role role , const QString & text , const QString & agent_id , const QString & model , double duration_ms , QWidget * parent)": {
+      "ccn": 6,
+      "cognitive": 10,
+      "halstead_difficulty": 31.56,
+      "length": 107
+    },
+    "apps/etx/src/widgets/header.cpp::euxis::etx::SparklineWidget::paintEvent( QPaintEvent *)": {
+      "ccn": 6,
+      "cognitive": 6,
+      "halstead_difficulty": 34.55,
+      "length": 38
+    },
+    "apps/etx/src/widgets/header.cpp::euxis::etx::create_header_widget( ThemeEngine * theme , QWidget * parent)": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 19.83,
+      "length": 63
+    },
+    "apps/etx/src/widgets/provider_select.cpp::euxis::etx::ProviderSelectDialog::ProviderSelectDialog( ChatEngine * chat , QWidget * parent = nullptr)": {
+      "ccn": 2,
+      "cognitive": 1,
+      "halstead_difficulty": 24.09,
+      "length": 135
+    },
+    "apps/etx/src/widgets/provider_select.cpp::euxis::etx::ProviderSelectDialog::refresh_profiles()": {
+      "ccn": 14,
+      "cognitive": 22,
+      "halstead_difficulty": 39.09,
+      "length": 65
+    },
+    "apps/etx/src/widgets/resource_monitor.cpp::euxis::etx::ResourceMonitorWidget::ResourceMonitorWidget( QWidget * parent = nullptr)": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 21.23,
+      "length": 97
+    },
+    "apps/etx/src/widgets/resource_monitor.cpp::euxis::etx::SparklineMini::paintEvent( QPaintEvent *)": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 33.88,
+      "length": 37
+    },
+    "apps/etx/src/widgets/sparkline.cpp::euxis::etx::SparklineChartWidget::paintEvent( QPaintEvent *)": {
+      "ccn": 10,
+      "cognitive": 12,
+      "halstead_difficulty": 34.77,
+      "length": 63
+    },
+    "apps/gateway/src/auth.cpp::euxis::gateway::verify_hmac( const std :: string & payload , const std :: string & signature , const std :: string & secret)": {
+      "ccn": 4,
+      "cognitive": 3,
+      "halstead_difficulty": 30.4,
+      "length": 33
+    },
+    "apps/gateway/src/gateway_main.cpp::euxis::gateway::gateway_main( int argc , char * argv [ ] , bool start_server)": {
+      "ccn": 8,
+      "cognitive": 12,
+      "halstead_difficulty": 30.41,
+      "length": 41
+    },
+    "apps/gateway/src/mcp.cpp::euxis::gateway::McpHost::handle_request( const nlohmann :: json & request)": {
+      "ccn": 12,
+      "cognitive": 10,
+      "halstead_difficulty": 23.69,
+      "length": 43
+    },
+    "apps/gateway/src/mcp_fleet_tools.cpp::euxis::gateway::is_safe_arg( const std :: string & arg)": {
+      "ccn": 24,
+      "cognitive": 10,
+      "halstead_difficulty": 18.16,
+      "length": 16
+    },
+    "apps/gateway/src/mcp_fleet_tools.cpp::euxis::gateway::register_fleet_tools( McpHost & host , const std :: string & euxis_home)": {
+      "ccn": 19,
+      "cognitive": 50,
+      "halstead_difficulty": 55.24,
+      "length": 170
+    },
+    "apps/gateway/src/mcp_fleet_tools.cpp::euxis::gateway::run_euxis_command( const std :: string & euxis_home , const std :: string & command , const std :: vector<std::string> & args = { })": {
+      "ccn": 24,
+      "cognitive": 33,
+      "halstead_difficulty": 57.99,
+      "length": 123
+    },
+    "apps/gateway/src/mcp_stdio.cpp::euxis::gateway::McpStdioServer::read_frame( std :: istream & in)": {
+      "ccn": 11,
+      "cognitive": 15,
+      "halstead_difficulty": 27.68,
+      "length": 38
+    },
+    "apps/gateway/src/server.cpp::euxis::gateway::GatewayServer::setup_ws_handlers()": {
+      "ccn": 12,
+      "cognitive": 18,
+      "halstead_difficulty": 28.89,
+      "length": 58
+    },
+    "apps/gateway/src/websocket.cpp::euxis::gateway::WebSocketHub::start()": {
+      "ccn": 8,
+      "cognitive": 26,
+      "halstead_difficulty": 23.2,
+      "length": 49
+    },
+    "apps/gateway/tests/test_server.cpp::euxis::gateway::TEST_F( GatewayServerTest , StartAndStopWithClient)": {
+      "ccn": 2,
+      "cognitive": 1,
+      "halstead_difficulty": 25.28,
+      "length": 121
+    },
+    "apps/publisher/src/publisher_main.cpp::euxis::publisher::publisher_main( int argc , char * argv [ ] , std :: ostream & out , std :: ostream & err)": {
+      "ccn": 20,
+      "cognitive": 29,
+      "halstead_difficulty": 45.14,
+      "length": 60
+    },
+    "libs/a2a/src/agent_card.cpp::euxis::a2a::AgentCard::from_json( const nlohmann :: json & j)": {
+      "ccn": 8,
+      "cognitive": 12,
+      "halstead_difficulty": 30.6,
+      "length": 39
+    },
+    "libs/a2a/src/agent_card.cpp::euxis::a2a::AgentCard::from_msgpack( const std :: vector<uint8_t> & data)": {
+      "ccn": 4,
+      "cognitive": 3,
+      "halstead_difficulty": 34.76,
+      "length": 26
+    },
+    "libs/a2a/src/agent_card.cpp::euxis::a2a::AgentCard::to_msgpack() const": {
+      "ccn": 3,
+      "cognitive": 2,
+      "halstead_difficulty": 33.5,
+      "length": 21
+    },
+    "libs/a2a/src/http_transport.cpp::euxis::a2a::parse_url( const std :: string & url)": {
+      "ccn": 6,
+      "cognitive": 8,
+      "halstead_difficulty": 35.65,
+      "length": 36
+    },
+    "libs/adapters/src/registry.cpp::euxis::adapters::build_adapters( const nlohmann :: json & config , MessageHandler on_message)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 29.95,
+      "length": 63
+    },
+    "libs/adapters/src/telegram.cpp::euxis::adapters::TelegramAdapter::connect()": {
+      "ccn": 9,
+      "cognitive": 19,
+      "halstead_difficulty": 22.04,
+      "length": 36
+    },
+    "libs/attest/src/bundle.cpp::euxis::attest::bundle_from_json( const nlohmann :: json & j)": {
+      "ccn": 14,
+      "cognitive": 16,
+      "halstead_difficulty": 33.02,
+      "length": 46
+    },
+    "libs/attest/src/dsse.cpp::euxis::attest::base64_decode( std :: string_view encoded)": {
+      "ccn": 8,
+      "cognitive": 8,
+      "halstead_difficulty": 35.0,
+      "length": 24
+    },
+    "libs/attest/src/dsse.cpp::euxis::attest::base64_encode( std :: span<const std::byte> data)": {
+      "ccn": 6,
+      "cognitive": 8,
+      "halstead_difficulty": 56.7,
+      "length": 33
+    },
+    "libs/attest/src/dsse.cpp::euxis::attest::from_json( const nlohmann :: json & j)": {
+      "ccn": 14,
+      "cognitive": 20,
+      "halstead_difficulty": 36.0,
+      "length": 33
+    },
+    "libs/attest/src/signing.cpp::euxis::attest::verify_envelope( const Envelope & envelope , std :: span<const std::byte,32> public_key)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 38.08,
+      "length": 45
+    },
+    "libs/attest/src/slsa.cpp::euxis::attest::to_json( const SlsaProvenance & p)": {
+      "ccn": 9,
+      "cognitive": 11,
+      "halstead_difficulty": 30.96,
+      "length": 50
+    },
+    "libs/attest/src/statement.cpp::euxis::attest::validate( const Statement & s)": {
+      "ccn": 11,
+      "cognitive": 17,
+      "halstead_difficulty": 35.82,
+      "length": 49
+    },
+    "libs/bench/src/autonomy_bench.cpp::euxis::bench::bench_error_recovery()": {
+      "ccn": 10,
+      "cognitive": 12,
+      "halstead_difficulty": 74.71,
+      "length": 80
+    },
+    "libs/bench/src/performance_bench.cpp::euxis::bench::bench_crypto_throughput()": {
+      "ccn": 5,
+      "cognitive": 6,
+      "halstead_difficulty": 33.75,
+      "length": 53
+    },
+    "libs/bench/src/performance_bench.cpp::euxis::bench::bench_crypto_throughput_cached()": {
+      "ccn": 6,
+      "cognitive": 7,
+      "halstead_difficulty": 34.93,
+      "length": 56
+    },
+    "libs/bench/src/performance_bench.cpp::euxis::bench::bench_crypto_throughput_xchacha()": {
+      "ccn": 5,
+      "cognitive": 5,
+      "halstead_difficulty": 34.4,
+      "length": 37
+    },
+    "libs/bench/src/performance_bench.cpp::euxis::bench::bench_key_derivation_p95()": {
+      "ccn": 4,
+      "cognitive": 3,
+      "halstead_difficulty": 31.94,
+      "length": 54
+    },
+    "libs/bench/src/result_matrix.cpp::euxis::bench::BenchmarkResultMatrix::column_percentile( size_t metric_index , int pct) const": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 34.58,
+      "length": 17
+    },
+    "libs/bench/src/runner.cpp::euxis::bench::BenchmarkRunner::run_suite( const std :: string & suite)": {
+      "ccn": 5,
+      "cognitive": 8,
+      "halstead_difficulty": 38.81,
+      "length": 38
+    },
+    "libs/bench/src/security_bench.cpp::euxis::bench::bench_malicious_detection_rate()": {
+      "ccn": 4,
+      "cognitive": 6,
+      "halstead_difficulty": 24.1,
+      "length": 74
+    },
+    "libs/bridge/src/executor.cpp::euxis::bridge::SkillExecutor::spawn_direct( const std :: filesystem :: path & entrypoint , const std :: vector<std::string> & env)": {
+      "ccn": 9,
+      "cognitive": 6,
+      "halstead_difficulty": 39.03,
+      "length": 44
+    },
+    "libs/bridge/src/executor.cpp::euxis::bridge::SkillExecutor::spawn_sandboxed( const std :: filesystem :: path & entrypoint , const std :: vector<std::string> & env)": {
+      "ccn": 12,
+      "cognitive": 10,
+      "halstead_difficulty": 30.66,
+      "length": 55
+    },
+    "libs/bridge/src/executor.cpp::euxis::bridge::safe_spawn( const std :: vector<std::string> & argv , const std :: vector<std::string> & env_vars , int timeout_seconds = 60)": {
+      "ccn": 16,
+      "cognitive": 25,
+      "halstead_difficulty": 44.68,
+      "length": 96
+    },
+    "libs/bridge/src/executor.cpp::euxis::bridge::safe_spawn_posix( const std :: vector<std::string> & argv , const std :: vector<std::string> & env_vars , int timeout_seconds = 60)": {
+      "ccn": 16,
+      "cognitive": 19,
+      "halstead_difficulty": 47.28,
+      "length": 96
+    },
+    "libs/bridge/src/importer.cpp::euxis::bridge::ClawHubImporter::import_skill( const std :: filesystem :: path & skill_dir)": {
+      "ccn": 10,
+      "cognitive": 13,
+      "halstead_difficulty": 32.28,
+      "length": 59
+    },
+    "libs/bridge/src/parser.cpp::euxis::bridge::parse_frontmatter( const std :: string & content)": {
+      "ccn": 12,
+      "cognitive": 22,
+      "halstead_difficulty": 37.56,
+      "length": 53
+    },
+    "libs/bridge/src/verification.cpp::euxis::bridge::load_public_key( const std :: filesystem :: path & key_path)": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 32.65,
+      "length": 31
+    },
+    "libs/bridge/src/verification.cpp::euxis::bridge::verify_skill_signature( const std :: filesystem :: path & file_path , const std :: filesystem :: path & signature_path , const std :: array<std::byte,32> & public_key)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 35.27,
+      "length": 41
+    },
+    "libs/cache/src/json_cache.cpp::euxis::cache::JsonCache::get( const std :: filesystem :: path & file) const": {
+      "ccn": 13,
+      "cognitive": 19,
+      "halstead_difficulty": 37.25,
+      "length": 59
+    },
+    "libs/cache/src/json_cache.cpp::euxis::cache::JsonCache::open( const std :: filesystem :: path & db_path)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 32.45,
+      "length": 48
+    },
+    "libs/cache/src/store.cpp::euxis::cache::ScanCache::open( const std :: filesystem :: path & path)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 32.8,
+      "length": 53
+    },
+    "libs/cache/src/store.cpp::euxis::cache::ScanCache::put( const KeyInputs & inputs , const CacheEntry & entry)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 31.87,
+      "length": 45
+    },
+    "libs/core/src/credential_pool.cpp::euxis::core::classify_failure( int http_status , std :: string_view msg)": {
+      "ccn": 17,
+      "cognitive": 16,
+      "halstead_difficulty": 17.55,
+      "length": 34
+    },
+    "libs/core/src/credential_pool.cpp::euxis::core::contains_ci( std :: string_view hay , std :: string_view needle)": {
+      "ccn": 7,
+      "cognitive": 10,
+      "halstead_difficulty": 42.0,
+      "length": 14
+    },
+    "libs/core/src/credential_pool.cpp::euxis::core::jittered_backoff_ms( std :: size_t attempt , std :: int64_t base_ms , std :: int64_t cap_ms , std :: uint64_t seed)": {
+      "ccn": 8,
+      "cognitive": 8,
+      "halstead_difficulty": 48.46,
+      "length": 33
+    },
+    "libs/core/src/delegation.cpp::euxis::core::DelegationCoordinator::delegate_parallel( std :: vector<DelegateRequest> reqs)": {
+      "ccn": 6,
+      "cognitive": 6,
+      "halstead_difficulty": 34.62,
+      "length": 27
+    },
+    "libs/core/src/router.cpp::euxis::core::FinOpsRouter::select_provider( const std :: string & task_complexity , const std :: string & priority)": {
+      "ccn": 11,
+      "cognitive": 10,
+      "halstead_difficulty": 38.41,
+      "length": 51
+    },
+    "libs/core/src/router.cpp::euxis::core::FinOpsRouter::track_session_usage( const std :: string & session_id , const std :: string & agent_id , const std :: string & model , int input_tokens , int output_tokens)": {
+      "ccn": 8,
+      "cognitive": 8,
+      "halstead_difficulty": 38.74,
+      "length": 43
+    },
+    "libs/core/src/swarm.cpp::euxis::core::derive_ws_url( const std :: string & gateway_url)": {
+      "ccn": 7,
+      "cognitive": 9,
+      "halstead_difficulty": 32.89,
+      "length": 24
+    },
+    "libs/cpg/src/builder.cpp::euxis::cpg::build( const euxis :: parse :: Ast & ast)": {
+      "ccn": 6,
+      "cognitive": 7,
+      "halstead_difficulty": 25.85,
+      "length": 61
+    },
+    "libs/cpg/src/cfg.cpp::euxis::cpg::CfgBuilder::process_if( NodeId if_node)": {
+      "ccn": 10,
+      "cognitive": 16,
+      "halstead_difficulty": 36.0,
+      "length": 45
+    },
+    "libs/cpg/src/types.cpp::euxis::cpg::classify( euxis :: parse :: Language lang , std :: string_view raw_kind)": {
+      "ccn": 58,
+      "cognitive": 66,
+      "halstead_difficulty": 23.06,
+      "length": 84
+    },
+    "libs/cpg/src/types.cpp::euxis::cpg::classify_common( std :: string_view k)": {
+      "ccn": 37,
+      "cognitive": 17,
+      "halstead_difficulty": 10.46,
+      "length": 25
+    },
+    "libs/cpg/src/types.cpp::euxis::cpg::node_kind_str( NodeKind k)": {
+      "ccn": 16,
+      "cognitive": 1,
+      "halstead_difficulty": 10.61,
+      "length": 20
+    },
+    "libs/crypto/src/aes_gcm.cpp::euxis::crypto::decrypt( std :: span<const std::byte> ciphertext , std :: span<const std::byte,32> key , std :: span<const std::byte,12> iv)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 34.08,
+      "length": 41
+    },
+    "libs/crypto/src/aes_gcm.cpp::euxis::crypto::decrypt_aad( std :: span<const std::byte> ciphertext , std :: span<const std::byte,32> key , std :: span<const std::byte,12> iv , std :: span<const std::byte> aad)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 36.26,
+      "length": 42
+    },
+    "libs/crypto/src/aes_gcm.cpp::euxis::crypto::encrypt( std :: span<const std::byte> data , std :: span<const std::byte,32> key)": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 32.25,
+      "length": 38
+    },
+    "libs/crypto/src/aes_gcm.cpp::euxis::crypto::encrypt_aad( std :: span<const std::byte> data , std :: span<const std::byte,32> key , std :: span<const std::byte> aad)": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 34.66,
+      "length": 38
+    },
+    "libs/crypto/src/errors.cpp::euxis::crypto::to_string( CryptoError error)": {
+      "ccn": 11,
+      "cognitive": 1,
+      "halstead_difficulty": 7.92,
+      "length": 15
+    },
+    "libs/crypto/src/key_derivation.cpp::euxis::crypto::derive_key( std :: span<const std::byte> password , std :: span<const std::byte> salt , uint32_t iterations , size_t key_size)": {
+      "ccn": 14,
+      "cognitive": 17,
+      "halstead_difficulty": 42.33,
+      "length": 96
+    },
+    "libs/crypto/src/xchacha.cpp::euxis::crypto::xchacha_decrypt( std :: span<const std::byte> ciphertext , std :: span<const std::byte,32> key , std :: span<const std::byte,kXChaChaNonceBytes> nonce , std :: span<const std::byte> aad)": {
+      "ccn": 6,
+      "cognitive": 4,
+      "halstead_difficulty": 34.66,
+      "length": 24
+    },
+    "libs/crypto/src/xchacha.cpp::euxis::crypto::xchacha_encrypt( std :: span<const std::byte> data , std :: span<const std::byte,32> key , std :: span<const std::byte> aad)": {
+      "ccn": 6,
+      "cognitive": 5,
+      "halstead_difficulty": 36.41,
+      "length": 25
+    },
+    "libs/ensemble/src/providers/http_verifier.cpp::euxis::ensemble::providers::HttpVerifier::vote( const VoteRequest & req)": {
+      "ccn": 13,
+      "cognitive": 13,
+      "halstead_difficulty": 33.86,
+      "length": 57
+    },
+    "libs/ensemble/src/response.cpp::euxis::ensemble::first_json_object( std :: string_view body)": {
+      "ccn": 12,
+      "cognitive": 20,
+      "halstead_difficulty": 36.64,
+      "length": 26
+    },
+    "libs/ensemble/src/runner.cpp::euxis::ensemble::verify( std :: vector<euxis::security::Finding> findings , std :: span<const VerifierPtr> verifiers , const EnsembleConfig & config)": {
+      "ccn": 10,
+      "cognitive": 14,
+      "halstead_difficulty": 32.88,
+      "length": 42
+    },
+    "libs/inference/src/claude_streaming.cpp::euxis::inference::dispatch_event( std :: string_view payload , std :: vector<ProviderDelta> & out , std :: vector<ToolCallContext> & tool_ctx)": {
+      "ccn": 13,
+      "cognitive": 19,
+      "halstead_difficulty": 33.99,
+      "length": 56
+    },
+    "libs/inference/src/gemini_streaming.cpp::euxis::inference::dispatch_event( std :: string_view payload , std :: vector<ProviderDelta> & out)": {
+      "ccn": 14,
+      "cognitive": 18,
+      "halstead_difficulty": 34.32,
+      "length": 42
+    },
+    "libs/inference/src/llama_engine.cpp::euxis::inference::LlamaEngine::generate( std :: string_view prompt , uint32_t max_tokens)": {
+      "ccn": 11,
+      "cognitive": 12,
+      "halstead_difficulty": 29.94,
+      "length": 58
+    },
+    "libs/inference/src/openai_streaming.cpp::euxis::inference::dispatch_event( std :: string_view payload , std :: vector<ProviderDelta> & out , std :: unordered_map<int,std::pair<std::string,std::string>> & tool_ctx)": {
+      "ccn": 21,
+      "cognitive": 34,
+      "halstead_difficulty": 40.57,
+      "length": 53
+    },
+    "libs/inference/src/quality_gate.cpp::euxis::inference::QualityGate::compute_relevance( std :: string_view prompt , std :: string_view response)": {
+      "ccn": 8,
+      "cognitive": 8,
+      "halstead_difficulty": 34.79,
+      "length": 35
+    },
+    "libs/inference/src/quality_gate.cpp::euxis::inference::QualityGate::compute_repetition( std :: string_view text)": {
+      "ccn": 5,
+      "cognitive": 5,
+      "halstead_difficulty": 32.87,
+      "length": 25
+    },
+    "libs/inference/src/quality_gate.cpp::euxis::inference::split_sentences( std :: string_view text)": {
+      "ccn": 18,
+      "cognitive": 19,
+      "halstead_difficulty": 46.8,
+      "length": 35
+    },
+    "libs/metrics/src/analyzer.cpp::euxis::metrics::PerformanceAnalyzer::analyze_agent_performance( int hours_back)": {
+      "ccn": 8,
+      "cognitive": 9,
+      "halstead_difficulty": 33.96,
+      "length": 39
+    },
+    "libs/metrics/src/analyzer.cpp::euxis::metrics::PerformanceAnalyzer::analyze_delegation_patterns( int hours_back)": {
+      "ccn": 7,
+      "cognitive": 10,
+      "halstead_difficulty": 31.31,
+      "length": 38
+    },
+    "libs/metrics/src/analyzer.cpp::euxis::metrics::PerformanceAnalyzer::analyze_tool_usage_patterns( int hours_back)": {
+      "ccn": 8,
+      "cognitive": 13,
+      "halstead_difficulty": 31.42,
+      "length": 38
+    },
+    "libs/metrics/src/insights.cpp::euxis::metrics::aggregate( std :: string_view session_id , const std :: vector<UsageRecord> & records)": {
+      "ccn": 4,
+      "cognitive": 6,
+      "halstead_difficulty": 30.68,
+      "length": 28
+    },
+    "libs/metrics/src/insights.cpp::euxis::metrics::lookup_pricing( std :: string_view provider , std :: string_view model)": {
+      "ccn": 6,
+      "cognitive": 9,
+      "halstead_difficulty": 52.07,
+      "length": 24
+    },
+    "libs/metrics/src/validation_pipeline.cpp::euxis::metrics::ValidationPipeline::check_forbidden_terms( const std :: string & text)": {
+      "ccn": 3,
+      "cognitive": 3,
+      "halstead_difficulty": 35.33,
+      "length": 18
+    },
+    "libs/metrics/src/validation_pipeline.cpp::euxis::metrics::ValidationPipeline::extract_quantitative_claims( const std :: string & text)": {
+      "ccn": 5,
+      "cognitive": 9,
+      "halstead_difficulty": 32.98,
+      "length": 44
+    },
+    "libs/metrics/src/validation_pipeline.cpp::euxis::metrics::ValidationPipeline::validate_report( const std :: string & text)": {
+      "ccn": 6,
+      "cognitive": 6,
+      "halstead_difficulty": 31.57,
+      "length": 33
+    },
+    "libs/network/src/acp.cpp::euxis::network::acp::is_valid_transition( SessionState from , SessionState to)": {
+      "ccn": 14,
+      "cognitive": 6,
+      "halstead_difficulty": 36.83,
+      "length": 25
+    },
+    "libs/platform/src/execution_backend.cpp::euxis::platform::DockerBackend::execute( const ExecutionRequest & req)": {
+      "ccn": 8,
+      "cognitive": 7,
+      "halstead_difficulty": 31.77,
+      "length": 45
+    },
+    "libs/platform/src/execution_backend.cpp::euxis::platform::build_envp( const std :: vector<std::pair<std::string,std::string>> & overrides)": {
+      "ccn": 9,
+      "cognitive": 13,
+      "halstead_difficulty": 48.0,
+      "length": 23
+    },
+    "libs/platform/src/execution_backend.cpp::euxis::platform::drain_pair( int fd_out , int fd_err , std :: string & s_out , std :: string & s_err , std :: chrono :: steady_clock :: time_point deadline)": {
+      "ccn": 18,
+      "cognitive": 45,
+      "halstead_difficulty": 61.05,
+      "length": 55
+    },
+    "libs/platform/src/execution_backend.cpp::euxis::platform::run_local( const ExecutionRequest & req)": {
+      "ccn": 25,
+      "cognitive": 31,
+      "halstead_difficulty": 72.99,
+      "length": 152
+    },
+    "libs/platform/src/sys/linux/sandbox.cpp::euxis::platform::apply_seccomp( SandboxProfile profile)": {
+      "ccn": 8,
+      "cognitive": 7,
+      "halstead_difficulty": 40.51,
+      "length": 110
+    },
+    "libs/publisher/src/publisher.cpp::euxis::publisher::yaml_to_json( const DataNode auto & node)": {
+      "ccn": 9,
+      "cognitive": 14,
+      "halstead_difficulty": 34.16,
+      "length": 23
+    },
+    "libs/reach/src/callgraph.cpp::euxis::reach::build_call_graph( const euxis :: cpg :: Graph & graph , const euxis :: parse :: Ast & ast)": {
+      "ccn": 10,
+      "cognitive": 19,
+      "halstead_difficulty": 34.46,
+      "length": 61
+    },
+    "libs/reach/src/callgraph.cpp::euxis::reach::enclosing_function( const euxis :: cpg :: Graph & graph , euxis :: cpg :: NodeId node)": {
+      "ccn": 6,
+      "cognitive": 7,
+      "halstead_difficulty": 34.59,
+      "length": 19
+    },
+    "libs/reach/src/callgraph.cpp::euxis::reach::extract_function_name( const euxis :: cpg :: Graph & graph , const euxis :: parse :: Ast & ast , euxis :: cpg :: NodeId fn_id)": {
+      "ccn": 9,
+      "cognitive": 15,
+      "halstead_difficulty": 31.09,
+      "length": 33
+    },
+    "libs/reach/src/reachability.cpp::euxis::reach::annotate_findings( const Graph & graph , const ReachabilityResult & reach , const std :: vector<euxis::security::Finding> :: iterator begin , const std :: vector<euxis::security::Finding> :: iterator end)": {
+      "ccn": 10,
+      "cognitive": 17,
+      "halstead_difficulty": 41.15,
+      "length": 46
+    },
+    "libs/reach/src/reachability.cpp::euxis::reach::compute_reachable( const Graph & graph , const euxis :: parse :: Ast & , const CallGraph & cg , const ReachabilityConfig & config)": {
+      "ccn": 29,
+      "cognitive": 57,
+      "halstead_difficulty": 48.87,
+      "length": 102
+    },
+    "libs/runtime/src/config.cpp::euxis::runtime::apply_env_overrides( RuntimeConfig & config)": {
+      "ccn": 12,
+      "cognitive": 12,
+      "halstead_difficulty": 27.36,
+      "length": 21
+    },
+    "libs/runtime/src/config.cpp::euxis::runtime::get_severity( const YAML :: Node & node , const std :: string & key , Severity fallback)": {
+      "ccn": 7,
+      "cognitive": 4,
+      "halstead_difficulty": 31.2,
+      "length": 7
+    },
+    "libs/runtime/src/config.cpp::euxis::runtime::merge_into( RuntimeConfig & base , const RuntimeConfig & overlay)": {
+      "ccn": 16,
+      "cognitive": 15,
+      "halstead_difficulty": 45.26,
+      "length": 39
+    },
+    "libs/runtime/src/config.cpp::euxis::runtime::parse_rules( const YAML :: Node & node , RulesConfig & cfg)": {
+      "ccn": 14,
+      "cognitive": 21,
+      "halstead_difficulty": 31.47,
+      "length": 28
+    },
+    "libs/runtime/src/config.cpp::euxis::runtime::resolve_config( const std :: filesystem :: path & project_root , const std :: filesystem :: path & user_home)": {
+      "ccn": 10,
+      "cognitive": 20,
+      "halstead_difficulty": 35.27,
+      "length": 39
+    },
+    "libs/runtime/src/context_engine.cpp::euxis::runtime::WindowedContextEngine::plan( const std :: vector<ConversationMessage> & messages , std :: size_t estimated_tokens , std :: size_t context_window) const": {
+      "ccn": 5,
+      "cognitive": 4,
+      "halstead_difficulty": 31.5,
+      "length": 43
+    },
+    "libs/runtime/src/interaction.cpp::euxis::runtime::InteractionOrchestrator::run_supervisor_worker( const SupervisorConfig & config , const std :: string & task)": {
+      "ccn": 5,
+      "cognitive": 5,
+      "halstead_difficulty": 31.57,
+      "length": 45
+    },
+    "libs/runtime/src/interaction.cpp::euxis::runtime::InteractionOrchestrator::run_with_evaluator( const std :: string & worker_agent_id , const std :: string & task , const EvaluationGateConfig & gate)": {
+      "ccn": 6,
+      "cognitive": 11,
+      "halstead_difficulty": 34.85,
+      "length": 48
+    },
+    "libs/runtime/src/lifecycle.cpp::euxis::runtime::LifecycleManager::load_from_disk()": {
+      "ccn": 9,
+      "cognitive": 16,
+      "halstead_difficulty": 28.6,
+      "length": 42
+    },
+    "libs/runtime/src/manifesto.cpp::euxis::runtime::manifesto_from_json( const nlohmann :: json & j)": {
+      "ccn": 5,
+      "cognitive": 3,
+      "halstead_difficulty": 31.38,
+      "length": 36
+    },
+    "libs/runtime/src/platform.cpp::euxis::runtime::GenericPlatform::detect()": {
+      "ccn": 12,
+      "cognitive": 11,
+      "halstead_difficulty": 23.83,
+      "length": 45
+    },
+    "libs/runtime/src/platform.cpp::euxis::runtime::GenericPlatform::open_url( std :: string_view url) const": {
+      "ccn": 16,
+      "cognitive": 10,
+      "halstead_difficulty": 15.97,
+      "length": 18
+    },
+    "libs/runtime/src/session_store.cpp::euxis::runtime::FileSessionStore::load( const std :: string & session_id , const std :: string & branch)": {
+      "ccn": 9,
+      "cognitive": 14,
+      "halstead_difficulty": 37.98,
+      "length": 38
+    },
+    "libs/runtime/src/tool_manifest.cpp::euxis::runtime::classify_approval( const ToolDeclaration_v2 & decl , std :: string_view required_scope)": {
+      "ccn": 33,
+      "cognitive": 31,
+      "halstead_difficulty": 37.21,
+      "length": 71
+    },
+    "libs/runtime/src/tool_manifest.cpp::euxis::runtime::contains_ci( std :: string_view s , std :: string_view needle)": {
+      "ccn": 11,
+      "cognitive": 18,
+      "halstead_difficulty": 43.64,
+      "length": 16
+    },
+    "libs/runtime/src/tool_manifest.cpp::euxis::runtime::starts_with_ci( std :: string_view s , std :: string_view prefix)": {
+      "ccn": 8,
+      "cognitive": 10,
+      "halstead_difficulty": 34.63,
+      "length": 12
+    },
+    "libs/runtime/src/validator.cpp::euxis::runtime::RuntimeValidator::read_jsonl( const std :: filesystem :: path & path) const": {
+      "ccn": 7,
+      "cognitive": 9,
+      "halstead_difficulty": 32.48,
+      "length": 31
+    },
+    "libs/sbom/include/euxis/sbom/types.hpp::euxis::sbom::digest_hex_length( HashAlgorithm a)": {
+      "ccn": 11,
+      "cognitive": 1,
+      "halstead_difficulty": 9.69,
+      "length": 15
+    },
+    "libs/sbom/src/cyclonedx.cpp::euxis::sbom::component_to_json( const Component & c)": {
+      "ccn": 16,
+      "cognitive": 19,
+      "halstead_difficulty": 32.44,
+      "length": 37
+    },
+    "libs/sbom/src/purl.cpp::euxis::sbom::Purl::to_string() const": {
+      "ccn": 21,
+      "cognitive": 47,
+      "halstead_difficulty": 63.08,
+      "length": 77
+    },
+    "libs/sbom/src/purl.cpp::euxis::sbom::parse_purl( const std :: string & s)": {
+      "ccn": 22,
+      "cognitive": 35,
+      "halstead_difficulty": 83.79,
+      "length": 93
+    },
+    "libs/sbom/src/purl.cpp::euxis::sbom::percent_decode_segment( const std :: string & s)": {
+      "ccn": 6,
+      "cognitive": 8,
+      "halstead_difficulty": 42.0,
+      "length": 17
+    },
+    "libs/sbom/src/purl.cpp::euxis::sbom::purl_type_str( PurlType t)": {
+      "ccn": 14,
+      "cognitive": 1,
+      "halstead_difficulty": 10.62,
+      "length": 18
+    },
+    "libs/sbom/src/spdx.cpp::euxis::sbom::package_to_node( const Component & c)": {
+      "ccn": 12,
+      "cognitive": 14,
+      "halstead_difficulty": 26.89,
+      "length": 47
+    },
+    "libs/sbom/src/spdx.cpp::euxis::sbom::to_spdx_3_0_1( const SbomDocument & doc)": {
+      "ccn": 9,
+      "cognitive": 9,
+      "halstead_difficulty": 27.6,
+      "length": 61
+    },
+    "libs/sbom/src/types.cpp::euxis::sbom::component_type_str( ComponentType t)": {
+      "ccn": 12,
+      "cognitive": 1,
+      "halstead_difficulty": 10.64,
+      "length": 16
+    },
+    "libs/sbom/src/types.cpp::euxis::sbom::external_ref_type_str( ExternalRefType t)": {
+      "ccn": 18,
+      "cognitive": 1,
+      "halstead_difficulty": 10.59,
+      "length": 22
+    },
+    "libs/sbom/src/types.cpp::euxis::sbom::hash_alg_cyclonedx( HashAlgorithm a)": {
+      "ccn": 11,
+      "cognitive": 1,
+      "halstead_difficulty": 10.65,
+      "length": 16
+    },
+    "libs/sbom/src/types.cpp::euxis::sbom::hash_alg_spdx( HashAlgorithm a)": {
+      "ccn": 11,
+      "cognitive": 1,
+      "halstead_difficulty": 10.65,
+      "length": 16
+    },
+    "libs/sca/src/cargo_lock.cpp::euxis::sca::parse_cargo_lock( const std :: string & contents , const std :: filesystem :: path & source)": {
+      "ccn": 32,
+      "cognitive": 72,
+      "halstead_difficulty": 51.28,
+      "length": 129
+    },
+    "libs/sca/src/go_sum.cpp::euxis::sca::parse_go_sum( const std :: string & contents , const std :: filesystem :: path & source)": {
+      "ccn": 22,
+      "cognitive": 35,
+      "halstead_difficulty": 51.22,
+      "length": 92
+    },
+    "libs/sca/src/npm_lock.cpp::euxis::sca::parse_npm_lock( const std :: string & contents , const std :: filesystem :: path & source)": {
+      "ccn": 29,
+      "cognitive": 43,
+      "halstead_difficulty": 57.56,
+      "length": 107
+    },
+    "libs/sca/src/pipfile_lock.cpp::euxis::sca::absorb_section( const nlohmann :: json & section , bool dev , std :: vector<ManifestEntry> & out)": {
+      "ccn": 14,
+      "cognitive": 25,
+      "halstead_difficulty": 32.05,
+      "length": 30
+    },
+    "libs/sca/src/scanner.cpp::euxis::sca::scan_directory( const fs :: path & root , const ScanOptions & opts)": {
+      "ccn": 14,
+      "cognitive": 25,
+      "halstead_difficulty": 41.51,
+      "length": 56
+    },
+    "libs/sca/src/scanner.cpp::euxis::sca::to_sbom_document( const ScanResult & scan , const fs :: path & project_root)": {
+      "ccn": 12,
+      "cognitive": 27,
+      "halstead_difficulty": 38.67,
+      "length": 58
+    },
+    "libs/sca/tests/test_cargo_lock.cpp::euxis::sca::TEST( CargoLock , ParsesSinglePackage)": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 13.55,
+      "length": 110
+    },
+    "libs/scan/src/rule.cpp::euxis::scan::parse_language_token( std :: string_view s)": {
+      "ccn": 16,
+      "cognitive": 14,
+      "halstead_difficulty": 14.82,
+      "length": 14
+    },
+    "libs/scan/src/rule.cpp::euxis::scan::parse_owasp_token( std :: string_view s)": {
+      "ccn": 16,
+      "cognitive": 14,
+      "halstead_difficulty": 19.72,
+      "length": 28
+    },
+    "libs/scan/src/rule_loader.cpp::euxis::scan::build_pattern_from_node( const YAML :: Node & node)": {
+      "ccn": 15,
+      "cognitive": 16,
+      "halstead_difficulty": 34.56,
+      "length": 53
+    },
+    "libs/scan/src/rule_loader.cpp::euxis::scan::build_rule_pattern( const YAML :: Node & rule_node)": {
+      "ccn": 11,
+      "cognitive": 11,
+      "halstead_difficulty": 32.41,
+      "length": 30
+    },
+    "libs/scan/src/rule_loader.cpp::euxis::scan::extract_first_cwe( const YAML :: Node & metadata)": {
+      "ccn": 8,
+      "cognitive": 7,
+      "halstead_difficulty": 30.83,
+      "length": 14
+    },
+    "libs/scan/src/rule_loader.cpp::euxis::scan::extract_references( const YAML :: Node & metadata)": {
+      "ccn": 9,
+      "cognitive": 11,
+      "halstead_difficulty": 36.28,
+      "length": 18
+    },
+    "libs/scan/src/rule_loader.cpp::euxis::scan::load_rules_yaml( std :: string_view yaml , std :: string name)": {
+      "ccn": 8,
+      "cognitive": 8,
+      "halstead_difficulty": 32.62,
+      "length": 45
+    },
+    "libs/security/src/finding.cpp::euxis::security::owasp_id( OwaspCategory c)": {
+      "ccn": 12,
+      "cognitive": 1,
+      "halstead_difficulty": 11.1,
+      "length": 16
+    },
+    "libs/security/src/finding.cpp::euxis::security::owasp_label( OwaspCategory c)": {
+      "ccn": 12,
+      "cognitive": 1,
+      "halstead_difficulty": 11.1,
+      "length": 16
+    },
+    "libs/security/src/governance.cpp::euxis::security::audit_session( const std :: vector<std::string> & messages , const GovernancePolicy & policy , const std :: vector<std::string> & , const std :: string & authorization_scope)": {
+      "ccn": 13,
+      "cognitive": 19,
+      "halstead_difficulty": 30.78,
+      "length": 63
+    },
+    "libs/security/src/policy.cpp::euxis::security::SecurityPolicy::from_json( const nlohmann :: json & j)": {
+      "ccn": 11,
+      "cognitive": 10,
+      "halstead_difficulty": 27.29,
+      "length": 22
+    },
+    "libs/slopsquatting/src/guard.cpp::euxis::slopsquatting::Guard::pypi_normalise( std :: string_view s)": {
+      "ccn": 7,
+      "cognitive": 11,
+      "halstead_difficulty": 31.84,
+      "length": 23
+    },
+    "libs/slopsquatting/src/guard.cpp::euxis::slopsquatting::parse_line( std :: string line , euxis :: sbom :: PurlType & eco , std :: string & name , std :: string & nearest)": {
+      "ccn": 7,
+      "cognitive": 7,
+      "halstead_difficulty": 34.52,
+      "length": 28
+    },
+    "libs/slopsquatting/src/integration.cpp::euxis::slopsquatting::check_scan_result( const Guard & guard , const euxis :: sca :: ScanResult & scan)": {
+      "ccn": 6,
+      "cognitive": 13,
+      "halstead_difficulty": 20.37,
+      "length": 67
+    },
+    "libs/slopsquatting/src/integration.cpp::euxis::slopsquatting::stable_fingerprint( const std :: string & path , std :: string_view ecosystem , std :: string_view name)": {
+      "ccn": 3,
+      "cognitive": 4,
+      "halstead_difficulty": 30.23,
+      "length": 34
+    },
+    "libs/taint/src/analyzer.cpp::euxis::taint::bfs_from_source( const Graph & graph , NodeId source , const std :: vector<ClassificationEntry> & roles , const TaintSpec & spec , std :: vector<TaintFlow> & flows , AnalysisStats & stats)": {
+      "ccn": 16,
+      "cognitive": 35,
+      "halstead_difficulty": 39.7,
+      "length": 84
+    },
+    "libs/taint/src/analyzer.cpp::euxis::taint::classify_all( const Graph & graph , const euxis :: parse :: Ast & ast , const TaintSpec & spec , AnalysisStats & stats)": {
+      "ccn": 12,
+      "cognitive": 29,
+      "halstead_difficulty": 35.82,
+      "length": 44
+    },
+    "libs/taint/src/analyzer.cpp::euxis::taint::flows_to_findings( const AnalysisResult & result , const euxis :: cpg :: Graph & graph , const std :: string & file_path)": {
+      "ccn": 6,
+      "cognitive": 9,
+      "halstead_difficulty": 51.26,
+      "length": 65
+    },
+    "libs/taint/src/analyzer.cpp::euxis::taint::fnv1a( std :: string_view a , std :: string_view b , std :: string_view c , std :: string_view d , std :: uint32_t e)": {
+      "ccn": 3,
+      "cognitive": 3,
+      "halstead_difficulty": 31.2,
+      "length": 17
+    },
+    "libs/taint/src/builtin_specs.cpp::euxis::taint::builtin_specs()": {
+      "ccn": 1,
+      "cognitive": 0,
+      "halstead_difficulty": 20.47,
+      "length": 123
+    },
+    "libs/vulndb/src/enricher.cpp::euxis::vulndb::Enricher::enrich( const euxis :: sbom :: SbomDocument & doc) const": {
+      "ccn": 10,
+      "cognitive": 16,
+      "halstead_difficulty": 29.1,
+      "length": 42
+    },
+    "libs/vulndb/src/osv_client.cpp::euxis::vulndb::parse_response( const std :: string & body)": {
+      "ccn": 40,
+      "cognitive": 122,
+      "halstead_difficulty": 51.02,
+      "length": 97
+    },
+    "libs/vulndb/src/osv_client.cpp::euxis::vulndb::post_with_retry( const OsvClientConfig & cfg , const std :: string & body)": {
+      "ccn": 9,
+      "cognitive": 14,
+      "halstead_difficulty": 37.64,
+      "length": 38
+    }
+  },
+  "files": {
+    "apps/cli/src/auth_profile_store.cpp": 573,
+    "apps/cli/src/certification.cpp": 1147,
+    "apps/cli/src/cmd/fleet.cpp": 3276,
+    "apps/cli/src/cmd/infra.cpp": 540,
+    "apps/cli/src/cmd/knowledge.cpp": 620,
+    "apps/cli/src/cmd/lifecycle.cpp": 919,
+    "apps/cli/src/cmd/scan.cpp": 769,
+    "apps/cli/src/cmd/specialized.cpp": 1351,
+    "apps/cli/src/cmd/system.cpp": 703,
+    "apps/cli/src/provider_router.cpp": 743,
+    "apps/cli/tests/test_auth_profile_store.cpp": 543,
+    "apps/cli/tests/test_certification.cpp": 2168,
+    "apps/cli/tests/test_cmd_certify.cpp": 716,
+    "apps/cli/tests/test_cmd_fleet.cpp": 1808,
+    "apps/cli/tests/test_cmd_infra.cpp": 519,
+    "apps/cli/tests/test_cmd_knowledge.cpp": 567,
+    "apps/cli/tests/test_cmd_lifecycle.cpp": 541,
+    "apps/cli/tests/test_cmd_specialized.cpp": 684,
+    "apps/cli/tests/test_cmd_surface.cpp": 532,
+    "apps/cli/tests/test_provider_executor.cpp": 518,
+    "apps/cli/tests/test_provider_router.cpp": 1026,
+    "apps/cli/tests/test_registry_client.cpp": 718,
+    "apps/etx/tests/test_registry.cpp": 532,
+    "apps/etx/tests/test_screens.cpp": 1329,
+    "apps/etx/tests/test_widgets.cpp": 1126
+  }
+}
