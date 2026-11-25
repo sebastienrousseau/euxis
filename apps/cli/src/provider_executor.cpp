@@ -7,7 +7,9 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <sstream>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -30,6 +32,77 @@ auto ProviderExecutor::get_breaker(const std::string& provider) -> euxis::networ
     return *it->second;
 }
 
+namespace {
+
+auto canonical_provider(const std::string& provider) -> std::string {
+    return provider == "anthropic" ? std::string("claude") : provider;
+}
+
+auto capability_denies(const bridge::AgentCapabilityToken* token, const std::string& provider) -> bool {
+    if (token == nullptr) return false;
+    const auto& allowed = token->allowed_providers;
+    return std::find(allowed.begin(), allowed.end(), provider) == allowed.end();
+}
+
+auto is_known_provider(const std::string& provider) -> bool {
+    static const std::vector<std::string> known_providers = {
+        "claude", "openai", "gemini", "ollama", "opencode", "aider", "sgpt", "kiro", "mcp"
+    };
+    return std::find(known_providers.begin(), known_providers.end(), provider) != known_providers.end();
+}
+
+// CLIs that are always driven as subprocesses, whatever auth is configured.
+auto is_cli_only_provider(const std::string& provider) -> bool {
+    return provider == "opencode" || provider == "aider" || provider == "sgpt" || provider == "kiro";
+}
+
+// Mock mode for tests. Sibling env `EUXIS_TEST_MOCK_EXECUTION_FAIL`, when set
+// to non-empty, returns a failure with that string as the error so
+// failure-path tests can exercise the same call sites.
+auto mock_response(const std::string& prompt,
+                   const std::function<void(const std::string&)>& on_chunk) -> std::optional<ProviderResponse> {
+    if (std::getenv("EUXIS_TEST_MOCK_EXECUTION") == nullptr) return std::nullopt;
+    if (const char* fail = std::getenv("EUXIS_TEST_MOCK_EXECUTION_FAIL"); fail != nullptr && *fail != '\0') {
+        return ProviderResponse{false, "", fail, 1, 0.0, {}};
+    }
+    if (on_chunk) on_chunk("mocked response chunk");
+    return ProviderResponse{true, "mocked response for " + prompt, "", 0, 10.0, {}};
+}
+
+struct CliInvocation {
+    std::string binary;
+    std::vector<std::string> args;
+};
+
+auto cli_invocation(const std::string& provider, const std::string& prompt) -> std::optional<CliInvocation> {
+    if (provider == "claude") {
+        return CliInvocation{"claude", {"--model", "sonnet", "--permission-mode", "dontAsk",
+                                        "--no-session-persistence", "-p", "--", prompt}};
+    }
+    if (provider == "gemini") return CliInvocation{"gemini", {"ask", prompt}};
+    if (provider == "opencode") return CliInvocation{"opencode", {"run", prompt}};
+    if (provider == "aider") {
+        return CliInvocation{"aider", {"--message", prompt, "--no-git", "--no-auto-commits", "--light-mode"}};
+    }
+    if (provider == "sgpt") return CliInvocation{"sgpt", {prompt}};
+    if (provider == "kiro") return CliInvocation{"kiro", {"chat", prompt}};
+    return std::nullopt;
+}
+
+auto forwarded_api_keys() -> std::map<std::string, std::string> {
+    std::map<std::string, std::string> env_vars;
+    for (const char* name : {"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"}) {
+        if (const char* value = std::getenv(name)) env_vars[name] = value;
+    }
+    return env_vars;
+}
+
+auto elapsed_ms(std::chrono::steady_clock::time_point start) -> double {
+    return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+}
+
+} // namespace
+
 auto ProviderExecutor::execute(const ModelSelection& selection,
                                 const std::string& prompt,
                                 int timeout_seconds,
@@ -37,104 +110,85 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
                                 std::function<void(const std::string&)> on_chunk,
                                 const bridge::AgentCapabilityToken* capability_token) -> ProviderResponse {
     auto start = std::chrono::steady_clock::now();
-    std::string effective_provider = selection.provider;
-    if (effective_provider == "anthropic") effective_provider = "claude";
+    const std::string provider = canonical_provider(selection.provider);
 
     // Capability token enforcement — check before anything else
-    if (capability_token) {
-        auto& allowed = capability_token->allowed_providers;
-        if (std::find(allowed.begin(), allowed.end(), effective_provider) == allowed.end()) {
-            return {false, "", "provider not allowed by capability token", 1, 0.0, {}};
-        }
+    if (capability_denies(capability_token, provider)) {
+        return {false, "", "provider not allowed by capability token", 1, 0.0, {}};
     }
-
     // Known providers — validate before mock check so unknown providers always fail
-    static const std::vector<std::string> known_providers = {
-        "claude", "openai", "gemini", "ollama", "opencode", "aider", "sgpt", "kiro", "mcp"
-    };
-    bool is_known = false;
-    for (const auto& kp : known_providers) {
-        if (effective_provider == kp) { is_known = true; break; }
+    if (!is_known_provider(provider)) {
+        return {false, "", "Unknown provider: " + provider, 1, 0.0, {}};
     }
-    if (!is_known) {
-        return {false, "", "Unknown provider: " + effective_provider, 1, 0.0, {}};
-    }
-
-    // Mock mode for tests — must come AFTER provider validation.
-    // Sibling env `EUXIS_TEST_MOCK_EXECUTION_FAIL`, when set to non-empty,
-    // returns a failure with that string as the error so failure-path tests
-    // can exercise the same call sites.
-    if (std::getenv("EUXIS_TEST_MOCK_EXECUTION")) {
-        if (const char* fail = std::getenv("EUXIS_TEST_MOCK_EXECUTION_FAIL"); fail != nullptr && *fail != '\0') {
-            return {false, "", fail, 1, 0.0, {}};
-        }
-        if (on_chunk) on_chunk("mocked response chunk");
-        return {true, "mocked response for " + prompt, "", 0, 10.0, {}};
-    }
+    if (auto mocked = mock_response(prompt, on_chunk)) return *mocked;
 
     // Circuit breaker check — skip provider if circuit is open
-    if (get_breaker(effective_provider).is_open()) {
-        return {false, "", "provider circuit open: " + effective_provider, 1, 0.0, {}};
+    if (get_breaker(provider).is_open()) {
+        return {false, "", "provider circuit open: " + provider, 1, 0.0, {}};
     }
-
-    // --- MCP provider — delegate to MCP server ---
-    if (effective_provider == "mcp") {
-        McpProviderBridge mcp_bridge(data_dir_);
-        std::string server_name = selection.model;  // model field holds server name for MCP
-        auto mcp_resp = mcp_bridge.execute(server_name, "generate", {{"prompt", prompt}}, timeout_seconds);
-        auto elapsed = std::chrono::steady_clock::now() - start;
-        mcp_resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
-        return mcp_resp;
-    }
-
-    // --- PRIORITY 1: Ollama Native REST ---
-    if (effective_provider == "ollama") {
-        auto resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
-        if (resp.success) {
-            get_breaker(effective_provider).record_success();
-        } else if (resp.failure_reason.has_value()) {
-            get_breaker(effective_provider).record_failure();
-        }
-        auto elapsed = std::chrono::steady_clock::now() - start;
-        resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
-        return resp;
-    }
-
-    if (!auth.has_value()) {
-        auth = auth_store_.resolve_with_fallback(effective_provider);
-    }
-
-    bool use_cli_bridge = auth.has_value() && auth->is_oauth;
 
     ProviderResponse resp;
-    // --- META-CLI DISPATCHER ---
-    if (use_cli_bridge || effective_provider == "opencode" || effective_provider == "aider" ||
-        effective_provider == "sgpt" || effective_provider == "kiro") {
-        resp = execute_via_cli(effective_provider, selection.model, prompt, timeout_seconds, on_chunk);
-    } else if (effective_provider == "claude") {
-        resp = execute_claude(selection.model, prompt, timeout_seconds, auth, on_chunk);
+    if (provider == "mcp") {
+        // model field holds the MCP server name
+        McpProviderBridge mcp_bridge(data_dir_);
+        resp = mcp_bridge.execute(selection.model, "generate", {{"prompt", prompt}}, timeout_seconds);
+    } else if (provider == "ollama") {
+        // PRIORITY 1: Ollama native REST
+        resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
+        record_breaker(provider, resp);
     } else {
-        resp = execute_api(effective_provider, selection.model, prompt, timeout_seconds, auth, on_chunk);
+        resp = execute_authenticated(provider, selection.model, prompt, timeout_seconds, std::move(auth), on_chunk);
     }
-
-    // Circuit breaker tracking
-    if (resp.success) {
-        get_breaker(effective_provider).record_success();
-    } else if (resp.failure_reason.has_value()) {
-        get_breaker(effective_provider).record_failure();
-    }
-
-    if (auth.has_value()) {
-        if (resp.success) {
-            auth_store_.report_success(auth->profile_id);
-        } else if (resp.failure_reason.has_value()) {
-            auth_store_.report_failure(auth->profile_id, *resp.failure_reason);
-        }
-    }
-
-    auto elapsed = std::chrono::steady_clock::now() - start;
-    resp.duration_ms = std::chrono::duration<double, std::milli>(elapsed).count();
+    resp.duration_ms = elapsed_ms(start);
     return resp;
+}
+
+auto ProviderExecutor::execute_authenticated(const std::string& provider,
+                                              const std::string& model,
+                                              const std::string& prompt,
+                                              int timeout_seconds,
+                                              std::optional<ResolvedAuth> auth,
+                                              std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    if (!auth.has_value()) {
+        auth = auth_store_.resolve_with_fallback(provider);
+    }
+    auto resp = route_authenticated(provider, model, prompt, timeout_seconds, auth, std::move(on_chunk));
+    record_breaker(provider, resp);
+    report_auth(auth, resp);
+    return resp;
+}
+
+// --- META-CLI DISPATCHER ---
+auto ProviderExecutor::route_authenticated(const std::string& provider,
+                                            const std::string& model,
+                                            const std::string& prompt,
+                                            int timeout_seconds,
+                                            const std::optional<ResolvedAuth>& auth,
+                                            std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    if ((auth.has_value() && auth->is_oauth) || is_cli_only_provider(provider)) {
+        return execute_via_cli(provider, model, prompt, timeout_seconds, std::move(on_chunk));
+    }
+    if (provider == "claude") {
+        return execute_claude(model, prompt, timeout_seconds, auth, std::move(on_chunk));
+    }
+    return execute_api(provider, model, prompt, timeout_seconds, auth, std::move(on_chunk));
+}
+
+void ProviderExecutor::record_breaker(const std::string& provider, const ProviderResponse& resp) {
+    if (resp.success) {
+        get_breaker(provider).record_success();
+    } else if (resp.failure_reason.has_value()) {
+        get_breaker(provider).record_failure();
+    }
+}
+
+void ProviderExecutor::report_auth(const std::optional<ResolvedAuth>& auth, const ProviderResponse& resp) {
+    if (!auth.has_value()) return;
+    if (resp.success) {
+        auth_store_.report_success(auth->profile_id);
+    } else if (resp.failure_reason.has_value()) {
+        auth_store_.report_failure(auth->profile_id, *resp.failure_reason);
+    }
 }
 
 auto ProviderExecutor::execute_via_cli(const std::string& provider,
@@ -142,45 +196,16 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         const std::string& prompt,
                                         int timeout,
                                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    
-    std::string binary = provider;
-    std::vector<std::string> args;
-    std::map<std::string, std::string> env_vars;
-
-    if (const char* ok = std::getenv("OPENAI_API_KEY")) env_vars["OPENAI_API_KEY"] = ok;
-    if (const char* ak = std::getenv("ANTHROPIC_API_KEY")) env_vars["ANTHROPIC_API_KEY"] = ak;
-    if (const char* gk = std::getenv("GEMINI_API_KEY")) env_vars["GEMINI_API_KEY"] = gk;
-
-    // --- REFINED ARGUMENT MAPPING ---
-    if (provider == "claude") {
-        binary = "claude";
-        args = {"--model", "sonnet", "--permission-mode", "dontAsk", "--no-session-persistence", "-p", "--", prompt};
-    } else if (provider == "gemini") {
-        binary = "gemini";
-        args = {"ask", prompt};
-    } else if (provider == "opencode") {
-        binary = "opencode";
-        args = {"run", prompt};
-    } else if (provider == "aider") {
-        binary = "aider";
-        args = {"--message", prompt, "--no-git", "--no-auto-commits", "--light-mode"};
-    } else if (provider == "sgpt") {
-        binary = "sgpt";
-        args = {prompt}; 
-    } else if (provider == "kiro") {
-        binary = "kiro";
-        args = {"chat", prompt};
-    } else {
+    auto invocation = cli_invocation(provider, prompt);
+    if (!invocation) {
         return {false, "", "No CLI bridge implemented for " + provider, 1, 0.0, {}};
     }
+    const auto env_vars = forwarded_api_keys();
 
-    ProcessResult result;
     // We pivot back to direct argument passing for CLIs that don't support stdin pipes correctly.
-    if (on_chunk) {
-        result = Process::run_streaming(binary, args, "", on_chunk, timeout, env_vars);
-    } else {
-        result = Process::run(binary, args, timeout, env_vars);
-    }
+    ProcessResult result = on_chunk
+        ? Process::run_streaming(invocation->binary, invocation->args, "", on_chunk, timeout, env_vars)
+        : Process::run(invocation->binary, invocation->args, timeout, env_vars);
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
 }

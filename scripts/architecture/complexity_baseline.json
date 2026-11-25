@@ -734,12 +734,6 @@
       "halstead_difficulty": 29.31,
       "length": 23
     },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute( const ModelSelection & selection , const std :: string & prompt , int timeout_seconds , std :: optional<ResolvedAuth> auth , std :: function<void(const std::string&)> on_chunk , const bridge :: AgentCapabilityToken * capability_token)": {
-      "ccn": 29,
-      "cognitive": 32,
-      "halstead_difficulty": 55.4,
-      "length": 106
-    },
     "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_api( const std :: string & provider , const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
       "ccn": 18,
       "cognitive": 28,
@@ -757,12 +751,6 @@
       "cognitive": 26,
       "halstead_difficulty": 44.43,
       "length": 33
-    },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_via_cli( const std :: string & provider , [ [ maybe_unused ] ] const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
-      "ccn": 11,
-      "cognitive": 12,
-      "halstead_difficulty": 32.27,
-      "length": 47
     },
     "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::classify_task_class( const std :: string & task , const std :: string & agent_id , const std :: string & pillar) const": {
       "ccn": 25,

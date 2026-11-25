@@ -69,6 +69,16 @@ private:
     auto execute_claude(const std::string& model, const std::string& prompt,
                         int timeout, const std::optional<ResolvedAuth>& auth,
                         std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    auto execute_authenticated(const std::string& provider, const std::string& model,
+                               const std::string& prompt, int timeout_seconds,
+                               std::optional<ResolvedAuth> auth,
+                               std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    auto route_authenticated(const std::string& provider, const std::string& model,
+                             const std::string& prompt, int timeout_seconds,
+                             const std::optional<ResolvedAuth>& auth,
+                             std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    void record_breaker(const std::string& provider, const ProviderResponse& resp);
+    void report_auth(const std::optional<ResolvedAuth>& auth, const ProviderResponse& resp);
     auto execute_via_cli(const std::string& provider, const std::string& model,
                          const std::string& prompt, int timeout,
                          std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
