@@ -38,10 +38,14 @@ struct SigningError {
     std::string keyid)
     -> std::expected<Envelope, SigningError>;
 
-/// Verify a DSSE envelope. Decodes the base64 payload, reconstructs
-/// the PAE bytes, and checks every signature against the supplied
-/// public key. Returns success iff *at least one* signature matches
-/// — DSSE explicitly supports multi-signer envelopes.
+/// Verify a DSSE envelope. Rejects any payloadType other than the
+/// in-toto one, decodes the base64 payload, reconstructs the PAE
+/// bytes, and checks every signature against the supplied public key.
+/// Returns success iff *at least one* signature matches — DSSE
+/// explicitly supports multi-signer envelopes.
+///
+/// The caller supplies the trust root: never pass a key taken from
+/// the envelope or bundle being verified.
 ///
 /// Returns the decoded payload bytes on success so callers can
 /// parse the Statement without re-decoding.

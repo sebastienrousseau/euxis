@@ -46,50 +46,52 @@ auto sign_statement(const Statement& statement,
     return env;
 }
 
-auto verify_envelope(const Envelope& envelope,
-                     std::span<const std::byte, 32> public_key)
-    -> std::expected<std::string, SigningError> {
-    if (envelope.signatures.empty()) {
-        return std::unexpected(SigningError{
-            .message = "Envelope has no signatures",
-        });
-    }
-    auto payload_dec = base64_decode(envelope.payload);
-    if (!payload_dec) {
-        return std::unexpected(SigningError{
-            .message = "payload base64 decode: " + payload_dec.error().message,
-        });
-    }
-    auto pae_bytes = pae(envelope.payload_type,
-        std::span<const std::byte>(payload_dec->data(), payload_dec->size()));
+namespace {
 
-    bool any_ok = false;
+auto fail(std::string message) -> std::unexpected<SigningError> {
+    return std::unexpected(SigningError{.message = std::move(message)});
+}
+
+// True iff any signature in the envelope is a valid Ed25519 signature
+// over `message` by `public_key`. Malformed signatures are skipped.
+auto any_signature_matches(const Envelope& envelope, std::span<const std::byte> message,
+                           std::span<const std::byte, 32> public_key) -> bool {
     for (const auto& sig : envelope.signatures) {
         auto sig_dec = base64_decode(sig.sig);
-        if (!sig_dec) continue;
-        if (sig_dec->size() != 64) continue;
+        if (!sig_dec || sig_dec->size() != 64)
+            continue;
         std::array<std::byte, 64> sig_arr{};
-        std::memcpy(sig_arr.data(), sig_dec->data(), 64);
-        if (euxis::crypto::verify(
-                public_key,
-                std::span<const std::byte>(
-                    reinterpret_cast<const std::byte*>(pae_bytes.data()),
-                    pae_bytes.size()),
-                std::span<const std::byte, 64>(sig_arr.data(), 64))) {
-            any_ok = true;
-            break;
-        }
+        std::memcpy(sig_arr.data(), sig_dec->data(), sig_arr.size());
+        if (euxis::crypto::verify(public_key, message, sig_arr))
+            return true;
     }
-    if (!any_ok) {
-        return std::unexpected(SigningError{
-            .message = "No valid signature found for the supplied public key",
-        });
-    }
+    return false;
+}
 
-    return std::string{
-        reinterpret_cast<const char*>(payload_dec->data()),
-        payload_dec->size(),
-    };
+}  // namespace
+
+auto verify_envelope(const Envelope& envelope, std::span<const std::byte, 32> public_key)
+    -> std::expected<std::string, SigningError> {
+    // The signature binds payloadType through PAE, but a valid
+    // signature over some other type must still not be accepted as a
+    // signed in-toto Statement.
+    if (envelope.payload_type != kDsseInTotoPayloadType) {
+        return fail("Unexpected payloadType '" + envelope.payload_type + "' (want " +
+                    kDsseInTotoPayloadType + ")");
+    }
+    if (envelope.signatures.empty())
+        return fail("Envelope has no signatures");
+    auto payload = base64_decode(envelope.payload);
+    if (!payload)
+        return fail("payload base64 decode: " + payload.error().message);
+
+    const auto pae_bytes =
+        pae(envelope.payload_type, std::span<const std::byte>(payload->data(), payload->size()));
+    const auto message = std::as_bytes(std::span(pae_bytes));
+    if (!any_signature_matches(envelope, message, public_key)) {
+        return fail("No valid signature found for the supplied public key");
+    }
+    return std::string{reinterpret_cast<const char*>(payload->data()), payload->size()};
 }
 
 } // namespace euxis::attest

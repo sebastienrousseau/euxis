@@ -294,9 +294,12 @@ int cmd_attest(Context& /*ctx*/, const std::vector<std::string>& argv) {
 struct VerifyArgs {
     std::filesystem::path bundle_path;
     std::string key_arg;  // either a path or a base64-encoded raw key
+    std::filesystem::path artifact_path;  // optional: file the bundle must cover
 };
 
 namespace {
+
+using TrustedKey = std::array<std::byte, 32>;
 
 auto parse_verify_args(const std::vector<std::string>& argv)
     -> std::expected<VerifyArgs, std::string> {
@@ -304,6 +307,10 @@ auto parse_verify_args(const std::vector<std::string>& argv)
     bool bundle_set = false;
     for (const auto& s : argv) {
         if (s.starts_with("--key=")) { a.key_arg = s.substr(6); continue; }
+        if (s.starts_with("--artifact=")) {
+            a.artifact_path = s.substr(11);
+            continue;
+        }
         if (s == "--help" || s == "-h") return std::unexpected("__help__");
         if (s.starts_with("-")) return std::unexpected("Unknown flag: " + s);
         if (!bundle_set) { a.bundle_path = s; bundle_set = true; continue; }
@@ -316,90 +323,135 @@ auto parse_verify_args(const std::vector<std::string>& argv)
 }
 
 void print_verify_help() {
-    std::println("Usage: euxis verify <bundle> [--key=<path-or-base64>]");
+    std::println("Usage: euxis verify <bundle> --key=<path-or-base64> [--artifact=<path>]");
     std::println("");
-    std::println("If --key is omitted, the public key is read from the bundle's");
-    std::println("verificationMaterial.publicKey.rawBytes (if present).");
+    std::println("  --key=<path-or-base64>  Trusted Ed25519 public key of the signer");
+    std::println("                          (required). The key embedded in a bundle is");
+    std::println("                          chosen by whoever made it, so it is never used.");
+    std::println("  --artifact=<path>       Also check that this file's sha256 matches a");
+    std::println("                          subject of the signed statement.");
+    std::println("");
+    std::println("The transparency log is not checked.");
 }
 
-} // namespace
+void trim_trailing_whitespace(std::string& s) {
+    while (!s.empty() &&
+           (s.back() == '\n' || s.back() == '\r' || s.back() == ' ' || s.back() == '\t')) {
+        s.pop_back();
+    }
+}
+
+auto load_trusted_key(const std::string& key_arg) -> std::expected<TrustedKey, std::string> {
+    if (key_arg.empty()) {
+        return std::unexpected(
+            "a trusted public key is required: pass --key=<path-or-base64>. "
+            "The key embedded in a bundle is chosen by whoever made the "
+            "bundle, so it cannot prove who signed it.");
+    }
+    // A real file path is read; anything else is inline base64.
+    std::string b64 = key_arg;
+    if (std::filesystem::exists(key_arg)) {
+        auto file = read_file_bytes(key_arg);
+        if (!file)
+            return std::unexpected("read --key: " + file.error());
+        b64 = std::move(*file);
+        trim_trailing_whitespace(b64);
+    }
+    auto bytes = b64_to_bytes(b64);
+    if (!bytes || bytes->size() != 32) {
+        return std::unexpected("public key must be 32 base64-encoded Ed25519 bytes");
+    }
+    TrustedKey key{};
+    std::memcpy(key.data(), bytes->data(), key.size());
+    return key;
+}
+
+auto load_bundle(const std::filesystem::path& path)
+    -> std::expected<euxis::attest::Bundle, std::string> {
+    auto raw = read_file_bytes(path);
+    if (!raw)
+        return std::unexpected(raw.error());
+    nlohmann::json j;
+    try {
+        j = nlohmann::json::parse(*raw);
+    } catch (const nlohmann::json::parse_error& e) {
+        return std::unexpected(std::string{"bundle JSON parse: "} + e.what());
+    }
+    auto bundle = euxis::attest::bundle_from_json(j);
+    if (!bundle)
+        return std::unexpected("bundle: " + bundle.error().message);
+    return std::move(*bundle);
+}
+
+// The payload has already been signature-verified, so a parse failure
+// here means a signed but malformed statement: reject, never skip.
+auto check_artifact_digest(const std::string& payload, const std::filesystem::path& artifact)
+    -> std::expected<void, std::string> {
+    auto bytes = read_file_bytes(artifact);
+    if (!bytes)
+        return std::unexpected("read --artifact: " + bytes.error());
+    const auto want = sha256_hex(*bytes);
+    const auto stmt = nlohmann::json::parse(payload, nullptr, /*allow_exceptions=*/false);
+    if (!stmt.is_object() || !stmt.contains("subject") || !stmt["subject"].is_array()) {
+        return std::unexpected("signed statement has no subject list");
+    }
+    for (const auto& subj : stmt["subject"]) {
+        const auto& digest = subj.value("digest", nlohmann::json::object());
+        if (digest.is_object() && digest.value("sha256", "") == want)
+            return {};
+    }
+    return std::unexpected("artifact digest sha256:" + want +
+                           " does not match any subject of the signed statement");
+}
+
+void print_verified(const VerifyArgs& a, const TrustedKey& key) {
+    std::println("euxis verify: signature OK");
+    std::println("  keyid:    {}", euxis::attest::derive_keyid(key));
+    std::println("  bundle:   {}", a.bundle_path.string());
+    if (!a.artifact_path.empty()) {
+        std::println("  artifact: {} (artifact digest matches)", a.artifact_path.string());
+    }
+    std::println("  transparency log: not checked");
+}
+
+}  // namespace
 
 int cmd_verify_attest(Context& /*ctx*/, const std::vector<std::string>& argv) {
     auto parsed = parse_verify_args(argv);
+    if (!parsed && parsed.error() == "__help__") {
+        print_verify_help();
+        return to_int(ExitCode::Success);
+    }
     if (!parsed) {
-        if (parsed.error() == "__help__") {
-            print_verify_help();
-            return to_int(ExitCode::Success);
-        }
         std::println(stderr, "euxis verify: {}", parsed.error());
         return to_int(ExitCode::InfraError);
     }
     const VerifyArgs& a = *parsed;
 
-    auto raw = read_file_bytes(a.bundle_path);
-    if (!raw) {
-        std::println(stderr, "euxis verify: {}", raw.error());
+    auto key = load_trusted_key(a.key_arg);
+    if (!key) {
+        std::println(stderr, "euxis verify: {}", key.error());
         return to_int(ExitCode::InfraError);
     }
-    nlohmann::json j;
-    try {
-        j = nlohmann::json::parse(*raw);
-    } catch (const nlohmann::json::parse_error& e) {
-        std::println(stderr, "euxis verify: bundle JSON parse: {}", e.what());
-        return to_int(ExitCode::InfraError);
-    }
-    auto bundle = euxis::attest::bundle_from_json(j);
+    auto bundle = load_bundle(a.bundle_path);
     if (!bundle) {
-        std::println(stderr, "euxis verify: bundle: {}", bundle.error().message);
+        std::println(stderr, "euxis verify: {}", bundle.error());
         return to_int(ExitCode::InfraError);
     }
 
-    // Resolve the public key: explicit --key wins, else the bundle's
-    // own rawBytes hint.
-    std::string pubkey_b64;
-    if (!a.key_arg.empty()) {
-        // If the value is a real file path, read it; otherwise treat
-        // as inline base64.
-        if (std::filesystem::exists(a.key_arg)) {
-            auto file = read_file_bytes(a.key_arg);
-            if (!file) {
-                std::println(stderr, "euxis verify: read --key: {}", file.error());
-                return to_int(ExitCode::InfraError);
-            }
-            pubkey_b64 = *file;
-            while (!pubkey_b64.empty() &&
-                   (pubkey_b64.back() == '\n' || pubkey_b64.back() == '\r' ||
-                    pubkey_b64.back() == ' '  || pubkey_b64.back() == '\t')) {
-                pubkey_b64.pop_back();
-            }
-        } else {
-            pubkey_b64 = a.key_arg;
-        }
-    } else {
-        pubkey_b64 = bundle->public_key.raw_b64;
-    }
-    if (pubkey_b64.empty()) {
-        std::println(stderr,
-            "euxis verify: no public key (use --key or include rawBytes in the bundle)");
-        return to_int(ExitCode::InfraError);
-    }
-    auto pub_bytes = b64_to_bytes(pubkey_b64);
-    if (!pub_bytes || pub_bytes->size() != 32) {
-        std::println(stderr,
-            "euxis verify: public key must be 32 base64-encoded Ed25519 bytes");
-        return to_int(ExitCode::InfraError);
-    }
-
-    auto verified = euxis::attest::verify_envelope(
-        bundle->dsse_envelope,
-        std::span<const std::byte, 32>(pub_bytes->data(), 32));
-    if (!verified) {
-        std::println(stderr, "euxis verify: {}", verified.error().message);
+    auto payload = euxis::attest::verify_envelope(bundle->dsse_envelope, *key);
+    if (!payload) {
+        std::println(stderr, "euxis verify: {}", payload.error().message);
         return to_int(ExitCode::PolicyViolation);
     }
-    std::println("euxis verify: signature OK");
-    std::println("  keyid:    {}", bundle->public_key.hint);
-    std::println("  bundle:   {}", a.bundle_path.string());
+    if (!a.artifact_path.empty()) {
+        if (auto ok = check_artifact_digest(*payload, a.artifact_path); !ok) {
+            std::println(stderr, "euxis verify: {}", ok.error());
+            return to_int(ExitCode::PolicyViolation);
+        }
+    }
+
+    print_verified(a, *key);
     return to_int(ExitCode::Success);
 }
 

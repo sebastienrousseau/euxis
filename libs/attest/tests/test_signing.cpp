@@ -56,6 +56,31 @@ TEST(Signing, VerifyFailsWithWrongKey) {
     EXPECT_FALSE(verified.has_value());
 }
 
+TEST(Signing, VerifyRejectsNonInTotoPayloadType) {
+    // A validly signed envelope whose payloadType is not in-toto must
+    // not verify: the signature would otherwise vouch for a payload the
+    // caller then parses as a Statement.
+    auto kp = euxis::crypto::generate_keypair();
+    const std::string payload = R"({"not":"a statement"})";
+    const std::string other_type = "text/plain";
+    auto pae_bytes = pae(other_type, payload);
+    auto sig = euxis::crypto::sign(
+        kp.secret_key, std::span<const std::byte>(
+                           reinterpret_cast<const std::byte*>(pae_bytes.data()), pae_bytes.size()));
+
+    Envelope env;
+    env.payload_type = other_type;
+    env.payload = base64_encode(payload);
+    env.signatures.push_back(Signature{
+        .keyid = derive_keyid(kp.public_key),
+        .sig = base64_encode(std::span<const std::byte>(sig.data(), sig.size())),
+    });
+
+    auto verified = verify_envelope(env, kp.public_key);
+    ASSERT_FALSE(verified.has_value());
+    EXPECT_NE(verified.error().message.find("payloadType"), std::string::npos);
+}
+
 TEST(Signing, VerifyFailsWhenPayloadTampered) {
     auto kp = euxis::crypto::generate_keypair();
     auto stmt = make_test_statement();
