@@ -34,7 +34,7 @@ using euxis::cli::i18n::tr;
 
 namespace {
 
-constexpr auto kVersion = "v0.0.16";
+constexpr auto kVersion = "v0.0.17";
 
 } // namespace
 

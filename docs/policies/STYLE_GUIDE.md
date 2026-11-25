@@ -111,7 +111,7 @@ def check_status():
 
 ```json
 {
-  "version": "v0.0.16",
+  "version": "v0.0.17",
   "status": "healthy"
 }
 ```
@@ -201,7 +201,7 @@ When demonstrating commands, show both the command and its expected output. This
 $ euxis health --json
 {
   "status": "healthy",
-  "version": "v0.0.16",
+  "version": "v0.0.17",
   "agents": {
     "orchestrator": "running",
     "analyzer": "running",

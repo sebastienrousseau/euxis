@@ -271,4 +271,4 @@ export GEMINI_API_KEY="..."
 
 ---
 
-*Euxis v0.0.16*
+*Euxis v0.0.17*
