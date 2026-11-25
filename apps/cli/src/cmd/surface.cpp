@@ -1,21 +1,23 @@
 #include "euxis/cli/cmd/surface.hpp"
+
 #include "euxis/cli/cmd/fleet.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/terminal.hpp"
-
-#include <algorithm>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <print>
-
-#include <nlohmann/json.hpp>
-
 #include "euxis/sbom/openvex.hpp"
 #include "euxis/sca/scanner.hpp"
 #include "euxis/vulndb/enricher.hpp"
 #include "euxis/vulndb/osv_client.hpp"
+
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <print>
+#include <string_view>
 
 using euxis::cli::i18n::tr;
 
@@ -32,36 +34,33 @@ struct ParsedArgs {
     std::vector<std::string> passthrough;
 };
 
+// Flags forwarded to the playbook verbatim, without a value.
+constexpr std::array<std::string_view, 4> kPassthroughSwitches{"--ci", "--json", "--fix",
+                                                               "--run-verifiers"};
+
 auto parse_common(const std::vector<std::string>& args,
                   const std::vector<std::string>& skip_flags = {}) -> ParsedArgs {
     ParsedArgs result;
+    auto& out = result.passthrough;
     for (size_t i = 0; i < args.size(); ++i) {
-        // Skip mode-like flags handled by caller
-        bool skip = false;
-        for (const auto& sf : skip_flags) {
-            if (args[i] == sf) { skip = true; break; }
-        }
-        if (skip) continue;
-
-        if (args[i] == "--policy") {
-            result.passthrough.push_back("--policy");
-            if (i + 1 < args.size() && !args[i + 1].starts_with("--")) {
-                result.passthrough.push_back(args[++i]);
-            }
-        } else if (args[i] == "--ci") {
-            result.passthrough.push_back("--ci");
-        } else if (args[i] == "--json") {
-            result.passthrough.push_back("--json");
-        } else if (args[i] == "--format" && i + 1 < args.size()) {
-            result.passthrough.push_back("--format");
-            result.passthrough.push_back(args[++i]);
-        } else if (args[i] == "--fix") {
-            result.passthrough.push_back("--fix");
-        } else if (args[i] == "--help" || args[i] == "-h") {
-            // Handled per-command
-            result.passthrough.push_back("--help");
-        } else if (!args[i].starts_with("--") && result.target.empty()) {
-            result.target = args[i];
+        const auto& a = args[i];
+        // Mode-like flags are handled by the caller.
+        if (std::ranges::find(skip_flags, a) != skip_flags.end())
+            continue;
+        const bool has_next = i + 1 < args.size();
+        if (std::ranges::find(kPassthroughSwitches, a) != kPassthroughSwitches.end()) {
+            out.push_back(a);
+        } else if (a == "--help" || a == "-h") {
+            out.push_back("--help");  // handled per command
+        } else if (a == "--policy") {
+            out.push_back(a);
+            if (has_next && !args[i + 1].starts_with("--"))
+                out.push_back(args[++i]);
+        } else if (a == "--format" && has_next) {
+            out.push_back(a);
+            out.push_back(args[++i]);
+        } else if (!a.starts_with("--") && result.target.empty()) {
+            result.target = a;
         }
     }
     return result;
@@ -125,12 +124,20 @@ int cmd_check(Context& ctx, const std::vector<std::string>& args) {
                       << tr("Usage:") << "\n"
                       << "  euxis check [target] [options]\n\n"
                       << tr("Options:") << "\n"
-                      << "  --triage          " << tr("Run fast triage instead of standard verification") << "\n"
+                      << "  --triage          "
+                      << tr("Run fast triage instead of standard verification") << "\n"
                       << "  --standard        " << tr("Force standard mode (default)") << "\n"
-                      << "  --forensic        " << tr("Run the most exhaustive verification") << "\n"
-                      << "  --enrich          " << tr("Cross-reference SBOM components against OSV.dev and write euxis-vex.openvex.json") << "\n"
+                      << "  --forensic        " << tr("Run the most exhaustive verification")
+                      << "\n"
+                      << "  --enrich          "
+                      << tr("Cross-reference SBOM components against OSV.dev and write "
+                            "euxis-vex.openvex.json")
+                      << "\n"
                       << "  --policy [path]   " << tr("Apply policy evaluation") << "\n"
                       << "  --ci              " << tr("Emit CI-safe output") << "\n"
+                      << "  --run-verifiers   "
+                      << tr("Run the repository's own build/test commands (executes its code)")
+                      << "\n"
                       << "  --json            " << tr("Emit artifact JSON to stdout") << "\n"
                       << "  --format sarif    " << tr("Emit SARIF v2.1.0 output") << "\n"
                       << "  --fix             " << tr("Request autofix suggestions") << "\n";
@@ -167,6 +174,9 @@ int cmd_triage(Context& ctx, const std::vector<std::string>& args) {
                       << tr("Options:") << "\n"
                       << "  --policy [path]   " << tr("Apply policy evaluation") << "\n"
                       << "  --ci              " << tr("Emit CI-safe output") << "\n"
+                      << "  --run-verifiers   "
+                      << tr("Run the repository's own build/test commands (executes its code)")
+                      << "\n"
                       << "  --json            " << tr("Emit artifact JSON to stdout") << "\n";
             return 0;
         }
@@ -190,6 +200,9 @@ int cmd_review(Context& ctx, const std::vector<std::string>& args) {
                       << "  --forensic        " << tr("Run forensic verification") << "\n"
                       << "  --policy [path]   " << tr("Apply policy evaluation") << "\n"
                       << "  --ci              " << tr("Emit CI-safe output") << "\n"
+                      << "  --run-verifiers   "
+                      << tr("Run the repository's own build/test commands (executes its code)")
+                      << "\n"
                       << "  --json            " << tr("Emit artifact JSON to stdout") << "\n";
             return 0;
         }
