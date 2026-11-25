@@ -7,6 +7,7 @@
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/playbook_verify.hpp"
 #include "euxis/cli/process.hpp"
+#include "euxis/cli/provider_status.hpp"
 #include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/provider_router.hpp"
 #include "euxis/cli/registry_client.hpp"
@@ -1418,20 +1419,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- SYSTEM INITIALIZATION PROBE ---
     tui << "\n" << term::bold(term::cyan("  === SYSTEM INITIALIZATION ===")) << "\n";
     auto check_auth = [&](const std::string& provider, const std::string& reauth_cmd) {
-        auto auth = executor.auth_store().resolve_with_fallback(provider);
-        bool has_key = (provider == "openai" && std::getenv("OPENAI_API_KEY")) ||
-                       (provider == "claude" && std::getenv("ANTHROPIC_API_KEY")) ||
-                       (provider == "gemini" && std::getenv("GEMINI_API_KEY"));
-        
-        if (has_key) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::green("(Native API Key Active)") << "\n";
-        } else if (auth && !auth->token.empty()) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::blue("(OAuth Session Active)") << "\n";
-        } else if (Process::available(provider)) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Binary found, CLI auth preserved)") << "\n";
-        } else {
-            tui << "    " << term::icon_warn() << " " << provider << " " << term::dim("(Not Configured -> ") << term::yellow(reauth_cmd) << term::dim(")") << "\n";
-        }
+        print_provider_auth(tui, provider, provider_auth_kind(executor.auth_store(), provider), reauth_cmd);
     };
     check_auth("claude", "claude login");
     check_auth("gemini", "gemini login");

@@ -273,10 +273,10 @@
       "length": 33
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_playbook( Context & ctx , const std :: vector<std::string> & args)": {
-      "ccn": 409,
-      "cognitive": 793,
-      "halstead_difficulty": 115.96,
-      "length": 1503
+      "ccn": 400,
+      "cognitive": 783,
+      "halstead_difficulty": 115.68,
+      "length": 1490
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_squad( Context & ctx , const std :: vector<std::string> & args)": {
       "ccn": 28,
@@ -739,12 +739,6 @@
       "cognitive": 28,
       "halstead_difficulty": 41.9,
       "length": 44
-    },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_claude( const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
-      "ccn": 19,
-      "cognitive": 53,
-      "halstead_difficulty": 50.42,
-      "length": 58
     },
     "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_ollama( const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
       "ccn": 13,
@@ -2220,7 +2214,7 @@
   "files": {
     "apps/cli/src/auth_profile_store.cpp": 573,
     "apps/cli/src/certification.cpp": 1147,
-    "apps/cli/src/cmd/fleet.cpp": 3217,
+    "apps/cli/src/cmd/fleet.cpp": 3205,
     "apps/cli/src/cmd/infra.cpp": 540,
     "apps/cli/src/cmd/knowledge.cpp": 620,
     "apps/cli/src/cmd/lifecycle.cpp": 919,
@@ -2237,7 +2231,6 @@
     "apps/cli/tests/test_cmd_lifecycle.cpp": 541,
     "apps/cli/tests/test_cmd_specialized.cpp": 684,
     "apps/cli/tests/test_cmd_surface.cpp": 532,
-    "apps/cli/tests/test_provider_executor.cpp": 518,
     "apps/cli/tests/test_provider_router.cpp": 1026,
     "apps/cli/tests/test_registry_client.cpp": 718,
     "apps/etx/tests/test_registry.cpp": 532,

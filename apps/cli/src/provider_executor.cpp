@@ -74,10 +74,15 @@ struct CliInvocation {
     std::vector<std::string> args;
 };
 
+// euxis never authenticates to Anthropic itself: the claude provider runs the
+// user's Claude Code CLI, which uses its own logged-in session (the Keychain on
+// macOS, ~/.claude on Linux). `env -u` removes any Anthropic key from the
+// child's environment, so the CLI cannot fall back to one.
 auto cli_invocation(const std::string& provider, const std::string& prompt) -> std::optional<CliInvocation> {
     if (provider == "claude") {
-        return CliInvocation{"claude", {"--model", "sonnet", "--permission-mode", "dontAsk",
-                                        "--no-session-persistence", "-p", "--", prompt}};
+        return CliInvocation{"env", {"-u", "ANTHROPIC_API_KEY", "-u", "ANTHROPIC_AUTH_TOKEN", "claude",
+                                     "--model", "sonnet", "--permission-mode", "dontAsk",
+                                     "--no-session-persistence", "-p", "--", prompt}};
     }
     if (provider == "gemini") return CliInvocation{"gemini", {"ask", prompt}};
     if (provider == "opencode") return CliInvocation{"opencode", {"run", prompt}};
@@ -91,11 +96,15 @@ auto cli_invocation(const std::string& provider, const std::string& prompt) -> s
 
 auto forwarded_api_keys() -> std::map<std::string, std::string> {
     std::map<std::string, std::string> env_vars;
-    for (const char* name : {"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"}) {
+    for (const char* name : {"OPENAI_API_KEY", "GEMINI_API_KEY"}) {
         if (const char* value = std::getenv(name)) env_vars[name] = value;
     }
     return env_vars;
 }
+
+constexpr const char* kClaudeCliMissing =
+    "Claude Code CLI not found on PATH. euxis runs the claude provider through your "
+    "Claude Code login, never an API key: install Claude Code and run `claude` once to log in.";
 
 auto elapsed_ms(std::chrono::steady_clock::time_point start) -> double {
     return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
@@ -132,6 +141,9 @@ auto ProviderExecutor::execute(const ModelSelection& selection,
         // model field holds the MCP server name
         McpProviderBridge mcp_bridge(data_dir_);
         resp = mcp_bridge.execute(selection.model, "generate", {{"prompt", prompt}}, timeout_seconds);
+    } else if (provider == "claude") {
+        resp = execute_claude_session(selection.model, prompt, timeout_seconds, on_chunk);
+        record_breaker(provider, resp);
     } else if (provider == "ollama") {
         // PRIORITY 1: Ollama native REST
         resp = execute_ollama(selection.model, prompt, timeout_seconds, on_chunk);
@@ -168,9 +180,6 @@ auto ProviderExecutor::route_authenticated(const std::string& provider,
     if ((auth.has_value() && auth->is_oauth) || is_cli_only_provider(provider)) {
         return execute_via_cli(provider, model, prompt, timeout_seconds, std::move(on_chunk));
     }
-    if (provider == "claude") {
-        return execute_claude(model, prompt, timeout_seconds, auth, std::move(on_chunk));
-    }
     return execute_api(provider, model, prompt, timeout_seconds, auth, std::move(on_chunk));
 }
 
@@ -191,6 +200,17 @@ void ProviderExecutor::report_auth(const std::optional<ResolvedAuth>& auth, cons
     }
 }
 
+// The user's Claude Code session, never an API key or a stored auth profile.
+auto ProviderExecutor::execute_claude_session(const std::string& model,
+                                               const std::string& prompt,
+                                               int timeout,
+                                               std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
+    if (!Process::available("claude")) {
+        return {false, "", kClaudeCliMissing, 1, 0.0, {}};
+    }
+    return execute_via_cli("claude", model, prompt, timeout, std::move(on_chunk));
+}
+
 auto ProviderExecutor::execute_via_cli(const std::string& provider,
                                         [[maybe_unused]] const std::string& model,
                                         const std::string& prompt,
@@ -208,23 +228,6 @@ auto ProviderExecutor::execute_via_cli(const std::string& provider,
         : Process::run(invocation->binary, invocation->args, timeout, env_vars);
 
     return {result.exit_code == 0, result.stdout_output, result.stderr_output, result.exit_code, 0.0, {}};
-}
-
-auto ProviderExecutor::resolve_anthropic_token() -> std::string {
-    const char* api_key = std::getenv("ANTHROPIC_API_KEY");
-    if (api_key && api_key[0]) return api_key;
-    const char* home = std::getenv("HOME");
-    if (!home) return {};
-    auto creds_path = std::filesystem::path(home) / ".claude" / ".credentials.json";
-    if (!std::filesystem::exists(creds_path)) return {};
-    try {
-        std::ifstream f(creds_path);
-        auto creds = nlohmann::json::parse(f);
-        if (creds.contains("claudeAiOauth")) {
-            return creds["claudeAiOauth"].value("accessToken", "");
-        }
-    } catch (const std::exception& e) { spdlog::debug("credential parse: {}", e.what()); }
-    return {};
 }
 
 auto ProviderExecutor::classify_error(int http_status, const std::string& body) -> std::optional<CooldownReason> {
@@ -249,65 +252,6 @@ auto ProviderExecutor::classify_error(int http_status, const std::string& body) 
         return CooldownReason::RateLimit;
     }
     return std::nullopt;
-}
-
-auto ProviderExecutor::execute_claude(const std::string& model,
-                                       const std::string& prompt,
-                                       int timeout,
-                                       const std::optional<ResolvedAuth>& auth,
-                                       std::function<void(const std::string&)> on_chunk) -> ProviderResponse {
-    std::string token = auth.has_value() ? auth->token : resolve_anthropic_token();
-    if (token.empty()) return {false, "", "No Anthropic auth found.", 1, 0.0, {}};
-
-    std::string m = model.empty() ? "claude-sonnet-4-6" : model;
-    nlohmann::json body;
-    body["model"] = m;
-    body["max_tokens"] = 4096;
-    body["messages"] = nlohmann::json::array({{{"role", "user"}, {"content", prompt}}});
-    std::string auth_header = "x-api-key: " + token;
-
-    if (on_chunk) {
-        body["stream"] = true;
-        std::string sse_buffer;  // Per-stream buffer — NOT static (was race condition)
-        auto sse_parser = [&](const std::string& chunk) {
-            sse_buffer += chunk;
-            size_t pos = 0;
-            while (pos < sse_buffer.size()) {
-                auto nl = sse_buffer.find('\n', pos);
-                if (nl == std::string::npos) break;
-                std::string line = sse_buffer.substr(pos, nl - pos);
-                pos = nl + 1;
-                if (line.starts_with("data: ")) {
-                    std::string data = line.substr(6);
-                    if (data == "[DONE]") continue;
-                    try {
-                        auto j = nlohmann::json::parse(data);
-                        if (j.value("type", "") == "content_block_delta") {
-                            std::string text = j["delta"].value("text", "");
-                            if (!text.empty()) on_chunk(text);
-                        }
-                    } catch (const std::exception& e) { spdlog::debug("SSE parse: {}", e.what()); }
-                }
-            }
-            sse_buffer = sse_buffer.substr(pos);
-        };
-        auto result = Process::run_streaming("curl", {"-s", "-S", "-N", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, "", sse_parser, timeout);
-        return {result.exit_code == 0, "Stream complete", "", 0, 0.0, {}};
-    } else {
-        auto result = Process::run("curl", {"-s", "-S", "-w", "\n%{http_code}", "https://api.anthropic.com/v1/messages", "-H", "Content-Type: application/json", "-H", "anthropic-version: 2023-06-01", "-H", auth_header, "-d", body.dump()}, timeout);
-        if (result.exit_code != 0) return {false, "", "curl failed", result.exit_code, 0.0, {}};
-        std::string output = result.stdout_output;
-        int status = 0;
-        auto last_nl = output.rfind('\n');
-        if (last_nl != std::string::npos) { try { status = std::stoi(output.substr(last_nl + 1)); } catch (const std::exception&) { /* swallowed: best-effort path */ (void)0; } output = output.substr(0, last_nl); }
-        try {
-            auto j = nlohmann::json::parse(output);
-            if (j.contains("error")) return {false, "", "Anthropic API: " + j["error"].dump(), 1, 0.0, classify_error(status, output)};
-            std::string content;
-            for (const auto& b : j["content"]) if (b.contains("text")) content += b["text"].get<std::string>();
-            return {true, content, "", 0, 0.0, {}};
-        } catch (const std::exception& e) { return {false, output, "JSON parse error", 1, 0.0, {}}; }
-    }
 }
 
 auto ProviderExecutor::execute_ollama(const std::string& model,
