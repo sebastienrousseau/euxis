@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Release notes follow the standards**: the release workflow titles each release `euxis <version>` (v0.0.15 and v0.0.16 were titled with the bare tag) and composes its notes with `scripts/release/compose_notes.py`: hand-written highlights from `.github/releases/<tag>.md`, then What's Changed, Checksums of every attached asset and the Full Changelog link. Publishing fails if a piece is missing. The notes of v0.0.12, v0.0.14, v0.0.15 and v0.0.16 were rebuilt the same way
 - **Version**: Bumped to v0.0.18 across CMakeLists.txt, engine, lifecycle, TUI, data configs, man page and docs
 
+### Fixed
+- **Coverage builds count atomically**: tests run code on several threads, and gcov's plain counter increments raced, so gcovr aborted on a negative hit count (`libs/core/src/delegation.cpp:32` on CI) and the Coverage Floor job failed on main. Coverage builds now compile with `-fprofile-update=atomic`
+
 ## [0.0.17] - 2026-11-26
 
 Covers every release after 0.0.9 up to 0.0.17 (v0.0.10 to v0.0.16 were tagged without their own sections here).

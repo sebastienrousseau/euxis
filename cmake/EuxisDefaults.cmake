@@ -113,7 +113,10 @@ endif()
 
 # Coverage support (opt-in via -DEUXIS_COVERAGE=ON)
 if(EUXIS_COVERAGE)
-  add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
+  # -fprofile-update=atomic: tests run code on several threads, and plain
+  # counter increments race, so gcov can report negative hit counts that
+  # make gcovr abort (GCC bug 68080).
+  add_compile_options(--coverage -fprofile-arcs -ftest-coverage -fprofile-update=atomic)
   add_link_options(--coverage)
 endif()
 
