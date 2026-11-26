@@ -89,7 +89,7 @@
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::collect_evidence( const fs :: path & target , const std :: vector<GateResult> & gates , const QualityRisk & qr)": {
       "ccn": 26,
       "cognitive": 32,
-      "halstead_difficulty": 38.84,
+      "halstead_difficulty": 37.5,
       "length": 141
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::evaluate_domains( std :: vector<DomainDefinition> & definitions , const std :: vector<Evidence> & evidence)": {
@@ -117,21 +117,21 @@
       "length": 51
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_docs_accuracy( const fs :: path & target , const std :: vector<std::string> & known_commands)": {
-      "ccn": 28,
-      "cognitive": 58,
-      "halstead_difficulty": 52.52,
-      "length": 89
+      "ccn": 24,
+      "cognitive": 43,
+      "halstead_difficulty": 49.92,
+      "length": 84
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_security_critical( const fs :: path & target)": {
       "ccn": 28,
       "cognitive": 37,
-      "halstead_difficulty": 40.14,
+      "halstead_difficulty": 38.65,
       "length": 91
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::gate_unit_test_health( const fs :: path & target)": {
-      "ccn": 43,
-      "cognitive": 89,
-      "halstead_difficulty": 67.72,
+      "ccn": 41,
+      "cognitive": 87,
+      "halstead_difficulty": 66.32,
       "length": 147
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::run_certification( Context & , const std :: filesystem :: path & target , const RunOptions & opts)": {
@@ -2207,7 +2207,7 @@
   },
   "files": {
     "apps/cli/src/auth_profile_store.cpp": 573,
-    "apps/cli/src/certification.cpp": 1147,
+    "apps/cli/src/certification.cpp": 1143,
     "apps/cli/src/cmd/fleet.cpp": 3205,
     "apps/cli/src/cmd/infra.cpp": 540,
     "apps/cli/src/cmd/knowledge.cpp": 620,

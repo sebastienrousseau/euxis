@@ -5,6 +5,7 @@
 #include "euxis/cli/certification.hpp"
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,12 @@ namespace fs = std::filesystem;
 auto check_file(const fs::path& root, const std::string& path) -> bool;
 auto full_path(const fs::path& root, const std::string& path) -> std::string;
 auto read_file_content(const fs::path& path) -> std::string;
+// The real path of `p` (relative to `root`, or absolute) when it is a
+// regular file that resolves inside `root`. A symlink out of the target,
+// a device or a FIFO yields nullopt: certification never reads those.
+auto resolve_target_file(const fs::path& root, const fs::path& p) -> std::optional<fs::path>;
+auto read_target_file(const fs::path& root, const fs::path& p) -> std::string;
+auto is_target_executable(const fs::path& root, const fs::path& p) -> bool;
 
 // Gates
 auto gate_commit_signing(const fs::path& target, int window,
