@@ -39,6 +39,7 @@ add_library(euxis-cli-lib STATIC
   src/cmd/vulndb.cpp
   src/agent_mcp_context.cpp
   src/certification.cpp
+  src/certification_fs.cpp
   src/playbook_schema.cpp
   src/sarif.cpp
   src/autofix.cpp

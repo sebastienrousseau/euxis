@@ -43,6 +43,69 @@ TEST(SecurityTest, QualityRiskDoesNotFollowSymlinkOutOfTarget) {
 }
 
 // =====================================================================
+//  Hostile repo — certification reads and runs only files inside target
+// =====================================================================
+namespace cert = certification::detail;
+
+class CertConfinementTest : public ::testing::Test {
+   protected:
+    std::filesystem::path base_ =
+        std::filesystem::temp_directory_path() / ("euxis_cert_conf_" + std::to_string(::getpid()));
+    std::filesystem::path target_ = base_ / "target";
+    std::filesystem::path outside_ = base_ / "outside";
+
+    void SetUp() override {
+        std::filesystem::create_directories(target_ / "docs");
+        std::filesystem::create_directories(outside_);
+    }
+    void TearDown() override { std::filesystem::remove_all(base_); }
+    void write(const std::filesystem::path& p, const std::string& text) {
+        std::ofstream(p) << text;
+    }
+};
+
+TEST_F(CertConfinementTest, ResolvesOnlyRegularFilesInsideTarget) {
+    write(target_ / "a.md", "in");
+    write(outside_ / "secret", "out");
+    std::filesystem::create_symlink(target_ / "a.md", target_ / "in_link.md");
+    std::filesystem::create_symlink(outside_ / "secret", target_ / "out_link");
+    std::filesystem::create_symlink("/dev/zero", target_ / "dev_link");
+    EXPECT_EQ(cert::read_target_file(target_, "a.md"), "in");
+    EXPECT_EQ(cert::read_target_file(target_, "in_link.md"), "in");
+    EXPECT_FALSE(cert::resolve_target_file(target_, "out_link"));
+    EXPECT_FALSE(cert::resolve_target_file(target_, "../outside/secret"));
+    EXPECT_FALSE(cert::resolve_target_file(target_, outside_ / "secret"));
+    EXPECT_FALSE(cert::resolve_target_file(target_, "dev_link"));
+    EXPECT_FALSE(cert::resolve_target_file(target_, "docs"));
+}
+
+TEST_F(CertConfinementTest, DocsGateIgnoresReadmeLinkedOutside) {
+    write(outside_ / "README.md", "Run `euxis scan` now\n");
+    std::filesystem::create_symlink(outside_ / "README.md", target_ / "README.md");
+    auto g = cert::gate_docs_accuracy(target_, {"scan"});
+    EXPECT_TRUE(g.data["checked_surfaces"].empty()) << g.data.dump();
+}
+
+TEST_F(CertConfinementTest, DocsGateIgnoresDocsLinkedOutside) {
+    write(target_ / "README.md", "Run `euxis scan` now\n");
+    write(outside_ / "x.md", "euxis bogus\n");
+    std::filesystem::create_symlink(outside_ / "x.md", target_ / "docs" / "x.md");
+    auto g = cert::gate_docs_accuracy(target_, {"scan"});
+    EXPECT_EQ(g.data["stale_examples"], 0) << g.data.dump();
+}
+
+TEST_F(CertConfinementTest, TestGateDoesNotRunBinaryLinkedOutside) {
+    const auto marker = base_ / "ran";
+    write(target_ / "CMakeLists.txt", "project(x)\n");
+    std::filesystem::create_directories(target_ / "build");
+    write(outside_ / "tests", "#!/bin/sh\ntouch '" + marker.string() + "'\n");
+    std::filesystem::permissions(outside_ / "tests", std::filesystem::perms::owner_all);
+    std::filesystem::create_symlink(outside_ / "tests", target_ / "build" / "tests");
+    (void)cert::gate_unit_test_health(target_);
+    EXPECT_FALSE(std::filesystem::exists(marker));
+}
+
+// =====================================================================
 //  S3 — Audit log permissions
 // =====================================================================
 TEST(SecurityTest, AuditLogPermissions) {
