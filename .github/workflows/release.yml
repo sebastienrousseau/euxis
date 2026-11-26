@@ -302,6 +302,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # compose_notes.py needs the tags and history
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -336,12 +338,26 @@ jobs:
         id: title
         run: echo "name=euxis ${EUXIS_VERSION#v}" >> "$GITHUB_OUTPUT"
 
+      # Highlights come from .github/releases/<tag>.md at the tag; the
+      # script adds What's Changed, Checksums and the Full Changelog link,
+      # and fails (so nothing is published) when a piece is missing.
+      - name: Release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The same globs as `files:` below: every attached asset.
+          (cd dist && sha256sum -- *.tar.gz *.tar.gz.sha256 *.cosign.bundle SHA256SUMS) \
+            > release-sums.txt
+          python3 scripts/release/compose_notes.py "$EUXIS_VERSION" \
+            --sums release-sums.txt > release-notes.md
+          cat release-notes.md
+
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.EUXIS_VERSION }}
           name: ${{ steps.title.outputs.name }}
-          generate_release_notes: true
+          body_path: release-notes.md
           # `dist/*.deb` and `dist/*.rpm` are intentionally absent: the
           # linux-packages job is decoupled from publish (see PR #106).
           # The .tar.gz / .sha256 / cosign bundles + Docker image are the
