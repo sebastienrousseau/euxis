@@ -329,10 +329,18 @@ jobs:
             --bundle dist/SHA256SUMS.cosign.bundle \
             dist/SHA256SUMS
 
+      # The release title is "euxis <version>" without the tag's leading
+      # "v" (standards: Key Release Invariants). Left unset, GitHub titles
+      # the release with the bare tag, as v0.0.15 and v0.0.16 were.
+      - name: Release title
+        id: title
+        run: echo "name=euxis ${EUXIS_VERSION#v}" >> "$GITHUB_OUTPUT"
+
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.EUXIS_VERSION }}
+          name: ${{ steps.title.outputs.name }}
           generate_release_notes: true
           # `dist/*.deb` and `dist/*.rpm` are intentionally absent: the
           # linux-packages job is decoupled from publish (see PR #106).
