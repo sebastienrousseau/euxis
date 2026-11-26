@@ -471,6 +471,14 @@ auto gate_security_critical(const fs::path& target) -> GateResult {
 //  QUALITY RISK ANALYSIS (not a gate — feeds into domains)
 // =====================================================================
 
+static auto not_own_code(const fs::path& p) -> bool {
+    const auto s = p.string();
+    for (const char* dir : {".git", "node_modules", "vendor", "cmake-build", "build/"})
+        if (s.find(dir) != std::string::npos)
+            return true;
+    return false;
+}
+
 auto analyze_quality_risk(const fs::path& target) -> QualityRisk {
     QualityRisk qr;
     qr.status = "pass";
@@ -483,20 +491,12 @@ auto analyze_quality_risk(const fs::path& target) -> QualityRisk {
     try {
         for (const auto& entry : fs::recursive_directory_iterator(
                  target, fs::directory_options::skip_permission_denied)) {
-            if (!entry.is_regular_file()) continue;
-            auto path_str = entry.path().string();
-            if (path_str.find(".git") != std::string::npos) continue;
-            if (path_str.find("node_modules") != std::string::npos) continue;
-            if (path_str.find("vendor") != std::string::npos) continue;
-            if (path_str.find("cmake-build") != std::string::npos) continue;
-            if (path_str.find("build/") != std::string::npos) continue;
+            if (!fs::is_regular_file(entry.symlink_status()) || not_own_code(entry.path()))
+                continue;  // a symlink can point outside the target: never follow one
 
-            auto ext = entry.path().extension().string();
-            bool is_source = false;
-            for (const auto& se : source_extensions) {
-                if (ext == se) { is_source = true; break; }
-            }
-            if (!is_source) continue;
+            if (std::ranges::find(source_extensions, entry.path().extension().string()) ==
+                source_extensions.end())
+                continue;
 
             // Count lines
             try {

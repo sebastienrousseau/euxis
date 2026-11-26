@@ -264,6 +264,29 @@ TEST_F(ScanCmdTest, RulePackScanFindsKnownPythonEvalPattern) {
     ASSERT_FALSE(sarif["runs"].empty());
 }
 
+TEST_F(ScanCmdTest, SymlinkToFileOutsideTargetIsNotScanned) {
+    // A hostile repo can link to files outside itself (~/.ssh/id_*,
+    // ~/.aws/credentials): their content must never be read into
+    // findings, caches or prompts.
+    const auto outside = fs::path(tmpdir.string() + "_outside");
+    fs::create_directories(outside);
+    std::ofstream{outside / "danger.py"} << "result = eval(user_input)\n";
+    fs::create_symlink(outside / "danger.py", tmpdir / "link.py");
+    write_rules_yaml();
+    auto argv = base_argv();
+    argv.push_back("--rules=" + rules_path.string());
+    argv.push_back("--no-taint");
+    argv.push_back("--no-reach");
+    (void)cmd_scan(ctx, argv);
+
+    std::error_code ec;
+    fs::remove_all(outside, ec);
+    ASSERT_TRUE(fs::exists(sarif_path));
+    std::ifstream f(sarif_path);
+    auto sarif = nlohmann::json::parse(f);
+    EXPECT_TRUE(sarif["runs"][0]["results"].empty()) << sarif["runs"][0]["results"].dump(2);
+}
+
 TEST_F(ScanCmdTest, NoSarifFlagSuppressesSarifFile) {
     write_python_fixture();
     write_rules_yaml();

@@ -35,6 +35,44 @@ auto dispatch(const fs::path& p)
     return std::nullopt;
 }
 
+using Dispatched = std::expected<ParsedManifest, ParseError>;
+
+void record(ScanResult& sr, Dispatched&& disp) {
+    if (disp)
+        sr.manifests.push_back(std::move(*disp));
+    else
+        sr.errors.push_back(std::move(disp).error());
+}
+
+auto scan_single_file(const fs::path& file) -> std::expected<ScanResult, ParseError> {
+    auto disp = dispatch(file);
+    if (!disp) {
+        return std::unexpected(ParseError{
+            .message = "Target is not a recognised lockfile",
+            .file = file,
+        });
+    }
+    ScanResult sr;
+    record(sr, std::move(*disp));
+    return sr;
+}
+
+// True when the iterator's current entry is a file to parse. Excluded
+// directories are pruned here; symlinks are never followed, as one can
+// point outside the tree (~/.ssh, ~/.aws).
+auto wants_entry(fs::recursive_directory_iterator& it, const fs::path& root,
+                 const ScanOptions& opts, std::error_code& ec) -> bool {
+    if (it->is_symlink(ec))
+        return false;
+    const bool skip = should_skip(it->path().lexically_relative(root), opts);
+    if (it->is_directory(ec)) {
+        if (skip)
+            it.disable_recursion_pending();
+        return false;
+    }
+    return !skip;
+}
+
 } // namespace
 
 auto scan_directory(const fs::path& root, const ScanOptions& opts)
@@ -45,22 +83,9 @@ auto scan_directory(const fs::path& root, const ScanOptions& opts)
             .file = root,
         });
     }
-    if (!fs::is_directory(root)) {
-        // Single file path; dispatch directly.
-        ScanResult sr;
-        auto disp = dispatch(root);
-        if (!disp) {
-            return std::unexpected(ParseError{
-                .message = "Target is not a recognised lockfile",
-                .file = root,
-            });
-        }
-        if (*disp) sr.manifests.push_back(std::move(**disp));
-        else       sr.errors.push_back(disp->error());
-        return sr;
-    }
+    if (!fs::is_directory(root))
+        return scan_single_file(root);
 
-    ScanResult sr;
     std::error_code ec;
     fs::recursive_directory_iterator it(
         root, fs::directory_options::skip_permission_denied, ec);
@@ -70,27 +95,18 @@ auto scan_directory(const fs::path& root, const ScanOptions& opts)
             .file = root,
         });
     }
-    fs::recursive_directory_iterator end;
 
+    ScanResult sr;
     std::size_t count = 0;
-    for (; it != end; it.increment(ec)) {
+    for (; it != fs::recursive_directory_iterator{}; it.increment(ec)) {
         if (ec) { ec.clear(); continue; }
-        if (it->is_directory(ec)) {
-            if (should_skip(it->path().lexically_relative(root), opts)) {
-                it.disable_recursion_pending();
-            }
+        if (!wants_entry(it, root, opts, ec))
             continue;
-        }
-        if (should_skip(it->path().lexically_relative(root), opts)) continue;
-
         auto disp = dispatch(it->path());
         if (!disp) continue;
-        if (*disp) sr.manifests.push_back(std::move(**disp));
-        else       sr.errors.push_back(disp->error());
-
+        record(sr, std::move(*disp));
         if (++count >= opts.max_files) break;
     }
-
     return sr;
 }
 
