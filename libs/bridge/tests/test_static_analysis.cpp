@@ -83,6 +83,22 @@ TEST_F(StaticAnalysisTest, AnalyzeDirectory) {
     EXPECT_FALSE(report.findings.empty());
 }
 
+TEST_F(StaticAnalysisTest, AnalyzeDirectoryDoesNotFollowSymlinkOut) {
+    // A skill directory can link to a file outside itself: never read it.
+    const auto outside = tmp_dir_.string() + "_outside";
+    std::filesystem::create_directories(outside);
+    std::ofstream(std::filesystem::path(outside) / "danger.js") << "eval('code');\n";
+    std::filesystem::create_symlink(std::filesystem::path(outside) / "danger.js",
+                                    tmp_dir_ / "link.js");
+
+    SkillStaticAnalyzer analyzer;
+    auto report = analyzer.analyze_directory(tmp_dir_);
+    std::filesystem::remove_all(outside);
+
+    EXPECT_EQ(report.scanned_files, 0u);
+    EXPECT_TRUE(report.findings.empty());
+}
+
 TEST_F(StaticAnalysisTest, AnalyzeCleanDirectory) {
     write_file("a.js", "const x = 1;\n");
     write_file("b.py", "x = 1\n");

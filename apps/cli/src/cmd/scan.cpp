@@ -549,8 +549,8 @@ auto collect_target_files(const ScanArgs& args)
             if (it->is_directory(ec)) it.disable_recursion_pending();
             continue;
         }
-        if (!it->is_regular_file(ec)) continue;
-        files.push_back(it->path());
+        if (fs::is_regular_file(it->symlink_status(ec)))  // never follow links out
+            files.push_back(it->path());
     }
     return files;
 }

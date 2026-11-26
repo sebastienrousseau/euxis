@@ -123,7 +123,9 @@ auto SkillStaticAnalyzer::analyze_directory(const std::filesystem::path& dir)
 
     for (const auto& entry :
          std::filesystem::recursive_directory_iterator(dir)) {
-        if (!entry.is_regular_file()) continue;
+        // Never follow a symlink: it can point outside `dir`.
+        if (!std::filesystem::is_regular_file(entry.symlink_status()))
+            continue;
         if (!is_analyzable(entry.path())) continue;
 
         ++report.scanned_files;

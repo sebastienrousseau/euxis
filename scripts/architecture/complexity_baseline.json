@@ -81,10 +81,10 @@
       "length": 50
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::analyze_quality_risk( const fs :: path & target)": {
-      "ccn": 16,
-      "cognitive": 29,
-      "halstead_difficulty": 36.4,
-      "length": 53
+      "ccn": 10,
+      "cognitive": 15,
+      "halstead_difficulty": 30.84,
+      "length": 45
     },
     "apps/cli/src/certification.cpp::euxis::cli::certification::detail::collect_evidence( const fs :: path & target , const std :: vector<GateResult> & gates , const QualityRisk & qr)": {
       "ccn": 26,
@@ -479,7 +479,7 @@
     "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::collect_target_files( const ScanArgs & args)": {
       "ccn": 10,
       "cognitive": 15,
-      "halstead_difficulty": 33.82,
+      "halstead_difficulty": 33.57,
       "length": 36
     },
     "apps/cli/src/cmd/scan.cpp::euxis::cli::cmd::deserialize_findings( const std :: string & json_str)": {
@@ -2095,12 +2095,6 @@
       "cognitive": 25,
       "halstead_difficulty": 32.05,
       "length": 30
-    },
-    "libs/sca/src/scanner.cpp::euxis::sca::scan_directory( const fs :: path & root , const ScanOptions & opts)": {
-      "ccn": 14,
-      "cognitive": 25,
-      "halstead_difficulty": 41.51,
-      "length": 56
     },
     "libs/sca/src/scanner.cpp::euxis::sca::to_sbom_document( const ScanResult & scan , const fs :: path & project_root)": {
       "ccn": 12,

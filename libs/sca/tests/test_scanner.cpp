@@ -52,6 +52,21 @@ source = "registry+x"
     EXPECT_EQ(res->manifests.size(), 2U);
 }
 
+TEST(Scanner, DoesNotFollowSymlinkedLockfileOutOfTheTree) {
+    TmpDir dir;
+    TmpDir outside;
+    write(outside.path / "Cargo.lock", R"toml(
+[[package]]
+name = "serde"
+version = "1.0.197"
+source = "registry+x"
+)toml");
+    fs::create_symlink(outside.path / "Cargo.lock", dir.path / "Cargo.lock");
+    auto res = scan_directory(dir.path);
+    ASSERT_TRUE(res.has_value()) << res.error().message;
+    EXPECT_TRUE(res->manifests.empty());
+}
+
 TEST(Scanner, SkipsIgnoredDirectories) {
     TmpDir dir;
     write(dir.path / "node_modules" / "Cargo.lock", R"toml(

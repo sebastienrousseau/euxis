@@ -1,6 +1,5 @@
-#include <gtest/gtest.h>
-
 #include "euxis/cli/autofix.hpp"
+#include "euxis/cli/certification_detail.hpp"
 #include "euxis/cli/lang_detect.hpp"
 #include "euxis/cli/lsp_bridge.hpp"
 #include "euxis/cli/pii_filter.hpp"
@@ -8,8 +7,11 @@
 
 #include <euxis/bridge/policy.hpp>
 
+#include <gtest/gtest.h>
+
 #include <filesystem>
 #include <fstream>
+#include <unistd.h>
 
 namespace euxis::cli {
 namespace {
@@ -18,6 +20,27 @@ namespace {
 //  S1 — SSE buffer is per-stream (compile-time verified by code review)
 //  No runtime test needed — the fix removes `static` keyword.
 // =====================================================================
+
+// =====================================================================
+//  Hostile repo — quality-risk scan never follows a symlink out of target
+// =====================================================================
+TEST(SecurityTest, QualityRiskDoesNotFollowSymlinkOutOfTarget) {
+    namespace fs = std::filesystem;
+    const auto base = fs::temp_directory_path() / ("euxis_qr_link_" + std::to_string(::getpid()));
+    fs::create_directories(base / "target");
+    fs::create_directories(base / "outside");
+    {
+        std::ofstream f(base / "outside" / "huge.cpp");
+        for (int i = 0; i < 2000; ++i)
+            f << "// line\n";
+    }
+    fs::create_symlink(base / "outside" / "huge.cpp", base / "target" / "link.cpp");
+    auto qr = certification::detail::analyze_quality_risk(base / "target");
+    fs::remove_all(base);
+    EXPECT_EQ(qr.status, "pass");
+    EXPECT_TRUE(qr.high_complexity_files.empty());
+    EXPECT_EQ(qr.data["files_scanned"], 0);
+}
 
 // =====================================================================
 //  S3 — Audit log permissions
