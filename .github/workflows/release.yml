@@ -338,6 +338,16 @@ jobs:
         id: title
         run: echo "name=euxis ${EUXIS_VERSION#v}" >> "$GITHUB_OUTPUT"
 
+      # Blocking: annotated, signed, "euxis <tag>", on main, and every
+      # version carrier current (standards: Release Preflight Is
+      # Blocking). The signature is cryptographically verified by the
+      # local tag script; CI has no allowed-signers file, so it checks
+      # that one is present.
+      - name: Release preflight
+        run: |
+          git fetch --force origin "refs/tags/${EUXIS_VERSION}:refs/tags/${EUXIS_VERSION}"
+          python3 scripts/release/preflight.py "$EUXIS_VERSION"
+
       # Highlights come from .github/releases/<tag>.md at the tag; the
       # script adds What's Changed, Checksums and the Full Changelog link,
       # and fails (so nothing is published) when a piece is missing.

@@ -16,13 +16,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(os.environ.get("EUXIS_REPO") or Path(__file__).resolve().parents[2])
 REPO = "sebastienrousseau/euxis"
 OWNER = REPO.split("/", maxsplit=1)[0]
 TAG = re.compile(r"^v\d+\.\d+\.\d+$")
