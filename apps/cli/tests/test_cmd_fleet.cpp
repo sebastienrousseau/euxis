@@ -1306,7 +1306,7 @@ TEST_F(FleetCmdTest, UnloadableProjectConfigIsReportedBeforeDetection) {
     std::stringstream err;
     auto* old_cout = std::cout.rdbuf(out.rdbuf());
     auto* old_cerr = std::cerr.rdbuf(err.rdbuf());
-    cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    cmd_playbook(ctx_, {path, "--ci", "--mode", "standard", "--run-verifiers"});
     std::cerr.rdbuf(old_cerr);
     std::cout.rdbuf(old_cout);
     fs::current_path(saved_cwd);
@@ -1336,7 +1336,7 @@ TEST_F(FleetCmdTest, BuildVerifierFailedNotTrusted) {
 
     std::stringstream buffer;
     auto* old_cout = std::cout.rdbuf(buffer.rdbuf());
-    auto code = cmd_playbook(ctx_, {path, "--ci", "--mode", "standard"});
+    auto code = cmd_playbook(ctx_, {path, "--ci", "--mode", "standard", "--run-verifiers"});
     std::cout.rdbuf(old_cout);
     fs::current_path(saved_cwd);
 

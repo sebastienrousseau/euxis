@@ -360,7 +360,7 @@ TEST(DocTest, ManPageExists) {
         std::ifstream f(man_path);
         std::string content((std::istreambuf_iterator<char>(f)),
                             std::istreambuf_iterator<char>());
-        EXPECT_NE(content.find("v0.0.16"), std::string::npos);
+        EXPECT_NE(content.find("v0.0.17"), std::string::npos);
         EXPECT_NE(content.find("certify"), std::string::npos);
         EXPECT_NE(content.find("system"), std::string::npos);
     }

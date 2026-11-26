@@ -26,13 +26,16 @@ namespace euxis::cli::cmd {
 /// uses it for the signing step. Useful for first-run.
 int cmd_attest(Context& ctx, const std::vector<std::string>& args);
 
-/// `euxis verify <bundle> --key=<path-or-pubkey-b64>`
+/// `euxis verify <bundle> --key=<path-or-pubkey-b64> [--artifact=<path>]`
 ///
 /// Validates the bundle structure, decodes the DSSE envelope,
 /// reconstructs the PAE bytes, and verifies the signature against
-/// the supplied public key. Returns Success (0) on a fully-valid
-/// bundle, PolicyViolation (4) on signature mismatch, InfraError
-/// (1) on malformed input.
+/// the trusted public key given with `--key` (required: the key
+/// embedded in the bundle is never used). With `--artifact`, also
+/// checks the file's sha256 against the signed statement's subjects.
+/// Returns Success (0) on a fully-valid bundle, PolicyViolation (4)
+/// on a signature, payloadType or digest mismatch, InfraError (1) on
+/// malformed input or a missing key. Does not check a transparency log.
 int cmd_verify_attest(Context& ctx, const std::vector<std::string>& args);
 
 } // namespace euxis::cli::cmd

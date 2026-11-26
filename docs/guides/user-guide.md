@@ -2,7 +2,7 @@
 
 **Enterprise Unified eXecution Intelligence System**
 
-Version v0.0.16
+Version v0.0.17
 
 ## Getting Started
 
@@ -322,4 +322,4 @@ euxis health                                # Fleet integrity
 
 ---
 
-Euxis v0.0.16 · [euxis.co](https://euxis.co)
+Euxis v0.0.17 · [euxis.co](https://euxis.co)

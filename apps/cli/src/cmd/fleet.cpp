@@ -1,32 +1,34 @@
 #include "euxis/cli/cmd/fleet.hpp"
+
+#include "euxis/bridge/provenance.hpp"
 #include "euxis/cli/agent_mcp_context.hpp"
+#include "euxis/cli/claim_verifiers.hpp"
 #include "euxis/cli/config_loader.hpp"
 #include "euxis/cli/i18n.hpp"
-#include "euxis/cli/process.hpp"
-#include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/playbook_verify.hpp"
+#include "euxis/cli/process.hpp"
+#include "euxis/cli/provider_status.hpp"
+#include "euxis/cli/provider_executor.hpp"
 #include "euxis/cli/provider_router.hpp"
 #include "euxis/cli/registry_client.hpp"
 #include "euxis/cli/session.hpp"
 #include "euxis/cli/terminal.hpp"
-#include "euxis/bridge/provenance.hpp"
 #include "euxis/runtime/config.hpp"
-
-#include <unistd.h>
 
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <condition_variable>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
-#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <sstream>
 #include <thread>
 #include <tuple>
+#include <unistd.h>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -507,104 +509,6 @@ auto compute_verdict_trend(const std::vector<VerdictHistoryEntry>& history,
     }
 
     return trend;
-}
-
-// =====================================================================
-//  CLAIM VERIFICATION ENGINE — Upgrade inferred claims to execution-backed
-// =====================================================================
-
-struct VerificationResult {
-    std::string check_name;
-    std::string command;
-    bool success{false};
-    double duration_ms{0.0};
-    int claims_upgraded{0};
-    std::string output_summary;
-};
-
-auto detect_project_verifiers(const std::string& repo_root) -> std::vector<std::pair<std::string, std::vector<std::string>>> {
-    std::vector<std::pair<std::string, std::vector<std::string>>> verifiers;
-
-    // A project's own `verify:` commands (.euxis.yaml) replace detection: a
-    // detected `npm test` can be a suite far longer than the agent budget.
-    const fs::path root = repo_root.empty() ? fs::current_path() : fs::path(repo_root);
-    if (auto cfg = euxis::runtime::resolve_config(root, {}); !cfg) {
-        // A config that does not load must not pass for "no verify list".
-        std::cerr << "euxis: " << cfg.error().file.string() << ": " << cfg.error().message
-                  << "; detecting verify commands instead\n";
-    } else if (!cfg->verify.commands.empty()) {
-        for (const auto& vc : cfg->verify.commands) verifiers.emplace_back(vc.name, vc.command);
-        return verifiers;
-    }
-
-    // Detect project type from the repo being analyzed (use repo root, not cwd)
-    auto check_file = [&repo_root](const std::string& path) {
-        if (repo_root.empty()) return fs::exists(path);
-        return fs::exists(fs::path(repo_root) / path);
-    };
-
-    // Rust
-    if (check_file("Cargo.toml")) {
-        verifiers.push_back({"cargo-check", {"cargo", "check", "--quiet"}});
-        verifiers.push_back({"cargo-test", {"cargo", "test", "--quiet", "--no-fail-fast"}});
-    }
-    // Node.js
-    if (check_file("package.json")) {
-        if (check_file("node_modules/.bin/jest")) verifiers.push_back({"jest", {"npx", "jest", "--passWithNoTests", "--silent"}});
-        else if (check_file("node_modules/.bin/vitest")) verifiers.push_back({"vitest", {"npx", "vitest", "run", "--reporter=verbose"}});
-        else verifiers.push_back({"npm-test", {"npm", "test", "--if-present"}});
-    }
-    // Go
-    if (check_file("go.mod")) {
-        verifiers.push_back({"go-vet", {"go", "vet", "./..."}});
-        verifiers.push_back({"go-test", {"go", "test", "-count=1", "-short", "./..."}});
-    }
-    // Python
-    if (check_file("pyproject.toml") || check_file("setup.py") || check_file("requirements.txt")) {
-        if (check_file("pytest.ini") || check_file("pyproject.toml")) verifiers.push_back({"pytest", {"python", "-m", "pytest", "-q", "--tb=no"}});
-    }
-    // C/C++ with CMake
-    if (check_file("CMakeLists.txt")) {
-        // Don't re-run our own build — look for a build dir
-        if (check_file("build/Makefile") || check_file("cmake-build/Makefile")) {
-            auto build_dir = check_file("cmake-build/Makefile") ? "cmake-build" : "build";
-            verifiers.push_back({"cmake-build", {"cmake", "--build", build_dir, "--target", "all"}});
-        }
-    }
-    // Generic: check for Makefile
-    if (verifiers.empty() && check_file("Makefile")) {
-        verifiers.push_back({"make-check", {"make", "check"}});
-    }
-
-    return verifiers;
-}
-
-auto run_claim_verifiers(const std::vector<std::pair<std::string, std::vector<std::string>>>& verifiers,
-                         int timeout_per_check = 60) -> std::vector<VerificationResult> {
-    std::vector<VerificationResult> results;
-    for (const auto& [name, cmd] : verifiers) {
-        if (cmd.empty()) continue;
-        auto start = std::chrono::steady_clock::now();
-        std::vector<std::string> args(cmd.begin() + 1, cmd.end());
-        auto proc = Process::run(cmd[0], args, timeout_per_check);
-        auto elapsed = std::chrono::steady_clock::now() - start;
-        double dur = std::chrono::duration<double, std::milli>(elapsed).count();
-
-        // Summarize output (first 3 lines)
-        std::string summary;
-        std::istringstream ss(proc.success() ? proc.stdout_output : proc.stderr_output);
-        std::string line;
-        int line_count = 0;
-        while (std::getline(ss, line) && line_count < 3) {
-            if (!line.empty()) { summary += line + " "; line_count++; }
-        }
-
-        results.push_back({name, cmd[0] + " " + (args.empty() ? "" : args[0]),
-                           proc.success(), dur,
-                           proc.success() ? 3 : 0, // Each successful check upgrades ~3 inferred claims
-                           summary});
-    }
-    return results;
 }
 
 // =====================================================================
@@ -1211,6 +1115,107 @@ auto to_playbook_evidence(const std::vector<AgentEvidence>& src) -> std::vector<
 
 // --- playbook ---
 
+struct PlaybookFlags {
+    std::string mode = "flash";
+    std::string goal = "Audit and improve the codebase";
+    bool ci_mode = false;
+    bool human_approve = false;
+    std::string policy_path;
+    bool policy_flag = false;
+    bool run_verifiers = false;  // opt-in: run the scanned repo's build/test commands
+};
+
+// Applies a value-less playbook switch; false when `a` is not one.
+auto apply_playbook_switch(PlaybookFlags& f, const std::string& a) -> bool {
+    if (a == "--ci")
+        f.ci_mode = true;
+    else if (a == "--human-approve")
+        f.human_approve = true;
+    else if (a == "--run-verifiers")
+        f.run_verifiers = true;
+    else
+        return false;
+    return true;
+}
+
+// Applies a flag that takes a value; true when it consumed `next`.
+// `--policy` alone is valid and keeps the default policy path.
+auto apply_value_flag(PlaybookFlags& f, const std::string& a, const std::string* next) -> bool {
+    if (a == "--mode" && next != nullptr) {
+        f.mode = *next;
+        return true;
+    }
+    if (a != "--policy")
+        return false;
+    f.policy_flag = true;
+    if (next == nullptr || next->starts_with("--"))
+        return false;
+    f.policy_path = *next;
+    return true;
+}
+
+// Applies args[i], and its value when it takes one; returns the next index.
+auto apply_playbook_flag(PlaybookFlags& f, const std::vector<std::string>& args, size_t i)
+    -> size_t {
+    const auto& a = args[i];
+    if (apply_playbook_switch(f, a))
+        return i + 1;
+    const std::string* next = i + 1 < args.size() ? &args[i + 1] : nullptr;
+    if (apply_value_flag(f, a, next))
+        return i + 2;
+    if (!a.starts_with("--"))
+        f.goal = a;
+    return i + 1;
+}
+
+auto parse_playbook_flags(const std::vector<std::string>& args) -> PlaybookFlags {
+    PlaybookFlags f;
+    for (size_t i = 1; i < args.size();)
+        i = apply_playbook_flag(f, args, i);
+    return f;
+}
+
+// Move upgraded claims from inferred to execution-backed, spread across agents.
+void upgrade_evidence(std::vector<AgentEvidence>& evidence_log, int claims_upgraded) {
+    if (claims_upgraded <= 0)
+        return;
+    int per_agent = std::max(1, claims_upgraded / (int)evidence_log.size());
+    for (auto& ev : evidence_log) {
+        int upgrade = std::min(per_agent, ev.inferred);
+        ev.execution_backed += upgrade;
+        ev.inferred -= upgrade;
+    }
+}
+
+// Back agent claims with the scanned repo's own checks (opt-in, see
+// claims::run_claim_verification) and fold the results into the evidence.
+auto verify_claims(std::vector<AgentEvidence>& evidence_log, int timeout_s, bool enabled,
+                   std::ostream& tui) -> claims::ClaimVerification {
+    if (evidence_log.empty())
+        return {};
+    auto cv = claims::run_claim_verification(timeout_s, enabled, tui);
+    upgrade_evidence(evidence_log, cv.claims_upgraded);
+    for (const auto& vr : cv.results) {
+        std::string pillar = claims::verifier_pillar(vr.check_name);
+        if (pillar.empty())
+            continue;
+        const int claims = vr.claims_upgraded;
+        std::string status = vr.success ? "PASS" : "FAILED";
+        evidence_log.push_back({"claim-verifier/" + vr.check_name,
+                                "claim-verifier",
+                                status,
+                                pillar,
+                                vr.duration_ms,
+                                vr.success ? claims : 0,
+                                0,
+                                std::max(1, claims),
+                                {},
+                                false,
+                                status});
+    }
+    return cv;
+}
+
 int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     if (args.empty()) {
         std::cerr << tr("Usage: euxis playbook <manifest.json> [goal] [--mode flash|standard|forensic] [--ci] [--stats] [--compare] [--check-baseline]") << "\n";
@@ -1380,24 +1385,9 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
         return (flash_rc != 0 || standard_rc != 0) ? 1 : 0;
     }
 
-    std::string mode = "flash";
-    std::string goal = "Audit and improve the codebase";
     std::string manifest_name = args[0];
-    bool ci_mode = false;
-    bool human_approve = false;
-    std::string policy_path;
-    bool policy_flag = false;
-
-    for (size_t i = 1; i < args.size(); ++i) {
-        if (args[i] == "--mode" && i + 1 < args.size()) { mode = args[++i]; }
-        else if (args[i] == "--ci") { ci_mode = true; }
-        else if (args[i] == "--human-approve") { human_approve = true; }
-        else if (args[i] == "--policy") {
-            policy_flag = true;
-            if (i + 1 < args.size() && !args[i + 1].starts_with("--")) policy_path = args[++i];
-        }
-        else if (!args[i].starts_with("--")) { goal = args[i]; }
-    }
+    auto flags = parse_playbook_flags(args);
+    auto& [mode, goal, ci_mode, human_approve, policy_path, policy_flag, run_verifiers] = flags;
 
     // Auto-detect CI environment
     if (!ci_mode) {
@@ -1429,20 +1419,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- SYSTEM INITIALIZATION PROBE ---
     tui << "\n" << term::bold(term::cyan("  === SYSTEM INITIALIZATION ===")) << "\n";
     auto check_auth = [&](const std::string& provider, const std::string& reauth_cmd) {
-        auto auth = executor.auth_store().resolve_with_fallback(provider);
-        bool has_key = (provider == "openai" && std::getenv("OPENAI_API_KEY")) ||
-                       (provider == "claude" && std::getenv("ANTHROPIC_API_KEY")) ||
-                       (provider == "gemini" && std::getenv("GEMINI_API_KEY"));
-        
-        if (has_key) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::green("(Native API Key Active)") << "\n";
-        } else if (auth && !auth->token.empty()) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::blue("(OAuth Session Active)") << "\n";
-        } else if (Process::available(provider)) {
-            tui << "    " << term::icon_ok() << " " << provider << " " << term::dim("(Binary found, CLI auth preserved)") << "\n";
-        } else {
-            tui << "    " << term::icon_warn() << " " << provider << " " << term::dim("(Not Configured -> ") << term::yellow(reauth_cmd) << term::dim(")") << "\n";
-        }
+        print_provider_auth(tui, provider, provider_auth_kind(executor.auth_store(), provider), reauth_cmd);
     };
     check_auth("claude", "claude login");
     check_auth("gemini", "gemini login");
@@ -1835,56 +1812,8 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // =====================================================================
     //  CLAIM VERIFICATION ENGINE — Auto-verify inferred claims
     // =====================================================================
-    std::vector<VerificationResult> verifications;
-    int claims_upgraded = 0;
-
-    // Use current directory as repo root (euxis should be run from repo root)
-    auto verifiers = detect_project_verifiers(fs::current_path().string());
-    if (!verifiers.empty() && !evidence_log.empty()) {
-        tui << "\n" << term::bold(term::cyan("  === CLAIM VERIFICATION ===")) << "\n";
-        verifications = run_claim_verifiers(verifiers, sla.agent_timeout_s);
-        for (const auto& vr : verifications) {
-            if (vr.success) {
-                claims_upgraded += vr.claims_upgraded;
-                tui << "    " << term::icon_ok() << " " << term::bold(vr.check_name)
-                          << " " << term::green("VERIFIED") << " " << term::dim(term::format_duration(vr.duration_ms)) << "\n";
-            } else {
-                tui << "    " << term::icon_fail() << " " << term::bold(vr.check_name)
-                          << " " << term::red("FAILED") << " " << term::dim(vr.output_summary) << "\n";
-            }
-        }
-        // Upgrade evidence density: move claims from inferred to execution-backed
-        if (claims_upgraded > 0 && !evidence_log.empty()) {
-            // Distribute upgraded claims across agents proportionally
-            int per_agent = std::max(1, claims_upgraded / (int)evidence_log.size());
-            for (auto& ev : evidence_log) {
-                int upgrade = std::min(per_agent, ev.inferred);
-                ev.execution_backed += upgrade;
-                ev.inferred -= upgrade;
-            }
-        }
-
-        // Map successful verifiers to pillar coverage
-        auto verifier_pillar = [](const std::string& name) -> std::string {
-            if (name.find("build") != std::string::npos || name.find("cmake") != std::string::npos ||
-                name.find("cargo-check") != std::string::npos || name.find("go-vet") != std::string::npos ||
-                name.find("make") != std::string::npos) return "build";
-            if (name.find("test") != std::string::npos || name.find("jest") != std::string::npos ||
-                name.find("vitest") != std::string::npos || name.find("pytest") != std::string::npos) return "testing";
-            return "";
-        };
-        for (const auto& vr : verifications) {
-            std::string pillar = verifier_pillar(vr.check_name);
-            if (!pillar.empty()) {
-                std::string status = vr.success ? "PASS" : "FAILED";
-                evidence_log.push_back({
-                    "claim-verifier/" + vr.check_name, "claim-verifier", status, pillar, vr.duration_ms,
-                    vr.success ? vr.claims_upgraded : 0, 0, std::max(1, vr.claims_upgraded),
-                    {}, false, status
-                });
-            }
-        }
-    }
+    auto [verifications, claims_upgraded] =
+        verify_claims(evidence_log, sla.agent_timeout_s, run_verifiers, tui);
 
     // =====================================================================
     //  BUILT-IN PILLAR CHECKS — Fill testing & security coverage gaps
@@ -2487,7 +2416,7 @@ int cmd_playbook(Context& ctx, const std::vector<std::string>& args) {
     // --- P1-7: Machine-Readable Provenance (SLSA v1) ---
     {
         nlohmann::json provenance;
-        provenance["builder"] = {{"id", "euxis-cli/v0.0.16"}};
+        provenance["builder"] = {{"id", "euxis-cli/v0.0.17"}};
         provenance["build_type"] = "https://slsa.dev/provenance/v1";
         provenance["invocation"] = {
             {"parameters", {

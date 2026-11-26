@@ -158,12 +158,6 @@
       "halstead_difficulty": 48.32,
       "length": 125
     },
-    "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::cmd_verify_attest( Context & , const std :: vector<std::string> & argv)": {
-      "ccn": 18,
-      "cognitive": 23,
-      "halstead_difficulty": 38.91,
-      "length": 78
-    },
     "apps/cli/src/cmd/attest.cpp::euxis::cli::cmd::parse_attest_args( const std :: vector<std::string> & argv)": {
       "ccn": 12,
       "cognitive": 19,
@@ -279,10 +273,10 @@
       "length": 33
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_playbook( Context & ctx , const std :: vector<std::string> & args)": {
-      "ccn": 438,
-      "cognitive": 840,
-      "halstead_difficulty": 119.82,
-      "length": 1566
+      "ccn": 400,
+      "cognitive": 783,
+      "halstead_difficulty": 115.68,
+      "length": 1490
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::cmd_squad( Context & ctx , const std :: vector<std::string> & args)": {
       "ccn": 28,
@@ -301,12 +295,6 @@
       "cognitive": 28,
       "halstead_difficulty": 58.99,
       "length": 49
-    },
-    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::detect_project_verifiers( const std :: string & repo_root)": {
-      "ccn": 22,
-      "cognitive": 28,
-      "halstead_difficulty": 30.79,
-      "length": 56
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::evaluate_policy( const nlohmann :: json & artifact , const Policy & policy)": {
       "ccn": 16,
@@ -331,12 +319,6 @@
       "cognitive": 141,
       "halstead_difficulty": 88.17,
       "length": 319
-    },
-    "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_claim_verifiers( const std :: vector<std::pair<std::string,std::vector<std::string>>> & verifiers , int timeout_per_check = 60)": {
-      "ccn": 9,
-      "cognitive": 15,
-      "halstead_difficulty": 41.9,
-      "length": 27
     },
     "apps/cli/src/cmd/fleet.cpp::euxis::cli::cmd::run_security_pillar_checks( const std :: string & repo_root)": {
       "ccn": 64,
@@ -609,10 +591,10 @@
       "length": 33
     },
     "apps/cli/src/cmd/surface.cpp::euxis::cli::cmd::parse_common( const std :: vector<std::string> & args , const std :: vector<std::string> & skip_flags = { })": {
-      "ccn": 17,
-      "cognitive": 23,
-      "halstead_difficulty": 58.79,
-      "length": 34
+      "ccn": 13,
+      "cognitive": 16,
+      "halstead_difficulty": 46.55,
+      "length": 27
     },
     "apps/cli/src/cmd/system.cpp::euxis::cli::cmd::cmd_cross_platform_verify( Context & ctx , const std :: vector<std::string> &)": {
       "ccn": 10,
@@ -752,35 +734,17 @@
       "halstead_difficulty": 29.31,
       "length": 23
     },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute( const ModelSelection & selection , const std :: string & prompt , int timeout_seconds , std :: optional<ResolvedAuth> auth , std :: function<void(const std::string&)> on_chunk , const bridge :: AgentCapabilityToken * capability_token)": {
-      "ccn": 29,
-      "cognitive": 32,
-      "halstead_difficulty": 55.4,
-      "length": 106
-    },
     "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_api( const std :: string & provider , const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
       "ccn": 18,
       "cognitive": 28,
       "halstead_difficulty": 41.9,
       "length": 44
     },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_claude( const std :: string & model , const std :: string & prompt , int timeout , const std :: optional<ResolvedAuth> & auth , std :: function<void(const std::string&)> on_chunk)": {
-      "ccn": 19,
-      "cognitive": 53,
-      "halstead_difficulty": 50.42,
-      "length": 58
-    },
     "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_ollama( const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
       "ccn": 13,
       "cognitive": 26,
       "halstead_difficulty": 44.43,
       "length": 33
-    },
-    "apps/cli/src/provider_executor.cpp::euxis::cli::ProviderExecutor::execute_via_cli( const std :: string & provider , [ [ maybe_unused ] ] const std :: string & model , const std :: string & prompt , int timeout , std :: function<void(const std::string&)> on_chunk)": {
-      "ccn": 11,
-      "cognitive": 12,
-      "halstead_difficulty": 32.27,
-      "length": 47
     },
     "apps/cli/src/provider_router.cpp::euxis::cli::ProviderRouter::classify_task_class( const std :: string & task , const std :: string & agent_id , const std :: string & pillar) const": {
       "ccn": 25,
@@ -1459,12 +1423,6 @@
       "cognitive": 20,
       "halstead_difficulty": 36.0,
       "length": 33
-    },
-    "libs/attest/src/signing.cpp::euxis::attest::verify_envelope( const Envelope & envelope , std :: span<const std::byte,32> public_key)": {
-      "ccn": 8,
-      "cognitive": 10,
-      "halstead_difficulty": 38.08,
-      "length": 45
     },
     "libs/attest/src/slsa.cpp::euxis::attest::to_json( const SlsaProvenance & p)": {
       "ccn": 9,
@@ -2250,7 +2208,7 @@
   "files": {
     "apps/cli/src/auth_profile_store.cpp": 573,
     "apps/cli/src/certification.cpp": 1147,
-    "apps/cli/src/cmd/fleet.cpp": 3276,
+    "apps/cli/src/cmd/fleet.cpp": 3205,
     "apps/cli/src/cmd/infra.cpp": 540,
     "apps/cli/src/cmd/knowledge.cpp": 620,
     "apps/cli/src/cmd/lifecycle.cpp": 919,
@@ -2267,7 +2225,6 @@
     "apps/cli/tests/test_cmd_lifecycle.cpp": 541,
     "apps/cli/tests/test_cmd_specialized.cpp": 684,
     "apps/cli/tests/test_cmd_surface.cpp": 532,
-    "apps/cli/tests/test_provider_executor.cpp": 518,
     "apps/cli/tests/test_provider_router.cpp": 1026,
     "apps/cli/tests/test_registry_client.cpp": 718,
     "apps/etx/tests/test_registry.cpp": 532,

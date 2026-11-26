@@ -274,7 +274,7 @@ TEST_F(LifecycleCmdTest, SelfHelpContent) {
 
 TEST_F(LifecycleCmdTest, SelfStatusShowsVersion) {
     auto out = capture_stdout([&]{ return cmd_self(ctx_, {"status"}); });
-    EXPECT_NE(out.find("v0.0.16"), std::string::npos);
+    EXPECT_NE(out.find("v0.0.17"), std::string::npos);
 }
 
 TEST_F(LifecycleCmdTest, SelfStatusShowsInstallMode) {
@@ -287,7 +287,7 @@ TEST_F(LifecycleCmdTest, SelfStatusJsonOutput) {
     ctx_.json_output = true;
     auto out = capture_stdout([&]{ return cmd_self(ctx_, {"status"}); });
     auto j = nlohmann::json::parse(out);
-    EXPECT_EQ(j["version"], "v0.0.16");
+    EXPECT_EQ(j["version"], "v0.0.17");
     EXPECT_TRUE(j.contains("euxis_home"));
     EXPECT_TRUE(j.contains("install_mode"));
     EXPECT_TRUE(j.contains("shell"));
@@ -297,7 +297,7 @@ TEST_F(LifecycleCmdTest, SelfStatusJsonOutput) {
 TEST_F(LifecycleCmdTest, SelfStatusJsonViaFlag) {
     auto out = capture_stdout([&]{ return cmd_self(ctx_, {"status", "--json"}); });
     auto j = nlohmann::json::parse(out);
-    EXPECT_EQ(j["version"], "v0.0.16");
+    EXPECT_EQ(j["version"], "v0.0.17");
 }
 
 TEST_F(LifecycleCmdTest, SelfPathsShowsEuxisHome) {
@@ -323,14 +323,14 @@ TEST_F(LifecycleCmdTest, SelfDoctorDelegates) {
 
 TEST_F(LifecycleCmdTest, SelfVersionShowsVersion) {
     auto out = capture_stdout([&]{ return cmd_self(ctx_, {"version"}); });
-    EXPECT_NE(out.find("v0.0.16"), std::string::npos);
+    EXPECT_NE(out.find("v0.0.17"), std::string::npos);
 }
 
 TEST_F(LifecycleCmdTest, SelfVersionJsonOutput) {
     ctx_.json_output = true;
     auto out = capture_stdout([&]{ return cmd_self(ctx_, {"version"}); });
     auto j = nlohmann::json::parse(out);
-    EXPECT_EQ(j["version"], "v0.0.16");
+    EXPECT_EQ(j["version"], "v0.0.17");
     EXPECT_EQ(j["protocol"], "1.0");
     EXPECT_EQ(j["language"], "C++23");
 }

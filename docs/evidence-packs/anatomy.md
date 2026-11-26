@@ -188,22 +188,21 @@ in the Statement's `subject[0].digest`.
 ## Verification, end to end
 
 ```bash
-# 1. Get the public key.
-#    Either trust the bundle's inline rawBytes:
-jq -r '.verificationMaterial.publicKey.rawBytes' \
-   euxis-evidence.tar.gz.sigstore.json | base64 -d > pubkey.bin
-#    Or resolve the hint against your own KMS / Fulcio root.
+# 1. Get the signer's public key from a channel you trust (the
+#    signer's published key, your KMS, a key you pinned earlier).
+#    Never take it from the bundle being verified: whoever made the
+#    bundle chose that key. The file holds the base64 Ed25519 key,
+#    as written by `euxis attest --keygen` to <name>.pub.
 
-# 2. Verify the bundle's signature.
-euxis verify euxis-evidence.tar.gz.sigstore.json --key=pubkey.bin
-
-# 3. Verify the subject digest still matches the tar.
-sha256sum euxis-evidence.tar.gz   # compare to the Statement's subject.digest.sha256
+# 2. Verify the signature and that the tar is the signed subject.
+euxis verify euxis-evidence.tar.gz.sigstore.json \
+  --key=signer.pub --artifact=euxis-evidence.tar.gz
 ```
 
-Step 2 is what `euxis verify` runs internally. Step 3 is the bit a
-regulator does themselves — it proves the bundle the auditor has
-in hand was signed over the same bytes they're holding.
+`--artifact` re-hashes the tar and requires its sha256 to match a
+subject of the signed statement, which proves the bundle the
+auditor has in hand was signed over the same bytes they're holding.
+The transparency log is not checked.
 
 ## Why this shape
 

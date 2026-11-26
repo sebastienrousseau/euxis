@@ -264,32 +264,6 @@ TEST_F(ProviderExecutorFileTest, ExecuteDurationTracked) {
     EXPECT_GE(resp.duration_ms, 0.0);
 }
 
-// --- Coverage: execute with claude/anthropic provider (exercises execute_claude path) ---
-TEST_F(ProviderExecutorFileTest, ExecuteClaudeProvider) {
-    ProviderExecutor executor(test_dir_);
-
-    ModelSelection sel;
-    sel.provider = "claude";
-    sel.model = "claude-sonnet-4-6";
-    sel.tier = Tier::Code;
-
-    auto resp = executor.execute(sel, "hello", 5);
-    // Will fail due to no API key, but exercises the claude path
-    EXPECT_TRUE(!resp.success || resp.success);
-}
-
-TEST_F(ProviderExecutorFileTest, ExecuteAnthropicProvider) {
-    ProviderExecutor executor(test_dir_);
-
-    ModelSelection sel;
-    sel.provider = "anthropic";
-    sel.model = "";
-    sel.tier = Tier::Code;
-
-    auto resp = executor.execute(sel, "hello", 5);
-    // Exercises the "anthropic" branch in execute()
-    EXPECT_TRUE(!resp.success || resp.success);
-}
 
 // --- Coverage: execute with openai provider (exercises execute_api path) ---
 TEST_F(ProviderExecutorFileTest, ExecuteOpenAIProvider) {
@@ -322,43 +296,6 @@ TEST_F(ProviderExecutorFileTest, ExecuteGeminiProvider) {
     // In mock mode succeeds; real mode may succeed (OAuth) or fail (no key/network)
     // Just verify the code path doesn't crash
     EXPECT_TRUE(resp.success || !resp.success);
-}
-
-// --- Coverage: execute with provided auth token (exercises auth.has_value() path) ---
-TEST_F(ProviderExecutorFileTest, ExecuteWithProvidedAuth) {
-    ProviderExecutor executor(test_dir_);
-
-    ModelSelection sel;
-    sel.provider = "claude";
-    sel.model = "claude-sonnet-4-6";
-    sel.tier = Tier::Code;
-
-    ResolvedAuth auth;
-    auth.token = "sk-ant-fake-token-for-test";
-    auth.provider = "anthropic";
-    auth.is_oauth = false;
-
-    auto resp = executor.execute(sel, "hello", 3, auth);
-    // Will fail with invalid token but exercises the auth path
-    EXPECT_TRUE(!resp.success || resp.success);
-}
-
-TEST_F(ProviderExecutorFileTest, ExecuteWithOAuthAuth) {
-    ProviderExecutor executor(test_dir_);
-
-    ModelSelection sel;
-    sel.provider = "claude";
-    sel.model = "";
-    sel.tier = Tier::Code;
-
-    ResolvedAuth auth;
-    auth.token = "sk-ant-oat01-fake-oauth-token";
-    auth.provider = "anthropic";
-    auth.is_oauth = true;
-
-    auto resp = executor.execute(sel, "test prompt", 3, auth);
-    // Exercises OAuth branch in execute_claude
-    EXPECT_TRUE(!resp.success || resp.success);
 }
 
 // --- Coverage: execute_api with provided auth for openai ---
@@ -396,14 +333,6 @@ TEST_F(ProviderExecutorFileTest, ExecuteGeminiWithOAuth) {
 
     auto resp = executor.execute(sel, "hello", 3, auth);
     EXPECT_TRUE(!resp.success || resp.success);
-}
-
-// --- Coverage: resolve_anthropic_token (exercises the function) ---
-TEST(ProviderExecutorTest, ResolveAnthropicTokenReturnsStringOrEmpty) {
-    auto token = ProviderExecutor::resolve_anthropic_token();
-    // Result depends on environment - just ensure it doesn't crash
-    // and returns a string (empty or not)
-    EXPECT_GE(token.size(), 0u);
 }
 
 // --- Coverage: execute_api with unsupported provider ---

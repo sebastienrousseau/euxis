@@ -51,7 +51,7 @@ euxis certify-readiness . --framework soc2  # SOC 2 readiness report
 euxis sbom . --format=both                  # CycloneDX 1.6 + SPDX 3.0.1
 euxis slopsquatting .                       # LLM-hallucinated-package guard
 euxis attest evidence.tar.gz                # Sigstore-signed evidence bundle
-euxis verify evidence.tar.gz.sigstore.json  # offline signature check
+euxis verify evidence.tar.gz.sigstore.json --key=signer.pub --artifact=evidence.tar.gz  # offline check
 euxis cache stats                           # incremental scan cache
 ```
 
@@ -308,7 +308,7 @@ Environment overrides: `EUXIS_DEFAULT_RESEARCH_PROVIDER`, `EUXIS_DEFAULT_CODING_
 
 ### Claim verification commands
 
-After the agents report, euxis runs the project's own checks to confirm their claims. By default it picks them from the manifests it finds (`package.json` gives `npm test`, `Cargo.toml` gives `cargo test`, a `Makefile` gives `make check`), each within the agent budget (45 s in flash mode). Where that command is a long suite, list fast checks in `.euxis.yaml` instead; they replace the detected ones:
+With `--run-verifiers`, after the agents report, euxis runs the project's own checks to confirm their claims. **This executes code from the repository being scanned**, so it is off by default: never enable it for untrusted code, such as pull requests from forks. euxis picks the checks from the manifests it finds (`package.json` gives `npm test`, `Cargo.toml` gives `cargo test`, a `Makefile` gives `make check`), each within the agent budget (45 s in flash mode). Where that command is a long suite, list fast checks in `.euxis.yaml` instead; they replace the detected ones:
 
 ```yaml
 version: "1"
@@ -442,4 +442,4 @@ Security disclosures: see [`SECURITY.md`](SECURITY.md) for the coordinated-discl
 
 AGPL-3.0 — see [LICENSE](LICENSE).
 
-Euxis v0.0.16 · [euxis.co](https://euxis.co)
+Euxis v0.0.17 · [euxis.co](https://euxis.co)

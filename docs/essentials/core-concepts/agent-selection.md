@@ -226,4 +226,4 @@ What are you trying to do?
 
 ---
 
-*Euxis v0.0.16 · Build something that matters.*
+*Euxis v0.0.17 · Build something that matters.*

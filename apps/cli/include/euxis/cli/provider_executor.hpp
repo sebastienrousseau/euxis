@@ -48,10 +48,6 @@ public:
                                             const std::string& task,
                                             const std::string& context = {}) -> std::string;
 
-    /// Resolve an Anthropic auth token from OAuth credentials or env var.
-    /// Returns empty string if none found.
-    [[nodiscard]] static auto resolve_anthropic_token() -> std::string;
-
     /// Classify an API error response into a cooldown reason.
     [[nodiscard]] static auto classify_error(int http_status,
                                               const std::string& body) -> std::optional<CooldownReason>;
@@ -66,9 +62,18 @@ private:
     /// Get or create a circuit breaker for the given provider.
     auto get_breaker(const std::string& provider) -> euxis::network::CircuitBreaker&;
 
-    auto execute_claude(const std::string& model, const std::string& prompt,
-                        int timeout, const std::optional<ResolvedAuth>& auth,
-                        std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    auto execute_authenticated(const std::string& provider, const std::string& model,
+                               const std::string& prompt, int timeout_seconds,
+                               std::optional<ResolvedAuth> auth,
+                               std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    auto route_authenticated(const std::string& provider, const std::string& model,
+                             const std::string& prompt, int timeout_seconds,
+                             const std::optional<ResolvedAuth>& auth,
+                             std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
+    void record_breaker(const std::string& provider, const ProviderResponse& resp);
+    void report_auth(const std::optional<ResolvedAuth>& auth, const ProviderResponse& resp);
+    auto execute_claude_session(const std::string& model, const std::string& prompt, int timeout,
+                                std::function<void(const std::string&)> on_chunk) -> ProviderResponse;
     auto execute_via_cli(const std::string& provider, const std::string& model,
                          const std::string& prompt, int timeout,
                          std::function<void(const std::string&)> on_chunk) -> ProviderResponse;

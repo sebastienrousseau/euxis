@@ -321,21 +321,102 @@ TEST_F(AttestCmdTest, VerifyValidBundleSucceeds) {
     EXPECT_EQ(rc, to_int(ExitCode::Success));
 }
 
-TEST_F(AttestCmdTest, VerifyWithoutExplicitKeyUsesBundleEmbeddedKey) {
-    // Sign first.
+TEST_F(AttestCmdTest, VerifyWithoutKeyIsRefused) {
     capture_stdout([&]() {
         return sign_with_keygen(key_basename, bundle_path);
     });
     ASSERT_TRUE(fs::exists(bundle_path));
 
-    // Verify WITHOUT --key — the bundle carries the public key
-    // in verificationMaterial.publicKey.rawBytes.
+    // The bundle carries a public key, but that key is chosen by
+    // whoever produced the bundle: verifying against it proves
+    // nothing about origin. Without a trust root, verify must fail.
     int rc = 0;
-    capture_stdout([&]() {
+    auto err = capture_cerr([&]() {
         rc = cmd_verify_attest(ctx, {bundle_path.string()});
         return rc;
     });
+    EXPECT_NE(rc, to_int(ExitCode::Success));
+    EXPECT_NE(err.find("--key"), std::string::npos);
+}
+
+TEST_F(AttestCmdTest, VerifyForgedBundleIsRejected) {
+    // The legitimate signer's public key is the trust root.
+    capture_stdout([&]() { return sign_with_keygen(key_basename, bundle_path); });
+    auto trusted_pub = fs::path{key_basename.string() + ".pub"};
+    ASSERT_TRUE(fs::exists(trusted_pub));
+
+    // An attacker signs their own bundle with their own key and embeds
+    // that key in the bundle.
+    auto forged = tmpdir / "forged.sigstore.json";
+    capture_stdout([&]() { return sign_with_keygen(tmpdir / "attacker", forged); });
+    ASSERT_TRUE(fs::exists(forged));
+
+    int no_key_rc = 0;
+    capture_cerr([&]() {
+        no_key_rc = cmd_verify_attest(ctx, {forged.string()});
+        return no_key_rc;
+    });
+    EXPECT_NE(no_key_rc, to_int(ExitCode::Success));
+
+    int trusted_rc = 0;
+    capture_cerr([&]() {
+        trusted_rc = cmd_verify_attest(ctx, {forged.string(), "--key=" + trusted_pub.string()});
+        return trusted_rc;
+    });
+    EXPECT_EQ(trusted_rc, to_int(ExitCode::PolicyViolation));
+}
+
+TEST_F(AttestCmdTest, VerifyArtifactMatchingSubjectSucceeds) {
+    capture_stdout([&]() { return sign_with_keygen(key_basename, bundle_path); });
+    auto pub_path = fs::path{key_basename.string() + ".pub"};
+
+    int rc = 0;
+    auto out = capture_stdout([&]() {
+        rc = cmd_verify_attest(ctx, {
+                                        bundle_path.string(),
+                                        "--key=" + pub_path.string(),
+                                        "--artifact=" + subject_path.string(),
+                                    });
+        return rc;
+    });
     EXPECT_EQ(rc, to_int(ExitCode::Success));
+    EXPECT_NE(out.find("artifact digest matches"), std::string::npos);
+}
+
+TEST_F(AttestCmdTest, VerifyArtifactMismatchIsPolicyViolation) {
+    capture_stdout([&]() { return sign_with_keygen(key_basename, bundle_path); });
+    auto pub_path = fs::path{key_basename.string() + ".pub"};
+
+    // A different file than the one that was signed.
+    auto swapped = tmpdir / "swapped.bin";
+    std::ofstream{swapped} << "not the signed payload\n";
+
+    int rc = 0;
+    auto err = capture_cerr([&]() {
+        rc = cmd_verify_attest(ctx, {
+                                        bundle_path.string(),
+                                        "--key=" + pub_path.string(),
+                                        "--artifact=" + swapped.string(),
+                                    });
+        return rc;
+    });
+    EXPECT_EQ(rc, to_int(ExitCode::PolicyViolation));
+    EXPECT_NE(err.find("digest"), std::string::npos);
+}
+
+TEST_F(AttestCmdTest, VerifyReportsKeyidOfTrustedKeyAndTlogStatus) {
+    capture_stdout([&]() { return sign_with_keygen(key_basename, bundle_path); });
+    auto pub_path = fs::path{key_basename.string() + ".pub"};
+
+    int rc = 0;
+    auto out = capture_stdout([&]() {
+        rc = cmd_verify_attest(ctx, {bundle_path.string(), "--key=" + pub_path.string()});
+        return rc;
+    });
+    ASSERT_EQ(rc, to_int(ExitCode::Success));
+    // No transparency-log check is implemented; say so instead of
+    // implying a full Sigstore verification.
+    EXPECT_NE(out.find("transparency log: not checked"), std::string::npos);
 }
 
 TEST_F(AttestCmdTest, VerifyWithWrongKeyIsPolicyViolation) {

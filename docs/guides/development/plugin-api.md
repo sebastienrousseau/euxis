@@ -746,4 +746,4 @@ euxis log-analyzer "Analyze the application logs from the last hour for any erro
 
 ---
 
-*Euxis v0.0.16 · Build something that matters.*
+*Euxis v0.0.17 · Build something that matters.*
