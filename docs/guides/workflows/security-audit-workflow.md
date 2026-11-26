@@ -236,4 +236,4 @@ euxis telemetrist "Add security event logging for failed authentication attempts
 
 ---
 
-*Euxis v0.0.17 · Build something that matters.*
+*Euxis v0.0.18 · Build something that matters.*

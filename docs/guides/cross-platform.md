@@ -2,7 +2,7 @@
 
 ## Overview
 
-Comprehensive automation system ensuring Euxis v0.0.17 build/package/runtime parity across macOS, Linux, and WSL platforms.
+Comprehensive automation system ensuring Euxis v0.0.18 build/package/runtime parity across macOS, Linux, and WSL platforms.
 
 ## Verification Architecture
 
@@ -60,22 +60,22 @@ Comprehensive automation system ensuring Euxis v0.0.17 build/package/runtime par
 ./euxis-bin/euxis-cross-platform-verify --local-only
 
 # Test specific version
-./euxis-bin/euxis-cross-platform-verify --version v0.0.17 --local-only
+./euxis-bin/euxis-cross-platform-verify --version v0.0.18 --local-only
 ```
 
 ### Full Cross-Platform CI
 ```bash
 # Trigger GitHub Actions workflow (requires gh CLI)
-./euxis-bin/euxis-cross-platform-verify --version v0.0.17
+./euxis-bin/euxis-cross-platform-verify --version v0.0.18
 
 # Manual GitHub workflow trigger
-gh workflow run cross-platform-ci.yml --field version=v0.0.17
+gh workflow run cross-platform-ci.yml --field version=v0.0.18
 ```
 
 ### Multi-Platform Container Build
 ```bash
 # Build for AMD64 and ARM64
-./deploy/build-multi-platform.sh --version v0.0.17
+./deploy/build-multi-platform.sh --version v0.0.18
 
 # Build and push to registry
 ./deploy/build-multi-platform.sh --push --registry ghcr.io/euxis
@@ -191,8 +191,8 @@ docker buildx create --name multi-platform --use
 
 ---
 
-**Verification Status for v0.0.17:** ✅ IMPLEMENTED
+**Verification Status for v0.0.18:** ✅ IMPLEMENTED
 **Last Updated:**-02-01
 **Next Review:** Release candidate testing
 
-*Euxis v0.0.17 · Build something that matters.*
+*Euxis v0.0.18 · Build something that matters.*

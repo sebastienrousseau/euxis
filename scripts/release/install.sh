@@ -7,7 +7,7 @@
 #
 # Or to pin a specific version:
 #
-#   curl -fsSL https://.../install.sh | EUXIS_VERSION=v0.0.17 sh
+#   curl -fsSL https://.../install.sh | EUXIS_VERSION=v0.0.18 sh
 #
 # What it does:
 #   1. Detects the platform (linux-amd64 / linux-arm64 / darwin-amd64 / darwin-arm64)
