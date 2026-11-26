@@ -302,6 +302,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # compose_notes.py needs the tags and history
 
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -329,11 +331,43 @@ jobs:
             --bundle dist/SHA256SUMS.cosign.bundle \
             dist/SHA256SUMS
 
+      # The release title is "euxis <version>" without the tag's leading
+      # "v" (standards: Key Release Invariants). Left unset, GitHub titles
+      # the release with the bare tag, as v0.0.15 and v0.0.16 were.
+      - name: Release title
+        id: title
+        run: echo "name=euxis ${EUXIS_VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      # Blocking: annotated, signed, "euxis <tag>", on main, and every
+      # version carrier current (standards: Release Preflight Is
+      # Blocking). The signature is cryptographically verified by the
+      # local tag script; CI has no allowed-signers file, so it checks
+      # that one is present.
+      - name: Release preflight
+        run: |
+          git fetch --force origin "refs/tags/${EUXIS_VERSION}:refs/tags/${EUXIS_VERSION}"
+          python3 scripts/release/preflight.py "$EUXIS_VERSION"
+
+      # Highlights come from .github/releases/<tag>.md at the tag; the
+      # script adds What's Changed, Checksums and the Full Changelog link,
+      # and fails (so nothing is published) when a piece is missing.
+      - name: Release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The same globs as `files:` below: every attached asset.
+          (cd dist && sha256sum -- *.tar.gz *.tar.gz.sha256 *.cosign.bundle SHA256SUMS) \
+            > release-sums.txt
+          python3 scripts/release/compose_notes.py "$EUXIS_VERSION" \
+            --sums release-sums.txt > release-notes.md
+          cat release-notes.md
+
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.EUXIS_VERSION }}
-          generate_release_notes: true
+          name: ${{ steps.title.outputs.name }}
+          body_path: release-notes.md
           # `dist/*.deb` and `dist/*.rpm` are intentionally absent: the
           # linux-packages job is decoupled from publish (see PR #106).
           # The .tar.gz / .sha256 / cosign bundles + Docker image are the

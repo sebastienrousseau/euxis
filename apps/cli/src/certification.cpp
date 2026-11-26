@@ -1,4 +1,5 @@
 #include "euxis/cli/certification.hpp"
+#include "euxis/cli/certification_detail.hpp"
 #include "euxis/cli/i18n.hpp"
 #include "euxis/cli/process.hpp"
 #include "euxis/cli/terminal.hpp"
@@ -115,7 +116,7 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
             // Pass 1: preferred names (exact filename match)
             for (const auto& pref : preferred_names) {
                 auto candidate = target / build_dir / "cmd" / "cli" / pref;
-                if (fs::exists(candidate) && ::access(candidate.c_str(), X_OK) == 0) {
+                if (is_target_executable(target, candidate)) {
                     tests_detected = true;
                     test_framework = "cmake/gtest";
                     test_cmd = candidate.string();
@@ -123,7 +124,7 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
                 }
                 // Also check directly in build dir
                 candidate = target / build_dir / pref;
-                if (fs::exists(candidate) && ::access(candidate.c_str(), X_OK) == 0) {
+                if (is_target_executable(target, candidate)) {
                     tests_detected = true;
                     test_framework = "cmake/gtest";
                     test_cmd = candidate.string();
@@ -135,7 +136,7 @@ auto gate_unit_test_health(const fs::path& target) -> GateResult {
             try {
                 for (const auto& entry : fs::recursive_directory_iterator(
                          target / build_dir, fs::directory_options::skip_permission_denied)) {
-                    if (entry.is_regular_file()) {
+                    if (resolve_target_file(target, entry.path())) {
                         auto fname = entry.path().filename().string();
                         if (fname.find("test") != std::string::npos &&
                             ::access(entry.path().c_str(), X_OK) == 0) {
@@ -302,11 +303,8 @@ auto gate_docs_accuracy(const fs::path& target,
     }
 
     // Read README and check for command references
-    std::string readme_content;
-    if (check_file(target, "README.md"))
-        readme_content = read_file_content(target / "README.md");
-    else
-        readme_content = read_file_content(target / "readme.md");
+    const auto readme_content =
+        read_target_file(target, check_file(target, "README.md") ? "README.md" : "readme.md");
 
     std::vector<std::string> checked_surfaces;
     int stale_count = 0;
@@ -320,8 +318,7 @@ auto gate_docs_accuracy(const fs::path& target,
 
     // Check for stale command references in docs
     auto check_stale = [&](const fs::path& doc_path) {
-        if (!fs::exists(doc_path)) return;
-        auto content = read_file_content(doc_path);
+        auto content = read_target_file(target, doc_path);  // empty if it leaves the target
         // Look for "euxis <word>" patterns and check against known commands
         std::istringstream ss(content);
         std::string token;
@@ -332,11 +329,10 @@ auto gate_docs_accuracy(const fs::path& target,
                 while (!token.empty() && !std::isalnum(static_cast<unsigned char>(token.back())))
                     token.pop_back();
                 if (!token.empty() && token[0] != '-' && token[0] != '<') {
-                    bool found = false;
-                    for (const auto& cmd : known_commands) {
-                        if (cmd == token) { found = true; break; }
-                    }
-                    if (!found && token.size() > 1) ++stale_count;
+                    const bool known =
+                        std::ranges::find(known_commands, token) != known_commands.end();
+                    if (!known && token.size() > 1)
+                        ++stale_count;
                 }
                 after_euxis = false;
             }
@@ -350,7 +346,7 @@ auto gate_docs_accuracy(const fs::path& target,
         try {
             for (const auto& entry : fs::recursive_directory_iterator(
                      target / "docs", fs::directory_options::skip_permission_denied)) {
-                if (entry.is_regular_file() && entry.path().extension() == ".md") {
+                if (entry.path().extension() == ".md") {  // check_stale confines
                     check_stale(entry.path());
                 }
             }
@@ -391,7 +387,7 @@ auto gate_security_critical(const fs::path& target) -> GateResult {
         bool env_gitignored = false;
 
         if (check_file(target, ".gitignore")) {
-            auto content = read_file_content(target / ".gitignore");
+            auto content = read_target_file(target, ".gitignore");
             if (content.find(".env") != std::string::npos) env_gitignored = true;
         }
 
@@ -422,7 +418,7 @@ auto gate_security_critical(const fs::path& target) -> GateResult {
         if (!audit_ran && check_file(target, "CMakeLists.txt")) {
             // Check for dependency management
             bool has_fetch = false;
-            auto content = read_file_content(target / "CMakeLists.txt");
+            auto content = read_target_file(target, "CMakeLists.txt");
             if (content.find("FetchContent") != std::string::npos) has_fetch = true;
             bool has_vcpkg = check_file(target, "vcpkg.json");
             bool has_conan = check_file(target, "conanfile.txt") || check_file(target, "conanfile.py");
@@ -437,7 +433,7 @@ auto gate_security_critical(const fs::path& target) -> GateResult {
 
     // 3. Build flags
     if (check_file(target, "CMakeLists.txt")) {
-        auto content = read_file_content(target / "CMakeLists.txt");
+        auto content = read_target_file(target, "CMakeLists.txt");
         bool has_unsafe = false;
         if (content.find("-DNDEBUG") != std::string::npos && content.find("Release") == std::string::npos) {
             has_unsafe = true;
@@ -562,7 +558,7 @@ auto collect_evidence(const fs::path& target,
 
     // IAM
     if (check_file(target, ".gitignore")) {
-        auto content = read_file_content(target / ".gitignore");
+        auto content = read_target_file(target, ".gitignore");
         if (content.find(".env") != std::string::npos || content.find("credentials") != std::string::npos) {
             ev.push_back({next_id(), "Identity & Access Management", "file", "pass", false,
                           "Secrets excluded via .gitignore"});

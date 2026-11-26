@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.18] - 2026-11-26
+
+### Security
+- **Certification reads and runs only files inside the target**: `certify-readiness` followed symlinks planted in the target repository. The docs gate read `README.md` and `docs/**/*.md` through a link (so `~/.ssh/id_*`, or `/dev/zero` as an unbounded read), the security gate and evidence collection did the same for `.gitignore` and `CMakeLists.txt`, and the unit-test gate executed a `build/tests` linked to a binary outside the repository. Every read and test-binary probe now requires a regular file whose canonical path is under the target; links that stay inside the repository keep working
+- **Scans never follow a symlink out of the target**: `euxis scan`, the SCA lockfile scanner, the skill static analyzer and certification quality-risk read files a hostile repository linked to from outside itself (`~/.ssh/id_*`, `~/.aws/credentials`) into findings, SBOMs and reports. They now accept only regular files and never follow a link
+- **Gateway store ids are validated**: `POST /api/sessions` used `session_id` and `run_id` from the request body as file names, so `../../x` or an absolute path created or appended `.jsonl` files outside the session store. Ids must be 1 to 128 characters of `[A-Za-z0-9_:-]`; anything else is a 400, and every store read and write checks the id again
+
+### Changed
+- **Release notes follow the standards**: the release workflow titles each release `euxis <version>` (v0.0.15 and v0.0.16 were titled with the bare tag) and composes its notes with `scripts/release/compose_notes.py`: hand-written highlights from `.github/releases/<tag>.md`, then What's Changed, Checksums of every attached asset and the Full Changelog link. Publishing fails if a piece is missing. The notes of v0.0.12, v0.0.14, v0.0.15 and v0.0.16 were rebuilt the same way
+- **Version**: Bumped to v0.0.18 across CMakeLists.txt, engine, lifecycle, TUI, data configs, man page and docs
+
+## [0.0.17] - 2026-11-26
+
+Covers every release after 0.0.9 up to 0.0.17 (v0.0.10 to v0.0.16 were tagged without their own sections here).
+
 ### Security
 - **The claude provider uses your Claude Code login, never an API key**: euxis read Claude Code's OAuth token only from `~/.claude/.credentials.json`, which macOS does not use (it keeps the login in the Keychain), so every claude agent fell back to `ANTHROPIC_API_KEY` and, without one, failed with "No Anthropic auth found." while the run still reported a verdict. The claude provider (and its `anthropic` alias) now always runs the `claude` CLI, which uses its own logged-in session, with `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN` removed from its environment; an auth passed in by the caller is ignored. Without the CLI on PATH the agent fails with a message saying to install Claude Code and run `claude` to log in. The pre-flight probe no longer reports "Native API Key Active" for claude. The direct Anthropic HTTP path (`execute_claude`, `resolve_anthropic_token`) is removed. **Breaking:** runs that authenticated claude with `ANTHROPIC_API_KEY` alone must install Claude Code and log in
 - **`euxis verify` requires a trusted key**: without `--key` it verified the signature against the public key embedded in the bundle, which whoever made the bundle chose, so a bundle signed with any key passed with exit 0. `--key` is now required and the embedded key is never used. `verify` also rejects any DSSE payloadType other than in-toto, prints the keyid of the trusted key rather than the bundle's unverified hint, and states that the transparency log is not checked. New `--artifact=<path>` checks the file's sha256 against the signed statement's subjects (exit 4 on mismatch). **Breaking:** scripts calling `euxis verify <bundle>` without `--key` now fail
@@ -44,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test Suite**: 1115 tests (up from 961), all passing
 - **CI Workflows**: Fixed stale artifact paths, added `cpp-bench` and `cpp-clang-tidy` Makefile targets, bumped release refs to v0.0.10
 - **TEMPLATE_CONFORMANCE**: Updated all 16 test path references from `euxis-cpp/` to `apps/`/`libs/`
-- **Data Config Versions**: Bumped `registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json` from v0.0.3 to v0.0.17
+- **Data Config Versions**: Bumped `registry.json`, `squads.json`, `router.json`, `capabilities.json`, `codex.json` from v0.0.3 to v0.0.18
 - **Documentation**: Updated ~40 doc files from v0.0.4 footers/badges to v0.0.10, fixed `euxis-cpp/` monorepo paths to `apps/`/`libs/`
 
 ### Security
