@@ -19,6 +19,8 @@ add_library(euxis-cli-lib STATIC
   src/mcp_provider.cpp
   src/cmd/system.cpp
   src/cmd/fleet.cpp
+  src/claim_verifiers.cpp
+  src/provider_status.cpp
   src/cmd/playbook_verify.cpp
   src/cmd/knowledge.cpp
   src/cmd/infra.cpp
@@ -122,6 +124,7 @@ add_executable(euxis-cli-cpp_tests
   tests/test_pii_filter.cpp
   tests/test_cmd_system.cpp
   tests/test_cmd_fleet.cpp
+  tests/test_claim_verifiers.cpp
   tests/test_cmd_knowledge.cpp
   tests/test_cmd_infra.cpp
   tests/test_cmd_dev.cpp
@@ -140,6 +143,8 @@ add_executable(euxis-cli-cpp_tests
   tests/test_cmd_system_card.cpp
   tests/test_auth_profile_store.cpp
   tests/test_process.cpp
+  tests/test_provider_claude_cli.cpp
+  tests/test_provider_status.cpp
   tests/test_provider_executor.cpp
   tests/test_term_caps.cpp
   tests/test_box.cpp

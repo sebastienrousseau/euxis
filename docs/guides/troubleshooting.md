@@ -265,8 +265,8 @@ which claude && claude --version
 which gemini && gemini --version
 which ollama && ollama --version
 
-# Check if API key is set (example for Claude)
-echo $ANTHROPIC_API_KEY | head -c 10
+# Claude runs through your Claude Code login: check the CLI answers
+claude -p "say ok"
 ```
 
 **Solutions:**
@@ -299,12 +299,15 @@ echo $ANTHROPIC_API_KEY | head -c 10
 
 **Claude (Anthropic):**
 
-```bash
-# Set API key
-export ANTHROPIC_API_KEY="sk-ant-..."
+euxis does not use an Anthropic API key. The claude provider runs the
+Claude Code CLI, which uses the session you logged in with (the Keychain
+on macOS, `~/.claude` on Linux). `ANTHROPIC_API_KEY` and
+`ANTHROPIC_AUTH_TOKEN` are removed from its environment, so a key in
+your shell cannot take over.
 
-# Add to shell profile for persistence
-echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.bashrc
+```bash
+claude            # log in once
+euxis triage .    # SYSTEM INITIALIZATION shows "claude (Binary found, CLI auth preserved)"
 ```
 
 **Gemini (Google):**

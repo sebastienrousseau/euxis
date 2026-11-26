@@ -30,7 +30,7 @@ Euxis routes tasks to the optimal provider. At least one must be available:
 | Provider | Best For | Setup |
 |:---------|:---------|:------|
 | [Ollama](https://ollama.com/) | Local inference, free | `curl -fsSL https://ollama.ai/install.sh \| sh` |
-| [Claude](https://docs.anthropic.com/en/docs/claude-cli) | Coding, architecture, audit | Set `ANTHROPIC_API_KEY` |
+| [Claude](https://docs.anthropic.com/en/docs/claude-cli) | Coding, architecture, audit | Install Claude Code and run `claude` once to log in |
 | [Gemini](https://github.com/google-gemini/gemini-cli) | Research, security, large context | Set `GEMINI_API_KEY` |
 | [OpenAI](https://platform.openai.com/) | Research, synthesis | Set `OPENAI_API_KEY` |
 
@@ -259,9 +259,10 @@ ollama pull qwen2.5-coder:7b
 ollama list
 ```
 
-Or set an API key for a cloud provider:
+Or use a cloud provider. Claude runs through your Claude Code login (euxis
+never uses an Anthropic API key); OpenAI and Gemini take a key:
 ```bash
-export ANTHROPIC_API_KEY="sk-..."
+claude                          # log in once; euxis reuses this session
 export OPENAI_API_KEY="sk-..."
 export GEMINI_API_KEY="..."
 ```
@@ -270,4 +271,4 @@ export GEMINI_API_KEY="..."
 
 ---
 
-*Euxis v0.0.16*
+*Euxis v0.0.17*

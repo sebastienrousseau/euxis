@@ -302,7 +302,7 @@ TEST(ProviderRouterTest, DetectProviderOpenAIEnv) {
     ProviderRouter router("/tmp/euxis_nonexistent");
     auto provider = router.detect_provider();
     // With OPENAI_API_KEY set and no anthropic, should detect openai or claude
-    // (depends on whether resolve_anthropic_token finds something)
+    // (depends on which credentials the environment provides)
     EXPECT_FALSE(provider.empty());
 
     unsetenv("OPENAI_API_KEY");
